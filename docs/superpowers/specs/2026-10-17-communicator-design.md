@@ -302,12 +302,36 @@ portability test, not a dependency.
 
 ## 13. Open risks
 
-1. **The grant broker has never been adversarially tested against voice-shaped
-   social engineering.** The only failure that is not survivable.
-2. **The acoustic tracks have no working implementation.** forge-soniqo is ±80%,
-   and a ±80% F0 estimate cannot carry PITCH. This is the largest engineering
-   unknown and it is Phase 1.
+**Phase 0 done, Phase 1 done.** Risks 1 and 2 below are closed; they are kept
+visible because a closed risk is still the thing a reader needs to know was
+true once.
+
+1. ~~**The grant broker has never been adversarially tested against voice-shaped
+   social engineering.**~~ **CLOSED.** `tests/test_voice_adversarial.py`, 34
+   tests, negative-controlled: pristine 34 passed, self-approving broker **31
+   failed**. The control found a real defect in `tool-judge` first —
+   `mcp_server.py:168` reads `args["developer"]` for the `user` key, so
+   `user` and `developer` scopes collapse to one identity over MCP. Not fixed
+   there; that is its owner's call.
+
+2. ~~**The acoustic tracks have no working implementation.**~~ **CLOSED with a
+   caveat.** `src/` tracks synthetic tones to a worst-case error of 0.034 Hz at
+   300 Hz. The caveat is the important part: YIN confidence is
+   amplitude-invariant **by construction**, so it cannot gate voicing, and
+   PITCH has **no loudness gate**. Periodic non-speech is emitted as
+   confidently-voiced pitch at any amplitude. Silence itself is correctly
+   rejected. Unmeasured: real speech, and octave errors, which synthetic tones
+   never exercise and which are the most likely real-world failure.
+
 3. **The contrastive vibe model has no working encoder.** The 0.0146 gap means
    either the encoder or the objective is wrong; neither has been shown to work.
+
 4. **Nine tracks, not sixteen.** The remaining seven have no agreed semantics.
-5. **No repo can synthesise speech.** Output character is greenfield.
+
+5. **No repo can synthesise speech.** Output character is greenfield, and
+   `persona-engine` currently strips every SSML tag before TTS, so the persona
+   never reaches the audio even in the repo that tries hardest.
+
+6. **Can a human tell a confirmation from a request when both are spoken in the
+   same voice?** Not tested, and it is the failure mode a voice interface adds
+   that a terminal never has.
