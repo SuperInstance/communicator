@@ -224,3 +224,86 @@ that each fail differently produced no usable combined signal. The honest
 consequence is that turn-end on this material is an open problem, and the best
 available answer is still *"wait longer, and be able to say you do not know"* —
 which is what `TURN_YIELD_FLOOR_S` and the `UNRESOLVED` verdict already do.
+---
+
+## Addendum: the watcher could not see a trailing silence at all
+
+Found after the four-route experiment above, by building
+`experiments/speculation_payoff.py` to ask whether speculating beats waiting.
+
+**Every conclusion above about "the 3 s threshold never fires" was measured
+against a watcher that could not report the silence it was waiting for.**
+
+A pause was emitted only once its segment **closed** — which means once speech
+resumed. A silence at the *end* of speech never closes, so it was never
+reported, at any length. Measured on real speech, identical construction,
+three different silence lengths:
+
+```
+END silence=0.20s -> pause run_s = [0.03, 0.08]
+END silence=0.60s -> pause run_s = [0.03, 0.08]
+END silence=1.30s -> pause run_s = [0.03, 0.08]
+```
+
+The trailing silence was not measured **at all**. The watcher's own internal
+state knew it — `elapsed_s - _pause_run_start` reached 2.625 s on the
+narration fixture — but nothing was ever emitted.
+
+So the 3 s threshold was never the problem. A peripheral could not learn that
+someone had stopped talking, which is the single most useful thing a
+peripheral needs to know.
+
+**Fix:** an open pause is now reported as it grows, on a `PAUSE_REPORT_S =
+0.25 s` cadence, marked `open=True, checkpoint=True`, carrying `run_s`.
+
+```
+END silence=0.20s -> [0.26, 0.56, 0.03, 0.08]
+END silence=1.30s -> [... 0.3, 0.5, 0.8, 1.1, 1.26]
+END silence=2.50s -> [... 1.8, 2.1, 2.3]
+
+real corpus, longest run now visible:
+  narration  1.830 s      (was invisible)
+  oration    2.540 s      (was invisible)
+```
+
+Four defects in that fix, all found by measuring rather than reading:
+
+1. The cadence arithmetic computed the *next* multiple and subtracted, which
+   could return a boundary already passed — the run stalled at 0.30 s however
+   long the silence got.
+2. The checkpoint path emits its own `Event` instead of going through
+   `_events_for`, so `_pause_run_start` was never established and every
+   checkpoint measured from the segment edge instead of the run start.
+3. **`if consumed_to is None: return []`** — the early return discarded the
+   checkpoints it had just collected, and that branch is reached *precisely*
+   when no segment closed, which is exactly when checkpoints matter. The
+   internal counter advanced to 1.25 s while the caller saw nothing.
+4. `_pause_reported_at` conflated two different numbers: which cadence steps
+   had been emitted (dedup) and the largest `run_s` actually reported. With
+   one variable the `MAX_PAUSE_S` flush reported 5.75 s after checkpoints had
+   reached 5.7599, so a run appeared to go backwards.
+
+`run_s` is now monotone within a silence run and resets when a new run begins.
+
+### What the fix did to the numbers
+
+Same experiment, same cases, before and after:
+
+| speculate_s | acted | interrupted | accuracy (before) | accuracy (after) |
+|---|---|---|---|---|
+| 0.20 s | 106 | 76 | 0.283 | 0.528 |
+| 0.30 s | 73 | 55 | 0.247 | 0.527 |
+| 0.40 s | 70 | 52 | 0.257 | **0.536** |
+| 0.60 s | 47 | 41 | 0.128 | 0.473 |
+| 0.90 s | 28 | 28 | 0.000 | 0.455 |
+| 1.80 s | 4 | 4 | 0.000 | 0.000 |
+
+The pre-fix 0.283 was *worse than a coin flip*, and it was an artefact: the
+broken watcher fed the gate almost only RESUME cases, so it could only
+interrupt people. Fixing the watcher moved the best accuracy from 0.283 to
+0.536 and the number of decisions from 106 to 250.
+
+**But 0.536 is still barely a coin flip, with 84 interruptions.** So even with
+the silence visible, speculation on this material is not good enough to ship as
+an action trigger. No bar reaches 90%. The honest default stays: wait, and be
+able to say you do not know.

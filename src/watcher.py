@@ -277,8 +277,18 @@ class Watcher:
         # 0.25 s is measured rather than chosen: the median real pause run in
         # the corpus is 0.320 s, so a finer cadence would emit events nobody
         # can act on and a coarser one would miss the median outright.
+        # Two DIFFERENT numbers, which is the second bug this fix exposed.
+        #
+        #   _pause_boundary_at  which cadence steps have already been emitted,
+        #                       used only to avoid saying the same thing twice
+        #   _pause_reported_at  the largest run_s actually REPORTED
+        #
+        # They were one variable, so a checkpoint stored its cadence boundary
+        # while emitting the real accumulated time (5.7599 vs a boundary of
+        # 5.75), and the MAX_PAUSE_S flush -- which computes the real value --
+        # then reported 5.75 after 5.7599 and the run appeared to go backwards.
         self._pause_reported_at: float = 0.0
-        self._speaking_since_report: bool = True
+        self._pause_boundary_at: float = 0.0
 
     # -- time ----------------------------------------------------------------
 
@@ -385,7 +395,7 @@ class Watcher:
                         run_s = seg_end_abs - self._pause_run_start
                         step = self._next_pause_report(run_s)
                         if step is not None:
-                            self._pause_reported_at = step
+                            self._pause_boundary_at = step
                             ev = Event(
                                 PAUSE,
                                 seg_start_abs, seg_end_abs,
@@ -393,6 +403,7 @@ class Watcher:
                                  "run_s": round(run_s, 4),
                                  "open": True,
                                  "checkpoint": True})
+                            self._pause_reported_at = run_s
                             self.emitted.append(ev)
                             events.append(ev)
                     break                   # still open; re-analyse next push
@@ -510,7 +521,7 @@ class Watcher:
         and the run stalled at 0.30 s however long the silence got.
         """
         boundary = int(run_s / PAUSE_REPORT_S) * PAUSE_REPORT_S
-        if boundary <= self._pause_reported_at + 1e-9:
+        if boundary <= self._pause_boundary_at + 1e-9:
             return None
         return boundary
 
@@ -584,14 +595,27 @@ class Watcher:
             # segmentation was right and the reporting was not.
             if self._pause_run_start is None:
                 self._pause_run_start = t0
-            self._pause_reported_at = t1 - self._pause_run_start
             run_s = t1 - self._pause_run_start
+            # Monotone WITHIN a run, by construction.
+            #
+            # When an open pause is flushed at MAX_PAUSE_S the flushed segment
+            # ends at the tail cut, which is EARLIER than the live segment
+            # edge the checkpoints were already measuring from -- so the flush
+            # reported 5.575 s after checkpoints had reached 5.760 s. Within a
+            # single silence run a listener must never see the clock go
+            # backwards, so the run never reports less than it already has.
+            # Across runs it still resets, which is the signal that a new
+            # silence began.
+            if run_s < self._pause_reported_at:
+                run_s = self._pause_reported_at
+            self._pause_reported_at = run_s
             return [Event(PAUSE, t0, t1, {"duration_s": seg.duration(),
                                            "run_s": round(run_s, 4),
                                            "open": is_open})]
 
         self._pause_run_start = None      # the voice is up; the next pause starts fresh
-        self._pause_reported_at = 0.0    # and the reporting cadence resets
+        self._pause_reported_at = 0.0    # and both reporting counters reset
+        self._pause_boundary_at = 0.0
 
         i0 = max(0, int(seg.start / self.hop_s) - 1)
         i1 = min(len(ef), int(seg.end / self.hop_s) + 1)

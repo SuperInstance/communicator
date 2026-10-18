@@ -181,15 +181,61 @@ class TestLongSilenceEndsATurn:
         The `run_s` field, tested directly. Without it a long pause is
         unreadable: measured across the real corpus, the longest pause the
         watcher emitted was 0.790 s, so no turn threshold could ever match.
+
+        `run_s` GROWS WITHIN a silence run and RESETS when a new one begins.
+        It is not globally monotone, and asserting that it was would be
+        asserting a bug -- the first version of this test did exactly that and
+        failed once trailing silences started being reported, because the
+        sequence legitimately contains runs of 0.26 .. 5.76 and then a fresh
+        run starting near zero.
+
+        So the property asserted is the real one: within a run, non-decreasing;
+        across runs, reset to near zero.
+        """
+        w = watcher.Watcher(SR, adaptive=True)
+        events = drain(w, speech_then(6.0))
+        runs, current = [], []
+        for ev in events:
+            if ev.kind in ("utterance", "onset"):
+                if current:
+                    runs.append(current)
+                    current = []
+            elif ev.kind == watcher.PAUSE:
+                current.append(ev.data["run_s"])
+        if current:
+            runs.append(current)
+
+        assert runs, "no pause events at all"
+        assert any(max(r) > 3.0 for r in runs), (
+            f"no run exceeded 3.0 s: {[max(r) for r in runs]}; a 6 s silence "
+            f"never appears in any single event")
+        for r in runs:
+            assert r == sorted(r), f"run_s went backwards within a run: {r}"
+            assert r[0] < 1.0, (
+                f"a fresh pause run started at {r[0]:.3f}s -- the reset is not "
+                f"happening and every run inherits the previous one's length")
+
+    def test_a_trailing_silence_is_reported_as_it_grows(self):
+        """
+        THE BUG THIS EXISTED TO CATCH, and the most important single test in
+        the file.
+
+        A pause used to be emitted only once its segment CLOSED -- which means
+        once speech resumed. A silence at the END of speech therefore never
+        closed and was never reported, at any length. Measured, a 1.30 s
+        trailing silence produced pause events reading 0.03 and 0.08 s: the
+        silence was not measured at all.
+
+        So a peripheral could not learn that someone had stopped talking, and
+        the 3 s turn threshold was never the problem -- the watcher could not
+        see the silence that matters most in any conversation.
         """
         w = watcher.Watcher(SR, adaptive=True)
         events = drain(w, speech_then(6.0))
         runs = [e.data["run_s"] for e in events if e.kind == watcher.PAUSE]
-        assert runs, "no pauses"
-        assert runs == sorted(runs), f"run_s went backwards: {runs}"
-        assert max(runs) > 3.0, \
-            f"the longest reported run is {max(runs):.3f}s; a 6 s silence " \
-            f"never appears in any single event"
+        assert max(runs) > 5.0, (
+            f"the trailing silence tops out at {max(runs):.3f}s; it is not "
+            f"being reported as it grows")
 
     def test_a_short_silence_does_not_end_a_turn(self):
         w = watcher.Watcher(SR, adaptive=True)

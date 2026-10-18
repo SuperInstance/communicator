@@ -4,50 +4,50 @@
   "bars": [
     {
       "speculate_s": 0.2,
-      "acted": 106,
-      "reached": 30,
-      "interrupted": 76,
-      "accuracy": 0.283,
+      "acted": 250,
+      "reached": 132,
+      "interrupted": 118,
+      "accuracy": 0.528,
       "latency_p50": 0.9
     },
     {
       "speculate_s": 0.3,
-      "acted": 73,
-      "reached": 18,
-      "interrupted": 55,
-      "accuracy": 0.2466,
+      "acted": 220,
+      "reached": 116,
+      "interrupted": 104,
+      "accuracy": 0.5273,
       "latency_p50": 0.9
     },
     {
       "speculate_s": 0.4,
-      "acted": 70,
-      "reached": 18,
-      "interrupted": 52,
-      "accuracy": 0.2571,
+      "acted": 181,
+      "reached": 97,
+      "interrupted": 84,
+      "accuracy": 0.5359,
       "latency_p50": 0.9
     },
     {
       "speculate_s": 0.6,
-      "acted": 47,
-      "reached": 6,
-      "interrupted": 41,
-      "accuracy": 0.1277,
+      "acted": 112,
+      "reached": 53,
+      "interrupted": 59,
+      "accuracy": 0.4732,
       "latency_p50": 1.3
     },
     {
       "speculate_s": 0.9,
-      "acted": 28,
-      "reached": 0,
-      "interrupted": 28,
-      "accuracy": 0.0,
+      "acted": 66,
+      "reached": 30,
+      "interrupted": 36,
+      "accuracy": 0.4545,
       "latency_p50": 1.3
     },
     {
       "speculate_s": 1.3,
-      "acted": 16,
-      "reached": 0,
+      "acted": 28,
+      "reached": 12,
       "interrupted": 16,
-      "accuracy": 0.0,
+      "accuracy": 0.4286,
       "latency_p50": 1.8
     },
     {
