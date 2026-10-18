@@ -183,7 +183,7 @@ class Watcher:
 
     def __init__(self, sample_rate: int = 16000, *, min_silence_s=None,
                  min_speech_s=None, frame_len: int = FRAME_LEN,
-                 hop: int = HOP, gate=None):
+                 hop: int = HOP, gate=None, adaptive: bool = False):
         self.sr = sample_rate
         self.hop = hop
         self.frame_len = frame_len
@@ -192,6 +192,10 @@ class Watcher:
                               if min_silence_s is None else min_silence_s)
         self.min_speech_s = (energy.MIN_SPEECH_S
                              if min_speech_s is None else min_speech_s)
+        # Local (moving-quantile) threshold instead of a fraction of the
+        # running peak. Off by default; see energy.adaptive_threshold for the
+        # measurements, including the high-quantile hypothesis that was wrong.
+        self.adaptive = adaptive
         # The voice-activity gate, or None.
         #
         # None is the DEFAULT and it is a real mode, not a stub: without
@@ -302,7 +306,8 @@ class Watcher:
                                                   default=0.0))
         segs = energy.segment(ef, self.hop_s, min_silence_s=self.min_silence_s,
                               min_speech_s=self.min_speech_s,
-                              peak_rms=self._peak_rms)
+                              peak_rms=self._peak_rms,
+                              adaptive=self.adaptive)
         if not segs:
             return []
 
