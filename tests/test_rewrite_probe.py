@@ -102,7 +102,8 @@ class TestNoulCriteriaKeys:
         which reads like a library bug rather than a wrong keyword. Asserting
         the real keys is cheaper than rediscovering this during a live run.
         """
-        from typesafe_sdk import Noul, NoulCriteria
+        typesafe_sdk = pytest.importorskip("typesafe_sdk")
+        Noul, NoulCriteria = typesafe_sdk.Noul, typesafe_sdk.NoulCriteria
 
         assert set(NoulCriteria.__annotations__) == {"true", "false"}
 
@@ -149,10 +150,11 @@ class TestOneCall:
 
         The control is pinned to the scales, not to the module.
         """
-        # Production has grown twice since this regression was written: 4 ->
-        # 8 (Phase 2.7 gates) -> 13 (the five adversarial-battery questions).
+        # Production has grown three times since this regression was written:
+        # 4 -> 8 (Phase 2.7 gates) -> 13 (five battery questions) -> 10 (the
+        # battery narrowed to two after it was caught blocking real speech).
         # What must stay fixed is the CONTROL at 4, never the production count.
-        assert len(judged.build_questions()) == 13, \
+        assert len(judged.build_questions()) == 10, \
             "judged.py should have gates and the adversarial battery"
         assert len(rp.build_questions("baseline")) == 4, \
             "the experiment's baseline must stay ungated"
