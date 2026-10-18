@@ -353,3 +353,44 @@ def test_this_file_does_not_measure_speech():
     samples = tone(200, 0.05)
     assert max(samples) <= 0.51
     assert len(samples) == 800
+
+# -- per-phrase tempo maps (E4) ----------------------------------------------
+
+def test_two_phrases_at_different_rates_get_different_tempos():
+    """A clip-wide BPM erases the band analogy: the speaker who speeds up.
+    Two burst trains -- fast then slow, separated by a real rest -- must
+    come back as two segments with materially different local tempo."""
+    SR = 16000
+
+    def syllable(f0=200, sec=0.06, amp=0.4):
+        return [amp * math.sin(2 * math.pi * f0 * i / SR)
+                for i in range(int(sec * SR))]
+
+    fast = []
+    for _ in range(8):
+        fast += syllable(sec=0.06) + [0.0] * int(0.07 * SR)   # ~7.7 syll/s
+    slow = []
+    for _ in range(4):
+        # slow speech drawls LONGER SYLLABLES, not longer gaps -- gaps past
+        # MIN_SILENCE_S are inter-phrase rests and correctly split segments
+        slow += syllable(160, sec=0.18) + [0.0] * int(0.13 * SR)  # ~3.2 syll/s
+    samples = fast + [0.0] * int(0.40 * SR) + slow
+
+    from src import energy, tempo
+    frames, _ = energy.rms_series(samples, 800, 160, SR)
+    segs = energy.segment(frames, hop_s=0.010)
+    segs = [s for s in segs if s.speech]
+    assert len(segs) >= 2, f"expected 2+ speech phrases, got {len(segs)}"
+
+    tmap = tempo.phrase_tempo_map(frames, segs + [s for s in energy.segment(frames, hop_s=0.010) if not s.speech])
+    rated = [e for e in tmap if e["syll_per_s"] is not None]
+    assert len(rated) >= 2
+    bpm = sorted(e["bpm"] for e in rated)
+    assert bpm[-1] > bpm[0] * 1.6, f"fast/slow phrases must differ: {bpm}"
+
+    # the map partitions the SAME peaks the global estimator counts
+    peaks_total = sum(e["n_peaks"] for e in tmap)
+    glob = tempo.estimate_bpm(frames, energy.segment(frames, hop_s=0.010))
+    speech_s = sum(s.duration() for s in segs)
+    expected = 60.0 * peaks_total / speech_s
+    assert abs(glob - expected) <= 0.05 * expected, (glob, expected)

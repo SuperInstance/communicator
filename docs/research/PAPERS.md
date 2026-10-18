@@ -282,3 +282,54 @@ Recorded because citation drift is a defect class this fleet keeps meeting:
 
 Six of thirty-plus citations drifted in venue or author; two would have
 been wrong papers. Verification is not optional.
+
+---
+
+## 13. Day-1 additions (2026-10-18, verified by research lane)
+
+**Audio→symbolic intermediates.** Wu, Y.-H. et al. (2022). MIDI-DDSP:
+Hierarchical musical modeling. *ICLR 2022*, arXiv:2112.09312 · the
+canonical argument FOR a symbolic/expressive mid-layer between waveform
+and score — this repo's architecture in published form. Gardner, I. et
+al. (2022). MT3: Multi-task multitrack music transcription. *ISMIR*,
+arXiv:2111.03017 (note: Gardner, not "Garcia") · MIDI-like tokens as
+universal audio→symbolic interchange. Bittner, R. et al. (2022). Basic
+Pitch. arXiv:2203.09893 · lightweight instrument-agnostic transcription
+— the small end of the field. Zeng, M. et al. (2021). MusicBERT.
+*Findings of ACL*, arXiv:2106.05630 · MIDI tokens made LM-friendly.
+
+**Prosody/emotion representation.** Yang, S.-W. et al. (2021). SUPERB.
+*Interspeech*, arXiv:2105.01051 — its prosody tasks ARE our inflection/
+emphasis tracks. Lin, J. et al. (2022). SUPERB-Prosody. *IEEE SLT* (Best
+Paper) — middle wav2vec/HuBERT layers carry prosody. Ma, Z. et al.
+(2024). emotion2vec. *ACL Findings*, arXiv:2312.15185 + EmoBox
+(arXiv:2406.01655): IEMOCAP SOTA ~73–77%, MSP-Podcast ~0.38 macro-F1 —
+the ceilings that justify presence gates over raw probabilities. Wang,
+Y. et al. (2018). Style Tokens. *ICML*, arXiv:1803.09017; Skerry-Ryan,
+R. et al. (2018). Prosody transfer. *ICML* — delivery mapped to a small
+controllable bank: the CC-bank move, in TTS.
+
+**Pre-event intent (the T-minus precedents).** Ekstedt, E., & Skantze, A.
+(2022). Voice Activity Projection. *Interspeech*, arXiv:2205.09812 —
+self-supervised forecast of FUTURE voice activity: the published analog
+of an intention track. Inoue, K. et al. (2024). Real-time VAP turn-taking,
+arXiv:2401.04868. Chang, S. et al. (2022). Turn-taking prediction.
+*Interspeech*, arXiv:2208.13321 (>97% shift recall). **Udupa et al.
+(2026). Endpoint anticipation for low-latency dialogue. *Interspeech*,
+arXiv:2606.13450 — forecasts end-of-turn up to 2.56 s ahead and cuts
+505 ms via speculative execution: published T-minus scheduling for
+speech.** Raux & Eskenazi (2008). Endpointing thresholds. *SIGdial*.
+
+**Anticipatory timing.** Repp, B., & Su, Y.-H. (2013). Sensorimotor
+synchronization review. *Psychon. Bull. Rev.* 20(3) — negative mean
+asynchrony is the NORMAL regime of skilled performance. Fujii, S. et al.
+(2011). Drum kit synchronization error. *Music Perception* 28(5) — pro
+drummers strike measurably AHEAD of the click: the kick-drum law with
+numbers.
+
+**System-1 ecosystem 2026.** Deußer et al. (2026). arXiv:2609.37647 (Jev
+benchmark); JEVal arXiv:2610.03935 (11,257 instances/36 datasets);
+DecisionRobust arXiv:2610.19118 (injection robustness — validates our
+presence-gate posture); multi-family arXiv:2610.00346. Microsoft
+Decision-1 announced 2026-10-09 (vendor-only, unflagged). Ollaya:
+github.com/ollaya-dev/ollaya (Apache-2.0).

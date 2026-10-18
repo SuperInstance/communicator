@@ -120,3 +120,18 @@ from metaphor into a measurable property of the agent's voice.
 3. **Calibrate the receiver's variance promise.** Prime the landing so
    delivered surprisal stays inside promised surprisal — then bumps are
    excitement. Same event, different promise, different world.
+
+---
+
+**Addendum 2026-10-18 — the law already runs, and it has numbers.**
+`tminus-dispatcher`/`tminus-client` (this fleet, npm) implement cue-
+primed-fire with 500 ms cognitive beats and negative-n pre-cues — §2's
+T-minus scheduling, deployed. The published precedents now in PAPERS.md
+§13: pro drummers strike ahead of the click by measurable margins (Fujii
+et al. 2011), negative mean asynchrony is the normal regime of skilled
+performance (Repp & Su 2013), and end-of-turn anticipation with
+speculative execution cuts dialogue latency by ~500 ms in published work
+(Udupa et al. 2026, arXiv:2606.13450) — that paper is T-minus scheduling
+for speech, independently invented. What the fleet adds over all of them:
+the score, so the offset can be scheduled PER MODALITY (judged tracks
+200–550 ms vs acoustic tens of ms) rather than one global lookahead.

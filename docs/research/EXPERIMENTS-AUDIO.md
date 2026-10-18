@@ -190,6 +190,74 @@ Findings this one run already produced:
    windowing for hour-long input is an engineering concern, not a science
    blocker.
 
+**Day-0 correction (Day-1):** the 285 "BPM" was called "falsified" above.
+Wrong: `src/tempo.py` documents one-syllable=one-beat deliberately
+(conversational 4–5 syll/s = 240–300 BPM, intentionally not rescaled).
+285 BPM = 4.75 syll/s — in-band for read speech. What Day-0 actually
+showed is that a GLOBAL rate erases the structure; E4's per-phrase map is
+the fix, and it passed (below).
+
+## 3a. Day-1 (2026-10-18) — first experiment results
+
+**E4 PASSED.** `phrase_tempo_map()` (src/tempo.py): 42 rated phrases in
+the 90 s excerpt, tempo 146–396 BPM (2.4–6.6 syll/s), **SD = 19% of mean**
+against a ≥15% bar. The speaker changes tempo by the phrase, and the map
+keeps it.
+
+**E3 first evidence.** F0 medians by 90 s window across the 38-minute
+chapter: 229/236/225 Hz early vs **174/194 Hz** at 1800 s/2200 s — the
+cast mix changes scene by scene and windowed F0 tracks it (~6 semitones).
+Pooled n=23,911: lower-half median 169 vs upper-half 262 Hz. Speaker
+signal is plainly present; formal dip-test diarization is now E3's
+remaining work, not a question of whether the signal exists.
+
+**ASR leg unblocked.** faster-whisper small, CPU int8, raw-PCM input
+(bypassing the broken PyAV path): **8 s for the 90 s clip (11× realtime)**,
+language en @1.00, clean multi-speaker transcript saved
+(`alice01_transcript.txt`; GPU blocked only by missing libcublas on this
+box).
+
+**Judged tracks on real dialogue (jev-1.14.0, gated).** Transcript lines
+scored directly:
+
+| line | GESTURE | INTENTION | ATTENTION | TIMBRE |
+|---|---|---|---|---|
+| "What did you do then?" | question 122 | 69 | listener 117 | 9 |
+| "This way, you see, Alice?" | question 67 | 51 | listener 117 | 8 |
+| "It's like a battle." | statement 64 | 6 | task 23 | 2 |
+| "With soldiers?" | question 112 | 29 | listener 55 | 2 |
+
+Questions vs statements separate by 40+ CC; addressee shifts with the
+scene; TIMBRE's presence gate holds it near zero on text-only input —
+exactly the designed honesty. The chain real audio → acoustics + ASR →
+judged tracks now works end to end.
+
+**Cross-model battery** (same 5 real + 4 garbage probes, urgency + gesture
+questions):
+
+| model | urgency split | garbage | gesture split | stability on re-ask |
+|---|---|---|---|---|
+| jev-1.14.0 | correct | parks (pos 0.06) | correct | 7%-class flips (jev-lattice) |
+| jev-1.13.0 | correct | parks (0.04) | correct | — |
+| tev1 (local, ollama --ask) | correct (73/95%) | **declines** no@77-80% | correct (96/89%) | **bit-stable 94%×3** |
+| laya:en (Ollaya) | correct but weak on urgent (0.80) | declines | **INVERTED** (no@0.69 / yes@0.97) | stable 0.67×3 |
+| gemma2:2b (chat control) | 1 of 2 | declines (no confidence) | 1 of 2 | — |
+
+Findings: (1) tev1 is a credible free/private judged-track fallback —
+deterministic, declines garbage; (2) laya's question/command inversion on
+typed criteria is a real cross-model divergence worth a question-rewrite
+probe; (3) the chat-model control loses calibration and half the answers,
+as expected.
+
+**Cross-build calibration (jev-1.13.0 vs 1.14.0, same corpus):** 1.14.0
+dominates — ATTENTION 0.917/0.097 vs 0.833/0.162 acc/ECE, INTENTION
+Spearman 0.978 vs 0.956; GESTURE perfect on both; ATTENTION more
+ill-posed on garbage in 1.13.0 (0.90 vs 0.79). The default build choice
+is validated. TypeSafe's public model list exposes only the two aliases
+(jev-latest→1.13.0, jev-preview→1.14.0); explicit probes of
+jev-1.15.0/jev-2.0.0/jev-mini all return 400 Unknown model — no newer
+public builds as of today.
+
 ## 4. Infrastructure gaps the Day-0 run exposed
 
 | gap | status | unblocks |
