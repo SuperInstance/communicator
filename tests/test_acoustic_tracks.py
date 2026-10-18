@@ -226,7 +226,7 @@ def test_emits_nothing_for_silence():
     assert all(f.hz != 0.0 for f in frames if f.hz is not None) or True
 
 
-def test_yin_confidence_is_amplitude_invariant_and_that_is_a_real_gap():
+def test_quiet_periodic_signal_is_not_voiced_gap_closed():
     """
     The first version of this test asserted a near-silent tone is NOT
     confidently voiced. It failed at confidence 1.0 -- and investigating WHY
@@ -239,27 +239,39 @@ def test_yin_confidence_is_amplitude_invariant_and_that_is_a_real_gap():
     measures -- PERIODICITY -- and it is exactly why YIN confidence cannot be
     used as a "is this speech" gate.
 
-    So the assertion here documents the real behaviour rather than pretending
-    otherwise: a periodic non-speech signal at any amplitude scores 1.0.
-
-    THE GAP, carried to the design doc: PITCH has no loudness gate. Periodic
-    noise -- a fan, a keyboard, a synthesiser tone leaking from speakers --
-    will be emitted as confidently-voiced pitch. The fix is an energy floor
-    applied to frames before voicing is claimed, which does not exist yet.
+    That gap (design doc, risk 2) is now CLOSED at this layer: a frame whose
+    RMS is under the tracker's energy_floor is unvoiced before YIN runs, so a
+    periodic non-speech signal -- a fan, a keyboard, a synth leaking from
+    speakers -- no longer becomes confidently-voiced pitch at any amplitude.
+    The periodicity is still THERE, which is why the loudness gate and not a
+    confidence threshold is the fix: YIN was never wrong about periodicity,
+    only about relevance.
     """
-    def peak_conf(amp: float) -> float:
-        frames = PitchTracker(SR).track(tone(200, 0.2, amp=amp))
+    def voiced(amp: float) -> tuple[int, float]:
+        tracker = PitchTracker(SR)
+        frames = tracker.track(tone(200, 0.2, amp=amp))
+        n = sum(1 for f in frames if f.hz is not None)
         conf = [f.confidence for f in frames if f.hz is not None]
-        return max(conf) if conf else 0.0
+        return n, (max(conf) if conf else 0.0)
 
-    loud = peak_conf(0.5)
-    whisper = peak_conf(0.0005)
-    assert whisper >= 0.95, (
-        "expected YIN to be amplitude-invariant; if this now fails the "
-        "behaviour changed and the gap may have been closed")
-    assert abs(loud - whisper) < 0.05, (loud, whisper)
-    # Documented gap: identical confidence regardless of amplitude.
-    assert whisper == loud
+    loud_n, loud_conf = voiced(0.5)
+    whisper_n, _ = voiced(0.0005)
+
+    assert loud_n > 0 and loud_conf >= 0.95, "the loud clean tone must track"
+    assert whisper_n == 0, (
+        f"{whisper_n} frames voiced a near-silent periodic tone; the energy "
+        "floor is not doing its job")
+
+
+def test_energy_floor_is_a_knob_not_a_law():
+    """A deliberately lowered floor re-admits the quiet tone -- the floor is a
+    parameter, so a quiet recording isn't silently unvoiced forever; the
+    operator can see and change the number they are trading against."""
+    tracker = PitchTracker(SR, energy_floor=1e-5)
+    frames = tracker.track(tone(200, 0.2, amp=0.0005))
+    assert sum(1 for f in frames if f.hz is not None) > 0, (
+        "with the floor effectively removed YIN's amplitude-invariance means "
+        "the whisper should track again")
 
 
 # -- tempo and inflection: shape only, no ground truth ----------------------

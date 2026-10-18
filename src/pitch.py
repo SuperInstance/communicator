@@ -26,6 +26,15 @@ pipeline — the energy gate in energy.py runs first — but this module also
 refuses non-finite input per frame (the ring-buffer defect class: one NaN
 contaminates everything after it).
 
+The loudness gate lives HERE as well, not only in the pipeline, because YIN
+confidence cannot provide it: the cumulative-mean normalisation makes d'(tau)
+amplitude-invariant by construction, so a periodic signal at ANY amplitude
+— a fan, a keyboard, a synth leaking from speakers — scores confidence 1.0.
+A frame whose RMS is below `energy_floor` is unvoiced before YIN is ever
+asked. The default, 1e-3 (≈ −60 dBFS), is ten times stricter than
+energy.ABS_FLOOR: claiming a pitch is a stronger statement than "not
+silent", so its floor must be stricter too.
+
 Pure standard library. The difference function is evaluated as
 d(tau) = e_head + e_tau - 2*c(tau) so the per-term arithmetic runs inside
 math.fsum(map(operator.mul, ...)) at C speed; pure-Python inner loops over
@@ -38,8 +47,14 @@ import math
 from dataclasses import dataclass
 from operator import mul
 
+from .energy import frame_rms
+
 FMIN = 70.0    # Hz, lower bound of the speaking range
 FMAX = 400.0   # Hz, upper bound
+
+# RMS below this is not voiced, whatever YIN thinks of its periodicity.
+# −60 dBFS: practical room noise sits above this, real speech above it easily.
+ENERGY_FLOOR = 1e-3
 
 
 @dataclass
@@ -68,6 +83,7 @@ class PitchTracker:
         fmax: float = FMAX,
         threshold: float = 0.15,   # YIN absolute threshold on d'(tau)
         min_confidence: float = 0.5,
+        energy_floor: float = ENERGY_FLOOR,
     ):
         if sample_rate <= 0:
             raise ValueError(f"nonsense sample rate: {sample_rate}")
@@ -78,6 +94,7 @@ class PitchTracker:
         self.fmax = fmax
         self.threshold = threshold
         self.min_confidence = min_confidence
+        self.energy_floor = energy_floor
 
         self.tau_min = max(1, int(math.floor(sample_rate / fmax)))
         self.tau_max = int(math.ceil(sample_rate / fmin))
@@ -90,6 +107,7 @@ class PitchTracker:
                 f"frame_len={frame_len} too short for fmin={fmin}Hz at "
                 f"{sample_rate}Hz (need frame_len >= tau_max + tau_min)")
         self.poisoned_frames = 0
+        self.quiet_frames = 0  # rejected by the energy floor, pre-YIN
 
     def track(self, samples: list[float]) -> list[PitchFrame]:
         """Frame the clip and estimate f0 at each position."""
@@ -117,6 +135,13 @@ class PitchTracker:
         if len(frame) < self.frame_len:
             return None, 0.0
         if not self._finite(frame):
+            return None, 0.0
+        # The loudness gate, BEFORE periodicity is even computed: YIN
+        # confidence is amplitude-invariant by construction (see module
+        # docstring), so it can never be the thing that refuses a quiet fan.
+        rms, _ = frame_rms(frame)
+        if rms < self.energy_floor:
+            self.quiet_frames += 1
             return None, 0.0
         return self._yin(frame)
 
