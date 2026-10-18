@@ -311,6 +311,17 @@ attached and the only one everything else consumes.
 
 ## 9. Honest limits
 
+* **The conserved budget does not exist, and cannot yet.** η is
+  surprise-against-baseline, and there is no baseline until Phase 5, so C
+  cannot be chosen honestly (§15). Until both exist the system must report
+  the budget as unmeasured rather than as satisfied.
+* **No prior-art mechanism in this family has been shown to bind under load.**
+  One had a law that could not fail; one had a law that never fired. Any
+  conservation adopted here inherits that burden of proof.
+* **Federation across cloud/workstation/ESP32 does not exist in any repo
+  studied**, despite being described. The claimed implementation is an
+  in-process write-through whose `query()` never consults the upstream at
+  all. Resource harmony is currently manual deployment.
 * **The latent layer does not exist.** §13 is an argument for a tiny JEPA
   over the score history, and the org's three JEPA repositories were measured
   this session and are empty or null (§13). Building one is new work with no
@@ -522,3 +533,131 @@ Constraints, in the same spirit as §6:
 Extending the adversarial suite to cover induced soft spots belongs in Phase 4
 alongside compression, because both are ways of getting authority without
 saying much.
+
+---
+
+## 15. The conserved budget, and the requirement that it bind
+
+> *growth is redistribution under a conserved budget, not creation*
+
+Two repositories in this family attempted a conservation law, and they are
+opposite failure modes worth learning from together (`docs/research/prior-art-audit.md`):
+
+* **A law that cannot fail.** `exoJ` defines η ≡ 1−γ, so γ+η=1 is an arithmetic
+  identity. No input violates it. It is a safety property that enforces
+  nothing.
+* **A law that never fired.** `quilt-dba` implements γ+η ≤ C=log₂3 with a real
+  predicate and a rollback, and its own recorded verdict is
+  `NEVER-BOUND (law untested in vivo)`. The code is correct; the budget was
+  simply never reached.
+
+So the design requirement is not "have a conservation law". It is:
+
+> **A conserved quantity must be demonstrated to bind in the measured regime,
+> or it is decoration.**
+
+Concretely, for this system:
+
+| term | meaning | how it is measured | measured so far |
+|---|---|---|---|
+| **γ** | compute spent on a turn | wall clock, tokens, whether the cloud was called | 0.13 s cloud / 2.44 s local / µs measured-only |
+| **η** | surprise | prediction error against the §4.1 baseline | **not yet measurable — η does not exist until Phase 5** |
+| **C** | the budget | must be *reachable* | must be set from data, not chosen |
+
+Two consequences, both awkward and both load-bearing:
+
+1. **The budget cannot be written until the tables exist**, because η needs a
+   baseline to be surprised *about*. C is not a design parameter; it is a
+   measurement.
+2. Until then **no law is enforced, and the system must say so.** A budget
+   that reads 0% utilisation on every turn is `quilt-dba`'s trap with better
+   manners.
+
+The *shape* is adopted from `quilt-dba` because it is right: fail closed,
+restore the snapshot, log the refusal, **learn nothing from a refused
+transition.**
+
+---
+
+## 16. The reflex tier, and an embedding that runs without a model
+
+`quilt-pincher` is the one prior-art mechanism that survives this audit intact,
+and it answers the question §7 left open — *what can run continuously?*
+
+**Three tiers, with the expensive one unreachable on the common path:**
+
+```
+score >= 0.80          → EXECUTE        no model touched
+0.55 <= score < 0.80   → CONFIRM        surface to the operator, no action
+score <  0.55          → COMPILE        spend a model
+```
+
+This is the presence gate of §0–2 generalised, and it is the mechanism that
+makes "decide, don't steer" true rather than aspirational: the common case
+never consults a model at all.
+
+**The embedding is hyperdimensional computing, not a neural net.** Tokens hash
+to ±1 hypervectors, position binds by permutation, superposition bundles by
+sign. Deterministic, seeded, no GPU, no API. That matters more than elegance:
+*this is what runs on an UNO Q*, and it makes the continuous layer of §3 step 3
+possible at all, because a baseline needs an embedding to compare against and
+a transformer embedding costs a forward pass per utterance.
+
+Requirements this project adopts from their implementation, with the two
+defects they shipped:
+
+* a **frozen seed and a hash-pinned regression test** — they have this, and it
+  is why their HDC is trustworthy
+* **never a silent fallback in the similarity path.** Their
+  `CloudflareAIEmbedder` falls back to a character histogram when the API is
+  unavailable, and the comment admits it. A silent degradation there is the
+  least visible and most dangerous kind, because the system keeps producing
+  numbers that merely get worse. Fallback in the embedder must be **loud**.
+
+---
+
+## 17. Recognition may be learned; approval may not
+
+> *give the pilot and the autopilot the decisions, not the hand-steering*
+
+The prior art resolves this cleanly and it collides with §5, so the collision
+is named here rather than discovered later.
+
+`lever-runner` is described as a *"post-inference command executor"* running
+*"pre-approved shell commands by intent, not by tool schemas."* Three ideas
+stack in one sentence:
+
+* **decide, not steer** — an intent says *what*; the executor owns *how*. Tool
+  schemas are the hand-steering equivalent: reaching for the right tool with
+  the right arguments is a chance to be wrong at every step.
+* **token-lean** — if the model decides once and a deterministic executor
+  carries it out, the expensive thing stops being consulted continuously.
+* **pre-approved** — and here is the collision. If the approval set is static
+  and immutable at runtime, then "tests" can never *become* runnable: the
+  system recognises it, offers, and a human decides. But §5 asks the system to
+  **learn** that a phrase maps to an action, which is unavoidably a mutable
+  approval surface.
+
+So:
+
+> **Recognition may be learned, mutable, and may only ever propose.
+> Approval may be explicit, human-decided, and immutable while the system runs.**
+
+If those two are one surface, then every shorter path is a slow grant and §6's
+law becomes unsatisfiable — the system would be teaching itself new authority
+while believing it was learning vocabulary.
+
+This also disposes of §14: induced soft spots are only dangerous if *learning*
+and *authority* share a surface. Split them, and an adversary manipulating
+recognition gains the ability to propose something it was already forbidden to
+do, which is a nuisance, rather than the ability to do it, which is not.
+
+Two properties are non-negotiable for the approval surface, both taken from
+the prior art's intent rather than its implementation:
+
+* **no runtime path may add to the approval set** — not the model, not a
+  learned table, not an induced soft spot
+* **the executor is fail-closed** — if the approval check cannot be performed,
+  the action does not run. `fastloop-guard`'s stated purpose is
+  sub-millisecond validation and sandbox termination; whether it fails open or
+  closed is the fact to verify before this is designed further.
