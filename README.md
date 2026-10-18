@@ -70,6 +70,9 @@ src/vad.py           voice-activity gate (silero ONNX, MIT, optional).
                      segment is reported.
 src/watcher.py       the continuous layer: onset / utterance / pause events,
                      checkpoints so a run that never ends still reports
+src/turn.py          when the TURN ended, as distinct from when the voice
+                     stopped. A consumer, never a filter — it adds
+                     information and removes nothing
 src/score.py         merge + export; tick = 1 ms; provenance sidecar
 src/stability.py     per-utterance trust probe (resample mode-share)
 src/local_judge.py   local-model judged-track reduction

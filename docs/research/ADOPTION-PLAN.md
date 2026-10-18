@@ -164,6 +164,43 @@ more than the latency:
 It discriminates speech correctly and must still be **VAD-gated** — feed it raw
 audio and it agrees with you constantly.
 
+> ### DONE, as a separate stage: `src/turn.py`
+>
+> The 3 s decision now exists as `turn.TurnTracker`, and it is a **consumer**,
+> never a filter. `feed` returns newly-decided turns and touches nothing
+> else, because a stage sitting downstream of everything can only ADD
+> information — anything else is a way to lose data that was already measured
+> correctly.
+>
+> Building it exposed one defect the segmentation had been hiding. Across the
+> real corpus the longest pause the **watcher** emitted was **0.790 s**, so no
+> 3 s threshold could ever have matched anything — the segmentation was right
+> and the reporting was not. A pause is only emitted once its segment closes
+> behind the 300 ms tail cut, and `MAX_PAUSE_S` flushes an open one at 3.0 s,
+> so a 6 s silence arrived as 2.755 / 2.775 / 0.360 s: the right total, and no
+> event that said "this was six seconds". Pause events now carry `run_s`, the
+> accumulated length of the whole silence run.
+>
+> Three more bugs, each producing a plausible wrong answer rather than an
+> exception, all found by running the tracker on real audio:
+>
+> 1. Silence measured against the watcher's clock at push time instead of the
+>    pause's own extent → 94 turn boundaries on 75 s of the essay instead of 2.
+> 2. Used each pause event's own duration, never long enough → zero turns.
+> 3. `if speaking and _silence_since is None` meant the first pause set the
+>    start and every LATER pause of the same run skipped the decision — so the
+>    run that finally exceeded 3 s was exactly the one that could not be seen.
+>
+> **And the uncomfortable result, which is correct:** five of six real cells
+> produce ZERO turn boundaries at 3 s. Recorded monologue simply does not
+> pause for three seconds; the longest gap anywhere in the corpus outside the
+> essay is 2.1 s. A 3 s give-up is an *interactive* rule, correct for deciding
+> when to speak back and wrong as a claim about where turns end in a
+> recording. So `TURN_YIELD_FLOOR_S` exists and the verdict can answer
+> `UNRESOLVED` — a peripheral that never speaks is also a failure, and
+> reporting "nothing happened" as an achievement when pointed at a recording
+> is the failure mode.
+
 **One inversion to copy deliberately:** pipecat fails **open** on model timeout
 (`SmartTurnTimeoutException → COMPLETE`). For a peripheral that is backwards —
 an unwanted gesture cannot be recalled. **Fail toward `INCOMPLETE`.**

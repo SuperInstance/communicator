@@ -149,21 +149,82 @@ class TurnTracker:
 
         Returns an empty list almost always. That is the normal case and it is
         not a failure: a tracker that fires often is a tracker guessing.
+
+        `elapsed_s` is the stream clock, and it is what lets the tracker know
+        silence is accumulating even when no PAUSE event exists yet. A pause
+        is only emitted once its segment CLOSES behind the tail cut, so a
+        still-open trailing silence produces no event at all -- 1.0 s of
+        speech followed by 1.5 s of silence emits an onset and an utterance
+        and nothing else. A tracker that only learned from pause events would
+        therefore believe the speaker was still talking forever, which is the
+        failure mode that matters most here: a peripheral that never knows
+        when to speak.
         """
         kind = getattr(ev, "kind", None)
         if kind in ("onset", "utterance"):
             self._speaking = True
-            self._silence_since = None
+            # Sound was heard until this event ENDED, so silence has been
+            # accumulating since `ev.t1` -- not since a pause event that may
+            # never arrive. A 1.0 s utterance followed by 1.5 s of silence
+            # emits an onset and an utterance and nothing else, so a tracker
+            # that only learned from pause events would believe the speaker
+            # was still talking forever.
+            self._silence_since = getattr(ev, "t1", elapsed_s)
         elif kind == "pause":
             # Only a pause that FOLLOWS speech can end a turn. A long silence
             # in an empty room is not the end of anyone's turn, and treating it
             # as one is how a peripheral decides to talk to nobody.
-            if self._speaking and self._silence_since is None:
+            #
+            # The `_silence_since is None` guard belongs on the ASSIGNMENT, not
+            # on the call. It used to guard both, which meant the first pause
+            # set the start and every LATER pause of the same run skipped
+            # `_decide` entirely -- so the run that finally exceeded 3 s was
+            # exactly the one that could not be seen. A 6 s silence produced
+            # run_s values of 2.755, 5.555 and 5.940 and zero turns, because
+            # the 5.555 arrived when `_silence_since` was already set.
+            if not self._speaking:
+                return []
+            if self._silence_since is None:
                 self._silence_since = ev.t0
-                return self._decide(ev)
+            return self._decide(ev)
         elif kind == "decision":
             self._human_decision_at = getattr(ev, "t0", elapsed_s)
+
+        # Silence is accumulating even if no pause has closed yet. Deciding
+        # from the clock here is what makes a trailing silence visible; the
+        # turn is emitted with `open=True` because the speaker may yet resume.
+        self._observe_clock(elapsed_s)
         return []
+
+    def _observe_clock(self, elapsed_s: float) -> list:
+        """
+        Decide from elapsed time alone. Used for silence that has not yet been
+        reported as an event.
+
+        Distinct from `_decide`, which trusts the pause's own measured run.
+        This one is a fallback and is marked `source="clock"` so a caller can
+        tell a clock-inferred boundary from a measured one.
+        """
+        if not self._speaking or self._silence_since is None:
+            return []
+        silence_for = elapsed_s - self._silence_since
+        if silence_for < self.turn_end_s:
+            return []
+        if elapsed_s < self.yield_floor_s:
+            return []
+        turn = {
+            "t0": self._silence_since,
+            "t1": elapsed_s,
+            "silence_s": round(silence_for, 4),
+            "reason": "sustained_silence",
+            "human_decision": False,
+            "open": True,
+            "source": "clock",
+        }
+        self.turns.append(turn)
+        self._speaking = False
+        self._silence_since = None
+        return [turn]
 
     def _decide(self, ev) -> list:
         """
@@ -186,12 +247,21 @@ class TurnTracker:
            length of the whole silence run, which is the quantity a turn
            decision is about.
 
+        3. It waited for the run to CLOSE. A 6 s silence is 2.755 / 2.775 /
+           0.360 s and the last of those is short, so a tracker that only
+           fires on a closed pause sees no pause over 3 s at all -- the run
+           crossed the threshold and then kept going. An OPEN checkpoint whose
+           `run_s` already clears the threshold IS the turn ending: the
+           evidence exists, and waiting for it to be re-reported in a
+           shorter final slice is waiting for information that has already
+           arrived.
+
         `run_s` is used when present and falls back to the event's own extent,
         so the tracker also works on events from a watcher that predates it.
         """
         if self._silence_since is None:
             return []
-        own = getattr(ev, "t1", self._silence_since) - self._silence_since
+        own = getattr(ev, "t1", self._silence_since) - getattr(ev, "t0", 0.0)
         silence_for = float(ev.data.get("run_s", own)) if hasattr(
             ev, "data") else own
         if silence_for < self.turn_end_s:
@@ -206,9 +276,15 @@ class TurnTracker:
             "silence_s": round(silence_for, 4),
             "reason": "sustained_silence",
             "human_decision": False,
+            # Whether the silence had finished when this was decided. An open
+            # turn is a real state: the speaker may resume, and a caller
+            # reacting to it has to be able to void the reaction.
+            "open": bool(getattr(ev, "data", {}).get("open", False)),
         }
         self.turns.append(turn)
-        # The turn is closed; a later pause belongs to whatever comes next.
+        # The turn is decided either way. If the speaker resumes, the next
+        # utterance opens a new turn; if they do not, `verdict()` keeps
+        # reporting the state without re-emitting.
         self._speaking = False
         self._silence_since = None
         return [turn]
@@ -249,15 +325,20 @@ class TurnTracker:
         The three reasons are not interchangeable:
 
           * `too_little_time`   -- below the yield floor. Not enough evidence.
-          * `still_speaking`    -- someone is mid-utterance. Nothing to decide.
+          * `idle`              -- nobody has spoken yet. An empty room.
+          * `still_speaking`    -- sound is still arriving. Nothing to decide.
           * `silence_short_of_threshold` -- waiting. The expected state most
             of the time, and not an error.
         """
         if elapsed_s < self.yield_floor_s:
             return TurnVerdict(UNRESOLVED, "too_little_time", elapsed_s=elapsed_s)
-        if self._speaking or self._silence_since is None:
-            return TurnVerdict(OPEN, "still_speaking", elapsed_s=elapsed_s)
+        if self._silence_since is None:
+            # No speech has been seen at all: an idle room, not an open turn.
+            return TurnVerdict(OPEN, "idle", elapsed_s=elapsed_s)
         silence_for = elapsed_s - self._silence_since
+        if self._speaking and silence_for <= 0:
+            # Sound is still coming; `ev.t1` is at or ahead of the clock.
+            return TurnVerdict(OPEN, "still_speaking", elapsed_s=elapsed_s)
         if silence_for >= self.turn_end_s:
             return TurnVerdict(COMPLETE, "sustained_silence",
                                since=self._silence_since, elapsed_s=elapsed_s)
