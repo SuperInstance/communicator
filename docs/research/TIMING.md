@@ -135,3 +135,16 @@ speculative execution cuts dialogue latency by ~500 ms in published work
 for speech, independently invented. What the fleet adds over all of them:
 the score, so the offset can be scheduled PER MODALITY (judged tracks
 200–550 ms vs acoustic tens of ms) rather than one global lookahead.
+
+
+**Correction, Day-3 (EXIMENTS-AUDIO §3h):** E7 proper — 56 annotated
+turning moments, symmetric controls — REFUTED the energy/pitch
+pre-event swing as an observable (the apparent F0 rise was utterance-
+onset pitch-up present in controls too, p=0.28). Law 2 stands on its
+published turn-timing precedents (VAP; Udupa et al. 2026 speculative
+execution), NOT on our acoustic evidence. The kick-drum remains true of
+drummers (Fujii 2011) and of schedulers; whether speakers' bodies
+broadcast the swing in acoustics is now a measured NO on one dramatic
+audiobook — the remaining candidate observable is onset micro-timing in
+the silence track. The prime-then-payload law (§3) is untouched and is
+the fleet's best next build (E8).

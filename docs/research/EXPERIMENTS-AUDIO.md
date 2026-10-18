@@ -492,3 +492,35 @@ systematically UNDERPREDICTS it; Dai et al. Interspeech 2022; Wav2ToBI
 predictors — non-circular precisely because they are NOT acoustic
 labels (which is what the Day-2 dissociation wants), but never as
 ground truth. E7's verdict will carry this caveat by design.
+
+## 3h. Day-3 — E7 PROPER (annotated moments): the clean negative
+
+56 text-annotated turning moments (annotator v1, typed + confidence'd,
+from a subagent reading the transcript; calibration per §3g note) vs 120
+matched control line-starts, symmetric analysis including the +1.5 s
+ASR-lead sensitivity shift:
+
+| series | w1 RMS | w2 RMS | f0 (2 s) |
+|---|---|---|---|
+| moments (as marked) | 0.30 | 0.46 | 0.46 |
+| moments +1.5 s | 0.57 | 0.45 | **0.64 (p=0.022)** |
+| controls (as marked) | 0.23 | 0.40 | 0.47 |
+| **controls +1.5 s** | 0.58 | 0.35 | **0.58 (p=0.041)** |
+
+**Moments vs controls at the same shift: hypergeometric p = 0.28.** The
+apparent F0 rise was the utterance-onset pitch-up every line start
+shows — visible in the CONTROLS once they got the same treatment. That
+is what a symmetric control is for.
+
+**E7 verdict, three operationalizations, one answer:** quartile proxy
+(n=626): no. Annotated moments (n=56): no. Symmetric controls: the
+"signal" was onset artifact. **The pre-event energy/pitch swing, as an
+acoustic observable before dramatic turning points, is REFUTED on this
+corpus (annotation v1, one audiobook, LLM-from-text moments — all three
+limits stated).** What survives untouched: the intent-delivery
+dissociation (definitive), and TIMING.md's law 2 as THEORY — its
+published support (VAP, endpoint anticipation, Udupa 2026) concerns
+TURN-TIMING prediction, not acoustic intensity approach; our
+energy-swing reading of the kick-drum was the wrong observable. If the
+law is to be seen in audio, the next candidate observable is micro-timing
+(onset preparation in the silence track), not loudness or pitch.
