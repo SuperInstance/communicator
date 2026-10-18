@@ -1,0 +1,204 @@
+# workers/ configuration -- EXAMPLE ONLY.
+#
+# Copy to `wrangler.toml` and fill in your own values. Do NOT deploy this file
+# as-is and do NOT put a real account id or token in it.
+#
+# There are deliberately NO credentials here. Tokens belong in wrangler's
+# secret store (`wrangler secret put`), never in a committed file:
+#
+#     wrangler secret put CF_API_TOKEN     # consumed by hotpath at runtime
+#
+# Three projects are defined because they have different bindings, different
+# CPU budgets, and -- critically -- different blast radii. The hotpath is the
+# always-on component and is the one that must keep working; the consumer runs
+# on retry and must not be able to take it down.
+
+# ===========================================================================
+# PROJECT 1: hotpath -- the always-on gate
+# ===========================================================================
+[[project]]
+name = "communicator-hotpath"
+main = "workers/hotpath/src/index.js"
+compatibility_date = "2026-10-01"
+
+# Accounts for plans/tiers. `workers_dev = false` because this is meant to be
+# reached from the watcher on a LAN, not exposed on a public workers.dev
+# subdomain -- an "invisible backend" should not be a findable hostname.
+workers_dev = false
+
+# The AI binding. No account_id here: the binding inherits it from wrangler's
+# auth. That is on purpose -- it is one fewer place a real account id could be
+# committed by accident.
+[project.ai]
+binding = "AI"
+
+# costs.json is bound as a MODULE, not inlined.
+#
+# This is the mechanism that keeps the budget constants in exactly one place:
+# hotpath, tables and the pytest suite all read this same file. Workers supports
+# JSON module imports natively, so there is no build step, no codegen and no
+# second copy to drift. Change a price in costs.json and the Worker, the ledger
+# and the tests all see it.
+[project.rules]
+type = "Data"
+globs = ["**/*.json"]
+fallthrough = true
+
+[[project.durable_objects.bindings]]
+name = "BUDGET"
+class_name = "NeuronLedger"
+# ONE object for the WHOLE ACCOUNT.
+#
+# Not one per session. Neurons are billed per account, so a per-session ledger
+# would hand every session the full 10,000/day allowance and overdraw by a
+# factor of the session count while each session believed it was fine.
+# A fixed namespace id also means there is exactly one instance, which is what
+# makes the single-threaded serialisation a mutual-exclusion lock.
+[[project.migrations]]
+tag = "v1"
+new_sqlite_classes = ["NeuronLedger"]
+
+[[project.d1_databases]]
+binding = "DB"
+database_name = "communicator"
+database_id = "REPLACE_WITH_YOUR_D1_DATABASE_ID"
+# The remote database UUID. Find it with:
+#     wrangler d1 list
+# Placeholder on purpose. A real database_id is not a secret, but committing
+# one from the wrong account is a confusing mistake.
+
+[[project.queues.producers]]
+binding = "JUDGE_QUEUE"
+queue = "communicator-judge"
+
+[[project.migrations]]
+# Queues, D1 and DO classes cannot share one migration block; if you add
+# classes here, give them their own block.
+
+# -- CPU and limits -------------------------------------------------------
+# Free tier is 10 ms CPU/request; HTTP-triggered Workers have NO wall-clock
+# limit, and awaiting a model response does not count as CPU. So the gate can
+# await several inference calls per invocation essentially for free in CPU
+# terms. That is why this design is affordable on the free tier rather than
+# merely legal.
+#
+# `limits.cpu_ms` is a PAID-plan setting. Leave it commented on Free.
+#
+# [[project.limits]]
+# cpu_ms = 30000
+
+# ===========================================================================
+# PROJECT 2: tables -- durable rows + per-session hot state
+# ===========================================================================
+[[project]]
+name = "communicator-tables"
+main = "workers/tables/src/index.js"
+compatibility_date = "2026-10-01"
+workers_dev = false
+
+[project.rules]
+type = "Data"
+globs = ["**/*.json"]
+fallthrough = true
+
+[[project.d1_databases]]
+binding = "DB"
+database_name = "communicator"
+database_id = "REPLACE_WITH_YOUR_D1_DATABASE_ID"
+
+# One DO instance per session: the DO id IS the session id.
+[[project.durable_objects.bindings]]
+name = "SESSIONS"
+class_name = "SessionState"
+
+[[project.migrations]]
+tag = "v1"
+new_sqlite_classes = ["SessionState"]
+
+# ===========================================================================
+# PROJECT 3: judge consumer -- at-least-once delivery of judged work
+# ===========================================================================
+[[project]]
+name = "communicator-judge"
+main = "workers/tables/src/consumer.js"
+compatibility_date = "2026-10-01"
+workers_dev = false
+
+[project.ai]
+binding = "AI"
+
+[project.rules]
+type = "Data"
+globs = ["**/*.json"]
+fallthrough = true
+
+[[project.d1_databases]]
+binding = "DB"
+database_name = "communicator"
+database_id = "REPLACE_WITH_YOUR_D1_DATABASE_ID"
+
+# The consumer needs to settle the reservation the gate took, so it binds the
+# SAME account-wide budget DO as the hotpath. This is the one cross-project
+# binding in the system and it is the reason the ledger lives in a DO: a DO can
+# be bound from more than one Worker, and there is only ever one of it.
+[[project.durable_objects.bindings]]
+name = "BUDGET"
+class_name = "NeuronLedger"
+
+# ---------------------------------------------------------------------------
+# Queue configuration
+# ---------------------------------------------------------------------------
+#
+# `max_batch_size = 100` is the platform maximum (queues/platform/limits).
+# `max_batch_timeout` 5 s: shorter than the 60 s ceiling because a judged clip
+# that arrives 60 s late is no longer worth judging -- the whole reason it was
+# queued is that it was timely. Latency has a budget too, it just is not a
+# money budget.
+#
+# `max_retries = 100` is the platform maximum. Combined with the consumer's
+# idempotent INSERT OR IGNORE, a retry costs one D1 read and write and zero
+# model calls.
+#
+# `dead_letter_queue` is NOT configured. An operator must choose one
+# deliberately: a DLQ that silently accumulates is its own kind of unbounded
+# growth, and a DLQ nobody reads turns message loss into a mystery. Deliberately
+# left blank rather than defaulted.
+#
+# [project.queues.consumers]
+# queue = "communicator-judge"
+# max_batch_size = 100
+# max_batch_timeout = 5
+# max_retries = 100
+# retry_delay = 30
+# dead_letter_queue = "REPLACE_WITH_YOUR_DLQ"   # <- choose deliberately
+#
+# ---------------------------------------------------------------------------
+# D1 schema
+# ---------------------------------------------------------------------------
+#
+#     wrangler d1 create communicator
+#     wrangler d1 execute communicator --file=workers/tables/schema.sql
+#
+# Not run as part of this task. See README, "what was deliberately not built".
+
+# ===========================================================================
+# NOT INCLUDED, AND WHY
+# ===========================================================================
+#
+# No KV namespace binding anywhere.
+#   KV is eventually consistent (up to 60 s), not atomic, and capped at 1
+#   write/second per key and 1,000 writes/day on Free. A per-session
+#   read-modify-write counter is none of the read-heavy, cacheable workloads KV
+#   is designed for. It is not a per-session state store. See
+#   workers/tables/src/session_do.js for the full argument.
+#
+# No cron trigger.
+#   There is nothing to poll: the watcher POSTs, the gate reacts, and the queue
+#   delivers. A cron would be a mechanism with no failure to defend against.
+#
+# No R2 binding.
+#   Audio does not fit a Queues message (128 KB cap; 16-bit 16 kHz mono is
+#   32,000 bytes/s, so ~3 s after base64). Where audio is persisted is a
+#   decision for whoever wires the watcher in -- and the gate deliberately does
+#   not care, because it receives base64 inline over HTTP, where the 100 MB
+#   Free-tier body limit is not close to binding for 2 s clips.

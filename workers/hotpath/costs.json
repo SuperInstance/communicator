@@ -1,0 +1,193 @@
+{
+  "_readme": [
+    "SINGLE SOURCE OF TRUTH for every limit, price and bound used by workers/.",
+    "Both the Python modules (budget.py, batching.py) and the JavaScript Workers",
+    "(hotpath/src/*.js, tables/src/*.js) read THIS file and nothing else, so a price",
+    "change is a one-line edit here rather than a hunt through four languages.",
+    "",
+    "Every entry carries a `source`. Entries whose `source` starts with `OURS:` are",
+    "our own policy choices, NOT Cloudflare constraints, and are grouped separately so",
+    "they are never mistaken for a platform limit. Per the design rule for this",
+    "directory, no mechanism exists without either a cited constraint or an explicit",
+    "OURS: justification."
+  ],
+
+  "neuron": {
+    "usd_per_neuron": 0.000011,
+    "usd_per_neuron_source": "https://developers.cloudflare.com/workers-ai/platform/pricing/ -- '$0.011 per 1,000 Neurons'. 0.011/1000 = 0.000011.",
+    "free_neurons_per_day": 10000,
+    "free_neurons_per_day_source": "https://developers.cloudflare.com/workers-ai/platform/pricing/ -- 'Our free allocation allows anyone to use a total of 10,000 Neurons per day at no charge.'",
+    "reset_utc_hour": 0,
+    "reset_source": "https://developers.cloudflare.com/workers-ai/platform/pricing/ -- 'All limits reset daily at 00:00 UTC.'",
+    "free_tier_hard_stop_source": "https://developers.cloudflare.com/workers-ai/platform/pricing/ -- 'If you exceed any one of the above limits, further operations will fail with an error.' On Workers Free there is nothing to bill, so an overrun does not degrade gracefully: calls start erroring.",
+    "paid_overage_note": "On Workers Paid the same 10,000/day is included and anything above it is billed. The included allowance resets at 00:00 UTC on paid too, so a ledger keyed on the UTC day is correct on both plans."
+  },
+
+  "plans": {
+    "free": {
+      "requests_per_day": 100000,
+      "requests_per_day_source": "https://developers.cloudflare.com/workers/platform/limits/#account-plan-limits -- Requests, Workers Free: 100,000/day.",
+      "cpu_ms_per_request": 10,
+      "cpu_ms_per_request_source": "https://developers.cloudflare.com/workers/platform/limits/#cpu-time -- 'CPU time per HTTP request | 10 ms | 5 min (default: 30 seconds)'. Note this is CPU, not wall clock; wall clock for an HTTP-triggered Worker is unbounded (see wall_clock_http).",
+      "subrequests_per_request": 50,
+      "subrequests_source": "https://developers.cloudflare.com/workers/platform/limits/#account-plan-limits -- Subrequests, Workers Free: 50/request.",
+      "max_simultaneous_open_connections": 6
+    },
+    "paid": {
+      "requests_per_day": null,
+      "requests_per_day_source": "https://developers.cloudflare.com/workers/platform/limits/#account-plan-limits -- Requests, Workers Paid: No limit.",
+      "cpu_ms_per_request_default": 30000,
+      "cpu_ms_per_request_max": 300000,
+      "subrequests_per_request": 10000
+    },
+    "max_simultaneous_open_connections": 6,
+    "simultaneous_connections_source": "https://developers.cloudflare.com/workers/platform/limits/#simultaneous-open-connections -- 'Each Worker invocation can have up to six connections simultaneously waiting for response headers.' Workers AI calls are subrequests and are counted while awaiting headers, so this bounds how many model calls may be in flight at once. This is the single hardest concurrency bound in the whole design.",
+    "wall_clock_http": null,
+    "wall_clock_http_source": "https://developers.cloudflare.com/workers/platform/limits/#duration -- 'HTTP request | No limit'. Awaiting a model response is wall-clock, not CPU: 'Waiting on network requests (such as fetch() calls, KV reads, or database queries) does not count toward CPU time.' This is what lets the gate await smart-turn inside an HTTP invocation on the free tier's 10 ms CPU budget."
+  },
+
+  "models": {
+    "smart-turn-v2": {
+      "slug": "@cf/pipecat-ai/smart-turn-v2",
+      "usd_per_unit": 0.000338,
+      "usd_per_unit_unit": "audio-minute",
+      "usd_source": "https://developers.cloudflare.com/workers-ai/models/smart-turn-v2/ -- 'Unit Pricing | $0.000338 per audio minute'. Independently confirmed live against the Workers AI catalog endpoint GET /accounts/{account}/ai/models/search, which reports properties[].value = [{unit: 'per audio minute', price: 0.000338}]. Catalog read performed 2026-10-18.",
+      "published_neurons_per_unit": 0.51,
+      "published_neurons_source": "https://developers.cloudflare.com/workers-ai/platform/pricing/ -- audio table, '@cf/pipecat-ai/smart-turn-v2 | $0.00033795 per audio minute input | 0.51 neurons per audio minute input'.",
+      "CONFLICT": {
+        "summary": "The published neuron figure and the published USD figure disagree by ~60x for this model, and only for this model.",
+        "evidence": "That page states the two columns are equivalent ('The Price in Tokens column is equivalent to the Price in Neurons column'). Recomputing USD-per-neuron as price/published_neurons for every model on the page yields 1.100e-05 (= the page's own $0.011/1,000) for whisper, whisper-large-v3-turbo, melotts, deepgram nova-3, deepgram flux, clef, clef-omni and clef-flash. smart-turn-v2 alone yields 6.627e-04, i.e. 60.2x the stated unit price. A single outlier out of nine points is the signature of a typo, not of a different billing unit.",
+        "two_readings": {
+          "as_published_neurons": {"neurons_per_audio_min": 0.51, "neurons_per_day_24x7": 734.4, "fraction_of_free_day": 0.073, "days_of_24x7_inside_free_allowance": 13.62},
+          "as_implied_by_price": {"neurons_per_audio_min": 30.7273, "neurons_per_day_24x7": 44247.3, "fraction_of_free_day": 4.42, "days_of_24x7_inside_free_allowance": 0.226}
+        },
+        "resolution": "We bill against max(published_neurons, usd_per_unit / usd_per_neuron) -- the more expensive of the two published numbers. Under-estimating cost is the one failure this whole directory exists to prevent: a 60x under-estimate would let the ledger believe it had 60x the budget it actually had and would overrun silently, which is strictly worse than refusing to run. The rule is applied uniformly to every model so it is not a special case for one slug.",
+        "not_verified": "We did NOT run a smart-turn-v2 inference to measure the real charge, because that would spend neurons and this task forbids mutating spend. The real per-call charge is reported back in the API response `usage` field for clef-omni, and settle() reconciles the ledger against reported usage so a wrong constant self-corrects from measurement rather than from assumption."
+      },
+      "task_type": "Dumb Pipe",
+      "rate_limit_note": "https://developers.cloudflare.com/workers-ai/platform/limits/ lists rate limits BY TASK TYPE and does not include 'Dumb Pipe'. The documented per-minute ceilings that do apply to models in this directory are: Automatic Speech Recognition 720/min, Text Generation 300/min. smart-turn-v2's own ceiling is therefore UNDOCUMENTED; we plan against the tightest documented ceiling that could plausibly bind it, text_generation_requests_per_minute."
+    },
+    "clef-omni": {
+      "slug": "@cf/cloudflare/clef-omni",
+      "usd_per_unit": 0.15,
+      "usd_per_unit_unit": "M-input-tokens",
+      "usd_source": "https://developers.cloudflare.com/workers-ai/platform/pricing/ -- '@cf/cloudflare/clef-omni | $0.150 per M input tokens'. Confirmed live in the catalog search endpoint (properties[].value price 0.15) on 2026-10-18.",
+      "published_neurons_per_unit": 13636,
+      "published_neurons_source": "https://developers.cloudflare.com/workers-ai/platform/pricing/ -- clef-omni: 13,636 neurons per M input tokens.",
+      "task_type": "Text Generation",
+      "rate_limit_requests_per_minute": 300,
+      "rate_limit_source": "https://developers.cloudflare.com/workers-ai/platform/limits/ -- 'Text Generation - 300 requests per minute, unless the model requires the Workers Paid plan'.",
+      "returns_usage": true,
+      "usage_source": "Live catalog + published output schema: clef-omni's output schema requires `usage` with {input_tokens, output_tokens}, so actual neuron spend can be measured after each call instead of only estimated."
+    },
+    "whisper-large-v3-turbo": {
+      "slug": "@cf/openai/whisper-large-v3-turbo",
+      "usd_per_unit": 0.000513,
+      "usd_per_unit_unit": "audio-minute",
+      "usd_source": "https://developers.cloudflare.com/workers-ai/platform/pricing/ -- audio table lists $0.0005 per audio minute; the catalog search endpoint reports the more precise 0.000513 (live, 2026-10-18). We use the catalog value.",
+      "published_neurons_per_unit": 46.63,
+      "published_neurons_source": "https://developers.cloudflare.com/workers-ai/platform/pricing/ -- 46.63 neurons per audio minute.",
+      "task_type": "Automatic Speech Recognition",
+      "rate_limit_requests_per_minute": 720,
+      "rate_limit_source": "https://developers.cloudflare.com/workers-ai/platform/limits/ -- 'Automatic Speech Recognition - 720 requests per minute'.",
+      "returns_usage": true,
+      "NOT_WIRED": "Listed here for completeness and for the cost model only. NOT wired into the gate: see README 'not viable'. It is batch-only (no streaming, no partial results, no WebSocket path), and the 'streaming Whisper' pattern in circulation is client-side chunking, which is not streaming."
+    },
+    "whisper": {
+      "slug": "@cf/openai/whisper",
+      "usd_per_unit": 0.0005,
+      "usd_per_unit_unit": "audio-minute",
+      "usd_source": "https://developers.cloudflare.com/workers-ai/platform/pricing/ -- '$0.0005 per audio minute'.",
+      "published_neurons_per_unit": 41.14,
+      "published_neurons_source": "https://developers.cloudflare.com/workers-ai/platform/pricing/ -- 41.14 neurons per audio minute.",
+      "task_type": "Automatic Speech Recognition",
+      "rate_limit_requests_per_minute": 720,
+      "rate_limit_source": "https://developers.cloudflare.com/workers-ai/platform/limits/ -- Automatic Speech Recognition 720/min.",
+      "returns_usage": true,
+      "NOT_WIRED": "Cheaper than whisper-large-v3-turbo and otherwise identical in shape here. Retained as a cost-model entry only; not on the gate path."
+    }
+  },
+
+  "rate_limits_fallback": {
+    "text_generation_requests_per_minute": 300,
+    "text_generation_source": "https://developers.cloudflare.com/workers-ai/platform/limits/ -- Text Generation: 300 requests per minute. Used as the planning ceiling for models whose own task type has no published entry (see models.smart-turn-v2.rate_limit_note).",
+    "asr_requests_per_minute": 720,
+    "asr_source": "https://developers.cloudflare.com/workers-ai/platform/limits/ -- Automatic Speech Recognition: 720 requests per minute (= 12/sec)."
+  },
+
+  "clef_media": {
+    "max_clips_per_request": 4,
+    "max_bytes_per_clip": 8388608,
+    "max_seconds_per_clip": 300,
+    "max_bytes_audio_plus_video_decoded": 16777216,
+    "source": "https://developers.cloudflare.com/workers-ai/models/clef-omni/schema-input.json (live, read 2026-10-18). audio: 'Optional embedded audio clips (max 4; 8 MiB and 300 seconds each). Audio and video clips together may total at most 16 MiB decoded. Remote URLs are not accepted.' images: max 4, 4 MiB and 16 megapixels each, 8 MiB total decoded, 64-1,024 input tokens each. videos: max 2, 16 MiB and 60 seconds each.",
+    "remote_urls_accepted": false,
+    "remote_urls_note": "Media must be EMBEDDED. There is no URL fetch path, so the caller (the watcher) must inline base64 audio; we do not pass remote references.",
+    "max_questions": 64,
+    "required_request_fields": ["model", "state", "questions"],
+    "model_selector": "clef-omni"
+  },
+
+  "queue": {
+    "max_message_bytes": 131072,
+    "max_consumer_batch_size": 100,
+    "max_send_batch_messages": 100,
+    "max_send_batch_bytes": 262144,
+    "max_batch_wait_s": 60,
+    "message_retries": 100,
+    "per_queue_throughput_per_second": 5000,
+    "max_backlog_bytes": 26214400000,
+    "consumer_wall_clock_s": 900,
+    "free_retention_s": 86400,
+    "delivery": "at-least-once",
+    "source": "https://developers.cloudflare.com/queues/platform/limits/ (read 2026-10-18). Message size 128 KB; consumer batch 100; sendBatch 100 messages or 256 KB; max batch wait 60 s; message retries 100; per-queue throughput 5,000/s; consumer duration 15 min; free-plan retention is a non-configurable 24 h.",
+    "idempotency_source": "https://developers.cloudflare.com/queues/ -- Queues delivery is at-least-once: a message can be delivered more than once (up to 100 retries). Every redelivery is another consumer invocation and therefore another billable Worker request against the 100,000/day free allowance, so consumers MUST be idempotent or the retry itself becomes the cost.",
+    "audio_in_message": false,
+    "audio_in_message_reason": "Message size is capped at 128 KB. 16-bit mono PCM at 16 kHz is 32,000 bytes/s, so ~4 s fits and base64 inflates that by 4/3 to ~3 s of audio. A queue message therefore cannot carry a real utterance. Messages carry job DESCRIPTORS (session id, event ids, audio reference); audio stays with the watcher or in object storage."
+  },
+
+  "kv": {
+    "free_reads_per_day": 100000,
+    "free_writes_per_day_different_keys": 1000,
+    "writes_per_second_same_key": 1,
+    "source": "https://developers.cloudflare.com/kv/platform/limits/ (read 2026-10-18). Free: 100,000 reads/day, 1,000 writes/day to different keys, 1 write/second to the same key.",
+    "consistency_source": "https://developers.cloudflare.com/kv/concepts/how-kv-works/ (read 2026-10-18). 'KV achieves high performance by being eventually-consistent... changes may take up to 60 seconds or more to be visible in other global network locations.' And: 'KV is not ideal for applications where you need support for atomic operations or where values must be read and written in a single transaction. If you need stronger consistency guarantees, consider using Durable Objects.'",
+    "verdict": "WRONG TOOL for per-session hot state. A read-modify-write on one session key is (a) not atomic, (b) visible at the writer's edge immediately but up to 60 s late everywhere else, and (c) capped at 1 write/second to that key -- below the watcher's own event rate, since the watcher can emit events faster than 1 Hz indefinitely (MAX_UTTERANCE_S = 2.0 s means a continuous monologue flushes an utterance every 2 s, and a checkpoint per 2 s is the designed steady state). 1,000 writes/day on free is also below the 100,000 reads/day, i.e. the ratio is backwards for a write-heavy per-session counter. Durable Objects give single-threaded per-key serialisation, which is exactly the missing primitive."
+  },
+
+  "durable_objects": {
+    "wall_clock_source": "https://developers.cloudflare.com/workers/platform/limits/#duration -- 'Durable Objects (RPC / HTTP) | Unlimited. No hard limit while the caller stays connected.'",
+    "alarm_wall_clock_s": 900,
+    "single_threaded": true,
+    "single_threaded_source": "https://developers.cloudflare.com/durable-objects/ -- each Durable Object instance is single-threaded and serialises requests for its key, which is what makes read-modify-write safe without a lock. This is the property that makes the neuron ledger correct."
+  },
+
+  "OURS": {
+    "_note": "Our tunables. NOT Cloudflare constraints. Each is a deliberate choice with its reasoning recorded; none is presented as a platform limit.",
+    "gate_probability_threshold": {
+      "value": 0.6,
+      "rationale": "smart-turn-v2 returns probability (P(end-of-turn)). This is a ROUTING threshold -- 'is it worth spending an expensive judgement call on this clip' -- not a claim about ground truth, so it is a calibration knob rather than a derived constant. 0.6 is a starting point, deliberately NOT presented as optimal: no measured precision/recall curve exists yet. The repo already has an analogous confidence dead-band in src/policy.py, and clef_audio_native.py records that clef's confidence does NOT reliably follow the same formula as Jev's, so a threshold carried over from the Jev ecosystem must be re-measured rather than assumed."
+    },
+    "request_budget_share": {
+      "value": 0.10,
+      "rationale": "The 100,000 requests/day free allowance is shared across ALL Workers on the account, not per Worker. The hotpath must leave room for the tables plane, the queue consumers, D1 and any future Worker, so it takes a fraction rather than the whole budget. 10% = 10,000 req/day = one batch per 8.64 s. Choosing 1.0 would be the same class of bug as budgeting neurons per-session when they are billed per-account."
+    },
+    "max_paid_overage_neurons_per_day": {
+      "value": 40000,
+      "usd": 0.44,
+      "rationale": "Paid overage is unbounded by Cloudflare and billed at $0.011/1,000. An unattended loop with no ceiling can bill without limit, so the ledger caps overage per UTC day and then refuses. 40,000 overage neurons = $0.44/day = ~$13/month at the worst case, which is a number a human agreed to rather than one discovered on an invoice."
+    },
+    "hotpath_min_clip_s": {
+      "value": 0.15,
+      "rationale": "Shorter clips are dropped before any model call. At smart-turn-v2's rate a clip this short costs ~0.08 neurons, so the saving is negligible; the reason is that sub-150 ms clips are almost always breath or click artefacts and they are the bulk of a busy room. Cheap hygiene, not an economic lever -- stated as such rather than dressed up as a saving."
+    },
+    "hotpath_max_clip_s": {
+      "value": 2.0,
+      "rationale": "Upper bound on a single endpointed clip, and it is NOT our choice: it is src/watcher.py's MAX_UTTERANCE_S. The watcher caps a speech run at 2.0 s and emits a CHECKPOINT utterance when a run exceeds it, so a longer clip could not have come from one speech run. Sending one would mean sending a mis-assembled buffer and paying for it."
+    },
+    "expected_input_tokens_per_judgement": {
+      "value": 8000,
+      "rationale": "Used ONLY to size a reservation before the call, so that a burst of concurrent judgements cannot collectively overdraw between reservation and settlement. clef-omni reports real input_tokens in its response `usage`, so settle() replaces this estimate with the measured value. Over-reserving slightly is safe; under-reserving is the failure we are avoiding, which is why this is an upper-ish estimate."
+    }
+  }
+}
