@@ -1,0 +1,173 @@
+{
+  "model": "jev-1.14.0",
+  "mean_pitch_spread_hz": 1.2,
+  "shape": {
+    "scalar": [
+      {
+        "picked": "flat",
+        "confidence": 0.92,
+        "probs": {
+          "rising": 0.01,
+          "falling": 0.04,
+          "flat": 0.95
+        },
+        "case": "rising",
+        "truth": "rising"
+      },
+      {
+        "picked": "flat",
+        "confidence": 0.92,
+        "probs": {
+          "rising": 0.01,
+          "falling": 0.04,
+          "flat": 0.95
+        },
+        "case": "falling",
+        "truth": "falling"
+      },
+      {
+        "picked": "flat",
+        "confidence": 0.89,
+        "probs": {
+          "rising": 0.01,
+          "falling": 0.06,
+          "flat": 0.93
+        },
+        "case": "flat",
+        "truth": "flat"
+      }
+    ],
+    "symbolic": [
+      {
+        "picked": "rising",
+        "confidence": 0.82,
+        "probs": {
+          "rising": 0.88,
+          "falling": 0.04,
+          "flat": 0.08
+        },
+        "case": "rising",
+        "truth": "rising"
+      },
+      {
+        "picked": "falling",
+        "confidence": 0.59,
+        "probs": {
+          "rising": 0.16,
+          "falling": 0.73,
+          "flat": 0.11
+        },
+        "case": "falling",
+        "truth": "falling"
+      },
+      {
+        "picked": "flat",
+        "confidence": 0.85,
+        "probs": {
+          "rising": 0.05,
+          "falling": 0.05,
+          "flat": 0.9
+        },
+        "case": "flat",
+        "truth": "flat"
+      }
+    ],
+    "prose": [
+      {
+        "picked": "flat",
+        "confidence": 1.0,
+        "probs": {
+          "rising": 0.0,
+          "falling": 0.0,
+          "flat": 1.0
+        },
+        "case": "rising",
+        "truth": "rising"
+      },
+      {
+        "picked": "flat",
+        "confidence": 1.0,
+        "probs": {
+          "rising": 0.0,
+          "falling": 0.0,
+          "flat": 1.0
+        },
+        "case": "falling",
+        "truth": "falling"
+      },
+      {
+        "picked": "flat",
+        "confidence": 1.0,
+        "probs": {
+          "rising": 0.0,
+          "falling": 0.0,
+          "flat": 1.0
+        },
+        "case": "flat",
+        "truth": "flat"
+      }
+    ]
+  },
+  "band_control": {
+    "scalar": [
+      {
+        "case": "rising",
+        "truth": "mid",
+        "picked": "mid",
+        "confidence": 0.54
+      },
+      {
+        "case": "falling",
+        "truth": "mid",
+        "picked": "mid",
+        "confidence": 0.53
+      },
+      {
+        "case": "flat",
+        "truth": "mid",
+        "picked": "mid",
+        "confidence": 0.55
+      }
+    ],
+    "symbolic": [
+      {
+        "case": "rising",
+        "truth": "mid",
+        "picked": "high",
+        "confidence": 0.43
+      },
+      {
+        "case": "falling",
+        "truth": "mid",
+        "picked": "low",
+        "confidence": 0.11
+      },
+      {
+        "case": "flat",
+        "truth": "mid",
+        "picked": "low",
+        "confidence": 0.51
+      }
+    ],
+    "symbolic_abs": [
+      {
+        "case": "rising",
+        "truth": "mid",
+        "picked": "high",
+        "confidence": 0.33
+      },
+      {
+        "case": "falling",
+        "truth": "mid",
+        "picked": "low",
+        "confidence": 0.25
+      },
+      {
+        "case": "flat",
+        "truth": "mid",
+        "picked": "low",
+        "confidence": 0.61
+      }
+    ]
+  }
+}
