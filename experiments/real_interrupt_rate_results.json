@@ -1,0 +1,48 @@
+{
+  "note": "Real-speech interrupt rates. For every silence run the watcher now reports, was the speaker followed by more speech? A 'no' at the file end is counted separately, not called a turn end.",
+  "thresholds": [
+    {
+      "min_s": 0.6,
+      "runs": 54,
+      "resumed": 53,
+      "file_end": 0,
+      "interrupt_rate": 0.981
+    },
+    {
+      "min_s": 0.9,
+      "runs": 38,
+      "resumed": 38,
+      "file_end": 0,
+      "interrupt_rate": 1.0
+    },
+    {
+      "min_s": 1.2,
+      "runs": 24,
+      "resumed": 24,
+      "file_end": 0,
+      "interrupt_rate": 1.0
+    },
+    {
+      "min_s": 1.5,
+      "runs": 15,
+      "resumed": 15,
+      "file_end": 0,
+      "interrupt_rate": 1.0
+    },
+    {
+      "min_s": 1.8,
+      "runs": 6,
+      "resumed": 6,
+      "file_end": 0,
+      "interrupt_rate": 1.0
+    },
+    {
+      "min_s": 2.1,
+      "runs": 2,
+      "resumed": 2,
+      "file_end": 0,
+      "interrupt_rate": 1.0
+    }
+  ],
+  "conclusion": "In recorded monologue, silence is essentially never a turn end: the speaker resumes ~100% of the time. The corpus is single-speaker continuous recordings, so the positive class (a speaker yielding the floor) is unrepresentable, not merely rare. Turn detection cannot be validated on this corpus."
+}

@@ -307,3 +307,84 @@ interrupt people. Fixing the watcher moved the best accuracy from 0.283 to
 the silence visible, speculation on this material is not good enough to ship as
 an action trigger. No bar reaches 90%. The honest default stays: wait, and be
 able to say you do not know.
+
+---
+
+## Addendum 2: the corpus cannot answer the turn question, and that is the finding
+
+With the watcher fixed, pauses are visible and the question can finally be
+asked of **real** speech rather than spliced audio. No manufactured data: for
+every silence run the watcher reports, did the speaker continue afterwards?
+
+A "no" at the very end of a file is ambiguous — the recording simply stopped —
+so those are counted separately rather than called turn ends.
+
+| threshold | silence runs | speaker resumed | at file end | would have interrupted |
+|---|---|---|---|---|
+| 0.6 s | 54 | 53 | 0 | **98.1%** |
+| 0.9 s | 38 | 38 | 0 | **100.0%** |
+| 1.2 s | 24 | 24 | 0 | **100.0%** |
+| 1.5 s | 15 | 15 | 0 | **100.0%** |
+| 1.8 s | 6 | 6 | 0 | **100.0%** |
+| 2.1 s | 2 | 2 | 0 | **100.0%** |
+
+**In recorded speech, silence is essentially never a turn end. The speaker
+comes back.**
+
+That single fact explains every other number in this document:
+
+* Why the 3 s threshold fires on nothing — the longest silence in 465 s of
+  seven cells is 2.54 s.
+* Why speculation scores ~0.536 with 84 interruptions — the manufactured END
+  cases (speech, then silence, then *nothing*) do not resemble the corpus,
+  because in the corpus the answer is almost always "they kept talking".
+* Why the four routes disagreed without pattern: they were being asked about
+  events that essentially do not occur in the material.
+
+**THE REALISATION: this corpus cannot answer the turn question.**
+
+Every file in `examples/realaudio/corpus/` is a recording of continuous
+speech — a LibriVox chapter, a reading, an address. A recording is cut at an
+arbitrary point and people keep talking until the cut. So it contains
+phrase-level pauses, and essentially **zero** instances of a speaker
+yielding the floor to someone else, because there is no someone else.
+
+Tuning a turn detector on this corpus tunes it on a fiction: the only way a
+pause becomes a turn end in this material is if the recording stops, which is
+an artefact of the file, not a property of the conversation.
+
+What would actually be needed:
+
+* **Two speakers.** Turn-taking is a two-party phenomenon. Every corpus file
+  here is monologues, so the positive class is not merely rare, it is
+  *unrepresentable*.
+* **Natural turn exchange**, not read speech. Read material has different
+  pause structure from conversation and will mislead any threshold fitted to
+  it.
+* **Overlapping and interrupted turns**, which is where real systems fail and
+  which no splice of a single voice can produce.
+
+Until then the honest position is unchanged and now has a measured reason
+behind it: `TURN_END_S = 3.0` is not wrong, it is **unfalsifiable with the
+data available**, and `UNRESOLVED` is the correct output rather than a
+failure to have tried harder.
+
+## A harness error worth recording
+
+Three separate measurements in this thread were wrong in the same way, and
+each was caught by the answer being implausible rather than by a failing
+assertion:
+
+1. Events collected first, then fed to the tracker with the watcher's
+   **final** clock — every pause looked like it was seen at the end of the
+   session, and the tracker correctly declined to believe it.
+2. Comparing each checkpoint against the file's final `elapsed_s` — produced
+   a clean **100%** interrupt rate, which was obviously wrong.
+3. Comparing a checkpoint against the clock at push time — produced a clean
+   **0%**, because a checkpoint's `t1` *is* the current clock by construction.
+
+Only the third formulation (look forward for a later utterance, with
+file-end runs counted separately) is the question actually being asked.
+
+A measurement that returns a suspiciously round 100% or 0% is usually a
+harness bug, not a result.
