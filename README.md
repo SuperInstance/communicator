@@ -65,6 +65,8 @@ src/question_health.py  ill-posed question detector (garbage vs real
                      batteries); safe-parked verdict for Score tracks
 src/calibration.py   label-by-construction corpus + ECE/Brier/Spearman
 src/score.py         merge + export; tick = 1 ms; provenance sidecar
+docs/SCIENCE.md      the backend science: why YIN, why gates, why ECE
+docs/research/       the verified annotated paper corpus (PAPERS.md)
 docs/superpowers/specs/   the design doc (v2) — read §0 before extending
 ```
 
