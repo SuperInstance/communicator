@@ -335,3 +335,20 @@ true once.
 6. **Can a human tell a confirmation from a request when both are spoken in the
    same voice?** Not tested, and it is the failure mode a voice interface adds
    that a terminal never has.
+---
+
+> **SUPERSEDED by v3** (`2026-10-17-communicator-design-v3.md`).
+>
+> Kept unedited for the record. Two things in this document are wrong, and v3
+> says so rather than quietly dropping them:
+>
+> * **§3 "The seam is the turn boundary" is superseded by "the seam is the
+>   event".** This document designs a voice *request* interface — speech in, a
+>   triage decision, speech out. The system being built is a peripheral one: it
+>   watches, and a watcher has no turns.
+> * **The three-plane sketch has no room for learning.** It has no step
+>   between "record" and "judge", so there is nowhere for "watches and learns,
+>   and builds its own intelligent tables" to live. v3 adds it.
+>
+> Everything else here stands: the nine tracks, the provenance split, the
+> one-call rule, the grant law, and §9's closed risks.

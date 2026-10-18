@@ -788,3 +788,79 @@ cloud for every track. The measured split is:
 
 That is a hybrid decided by measurement rather than by preference, and it is
 the first concrete shape "configurable cloud/local/hybrid" has taken.
+
+## Design v3 — a peripheral system, not a request interface
+
+Casey reframed it: this is not the *first* UI, it is the **second** — the one
+that grows in alongside the primary work surface, more musclememory-like, one
+member of a family with db-log and robotics interfaces. It **watches**,
+learns, and builds its own intelligent tables out of the compute, storage and
+memory it has. And: *it builds its shorter paths little by little.*
+
+Written to `docs/superpowers/specs/2026-10-17-communicator-design-v3.md`.
+v2 is kept unedited with a banner naming exactly what is wrong in it. No code
+written — Casey asked for the design first.
+
+### The corrections, and what forced them
+
+**The seam is the event, not the turn.** v2 §3 says "the seam is the turn
+boundary... cost per turn, not per frame". A watcher has no turns. Sealing is
+per utterance; *events* are what spend attention — voiced onsets, utterance
+boundaries, tempo excursions, gate crossings, and **human decisions**, which
+are events with no acoustic signature. A system that only listens cannot see
+the most important events it will ever receive.
+
+**Three planes become five steps.** v2 had fast/durable/delegated and no room
+for learning. v3 inserts the missing step:
+
+    watcher (no model, µs) → score → TABLES → judged (event-triggered) → delegated
+
+The tables are the new plane and they are **pure arithmetic over the score**,
+which is the load-bearing property: learning is not the expensive part,
+judgement is.
+
+**Two tables, because there are two questions.** *Baselines* — what is normal
+per session/context, so a new utterance has a real deviation number against
+it. *Motifs* — recurring figures across the nine tracks, quantised, with
+occurrence counts and the set of actions each has resolved to. The rule that
+matters: **a motif with more than one distinct resolution is not compressible.**
+
+**Shorter paths borrow context, not understanding.** "Could you please run the
+test suite in the glasses repo" → "tests", because the repo is where you are.
+The length leaves the utterance and gets paid for in surroundings.
+
+### The safety law this produces
+
+> A shortened path carries more authority per syllable, therefore must pass
+> more gates, **never fewer**.
+
+Because the failure mode of compression is not that it breaks — it is that it
+*works confidently while meaning something else*. The baseline INTENTION
+question placed gibberish higher than real speech; a compressed path is a
+maximally ambiguous utterance, which is exactly what provokes confident
+invention.
+
+So Phase 0's invariant moves to a second, load-bearing place: a motif may
+**propose** a shorter path, never **enable** one, and nothing executes without
+a decision at the point of use. The corollary is uncomfortable and worth
+writing down: **a compressed path is the hardest attack surface in the
+system** — short enough that a social engineer no longer has to sound urgent,
+only familiar. `tests/test_voice_adversarial.py` was written for
+voice-shaped social engineering; extending it for compression is Phase 4.
+
+And the framing earns the MIDI decision rather than merely justifying it: a
+habit is *literally* a repeated figure in the score. Not a metaphor — because
+the record is the score and not the transcript, historical motifs are
+re-derivable when the perception layer improves, and the compression
+decisions get re-made against better data.
+
+### What is now measured vs specified
+
+| | |
+|---|---|
+| measured | phases 0-3, the hybrid split, all the falsified claims below |
+| specified, unbuilt | watcher, tables, deviation number, shorter paths |
+| unvalidated | **no real speech anywhere in this repo** |
+
+Next is Phase 4, the watcher, chosen because it is the only component with no
+measured number attached and the only one everything downstream consumes.
