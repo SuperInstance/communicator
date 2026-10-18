@@ -1,0 +1,329 @@
+{
+  "cloud_model": "jev-1.14.0",
+  "warmup": {
+    "cold_start_s": 30.528,
+    "warm_s": 0.339
+  },
+  "battery_cloud": {
+    "honest": {
+      "holistic": 0.61,
+      "max": 0.24,
+      "argmax": "no_listener",
+      "mean": 0.09
+    },
+    "question": {
+      "holistic": 0.62,
+      "max": 0.71,
+      "argmax": "no_request",
+      "mean": 0.282
+    },
+    "garbage": {
+      "holistic": 0.09,
+      "max": 0.94,
+      "argmax": "no_request",
+      "mean": 0.702
+    },
+    "garbage_arguing": {
+      "holistic": 0.04,
+      "max": 0.97,
+      "argmax": "self_promotion",
+      "mean": 0.728
+    }
+  },
+  "battery_local": {
+    "honest": {
+      "holistic": 0.9142,
+      "max": 0.4054,
+      "argmax": "self_promotion",
+      "mean": 0.1734
+    },
+    "question": {
+      "holistic": 0.588,
+      "max": 0.3664,
+      "argmax": "self_promotion",
+      "mean": 0.2525
+    },
+    "garbage": {
+      "holistic": 0.1106,
+      "max": 0.7915,
+      "argmax": "content_noise",
+      "mean": 0.6045
+    },
+    "garbage_arguing": {
+      "holistic": 0.9641,
+      "max": 0.7916,
+      "argmax": "self_promotion",
+      "mean": 0.3698
+    }
+  },
+  "confidence_cloud": {
+    "rows": [
+      {
+        "n_options": 5,
+        "reported": 1.0,
+        "predicted": 1.0,
+        "abs_error": 0.0
+      },
+      {
+        "n_options": 5,
+        "reported": 0.97,
+        "predicted": 0.975,
+        "abs_error": 0.005
+      },
+      {
+        "n_options": 5,
+        "reported": 0.45,
+        "predicted": 0.45,
+        "abs_error": 0.0
+      },
+      {
+        "n_options": 5,
+        "reported": 0.71,
+        "predicted": 0.7125,
+        "abs_error": 0.0025
+      }
+    ],
+    "max_abs_error": 0.005,
+    "mean_abs_error": 0.0019
+  },
+  "confidence_local": {
+    "rows": [
+      {
+        "n_options": 5,
+        "reported": 0.9321,
+        "predicted": 0.9321,
+        "abs_error": 0.0
+      },
+      {
+        "n_options": 5,
+        "reported": 0.6206,
+        "predicted": 0.6206,
+        "abs_error": 0.0
+      },
+      {
+        "n_options": 5,
+        "reported": 0.6481,
+        "predicted": 0.6481,
+        "abs_error": 0.0
+      },
+      {
+        "n_options": 5,
+        "reported": 0.4231,
+        "predicted": 0.4231,
+        "abs_error": 0.0
+      }
+    ],
+    "max_abs_error": 0.0,
+    "mean_abs_error": 0.0
+  },
+  "latency_cloud": {
+    "1": {
+      "median_s": 0.1275,
+      "per_question_ms": 127.48
+    },
+    "4": {
+      "median_s": 0.1088,
+      "per_question_ms": 27.21
+    },
+    "8": {
+      "median_s": 0.1808,
+      "per_question_ms": 22.6
+    },
+    "16": {
+      "median_s": 0.1081,
+      "per_question_ms": 6.75
+    }
+  },
+  "latency_local": {
+    "1": {
+      "median_s": 0.3433,
+      "per_question_ms": 343.31
+    },
+    "4": {
+      "median_s": 0.6412,
+      "per_question_ms": 160.29
+    },
+    "8": {
+      "median_s": 0.6715,
+      "per_question_ms": 83.94
+    },
+    "16": {
+      "median_s": 1.7928,
+      "per_question_ms": 112.05
+    }
+  },
+  "tracks_cloud": {
+    "honest": {
+      "TIMBRE": 5,
+      "INTENTION": 121,
+      "ATTENTION": 91,
+      "GESTURE": 122
+    },
+    "question": {
+      "TIMBRE": 6,
+      "INTENTION": 70,
+      "ATTENTION": 82,
+      "GESTURE": 117
+    },
+    "garbage": {
+      "TIMBRE": 6,
+      "INTENTION": 0,
+      "ATTENTION": 17,
+      "GESTURE": 15
+    },
+    "garbage_arguing": {
+      "TIMBRE": 6,
+      "INTENTION": 23,
+      "ATTENTION": 93,
+      "GESTURE": 70
+    }
+  },
+  "tracks_local": {
+    "honest": {
+      "TIMBRE": 0,
+      "INTENTION": 118,
+      "ATTENTION": 66,
+      "GESTURE": 116
+    },
+    "question": {
+      "TIMBRE": 4,
+      "INTENTION": 56,
+      "ATTENTION": 41,
+      "GESTURE": 79
+    },
+    "garbage": {
+      "TIMBRE": 5,
+      "INTENTION": 1,
+      "ATTENTION": 12,
+      "GESTURE": 25
+    },
+    "garbage_arguing": {
+      "TIMBRE": 2,
+      "INTENTION": 123,
+      "ATTENTION": 80,
+      "GESTURE": 43
+    }
+  },
+  "disagreement": {
+    "INTENTION": {
+      "exact_agreements": "0/4",
+      "rows": [
+        {
+          "probe": "honest",
+          "cloud": 121,
+          "local": 118,
+          "delta": 3
+        },
+        {
+          "probe": "question",
+          "cloud": 70,
+          "local": 56,
+          "delta": 14
+        },
+        {
+          "probe": "garbage",
+          "cloud": 0,
+          "local": 1,
+          "delta": -1
+        },
+        {
+          "probe": "garbage_arguing",
+          "cloud": 23,
+          "local": 123,
+          "delta": -100
+        }
+      ],
+      "mean_abs_delta": 29.5
+    },
+    "ATTENTION": {
+      "exact_agreements": "0/4",
+      "rows": [
+        {
+          "probe": "honest",
+          "cloud": 91,
+          "local": 66,
+          "delta": 25
+        },
+        {
+          "probe": "question",
+          "cloud": 82,
+          "local": 41,
+          "delta": 41
+        },
+        {
+          "probe": "garbage",
+          "cloud": 17,
+          "local": 12,
+          "delta": 5
+        },
+        {
+          "probe": "garbage_arguing",
+          "cloud": 93,
+          "local": 80,
+          "delta": 13
+        }
+      ],
+      "mean_abs_delta": 21
+    },
+    "GESTURE": {
+      "exact_agreements": "0/4",
+      "rows": [
+        {
+          "probe": "honest",
+          "cloud": 122,
+          "local": 116,
+          "delta": 6
+        },
+        {
+          "probe": "question",
+          "cloud": 117,
+          "local": 79,
+          "delta": 38
+        },
+        {
+          "probe": "garbage",
+          "cloud": 15,
+          "local": 25,
+          "delta": -10
+        },
+        {
+          "probe": "garbage_arguing",
+          "cloud": 70,
+          "local": 43,
+          "delta": 27
+        }
+      ],
+      "mean_abs_delta": 20.2
+    },
+    "TIMBRE": {
+      "exact_agreements": "0/4",
+      "rows": [
+        {
+          "probe": "honest",
+          "cloud": 5,
+          "local": 0,
+          "delta": 5
+        },
+        {
+          "probe": "question",
+          "cloud": 6,
+          "local": 4,
+          "delta": 2
+        },
+        {
+          "probe": "garbage",
+          "cloud": 6,
+          "local": 5,
+          "delta": 1
+        },
+        {
+          "probe": "garbage_arguing",
+          "cloud": 6,
+          "local": 2,
+          "delta": 4
+        }
+      ],
+      "mean_abs_delta": 3
+    }
+  }
+}

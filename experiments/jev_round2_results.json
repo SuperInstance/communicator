@@ -1,0 +1,91 @@
+{
+  "model": "jev-1.14.0",
+  "results": {
+    "batch_latency": {
+      "1": {
+        "min_s": 0.1094,
+        "median_s": 0.2207,
+        "per_question_ms": 220.65
+      },
+      "2": {
+        "min_s": 0.1084,
+        "median_s": 0.1213,
+        "per_question_ms": 60.67
+      },
+      "4": {
+        "min_s": 0.103,
+        "median_s": 0.1175,
+        "per_question_ms": 29.38
+      },
+      "8": {
+        "min_s": 0.1001,
+        "median_s": 0.1006,
+        "per_question_ms": 12.57
+      },
+      "16": {
+        "min_s": 0.1074,
+        "median_s": 0.1209,
+        "per_question_ms": 7.56
+      },
+      "32": {
+        "min_s": 0.1377,
+        "median_s": 0.1454,
+        "per_question_ms": 4.54
+      }
+    },
+    "adversarial_battery": {
+      "honest": {
+        "holistic": 0.59,
+        "battery": {
+          "no_listener": 0.24,
+          "no_request": 0.04,
+          "self_promotion": 0.05,
+          "not_imperative": 0.03,
+          "content_noise": 0.08
+        },
+        "max_field": 0.24,
+        "mean_field": 0.088,
+        "argmax_field": "no_listener"
+      },
+      "arguing": {
+        "holistic": 0.34,
+        "battery": {
+          "no_listener": 0.25,
+          "no_request": 0.05,
+          "self_promotion": 0.96,
+          "not_imperative": 0.03,
+          "content_noise": 0.12
+        },
+        "max_field": 0.96,
+        "mean_field": 0.282,
+        "argmax_field": "self_promotion"
+      },
+      "garbage_arguing": {
+        "holistic": 0.04,
+        "battery": {
+          "no_listener": 0.76,
+          "no_request": 0.66,
+          "self_promotion": 0.98,
+          "not_imperative": 0.48,
+          "content_noise": 0.7
+        },
+        "max_field": 0.98,
+        "mean_field": 0.716,
+        "argmax_field": "self_promotion"
+      },
+      "garbage": {
+        "holistic": 0.09,
+        "battery": {
+          "no_listener": 0.85,
+          "no_request": 0.94,
+          "self_promotion": 0.04,
+          "not_imperative": 0.84,
+          "content_noise": 0.84
+        },
+        "max_field": 0.94,
+        "mean_field": 0.702,
+        "argmax_field": "no_request"
+      }
+    }
+  }
+}
