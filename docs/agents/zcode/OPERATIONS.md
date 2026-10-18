@@ -73,3 +73,25 @@ calls / 11 s. Call counts are a first-class output — report them.
   or loading anything (Ollama is on :11434, Ollaya on :11435).
 - A tmux session (`quiltprobe`) and possibly other agents share this tree —
   see COLLABORATION.md before assuming a surprise is corruption.
+
+## Cloudflare (2026-10-18)
+
+- Token: `/mnt/c/Users/casey/CF.txt` — `CF_TOKEN="..."` (extract between
+  quotes). Verified active. Account:
+  `049ff5e84ecf636b53b162cbb580aae6`.
+- Workers AI REST: `POST /accounts/<id>/ai/run/@cf/meta/llama-3.1-8b-instruct`
+  with `{"messages":[...]}` — battery probe 3/3 correct incl. garbage
+  decline (better than jev-lattice's smaller-model overconfidence finding;
+  treat as a second path, never sole authority, per the fleet law).
+- Never write either key (TypeSafe or CF) into any repo or log line.
+
+## Jev continual-experiment recipes (the trails)
+
+- Per-item stability (semantic-entropy lite): resample `read_tracks` N=10
+  UNCACHED on fixed texts → per-track mode-share. Script pattern in
+  /tmp/jev_stability.py (recreate from git history of this section if
+  lost); results → EXPERIMENTS-AUDIO.md.
+- Cross-build: `read_tracks(text, model="jev-1.13.0")` etc. — always
+  fingerprint + model-name the numbers.
+- The corpus in examples/realaudio/corpus/ is the standing battery
+  surface for new questions; whisper (audio venv) makes more of it.
