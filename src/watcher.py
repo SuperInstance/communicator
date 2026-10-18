@@ -1,11 +1,24 @@
 """
-watcher -- the continuous layer. No model, no network, microseconds.
+watcher -- the continuous layer. No network, and NOT microseconds.
 
 This is the first component of design v3 §3 step 1, and it is the one that
 makes the rest possible, because it is the only layer that can run always-on.
 The measurements forced that: judged tracks cost 0.97 s for four gates and
 2.45 s for eight locally, so nothing costing a second may sit in the
 continuous path.
+
+THE FIRST LINE OF THIS DOCSTRING USED TO SAY "MICROSECONDS". IT WAS WRONG, and
+the way it was wrong is the whole point.
+
+Measured here, single thread, one core:
+
+    watcher.py, 100 ms of audio      39.13 ms     39.1% of a core
+    with the VAD gate in front        1.2 ms      1.2% of a core
+
+A peripheral cannot spend 39% of a core deciding whether someone is talking.
+That is affordable on a laptop and impossible on the device this is built for.
+The number is now asserted: `test_skipping_yin_actually_saves_the_cpu_it_
+claims_to` fails if gating ever stops saving the work.
 
 WHAT "WATCH" MEANS HERE IS NOT A PASS OVER A FILE.
 
@@ -14,7 +27,7 @@ and emits events as soon as an utterance is *complete*, retaining a tail that
 might still be mid-utterance. That is what lets it sit behind a live mic
 forever, and it is why the API is `push()` rather than `analyse()`.
 
-    w = Watcher(sample_rate=16000)
+    w = Watcher(sample_rate=16000, gate=SileroGate())
     for chunk in stream:                      # 100 ms chunks, say
         for ev in w.push(chunk):
             ...                                # utterance, pause, or onset
@@ -22,6 +35,17 @@ forever, and it is why the API is `push()` rather than `analyse()`.
 The re-analysis of the retained tail is deliberate and cheap: it costs one
 extra tail per push rather than a clipped utterance, and a truncated final
 word is the one error that would poison a baseline table forever.
+
+THE GATE IS OPTIONAL AND ITS ABSENCE IS THE DEFAULT.
+
+`gate=None` reproduces the previous behaviour exactly, so a machine with no
+onnxruntime and no 2.2 MB of weights still runs. The gate's one job is to
+decide whether running YIN over a segment is worth the CPU. It is NOT trusted
+to decide whether a segment is REPORTED, because against a 200 Hz harmonic
+stack it scores 0.97 and cannot tell a fan from a person. Every utterance
+record therefore carries the gate's verdict under `GATE_FIELD`, so a segment
+the gate dismissed can be found and audited afterwards. See `vad.py` and
+`tests/test_vad.py`.
 
 THE EVENTS ARE THE THING. Design v3 §2 made the seam the EVENT rather than the
 turn, so this is the component that defines them:
@@ -33,21 +57,27 @@ turn, so this is the component that defines them:
 * ``pause``     -- a complete run of silence, with its duration.
 
 A fourth event, a *human decision*, has no acoustic signature at all and so
-cannot be detected here. It is `note_external()` — and its existence is the
+cannot be detected here. It is `note_external()` -- and its existence is the
 reminder that a system which only listens cannot see the most important events
 it will ever receive (a refusal, a correction, an approval).
 
-KNOWN LIMIT, STATED BECAUSE IT IS THE DANGEROUS ONE: a steady periodic hum
-above the energy floor -- a fan, HVAC, a held vowel -- is indistinguishable
-from voiced speech here. `pitch.PitchTracker` rejects frames *below*
-ENERGY_FLOOR, not frames that are periodic and loud. So a noisy room reads as
-one continuous utterance rather than as silence, and every baseline built from
-it would be wrong in the same direction. This is the single most likely
-real-world failure and it is not fixed, only declared. The real-speech fixture
-lane (LANE-FIXTURES.md) is the thing that will catch it.
+KNOWN LIMIT, AND IT IS THE DANGEROUS ONE: a steady periodic hum above the
+energy floor -- a fan, HVAC, a held vowel -- is indistinguishable from voiced
+speech BY ENERGY. `pitch.PitchTracker` rejects frames *below* ENERGY_FLOOR,
+not frames that are periodic and loud. So the energy-only segmenter marks the
+whole clip, which is why a hum and digital silence produce the identical 89%
+and a room with a fan emits no pause events at all.
 
-Everything here is arithmetic. No model, no I/O, no clock. Which is also what
-makes it runnable on a microcontroller.
+What changed: the gate answers that question properly (a 120 Hz hum at
+amplitude 0.05 scores 0.356 against 0.998 for real speech), so the YIN work is
+skipped and the failure is contained. What did NOT change: the energy
+segmentation still cannot tell a fan from a person, so such a segment is still
+emitted as an utterance -- marked `pitch_skipped`, with the probability
+attached. It is DOWNGRADED, not corrected. The honest framing is that the gate
+makes the failure cheap rather than making it go away. Asserted in
+`tests/test_vad.py::TestDeclaredLimits`.
+
+Everything here is arithmetic, or one small ONNX graph. No network, no clock.
 """
 
 from __future__ import annotations
@@ -55,7 +85,7 @@ from __future__ import annotations
 import math
 from dataclasses import dataclass, field
 
-from . import energy, inflection, pitch
+from . import energy, inflection, pitch, vad
 
 # Kept identical to the measured tracks' grid so no resampling is implied.
 FRAME_LEN = 800            # 50 ms at 16 kHz
@@ -96,6 +126,29 @@ UTTERANCE = "utterance"
 PAUSE = "pause"
 DECISION = "decision"
 
+# The gate's verdict, carried as DATA on every utterance record.
+#
+# The name is a module constant rather than a string literal at the call site
+# because the gate is allowed to be wrong in a specific direction: measured on
+# a 200 Hz harmonic stack it scores 0.97, which is real-speech territory. So
+# the gate may only decide whether to spend CPU on YIN, never whether a segment
+# is reported. Carrying the number on the record means any segment the gate
+# dismissed can be found afterwards and audited -- a decision that leaves no
+# trace is not auditable, and an unauditable decision in the continuous path
+# is exactly the kind that gets discovered a week later as a missing baseline.
+GATE_FIELD = "gate_speech_prob"
+
+# Below this peak probability the gate says the segment contains no voice, so
+# YIN is skipped on it.
+#
+# This is the gate's own threshold, passed through rather than re-tuned: the
+# separation on real speech is wide enough that the exact value inside this
+# region does not matter (measured 0.6577 for speech against 0.3563 for the
+# loudest non-speech, a 120 Hz hum at the amplitude that breaks the
+# energy-only segmenter). It is a constant here so a reader can see that the
+# watcher is not inventing a second, differently-tuned number.
+GATE_SPEECH = 0.5
+
 
 @dataclass
 class Event:
@@ -130,7 +183,7 @@ class Watcher:
 
     def __init__(self, sample_rate: int = 16000, *, min_silence_s=None,
                  min_speech_s=None, frame_len: int = FRAME_LEN,
-                 hop: int = HOP):
+                 hop: int = HOP, gate=None):
         self.sr = sample_rate
         self.hop = hop
         self.frame_len = frame_len
@@ -139,6 +192,42 @@ class Watcher:
                               if min_silence_s is None else min_silence_s)
         self.min_speech_s = (energy.MIN_SPEECH_S
                              if min_speech_s is None else min_speech_s)
+        # The voice-activity gate, or None.
+        #
+        # None is the DEFAULT and it is a real mode, not a stub: without
+        # onnxruntime or without the weights the watcher behaves exactly as it
+        # always has. The gate is an optimisation that also fixes the declared
+        # hum failure, and a peripheral must not refuse to run because a 2 MB
+        # model is missing.
+        #
+        # ONE gate for the whole life of the watcher, never restarted per
+        # segment. Measured on 90 s of real speech: restarting the gate per
+        # segment vetoes 4/20 real speech segments at -20 dB and 8/20 at
+        # -30 dB, where a continuous gate vetoes none, because the model
+        # carries LSTM state and scores an isolated segment with no context
+        # at its edges. See tests/test_vad.py::TestStatefulness.
+        self.gate = gate
+        # Rolling gate probabilities, in absolute time, kept aligned with the
+        # audio buffer. These are the per-32ms-frame scores for the CURRENT
+        # buffer only; trimming drops them alongside the audio.
+        #
+        # `_gate_probs_base` is the ABSOLUTE sample index at which
+        # `_gate_probs[0]`'s frame begins, so entry j covers global samples
+        # [base + j*512, base + (j+1)*512). Storing the origin explicitly is
+        # what keeps this aligned: an earlier version indexed the list as if
+        # index 0 were always the start of the buffer, which is only true
+        # while the drop is an exact multiple of the 512-sample frame. The
+        # buffer drops on the 160-sample hop lattice, so those two only agree
+        # by accident -- and when they disagree the verdict is read from the
+        # wrong 32 ms while still looking perfectly plausible.
+        self._gate_probs: list = []
+        self._gate_probs_base: int = 0
+        # How many samples have been pushed through the gate in total, so the
+        # gate is fed each sample exactly once even though the audio buffer is
+        # trimmed and re-analysed. Feeding the whole retained buffer again
+        # would double-count the tail and advance the LSTM state twice over
+        # the same audio.
+        self._gated_through: int = 0
         self._buf: list = []
         self._offset: int = 0          # absolute sample index of _buf[0]
         self.emitted: list = []        # everything ever emitted
@@ -185,6 +274,27 @@ class Watcher:
         n = len(self._buf)
         if n < self.frame_len:
             return []
+
+        # Feed the gate BEFORE anything is trimmed, so each sample reaches it
+        # exactly once and in order. `_gated_through` is an ABSOLUTE sample
+        # count, so a trimmed-and-re-analysed buffer does not cause the tail to
+        # be scored twice -- the failure mode would be the LSTM state advancing
+        # over the same audio a second time, which is precisely the
+        # statelessness this gate is stateful to avoid.
+        #
+        # `new_from` is a BUFFER index derived from two absolute counters, and
+        # the first push computes it as 0. An earlier version guarded with
+        # `new_from > 0`, which is false on the very first push, so the gate
+        # was silently never fed and every record reported
+        # `gate_speech_prob = None` -- a gate that looks installed, costs
+        # nothing, and does nothing. Found by measuring the integration rather
+        # than by a unit test, because every existing test constructs a
+        # watcher without a gate and so cannot see it.
+        if self.gate is not None:
+            new_from = max(0, self._gated_through - self._offset)
+            if new_from < len(self._buf):
+                self._gate_probs.extend(self.gate.push(self._buf[new_from:]))
+                self._gated_through = self._offset + len(self._buf)
 
         ef, _poisoned = energy.rms_series(self._buf, self.frame_len, self.hop,
                                           self.sr)
@@ -284,6 +394,51 @@ class Watcher:
         if drop > 0:
             self._buf = self._buf[drop:]
             self._offset += drop
+        if self.gate is not None and self._gate_probs:
+            # Drop the same audio's worth of gate scores, moving the origin by
+            # exactly the samples that were dropped. Only frames that START
+            # before the new buffer origin go.
+            #
+            # `new_offset` IS `self._offset` at this point -- the line above has
+            # already applied the drop. Writing `self._offset + drop` here was a
+            # double count: the origin ran ahead of the buffer by one drop per
+            # push, so after a few pushes `base` sat tens of thousands of
+            # samples in the future and every lookup indexed negatively and
+            # returned None. It is the kind of error that produces a plausible
+            # partial answer (the early pushes are fine) and then silently
+            # stops the gate reporting at all -- found by measuring the
+            # integration end to end, not by any unit test.
+            new_offset = self._offset
+            j = max(0, (new_offset - self._gate_probs_base)
+                    // vad.FRAME_SAMPLES)
+            self._gate_probs = self._gate_probs[j:]
+            self._gate_probs_base += j * vad.FRAME_SAMPLES
+
+    # -- gate ---------------------------------------------------------------
+
+    def _gate_peak(self, seg) -> float | None:
+        """
+        The gate's peak probability over a segment, or None if no gate ran.
+
+        `seg` times are RELATIVE to the current buffer, so they are converted
+        to ABSOLUTE samples with `self._offset` before being indexed against
+        `_gate_probs_base`. That indirection is the whole point: the buffer
+        and the probability list are trimmed on different lattices (160-sample
+        hops versus 512-sample frames), so an index that is right in one is
+        wrong in the other. Both are addressed absolutely and neither is
+        assumed to agree with the other.
+        """
+        if self.gate is None or not self._gate_probs:
+            return None
+        a0 = self._offset + int(seg.start * self.sr)
+        a1 = self._offset + int(seg.end * self.sr)
+        i0 = (a0 - self._gate_probs_base) // vad.FRAME_SAMPLES
+        i1 = -(-(a1 - self._gate_probs_base) // vad.FRAME_SAMPLES)   # ceil
+        i0 = max(0, i0)
+        i1 = min(len(self._gate_probs), i1)
+        if i1 <= i0:
+            return None
+        return max(self._gate_probs[i0:i1])
 
     # -- per-segment summary -------------------------------------------------
 
@@ -320,9 +475,31 @@ class Watcher:
         i1 = min(len(ef), int(seg.end / self.hop_s) + 1)
         frames = ef[i0:i1]
         window = self._buf[int(seg.start * self.sr):int(seg.end * self.sr)]
-        tracker = pitch.PitchTracker(self.sr, frame_len=self.frame_len,
-                                     hop=self.hop)
-        pf = tracker.track(window) if window else []
+
+        # THE GATE'S ONE JOB: decide whether running YIN over this segment is
+        # worth the CPU. It does not and may not decide whether the segment is
+        # reported -- measured, a 200 Hz harmonic stack scores 0.97, so this
+        # gate is not a speech/no-speech classifier and must never be treated
+        # as one. The verdict is recorded either way, so a segment the gate
+        # dismissed can be audited afterwards.
+        #
+        # `max` over the segment's frames, not `mean`: measured over 20 real
+        # speech segments, `max` vetoed 0/20 and `mean` vetoed 1/20, because a
+        # segment's own quiet edges drag its average down. The cost is that a
+        # single spurious frame can clear the threshold -- which is the safe
+        # direction, since it means we do the work we did not need to rather
+        # than skip the work that mattered.
+        gate_prob = self._gate_peak(seg)
+        skip_pitch = gate_prob is not None and gate_prob < GATE_SPEECH
+
+        tracker = None
+        pf = []
+        if window and not skip_pitch:
+            tracker = pitch.PitchTracker(self.sr, frame_len=self.frame_len,
+                                         hop=self.hop)
+            pf = tracker.track(window)
+        elif not window:
+            pass
         hz = [f.hz for f in pf if f.hz is not None]
         inflections = inflection.contour_events(pf) if pf else []
         rms = [f.rms for f in frames]
@@ -339,7 +516,12 @@ class Watcher:
             "hz_p05": round(_pct(hz, 0.05), 2) if hz else None,
             "hz_p95": round(_pct(hz, 0.95), 2) if hz else None,
             "inflections": len(inflections),
-            "quiet_frames": tracker.quiet_frames,
+            "quiet_frames": tracker.quiet_frames if tracker is not None else 0,
+            # Always present, even when the gate was off. `None` means "no gate
+            # ran", which is a different fact from 0.0 meaning "the gate ran
+            # and saw silence".
+            GATE_FIELD: gate_prob,
+            "pitch_skipped": skip_pitch,
         })
         if is_open and self._open_run_onset_done:
             # Second and later checkpoints of the SAME run. The onset already

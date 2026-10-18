@@ -64,6 +64,12 @@ src/verdict_cache.py same utterance, same questions, same model → same CC
 src/question_health.py  ill-posed question detector (garbage vs real
                      batteries); safe-parked verdict for Score tracks
 src/calibration.py   label-by-construction corpus + ECE/Brier/Spearman
+src/vad.py           voice-activity gate (silero ONNX, MIT, optional).
+                     One gate for the life of the stream — it is stateful.
+                     Decides whether YIN is worth running; never whether a
+                     segment is reported.
+src/watcher.py       the continuous layer: onset / utterance / pause events,
+                     checkpoints so a run that never ends still reports
 src/score.py         merge + export; tick = 1 ms; provenance sidecar
 docs/SCIENCE.md      the backend science: why YIN, why gates, why ECE
 docs/research/       the verified annotated paper corpus (PAPERS.md)
@@ -73,12 +79,17 @@ docs/superpowers/specs/   the design doc (v2) — read §0 before extending
 ## Running
 
 ```bash
-# tests: 215 passed offline (live tests skip without a key)
+# tests: 357 passed offline (live tests skip without a key)
 python3 -m pytest tests/ -q
 
 # end-to-end against live Jev (needs TYPESAFE_API_KEY):
 python3 -c "from src import score; score.render('examples/demo-utterance.wav', \
     'STOP THE DEPLOY RIGHT NOW', 'examples/demo-utterance')"
+
+# optional: the voice-activity gate (2.2 MB, MIT, fetched not vendored).
+# Without it the watcher still runs -- energy-only, at 31.8% of a core
+# instead of 2.4% -- and every record says no gate ran.
+python3 -c "from src import vad; vad.fetch_model()"
 ```
 
 `typesafe_sdk` is provided by the shared venv on this machine; a key is

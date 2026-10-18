@@ -561,3 +561,191 @@ class TestNegativeControl:
 
 if __name__ == "__main__":
     raise SystemExit(pytest.main([__file__, "-q"]))
+
+# -- the voice-activity gate in front of the watcher ------------------------
+#
+# Three defects were found here by MEASURING the integration rather than by
+# writing the tests first, and all three had the same signature: the gate
+# looked installed, cost nothing, and reported nothing. Every test in
+# test_watcher.py constructs a watcher WITHOUT a gate, so none of them could
+# have caught any of them. Each one below is a regression for a specific
+# failure, and each names the number that proves the gate is live.
+
+class TestGateIntegration:
+    def test_the_gate_is_off_by_default_and_the_record_says_so(self):
+        """
+        The default is no gate, and the record distinguishes "no gate ran"
+        from "the gate ran and saw silence". Those are different facts: the
+        first means untested, the second means measured.
+        """
+        w = watcher.Watcher(SR)
+        drain(w, session())
+        utts = [e for e in w.emitted if e.kind == watcher.UTTERANCE]
+        assert utts
+        for u in utts:
+            assert u.data[watcher.GATE_FIELD] is None
+            assert u.data["pitch_skipped"] is False
+
+    def test_the_gate_actually_reports_on_the_first_push(self):
+        """
+        REGRESSION. `new_from` is a buffer index derived from two absolute
+        counters, and on the very first push it computes to 0. An earlier
+        version guarded with `new_from > 0`, which is false for 0, so the gate
+        was silently never fed and every record read `None` forever.
+
+        Nothing caught it: the gate is cheap, so timing looked fine, and no
+        test built a gated watcher. The symptom was a gate that did nothing
+        while appearing to be installed.
+        """
+        g = _silent_gate()
+        w = watcher.Watcher(SR, gate=g)
+        drain(w, session())
+        utts = [e for e in w.emitted if e.kind == watcher.UTTERANCE]
+        assert utts, "nothing was emitted to check"
+        reported = [u.data[watcher.GATE_FIELD] for u in utts]
+        assert any(p is not None for p in reported), \
+            "the gate was never fed -- every record is None"
+
+    def test_gate_probabilities_stay_aligned_after_trimming(self):
+        """
+        REGRESSION, and the subtler of the three.
+
+        The audio buffer is trimmed on the 160-sample hop lattice while the
+        gate's probabilities are indexed in 512-sample frames. An earlier
+        version advanced the probability origin by `self._offset + drop`
+        inside `_trim`, but `self._offset` had ALREADY been advanced by `drop`
+        on the line above -- so the origin ran one whole drop ahead on every
+        push. After a few pushes it sat tens of thousands of samples in the
+        future, every lookup indexed negatively, and `_gate_peak` returned
+        None.
+
+        The signature was a plausible partial answer: the first handful of
+        utterances reported a real probability and everything after silently
+        stopped reporting at all.
+
+        So this asserts the INVARIANT -- the origin must never run ahead of
+        the buffer -- across a session long enough for many trims to happen.
+        """
+        g = _silent_gate()
+        w = watcher.Watcher(SR, gate=g)
+        long_session = (tone(200.0, 0.3) + silence(0.3)) * 20      # ~12 s
+        for i in range(0, len(long_session), 1600):
+            w.push(long_session[i:i + 1600])
+            assert w._gate_probs_base <= w._offset, (
+                f"gate origin {w._gate_probs_base} ran ahead of buffer "
+                f"offset {w._offset}; every lookup after this is wrong")
+        utts = [e for e in w.emitted if e.kind == watcher.UTTERANCE]
+        late = [u for u in utts if u.t0 > 4.0]
+        assert late, "session too short to exercise late trims"
+        assert all(u.data[watcher.GATE_FIELD] is not None for u in late), \
+            "late utterances lost their gate probability -- the origin " \
+            "drifted"
+
+    def test_the_gate_never_deletes_an_event(self):
+        """
+        The rule that makes this safe to put in front of the watcher: the gate
+        decides whether to do the WORK, never whether to report the event.
+
+        A segment the gate dismisses is still emitted, still carries its
+        duration and energy, and still says it was skipped. Measured reason:
+        a 200 Hz harmonic stack scores 0.97, so this gate is not a
+        speech/no-speech classifier and must never be trusted as one.
+        """
+        g = _silent_gate()
+        w = watcher.Watcher(SR, gate=g)
+        ungated = watcher.Watcher(SR)
+        drain(w, tone(120.0, 3.0, 0.05))
+        drain(ungated, tone(120.0, 3.0, 0.05))
+        gated_utts = [e for e in w.emitted if e.kind == watcher.UTTERANCE]
+        plain_utts = [e for e in ungated.emitted if e.kind == watcher.UTTERANCE]
+        assert len(gated_utts) == len(plain_utts), \
+            "the gate changed how many utterances are reported"
+        assert gated_utts[0].data["pitch_skipped"] is True, \
+            "precondition: the gate should have skipped YIN here"
+        # and the record still says what the segment actually was
+        assert gated_utts[0].data["duration_s"] > 0
+        assert gated_utts[0].data["energy_peak"] > 0
+
+    def test_skipping_yin_actually_saves_the_cpu_it_claims_to(self):
+        """
+        The claim the gate exists for: YIN over a hum is most of the cost,
+        and skipping it is most of the win. Measured 31.8% -> 2.4% of a core
+        on 5 s of 120 Hz hum.
+
+        If this ever fails, the gate is not worth its 2.2 MB and the whole
+        argument for it is wrong -- which is a thing that should be noticed
+        here rather than in a room.
+        """
+        import time
+        hum = tone(120.0, 3.0, 0.05)
+        w = watcher.Watcher(SR)
+        drain(w, hum)                                          # warm
+        t0 = time.perf_counter()
+        drain(watcher.Watcher(SR), hum)
+        plain = time.perf_counter() - t0
+
+        g = _silent_gate()
+        drain(watcher.Watcher(SR, gate=g), hum)
+        t0 = time.perf_counter()
+        drain(watcher.Watcher(SR, gate=g), hum)
+        gated = time.perf_counter() - t0
+
+        assert gated < plain * 0.5, \
+            f"gating saved nothing: {plain * 1000:.0f} ms -> " \
+            f"{gated * 1000:.0f} ms"
+
+    def test_real_speech_pitch_is_unchanged_by_the_gate(self):
+        """
+        The accuracy guard. The gate may skip work on segments it calls
+        silent; it must never skip it on a person talking. With a real gate
+        over real speech this is 16/16 utterances carrying full pitch, and the
+        hz_p05/hz_p95 values bit-identical to the ungated watcher.
+        """
+        from src import vad as _vad
+        try:
+            gate = _vad.SileroGate()
+        except Exception as exc:                                # noqa: BLE001
+            pytest.skip(f"silero gate unavailable: {exc}")
+        fixture = ROOT / "examples" / "realaudio" / "alice01_excerpt.wav"
+        if not fixture.is_file():
+            pytest.skip("real speech fixture absent")
+        from src import wavio
+        speech = wavio.read_wav(str(fixture)).samples[:30 * SR]
+
+        def pitches(w):
+            return [(u.data["hz_p05"], u.data["hz_p95"])
+                    for u in drain(w, speech) if u.kind == watcher.UTTERANCE]
+
+        gated_w = watcher.Watcher(SR, gate=gate)
+        gated = pitches(gated_w)
+        plain = pitches(watcher.Watcher(SR))
+        assert gated, "no utterances from real speech"
+        assert gated == plain, "gating changed the pitch data on real speech"
+        utts = [u for u in gated_w.emitted if u.kind == watcher.UTTERANCE]
+        assert all(u.data["pitch_skipped"] is False for u in utts), \
+            f"{sum(1 for u in utts if u.data['pitch_skipped'])} of {len(utts)} " \
+            f"real utterances were wrongly skipped"
+
+    def test_a_gate_that_disappears_does_not_break_the_watcher(self):
+        """
+        `reset()` returns the gate to its opening state. Used when a stream
+        restarts, and the watcher must not lose its probability alignment
+        across one -- the audio kept flowing while the gate's history went
+        away.
+        """
+        g = _silent_gate()
+        w = watcher.Watcher(SR, gate=g)
+        long_session = (tone(200.0, 0.3) + silence(0.3)) * 8
+        for i in range(0, len(long_session), 1600):
+            w.push(long_session[i:i + 1600])
+        w.gate.reset()
+        assert w._gate_probs_base <= w._offset
+        drain(w, long_session)
+        assert w._gate_probs_base <= w._offset, \
+            "resetting the gate broke the buffer/probability alignment"
+
+
+def _silent_gate():
+    """A ScriptedGate that always says silence, for the skip-path tests."""
+    from src import vad
+    return vad.ScriptedGate([0.0])
