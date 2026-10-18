@@ -289,6 +289,96 @@ except that here the absolute scale is the one the model reads correctly.
    from the other.
 6. **Never threshold `confidence` in the middle band.** It is arithmetic.
 
+## 7. The reduction step is not the only option — `clef-omni` reads audio
+
+Every measurement above went through the same bottleneck: **Jev reads text
+only.** So audio became five scalars per frame, and the scalars became a
+sentence. That reduction was never a design choice — it was a workaround, and
+its cost was unmeasured.
+
+`@cf/cloudflare/clef-omni` is a **System One implementation** with the same
+typed Choice/Score/Noul primitives and the same wire shape, and it **accepts
+raw audio**. Verified by probing, not from a doc: the schema wants `audio` as an
+**array of objects** with `content_type` and `base64` (four wrong shapes first),
+and the root also requires `model` and `state`.
+
+**Three routes, same bytes, 6 s of real LibriVox speech:**
+
+| route | what it carries | wall clock |
+|---|---|---|
+| **A** our tracks → sentence → Jev | 5 scalars. Cannot answer a content question at all | 0.12 – 0.39 s |
+| **B** raw audio → clef-omni | the audio itself | **0.75 – 0.81 s** |
+| **C** raw audio → Whisper → text → Jev | the words | **1.75 – 2.04 s + 0.13 s** |
+
+**C is the folklore answer and it is the slowest thing here.** Whisper on
+Workers AI is batch-only — no streaming, no partials, no WebSocket path — so
+6 s of audio costs ~2 s and the hop compounds per event.
+
+**B does not replace C.** clef-omni judges; it does not transcribe. It can tell
+you an utterance is not a directive, and it cannot tell you what was said.
+Those are different products and both are needed.
+
+On the same clips, all three agreed on the categorical answer (narration is
+not a directive) with different confidence:
+
+| | is_speech (noul) | is_directive (p yes) |
+|---|---|---|
+| A tracks → Jev | 0.76 / 0.70 | 0.0 / 0.0 |
+| B audio → clef | **0.92 / 0.83** | 0.008 / 0.006 |
+| C STT → Jev | 0.90 / 0.89 | 0.0 / 0.08 |
+
+**A is not redundant.** It is strictly less informed — it answered `is_speech`
+at 0.76 where clef read the same audio at 0.92, and it cannot answer a content
+question at all. But it is the fastest and it is *ours*, which matters when the
+network is gone.
+
+### 7a. `confidence` is NOT portable across System One implementations
+
+This is the sharpest negative result in the whole file.
+
+| model | confidence vs `(p_max − 1/K)/(1 − 1/K)` |
+|---|---|
+| Jev `jev-1.14.0` (cloud) | max abs error **0.0025** |
+| `tev1:latest` (local) | max abs error **0.0000** |
+| **`clef-omni`** | max abs error **0.0275**, mean 0.0184 |
+
+Reported 0.9666 / 0.9779 / 0.9443 where the formula predicts 0.9832 / 0.9890 /
+0.9718 — consistently low, not a rounding difference.
+
+So the "confidence is pure arithmetic" finding is **true of the TypeSafe
+ecosystem and false of Cloudflare's**. Consequence, and it is a real one:
+**the dead-band rule in `policy.py` was derived from the Jev ecosystem and
+cannot be assumed to hold for clef.** A threshold tuned on one implementation
+means nothing on the other.
+
+### 7b. clef's adversarial battery separates *better* than Jev's
+
+Same battery, same failure-framed phrasing, same max:
+
+| probe | Jev | clef |
+|---|---|---|
+| honest command | 0.240 | **0.080** |
+| garbage | — | 0.922 |
+| garbage arguing | 0.970 | 0.900 |
+| **separation** | 0.730 | **0.820** |
+
+clef's honest baseline is three times cleaner (0.080 vs 0.240) and its total
+separation is wider. It finds the same field (`self_promotion`). Cost per call
+is higher — 0.48–1.23 s against Jev's 0.1–0.2 s — so this is a quality/latency
+trade, not a clear win.
+
+**Cost, from measured token usage:** clef-omni billed **285 input tokens for
+6 s of audio** including the text, ≈780 tokens/min at the published
+$0.150/M → **$0.000117/min, $0.007/hour**. For a system meant to run all day,
+direct audio judging is effectively free.
+
+**What this does not yet establish.** Two questions are open and both matter:
+whether clef and Jev *agree* on real decisions (they are different models, so a
+disagreement is not automatically an error), and whether clef's wider
+separation holds on real speech and not just synthetic adversarial strings.
+
+---
+
 ## 8. What the literature says about where this points
 
 A parallel survey (`Awesome-Vision2Audio` and the surrounding literature) was
@@ -369,8 +459,12 @@ whatever microphone happens to be in the room, that is the axis to measure on.
 
 ---
 
-## 9. Open threads
+## 10. Open threads
 
+- **`clef-omni` and Jev have never been run on the same real decisions.** They
+  are different models, so agreement is not a correctness check -- but a
+  systematic disagreement on `is_speech` or on the battery would be the most
+  informative thing available right now.
 - The ladder's level-reading failure is not understood well enough to fix.
   Absolute calibration of a symbolic audio encoding is the next experiment.
 - Symbolic encoding has only been tried on synthetic sweeps. The real-speech

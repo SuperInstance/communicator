@@ -255,11 +255,21 @@ class TestBatchingIsTheDefault:
 
 class TestLawsAreTraceable:
     def test_every_law_names_a_source_and_carries_numbers(self):
+        """
+        Every law needs a source and a claim. A `measured` block is required
+        whenever the law asserts something about the world; a DESIGN law is
+        allowed to have none, and says so with `measured_is_design` rather than
+        by leaving an empty dict that reads like a failed measurement.
+        """
         for name, law in policy.LAWS.items():
             assert law.get("source"), f"{name} has no source"
-            assert law.get("measured"), f"{name} carries no measurement"
             assert law.get("claim"), f"{name} has no claim"
             assert law.get("consequence"), f"{name} has no consequence"
+            if not law.get("measured"):
+                assert law.get("measured_is_design"), (
+                    f"{name} carries no measurement and does not declare "
+                    "itself a design rule -- that is how a guess becomes a "
+                    "law by omission")
 
     def test_the_measured_numbers_are_the_ones_in_the_writeup(self):
         """
@@ -336,3 +346,105 @@ class TestEnforcersHaveTeeth:
 
 if __name__ == "__main__":
     raise SystemExit(pytest.main([__file__, "-q"]))
+
+# -- the position control ----------------------------------------------------
+
+class TestPositionControl:
+    """
+    The control this project originally got wrong, and the correction.
+
+    Round 1 tested Choice option order with three options that had genuinely
+    DIFFERENT descriptions and found no bias -- first option picked 0 of 6.
+    That was true and it was useless: distinguishable options cannot show a
+    position preference, because the content overrides it.
+
+    SuperInstance/jev-lab E4 ran the control that does: two options with
+    INDISTINGUISHABLE descriptions, and Jev picked the first 9 times out of 9
+    at P=0.86. So the correct reading of "no order bias found" is "the options
+    were too different for position to show".
+    """
+
+    def test_agreement_is_reported_with_the_content(self):
+        v = policy.position_control(
+            {"command": 0.82, "question": 0.18},
+            {"question": 0.18, "command": 0.82})   # same KEYS, swapped order
+        assert v["verdict"] == "command"
+        assert v["stable"] is True
+        assert v["within_noise"] is True
+
+    def test_disagreement_is_unresolved_and_never_a_verdict(self):
+        """
+        The whole point. A Choice whose pick does not survive reordering has
+        shown a position preference, and reporting it anyway would be
+        laundering a preference as a reading.
+        """
+        v = policy.position_control(
+            {"command": 0.86, "question": 0.14},       # command listed first
+            {"question": 0.14, "command": 0.86})        # and won again
+        # same content, same winner -> still fine. Now the real failure mode:
+        v = policy.position_control(
+            {"first": 0.86, "second": 0.14},
+            {"first": 0.14, "second": 0.86})            # flipped WITH content
+        assert v["verdict"] == policy.UNRESOLVED
+        assert "position preference" in v["why"]
+
+    def test_mismatched_keys_are_refused(self):
+        with pytest.raises(policy.PolicyViolation) as exc:
+            policy.position_control({"a": 0.9, "b": 0.1},
+                                    {"a": 0.1, "c": 0.9})
+        assert "same option keys" in str(exc.value)
+
+    def test_confidence_is_reported_as_a_range_not_a_point(self):
+        """
+        jev-lab E6: the PICK is stable across orderings but the CONFIDENCE is
+        not -- 0.80 when the answer is first, 0.60 when it is second, with the
+        spread growing from 0.06 to 0.14. "Quote the spread, never the point."
+        """
+        v = policy.position_control(
+            {"answer": 0.80, "other": 0.20},
+            {"other": 0.20, "answer": 0.60})
+        assert v["verdict"] == "answer"
+        lo, hi = v["probability_range"]
+        assert lo == pytest.approx(0.60) and hi == pytest.approx(0.80)
+        assert v["probability_delta"] == pytest.approx(0.20)
+        assert v["within_noise"] is False, \
+            "a 0.20 gap between orderings is NOT within the 0.02 noise band"
+
+    def test_coin_flip_refuses_to_grade_what_it_cannot_grade(self):
+        assert policy.is_coin_flip(0.70, 0.70) is True
+        assert policy.is_coin_flip(0.705, 0.70) is True
+        assert policy.is_coin_flip(0.75, 0.70) is False
+        assert policy.is_coin_flip(None, 0.70) is True
+
+    def test_the_spread_grows_as_the_answer_gets_LESS_certain(self):
+        """
+        Regression: the first version of this used `1 - sum(p)/K`, which is
+        BACKWARDS -- a point mass scored 0.5 and uniform scored 0.0, so the
+        "spread" shrank as the answer got more certain. A metric with an
+        inverted sign is worse than none, because it still looks like a
+        measurement.
+        """
+        assert policy.policy_spread({"a": 1.0, "b": 0.0}) == 0.0
+        assert policy.policy_spread({"a": 0.5, "b": 0.5}) == pytest.approx(0.5)
+        assert policy.policy_spread({"a": 0.7, "b": 0.3}) < \
+            policy.policy_spread({"a": 0.55, "b": 0.45}), \
+            "more agreement must mean less spread"
+
+
+class TestTheNewLawsCarryTheirEvidence:
+    def test_position_control_law_is_present_and_cited(self):
+        law = policy.LAWS["position_control"]
+        assert "9/9" in str(law["measured"]["e4_first_option_picked"])
+        assert law["source"].startswith("SuperInstance/jev-lab")
+
+    def test_prose_not_results_law_records_the_opposite_reading(self):
+        law = policy.LAWS["prose_not_results"]
+        assert "OPPOSITE" in law["measured"]["e7_result"]
+
+    def test_the_laws_dict_grew_and_all_still_have_sources(self):
+        assert "position_control" in policy.LAWS
+        assert "prose_not_results" in policy.LAWS
+        assert "judge_never_decides" in policy.LAWS
+        for name, law in policy.LAWS.items():
+            assert law.get("source"), name
+            assert law.get("claim"), name

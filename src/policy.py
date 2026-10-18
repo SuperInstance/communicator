@@ -110,12 +110,65 @@ LAW_CONFIDENCE_DEAD_BAND = {
     "consequence": "Gate at the top or do not gate.",
 }
 
+LAW_POSITION_CONTROL = {
+    "claim": ("Jev leans toward the option that comes first, and a Choice "
+              "with indistinguishable options measures a position preference "
+              "rather than a reading."),
+    "measured": {
+        # SuperInstance/jev-lab, E4: two INDISTINGUISHABLE options.
+        "e4_first_option_picked": "9/9 at P=0.86",
+        # E6: the pick survives reordering but the CONFIDENCE does not.
+        "e6_confidence_first": 0.80,
+        "e6_confidence_second": 0.60,
+        "e6_spread_first": 0.06,
+        "e6_spread_second": 0.14,
+        # E1b retracted: stripping option descriptions to empty strings still
+        # scored 9/9, so that arm was measuring position, not reading.
+        "e1b_bare_descriptions": "9/9 -- RETRACTED as a position preference",
+    },
+    "source": "SuperInstance/jev-lab (E1b, E4, E6)",
+    "consequence": ("Run every Choice both ways. If the pick does not travel "
+                    "with the content, there is no reading -- refuse the "
+                    "verdict rather than report one."),
+}
+
+LAW_PROSE_NOT_RESULTS = {
+    "claim": ("Ask about prose, never about a bare result. Asked as a RESULT, "
+              "Jev picks the OPPOSITE reading; asked as PROSE, the same rule "
+              "is picked in every arrangement."),
+    "measured": {"e7_prose": "spec reading 9/9 in every arrangement",
+                 "e7_result": "OPPOSITE reading 9/9 in every arrangement"},
+    "source": "SuperInstance/jev-lab (E7)",
+    "consequence": ("State questions in sentences. A bare number or a "
+                    "tabulated result invites the model to agree with the "
+                    "shape of the table rather than its content."),
+}
+
+LAW_JUDGE_NEVER_DECIDES = {
+    "claim": ("A judge may never be the thing that decides. It proposes; "
+              "the ledger remembers; the verdict reproduces with no judge "
+              "call."),
+    # A DESIGN law, not a measurement: nothing was run to produce it. Declared
+    # as such so it cannot be mistaken for a result -- policy.py is supposed to
+    # be the place where claims are traceable to a number, and an empty
+    # `measured` block that looks like a failed measurement is worse than
+    # saying plainly that there is nothing to point at.
+    "measured": {},
+    "measured_is_design": True,
+    "source": "SuperInstance/jev-lab, law 1 of 6",
+    "consequence": ("Recognition may be learned; approval may not. Splitting "
+                    "them disposes of the induced-soft-spot attack."),
+}
+
 LAWS = {
     "confidence_is_arithmetic": LAW_CONFIDENCE_IS_ARITHMETIC,
     "holistic_gates_invert": LAW_HOLISTIC_GATES_INVERT,
     "local_inverts_on_adversarial": LAW_LOCAL_INVERTS_ON_ADVERSARIAL,
     "batch_beats_single": LAW_BATCH_BEATS_SINGLE,
     "confidence_dead_band": LAW_CONFIDENCE_DEAD_BAND,
+    "position_control": LAW_POSITION_CONTROL,
+    "prose_not_results": LAW_PROSE_NOT_RESULTS,
+    "judge_never_decides": LAW_JUDGE_NEVER_DECIDES,
 }
 
 # The knobs the rest of the system reads. Named once, here, so there is exactly
@@ -361,6 +414,122 @@ def batching_worth_it(n_questions: int, max_batch: int = MAX_BATCH) -> bool:
     -- which is the correct and slightly surprising answer.
     """
     return n_questions > max_batch
+
+
+# -- the position control ----------------------------------------------------
+
+# The single most important control in this project, and the one this project
+# originally got wrong.
+#
+# `experiments/jev_jaggedness.py` tested whether Choice option order biases the
+# answer, using three options with genuinely different descriptions, and found
+# no bias -- the first option was picked 0 of 6 times. That result was CORRECT
+# and it was USELESS, because distinguishable options cannot show a position
+# preference: the content is strong enough to override it.
+#
+# SuperInstance/jev-lab E4 ran the control that does. Two options with
+# INDISTINGUISHABLE descriptions: Jev picked the first one 9 times out of 9 at
+# P=0.86. E1b is the retraction that followed -- stripping option descriptions
+# to empty strings still scored 9/9, which meant that arm had been measuring
+# position rather than a reading.
+#
+# So the correct reading of "no order bias found" is "the options were too
+# different for position to show", not "there is no order bias".
+
+POSITION_CONTROL_MARGIN = 0.02   # jev-lab's NOISE_BAND
+UNRESOLVED = "UNRESOLVED"
+
+
+def position_control(forward: dict, reversed_: dict,
+                     margin: float = POSITION_CONTROL_MARGIN) -> dict:
+    """
+    Adjudicate a Choice by asking it twice, with the options swapped.
+
+    `forward` and `reversed_` are the same question asked both ways. Each maps
+    option key -> probability, in the SAME (canonical) key space -- the caller
+    is responsible for reversing the KEYS as well as the order, because the
+    whole question is whether the winner was the same CONTENT.
+
+    Returns a verdict that may be UNRESOLVED. Refusing to report is the entire
+    point: an unresolved result is information, and a confidently-wrong one is
+    not.
+
+    This mirrors bin/adjudicate.mjs in SuperInstance/jev-lab, which "refuses to
+    report a verdict unless the pick travelled with the content".
+    """
+    if set(forward) != set(reversed_):
+        raise PolicyViolation(
+            "position control needs the same option keys in both directions; "
+            "reverse the KEYS as well as the order, or you are comparing two "
+            "different questions.")
+
+    f_pick = max(forward, key=forward.get)
+    r_pick = max(reversed_, key=reversed_.get)
+
+    if f_pick != r_pick:
+        return {
+            "verdict": UNRESOLVED,
+            "why": ("the two orderings disagree, so the pick may be a position "
+                    "preference rather than a reading"),
+            "forward_pick": f_pick, "reversed_pick": r_pick,
+            "forward": forward, "reversed": reversed_,
+            "law": LAW_POSITION_CONTROL["claim"],
+        }
+
+    spread_f = policy_spread(forward)
+    spread_r = policy_spread(reversed_)
+    pick = f_pick
+    p_f, p_r = forward[pick], reversed_[pick]
+    delta = abs(p_f - p_r)
+    return {
+        "verdict": pick,
+        "stable": True,
+        # jev-lab E6: the PICK is stable across orderings but the CONFIDENCE is
+        # not (0.80 first vs 0.60 second). So confidence is reported as a range,
+        # never as a point -- "quote the spread, never the point".
+        "probability_range": [round(min(p_f, p_r), 4), round(max(p_f, p_r), 4)],
+        "probability_delta": round(delta, 4),
+        "within_noise": delta <= margin,
+        "spread_range": [round(min(spread_f, spread_r), 4),
+                         round(max(spread_f, spread_r), 4)],
+        "law": "quote the spread, never the point",
+    }
+
+
+def policy_spread(probs: dict) -> float:
+    """
+    How far the distribution is from being a point mass. 0 = certain,
+    1 - 1/K = uniform.
+
+    Uses the complement of Simpson's index, `1 - sum(p_i^2)`, rather than
+    `1 - sum(p_i)/K`.
+
+    The first version used `1 - sum(p_i)/K` and it was BACKWARDS: a point mass
+    scored 0.5 and a uniform distribution scored 0.0, so "spread" grew as the
+    answer got LESS certain. A test caught it immediately, which is the only
+    reason it did not ship -- a metric with an inverted sign is worse than no
+    metric, because it looks like a measurement.
+
+    Entropy would also be non-negative here, but it needs a log and Simpson's
+    is exact at both ends and cheaper to read off a report.
+    """
+    if not probs:
+        return 1.0
+    return round(1.0 - sum(float(p) * float(p) for p in probs.values()), 4)
+
+
+def is_coin_flip(value, threshold: float,
+                 margin: float = POSITION_CONTROL_MARGIN) -> bool:
+    """
+    Within the noise band of the threshold, so pass/fail would be a coin flip.
+
+    jev-lab's measure.mjs returns COIN_FLIP rather than YES/NO inside a 0.02
+    band, for the same reason: an answer that close to the line is not an
+    answer, and reporting it as one is how a suite learns to lie.
+    """
+    if value is None:
+        return True
+    return abs(float(value) - threshold) <= margin + 1e-9
 
 
 # -- a human-readable dump for the docs --------------------------------------
