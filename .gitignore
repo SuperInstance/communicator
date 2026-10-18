@@ -8,3 +8,4 @@ __pycache__/
 .scratch/
 examples/realaudio/*.mp3
 examples/realaudio/*.wav
+experiments/_matrix/
