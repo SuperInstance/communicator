@@ -176,6 +176,49 @@ GESTURE_CHOICE = {
     "greeting": "Opening or acknowledging contact.",
 }
 
+# The instructions live in named constants rather than inline in
+# build_questions() so the ENTIRE question wording can be fingerprinted
+# without constructing SDK objects. The fingerprint keys the verdict cache:
+# change a word of a question and every cached verdict for it is invalid,
+# by construction, with no manual invalidation anywhere.
+TIMBRE_INSTRUCTIONS = (
+    "Where does this utterance sit on the warm-to-cold scale? Judge the "
+    "delivery as performed, not the sentiment of the words -- a "
+    "cheerful statement can be delivered cold."
+)
+INTENTION_INSTRUCTIONS = (
+    "How much intent stands behind this utterance? Judge how strongly "
+    "the speaker means to be acted upon."
+)
+ATTENTION_INSTRUCTIONS = "Where is this utterance's focus directed?"
+GESTURE_INSTRUCTIONS = "What kind of speech act is this utterance?"
+
+
+def question_fingerprint() -> str:
+    """
+    A digest of exactly what the model is asked, per track.
+
+    This is decision-ledger's question_hash, applied to a control surface: it
+    makes question wording a first-class versioned input. The verdict cache
+    and the calibration records both key on it, so a rewrite of a question can
+    never be silently mixed with readings taken under the old wording.
+    """
+    import hashlib
+    import json
+
+    spec = {
+        "timbre": {"instructions": TIMBRE_INSTRUCTIONS, "criteria": TIMBRE_SCALE},
+        "intention": {"instructions": INTENTION_INSTRUCTIONS,
+                      "criteria": INTENTION_SCALE},
+        "attention": {"instructions": ATTENTION_INSTRUCTIONS,
+                      "criteria": ATTENTION_CHOICE},
+        "gesture": {"instructions": GESTURE_INSTRUCTIONS,
+                    "criteria": GESTURE_CHOICE},
+    }
+    return hashlib.sha1(
+        json.dumps(spec, sort_keys=True, ensure_ascii=True).encode()
+    ).hexdigest()[:12]
+
 
 def build_questions():
     """
@@ -186,33 +229,42 @@ def build_questions():
     from typesafe_sdk import Choice, Score
 
     return {
-        "timbre": Score(instructions=(
-            "Where does this utterance sit on the warm-to-cold scale? Judge the "
-            "delivery as performed, not the sentiment of the words -- a "
-            "cheerful statement can be delivered cold."
-        ), criteria=TIMBRE_SCALE),
-        "intention": Score(instructions=(
-            "How much intent stands behind this utterance? Judge how strongly "
-            "the speaker means to be acted upon."
-        ), criteria=INTENTION_SCALE),
-        "attention": Choice(instructions=(
-            "Where is this utterance's focus directed?"
-        ), criteria=ATTENTION_CHOICE),
-        "gesture": Choice(instructions=(
-            "What kind of speech act is this utterance?"
-        ), criteria=GESTURE_CHOICE),
+        "timbre": Score(instructions=TIMBRE_INSTRUCTIONS, criteria=TIMBRE_SCALE),
+        "intention": Score(instructions=INTENTION_INSTRUCTIONS,
+                           criteria=INTENTION_SCALE),
+        "attention": Choice(instructions=ATTENTION_INSTRUCTIONS,
+                            criteria=ATTENTION_CHOICE),
+        "gesture": Choice(instructions=GESTURE_INSTRUCTIONS,
+                          criteria=GESTURE_CHOICE),
     }
 
 
 def read_tracks(text: str, *, model: str = DEFAULT_MODEL,
-                client=None, timeout: float = 8.0) -> tuple[list[TrackReading], str]:
+                client=None, timeout: float = 8.0,
+                cache=None) -> tuple[list[TrackReading], str]:
     """
     Score one utterance. Returns the four readings and the model that answered.
 
     Never raises: a voice loop that dies because a network call failed is
     worse than a voice loop that says nothing. Each track carries `ok=False`
     so the caller can distinguish "unvoiced" from "we did not get to ask".
+
+    `cache` (a verdict_cache.VerdictCache) makes the SAME utterance under the
+    SAME questions and model return the SAME control values. Jev is not
+    bit-deterministic -- jev-lattice measured 7% of gates flipping on a pure
+    re-ask at threshold 0.9 -- and a synthesiser fed a controller that jitters
+    for no reason is an instrument nobody can play. Only successful readings
+    are cached: a network failure must never become a sticky verdict.
     """
+    if cache is not None:
+        hit = cache.get(text, model)
+        if hit is not None:
+            readings = [TrackReading(r["track"], r["value"],
+                                     detail=dict(r["detail"], cached=True),
+                                     model=r["model"], ok=r["ok"])
+                        for r in hit["readings"]]
+            return readings, hit["model"]
+
     # The key check guards CONSTRUCTING a client, not calling one. An injected
     # client has already had its authentication decided by whoever injected it
     # -- a test double, a proxy, a cached session -- so gating on the ambient
@@ -268,4 +320,6 @@ def read_tracks(text: str, *, model: str = DEFAULT_MODEL,
                                 detail={"choice": chosen, "probabilities": probs},
                                 model=resolved))
 
+    if cache is not None and all(r.ok for r in out):
+        cache.put(text, model, resolved, out)
     return out, resolved
