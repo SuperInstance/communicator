@@ -6,3 +6,5 @@ __pycache__/
 *.log
 .quiltprobe-scratch/
 .scratch/
+examples/realaudio/*.mp3
+examples/realaudio/*.wav
