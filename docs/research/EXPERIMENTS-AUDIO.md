@@ -356,3 +356,28 @@ short-story / Shakespeare full-cast / children's / JFK oration, 75 s
 excerpts, pipeline sanity green — the oration cell (64% voiced, 5 long
 segments) vs children's (156 segments) brackets the cadence range the
 matrix was designed to span. MANIFEST in `examples/realaudio/corpus/`.
+
+## 3d. Day-3 — the laya "inversion" resolved; winnow is clean
+
+Five phrasing variants × 10-text battery on Ollaya (local), plus a
+winnow:e4b baseline:
+
+| model × phrasing | accuracy | garbage-yes |
+|---|---|---|
+| laya:en V0 "is this a question..." (bare criteria) | 3/7 | 1/2 |
+| laya:en V1 grammar-detailed criteria | 1/7 | 1/2 |
+| **laya:en V2 "is this a command..." (polarity swapped)** | **7/7** | 1/2 |
+| laya:en V3 intent-framed | 4/7 | 0/2 |
+| laya:en V4 examples-inline | 4/7 | 0/2 |
+| **winnow:e4b V0 baseline** | **7/7** | 0/2 |
+
+Day-1's "laya inverts the gesture question" is downgraded and resolved:
+laya has a **label-orientation bias** — the command-framed polarity
+scores perfectly while the question-framed one sits near chance (a
+blocked agent's probe caught it at exact chance, 0.502/0.498), and RICH
+criteria make it worse (V1 < V0), echoing the fleet's small-model finding
+that elaborate instructions can hurt sub-1B encoders. Practical rules:
+on Ollaya, use **winnow:e4b for speech-act questions** (clean at
+baseline, declines garbage); if laya must be used, swap the polarity and
+map the answer accordingly. The QUESTION-REWRITE method worked exactly
+as designed — before/after kept, claim corrected.
