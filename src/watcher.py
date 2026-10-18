@@ -149,6 +149,10 @@ GATE_FIELD = "gate_speech_prob"
 # watcher is not inventing a second, differently-tuned number.
 GATE_SPEECH = 0.5
 
+# Cadence for reporting a pause that has not closed yet, in seconds of
+# accumulated silence. See Watcher._pause_reported_at.
+PAUSE_REPORT_S = 0.25
+
 
 @dataclass
 class Event:
@@ -264,6 +268,17 @@ class Watcher:
         # length on every event rather than only in slices. Reset by any
         # speech; see `_events_for`.
         self._pause_run_start: float | None = None
+        # Reporting cadence for a pause that is still running, in seconds of
+        # accumulated silence. An open pause is reported every time its run
+        # crosses the next multiple of this, so downstream sees a live
+        # "how long has it been quiet" rather than nothing until the silence
+        # either closes or hits MAX_PAUSE_S.
+        #
+        # 0.25 s is measured rather than chosen: the median real pause run in
+        # the corpus is 0.320 s, so a finer cadence would emit events nobody
+        # can act on and a coarser one would miss the median outright.
+        self._pause_reported_at: float = 0.0
+        self._speaking_since_report: bool = True
 
     # -- time ----------------------------------------------------------------
 
@@ -337,6 +352,49 @@ class Watcher:
                 # Still open. Waiting is correct, but not forever.
                 bound = MAX_PAUSE_S if not seg.speech else MAX_UTTERANCE_S
                 if seg_end_abs - seg_start_abs < bound:
+                    # Still open. For SPEECH, waiting is right -- an utterance
+                    # that has not ended cannot be reported as one.
+                    #
+                    # For a PAUSE it is the opposite, and this branch was the
+                    # root cause of turn detection not working at all. A
+                    # pause is only ever emitted once its segment CLOSES --
+                    # which means once speech resumes. A silence at the END of
+                    # speech never closes, so it was never reported, and a
+                    # peripheral could not learn that someone had stopped
+                    # talking. Measured on real audio, a 1.30 s trailing
+                    # silence produced pause events reporting run_s of 0.03
+                    # and 0.08 s: the trailing silence was not measured at
+                    # all, at any length.
+                    #
+                    # So an open pause is now REPORTED AS IT GROWS, on a
+                    # fixed cadence, marked `open=True` with the accumulated
+                    # `run_s`. Downstream can act on it and void the action if
+                    # speech resumes -- which is exactly what
+                    # `speculate.SpeculationGate` is for. Waiting for the
+                    # segment to close before saying anything was correct for
+                    # utterances and wrong for the silence that matters most.
+                    if not seg.speech:
+                        # The run start has to be established HERE as well as
+                        # in `_events_for`: this path emits its own Event
+                        # rather than going through the summary builder, so
+                        # without this the run start stayed None and every
+                        # checkpoint measured from the segment edge instead
+                        # of from the beginning of the silence.
+                        if self._pause_run_start is None:
+                            self._pause_run_start = seg_start_abs
+                        run_s = seg_end_abs - self._pause_run_start
+                        step = self._next_pause_report(run_s)
+                        if step is not None:
+                            self._pause_reported_at = step
+                            ev = Event(
+                                PAUSE,
+                                seg_start_abs, seg_end_abs,
+                                {"duration_s": round(seg_end_abs - seg_start_abs, 4),
+                                 "run_s": round(run_s, 4),
+                                 "open": True,
+                                 "checkpoint": True})
+                            self.emitted.append(ev)
+                            events.append(ev)
                     break                   # still open; re-analyse next push
                 # Emit what is certainly complete and start fresh from there.
                 flush_abs = cut
@@ -354,7 +412,12 @@ class Watcher:
             self._emitted_until = max(self._emitted_until, seg_end_abs)
         if consumed_to is None:
             self.dropped_tail += 1
-            return []
+            # `events` is NOT empty here even when nothing was consumed: an
+            # open pause emits checkpoints precisely when no segment has
+            # closed, which is exactly this branch. Returning `[]` discarded
+            # them, so a trailing silence was still never reported -- the run
+            # advanced to 1.25 s internally and the caller saw nothing.
+            return events
         self._trim(consumed_to)
         return events
 
@@ -423,6 +486,33 @@ class Watcher:
                     // vad.FRAME_SAMPLES)
             self._gate_probs = self._gate_probs[j:]
             self._gate_probs_base += j * vad.FRAME_SAMPLES
+
+    # -- reporting a pause that is still running ------------------------------
+
+    def _pause_start_or(self, seg_start_abs: float) -> float:
+        """Absolute start of the silence run this open segment belongs to."""
+        if self._pause_run_start is None:
+            return seg_start_abs
+        return self._pause_run_start
+
+    def _next_pause_report(self, run_s: float):
+        """
+        The cadence boundary this run has just crossed, or None.
+
+        None means "nothing new to say" -- which is most pushes. A gate that
+        emits on every push is a gate nobody downstream can use, because
+        everything it says is the same thing again.
+
+        Monotone by construction: the boundary is `floor(run/interval) *
+        interval`, so it only ever moves forward and each crossing fires
+        exactly once. The first version of this computed the NEXT multiple
+        and then subtracted, which could hand back a boundary already passed,
+        and the run stalled at 0.30 s however long the silence got.
+        """
+        boundary = int(run_s / PAUSE_REPORT_S) * PAUSE_REPORT_S
+        if boundary <= self._pause_reported_at + 1e-9:
+            return None
+        return boundary
 
     # -- gate ---------------------------------------------------------------
 
@@ -494,12 +584,14 @@ class Watcher:
             # segmentation was right and the reporting was not.
             if self._pause_run_start is None:
                 self._pause_run_start = t0
+            self._pause_reported_at = t1 - self._pause_run_start
             run_s = t1 - self._pause_run_start
             return [Event(PAUSE, t0, t1, {"duration_s": seg.duration(),
                                            "run_s": round(run_s, 4),
                                            "open": is_open})]
 
         self._pause_run_start = None      # the voice is up; the next pause starts fresh
+        self._pause_reported_at = 0.0    # and the reporting cadence resets
 
         i0 = max(0, int(seg.start / self.hop_s) - 1)
         i1 = min(len(ef), int(seg.end / self.hop_s) + 1)

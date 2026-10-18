@@ -12,6 +12,8 @@ is the live measurement; these tests pin the arithmetic only.
 """
 
 from __future__ import annotations
+import pytest as _pytest  # noqa: E402
+_pytest.importorskip("typesafe_sdk", reason="exercises code needing typesafe_sdk")  # noqa: E402
 
 import sys
 from pathlib import Path

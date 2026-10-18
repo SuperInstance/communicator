@@ -20,6 +20,8 @@ utterance. See the module docstring and LANE-FIXTURES.md.
 """
 
 from __future__ import annotations
+import pytest as _pytest  # noqa: E402
+_pytest.importorskip("numpy", reason="exercises code needing numpy")  # noqa: E402
 
 import math
 import sys
@@ -196,7 +198,25 @@ class TestStreaming:
         for chunk in (800, 1600, 4000, 8000, 16000, len(session())):
             w = watcher.Watcher(SR)
             evs = drain(w, session(), chunk=chunk)
-            sig = [(e.kind, e.t0, e.t1) for e in evs]
+            # CHECKPOINTS ARE EXCLUDED, AND THAT IS A REAL CONCESSION.
+            #
+            # An open pause now emits advisory checkpoints on a fixed cadence
+            # (PAUSE_REPORT_S) as the silence grows, which is what lets a live
+            # system see a trailing silence at all -- see Watcher.push. Their
+            # NUMBER depends on how many pushes the run was observed across,
+            # so they are chunking-dependent by construction.
+            #
+            # What is still invariant is everything this property is actually
+            # about: the DECISIONS. Same kinds, same count, same times. A
+            # checkpoint says "it has been quiet for at least this long",
+            # which is a monotonically repeated fact, not a new observation --
+            # so dropping it here loses no information about what happened.
+            #
+            # Stated rather than hidden, because a suite that quietly stopped
+            # comparing something would be worse than one that admits the
+            # exception.
+            sig = [(e.kind, e.t0, e.t1) for e in evs
+                   if not e.data.get("checkpoint")]
             if base is None:
                 base = sig
                 continue

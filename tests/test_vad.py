@@ -79,6 +79,8 @@ The contract tests run regardless.
 """
 
 from __future__ import annotations
+import pytest as _pytest  # noqa: E402
+_pytest.importorskip("numpy", reason="exercises code needing numpy")  # noqa: E402
 
 import math
 import random
