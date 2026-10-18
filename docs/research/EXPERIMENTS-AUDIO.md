@@ -414,3 +414,40 @@ Score fades exactly like an absent property — the controller holds back
 on unresolved positions. This composes with tev1 as the deterministic
 cross-check: where tev1 (bit-stable) and Jev agree, drive; where they
 differ on an unstable Score, fade.
+
+## 3f. Day-3 — E7 full replication: the proxy does NOT confirm; the dissociation does
+
+626 sentence-lines scored (Jev intent, verdict-cached), RMS/F0/rate in
+three lead windows vs an [t−8,t−4] baseline, 160 top-quartile vs 328
+mid-control lines:
+
+| lead window | top-quart rise | mid-control | p (top) |
+|---|---|---|---|
+| [t−1,t] | 0.40 | 0.32 | 0.996 |
+| [t−2,t] | 0.53 | 0.41 | 0.290 |
+| [t−4,t] | 0.57 | 0.43 | **0.048** (uncorrected, 1 of 15 tests) |
+
+Spearman intent×rise-ratio +0.08–0.09 at every window (consistent sign,
+weak). F0 and syllable-rate: nothing.
+
+**Verdict: Day-2's 6/7 was small-n noise, as its p≈0.06 exploratory flag
+warned.** What survives at n=626:
+
+1. **The dissociation is now definitive** — intent × line-RMS +0.038,
+   intent × line-syll +0.042 on 626 lines (Day-2: +0.07/−0.18 on 28).
+   Within-line delivery intensity does not carry judged intent.
+2. A weak, long-lead (4 s) energy gradient into high-intent lines
+   (57% vs 43% control) — the right shape for a slow pedal-swing, but it
+   does not survive multiple-comparison correction, and the baseline
+   abuts the t−4 window (autocorrelation caveat).
+
+The kick-drum law (TIMING.md §2) remains a HYPOTHESIS on real speech.
+Confirming it needs E7 proper — human-annotated punchlines/turning
+points, not intent quartiles — which is now the single most valuable
+unrun experiment in this doc. The proxy machinery (629-line pipeline,
+resumable, `/tmp/e7/`) is reusable for it as-is.
+
+**Workers AI joins the provider matrix** (Cloudflare lane, 2026-10-18):
+llama-3.1-8b question 7/7 (garbage-yes 1/2), urgent 5/7; llama-3.2-3b
+4–5/7. Mid-tier: viable second-path, not a primary; tev1 and Jev keep
+the crown for these questions.
