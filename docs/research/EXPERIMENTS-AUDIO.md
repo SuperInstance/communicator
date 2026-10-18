@@ -476,3 +476,19 @@ cross-gap jumps live at his long phrase boundaries (register shifts
 across rests, the Day-3 artifact class, at oratory scale). A boring
 classifier on these six features per cell would likely nail genre —
 E6's premise, now with a real table to stand on.
+
+**E5 rendering options + annotation-v1 calibration (research lane, Day-3).**
+Rendering: no synth CLI on this box; numpy additive synthesis + stdlib
+`wave` satisfies E5's protocol TODAY (the reduction, not a
+reconstruction); `apt install fluidsynth fluid-soundfont-gm` is the one
+unlock for instrument timbres (pip routes do not — they wrap the native
+lib); PyAV packages WAV→MP3 for stimuli. Calibration for E7's
+annotation-v1 (LLM marking turning points from transcript text):
+**no published validation of text-only LLM prosody annotation exists**;
+the nearest evidence (Kakouros et al., SSW 2023, arXiv:2306.09814 — text
+surprisal correlates only moderately with realized prominence and
+systematically UNDERPREDICTS it; Dai et al. Interspeech 2022; Wav2ToBI
+2023 for the audio+text SOTA) says treat v1 moments as text-structural
+predictors — non-circular precisely because they are NOT acoustic
+labels (which is what the Day-2 dissociation wants), but never as
+ground truth. E7's verdict will carry this caveat by design.
