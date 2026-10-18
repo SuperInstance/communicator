@@ -228,10 +228,191 @@ are entirely documentary.
 
 ---
 
-## 5. `pincher` and `lever-runner`
+## 5. `pincher` — a well-tested fuzzy lookup table in front of a SQL executor
 
-Research in flight at the time of writing; see the addendum at the end of this
-file and the sections added to the design.
+**Verified real:** 296 files, 99 `.rs` (75 real source + 24 research
+prototypes), a real Cargo workspace (`pincher-core`, `pincher-cli`,
+`hybrid-bridge`) and a Python sidecar. CI is unusually honest with itself: its
+workflow file carries a comment admitting a sandbox test *"has been red since
+2026-06-06."*
+
+### "Vector Database as runtime" is a slogan
+
+Real KNN exists (`db/schema.rs:112` `vec0(embedding float[384])`;
+`search_nearest` uses `WHERE v.embedding MATCH ?1 AND k = ?2`). But the index
+only **selects a row**, and behaviour is then 100% determined by that row's
+`action_sql` text. Nothing about the nearest-neighbour geometry affects
+execution beyond argmax. That is storage with code around it.
+
+**And the default build has no semantics.** `pincher-core/Cargo.toml:6` is
+`default = []`, so the ONNX embedder is off and the default is a deterministic
+hash (`embed/onnx.rs:266`, "ONNX feature not enabled, using deterministic hash
+embeddings"). The repo's own benchmark states the hash has **no semantic
+similarity** — *"turn on lights" ≠ "switch on lights"* — so the README's
+headline claim that two differently-worded requests map to the same reflex is
+**false in the default build**.
+
+### The reflex path is real
+
+`pincher do "<input>"` → `reflex/engine.rs:222` → `matcher.rs`: exact string
+equality **first**, then sqlite-vec KNN k=5, cosine re-rank, thresholds
+**0.80 exact / 0.55 similar**. Below 0.55 it returns
+`"[NOVEL INTENT] No matching reflex found"` — no LLM, no write.
+
+Between 0.55 and 0.80 it executes anyway and prepends
+`"This response may need LLM refinement."` — a string concatenation. The
+refinement is **not implemented**. So the middle tier does nothing different,
+which makes the dead zone decorative.
+
+### No learning loop exists
+
+Only `ReflexEngine::teach()` via interactive `pincher teach` or RPC. **No
+counter anywhere.** `pincher-infer/distiller.py`'s docstrings claim *"after the
+third time you ask the agent to do something, it compiles a reflex"* — there
+is no counter, threshold, or promotion code, and that file is **dead**: nothing
+imports `ReflexDistiller`; `server.py` uses `distill.py` instead. The repo's
+own `docs/REFLEX_PROMOTION.md` is titled **"Gap κ Design"** — the promotion
+pipeline is a markdown procedure.
+
+Confidence *is* updated (`confidence.rs:19-25`, +5% gap / −10%, clamped
+0.05–0.95) but triggers nothing, and `ReflexPath::Direct/Confirm/LlmRoute` is
+defined and never wired into `do_command`.
+
+### Conservation, again un-enforced
+
+`oxide-pipeline`'s `verify_conservation` is `|sum(in) − sum(out)| <=
+in.len()` — tolerance equal to the element count. It is computed, stored in
+`PipelineResult.conserved`, and **never enforced**: no branch, no error, only a
+test asserting it is true. `layers_used: 5` is a hardcoded literal and
+`execution_us = len*4` is fabricated.
+
+### The one thing worth copying from any repo in this family
+
+**`benchmarks/embed-benchmark-rtx4050.md` is genuinely honest** — real numbers,
+a real negative result, and it *publishes* that the default embedding cannot do
+semantics. It is the model for how retrieval quality should be reported here:
+> you cannot learn habits if you cannot measure whether retrieval works.
+
+**Falsifier for the whole repo:** build default features, teach "turn on the
+lights", query "switch on the lights". It should fail.
+
+---
+
+## 6. `lever-runner` — the decide-not-steer loop, and two gates that fail OPEN
+
+This is the most consequential entry in the audit, because it is the system
+whose *description* this project has been built against, and it contains
+exactly the failure modes §14 and §17 predicted.
+
+**Verified real:** 4,612 LOC across 20 modules, 42 `.py` vs 27 `.md`. Three
+front-ends (CLI, Telegram bot, HTTP) → `orchestrator.do()` → LanceDB →
+`executor.run_command()`.
+
+### The loop is genuinely the shape §17 wants
+
+```
+orchestrator.py:59  fast-loop
+          :73       ONE LLM call — compress the utterance to 3-8 words, nothing else
+          :91       embed + vector search
+          :107      trust score
+          :113      MATCH_SIMILARITY_FLOOR = 0.55
+          :140      {{param}} substitution
+          :185      run_command
+          :186      update_trust
+```
+
+Deterministic to completion after a single inference. **The LLM never emits a
+command and never sees the shell** (`intent_extractor.py:87-104` is a ~58-token
+prompt whose whole output is a phrase). Token counts are real and modest
+(~58 in, ~8 out, ~6 embed) — though counted by `_approx_tokens = len//4`, and
+`BENCHMARKS.md` **contradicts its own `results-rtx4050.json`**: it claims
+orchestrator p50 **7.6 ms** where the raw file says **4168 ms**.
+
+### The approval set is mutable, unsigned, and open by default
+
+Not a static committed file. It is a **LanceDB table, unsigned, unhashed,
+mutable at runtime**, seeded with 57 commands at trust 50.
+
+Three things add to it: `/teach` (Telegram, `bot.py:256`), the CLI, and HTTP
+`/teach`. A human types the command — so there *is* a human decision — but the
+authorisation is **opt-in and defaults to open**:
+
+```python
+bot.py:99        if not ALLOWED_USER_ID: return True   # anyone can teach
+http_api.py:107  if not API_TOKEN:        return True   # anyone can teach
+```
+
+### Gate 1: the trust floor fails open
+
+```python
+orchestrator.py:107
+eligible = [m for m in matches if m.trust_score >= min_trust] or matches[:1]
+```
+
+If **nothing** clears the trust floor, it runs the best match anyway. The gate
+is decorative. And the trust floor itself is untested — `tests/smoke.py:610`
+only tests `list_all(min_trust=)`, a listing filter, not execution gating.
+
+### Gate 2: a latent path where an LLM authors approved commands
+
+`auto_promote.py:63-124` asks a remote LLM to **rewrite a failing shell
+command**, and `rewrite_losers()` would `teach()` that rewrite at trust 40 and
+delete the original.
+
+It is currently dead **by bug**: `store.TRUST_REWRITTEN` (`auto_promote.py:145`)
+is a module constant rather than an attribute, so `AttributeError` is swallowed
+at line 146.
+
+> **Fix that one reference and a remote LLM begins authoring the approved
+> command set.** This is §14's induced-soft-spot hazard and §17's collapsed
+> surface, realised in a real codebase and one line from being live.
+
+### The guard is a cache, not a validator, and it is unreachable
+
+`fastloop-guard` is a **semantic response cache** — BLAKE2b exact → MinHash
+fuzzy → miss. Grepping its `src/*.rs` for validation, rate-limit or terminate
+returns nothing; its own README calls it a cache. *"Sub-millisecond validation,
+rate limiting, and sandbox termination"* is a **docs claim only**.
+
+It is also **unreachable**: Rust binds `/tmp/fastloop.sock` (`main.rs:13`) and
+Python dials `/tmp/fastloop_guard.sock` (`fastloop_bridge.py:34`). And
+`fastloop_bridge.py:55-61` drops to the Python path on **any** exception —
+**fail-open, silently, with no log**. `SANDBOX_TERMINATED` appears only in a
+comment; it is implemented nowhere.
+
+Actual enforcement is that Python fallback: 10 req/1s per chat, 500-char cap,
+metacharacter block.
+
+### No confidence gating, and the seed set contradicts the executor
+
+Zero occurrences of confidence/logprob/entropy. The only gate is geometric —
+a vector-distance similarity floor, which is a retrieval heuristic and not
+model confidence.
+
+The executor blocks `$ ; | & < >` (`executor.py:37`), so **5 of the 57 seeds
+contain pipes and can never execute**. The pre-approved set contradicts the
+thing enforcing it.
+
+### And CI cannot fail
+
+`.github/workflows/ci.yml:19` is `pytest || true`. The only real gate,
+`smoke.yml`, has been **red since 2026-06-04**.
+
+---
+
+## 7. The verdict across all six repositories
+
+| repo | real code | claimed intelligence | verdict |
+|---|---|---|---|
+| `exoJ` | yes, CI green 44× | conservation (vacuous), growth (not implemented) | infrastructure only |
+| `quilt-dba` | yes, CI green, 8 runs | conservation **implemented but never fired**; growth real | best of the six |
+| `quilt-pincher` | yes, CI green 6× | federation (absent), ESP32 (aspirational) | **one adoptable mechanism** |
+| `pincher` | yes, 99 `.rs`, honest CI | "vector runtime" (a slogan), learning loop (absent) | a fuzzy lookup table |
+| `lever-runner` | yes, 4.6k LOC | approval gate (**fails open**), LLM authoring (**latent**) | **the cautionary tale** |
+| `quilt` | SDK + engine, no evolution code | 249 docs of unimplemented theory | a paper, not a system |
+
+Five of six have the same shape: **real infrastructure, aspirational
+intelligence, and at least one gate that cannot fail.**
 
 ---
 

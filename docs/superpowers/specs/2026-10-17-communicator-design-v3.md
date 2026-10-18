@@ -661,3 +661,68 @@ the prior art's intent rather than its implementation:
   the action does not run. `fastloop-guard`'s stated purpose is
   sub-millisecond validation and sandbox termination; whether it fails open or
   closed is the fact to verify before this is designed further.
+
+---
+
+## 18. Per-utterance trust is a SET, not a scalar
+
+This corrects an open question from v2's own limits list, which said per-
+utterance reliability was *"unmeasured"*. It is not unmeasured. It is
+**provably unavailable in the form assumed.**
+
+> Distribution-free instance-conditional calibration is **impossible except
+> trivially** — Gupta, Podkopaev & Ramdas, *NeurIPS* 2020, arXiv:2006.10564,
+> Thm. 3.
+
+So the Phase 2.5 figure (ECE 0.0565 ± 0.0027) is **aggregate** calibration and
+is not evidence about any individual utterance. A controller cannot ask JEV
+"how confident are you about this one" and get a guaranteed answer, and any
+design that pretends otherwise is promising something the literature rules
+out.
+
+### What is available instead
+
+Per-item guarantees exist only as **prediction-set coverage**: conformal
+prediction (Vovk/Gammerman/Shafer 2005; Campos et al., *TACL* 2024 survey,
+arXiv:2405.01976; Jiang et al., *NeurIPS* 2018 arXiv:1805.11783 for the
+per-instance trust score). Under a coverage guarantee the model returns a
+**set** of plausible readings and is right if the truth is anywhere in it.
+
+> **The set size is the per-utterance trust signal.**
+
+This is not a consolation prize. For a control surface it is better-shaped
+than a scalar, because it is the honest geometry of the uncertainty:
+
+| set | reading | controller behaviour |
+|---|---|---|
+| singleton | certain | drive the CC directly |
+| 2–3 | ambiguous but bounded | drive, and flag the spread |
+| large | the question does not localise | **hold back** (§6's law) |
+
+And it composes with the presence gate rather than replacing it. Two
+independent kinds of uncertainty:
+
+* **spread** — how many readings survive, *given* that something is here
+* **gate** — whether anything is here at all
+
+They fail independently, which is exactly what you want. A high gate with a
+large set means the utterance is definitely speech and the system cannot say
+what kind. A high spread with a low gate means near-nothing was said at all.
+Only the conjunction licenses driving hard.
+
+### Consequences, which are not small
+
+1. **The `confidence` field is not a trust signal.** §1 already established
+   it is distribution spread and is never driven; this section explains *why*
+   that rule was right rather than merely conservative.
+2. **A conformal set is the natural encoding for the record.** The score's
+   judged tracks would carry a modal reading plus a set-size CC, and both are
+   re-analysable when the question set changes — which the fingerprint
+   already forces.
+3. **Calibration work moves.** Effort stops going into making scalar
+   probabilities more accurate and goes into (a) choosing an exchangeable
+   calibration set, and (b) emitting sets. Neither is built.
+4. **The obstacle is data, not method.** Split-conformal needs a calibration
+   set drawn from the deployment distribution. This repo has 58 probes and
+   **no real speech at all**, so any set produced today would be conformal
+   with respect to a distribution that does not exist in production.

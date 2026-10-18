@@ -44,6 +44,7 @@ math.fsum(map(operator.mul, ...)) at C speed; pure-Python inner loops over
 from __future__ import annotations
 
 import math
+import statistics
 from dataclasses import dataclass
 from operator import mul
 
@@ -212,3 +213,74 @@ class PitchTracker:
             return float(tau)
         shift = 0.5 * (dp[tau - 1] - dp[tau + 1]) / denom
         return tau + max(-1.0, min(1.0, shift))
+
+
+def smooth_octaves(
+    frames: list[PitchFrame],
+    max_semitone_jump: float = 9.0,
+    hold: int = 3,
+) -> list[PitchFrame]:
+    """
+    Suppress octave-scale outliers against the stable local median.
+
+    The pYIN-lite post-pass (Mauch & Dixon 2014's temporal-smoothing idea,
+    deterministic, pure stdlib; the reference implementation carries no
+    license so only the idea was used). Day-0 real speech measured YIN's
+    classic failure at 3.0% of adjacent voiced pairs; this is the
+    conservative repair. WHAT IT DOES: within each contiguous voiced run
+    of at least `hold` frames, every INTERIOR frame is compared to the
+    median of its +-SMOOTH_HALF_WIDTH run-mates; a frame further than
+    `max_semitone_jump` semitones out where exactly ONE octave of
+    correction restores agreement is rescaled (f/2 or 2f -- the frame's
+    own measurement, so within-octave contour motion survives, never a
+    pasted-in median). Order-free: medians read originals, corrections
+    write to the copy. Never touches run edges, gaps, short runs, or the
+    tracker's voicedness; refuses corrections outside [FMIN, FMAX] and
+    anything that is not a single-octave displacement (the f/3 error must
+    NOT be snapped two octaves -- that maps it to 4f/3 and worsens it).
+    Cannot see majority-octave runs (the error IS the consensus there) or
+    bursts >= the window; those need pYIN's candidate prior, which this
+    pass does not pretend to be.
+    """
+    out = list(frames)
+    n = len(frames)
+    i = 0
+    while i < n:
+        if frames[i].hz is None:
+            i += 1
+            continue
+        j = i
+        while j < n and frames[j].hz is not None:
+            j += 1
+        _smooth_run(frames, out, i, j, max_semitone_jump, hold)
+        i = j
+    return out
+
+
+SMOOTH_HALF_WIDTH = 5    # +-5 frames = +-50 ms of context at the 10 ms hop
+
+
+def _smooth_run(frames, out, start, end, max_semitone_jump, hold):
+    """Correct octave outliers inside one voiced run [start, end)."""
+    if end - start < hold:
+        return
+    vals = [f.hz for f in frames[start:end]]
+    for k in range(1, len(vals) - 1):        # interior only: support both sides
+        lo = max(0, k - SMOOTH_HALF_WIDTH)
+        hi = min(len(vals), k + SMOOTH_HALF_WIDTH + 1)
+        med = statistics.median(vals[lo:hi])
+        val = vals[k]
+        if not (val > 0.0 and med > 0.0):
+            continue                          # defensive: hz is sr/tau > 0
+        r = 12.0 * math.log2(val / med)       # semitones from local truth
+        if abs(r) <= max_semitone_jump:
+            continue                          # plausible, keep
+        octaves = math.floor(r / 12.0 + 0.5)  # nearest whole-octave displacement
+        if octaves not in (-1, 1):
+            continue                          # not a single-octave error
+        corrected = val / (2.0 ** octaves)
+        if not (FMIN <= corrected <= FMAX):
+            continue                          # the tracker could not have said this
+        src = frames[start + k]
+        out[start + k] = PitchFrame(index=src.index, time=src.time,
+                                    hz=corrected, confidence=src.confidence)
