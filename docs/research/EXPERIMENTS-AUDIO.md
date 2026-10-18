@@ -331,3 +331,28 @@ annotated punchlines, not quartile cutoffs).
 Also: full transcript committed (`alice01_full_transcript.txt`, 467
 timestamped segments, 247 s CPU); gesture distribution across the real
 scene — statements 15, questions 6, commands 4, reactions 3.
+
+## 3c. Day-3 — E3 completed on the full chapter; corpus built
+
+**E3 full pass** (120,762 voiced frames, whole 38 min): EM components
+**125 Hz (18%) vs 239 Hz (82%)**, BIC difference **10,097** (decisive;
+the 5-window probe's 1933 was conservative). 30 s windows: 54% pure-HIGH,
+**0% pure-LOW**, 46% mixed — the low voice appears only in short stints
+inside predominantly-high windows, with one long HIGH run over the first
+~22 min and H/L alternation concentrated in the later, song-heavy scenes
+(handoff rate 18.7%). The 7 LOW-dominated sampled lines are CHARACTER
+voices ("With extras?" — Gryphon; "Soup of the evening, beautiful soup"
+— Mock Turtle's song) while HIGH carries Alice and narration;
+P(question∪reaction | HIGH) = 0.31 vs 0.14 for LOW (n_LOW=7 — directional
+only). **The confound stands and is now sharper**: one dramatic reader
+dropping to a creaky 125 Hz register for characters produces the same
+signal as multiple readers. For the SCORE this is moot — the
+register-to-character mapping is the per-voice encoding either way — but
+"two speakers" is NOT established by pitch alone (consistent with
+PAPERS.md §14: no canonical F0-only diarization result exists).
+
+**Corpus built** (§2 matrix filled, public domain): poetry / essay /
+short-story / Shakespeare full-cast / children's / JFK oration, 75 s
+excerpts, pipeline sanity green — the oration cell (64% voiced, 5 long
+segments) vs children's (156 segments) brackets the cadence range the
+matrix was designed to span. MANIFEST in `examples/realaudio/corpus/`.
