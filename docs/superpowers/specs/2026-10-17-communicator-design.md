@@ -1,137 +1,153 @@
-# Communicator — design
+# Communicator — design (v2)
 
-*Date: 2026-10-17. Status: design for approval, nothing built.*
-
-A person's frontend computer. You speak, it understands quickly, answers simple
-things immediately, escalates the rest to a real agent, and matches the shape of
-the conversation you're actually having.
+*Date: 2026-10-17. Supersedes v1. Nothing built.*
+*A person's frontend computer.*
 
 ---
 
-## 1. Authority, and what it obliges
+## 0. What changed, and the evidence for it
 
-**Full desktop control.** The agent may act on the machine. This is the point and
-it is not being softened in this document.
+v1 assumed an audio stack existed underneath this. Research across ten further
+repos says it does not. The **MIDI representation is real and works**; almost
+everything that tries to *measure* or *render* voice character does not.
 
-That choice has one consequence worth stating plainly, because it governs every
-other section: with full authority, the permission model is not a feature of the
-system, it *is* the system. A voice agent additionally has a failure mode a typed
-agent does not — **a transcription error is an action error**. So:
+| Claim | Reality | Source |
+|---|---|---|
+| 9-track MIDI perception of audio | **Works.** 104 tests | `slackwater-perception` |
+| Each perceptual event is a chained cell | **Works.** FNV-1a `prev_hash` | `slackwater-substrate` |
+| Lock-free real-time MIDI→synth | **Works.** SPSC ring, bounded | `fleet-audio/src/ring.rs:32` |
+| Acoustic decomposition for Plato agents | **3 crude scalars.** F0 test tolerance is ±80%; sample rate is parsed then **discarded**; stereo→channel 0 | `forge-soniqo/src/lib.rs:104-154, 172, 205` |
+| PLATO audio module using JEPA | **Not a neural network.** deps are `serde`+`uuid`; a 16-bin DFT; **12 of 16 output values are never computed** | `plato-audio-jepa/src/lib.rs` |
+| The 384-dim ConvEncoder `contrast.py` cites | **Python, in a third repo, trained on 16 clips.** Same-room vs cross-room gap **0.0146** — null. Author's own review: *"You Are Not Actually Running JEPA"*. `BatchNorm1d` collapse bug still unfixed at HEAD | `fleet-jepa-midi` |
+| Persona engine gives speech character | **Strips every SSML tag before TTS** (`compose/engine.py:264`); `_apply_groove` is a no-op (`:316`); decompose degrades to seeded noise without OpenSMILE (`:628`) | `persona-engine` |
+| Federated TinyML with a large model supervising | **No large model exists.** Peer-averaging of identical 325-param heads. Real-audio ceiling **47.5%**, one class at **0%** | `federated-tinyml-vessel` |
+| Constraint-theory synth for speech | **Zero hits** for formant, phoneme, vowel, glottal, source-filter across the whole repo | `constraint-synth`, `constraint-audio` |
+| Room-transition awareness | `STORM` **latches permanently** (`_activity_count` never resets); `QUIET` is dead code (staleness clock only evaluated inside event handlers) | `plato-room-context/context.py:52-56` |
+| project-JEPA | **Not contrastive.** No positives, negatives, target encoder, or EMA teacher. Energy regressor, **103% error on real GPU** | `project-JEPA` |
 
-- No action is ever taken directly from a raw transcript. Every action passes
-  through a confirmation that renders **what was understood**, not what was heard.
-- The confirm step is speech-shaped, not a prompt. It reads back the resolved
-  intent and the exact command, and waits for a distinct affirmative. "Yes" to one
-  thing is never consent to another.
-- **Agitation narrows authority, never widens it.** High volume, panic, or a
-  fast pace dial pushes the nudge prior toward *ask first*. A user having a bad
-  moment is the moment least likely to catch a mishearing.
-- Refusal is a first-class outcome with its own voice, not an error path.
+**Design consequence:** the score is the asset. The engines that produce and
+consume it must be built. `v1` treated this layer as solved; it is the actual
+project.
 
-`tool-judge/LIMITS.md` is blunt about its own reach: an allowlist advises, it does
-not enforce — the real boundary lives in the credential layer. That is adopted as a
-design constraint, not a caveat.
+## 1. Authority
 
-## 2. Three planes, two clocks, one seam
+**Full desktop control.** The agent may act on the machine.
 
-Latency *is* the product in a voice system. The project's own quilt-vs-tangermeme
-thesis says so directly: *"Latency is not a detail, it is the product… a ledgered,
-witnessable patch operation costs a git write plus protocol ceremony."* So the
-ledger never sits in the audio path, and the boundary is drawn on that principle.
+That makes the permission model the system rather than a feature of it, and voice
+adds a failure mode typed input does not: **a transcription error is an action
+error.** Therefore:
 
-| Plane | Lives in | Clock | Ledgered? |
+- No action is ever taken from a raw transcript. Every action passes a
+  confirmation rendering **what was understood**, not what was heard.
+- Confirmation is speech-shaped and waits for a distinct affirmative. Consent to
+  one thing is never consent to another.
+- **Agitation narrows authority, never widens it.** High volume or panic dials push
+  the prior toward *ask first*.
+- Refusal is a first-class voice, not an error path.
+
+`tool-judge/LIMITS.md` — an allowlist advises, it does not enforce; the boundary
+lives in the credential layer. Adopted as a constraint.
+
+## 2. The score is the durable record
+
+**The durable plane stores MIDI scores, not transcripts.** A transcript is lossy
+and un-re-analysable. The 9-track score preserves the acoustic evidence, so when
+the dials scheme improves the entire history can be re-derived.
+
+Track provenance — **which tracks are measured and which are judged** is the
+central design decision, and it is forced by the evidence:
+
+| Track | Source | Status |
+|---|---|---|
+| PITCH | measured | **build** — forge-soniqo's ±80% F0 is unusable |
+| TEMPO | measured | **build** — from speech rate, not boat-roll IMU |
+| VELOCITY | measured | **build** — RMS with a NaN guard |
+| INFLECTION | measured | **build** — pitch contour direction |
+| SILENCE | measured | **build** — note vel=0 |
+| TIMBRE | **Jev** | CC71-76: warm/cold/nasal/breathy/bright |
+| INTENTION | **Jev** | CC74: pre-event prediction confidence |
+| ATTENTION | **Jev** | CC91: where focus is directed |
+| GESTURE | **Jev** | CC80-87: what triggered the cell |
+
+The split is not aesthetic. **Acoustic measurement of voice character is the
+part that does not work in any existing repo** — every attempt is crude,
+uncalibrated, or null. Judgement, by contrast, is exactly what Jev does and has
+already been measured doing (130 ms median; and this morning, calibration
+separating at −0.032 ECE between model generations while separation did not).
+
+So **Jev's real role in this system is not triage. It is the synthesiser's
+control surface.** A calibrated probability *is* a continuous controller value;
+that is what a MIDI CC is. `is this utterance warm?` → `p=0.73` → `CC71 = 73`.
+`how urgent?` → `INTENTION = p`. `where is attention directed?` → `CC91`.
+
+Triage survives as one decision among several, at the front of the chain.
+
+The **128-step window** is the bounded time span a score is held before it is
+sealed into a cell — real-time sized, and the reason the previous
+`snapkit-v2` beat grid matters less: it is a stateless quantiser with no memory of
+the moment, derived from boat-roll IMU. Useful primitive, wrong source.
+
+## 3. Three planes, two clocks, one seam
+
+Latency is the product in a voice system, so the ledger never sits in the audio
+path. The project's own thesis: *"Latency is not a detail, it is the product."*
+
+| Plane | Lives in | Clock | Ledgered |
 |---|---|---|---|
-| **Fast** | browser, ephemeral | microseconds–ms | **Never** |
-| **Durable** | Quilt sheet, portable | seconds | Yes, witnessed |
-| **Delegated** | tmux, out of process | minutes | Yes, via the agent's own log |
+| **Fast** | browser, ephemeral | µs–ms | **Never** |
+| **Durable** | Quilt sheet, portable | seconds | Yes |
+| **Delegated** | tmux, out of process | minutes | Yes |
 
-**The seam is the turn boundary.** When the user stops speaking, the fast plane
-emits one turn summary into the durable sheet. That is the only crossing. Cost is
-paid per *turn*, not per *frame*.
+**The seam is the turn boundary.** On turn end the fast plane seals a score and
+emits it into the durable sheet. Cost per *turn*, not per *frame*. Every event
+already carries `prev_hash`, so the chain is inherent rather than bolted on.
 
-## 3. The cell chain
+## 4. The chain
 
-Inherited from `voice-games/COLOR SQUAD`, which already runs this in the browser
-with 15/15 headless logic tests.
+Inherited from `voice-games/COLOR SQUAD`, extended with the score layer.
 
 ```
-audio ─► dials(field) ─► nudge prior ─┬─► reflex          (3 clean runs → no LLM)
-                                      └─► Jev Gate ── act / review / block
-                                               │
-                                    answer in-line│
-                                               └─► tmux → mcode/zcode
-                                                        │
-                                              grant broker (REQUEST only)
-                                                        │
-                                                  curator shapes result
-                                                        │
-                              turn edge ──► Durable Object (chain-hashed)
+audio ─► score (9 tracks, 128-step window)
+          │
+          ├─ measured: pitch/tempo/velocity/inflection/silence
+          └─ judged:   timbre/intention/attention/gesture  ← Jev
+          │
+      nudge prior ──► reflex (3 clean runs, no LLM)
+          │         └─► Jev Gate ─ act / review / block
+          │                    └─► tmux → mcode/zcode
+          │                              │
+          │                      grant broker (REQUEST only)
+          │                              │
+          │                        curator shapes result
+          ▼
+   seal score ──► substrate cell (prev_hash) ──► Durable Object
 ```
 
 | Cell | Job | Provenance |
 |---|---|---|
-| `Ear` | capture audio, VAD drops silence before anything sees it | COLOR SQUAD |
-| `Field` | dials read the moment — pace, volume, verbosity, coherence, agitation | **new** (replaces `Prism`) |
-| `Nudge` | dials → signed prior over behaviours; zero means no opinion | **new** (replaces `Decompose`) |
+| `Ear` | capture, VAD drops silence early | COLOR SQUAD |
+| `Score` | 9 tracks over a bounded window | `slackwater-perception` |
+| `Judge` | Jev fills the semantic tracks | **new** |
+| `Field` | dials read the moment | `elephant/dials/` (scaffold) |
+| `Nudge` | dials → signed prior over behaviours, zero = no opinion | `elephant/nudge.py` |
 | `Router` | reflex vs gate | COLOR SQUAD |
-| `Jev Gate` | triage into act / review / block, fails closed | `gitpp-gate` |
-| `Act` | execute, or request a grant | tool-judge broker |
-| `Memory` | turn summaries, preference state | Quilt sensor cells |
-| `Sleep` | distil; dial weights drift and the drift is measured | `elephant-sim-worker` |
+| `Jev Gate` | act / review / block, fails closed | `gitpp-gate` |
+| `Act` | execute or request a grant | `tool-judge` |
+| `Memory` | sealed scores, preference state | Quilt sensor cells |
+| `Sleep` | distil; dial-weight drift is measured | `elephant-sim-worker` |
 
-COLOR SQUAD's actual chain is `Ear → Router → Jev Gate → Prism → Decompose →
-Act → Memory → Sleep`. **`Prism` and `Decompose` are deliberately replaced, not
-dropped by omission.** In the game they decomposed a fixed verb grammar into unit
-orders; here the shape is "read the moment, then steer by prior," which is what
-`Field` and `Nudge` do. Their names and roles are preserved in the new cells so the
-diff against the game stays legible — this is a generalisation of the chain, not a
-rewrite of it.
-
-## 4. The field: dials and the nudge prior
-
-`elephant`'s central claim is *"a room is a field, not a stream"* — the unit of
-perception is the ambient state, not the ordered feed. Adopted directly.
-
-A **dial** is one reading on one dimension. A `DialBank` reads the moment
-simultaneously. The **nudge prior** maps dials to behaviours with signs and
-weights; each behaviour gets a nudge in `[-1, 1]`, and **zero means no opinion**.
-
-For a communicator the dials are: pacing, volume, verbosity tolerance,
-interruption tolerance, topic coherence, agitation. The behaviours they steer:
-*speak shorter*, *don't escalate*, *ask first*, *offer options*.
-
-**Contrast is the training signal**, per `elephant/contrast.py`: positives from the
-same conversation, negatives from other conversations, and no centroid is ever an
-anchor. The interesting signal is *how style shifts between contexts*, never an
-absolute verbosity score. Two guards are carried over:
-
-- **Anti-collapse** — a hinge penalty if within-conversation spread falls below a
-  fraction of a frozen baseline, measured before training and frozen for the run.
-- **Condition-level fitting** — fit at the conversation level with message-level
-  bootstrap. The deadband lesson: signal lives at condition level, not message grain.
-
-**Standing constraint: no self-feedback.** The preference model must never consume
-its own prior verdicts as features. A model that reads its own past opinions learns
-to agree with itself — the same defect as `clean_pushes` depending on how tidily
-the backlog was worked. Inherited from `minigate/train.py:59`.
-
-Dial implementations are adapted from `elephant/dials/` (mood, panic, presence,
-volume, earnestness, cynicism, joke-landing) and the prior mapping from
-`elephant/nudge.py`. The dial set is replaced wholesale for voice — a room's
-vibe is not a conversation's vibe — but the mechanism is the mechanism.
+COLOR SQUAD's `Prism` and `Decompose` are **deliberately replaced** by `Score` and
+`Judge` — in the game they decomposed a fixed verb grammar; here the shape is
+"measure, then judge, then steer."
 
 ## 5. Triage
 
-Three rules, all inherited from measured work rather than invented here.
+Unchanged from v1, because it was right, and all of it is measured prior art.
 
-**Decidable predicates belong in code.** From `gitpp-gate`: an earlier draft asked
-Jev something the caller already knew — *"the prompt contained its own answer."*
-A parent check that is a string comparison must not be a model question. Only
-genuinely underdetermined questions reach the model.
+**Decidable predicates belong in code.** `gitpp-gate`: an earlier draft asked Jev
+something the caller already knew — *"the prompt contained its own answer."*
 
-**Jev is asked whether a decision is safe, never what the right value is.** The
-code knows the answer; the model supplies calibrated confidence that acting on it
-now is appropriate.
+**Jev is asked whether a decision is safe, never what the right value is.**
 
 **Route three ways, fail closed.**
 
@@ -141,187 +157,157 @@ now is appropriate.
 | `review` | decision is close, or a gate is weak |
 | `block` | a gate is confidently no, **or no gate answered** |
 
-**A gate that does not separate may not block.** `gitpp-gate` measured this: the
-intent gate separated on the wrong scale, so it was demoted to `review` and only
-the gate that actually separates kept blocking authority. Any new gate must
-demonstrate separation before it is allowed to block.
+**A gate that does not separate may not block.** `gitpp-gate` demoted its intent
+gate to `review` for exactly this.
 
-**The threshold is a knob, not a constant.** `DEFAULT_THRESHOLD = 0.80` is a
-starting point to be tuned against real data. Tuning it until a test's assertions
-pass is the false-green move this project has already made repeatedly.
+**The threshold is a knob.** `DEFAULT_THRESHOLD = 0.80` is a starting point.
+Tuning it until a test passes is the false-green move this project has made
+repeatedly.
 
-**Reflexes skip the model entirely.** After 3 clean runs a verb pattern becomes a
-local reflex with no LLM call. Counters track LLM calls against local reflexes.
+**Reflexes skip the model.** After 3 clean runs a pattern becomes a local reflex
+with no LLM call.
 
-**The pass detector distinguishes two failure modes.** `decision-ledger`'s
-`pass_detector()` plus `question_hash()` tells us whether a triage prompt is
-ill-posed rather than the model being unsure — the instrument that says *"rewrite
-the question"*, and a hash that proves the rewrite fixed it. Nothing else in the
-existing repos measures this.
+**`pass_detector()` distinguishes two failures** — an ill-posed *question* versus
+an unsure model — and `question_hash()` proves a rewrite fixed it.
 
 ## 6. Permission
 
 | Mechanism | Source | Role |
 |---|---|---|
 | Grant broker | `tool-judge/mcp_server.py:242` | agent may REQUEST, human may GRANT |
+| Broker invariant | `tests/test_broker.py:44` | forbids `{grant, decide, approve, set_grant, revoke}` on the agent surface |
 | Scope + rails | `tool-judge/scope.py`, `rails.py:139` | deterministic, no model, fails closed |
-| Posture + kill switch | `tool-judge/modes.py:122,184` | graded authority, one lever |
+| Posture + kill switch | `tool-judge/modes.py:122,184` | graded authority |
 | Autonomy ceiling | `trust-ledger/trust.py:234` | `may_act_autonomously()` by stake |
+| Anti-flip-flop | `snapkit/governor.py:131-139` | `FrictionLevel` + `deadband*0.7` hysteresis |
+| NaN policy | `snapkit/governor.py:68-81` | non-finite → max alarm, latched, *"otherwise the architecture dies quietly"* |
 
-**The broker invariant is mechanically tested** in `tool-judge/tests/test_broker.py`:
-no agent-facing tool may write a grant, and the suite fails if one ever appears. A
-voice agent can be socially engineered into granting itself anything, so this
-invariant is adopted whole and is the single most important thing not to reinvent.
+The broker invariant is adopted whole. A voice agent can be socially engineered
+into granting itself anything.
 
-Grant storage is **not** tamper-evident (`tool-judge/LIMITS.md`), so grants live in
-the credential layer, not in a file the agent can write.
-
-The goal-fit judge is **measurably weak** — two in-scope commands scored 0.58 and
-0.52 at n=5, *"the judge as configured does not separate well."* It is advisory
-only and is not permitted to block.
+The goal-fit judge is **measurably weak** — 0.58 and 0.52 at n=5, *"does not
+separate well."* Advisory only; never permitted to block.
 
 ## 7. Escalation
 
-Complex requests announce intent in one short sentence, then hand off to a **clean
-tmux session running mcode or zcode**, shaped to the task. The delegated agent is
-also the vibe-coding surface: it may rewrite the **durable sheet and the behaviour
-config**.
+Complex requests announce intent in one sentence, then hand off to a clean tmux
+session running mcode or zcode. The delegated agent is the vibe-coding surface: it
+may rewrite the **durable sheet and behaviour config**.
 
 **It may not rewrite the fast plane.** An agent editing its own audio loop is a
-bad idea, and drawing that line now is cheaper than discovering it at 2am. This is
-the one place where approach B gives up Quilt's uniformity on purpose.
+bad idea, and that line is cheaper now than at 2am.
 
-Results return to the curator, which shapes them into the conversational form
-rather than reading out raw agent output. The two-view pattern from
-`bomberman-commander/CONCEPT.md` carries over: the conversation, plus the live
-substrate beside it, so the operator can see the machine's state without reading
-logs.
+mcode vs zcode selection is undecided and stays that way until Phase 4. The
+*interface* is fixed: a clean tmux session, a task-shaped prompt, a summarisable
+result.
 
 ## 8. Durable plane at the edge
 
-`elephant-sim-worker` is the shape: a **Cloudflare Durable Object** whose loop reads
-state, runs steps, records every transition as a **chain-hashed edge**, and returns
-a summary. Nights persist mid-flight. `dial_weights` drift across runs — *that
-drift is the experiment.*
-
-Cloudflare's role, chosen against measured limits rather than vibes:
+`elephant-sim-worker` is the shape: a Durable Object that reads state, runs steps,
+records every transition as a **chain-hashed edge**, and returns a summary, with
+`dial_weights` drifting across runs — *that drift is the experiment.*
 
 | Need | Product | Note |
 |---|---|---|
-| durable conversation state | Durable Objects | stateful, survives mid-turn |
-| preference + grant records | D1 | relational, no egress charges |
-| long transcripts, artefacts | R2 | S3-compatible, no egress fees |
-| embeddings + semantic recall | Workers AI + Vectorize | ASR also available: 720 req/min |
+| durable conversation state | Durable Objects | survives mid-turn |
+| scores, preference, grants | D1 | no egress charges |
+| long artefacts | R2 | S3-compatible, no egress |
+| embeddings + semantic recall | Workers AI + Vectorize | ASR available: 720 req/min |
 
-The UNO Q later needs only a microphone, a triage model, and a thin voice. Its state
-lives at the edge and is reachable from anywhere with a connection — a terminal for
-the ecosystem rather than a box that owns the data.
+The UNO Q later needs only a microphone, a judge, and a thin voice. **This is also
+the test of the two-plane split:** if the durable sheet runs unchanged from Worker
+to UNO Q, the split was correct.
 
-**This is also the test of the two-plane split.** If the durable sheet runs unchanged
-from Worker to UNO Q, the split was correct. If it needs laptop-specific code, it
-wasn't.
-
-## 9. What is reused, and from where
+## 9. What to reuse
 
 | Asset | Repo | Reuse |
 |---|---|---|
-| Cell chain, reflex loop, Web Speech capture | `voice-games/color-squad` | extend |
-| Triage gate, act/review/block, fail-closed | `gitpp-gate` | adopt whole |
-| Grant broker, scope, modes, anomaly detection | `tool-judge` | adopt whole |
-| Autonomy ceiling, anti-inflation, decay | `trust-ledger` | adopt whole |
-| Dials, nudge prior, contrast objective | `elephant` | adapt |
+| 9-track MIDI encoding, prev_hash substrate | `slackwater-perception`, `-substrate` | **adopt whole** |
+| Lock-free SPSC `EventRing`, chunked synth | `fleet-audio/src/ring.rs:32`, `synth.rs:97` | adopt the ring + chunk contract; **not** `cpal_out.rs` |
+| Triage gate, act/review/block | `gitpp-gate` | adopt |
+| Grant broker, scope, modes, anomaly detection | `tool-judge` | adopt |
+| Autonomy ceiling, anti-inflation | `trust-ledger` | adopt |
+| Hysteresis deadband + NaN latch policy | `snapkit/governor.py` | adopt (~15 lines) |
+| `CharacterParameters` dials + `to_persona()` | `persona-engine/schemas/persona.py:210,254` | **schema only** — the engine is broken |
+| 64-sample overlap stitch | `constraint-synth/synth.py:233` | adopt for joining speech segments |
+| Reflex loop, negation guards, two views | COLOR SQUAD, bomberman concept | extend |
+| Contrast objective shape | `elephant/contrast.py` | adopt the *objective*; the encoder is null |
+| Blindness veto, no-self-feedback | `minigate` | adopt as hard law |
+| Threshold harness, 24 adversarial probes | `gate-replay` | reuse |
 | Durable Object loop, chain-hashed edges | `elephant-sim-worker` | adapt |
-| Reflex gate, blindness veto, no-self-feedback law | `minigate` | adopt |
-| Triage-threshold harness, adversarial probes | `gate-replay` | reuse harness |
-| Pass detector, question hash | `decision-ledger` | adopt |
-| Local inference, three-tier permission stub | `zero-poc` | reuse patterns |
-| Two-view UI, vibe-code confirmation | `bomberman-commander` | adapt |
 | UNO Q bridge, staleness, heartbeat | `vision/research/introception-node.md` | follow |
 
 ## 10. What is genuinely new
 
-Everything else is assembly. These four do not exist anywhere in the surveyed work:
-
-1. **Verbs → tasks.** COLOR SQUAD's grammar is game commands. Arbitrary computer
-   tasks need decomposition, and that is a real design problem.
-2. **Escalation to a larger agent.** Every existing gate decides *skip vs run* on
-   an agent digest, never *answer vs escalate* on a user request.
-3. **Conversational preference learning.** The `elephant` nudge is a *prior over
-   attention*; it has never been wired to a user's spoken corrections over time.
-4. **The durable plane at the edge.** No repo touches Vectorize or Workers AI.
+1. **Acoustic tracks.** PITCH/TEMPO/INFLECTION/VELOCITY/SILENCE measured
+   properly. Nothing existing comes close; forge-soniqo's is ±80%.
+2. **Jev as synthesiser control.** Nine tracks of character per utterance, not one
+   yes/no route.
+3. **Escalation to a larger agent.** Every existing gate decides skip-vs-run on an
+   agent digest, never answer-vs-escalate on a request.
+4. **Preference learning.** Contrastive per-conversation vibe model. **No prior art
+   anywhere** — the encoder that would support it measured a 0.0146 gap.
+5. **The edge durable plane.** No repo touches Vectorize or Workers AI.
+6. **Real speech output.** No synthesis repo can produce it; `constraint-synth` has
+   zero formant/glottal machinery.
 
 ## 11. Honest limits
 
-Carried forward rather than discovered later:
-
-- `elephant`'s dials are **keyword heuristics** and its JEPA backbone is a stub —
-  its own README says the aspiration is not yet an implementation. The field layer
-  is scaffolding, and perception quality is unproven.
-- `elephant-sim-worker` is **scaffold, never deployed**.
-- `cycle-judge`'s eval numbers are **refuted by its own `EVAL.md`** — 5/14 met
-  expectation, InjectionScreen 0/6 attacks annotated. Take its fail-closed /
-  fail-open law; leave its accuracy claims.
-- Platt scaling **hurts** an already-calibrated model (ECE 0.033 → 0.053).
-- All existing eval numbers come from n≈49 idle-dominated cycles with 3–4
-  positives. None of them is a real accuracy estimate.
-- Quilt's engine has **not been benchmarked at audio push rates**. The source says
-  backpressure is *"reserved for future use."* At game cadence this is proven in
-  production; at per-token cadence it is unknown.
-- Web Speech API is Chrome-only today. A Cloudflare STT fallback is referenced but
-  was not located in the repo tree and must be found or rebuilt.
-- `SharedArrayBuffer` requires cross-origin isolation (`COOP`/`COEP` headers), or
-  it fails in a way that looks like nothing at all.
+- `slackwater-perception` encodes **nine** tracks. The design target is 16; the
+  gap is acknowledged, not closed.
+- `elephant`'s dials are keyword heuristics with a stubbed JEPA backbone.
+- `elephant-sim-worker` is scaffold, never deployed.
+- `cycle-judge`'s eval numbers are refuted by its own `EVAL.md` (5/14).
+- Platt scaling hurts an already-calibrated model (ECE 0.033 → 0.053).
+- Every existing eval number is n≈49 with 3–4 positives.
+- `plato-audio-jepa` has CI lint red at HEAD and declares Apache-2.0 in
+  `Cargo.toml` while its `LICENSE`/`README` say MIT.
+- Several sibling repos gate CI with `|| true`, meaning green proves nothing.
+- `ring-buffer`'s sanitiser allocates per push — adopt the *behaviour* via
+  `np.nan_to_num` in the capture callback, not the class.
+- Web Speech API is Chrome-only; the referenced Cloudflare STT fallback was not
+  located in the repo tree.
+- `SharedArrayBuffer` needs COOP/COEP or fails invisibly.
 
 ## 12. Sequence
 
-This spec covers a whole product, so the implementation plan decomposes it. The
-order is dictated by risk, not by feature appeal — each phase is only worth
-starting if the previous one survived.
+Ordered by risk, not appeal. Each phase is only worth starting if the last
+survived.
 
-**Phase 0 — Break the broker.** Adversarial tests against the grant broker using
-voice-shaped social engineering. Nothing else ships first. If a spoken request can
-obtain a grant it should not, the design is wrong regardless of how good the
-conversation is.
+**Phase 0 — Break the broker.** Voice-shaped social engineering against the grant
+broker. Nothing ships first. If a spoken request can obtain a grant it should
+not, the design is wrong regardless of how good the conversation is.
 
-**Phase 1 — Ear and turn.** Capture, VAD, transcription, turn detection, speech
-back. No triage, no authority. This is where the latency claim gets measured
-rather than asserted — a voice agent that answers in four seconds is broken in a
-way a terminal is not.
+**Phase 1 — Score one utterance.** Capture → measure the five acoustic tracks
+→ seal → export MIDI. No Jev, no authority. Proves the representation and
+establishes the latency budget by measurement.
 
-**Phase 2 — Reflex before gate.** Port the reflex loop and the Jev gate, and
-establish the triage threshold against `gate-replay`'s corpus. The pass detector
-comes here too, because until the question is known-good, a threshold on it is
-meaningless.
+**Phase 2 — Jev fills the semantic tracks.** The same utterance scored by judge.
+This is the novel core and it gets measured against `gate-replay`'s adversarial
+rows, with `pass_detector()` watching for an ill-posed question.
 
-**Phase 3 — Field.** Dials and the nudge prior. **Explicitly allowed to fail** —
-if the dials do not yield a usable signal, that is a finding, and the agent simply
-runs with a zero prior rather than a decorative one.
+**Phase 3 — Reflex before gate.** The gate, with a threshold tuned on real data.
 
-**Phase 4 — Authority.** Grant broker wired in, escalation to tmux, curator. Only
-once phases 0–3 are real does the agent get to touch the machine.
+**Phase 4 — Authority.** Broker wired in, escalation to tmux, curator.
 
-**Phase 5 — Edge.** Durable Object, D1, R2, Vectorize. Portable only after the
-laptop version works end to end locally.
+**Phase 5 — Field.** Dials and nudge prior. **Explicitly allowed to fail** — if
+the dials yield no usable signal that is a finding, and the agent runs with a zero
+prior rather than a decorative one.
 
-Phases 0–2 are laptop-only and need nothing from Cloudflare. That is deliberate:
-the edge is an optimisation and a portability test, not a dependency.
+**Phase 6 — Edge.** Durable Object, D1, R2, Vectorize, after the laptop version
+works end to end locally.
 
-### mcode or zcode
+Phases 0–3 need nothing from Cloudflare. The edge is an optimisation and a
+portability test, not a dependency.
 
-Selection is not yet decided and this spec does not pretend otherwise. The
-decision belongs with Phase 4, where the escalation contract is written. What the
-design fixes now is the *interface* — a clean tmux session with a task-shaped
-prompt and a summarisable result — so either can be swapped without touching the
-gate.
-
-## 13. Open risks, in priority order
+## 13. Open risks
 
 1. **The grant broker has never been adversarially tested against voice-shaped
-   social engineering.** This is the one failure that is not survivable, and it is
-   testable before anything else ships.
-2. **Triage quality is unmeasured.** The threshold has no real corpus behind it.
-   `gate-replay` has 55 real + 24 adversarial rows to start from.
-3. **The field layer may not work.** If dials do not produce a usable signal, the
-   nudge prior is decoration and the agent reads as tone-deaf.
-4. **Quilt at audio rates is unknown** and the mitigation is to keep audio out of
-   the engine, which the two-plane split already does.
+   social engineering.** The only failure that is not survivable.
+2. **The acoustic tracks have no working implementation.** forge-soniqo is ±80%,
+   and a ±80% F0 estimate cannot carry PITCH. This is the largest engineering
+   unknown and it is Phase 1.
+3. **The contrastive vibe model has no working encoder.** The 0.0146 gap means
+   either the encoder or the objective is wrong; neither has been shown to work.
+4. **Nine tracks, not sixteen.** The remaining seven have no agreed semantics.
+5. **No repo can synthesise speech.** Output character is greenfield.
