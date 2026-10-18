@@ -911,3 +911,18 @@ consistently right, the implementations are consistently null. So a correct
 tiny JEPA here is new work, not a port — and the baseline half of §4 does not
 need a neural net and should be built first precisely because it is
 arithmetic.
+
+---
+
+## Real-audio arc pointer (2026-10-18, Days 0–3)
+
+The "no real speech anywhere in this repo" table above is superseded:
+real-audio work lives in **docs/research/EXPERIMENTS-AUDIO.md** (Day-0
+first real speech through the pipeline → Day-3: E4 per-phrase tempo
+PASSED, E3 bimodality BIC 10,097 with the register confound kept sharp,
+the cross-genre table, per-item stability + the trust layer, E7 refuted
+three ways with the dissociation definitive, the laya/winnow resolution,
+GOLD.md's H1–H10 + use-case corpus, the CF/Workers-AI lane, and the
+public-domain 8-cell corpus in examples/realaudio/). Workers/ and
+experiments/ carry the newer lanes. This section exists so a reader of
+PROGRESS alone cannot conclude the repo never touched real audio.

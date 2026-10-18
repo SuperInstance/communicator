@@ -259,6 +259,11 @@ class Watcher:
         # Checkpoints of a long run must not re-charge attention, but the first
         # checkpoint of a run whose segment never closed still owes one.
         self._open_run_onset_done: bool = False
+        # Absolute start of the current run of silence, or None when the voice
+        # is up. Carried across checkpoints so a long pause reports its true
+        # length on every event rather than only in slices. Reset by any
+        # speech; see `_events_for`.
+        self._pause_run_start: float | None = None
 
     # -- time ----------------------------------------------------------------
 
@@ -473,8 +478,28 @@ class Watcher:
             # Any pause ends the current speech run, so the next one owes an
             # onset of its own.
             self._open_run_onset_done = False
+            # `run_s` is how long THIS SILENCE RUN has lasted so far, across
+            # however many checkpoints it took to report it.
+            #
+            # Without it a long pause is unreadable. A pause is only emitted
+            # once its segment closes behind the tail cut, and an open one is
+            # flushed at MAX_PAUSE_S, so a 6 s silence arrives as three events
+            # of 2.755 / 2.775 / 0.360 s -- each below any threshold a turn
+            # decision would use, summing to roughly the right total and
+            # carrying NO event that says "this was six seconds".
+            #
+            # Measured on the real corpus before this existed: the longest
+            # pause the watcher emitted across 465 s of speech was 0.790 s,
+            # so a 3 s turn threshold could never have matched anything. The
+            # segmentation was right and the reporting was not.
+            if self._pause_run_start is None:
+                self._pause_run_start = t0
+            run_s = t1 - self._pause_run_start
             return [Event(PAUSE, t0, t1, {"duration_s": seg.duration(),
+                                           "run_s": round(run_s, 4),
                                            "open": is_open})]
+
+        self._pause_run_start = None      # the voice is up; the next pause starts fresh
 
         i0 = max(0, int(seg.start / self.hop_s) - 1)
         i1 = min(len(ef), int(seg.end / self.hop_s) + 1)

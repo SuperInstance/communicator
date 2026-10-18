@@ -29,6 +29,7 @@ from . import judged
 
 DEFAULT_N = 3
 STABLE_BAR = 0.995     # mode-share at or above this reads as deterministic
+MIN_SAMPLES_N = 2      # fewer successful asks than this = unmeasured, not stable
 
 
 def _answer(reading):
@@ -66,6 +67,16 @@ def probe_stability(text: str, *, n: int = DEFAULT_N, model: str = judged.DEFAUL
     out = {}
     for track, answers in samples.items():
         counts = Counter(map(str, answers))
+        # SILENT TRUST INFLATION, fixed: a track that answered only once
+        # (the other asks failed) is NOT maximally stable -- it is
+        # UNMEASURED, and one answer always agrees with itself. Below
+        # MIN_SAMPLES_N there is no stability claim at all (None fades
+        # like unstable downstream; an absent measurement is not
+        # evidence of stability).
+        if len(answers) < MIN_SAMPLES_N:
+            out[track] = {"n": len(answers), "distinct": len(counts),
+                          "mode_share": None, "factor": None}
+            continue
         mode_share = counts.most_common(1)[0][1] / len(answers)
         out[track] = {
             "n": len(answers),

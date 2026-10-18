@@ -6,8 +6,8 @@ license verification; excerpts 75 s from ~25 s in, past LibriVox intros;
 
 | cell | file | source item | voiced | F0 med | segs |
 |---|---|---|---|---|---|
-| solo narration | ../alice01_excerpt.wav | aliceinwonderland_drama_1310_librivox | 50% | 229 Hz | 91 |
-| dramatic multi-voice | ../alice01_excerpt.wav (full ch.) | same | 50% | 229 Hz | 91 |
+| solo narration (LOCAL-ONLY — gitignored, regenerate via measure_excerpt.py) | ../alice01_excerpt.wav | aliceinwonderland_drama_1310_librivox | 50% | 229 Hz | 91 |
+| dramatic multi-voice (LOCAL-ONLY) | ../alice01_excerpt.wav (full ch.) | same | 50% | 229 Hz | 91 |
 | poetry | poetry_weeds_by_the_wall_1702_librivox.wav | Cawein, *Weeds by the Wall* (collab.) | 39% | 196 Hz | 14 |
 | essay/lecture | essay_perpetual_peace_librivox.wav | Kant, *Perpetual Peace* (single reader) | 31% | 90 Hz | 66 |
 | short story w/ dialogue | shortstory_shortstory058_1405_librivox.wav | Short Story Collection 058 | 55% | 109 Hz | 70 |

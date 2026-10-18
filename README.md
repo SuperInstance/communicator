@@ -18,7 +18,7 @@ instead of inventing it.
 
 | # | track | source | in the file |
 |---|---|---|---|
-| 1 | pitch | measured (YIN, 0.03 Hz worst-case on synthetic tones) | notes, velocity from co-timed RMS |
+| 1 | pitch | measured (YIN, 0.03 Hz worst-case on synthetic tones; real speech adds ~1–3% octave errors — smoother shipped, see EXPERIMENTS-AUDIO §3/§3g) | notes, velocity from co-timed RMS |
 | 2 | tempo | measured (speech rate → BPM) | set_tempo + CC120 |
 | 3 | velocity | measured (RMS per frame) | CC7 |
 | 4 | timbre | judged (Score, warm↔cold) | CC71, gated |
@@ -71,6 +71,16 @@ src/vad.py           voice-activity gate (silero ONNX, MIT, optional).
 src/watcher.py       the continuous layer: onset / utterance / pause events,
                      checkpoints so a run that never ends still reports
 src/score.py         merge + export; tick = 1 ms; provenance sidecar
+src/stability.py     per-utterance trust probe (resample mode-share)
+src/local_judge.py   local-model judged-track reduction
+src/local_tev.py     tev1 adapter (ollama --ask)
+src/watcher.py       continuous listening layer
+src/policy.py        laws enforced in code (confidence-never-drives-CC)
+src/rewrite_probe.py question rewrite instrumentation
+src/calib.py         calibration lane helpers
+workers/             Cloudflare lane (budget-gated)
+experiments/         one-off experiments + their committed results
+examples/realaudio/  the public-domain corpus + analysis recipes
 docs/SCIENCE.md      the backend science: why YIN, why gates, why ECE
 docs/research/       the verified annotated paper corpus (PAPERS.md)
 docs/superpowers/specs/   the design doc (v2) — read §0 before extending
@@ -79,12 +89,18 @@ docs/superpowers/specs/   the design doc (v2) — read §0 before extending
 ## Running
 
 ```bash
-# tests: 357 passed offline (live tests skip without a key)
-python3 -m pytest tests/ -q
+# tests: run under an interpreter that has typesafe_sdk (this box: the
+# glasses venv, see docs/agents/zcode/OPERATIONS.md). Under a bare
+# python3, SDK-dependent tests SKIP and the pure-stdlib majority still
+# passes; the count moves weekly, trust the run over this README.
+/home/proart/projects/glasses/.venv/bin/python -m pytest tests/ -q
 
-# end-to-end against live Jev (needs TYPESAFE_API_KEY):
-python3 -c "from src import score; score.render('examples/demo-utterance.wav', \
-    'STOP THE DEPLOY RIGHT NOW', 'examples/demo-utterance')"
+# end-to-end against live Jev (needs the venv interpreter AND
+# TYPESAFE_API_KEY; without a key the render exits 0 and writes a .mid
+# whose judged tracks are EMPTY by design, not silently zero):
+/home/proart/projects/glasses/.venv/bin/python -c \
+  "from src import score; score.render('examples/demo-utterance.wav', \
+   'STOP THE DEPLOY RIGHT NOW', 'examples/demo-utterance')"
 
 # optional: the voice-activity gate (2.2 MB, MIT, fetched not vendored).
 # Without it the watcher still runs -- energy-only, at 31.8% of a core
@@ -93,7 +109,9 @@ python3 -c "from src import vad; vad.fetch_model()"
 ```
 
 `typesafe_sdk` is provided by the shared venv on this machine; a key is
-needed only for live calls — every suite is useful without one.
+needed only for live calls — every suite is useful without one (the SDK
+itself, however, is required for the judged-track tests: no venv, they
+SKIP rather than fail).
 
 ## House rules (violated once each, then written down)
 

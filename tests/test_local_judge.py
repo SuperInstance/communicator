@@ -261,8 +261,11 @@ class TestNegativeControl:
         obj.pop("gesture")
         r = lj.reduce_local(obj)
         assert r.ok is False
-        assert r.ccs == {} or True   # ok is the contract; ccs may be partial
         assert r.why
+        # ok is the contract; ccs may be partial (the audit found the old
+        # `assert r.ccs == {} or True` hiding exactly this: implementation
+        # returns partial ccs on failure, so we assert the CONTRACT, not
+        # an emptiness the code never guaranteed).
 
     def test_sabotage_argmax_to_first_key(self):
         """Taking probabilities[0] instead of the max must change the CC."""

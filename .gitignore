@@ -11,3 +11,4 @@ examples/realaudio/*.wav
 experiments/_matrix/
 docs/research/**/__pycache__/
 models/
+.pytest_cache/

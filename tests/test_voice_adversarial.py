@@ -50,7 +50,10 @@ import pytest
 
 TOOL_JUDGE = Path("/home/proart/projects/tool-judge")
 if not TOOL_JUDGE.exists():
-    raise SystemExit(f"tool-judge not found at {TOOL_JUDGE}")
+    # A fresh clone off this box has no sibling checkout: SKIP the file,
+    # never abort collection -- a suite that dies hides its own results.
+    import pytest
+    pytest.skip(f"tool-judge not found at {TOOL_JUDGE}", allow_module_level=True)
 sys.path.insert(0, str(TOOL_JUDGE))
 
 from tool_judge.grants import GrantStore       # noqa: E402

@@ -223,8 +223,7 @@ def test_emits_nothing_for_silence():
     assert all(f.hz is None for f in frames), (
         f"{sum(1 for f in frames if f.hz is not None)} frames invented pitch "
         f"in digital silence")
-    assert all(f.hz != 0.0 for f in frames if f.hz is not None) or True
-
+    
 
 def test_quiet_periodic_signal_is_not_voiced_gap_closed():
     """

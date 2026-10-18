@@ -31,9 +31,12 @@ first-class MIDI events" idea.
 voice-commanded-game lineage the design doc inherits (Router, Prism→Score
 substitution). The player-facing end of the same representation.
 
-**slackwater-tools / slack-water** — the perception/substrate lineage our
-9-track encoding and CC assignments already adopt (slackwater-perception
-via the design doc).
+**slackwater-tools / slack-water** — CORRECTED (audit): the local
+slackwater-tools repo is the roundtable/ideation extraction from
+lucineer-system, NOT the perception/substrate code. The
+slackwater-perception 9-track lineage our CC assignments adopt lives in
+the design doc's source table and stays archived on the lucineer-system
+branch — no local checkout exists.
 
 **Design-doc siblings** (fleet-audio's SPSC ring, constraint-synth's
 64-sample stitch, snapkit's deadband+NaN-latch, persona-engine's
@@ -51,7 +54,7 @@ intention track, MIDI-DDSP for the hierarchy, Repp/Fujii for the offsets.
 ## Concrete next welds
 
 1. tminus-dispatcher consuming MEASURED latencies per agent (ours are in
-   EXPERIMENTS-AUDIO §3a) instead of fixed beats — the calibration loop
+   PROGRESS.md Phase 2 (214–554 ms, jev-1.14.0)) instead of fixed beats — the calibration loop
    between the two repos.
 2. midi-temporal's lecture-cadence training system run on the
    EXPERIMENTS-AUDIO corpus — its idea, our data.

@@ -89,3 +89,43 @@ def test_trust_fields_are_flat_and_json_safe():
     import json
     assert set(f) == set(s)
     json.dumps(f)  # must not raise
+
+
+def test_insufficient_samples_are_unmeasured_not_stable():
+    """The silent-trust-inflation bug, pinned: a client that fails 2 of 3
+    asks leaves n=1 -- and ONE successful answer always agrees with
+    itself. Before the fix that read as mode_share 1.0, factor 1.0: a
+    half-dead model looked maximally trustworthy, and that number
+    multiplies into a gate. Now: None -- unmeasured fades like unstable,
+    because an absent measurement is not evidence of stability."""
+    class FlakyTwoThirdsDown:
+        def __init__(self):
+            self.calls = 0
+
+        def system_one(self, **kw):
+            self.calls += 1
+            if self.calls != 1:
+                raise RuntimeError("network down")
+            class R: pass
+            class Ch:
+                def __init__(self, c):
+                    self.choice = c
+                    self.probabilities = {c: 0.9}
+                    self.confidence = 0.9
+            class Sc:
+                def __init__(self):
+                    self.score = 2.0; self.confidence = 0.7
+                    self.legend = {}; self.probabilities = {0: 1.0}
+            r = R(); r.model = "fake"
+            r.answers = {"timbre": Sc(), "intention": Sc(),
+                         "attention": Ch("listener"),
+                         "gesture": Ch("question")}
+            return r
+
+    s = stability.probe_stability("run the tests", n=3,
+                                  client=FlakyTwoThirdsDown(), sleep_s=0)
+    for track in ("TIMBRE", "INTENTION", "ATTENTION", "GESTURE"):
+        assert s[track]["n"] == 1
+        assert s[track]["mode_share"] is None, (
+            f"{track}: one sample claimed a stability measurement")
+        assert s[track]["factor"] is None

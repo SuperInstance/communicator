@@ -1,0 +1,263 @@
+{
+  "account": "049ff5...",
+  "models": [
+    "@cf/cloudflare/clef-omni",
+    "@cf/cloudflare/clef"
+  ],
+  "p1": {
+    "clip": "children_english_fairy_tales_joy_librivox.wav",
+    "ok": true,
+    "error": null,
+    "detail": null,
+    "elapsed_s": 1.015,
+    "usage": null,
+    "answers": {
+      "is_speech": {
+        "type": "noul",
+        "noul": 0.9212
+      },
+      "is_directive": {
+        "type": "choice",
+        "choice": "no",
+        "probabilities": {
+          "yes": 0.0084,
+          "no": 0.9916
+        },
+        "confidence": 0.9666
+      }
+    }
+  },
+  "p2": {
+    "rows": [
+      {
+        "clip": "children_english_fairy_tales_joy_librivox.wav",
+        "question": "is_directive",
+        "k": 2,
+        "reported": 0.9666,
+        "predicted": 0.9832,
+        "abs_error": 0.0166
+      },
+      {
+        "clip": "essay_perpetual_peace_librivox.wav",
+        "question": "is_directive",
+        "k": 2,
+        "reported": 0.9779,
+        "predicted": 0.989,
+        "abs_error": 0.0111
+      },
+      {
+        "clip": "oration_jfks19620912.wav",
+        "question": "is_directive",
+        "k": 2,
+        "reported": 0.9443,
+        "predicted": 0.9718,
+        "abs_error": 0.0275
+      }
+    ],
+    "n": 3,
+    "max_abs_error": 0.0275,
+    "mean_abs_error": 0.0184
+  },
+  "p3": {
+    "honest": {
+      "elapsed_s": 11.237,
+      "error": null,
+      "fields": {
+        "no_listener": 0.0605,
+        "no_request": 0.0349,
+        "self_promotion": 0.02,
+        "not_imperative": 0.0801,
+        "content_noise": 0.0325
+      },
+      "max": 0.0801,
+      "argmax": "not_imperative"
+    },
+    "question": {
+      "elapsed_s": 0.849,
+      "error": null,
+      "fields": {
+        "no_listener": 0.0402,
+        "no_request": 0.5218,
+        "self_promotion": 0.0254,
+        "not_imperative": 0.1951,
+        "content_noise": 0.0361
+      },
+      "max": 0.5218,
+      "argmax": "no_request"
+    },
+    "garbage": {
+      "elapsed_s": 1.129,
+      "error": null,
+      "fields": {
+        "no_listener": 0.7376,
+        "no_request": 0.922,
+        "self_promotion": 0.0385,
+        "not_imperative": 0.8599,
+        "content_noise": 0.8861
+      },
+      "max": 0.922,
+      "argmax": "no_request"
+    },
+    "garbage_arguing": {
+      "elapsed_s": 0.698,
+      "error": null,
+      "fields": {
+        "no_listener": 0.4547,
+        "no_request": 0.5279,
+        "self_promotion": 0.9002,
+        "not_imperative": 0.5998,
+        "content_noise": 0.54
+      },
+      "max": 0.9002,
+      "argmax": "self_promotion"
+    }
+  },
+  "three_way": [
+    {
+      "clip": "children_english_fairy_tales_joy_librivox.wav",
+      "duration_s": 6.0,
+      "wav_bytes": 192045,
+      "arm_A_ours_tracks_to_jev": {
+        "state_sent": "Measured from a 6.00 s audio clip. Peak RMS 0.1031, mean RMS 0.0218. 9 segments, 4 of them speech. Voiced proportion 1.00.",
+        "elapsed_s": 0.39,
+        "answers": {
+          "is_speech": {
+            "type": "noul",
+            "noul": 0.76,
+            "choice": null,
+            "probabilities": null,
+            "confidence": null
+          },
+          "is_directive": {
+            "type": "choice",
+            "noul": null,
+            "choice": "no",
+            "probabilities": {
+              "yes": 0.0,
+              "no": 1.0
+            },
+            "confidence": 1.0
+          }
+        }
+      },
+      "arm_B_direct_audio_to_clef": {
+        "elapsed_s": 0.752,
+        "error": null,
+        "usage": null,
+        "answers": {
+          "is_speech": {
+            "type": "noul",
+            "noul": 0.9212
+          },
+          "is_directive": {
+            "type": "choice",
+            "choice": "no",
+            "probabilities": {
+              "yes": 0.0084,
+              "no": 0.9916
+            },
+            "confidence": 0.9666
+          }
+        }
+      },
+      "arm_C_stt_to_jev": {
+        "transcript_head": "travelled the land all over in search of a wife he saw young and old rich and poor",
+        "transcript_len": 82,
+        "stt_elapsed_s": 1.754,
+        "elapsed_s": 0.131,
+        "answers": {
+          "is_speech": {
+            "type": "noul",
+            "noul": 0.9,
+            "choice": null,
+            "probabilities": null,
+            "confidence": null
+          },
+          "is_directive": {
+            "type": "choice",
+            "noul": null,
+            "choice": "no",
+            "probabilities": {
+              "yes": 0.0,
+              "no": 1.0
+            },
+            "confidence": 1.0
+          }
+        }
+      }
+    },
+    {
+      "clip": "essay_perpetual_peace_librivox.wav",
+      "duration_s": 6.0,
+      "wav_bytes": 192045,
+      "arm_A_ours_tracks_to_jev": {
+        "state_sent": "Measured from a 6.00 s audio clip. Peak RMS 0.1577, mean RMS 0.0236. 6 segments, 3 of them speech. Voiced proportion 0.67.",
+        "elapsed_s": 0.12,
+        "answers": {
+          "is_speech": {
+            "type": "noul",
+            "noul": 0.7,
+            "choice": null,
+            "probabilities": null,
+            "confidence": null
+          },
+          "is_directive": {
+            "type": "choice",
+            "noul": null,
+            "choice": "no",
+            "probabilities": {
+              "yes": 0.0,
+              "no": 1.0
+            },
+            "confidence": 1.0
+          }
+        }
+      },
+      "arm_B_direct_audio_to_clef": {
+        "elapsed_s": 0.759,
+        "error": null,
+        "usage": null,
+        "answers": {
+          "is_speech": {
+            "type": "noul",
+            "noul": 0.829
+          },
+          "is_directive": {
+            "type": "choice",
+            "choice": "no",
+            "probabilities": {
+              "yes": 0.0055,
+              "no": 0.9945
+            },
+            "confidence": 0.9779
+          }
+        }
+      },
+      "arm_C_stt_to_jev": {
+        "transcript_head": "Perpetual Peace, by Immanuel Kant, taken from",
+        "transcript_len": 45,
+        "stt_elapsed_s": 2.037,
+        "elapsed_s": 0.138,
+        "answers": {
+          "is_speech": {
+            "type": "noul",
+            "noul": 0.89,
+            "choice": null,
+            "probabilities": null,
+            "confidence": null
+          },
+          "is_directive": {
+            "type": "choice",
+            "noul": null,
+            "choice": "no",
+            "probabilities": {
+              "yes": 0.08,
+              "no": 0.92
+            },
+            "confidence": 0.84
+          }
+        }
+      }
+    }
+  ]
+}

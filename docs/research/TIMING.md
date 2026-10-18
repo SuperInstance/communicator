@@ -41,7 +41,7 @@ The compensation lives upstream of the render, keyed to a target moment:
 Everything upstream schedules against T-minus, not T-zero. Sequencers do
 this (events dispatched ahead by the synth's latency); DAWs do it (plugin
 lookahead, automatic delay compensation). Our stack's measured latencies
-make the voice loop's T-minus table concrete: judged tracks 200–550 ms
+make the voice loop's T-minus table concrete: judged tracks 214–554 ms (PROGRESS.md Phase 2, jev-1.14.0)
 per call, acoustic measurement ~tens of ms, synthesis TBD. A response
 that must land when the user finishes speaking must START before they
 finish — endpointing is not an optimization, it is the pedal swing.
@@ -137,7 +137,7 @@ the score, so the offset can be scheduled PER MODALITY (judged tracks
 200–550 ms vs acoustic tens of ms) rather than one global lookahead.
 
 
-**Correction, Day-3 (EXIMENTS-AUDIO §3h):** E7 proper — 56 annotated
+**Correction, Day-3 (EXPERIMENTS-AUDIO §3h):** E7 proper — 56 annotated
 turning moments, symmetric controls — REFUTED the energy/pitch
 pre-event swing as an observable (the apparent F0 rise was utterance-
 onset pitch-up present in controls too, p=0.28). Law 2 stands on its
