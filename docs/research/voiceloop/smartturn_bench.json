@@ -1,0 +1,26 @@
+{
+  "model_bytes": 8679182,
+  "input_shape": [
+    1,
+    80,
+    800
+  ],
+  "output_node_name": "logits",
+  "feature_ms": {
+    "median": 6.52,
+    "p95": 10.98
+  },
+  "infer_ms": {
+    "median": 72.87,
+    "p95": 99.19
+  },
+  "total_ms_median": 79.39,
+  "behaviour_prob_complete": {
+    "speechlike_4_syllables": 0.0495,
+    "speechlike_1_syllable": 0.8972,
+    "white_noise": 0.9619,
+    "sine_220hz_tone": 0.9574,
+    "digital_silence": 0.987
+  },
+  "note": "pipecat thresholds prediction at probability > 0.5 (local_smart_turn_v3.py:174)"
+}

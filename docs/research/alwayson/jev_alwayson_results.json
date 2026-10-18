@@ -1,0 +1,413 @@
+{
+  "e1_screen": {
+    "holistic_forward": {
+      "choice": "watcher_plus_silero",
+      "confidence": 0.99,
+      "probabilities": {
+        "watcher_only": 0.0,
+        "watcher_plus_silero": 0.99,
+        "openwakeword": 0.01,
+        "pyannote_diarization": 0.0
+      }
+    },
+    "holistic_reversed": {
+      "choice": "watcher_plus_silero",
+      "confidence": 1.0,
+      "probabilities": {
+        "pyannote_diarization": 0.0,
+        "openwakeword": 0.0,
+        "watcher_plus_silero": 1.0,
+        "watcher_only": 0.0
+      }
+    },
+    "battery_forward": {
+      "watcher_only": {
+        "per_criterion": {
+          "runs_without_torch": 0.96,
+          "commercially_usable_weights": 0.62,
+          "fits_a_peripheral": 0.57,
+          "survives_steady_hum": 0.02,
+          "installable_now": 0.94
+        },
+        "max": 0.96,
+        "mean": 0.622,
+        "n_satisfied": 4
+      },
+      "watcher_plus_silero": {
+        "per_criterion": {
+          "runs_without_torch": 0.96,
+          "commercially_usable_weights": 0.94,
+          "fits_a_peripheral": 0.86,
+          "survives_steady_hum": 0.94,
+          "installable_now": 0.5
+        },
+        "max": 0.96,
+        "mean": 0.84,
+        "n_satisfied": 5
+      },
+      "openwakeword": {
+        "per_criterion": {
+          "runs_without_torch": 0.92,
+          "commercially_usable_weights": 0.03,
+          "fits_a_peripheral": 0.63,
+          "survives_steady_hum": 0.43,
+          "installable_now": 0.2
+        },
+        "max": 0.92,
+        "mean": 0.442,
+        "n_satisfied": 2
+      },
+      "pyannote_diarization": {
+        "per_criterion": {
+          "runs_without_torch": 0.02,
+          "commercially_usable_weights": 0.12,
+          "fits_a_peripheral": 0.07,
+          "survives_steady_hum": 0.35,
+          "installable_now": 0.1
+        },
+        "max": 0.35,
+        "mean": 0.132,
+        "n_satisfied": 0
+      }
+    },
+    "battery_reversed": {
+      "pyannote_diarization": {
+        "per_criterion": {
+          "runs_without_torch": 0.02,
+          "commercially_usable_weights": 0.12,
+          "fits_a_peripheral": 0.07,
+          "survives_steady_hum": 0.35,
+          "installable_now": 0.08
+        },
+        "max": 0.35,
+        "mean": 0.128,
+        "n_satisfied": 0
+      },
+      "openwakeword": {
+        "per_criterion": {
+          "runs_without_torch": 0.91,
+          "commercially_usable_weights": 0.04,
+          "fits_a_peripheral": 0.59,
+          "survives_steady_hum": 0.42,
+          "installable_now": 0.2
+        },
+        "max": 0.91,
+        "mean": 0.432,
+        "n_satisfied": 2
+      },
+      "watcher_plus_silero": {
+        "per_criterion": {
+          "runs_without_torch": 0.96,
+          "commercially_usable_weights": 0.94,
+          "fits_a_peripheral": 0.88,
+          "survives_steady_hum": 0.94,
+          "installable_now": 0.5
+        },
+        "max": 0.96,
+        "mean": 0.844,
+        "n_satisfied": 5
+      },
+      "watcher_only": {
+        "per_criterion": {
+          "runs_without_torch": 0.97,
+          "commercially_usable_weights": 0.73,
+          "fits_a_peripheral": 0.54,
+          "survives_steady_hum": 0.02,
+          "installable_now": 0.95
+        },
+        "max": 0.97,
+        "mean": 0.642,
+        "n_satisfied": 4
+      }
+    }
+  },
+  "e2_audio_gate": {
+    "hum": {
+      "holistic": 0.14,
+      "battery": {
+        "not_voiced_speech": 0.8,
+        "single_tone": 0.98,
+        "transient": 0.02,
+        "music_or_machinery": 0.93,
+        "unvoiced_noise": 0.02
+      },
+      "max_battery": 0.98,
+      "mean_battery": 0.55,
+      "argmax_battery": "single_tone"
+    },
+    "clicks": {
+      "holistic": 0.13,
+      "battery": {
+        "not_voiced_speech": 0.97,
+        "single_tone": 0.11,
+        "transient": 0.95,
+        "music_or_machinery": 0.87,
+        "unvoiced_noise": 0.11
+      },
+      "max_battery": 0.97,
+      "mean_battery": 0.602,
+      "argmax_battery": "not_voiced_speech"
+    },
+    "music": {
+      "holistic": 0.17,
+      "battery": {
+        "not_voiced_speech": 0.56,
+        "single_tone": 0.77,
+        "transient": 0.03,
+        "music_or_machinery": 0.93,
+        "unvoiced_noise": 0.02
+      },
+      "max_battery": 0.93,
+      "mean_battery": 0.462,
+      "argmax_battery": "music_or_machinery"
+    },
+    "noise": {
+      "holistic": 0.13,
+      "battery": {
+        "not_voiced_speech": 0.97,
+        "single_tone": 0.06,
+        "transient": 0.08,
+        "music_or_machinery": 0.82,
+        "unvoiced_noise": 0.9
+      },
+      "max_battery": 0.97,
+      "mean_battery": 0.566,
+      "argmax_battery": "not_voiced_speech"
+    },
+    "speech": {
+      "holistic": 0.21,
+      "battery": {
+        "not_voiced_speech": 0.35,
+        "single_tone": 0.24,
+        "transient": 0.27,
+        "music_or_machinery": 0.07,
+        "unvoiced_noise": 0.12
+      },
+      "max_battery": 0.35,
+      "mean_battery": 0.21,
+      "argmax_battery": "not_voiced_speech"
+    },
+    "hum_ADVERSARIAL": {
+      "holistic": 0.09,
+      "battery": {
+        "not_voiced_speech": 0.9,
+        "single_tone": 0.94,
+        "transient": 0.04,
+        "music_or_machinery": 0.88,
+        "unvoiced_noise": 0.06
+      },
+      "max_battery": 0.94,
+      "mean_battery": 0.564,
+      "argmax_battery": "single_tone"
+    }
+  },
+  "e3_classify": {
+    "hum": {
+      "forward": {
+        "raw": "steady_machine_tone",
+        "canonical": "steady_machine_tone",
+        "p": 1.0,
+        "confidence": 1.0
+      },
+      "reversed": {
+        "raw": "a steady tone from equipment",
+        "canonical": "steady_machine_tone",
+        "p": 1.0,
+        "confidence": 1.0
+      },
+      "travels": true,
+      "verdict": "steady_machine_tone"
+    },
+    "clicks": {
+      "forward": {
+        "raw": "impact_events",
+        "canonical": "impact_events",
+        "p": 1.0,
+        "confidence": 1.0
+      },
+      "reversed": {
+        "raw": "discrete mechanical impacts",
+        "canonical": "impact_events",
+        "p": 1.0,
+        "confidence": 1.0
+      },
+      "travels": true,
+      "verdict": "impact_events"
+    },
+    "music": {
+      "forward": {
+        "raw": "deliberate_music",
+        "canonical": "deliberate_music",
+        "p": 0.9,
+        "confidence": 0.88
+      },
+      "reversed": {
+        "raw": "intentional music",
+        "canonical": "deliberate_music",
+        "p": 0.89,
+        "confidence": 0.87
+      },
+      "travels": true,
+      "verdict": "deliberate_music"
+    },
+    "noise": {
+      "forward": {
+        "raw": "broadband_machine_noise",
+        "canonical": "broadband_machine_noise",
+        "p": 0.91,
+        "confidence": 0.89
+      },
+      "reversed": {
+        "raw": "continuous noise from a fan or air flow",
+        "canonical": "broadband_machine_noise",
+        "p": 0.91,
+        "confidence": 0.89
+      },
+      "travels": true,
+      "verdict": "broadband_machine_noise"
+    },
+    "speech": {
+      "forward": {
+        "raw": "voiced_person",
+        "canonical": "voiced_person",
+        "p": 1.0,
+        "confidence": 1.0
+      },
+      "reversed": {
+        "raw": "a human being speaking",
+        "canonical": "voiced_person",
+        "p": 1.0,
+        "confidence": 1.0
+      },
+      "travels": true,
+      "verdict": "voiced_person"
+    },
+    "fan": {
+      "forward": {
+        "raw": "broadband_machine_noise",
+        "canonical": "broadband_machine_noise",
+        "p": 1.0,
+        "confidence": 1.0
+      },
+      "reversed": {
+        "raw": "continuous noise from a fan or air flow",
+        "canonical": "broadband_machine_noise",
+        "p": 1.0,
+        "confidence": 1.0
+      },
+      "travels": true,
+      "verdict": "broadband_machine_noise"
+    },
+    "silence": {
+      "forward": {
+        "raw": "no_signal",
+        "canonical": "no_signal",
+        "p": 1.0,
+        "confidence": 1.0
+      },
+      "reversed": {
+        "raw": "no meaningful acoustic event",
+        "canonical": "no_signal",
+        "p": 1.0,
+        "confidence": 1.0
+      },
+      "travels": true,
+      "verdict": "no_signal"
+    }
+  },
+  "e3b_position": {
+    "forward": {
+      "raw": "alpha",
+      "canonical": "alpha",
+      "probabilities": {
+        "alpha": 0.53,
+        "beta": 0.2,
+        "gamma": 0.16,
+        "delta": 0.11
+      },
+      "confidence": 0.37
+    },
+    "reversed": {
+      "raw": "Use the combined approach: keep the cheap segmentation and add the cheap voice gate in front of it.",
+      "canonical": "alpha",
+      "probabilities": {
+        "Use the union approach: preserve the low-cost segmentation and put the low-cost speech gate in front.": 0.13,
+        "Take the merged design, keeping the cheap segmenter and the cheap activity gate before it.": 0.09,
+        "Adopt the combined option, retaining the inexpensive segmentation with the inexpensive voice gate ahead of it.": 0.23,
+        "Use the combined approach: keep the cheap segmentation and add the cheap voice gate in front of it.": 0.55
+      },
+      "confidence": 0.4
+    },
+    "travels": true,
+    "first_position_forward": "alpha",
+    "first_position_reversed": "Use the combined approach: keep the cheap segmentation and add the cheap voice gate in front of it."
+  },
+  "e5_confidence": {
+    "rows": [
+      {
+        "pick": "voiced_person",
+        "k": 6,
+        "p_max": 1.0,
+        "confidence": 1.0,
+        "predicted": 1.0,
+        "abs_error": 0.0
+      },
+      {
+        "pick": "steady_machine_tone",
+        "k": 6,
+        "p_max": 1.0,
+        "confidence": 1.0,
+        "predicted": 1.0,
+        "abs_error": 0.0
+      },
+      {
+        "pick": "steady_machine_tone",
+        "k": 6,
+        "p_max": 0.99,
+        "confidence": 0.99,
+        "predicted": 0.988,
+        "abs_error": 0.002
+      }
+    ],
+    "max_abs_error": 0.002
+  },
+  "e4_derive_count": {
+    "count_nonspeech": {
+      "state": "hum, keyboard clicks, music, white noise, silence, speech",
+      "free_form_score": 1.4,
+      "choice_pick": "five",
+      "choice_correct": true,
+      "probabilities": {
+        "five": 0.97,
+        "six": 0.03,
+        "two": 0.0
+      }
+    },
+    "derive_latency": {
+      "state": "74.9 microseconds per 32 ms chunk",
+      "free_form_score": 1.89,
+      "choice_pick": "fraction",
+      "choice_correct": true,
+      "probabilities": {
+        "fraction": 1.0,
+        "none": 0.0,
+        "slower": 0.0
+      }
+    },
+    "derive_margin": {
+      "state": "39.1% of one core for segmentation; 0.23% of one core for VAD",
+      "free_form_score": 1.8,
+      "choice_pick": "about_40",
+      "choice_correct": true,
+      "probabilities": {
+        "about_40": 0.98,
+        "about_100": 0.01,
+        "about_1": 0.01
+      }
+    }
+  },
+  "_meta": {
+    "model": "jev-1.14.0",
+    "wall_clock_s": 4.44
+  }
+}

@@ -1,0 +1,554 @@
+{
+  "model": "jev-1.14.0",
+  "results": {
+    "E1": {
+      "hypothesis": "confidence == (p_max - 1/K)/(1 - 1/K) exactly",
+      "n": 15,
+      "max_abs_err": 0.0050000000000000044,
+      "mean_abs_err": 0.0013333333333333522,
+      "exact_within_1e_9": false,
+      "rows": [
+        {
+          "probe": "complete",
+          "K": 2,
+          "choice": "yes",
+          "p_max": 0.85,
+          "confidence": 0.7,
+          "predicted": 0.7,
+          "abs_err": 0.0
+        },
+        {
+          "probe": "complete",
+          "K": 3,
+          "choice": "done",
+          "p_max": 0.88,
+          "confidence": 0.82,
+          "predicted": 0.82,
+          "abs_err": 0.0
+        },
+        {
+          "probe": "complete",
+          "K": 4,
+          "choice": "done",
+          "p_max": 0.96,
+          "confidence": 0.95,
+          "predicted": 0.946667,
+          "abs_err": 0.003333
+        },
+        {
+          "probe": "trailing",
+          "K": 2,
+          "choice": "no",
+          "p_max": 0.58,
+          "confidence": 0.16,
+          "predicted": 0.16,
+          "abs_err": 0.0
+        },
+        {
+          "probe": "trailing",
+          "K": 3,
+          "choice": "done",
+          "p_max": 0.63,
+          "confidence": 0.45,
+          "predicted": 0.445,
+          "abs_err": 0.005
+        },
+        {
+          "probe": "trailing",
+          "K": 4,
+          "choice": "done",
+          "p_max": 0.77,
+          "confidence": 0.69,
+          "predicted": 0.693333,
+          "abs_err": 0.003333
+        },
+        {
+          "probe": "garbage",
+          "K": 2,
+          "choice": "no",
+          "p_max": 0.92,
+          "confidence": 0.84,
+          "predicted": 0.84,
+          "abs_err": 0.0
+        },
+        {
+          "probe": "garbage",
+          "K": 3,
+          "choice": "maybe",
+          "p_max": 0.39,
+          "confidence": 0.09,
+          "predicted": 0.085,
+          "abs_err": 0.005
+        },
+        {
+          "probe": "garbage",
+          "K": 4,
+          "choice": "garbage",
+          "p_max": 0.97,
+          "confidence": 0.96,
+          "predicted": 0.96,
+          "abs_err": 0.0
+        },
+        {
+          "probe": "mid_thought",
+          "K": 2,
+          "choice": "no",
+          "p_max": 1.0,
+          "confidence": 1.0,
+          "predicted": 1.0,
+          "abs_err": 0.0
+        },
+        {
+          "probe": "mid_thought",
+          "K": 3,
+          "choice": "not_done",
+          "p_max": 1.0,
+          "confidence": 1.0,
+          "predicted": 1.0,
+          "abs_err": 0.0
+        },
+        {
+          "probe": "mid_thought",
+          "K": 4,
+          "choice": "trailing",
+          "p_max": 0.63,
+          "confidence": 0.51,
+          "predicted": 0.506667,
+          "abs_err": 0.003333
+        },
+        {
+          "probe": "hesitant",
+          "K": 2,
+          "choice": "no",
+          "p_max": 0.98,
+          "confidence": 0.96,
+          "predicted": 0.96,
+          "abs_err": 0.0
+        },
+        {
+          "probe": "hesitant",
+          "K": 3,
+          "choice": "maybe",
+          "p_max": 0.68,
+          "confidence": 0.52,
+          "predicted": 0.52,
+          "abs_err": 0.0
+        },
+        {
+          "probe": "hesitant",
+          "K": 4,
+          "choice": "done",
+          "p_max": 0.49,
+          "confidence": 0.32,
+          "predicted": 0.32,
+          "abs_err": 0.0
+        }
+      ]
+    },
+    "E2": {
+      "hypothesis": "holistic inverts on adversarial input; narrow+max recovers",
+      "inversions_observed": [
+        "garbage_argue scored BELOW complete on the holistic question",
+        "trailing-off scored BELOW complete on the holistic question"
+      ],
+      "battery_beats_holistic_on": [
+        "complete",
+        "trailing",
+        "garbage_argue",
+        "garbage",
+        "mid_thought",
+        "hesitant"
+      ],
+      "rows": {
+        "complete": {
+          "holistic": 0.6,
+          "battery": {
+            "still_formulating": 0.18,
+            "trailing_clause": 0.06,
+            "discourse_marker": 0.63,
+            "not_speech": 0.07,
+            "argues_its_own_score": 0.04
+          },
+          "max_field": 0.63,
+          "argmax_field": "discourse_marker",
+          "mean_field": 0.196
+        },
+        "trailing": {
+          "holistic": 0.3,
+          "battery": {
+            "still_formulating": 0.5,
+            "trailing_clause": 0.15,
+            "discourse_marker": 0.82,
+            "not_speech": 0.11,
+            "argues_its_own_score": 0.04
+          },
+          "max_field": 0.82,
+          "argmax_field": "discourse_marker",
+          "mean_field": 0.324
+        },
+        "garbage_argue": {
+          "holistic": 0.5,
+          "battery": {
+            "still_formulating": 0.06,
+            "trailing_clause": 0.05,
+            "discourse_marker": 0.07,
+            "not_speech": 0.85,
+            "argues_its_own_score": 0.32
+          },
+          "max_field": 0.85,
+          "argmax_field": "not_speech",
+          "mean_field": 0.27
+        },
+        "garbage": {
+          "holistic": 0.28,
+          "battery": {
+            "still_formulating": 0.43,
+            "trailing_clause": 0.46,
+            "discourse_marker": 0.12,
+            "not_speech": 0.91,
+            "argues_its_own_score": 0.05
+          },
+          "max_field": 0.91,
+          "argmax_field": "not_speech",
+          "mean_field": 0.394
+        },
+        "mid_thought": {
+          "holistic": 0.09,
+          "battery": {
+            "still_formulating": 0.79,
+            "trailing_clause": 0.92,
+            "discourse_marker": 0.48,
+            "not_speech": 0.16,
+            "argues_its_own_score": 0.04
+          },
+          "max_field": 0.92,
+          "argmax_field": "trailing_clause",
+          "mean_field": 0.478
+        },
+        "hesitant": {
+          "holistic": 0.34,
+          "battery": {
+            "still_formulating": 0.73,
+            "trailing_clause": 0.25,
+            "discourse_marker": 0.49,
+            "not_speech": 0.33,
+            "argues_its_own_score": 0.04
+          },
+          "max_field": 0.73,
+          "argmax_field": "still_formulating",
+          "mean_field": 0.368
+        }
+      }
+    },
+    "E3": {
+      "hypothesis": "pick travels with content, not position",
+      "first_option_forward": "fixed_energy_silence",
+      "first_option_reversed": "speculative_gate",
+      "forward": {
+        "choice": "semantic_waveform_model",
+        "p_winner": 0.29,
+        "confidence": 0.15
+      },
+      "reversed": {
+        "choice": "semantic_waveform_model",
+        "p_winner": 0.4,
+        "confidence": 0.28
+      },
+      "RESOLVED": true,
+      "picked_first_option_both_orders": false
+    },
+    "E4": {
+      "hypothesis": "Jev cannot count or derive",
+      "options_ms": {
+        "adaptive_energy": 180.0,
+        "fixed_energy_silence": 150.0,
+        "semantic_waveform_model": 40.0,
+        "stt_finalized_transcript": 620.0
+      },
+      "true_minimum": "semantic_waveform_model",
+      "pick": "semantic_waveform_model",
+      "correct": true,
+      "pick_p": 1.0,
+      "true_min_p": 1.0,
+      "score_band_probe": {
+        "score": 1.41,
+        "true_bands": {
+          "adaptive_energy": 1,
+          "fixed_energy_silence": 1,
+          "semantic_waveform_model": 0,
+          "stt_finalized_transcript": 2
+        }
+      }
+    },
+    "E5": {
+      "criteria": [
+        "speed_to_decision",
+        "robust_to_trailing_off",
+        "works_without_text",
+        "cpu_and_offline",
+        "simple_to_integrate",
+        "permissive_license",
+        "fails_safe"
+      ],
+      "holistic": {
+        "fixed_energy_silence": 0.24,
+        "adaptive_energy": 0.27,
+        "stt_finalized_transcript": 0.14,
+        "semantic_waveform_model": 0.34,
+        "llm_completion_marker": 0.21,
+        "speculative_gate": 0.3
+      },
+      "per_criterion": {
+        "fixed_energy_silence": [
+          0.7,
+          0.37,
+          0.5,
+          0.83,
+          0.82,
+          0.21,
+          0.64
+        ],
+        "adaptive_energy": [
+          0.45,
+          0.77,
+          0.57,
+          0.66,
+          0.54,
+          0.23,
+          0.71
+        ],
+        "stt_finalized_transcript": [
+          0.42,
+          0.64,
+          0.18,
+          0.31,
+          0.6,
+          0.16,
+          0.76
+        ],
+        "semantic_waveform_model": [
+          0.49,
+          0.48,
+          0.47,
+          0.68,
+          0.63,
+          0.31,
+          0.51
+        ],
+        "llm_completion_marker": [
+          0.29,
+          0.45,
+          0.35,
+          0.47,
+          0.58,
+          0.12,
+          0.8
+        ],
+        "speculative_gate": [
+          0.4,
+          0.64,
+          0.35,
+          0.59,
+          0.51,
+          0.19,
+          0.7
+        ]
+      },
+      "aggregated": {
+        "fixed_energy_silence": {
+          "max_crit": 0.83,
+          "mean_crit": 0.5814,
+          "weakest": "permissive_license",
+          "strongest": "cpu_and_offline"
+        },
+        "adaptive_energy": {
+          "max_crit": 0.77,
+          "mean_crit": 0.5614,
+          "weakest": "permissive_license",
+          "strongest": "robust_to_trailing_off"
+        },
+        "stt_finalized_transcript": {
+          "max_crit": 0.76,
+          "mean_crit": 0.4386,
+          "weakest": "permissive_license",
+          "strongest": "fails_safe"
+        },
+        "semantic_waveform_model": {
+          "max_crit": 0.68,
+          "mean_crit": 0.51,
+          "weakest": "permissive_license",
+          "strongest": "cpu_and_offline"
+        },
+        "llm_completion_marker": {
+          "max_crit": 0.8,
+          "mean_crit": 0.4371,
+          "weakest": "permissive_license",
+          "strongest": "fails_safe"
+        },
+        "speculative_gate": {
+          "max_crit": 0.7,
+          "mean_crit": 0.4829,
+          "weakest": "permissive_license",
+          "strongest": "fails_safe"
+        }
+      },
+      "rank_by_holistic": [
+        "semantic_waveform_model",
+        "speculative_gate",
+        "adaptive_energy",
+        "fixed_energy_silence",
+        "llm_completion_marker",
+        "stt_finalized_transcript"
+      ],
+      "rank_by_max_of_criteria": [
+        "fixed_energy_silence",
+        "llm_completion_marker",
+        "adaptive_energy",
+        "stt_finalized_transcript",
+        "speculative_gate",
+        "semantic_waveform_model"
+      ],
+      "rank_by_mean_of_criteria": [
+        "fixed_energy_silence",
+        "adaptive_energy",
+        "semantic_waveform_model",
+        "speculative_gate",
+        "stt_finalized_transcript",
+        "llm_completion_marker"
+      ],
+      "max_and_mean_agree_at_top": true,
+      "holistic_and_max_agree_at_top": false
+    },
+    "E6": {
+      "axes": [
+        "timing",
+        "prosody",
+        "realtime_safe",
+        "orthogonal"
+      ],
+      "rows": {
+        "noise_scale": {
+          "timing": 0.91,
+          "prosody": 0.85,
+          "realtime_safe": 0.38,
+          "orthogonal": 0.77
+        },
+        "noise_scale_w": {
+          "timing": 0.91,
+          "prosody": 0.84,
+          "realtime_safe": 0.38,
+          "orthogonal": 0.78
+        },
+        "sdp_ratio": {
+          "timing": 0.91,
+          "prosody": 0.86,
+          "realtime_safe": 0.39,
+          "orthogonal": 0.78
+        }
+      },
+      "distinct_control_vectors": 3,
+      "knobs_are_separate": true
+    },
+    "E7": {
+      "short": {
+        "cuts_off": 0.92,
+        "feels_slow": 0.43,
+        "reacts_to_nothing": 0.66,
+        "max": 0.92,
+        "argmax": "cuts_off"
+      },
+      "long": {
+        "cuts_off": 0.26,
+        "feels_slow": 0.42,
+        "reacts_to_nothing": 0.49,
+        "max": 0.49,
+        "argmax": "reacts_to_nothing"
+      },
+      "max_gap": 0.43,
+      "verdict_choice": "long_600ms",
+      "verdict_p": 0.85,
+      "verdict_confidence": 0.8,
+      "verdict_all_p": {
+        "short_150ms": 0.01,
+        "long_600ms": 0.85,
+        "adaptive": 0.13,
+        "none": 0.01
+      }
+    },
+    "E8": {
+      "hypothesis": "position preference appears only with indistinguishable options",
+      "n_trials": 6,
+      "picked_first_option_rate": 0.5,
+      "RESOLVED": true,
+      "verdict": "RESOLVED - pick is not purely positional",
+      "rows": [
+        {
+          "pair": "variant_A/variant_B",
+          "order": "forward",
+          "first_option": "variant_A",
+          "picks": [
+            "variant_A",
+            "variant_A",
+            "variant_A"
+          ],
+          "all_first": true
+        },
+        {
+          "pair": "variant_A/variant_B",
+          "order": "reversed",
+          "first_option": "variant_B",
+          "picks": [
+            "variant_A",
+            "variant_A",
+            "variant_A"
+          ],
+          "all_first": false
+        },
+        {
+          "pair": "variant_C/variant_D",
+          "order": "forward",
+          "first_option": "variant_C",
+          "picks": [
+            "variant_C",
+            "variant_C",
+            "variant_C"
+          ],
+          "all_first": true
+        },
+        {
+          "pair": "variant_C/variant_D",
+          "order": "reversed",
+          "first_option": "variant_D",
+          "picks": [
+            "variant_D",
+            "variant_D",
+            "variant_C"
+          ],
+          "all_first": false
+        },
+        {
+          "pair": "variant_E/variant_F",
+          "order": "forward",
+          "first_option": "variant_E",
+          "picks": [
+            "variant_E",
+            "variant_E",
+            "variant_E"
+          ],
+          "all_first": true
+        },
+        {
+          "pair": "variant_E/variant_F",
+          "order": "reversed",
+          "first_option": "variant_F",
+          "picks": [
+            "variant_E",
+            "variant_F",
+            "variant_E"
+          ],
+          "all_first": false
+        }
+      ]
+    }
+  }
+}

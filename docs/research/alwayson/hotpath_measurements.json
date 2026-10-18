@@ -1,0 +1,884 @@
+{
+  "host": {
+    "cpu": "AMD Ryzen AI 9 HX 370 w/ Radeon 890M",
+    "cores": 24,
+    "onnxruntime": "1.31.0",
+    "threads": 1,
+    "numpy": "2.5.4"
+  },
+  "sizes_bytes": {
+    "alexa_v0.1.onnx": 854246,
+    "alexa_v0.1.tflite": 855312,
+    "cur_silero_vad.onnx": 2327524,
+    "cur_silero_vad_16k_op15.onnx": 1289603,
+    "cur_silero_vad_16k_sequence.onnx": 1246165,
+    "cur_silero_vad_half.onnx": 1280395,
+    "cur_silero_vad_op18_ifless.onnx": 2845718,
+    "embedding_model.onnx": 1326578,
+    "hey_jarvis_v0.1.onnx": 1271370,
+    "hey_mycroft_v0.1.onnx": 857691,
+    "hey_rhasspy_v0.1.onnx": 204081,
+    "melspectrogram.onnx": 1087958,
+    "silero_vad.onnx": 1807522,
+    "timer_v0.1.onnx": 1742475,
+    "weather_v0.1.onnx": 1149158
+  },
+  "silero_latency": {
+    "cold_session_load_ms": 11.06,
+    "480": {
+      "chunk_samples": 480,
+      "chunk_ms": 30.0,
+      "mean_ms": 0.08737,
+      "median_ms": 0.08088,
+      "p95_ms": 0.12665,
+      "realtime_ratio": 370.9
+    },
+    "512": {
+      "chunk_samples": 512,
+      "chunk_ms": 32.0,
+      "mean_ms": 0.07976,
+      "median_ms": 0.07471,
+      "p95_ms": 0.11413,
+      "realtime_ratio": 428.3
+    },
+    "1536": {
+      "chunk_samples": 1536,
+      "chunk_ms": 96.0,
+      "mean_ms": 0.1124,
+      "median_ms": 0.1045,
+      "p95_ms": 0.15239,
+      "realtime_ratio": 918.6
+    },
+    "15360": {
+      "chunk_samples": 15360,
+      "chunk_ms": 960.0,
+      "mean_ms": 0.50379,
+      "median_ms": 0.49292,
+      "p95_ms": 0.55496,
+      "realtime_ratio": 1947.6
+    },
+    "batch_30x_512": {
+      "chunk_samples": 512,
+      "chunk_ms": 32.0,
+      "mean_ms": 0.08129,
+      "median_ms": 0.07691,
+      "p95_ms": 0.1073,
+      "realtime_ratio": 416.1
+    }
+  },
+  "silero_scores": {
+    "chunk_480": {
+      "hum_60hz": {
+        "mean": 0.0001,
+        "max": 0.0011,
+        "p90": 0.0002,
+        "frac_over_0.5": 0.0
+      },
+      "fan_noise": {
+        "mean": 0.0148,
+        "max": 0.1593,
+        "p90": 0.0276,
+        "frac_over_0.5": 0.0
+      },
+      "keyboard_clicks": {
+        "mean": 0.0164,
+        "max": 0.0717,
+        "p90": 0.0275,
+        "frac_over_0.5": 0.0
+      },
+      "music_triad": {
+        "mean": 0.0317,
+        "max": 0.0995,
+        "p90": 0.0685,
+        "frac_over_0.5": 0.0
+      },
+      "white_noise": {
+        "mean": 0.03,
+        "max": 0.2756,
+        "p90": 0.0346,
+        "frac_over_0.5": 0.0
+      },
+      "silence": {
+        "mean": 0.0244,
+        "max": 0.1422,
+        "p90": 0.033,
+        "frac_over_0.5": 0.0
+      },
+      "speech_alexa": {
+        "mean": 0.6931,
+        "max": 0.9919,
+        "p90": 0.9824,
+        "frac_over_0.5": 0.7519
+      },
+      "speech_mycroft": {
+        "mean": 0.791,
+        "max": 0.9992,
+        "p90": 0.9987,
+        "frac_over_0.5": 0.7594
+      },
+      "speech_jane": {
+        "mean": 0.6658,
+        "max": 0.9997,
+        "p90": 0.9994,
+        "frac_over_0.5": 0.6842
+      }
+    },
+    "chunk_512": {
+      "hum_60hz": {
+        "mean": 0.0001,
+        "max": 0.0011,
+        "p90": 0.0002,
+        "frac_over_0.5": 0.0
+      },
+      "fan_noise": {
+        "mean": 0.0212,
+        "max": 0.2389,
+        "p90": 0.0358,
+        "frac_over_0.5": 0.0
+      },
+      "keyboard_clicks": {
+        "mean": 0.0123,
+        "max": 0.0436,
+        "p90": 0.0196,
+        "frac_over_0.5": 0.0
+      },
+      "music_triad": {
+        "mean": 0.0241,
+        "max": 0.0812,
+        "p90": 0.0452,
+        "frac_over_0.5": 0.0
+      },
+      "white_noise": {
+        "mean": 0.033,
+        "max": 0.32,
+        "p90": 0.044,
+        "frac_over_0.5": 0.0
+      },
+      "silence": {
+        "mean": 0.0256,
+        "max": 0.1363,
+        "p90": 0.0408,
+        "frac_over_0.5": 0.0
+      },
+      "speech_alexa": {
+        "mean": 0.799,
+        "max": 0.9995,
+        "p90": 0.999,
+        "frac_over_0.5": 0.792
+      },
+      "speech_mycroft": {
+        "mean": 0.8032,
+        "max": 0.9998,
+        "p90": 0.9997,
+        "frac_over_0.5": 0.792
+      },
+      "speech_jane": {
+        "mean": 0.6966,
+        "max": 0.9998,
+        "p90": 0.9996,
+        "frac_over_0.5": 0.704
+      }
+    }
+  },
+  "silero_versions": {
+    "oww_vendored_v4_ish": {
+      "file": "silero_vad.onnx",
+      "bytes": 1807522,
+      "inputs": {
+        "input": [
+          [
+            "batch",
+            "sequence"
+          ],
+          "tensor(float)"
+        ],
+        "sr": [
+          [],
+          "tensor(int64)"
+        ],
+        "h": [
+          [
+            2,
+            "batch",
+            64
+          ],
+          "tensor(float)"
+        ],
+        "c": [
+          [
+            2,
+            "batch",
+            64
+          ],
+          "tensor(float)"
+        ]
+      },
+      "has_sr_input": true
+    },
+    "current_v5_opset16": {
+      "file": "cur_silero_vad.onnx",
+      "bytes": 2327524,
+      "inputs": {
+        "input": [
+          [
+            null,
+            null
+          ],
+          "tensor(float)"
+        ],
+        "state": [
+          [
+            2,
+            null,
+            128
+          ],
+          "tensor(float)"
+        ],
+        "sr": [
+          [],
+          "tensor(int64)"
+        ]
+      },
+      "has_sr_input": true
+    },
+    "current_v5_opset15_16k": {
+      "file": "cur_silero_vad_16k_op15.onnx",
+      "bytes": 1289603,
+      "inputs": {
+        "input": [
+          [
+            "batch",
+            "sequence"
+          ],
+          "tensor(float)"
+        ],
+        "state": [
+          [
+            2,
+            "batch",
+            128
+          ],
+          "tensor(float)"
+        ],
+        "sr": [
+          [],
+          "tensor(int64)"
+        ]
+      },
+      "has_sr_input": true
+    }
+  },
+  "silero_v5_scores": {
+    "current_v5_opset16": {
+      "hum_60hz": {
+        "mean": 0.0036,
+        "max": 0.0374,
+        "p95": 0.0125,
+        "frac_over_0.5": 0.0
+      },
+      "fan_noise": {
+        "mean": 0.0063,
+        "max": 0.0306,
+        "p95": 0.0201,
+        "frac_over_0.5": 0.0
+      },
+      "keyboard_clicks": {
+        "mean": 0.0054,
+        "max": 0.0334,
+        "p95": 0.0113,
+        "frac_over_0.5": 0.0
+      },
+      "music_triad": {
+        "mean": 0.0052,
+        "max": 0.1736,
+        "p95": 0.0092,
+        "frac_over_0.5": 0.0
+      },
+      "white_noise": {
+        "mean": 0.0081,
+        "max": 0.0289,
+        "p95": 0.0168,
+        "frac_over_0.5": 0.0
+      },
+      "silence": {
+        "mean": 0.0067,
+        "max": 0.023,
+        "p95": 0.0142,
+        "frac_over_0.5": 0.0
+      },
+      "speech_alexa": {
+        "mean": 0.8819,
+        "max": 1.0,
+        "p95": 1.0,
+        "frac_over_0.5": 0.88
+      },
+      "speech_mycroft": {
+        "mean": 0.7642,
+        "max": 1.0,
+        "p95": 1.0,
+        "frac_over_0.5": 0.76
+      },
+      "speech_jane": {
+        "mean": 0.753,
+        "max": 1.0,
+        "p95": 1.0,
+        "frac_over_0.5": 0.752
+      }
+    },
+    "current_v5_opset15_16k": {
+      "hum_60hz": {
+        "mean": 0.0036,
+        "max": 0.0374,
+        "p95": 0.0125,
+        "frac_over_0.5": 0.0
+      },
+      "fan_noise": {
+        "mean": 0.0063,
+        "max": 0.0306,
+        "p95": 0.0201,
+        "frac_over_0.5": 0.0
+      },
+      "keyboard_clicks": {
+        "mean": 0.0054,
+        "max": 0.0334,
+        "p95": 0.0113,
+        "frac_over_0.5": 0.0
+      },
+      "music_triad": {
+        "mean": 0.0052,
+        "max": 0.1736,
+        "p95": 0.0092,
+        "frac_over_0.5": 0.0
+      },
+      "white_noise": {
+        "mean": 0.0081,
+        "max": 0.0289,
+        "p95": 0.0168,
+        "frac_over_0.5": 0.0
+      },
+      "silence": {
+        "mean": 0.0067,
+        "max": 0.023,
+        "p95": 0.0142,
+        "frac_over_0.5": 0.0
+      },
+      "speech_alexa": {
+        "mean": 0.8819,
+        "max": 1.0,
+        "p95": 1.0,
+        "frac_over_0.5": 0.88
+      },
+      "speech_mycroft": {
+        "mean": 0.7642,
+        "max": 1.0,
+        "p95": 1.0,
+        "frac_over_0.5": 0.76
+      },
+      "speech_jane": {
+        "mean": 0.753,
+        "max": 1.0,
+        "p95": 1.0,
+        "frac_over_0.5": 0.752
+      }
+    }
+  },
+  "silero_v5_latency": {
+    "cur_silero_vad.onnx": {
+      "512": {
+        "chunk_samples": 512,
+        "chunk_ms": 32.0,
+        "median_ms": 0.06426,
+        "realtime_ratio": 498.0
+      }
+    },
+    "cur_silero_vad_16k_op15.onnx": {
+      "512": {
+        "chunk_samples": 512,
+        "chunk_ms": 32.0,
+        "median_ms": 0.06286,
+        "realtime_ratio": 509.1
+      }
+    }
+  },
+  "onnx_param_counts": {
+    "alexa_v0.1.onnx": {
+      "total_params": 213377,
+      "float32_params": 213377,
+      "n_initializers": 6,
+      "opset": 13,
+      "n_functions": 0,
+      "ops_used": [
+        "Flatten",
+        "Gemm",
+        "Relu",
+        "Sigmoid"
+      ]
+    },
+    "cur_silero_vad.onnx": {
+      "total_params": 0,
+      "float32_params": 0,
+      "n_initializers": 0,
+      "opset": 16,
+      "n_functions": 0,
+      "ops_used": [
+        "Constant",
+        "Equal",
+        "Identity",
+        "If"
+      ]
+    },
+    "cur_silero_vad_16k_op15.onnx": {
+      "total_params": 309633,
+      "float32_params": 309633,
+      "n_initializers": 15,
+      "opset": 15,
+      "n_functions": 0,
+      "ops_used": [
+        "Add",
+        "Cast",
+        "Concat",
+        "Constant",
+        "ConstantOfShape",
+        "Conv",
+        "Equal",
+        "Gather",
+        "If",
+        "Mul",
+        "Pad",
+        "Pow",
+        "ReduceMean",
+        "Relu",
+        "Reshape",
+        "Shape",
+        "Sigmoid",
+        "Slice",
+        "Sqrt",
+        "Squeeze",
+        "Sub",
+        "Transpose",
+        "Unsqueeze"
+      ]
+    },
+    "cur_silero_vad_16k_sequence.onnx": {
+      "total_params": 309633,
+      "float32_params": 309633,
+      "n_initializers": 14,
+      "opset": 16,
+      "n_functions": 0,
+      "ops_used": [
+        "Add",
+        "Cast",
+        "Concat",
+        "Constant",
+        "ConstantOfShape",
+        "Conv",
+        "LSTM",
+        "Pad",
+        "Pow",
+        "Relu",
+        "Reshape",
+        "Sigmoid",
+        "Slice",
+        "Sqrt",
+        "Squeeze",
+        "Transpose",
+        "Unsqueeze"
+      ]
+    },
+    "cur_silero_vad_half.onnx": {
+      "total_params": 309633,
+      "float32_params": 309633,
+      "n_initializers": 15,
+      "opset": 16,
+      "n_functions": 0,
+      "ops_used": [
+        "Add",
+        "Cast",
+        "Concat",
+        "Constant",
+        "ConstantOfShape",
+        "Conv",
+        "Equal",
+        "Gather",
+        "If",
+        "Pad",
+        "Pow",
+        "ReduceMean",
+        "Relu",
+        "Reshape",
+        "Shape",
+        "Sigmoid",
+        "Slice",
+        "Sqrt",
+        "Squeeze",
+        "Transpose",
+        "Unsqueeze"
+      ]
+    },
+    "cur_silero_vad_op18_ifless.onnx": {
+      "total_params": 545689,
+      "float32_params": 545671,
+      "n_initializers": 45,
+      "opset": 18,
+      "n_functions": 0,
+      "ops_used": [
+        "Equal",
+        "Gather",
+        "If",
+        "Reshape"
+      ]
+    },
+    "embedding_model.onnx": {
+      "total_params": 328137,
+      "float32_params": 328129,
+      "n_initializers": 42,
+      "opset": 13,
+      "n_functions": 0,
+      "ops_used": [
+        "Conv",
+        "LeakyRelu",
+        "Max",
+        "MaxPool",
+        "Reshape"
+      ]
+    },
+    "hey_jarvis_v0.1.onnx": {
+      "total_params": 316738,
+      "float32_params": 316738,
+      "n_initializers": 20,
+      "opset": 13,
+      "n_functions": 0,
+      "ops_used": [
+        "Add",
+        "Cast",
+        "Constant",
+        "Div",
+        "Flatten",
+        "Gemm",
+        "GreaterOrEqual",
+        "If",
+        "Mul",
+        "Pow",
+        "ReduceMean",
+        "Relu",
+        "Sigmoid",
+        "Sqrt",
+        "Sub"
+      ]
+    },
+    "hey_mycroft_v0.1.onnx": {
+      "total_params": 213889,
+      "float32_params": 213889,
+      "n_initializers": 10,
+      "opset": 13,
+      "n_functions": 0,
+      "ops_used": [
+        "Add",
+        "Constant",
+        "Div",
+        "Flatten",
+        "Gemm",
+        "Mul",
+        "Pow",
+        "ReduceMean",
+        "Relu",
+        "Sigmoid",
+        "Sqrt",
+        "Sub"
+      ]
+    },
+    "hey_rhasspy_v0.1.onnx": {
+      "total_params": 50401,
+      "float32_params": 50401,
+      "n_initializers": 10,
+      "opset": 14,
+      "n_functions": 0,
+      "ops_used": [
+        "Add",
+        "Constant",
+        "Div",
+        "Flatten",
+        "Gemm",
+        "Mul",
+        "Pow",
+        "ReduceMean",
+        "Relu",
+        "Sigmoid",
+        "Sqrt",
+        "Sub"
+      ]
+    },
+    "melspectrogram.onnx": {
+      "total_params": 271395,
+      "float32_params": 271395,
+      "n_initializers": 6,
+      "opset": 13,
+      "n_functions": 0,
+      "ops_used": [
+        "Add",
+        "Cast",
+        "Clip",
+        "Constant",
+        "Conv",
+        "Div",
+        "Log",
+        "MatMul",
+        "Mul",
+        "Pow",
+        "ReduceMax",
+        "Sub",
+        "Transpose",
+        "Unsqueeze"
+      ]
+    },
+    "silero_vad.onnx": {
+      "total_params": 445117,
+      "float32_params": 444944,
+      "n_initializers": 259,
+      "opset": 16,
+      "n_functions": 0,
+      "ops_used": [
+        "Equal",
+        "If"
+      ]
+    },
+    "timer_v0.1.onnx": {
+      "total_params": 435335,
+      "float32_params": 435335,
+      "n_initializers": 6,
+      "opset": 13,
+      "n_functions": 0,
+      "ops_used": [
+        "Flatten",
+        "Gemm",
+        "Relu",
+        "Softmax"
+      ]
+    },
+    "weather_v0.1.onnx": {
+      "total_params": 287105,
+      "float32_params": 287105,
+      "n_initializers": 6,
+      "opset": 13,
+      "n_functions": 0,
+      "ops_used": [
+        "Flatten",
+        "Gemm",
+        "Relu",
+        "Sigmoid"
+      ]
+    }
+  },
+  "openwakeword_latency": {
+    "n_heads": 6,
+    "heads": [
+      "alexa_v0.1.onnx",
+      "hey_jarvis_v0.1.onnx",
+      "hey_mycroft_v0.1.onnx",
+      "hey_rhasspy_v0.1.onnx",
+      "timer_v0.1.onnx",
+      "weather_v0.1.onnx"
+    ],
+    "melspec_ms": 0.0641,
+    "embedding_ms": 0.8494,
+    "shared_front_ms": 0.9199,
+    "one_head_ms": 0.0103,
+    "stack_1_head_ms": 1.1269,
+    "stack_all_heads_ms": 1.6281,
+    "budget_80ms_ms": 80.0
+  },
+  "signals_seconds": {
+    "hum_60hz": 4.0,
+    "fan_noise": 4.0,
+    "keyboard_clicks": 4.0,
+    "music_triad": 4.0,
+    "white_noise": 4.0,
+    "silence": 4.0,
+    "speech_alexa": 4.0,
+    "speech_mycroft": 4.0,
+    "speech_jane": 4.0
+  },
+  "watcher": {
+    "hum_60hz": {
+      "n_events": 3,
+      "n_onset": 1,
+      "n_utterance": 2,
+      "n_pause": 0,
+      "onsets_per_min": 15.0,
+      "speech_seconds": 3.55,
+      "voiced_ratio": [
+        0.0,
+        0.0
+      ],
+      "open": [
+        true,
+        true
+      ],
+      "push_total_ms": 1276.5,
+      "push_us_per_100ms": 31912.58,
+      "realtime_ratio": 3.1
+    },
+    "fan_noise": {
+      "n_events": 3,
+      "n_onset": 1,
+      "n_utterance": 2,
+      "n_pause": 0,
+      "onsets_per_min": 15.0,
+      "speech_seconds": 3.55,
+      "voiced_ratio": [
+        0.0,
+        0.0
+      ],
+      "open": [
+        true,
+        true
+      ],
+      "push_total_ms": 1643.79,
+      "push_us_per_100ms": 41094.79,
+      "realtime_ratio": 2.4
+    },
+    "keyboard_clicks": {
+      "n_events": 3,
+      "n_onset": 1,
+      "n_utterance": 2,
+      "n_pause": 0,
+      "onsets_per_min": 15.0,
+      "speech_seconds": 3.55,
+      "voiced_ratio": [
+        0.0,
+        0.0
+      ],
+      "open": [
+        true,
+        true
+      ],
+      "push_total_ms": 1935.49,
+      "push_us_per_100ms": 48387.24,
+      "realtime_ratio": 2.1
+    },
+    "music_triad": {
+      "n_events": 3,
+      "n_onset": 1,
+      "n_utterance": 2,
+      "n_pause": 0,
+      "onsets_per_min": 15.0,
+      "speech_seconds": 3.55,
+      "voiced_ratio": [
+        1.0,
+        1.0
+      ],
+      "open": [
+        true,
+        true
+      ],
+      "push_total_ms": 1355.08,
+      "push_us_per_100ms": 33877.06,
+      "realtime_ratio": 3.0
+    },
+    "white_noise": {
+      "n_events": 3,
+      "n_onset": 1,
+      "n_utterance": 2,
+      "n_pause": 0,
+      "onsets_per_min": 15.0,
+      "speech_seconds": 3.55,
+      "voiced_ratio": [
+        0.0,
+        0.0
+      ],
+      "open": [
+        true,
+        true
+      ],
+      "push_total_ms": 1572.28,
+      "push_us_per_100ms": 39307.04,
+      "realtime_ratio": 2.5
+    },
+    "silence": {
+      "n_events": 3,
+      "n_onset": 1,
+      "n_utterance": 2,
+      "n_pause": 0,
+      "onsets_per_min": 15.0,
+      "speech_seconds": 3.55,
+      "voiced_ratio": [
+        0.0,
+        0.0
+      ],
+      "open": [
+        true,
+        true
+      ],
+      "push_total_ms": 1606.12,
+      "push_us_per_100ms": 40153.06,
+      "realtime_ratio": 2.5
+    },
+    "speech_alexa": {
+      "n_events": 6,
+      "n_onset": 2,
+      "n_utterance": 2,
+      "n_pause": 2,
+      "onsets_per_min": 30.0,
+      "speech_seconds": 3.46,
+      "voiced_ratio": [
+        0.3892,
+        0.3824
+      ],
+      "open": [
+        true,
+        true
+      ],
+      "push_total_ms": 1444.97,
+      "push_us_per_100ms": 36124.33,
+      "realtime_ratio": 2.8
+    },
+    "speech_mycroft": {
+      "n_events": 20,
+      "n_onset": 8,
+      "n_utterance": 8,
+      "n_pause": 4,
+      "onsets_per_min": 120.0,
+      "speech_seconds": 2.65,
+      "voiced_ratio": [
+        0.661,
+        0.0,
+        0.661,
+        0.0,
+        0.6207,
+        0.0
+      ],
+      "open": [
+        false,
+        false,
+        false,
+        false,
+        false,
+        false
+      ],
+      "push_total_ms": 986.64,
+      "push_us_per_100ms": 24665.91,
+      "realtime_ratio": 4.1
+    },
+    "speech_jane": {
+      "n_events": 10,
+      "n_onset": 3,
+      "n_utterance": 3,
+      "n_pause": 4,
+      "onsets_per_min": 45.0,
+      "speech_seconds": 2.3,
+      "voiced_ratio": [
+        0.9437,
+        0.8816,
+        0.9296
+      ],
+      "open": [
+        false,
+        false,
+        false
+      ],
+      "push_total_ms": 877.8,
+      "push_us_per_100ms": 21945.1,
+      "realtime_ratio": 4.6
+    }
+  }
+}

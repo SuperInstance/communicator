@@ -9,3 +9,4 @@ __pycache__/
 examples/realaudio/*.mp3
 examples/realaudio/*.wav
 experiments/_matrix/
+docs/research/**/__pycache__/
