@@ -317,7 +317,11 @@ def read_tracks(text: str, *, model: str = DEFAULT_MODEL,
         # exactly the ones where a controller wants to hold back.
         p = probs.get(chosen)
         out.append(TrackReading(track, _scale(p) if p is not None else 0,
-                                detail={"choice": chosen, "probabilities": probs},
+                                detail={"choice": chosen, "probabilities": probs,
+                                        # spread-confidence is NOT the CC, but
+                                        # it is the question-health signal --
+                                        # stored as provenance, never driven.
+                                        "confidence": getattr(a, "confidence", None)},
                                 model=resolved))
 
     if cache is not None and all(r.ok for r in out):

@@ -197,3 +197,87 @@ credential.
 - **Nothing about real speech.** Integration tests type text; transcription
   error is entirely out of scope.
 - **Nothing about latency under load.** Elapsed time is printed, not asserted.
+
+---
+
+## Phase 2.5 — calibration measured
+
+The gap Phase 2 declared: the CC was sourced correctly, but neither it nor
+`confidence` is a *calibrated* probability, and an agent that may act
+autonomously needs the real number.
+
+**58 probes, 48 labelled, 10 ambiguous and excluded.** Model `jev-1.14.0`,
+three passes.
+
+| | ECE |
+|---|---|
+| equal-width bins | **0.0565 ± 0.0027** |
+| equal-mass bins | 0.0493 |
+| **ambiguous subset** (n=10) | **0.1532** |
+
+Base rate 0.250, mean stated confidence 0.250.
+
+### Three things this says, in order of importance
+
+**1. The INTENTION track is well calibrated overall.** 0.057 is a usable
+number for a threshold. For comparison, the Jev gate measured ECE **0.36** on
+the same account earlier today — that model was badly miscalibrated, this one
+is not.
+
+**2. It is badly calibrated exactly where the humans are unsure.** The
+ambiguous subset sits at **0.153**, nearly three times the headline. Those ten
+probes are things like "do it", "asap please", "fine" — utterances where a
+careful person cannot settle the label. The model is confident where nothing is
+certain.
+
+That has a direct architectural consequence, and it happens to match what
+`gitpp-gate` already concluded from the other direction: **the middle
+confidence band should route to `ask`, not to act.** Acting on a number the
+model gives in the band where it is demonstrably unreliable is exactly the
+failure an autonomous agent cannot recover from.
+
+**3. The repeat-to-repeat spread is tiny — ±0.0027.** This surprised me. Phase 2
+measured AUC varying 0.913–0.940 across five identical runs, so I expected ECE
+to be noisy too. It is not, because ECE pools 192 probability–outcome pairs per
+pass rather than ranking 40 items. Pooling averages the sampler out. Worth
+knowing: the noise floor is task-dependent, and it was measured rather than
+assumed.
+
+### Worst bin
+
+    bin 0.80-0.90   stated 0.846   observed 0.500   gap -0.346   (n=8)
+
+Overconfident in the top band — but **n=8 is not significant** and is reported
+because hiding it would be worse than showing a weak bin.
+
+### A blind spot in the metric itself
+
+A test I wrote asserted ECE would catch a model that is exactly backwards. It
+does not. Two bands, errors cancelling:
+
+    bin 0.2-0.3:  accuracy 0.10, states 0.2
+    bin 0.9-1.0:  accuracy 0.90, states 0.9
+    ECE = 0.05
+
+So **ECE is a statement about the distribution of errors, not about any of
+them.** A good ECE is necessary for trusting a threshold and is not sufficient.
+This system also needs an accuracy or ranking check alongside it, and until
+that exists the calibration number must not be quoted as if it stood alone.
+
+### What this does not prove
+
+- **The labels are one author's judgements, not Casey's.** This measures
+  agreement with a reasonable annotator, not truth. A biased label set gives a
+  perfectly calibrated model against the bias.
+- 48 labelled probes, 12 per level. Enough to see a 0.36 or a 0.15; not enough
+  to claim 0.057 to three decimals.
+- Every probe is typed text. Nothing here says anything about speech.
+- **Per-utterance reliability is unmeasured.** ECE is aggregate. An agent
+  deciding on one utterance needs to know whether *this* number is trustworthy,
+  and ECE cannot answer that.
+
+### Not done, deliberately
+
+No Platt scaling. `decision-ledger` measured it making an already-calibrated
+model worse (ECE 0.033 → 0.053), and "apply a correction" is the reflex this
+repo keeps having to unlearn.
