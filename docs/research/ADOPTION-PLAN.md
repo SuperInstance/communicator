@@ -96,6 +96,54 @@ pipecat's numbers are the reference: **~200 ms to trigger** a VAD stop, **3 s to
 give up** and treat it as end-of-turn. Our single 150 ms threshold is a fine
 trigger and a **20×-too-eager decision**.
 
+> ### RETRACTED, PARTLY: do NOT raise `MIN_SILENCE_S` to 200 ms.
+>
+> Measured on the seven-cell real corpus (`examples/realaudio/corpus/`), the
+> shortest pause a human voice actually takes is **110 ms**, in dramatic
+> speech. Real inter-utterance gaps by cell:
+>
+> | cell | gaps | shortest | p05 | median |
+> |---|---|---|---|---|
+> | narration | 45 | 0.170 | 0.210 | 0.640 |
+> | poetry | 7 | 0.150 | 0.150 | 0.510 |
+> | essay | 33 | 0.150 | 0.160 | 0.760 |
+> | dialogue | 35 | 0.130 | 0.160 | 0.450 |
+> | shakespeare | 62 | **0.110** | 0.160 | 0.380 |
+> | children | 78 | **0.110** | 0.160 | 0.300 |
+> | oration | 2 | 0.310 | 0.310 | 0.380 |
+>
+> Raising the trigger from 150 ms to 200 ms costs:
+>
+> | cell | pauses @0.150 | @0.200 | lost |
+> |---|---|---|---|
+> | narration | 45 | 43 | 2 (4.4%) |
+> | poetry | 7 | 6 | 1 (14.3%) |
+> | essay | 33 | 24 | 9 (27.3%) |
+> | dialogue | 34 | 30 | 4 (11.8%) |
+> | shakespeare | 61 | 46 | **15 (24.6%)** |
+> | children | 77 | 62 | **15 (19.5%)** |
+> | oration | 2 | 2 | 0 |
+> | **TOTAL** | **259** | **213** | **46 (17.8%)** |
+>
+> **17.8% of all real pauses disappear.** A pause is not decoration: it is the
+> event the §4.1 baseline table counts and every TEMPO calculation divides by,
+> so this is data loss presented as a tuning change. And it lands worst on
+> exactly the two cells that are hardest to replace — dramatic and children's
+> speech, where the pause structure *is* the prosody.
+>
+> The mistake was treating a **trigger** constant as a **decision** constant.
+> 150 ms is measured to sit *below* the shortest real pause in every cell, so
+> it is correctly placed for deciding "the voice stopped" and is 20× too eager
+> only for deciding "the turn is over". Those are different questions and the
+> fix belongs to the second one:
+>
+> * **Keep `MIN_SILENCE_S = 0.150`.** It is measured to be right.
+> * Add the 3 s end-of-turn decision as a **separate** stage that consumes
+>   pause events and emits turn boundaries — it must never filter them.
+>
+> The 150 ms/3 s split below survives; the "raise the trigger to 200 ms"
+> half of it does not. See `tests/test_pause_threshold.py`.
+
 The shape worth adopting is three-stage, and it is cheap:
 
 1. VAD gate (ours already, plus silero).
@@ -221,16 +269,24 @@ encforces.
 
 ## 7. Ranked next actions
 
-| # | action | cost | why now |
+Status as of the execution pass. Three are done and pushed; two are falsified
+by measurement and struck rather than deleted.
+
+| # | action | cost | status |
 |---|---|---|---|
-| 1 | **silero-vad ONNX gate in front of the watcher** | ~1 day | removes a total failure (hum) and 39% of a core |
-| 2 | **Correct `src/watcher.py`'s docstring** | 5 min | it claims microseconds; it is 39% of a core |
-| 3 | **Split our 150 ms into a 200 ms trigger and a 3 s decision** | 2 h | matches measured practice; removes 20× over-eagerness |
-| 4 | **Locally adaptive median threshold** (reimplement `peakpicker.c:110-117`) | 3 h | file-global thresholds cannot survive a night |
-| 5 | **Test the 3 s decision against a waveform-only classifier** (smart-turn v3.2, BSD-2, bundled) | 2 days | the measured 63–79 ms and the silence finding |
+| 1 | **silero-vad ONNX gate in front of the watcher** | ~1 day | **DONE** `8eb05f6` — 31.8% → 2.4% of a core on hum, pitch data bit-identical on 30 s of real speech |
+| 2 | **Correct `src/watcher.py`'s docstring** | 5 min | **DONE** `8eb05f6` |
+| 3 | ~~**Split 150 ms into a 200 ms trigger and a 3 s decision**~~ | 2 h | **PARTLY FALSIFIED** — the 200 ms trigger half costs 17.8% of real pauses. Keep 150 ms; add 3 s as a separate stage. See §3. |
+| 4 | **Locally adaptive threshold** (reimplement `peakpicker.c:110-117`) | 3 h | **DONE, and the plan was wrong about it** `77dd5c2` — a *median* threshold discards 94% of real speech; a 20th-percentile one beats the global bar on every axis. §3. |
+| 5 | **Test the 3 s decision against a waveform-only classifier** (smart-turn v3.2, BSD-2, bundled) | 2 days | next — the measured 63–79 ms and the silence finding |
 | 6 | Speculation gate (OPEN/HOLDING/DROPPING) | 3 days | what makes 5 defensible |
 | 7 | FunASR 2pass for the cold path | 1 week | only after the hot path is cheap |
 | 8 | Lock-free SPSC ring + fixed-capacity event heap | 1 week | reimplement; GPL/AGPL means reimplement |
+
+Two of eight recommendations in this document did not survive contact with
+real audio. Both are marked in place. That is the expected rate for a plan
+written from other people's numbers, and it is why the corpus is the thing to
+build before the plan, not after.
 
 ## 8. What would most change our minds
 
