@@ -864,3 +864,50 @@ decisions get re-made against better data.
 
 Next is Phase 4, the watcher, chosen because it is the only component with no
 measured number attached and the only one everything downstream consumes.
+
+## Design v3 §11-14 — soft spots, teacher supervision, latent momentum
+
+Casey described the system's actual job with a cashier: a skilled job reduced
+to basic math and robotics plus the emotional intelligence an LLM in a job
+could do and a decision tree struggles with. Three consequences, written into
+the design.
+
+**§11 The system's job is finding soft spots.** Not "replace the job with a
+model" — decompose it into the decidable part and the undecidable part and
+put a model only where the logic is insufficient. The placement has to be
+evidence, so the instrument is divergence between the deterministic and model
+components on the same inputs: agree always → the rule wins and the model is
+deleted; diverge persistently on a cluster → that cluster names a soft spot;
+diverge randomly → noise, don't spend a model. **Most rules should win**, and
+that conclusion is the valuable output.
+
+**§14 ...which creates a new attack surface.** Self-modifying logic means an
+adversary who can influence inputs can try to *induce* a soft spot — pushing a
+safety-relevant action off the deterministic path onto the model path, where
+the grant law is weaker. That is not social engineering of the user, it is
+social engineering of the system's own architecture. Constraints: declared
+soft spots are append-only and witnessed, may never be un-declared, must be
+logged with their evidence, and may never rest on a single observation — that
+threshold is a security parameter, not a tuning knob.
+
+**§12 Large Jev calls calibrating small ones** is supervision by a stronger
+teacher, and the plumbing already exists: `read_tracks(client=)` is the swap
+point, `verdict_cache` keys on the question fingerprint so a small model
+cannot inherit another's numbers, `calib.py` measures the quantity a teacher
+can improve. The property worth keeping: **the teacher is only consulted off
+the latency path**, so nothing in a turn waits on the cloud.
+
+**§13 Tiny-JEPA for momentum**, filling the gap the measurements left: the
+continuous layer is acoustic only, because nothing that costs a second may run
+continuously. A latent model predicts the next embedding rather than the next
+token, needs no calibrated probability, and is small enough to be always-on.
+
+Ground state verified this session, not recalled: the org's three JEPA repos
+are empty or null — `project-JEPA` has **0 source files in 43 blobs**,
+`plato-audio-jepa` is a 16-bin DFT with serde and uuid, `fleet-jepa-midi` has
+a 0.0146 same/cross-room gap and its own README saying "You Are Not Actually
+Running JEPA". Same pattern as forge-soniqo and persona-engine: the idea is
+consistently right, the implementations are consistently null. So a correct
+tiny JEPA here is new work, not a port — and the baseline half of §4 does not
+need a neural net and should be built first precisely because it is
+arithmetic.

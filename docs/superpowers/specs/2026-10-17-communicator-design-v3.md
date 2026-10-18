@@ -301,6 +301,7 @@ Two caveats that must travel with this table:
 | **4** | **the watcher** — continuous, no model, event stream | **next** |
 | **5** | **the tables** — baselines then motifs, with deviation | after 4 |
 | 6 | shorter paths — propose only, never enable | after 5, gated on §6 |
+| 6b | soft-spot instrument (§11) + adversarial coverage | alongside 6 |
 | 7 | delegation, tmux escalation — untested since v1 | last |
 
 Phase 4 is next because it is the only component with no measured number
@@ -310,6 +311,14 @@ attached and the only one everything else consumes.
 
 ## 9. Honest limits
 
+* **The latent layer does not exist.** §13 is an argument for a tiny JEPA
+  over the score history, and the org's three JEPA repositories were measured
+  this session and are empty or null (§13). Building one is new work with no
+  working prior art to port.
+* **Soft-spot detection has never been run.** §11 specifies the divergence
+  instrument; it has not been implemented, and its false-positive rate is
+  unknown. An instrument that flags everything is as useless as the decision
+  tree it was meant to replace.
 * **No real speech has been tested.** Every acoustic test runs on synthetic
   tones. Octave errors are the classic failure of a YIN-style estimator on
   human voice and **none of this repo can currently catch one**. The measured
@@ -359,3 +368,157 @@ found wrong:
   raised `TypeError` on first run. Both had tests written after, never before.
 * ~~"One tick is one millisecond."~~ **False in the file** until the clock
   event was written unconditionally.
+---
+
+## 11. The system's actual job: finding soft spots
+
+> a cashier's job reduced to basic math and robotics, plus the emotional
+> intelligence of how to be with different people as they banter, or don't
+> want to take something, or seem touchy that day — things an LLM in a job
+> could do but a decision tree struggles with
+
+This names the operation precisely, and it is not "replace the job with a
+model". It is **decompose a skilled job into its decidable part and its
+undecidable part, and put a model only where the logic is insufficient.**
+
+So the interesting capability is meta: the system finds where *its own* logic
+needs softening, and how the logic of the larger situation interconnects. A
+decision tree fails on "seem touchy that day" not because the tree is badly
+written but because that input does not localise — the answer depends on the
+whole situation, and the tree has no state. That is what the tables (§4) are
+for.
+
+### Soft spots are measurable, not a judgement call
+
+"Place a model here" is only credible if the placement is evidence. The
+instrument is **divergence between the deterministic component and the model
+component on the same inputs**:
+
+| observation | meaning |
+|---|---|
+| both agree always | the rule is sufficient; **delete the model** |
+| they diverge persistently on a cluster | **soft spot**, and the cluster names it |
+| they diverge randomly | noise, not a soft spot — do not spend a model here |
+
+The middle row is the whole idea, and it is the same discipline as everything
+else in this repo: an instrument that cannot fail proves nothing, so the
+divergence detector must be shown failing on a rule that *is* sufficient.
+A soft-spot map that flags every boundary would be as useless as the decision
+tree was.
+
+The benefit is symmetric and worth stating: **most rules should win.** A
+system that discovers its soft spots will conclude it needs very few models,
+and that conclusion is the valuable output.
+
+---
+
+## 12. Large calls calibrating small ones
+
+> larger JEV calls can calibrate smaller models stuck into answers for a
+> specific component
+
+This is supervision by a stronger teacher, and most of the plumbing already
+exists in this repo:
+
+* `judged.read_tracks(client=...)` — a client is already the swap point, so a
+  small local model and the cloud model are the same call site. `tev1` is
+  wired in with `judged.py` unmodified.
+* `verdict_cache` keys on a question fingerprint, so a small model given a
+  *different* question set cannot silently inherit another's numbers.
+* `calib.py` measures ECE against ground truth built by construction, which is
+  the quantity a teacher can actually improve.
+* The `question_fingerprint` makes the teacher/student question set a
+  versioned input — retrain on a reword and the old verdicts are invalid by
+  construction.
+
+The shape of the loop:
+
+    idle capacity ──► JEV labels / checks a component's answers
+                          │
+                          ├─ disagree ──► the small model's question is
+                          │               soft, or the small model is
+                          │               wrong. Either way: not shipped.
+                          └─ agree   ──► the small model may stand alone
+
+This is the "local system self-trains under large-system supervision during
+idle capacity" idea, and it has a hard property worth keeping: **the teacher
+is only consulted off the latency path.** Nothing in a turn waits on a cloud
+call, which is what lets the small model be the thing that actually runs.
+
+Measured, so the sizing is not guesswork: `tev1` answers one question in
+0.267 s and four gates in 0.967 s locally; JEV answers eight questions in
+0.13 s in the cloud. A component that needs one yes/no per event is a
+candidate for the small model. A component that needs four is a candidate for
+the teacher.
+
+---
+
+## 13. Momentum: tiny models in latent space
+
+> tiny-JEPA models can help find the momentum over more and more data
+
+This fits a specific gap that the measurements left open. Today the
+continuous layer (§1 step 1) is **acoustic only** — pitch, energy, tempo,
+inflection, silence. There is no continuous *semantic* layer, because nothing
+that runs continuously may cost a second. A latent predictive model is the
+shape that fits:
+
+* it predicts the **next embedding**, not the next token, so "momentum" is its
+  native output rather than something decoded back out of text;
+* it needs no calibrated probability, which side-steps the entire calibration
+  problem that made the judged tracks expensive;
+* it is small enough to run always-on, which the judged layer demonstrably
+  cannot be.
+
+Deviation detection is then trivially available: *is this embedding where I
+expect it?* — which is §4.1's deviation number expressed in a space where
+"where I expect it" is meaningful rather than a hand-picked percentile.
+
+### Ground state, verified: this org's JEPA prior art is empty
+
+Checked against the repositories this session, not recalled:
+
+| repo | source files | finding |
+|---|---|---|
+| `project-JEPA` | **0** of 43 blobs | documentation only; no implementation exists |
+| `plato-audio-jepa` | 2 of 11 | a 16-bin DFT with serde and uuid — not a neural net |
+| `fleet-jepa-midi` | 26 of 53 | same/cross-room gap **0.0146**; its own README: *"You Are Not Actually Running JEPA"* |
+
+That is not a reason to skip this. It is the same pattern as forge-soniqo's
+±80% F0 and persona-engine's stripped SSML: the *idea* is consistently right
+and the *implementations* are consistently null. A correctly built tiny JEPA
+over the score history would be new work, not a port.
+
+It also means §4's tables cannot be leaned on to arrive at this — they must be
+built, and a latent model is the honest way to build the momentum part. The
+baseline half (§4.1) does not need a neural net at all and should be built
+first precisely because it is arithmetic.
+
+---
+
+## 14. The attack surface this creates, and it is a new one
+
+Self-modifying logic has a hazard that the rest of this design does not have.
+
+If the system decides where its own logic is insufficient, then an adversary
+who can influence its inputs can try to **induce a soft spot** — to push a
+safety-relevant action off the deterministic path and onto the model path,
+where the grant law is weaker by construction. That is not social engineering
+of the *user*; it is social engineering of the *system's own architecture*.
+
+Constraints, in the same spirit as §6:
+
+* soft-spot declarations are **appended-only and witnessed**; the system may
+  learn that a rule is insufficient and may never learn that one is
+  unnecessary
+* a declared soft spot is **logged with its evidence** — the divergence
+  cluster, its size, its rate — so it can be audited like any other decision
+* **no soft spot may be declared on a single observation.** The instrument in
+  §11 requires a persistent cluster, and that threshold is a security
+  parameter, not a tuning knob
+* a soft spot may **propose**; only a human decision **grants** — unchanged
+  from Phase 0, and now covering a path the system chose for itself
+
+Extending the adversarial suite to cover induced soft spots belongs in Phase 4
+alongside compression, because both are ways of getting authority without
+saying much.
