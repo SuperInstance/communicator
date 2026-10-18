@@ -381,3 +381,36 @@ on Ollaya, use **winnow:e4b for speech-act questions** (clean at
 baseline, declines garbage); if laya must be used, swap the polarity and
 map the answer accordingly. The QUESTION-REWRITE method worked exactly
 as designed — before/after kept, claim corrected.
+
+## 3e. Day-3 — per-item stability measured (the §14 recipe, live)
+
+20 texts × 10 uncached resamples × 4 tracks (200 Jev calls,
+`/tmp/jev_stability.json`; mode-share = fraction of asks agreeing with
+the modal answer):
+
+| track | behavior across all 20 items |
+|---|---|
+| GESTURE | **1.00 mode-share, 1 distinct value, every item** |
+| ATTENTION | ~1.00 (one item at 0.90) |
+| TIMBRE | 0.50–1.00 (Score: jitters) |
+| INTENTION | 0.30–1.00 — worst: "Why is the build red again?" **0.30 across 6 distinct values**; "With soldiers?" 0.40/5 |
+
+**The law this measures: categorical Choice questions are essentially
+deterministic in Jev; non-determinism lives in the Score tracks' continuous
+positions, concentrated on ambiguous mid-scale texts.** Mean per-item
+mode-share 0.879; 13/20 items unstable on ≥1 track. The verdict cache now
+has two faces, both correct: it FREEZES the jitter for the consumer
+(stability), and it would have HIDDEN it (measurement must resample
+uncached — the recipe above).
+
+**Design consequence — the per-utterance trust layer** (next unit):
+per-item stability is measurable in 2–3 extra calls, and §14 proved
+per-item probability guarantees are impossible (conformal sets are the
+ceiling) — so: (a) Choice tracks ride as-is (stable); (b) Score tracks
+carry a stability stamp in the provenance sidecar (resample spread from
+a 3-ask probe at scoring time, or a fleet-measured ambiguity prior);
+(c) the presence gate multiplies in the stability term, so an unstable
+Score fades exactly like an absent property — the controller holds back
+on unresolved positions. This composes with tev1 as the deterministic
+cross-check: where tev1 (bit-stable) and Jev agree, drive; where they
+differ on an unstable Score, fade.
