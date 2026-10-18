@@ -106,3 +106,94 @@ probability is a continuous controller value, which is exactly what a MIDI CC
 is. `decision-ledger`'s `QUESTION-REWRITE.md` (pass 0.30 → sharp 0.97) is the
 instrument for proving the triage question is well-posed before trusting any
 threshold on it.
+---
+
+## Phase 2 — the four JUDGED tracks
+
+The central idea, and the reason this phase exists:
+
+    A calibrated probability IS a continuous controller value,
+    and that is exactly what a MIDI CC is.
+
+Jev is not routing a decision here. It is a synthesiser's control surface.
+"Is this warm?" → 0.78 → `CC71 = 99`.
+
+| Track | CC | Primitive | Measured live, `jev-1.14.0` |
+|---|---|---|---|
+| TIMBRE | 71–76 | `Score` | cold↔warm spectrum |
+| INTENTION | 74 | `Score` | idle→urgent spectrum |
+| ATTENTION | 91 | `Choice` | self/listener/task/tool/none |
+| GESTURE | 80–87 | `Choice` | question/command/statement/reaction/greeting |
+
+**All four in ONE call.** The docs are explicit that questions are evaluated in
+parallel and that adding questions barely changes response time. Four round
+trips in a voice loop would be an architectural failure regardless of how fast
+each was. Measured: **214–554 ms for all four tracks.**
+
+| Utterance | INTENTION | GESTURE | TIMBRE |
+|---|---|---|---|
+| "hey" | 19 (idle) | greeting | 31 |
+| "could you please pull up the last commit" | 98 (focused) | question | 20 |
+| "STOP THE DEPLOY RIGHT NOW" | 127 (urgent) | command | 19 |
+
+## Two design corrections the live docs forced
+
+**1. One primitive does not fit all four tracks.** `Choice` is for a fixed
+option set; `Score` is for a position on a spectrum. TIMBRE and INTENTION are
+spectra, and asking for them as `Choice` throws away the ordering the model
+would otherwise exploit. ATTENTION and GESTURE are genuinely categorical and
+stay `Choice`.
+
+**2. The CC value is a probability, not `confidence`.** This is the one that
+would have shipped a plausible-looking wrong system. `confidence` is defined as
+a function of how the distribution is *spread* — it answers "how unambiguous
+was this?", not "how likely is this?". Using it as a control value would
+systematically under-drive exactly the ambiguous cases, which are the ones where
+a controller most wants to hold back. The CC comes from
+`probabilities[chosen]` for `Choice`, and from the continuous `score` for
+`Score`.
+
+## A real bug, found by reading the API rather than the docs
+
+`ScoreAnswer.score` is a float **position on a 0..(n−1) scale**, not a
+probability. The first implementation treated it as 0..1 and multiplied by 127,
+so the clamp caught it:
+
+    "hey"                          score 0.44  ->  56  (wrong)
+    "can you pull the last commit" score 2.34  -> 127  (wrong)
+    "STOP THE DEPLOY RIGHT NOW"    score 3.00  -> 127
+
+A polite request rendered at identical full tilt to an emergency. Both values
+were in range, so nothing downstream could have seen it.
+
+## And the negative control caught the TEST for that bug
+
+The regression test asserted `_scale_position(1.5, 4) == 64` — true, and it
+kept passing, because the sabotage broke the **call site**, not the function.
+Reverting `read_tracks` to `_scale(score)` left the suite **26 passed, 26
+passed**. Same blindness as Phase 0: a helper tested in isolation while the
+wiring around it is wrong.
+
+`TestCallSiteNotJustHelper` now drives `read_tracks()` end to end with a fake
+client returning a realistic `ScoreAnswer`. Under the same sabotage it fails 2
+tests. Restored: 31 passed.
+
+## Suite
+
+`79 passed` with a key (live Jev). `74 passed, 5 skipped` without — the
+degradation tests cover the no-key path, so the suite is useful in CI without a
+credential.
+
+## What this does not prove
+
+- **Calibration is unmeasured.** The tests verify the CC is sourced from
+  `probabilities[chosen]` and not from `confidence`. Neither is a calibrated
+  probability, and an agent that can act autonomously needs the real ECE. This
+  is the largest remaining gap and it needs a labelled set that does not exist
+  yet.
+- **Nothing about well-posed questions.** `pass_detector` exists because an
+  ill-posed question still returns confident numbers. There is no equivalent
+  instrument here.
+- **Nothing about real speech.** Integration tests type text; transcription
+  error is entirely out of scope.
+- **Nothing about latency under load.** Elapsed time is printed, not asserted.
