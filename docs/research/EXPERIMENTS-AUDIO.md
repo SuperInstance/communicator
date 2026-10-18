@@ -211,3 +211,12 @@ the thesis, is blocked on transcripts for the judged tracks. E5 last and
 deliberately: it is the most direct test of the "sound on the way to
 make music" claim, and its failure would be the most informative event
 in the whole program.
+
+## 6. Later additions
+
+**E7 — the pedal swing observable** (pre-event rises before annotated
+moments) and **E8 — prime-then-payload landing quality** (operator
+response with vs without variance-primed delivery) live in
+`docs/research/TIMING.md` §4 with the timing theory that motivates them
+(capture point, T-minus scheduling, priming as receiver calibration).
+
