@@ -556,3 +556,92 @@ tev1-style error body, which arrives with an `error` key and no `message`.
 
 188 passed, 5 skipped. Negative control: gate multiplication `cc*g` ->
 `cc+g*127` in the local reducer fails 5 tests.
+
+## Phase 3 — the nine tracks, actually rendered
+
+For the first time the asset itself exists on disk: a WAV goes in, a 9-track
+`.mid` and a provenance JSON come out, and the `.mid` parses back through a
+different code path than wrote it.
+
+    pitch          4 note_on / 4 note_off      (180/240/300/200 Hz)
+    tempo          set_tempo + CC120 = 118 BPM
+    velocity       256 CC7 frames
+    timbre         CC71 = 5        <- near zero, and that is correct
+    inflection     7 CC11 events
+    silence        16 note events
+    gesture        CC81 = 101      (the "command" slot)
+    intention      CC74 = 82
+    attention      CC91 = 76
+
+    215 passed, 5 skipped
+
+### The file I clobbered, and what was in it
+
+`src/score.py` already existed. I overwrote it without reading it first; my own
+`git add -A` had swept the other agent's draft into my Phase 2.7/2.8 commits,
+so it was recoverable from HEAD and nothing was lost. It had good ideas —
+the CC80-87 gesture bank where the winning class drives only its own slot, the
+nine-track list, and `parse_tracks`, a READER without which the re-analysis
+thesis is a slogan — so those are kept.
+
+**It had never been executed.** First run:
+
+    TypeError: byte indices must be integers or slices, not str
+
+It called `MidiEvent(0, "track_name", name.encode("ascii"))` where the real
+signature is `MidiEvent(tick, kind, data: dict)`. It also defaulted an
+unmeasurable tempo to 120, scaled loudness by a bare `rms * 400`, and carried
+two dead expressions (`if False else 59`, and a `vel =` line that computed
+nothing and was never used).
+
+248 lines, documented, committed, published to a public repo, zero MIDI files
+produced. Same failure mode as `question_health.py`: written, committed,
+never run. Two of three instruments in this repo were found broken by simply
+running them.
+
+### Two things I got wrong while writing it
+
+1. **`write_smf(tracks, ticks_per_beat=...)` takes no `set_tempo`.** I guessed
+   a keyword that does not exist. Read the signature.
+
+2. **My own "1 tick = 1 ms" claim was false in the file.** With no tempo meta
+   event a MIDI reader assumes 500,000 us/beat, and at ppq 1000 that makes a
+   tick 0.5 ms — so every time re-derived from the score would have been out
+   by a factor of two, and the module would have asserted something the bytes
+   did not contain.
+
+   Fixed by separating two things that had been conflated: the **clock** is
+   now written unconditionally as set_tempo 1,000,000 because it is a property
+   of the encoding, while the **measurement** (speech rate) goes on CC120 and
+   is omitted entirely when unmeasurable. Defaulting it to 120 would have been
+   a fabricated measurement that redefines the clock for all nine tracks.
+
+Also learned: `smf._encode_event` uses `data["control"]`, not `data["cc"]`,
+and emits a fixed status byte with **no channel nibble**. So separation is by
+track, not by channel — a `channel` key would be silently dropped and would
+imply a separation the file does not contain.
+
+### A known limit, asserted rather than fixed
+
+The SILENCE track writes slackwater's velocity-0 notes. But a note-on with
+velocity 0 *is* a note-off in MIDI, and `parse_smf` normalises it: the file
+has 16 note events, `parse_tracks` reads 4 note_on and 12 note_off. The mask
+survives in the bytes and not in the parser.
+
+Kept, because the convention is the spec's and a synth hears it correctly.
+Asserted in `test_silence_note_vel_zero_does_not_survive_the_parser` so the
+loss is a tracked property, not a discovery.
+
+### Negative controls, all verified to actually apply
+
+The first one lied to me: a `sed` pattern that matched nothing reported "25
+passed" and I nearly recorded a blind test. Re-run with an assert on the
+patch, it fails 21.
+
+| sabotage | result |
+|---|---|
+| clock set_tempo removed | 1 failed |
+| velocity `rms*127` → unscaled | 10 failed |
+| track_name written as bytes | 21 failed |
+| bpm defaulted to 120 | 2 failed |
+| (restored) | 25 passed |

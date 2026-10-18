@@ -341,6 +341,44 @@ class TestVelocityIsNormalised:
                     assert 0 <= e["data"]["value"] <= 127
 
 
+class TestKnownRoundTripLimits:
+    def test_silence_note_vel_zero_does_not_survive_the_parser(self):
+        """
+        A documented limit, asserted so it cannot rot.
+
+        slackwater's "silence is a note with velocity 0" is correct for a SYNTH
+        -- a velocity-0 note is silence -- but in MIDI a note-on with velocity
+        0 IS a note-off, and smf.parse_sfm normalises it. So the SILENCE track
+        writes 2 events per segment and reads back with the silent ones
+        relabelled as note_off.
+
+        Asserted rather than fixed because the convention is the spec's and
+        the playback behaviour is right; the cost is that parse_tracks alone
+        cannot reconstruct the mask.
+        """
+        sc = score_mod.score_utterance(speechy(), "Run the tests.", client=_Fake())
+        evs = score_mod.parse_tracks(score_mod.build_smf(sc))["silence"]
+        ons = [e for e in evs if e["kind"] == "note_on"]
+        offs = [e for e in evs if e["kind"] == "note_off"]
+        assert ons, "speech notes must still be note_on after parsing"
+        assert len(offs) > len(ons), (
+            "expected the velocity-0 notes to have been normalised to "
+            "note_off -- if this ever stops happening the byte-level encoding "
+            "and the parser have diverged and the caveat above is stale")
+
+    def test_the_writer_still_emits_velocity_zero_notes(self):
+        """
+        The pre-parse side of the same fact: the convention must still be
+        what is WRITTEN, or the caveat is describing nothing.
+        """
+        sc = score_mod.score_utterance(speechy(), "Run the tests.", client=_Fake())
+        data = score_mod.build_smf(sc)
+        _, parsed = smf.parse_smf(data)
+        written = [e for t in parsed if t.name == "silence" for e in t.events
+                   if e.kind == "note_on"]
+        assert written, "silence track must contain notes"
+
+
 # -- negative controls ------------------------------------------------------
 
 class _Fake:

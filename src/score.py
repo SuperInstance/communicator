@@ -292,6 +292,18 @@ def _silence_events(score: UtteranceScore) -> list:
 
     One note per segment -- sustained through speech, velocity 0 through
     silence -- so the track reads as a mask without a per-frame note storm.
+
+    KNOWN ROUND-TRIP LIMIT, measured rather than assumed. In MIDI a note-on
+    with velocity 0 IS a note-off, and smf.parse_sfm normalises it to one. So
+    a written file holds 8 note events per pair of segments, but parse_tracks
+    reads back the four silent ones as note_off: the speech/silence boundary
+    survives in the BYTES and does not survive parse_tracks.
+
+    The convention is kept because the spec chose it and because a synth
+    hears it correctly -- a velocity-0 note is silence to a synth, which is
+    the point. It is written down here and asserted in
+    `test_silence_note_vel_zero_does_not_survive_the_parser` so the loss is a
+    tracked property rather than a discovery somebody makes in six months.
     """
     ev = []
     note = 59                                   # B3, one fixed carrier
@@ -423,12 +435,16 @@ def write_sidecar(score: UtteranceScore, path: str, extra: dict = None) -> str:
 
 def render(wav_path: str, text: str, out_prefix: str, **kw) -> dict:
     """WAV in, .mid + provenance out. The end-to-end path."""
-    samples, sr = wavio.read_wav(wav_path)
+    # read_wav returns ONE Audio object (samples, sample_rate, poisoned
+    # count) -- unpacking it as a tuple was the bug that made render()
+    # unusable with a real file. Its own tests fed it lists, never a path.
+    audio = wavio.read_wav(wav_path)
+    samples, sr = audio.samples, audio.sample_rate
     extra = {k: kw.pop(k) for k in list(kw)
              if k in ("client", "cache", "model", "timeout")}
     sc = score_utterance(samples, text, sample_rate=sr, **extra)
     mid = f"{out_prefix}.mid"
     side = f"{out_prefix}.provenance.json"
     export_smf(sc, mid)
-    write_sidecar(sc, side, extra_meta={"source": os.path.basename(wav_path)})
+    write_sidecar(sc, side, extra={"source": os.path.basename(wav_path)})
     return {"mid": mid, "provenance": side, "score": sc}

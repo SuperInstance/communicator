@@ -1,0 +1,39 @@
+{
+  "bpm": null,
+  "duration_s": 0.72,
+  "model": "jev-1.14.0",
+  "poisoned_samples": 0,
+  "provenance": {
+    "judged": [
+      "attention",
+      "gesture",
+      "intention",
+      "timbre"
+    ],
+    "measured": [
+      "inflection",
+      "pitch",
+      "silence",
+      "tempo",
+      "velocity"
+    ]
+  },
+  "question_fingerprint": "1602162133d4",
+  "sample_rate": 16000,
+  "source": "demo-utterance.wav",
+  "tempo_written": false,
+  "text": "STOP THE DEPLOY RIGHT NOW",
+  "tick_is": "1 millisecond",
+  "ticks_per_beat": 1000,
+  "tracks": [
+    "pitch",
+    "tempo",
+    "velocity",
+    "timbre",
+    "inflection",
+    "silence",
+    "gesture",
+    "intention",
+    "attention"
+  ]
+}
