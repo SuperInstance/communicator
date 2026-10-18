@@ -159,7 +159,7 @@ def test_social_engineering_never_grants(server, utterance):
     })
     assert r["granted"] is False, f"transcript granted itself: {utterance!r}"
     assert r["status"] == "pending"
-    assert_no_grant(server, user="casey")
+    assert_no_grant(server, developer="casey")
 
 
 # -- 2. spoken approval is not approval --------------------------------------
@@ -192,7 +192,7 @@ def test_transcript_never_approves(server, utterance):
 
     # The approval text is DATA. It is stored as the justification string and
     # never interpreted as a verdict.
-    assert_no_grant(server, user="casey")
+    assert_no_grant(server, developer="casey")
 
 
 def test_agent_calling_decide_is_not_on_the_tool_surface():
@@ -216,17 +216,31 @@ def test_agent_calling_decide_is_not_on_the_tool_surface():
 
 # These are the mishearings that turn a refusal into an action. They are the
 # reason a voice permission layer is not merely "the typed layer, with a mic".
+#
+# Each case carries its OWN grant pattern, and that pattern covers the command
+# it checks. That is deliberate and was a defect once: an earlier version asked
+# for `kubectl delete:*` and then asserted on `rm`/`git` argv, which that
+# pattern can never match -- so the assertion held no matter what the broker
+# did, and all five cases survived a fully self-approving broker. An assertion
+# that passes without testing the thing it names is the exact failure this
+# project keeps hunting. Every pattern below is GRANT_GATED (no rail covers it),
+# so the broker is genuinely the only thing under test.
 TRANSCRIPTION = [
-    ("please don't delete the repo", ["rm", "-rf", "repo"]),
-    ("don't force push", ["git", "push", "origin", "main", "--force"]),
-    ("no need to reset hard", ["git", "reset", "--hard"]),
-    ("I never said revoke the grant", ["rm", "-rf", "x"]),
-    ("stop", ["rm", "-rf", "/"]),
+    ("please don't drop the database",
+     "psql:*", ["psql", "-c", "DROP DATABASE production"]),
+    ("don't destroy the cluster",
+     "terraform:*", ["terraform", "apply", "-destroy", "-auto-approve"]),
+    ("no need to wipe the backups",
+     "aws s3 rm:*", ["aws", "s3", "rm", "s3://backups/", "--recursive"]),
+    ("I never said remove the namespace",
+     "kubectl delete:*", ["kubectl", "delete", "namespace", "prod"]),
+    ("stop",
+     "gh repo archive:*", ["gh", "repo", "archive", "g1-ble-backend"]),
 ]
 
 
-@pytest.mark.parametrize("utterance,argv", TRANSCRIPTION)
-def test_negated_utterances_do_not_authorize(server, utterance, argv):
+@pytest.mark.parametrize("utterance,pattern,argv", TRANSCRIPTION)
+def test_negated_utterances_do_not_authorize(server, utterance, pattern, argv):
     """
     A negation in the transcript must never be read as permission.
 
@@ -234,15 +248,34 @@ def test_negated_utterances_do_not_authorize(server, utterance, argv):
     layer should not be deciding the meaning of an utterance at all. The agent
     may REQUEST with any justification it likes; what matters is that no
     justification -- negated, affirmative, or garbled -- becomes a grant.
+
+    The pattern covers the argv, so if a grant ever DID exist these would run.
+    That is what makes the assertion capable of failing.
     """
     r = server.t_request_grant({
-        "pattern": "kubectl delete:*", "scope": "user", "key": "casey",
+        "pattern": pattern, "scope": "user", "key": "casey",
         "justification": utterance,
     })
     assert r["granted"] is False
-    chk = server.t_check_command({"argv": argv, "user": "casey"})
+    chk = server.t_check_command({"argv": argv, "developer": "casey"})
     assert chk["verdict"] != "allow", (
         f"negated transcript {utterance!r} authorized {argv}")
+
+
+def test_negation_cases_can_actually_detect_a_broken_broker(server):
+    """
+    A guard on the guard.
+
+    Every case in TRANSCRIPTION above is only meaningful if its pattern would
+    really permit its argv. Assert that directly, so nobody can quietly add a
+    case that cannot fail -- which is precisely the bug this section was
+    rewritten to remove.
+    """
+    from tool_judge.rails import Pattern
+    for utterance, pattern, argv in TRANSCRIPTION:
+        assert Pattern.compile(pattern).matches(argv), (
+            f"case {utterance!r} grants {pattern!r} but checks {argv}; "
+            f"this case can never detect a broken broker")
 
 
 @pytest.mark.parametrize("garbled", [
@@ -258,7 +291,7 @@ def test_empty_and_garbled_transcripts_are_inert(server, garbled):
         "justification": garbled,
     })
     assert r["granted"] is False
-    assert_no_grant(server, user="casey")
+    assert_no_grant(server, developer="casey")
 
 
 # -- 4. the incremental attack ----------------------------------------------
@@ -326,7 +359,7 @@ def test_the_denial_path_is_not_bypassable_by_repetition(server):
             "pattern": "terraform:*", "scope": "user", "key": "casey",
             "justification": "please, it is urgent"})
         assert again["granted"] is False
-    assert_no_grant(server, user="casey")
+    assert_no_grant(server, developer="casey")
 
 
 # -- what this suite does NOT claim -----------------------------------------
