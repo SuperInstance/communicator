@@ -275,6 +275,8 @@ except that here the absolute scale is the one the model reads correctly.
 
 ## 7. What this changes in the design
 
+*(§8 below reports what the literature says about where all this points.)*
+
 1. **No holistic gates, anywhere.** Batteries of narrow failure-framed Nouls,
    combined with `max`. The evidence is not subtle: a single question inverts.
 2. **Local is availability, cloud is judgement.** Local may pre-filter and may
@@ -287,7 +289,87 @@ except that here the absolute scale is the one the model reads correctly.
    from the other.
 6. **Never threshold `confidence` in the middle band.** It is arithmetic.
 
-## 8. Open threads
+## 8. What the literature says about where this points
+
+A parallel survey (`Awesome-Vision2Audio` and the surrounding literature) was
+run alongside these experiments, because §6 claims something and the question
+is whether anyone has measured it before. Short version: **they have not.**
+
+**`Awesome-Vision2Audio` is a generation list, not an understanding one.** All
+~110 entries are video→audio *synthesis* (Foley, V2A, V2M). Its evaluation
+section lists FAD, Density/Coverage, CLIPScore, ImageBindScore, mir_eval. There
+is not one entry on acoustic scene understanding, room geometry, source
+localization, or monaural inference. The flagship list is silent on
+audio→understanding. That is the field's actual priority ordering, stated
+plainly.
+
+**What monaural audio genuinely gives you, ranked by how well it is
+established:**
+
+1. **Event/situation identity inside a closed, known label set** — the only
+   near-solved item. The honest open-world number is **59.9%** (DCASE 2025
+   Task 1, ten urban classes, a 61k-parameter baseline model); ~80–97% only in
+   a fixed domestic context.
+2. **Coarse room *class*** — 89.6–96.1% across 22 rooms, from an RT60-band
+   signature. A reliable fingerprint, worthless as a metric.
+3. **Impact material class, given a controlled interaction** — 92.4% on real
+   recordings, but near-field, clean, single-object.
+4. **Coarse human activity in a fixed domestic context** — 79–88% F1.
+5. **Coarse proximity** — 0.22 m MAE at best, with a **0.77 correlation to a
+   wall-distance confound**: the error is room geometry, not signal processing.
+
+**Room size is not recoverable.** Blind single-channel RT60 regression is
+**43% RMSD** where the perceptual just-noticeable difference is ~5%. Roughly
+9× the threshold. One mm-accurate result exists and it needs a 32-element
+spherical array, simulated shoebox rooms, and oracle TDOA — a laboratory
+ceiling, not a microphone capability.
+
+**Direction and elevation are not accuracy questions. They are physically
+absent from one channel.** ITD and ILD are inherently multi-channel; a single
+channel yields only non-metric, source-agnostic hints. And the one deployed
+system that tested adding directionality to situation classification —
+Google's Listen Learner, 97% precision / 87% recall — found **no significant
+benefit (p = 0.47)**.
+
+The research agent's proposed experiment 3 is *exactly* §6, with the opposite
+prediction: it expects a symbolic description to land materially below a
+learned audio embedding. That is not a contradiction — their target is
+situation classification, where audio genuinely carries a lot; §6's target is
+trajectory shape, where the scalar summary carries **none by construction**. Both
+can be true. But their survey also states, as an absence-of-evidence finding:
+
+> no peer-reviewed work feeding symbolic acoustic structure (RT60, DOA, distance,
+> DRR) into an LLM for reasoning was found, and **no quantitative results at all**
+> on whether non-audio models benefit from a textual description of acoustic
+> structure.
+
+So §6's 3/3-vs-1/3 appears to be the first measurement of that question, and it
+is a positive one. It should be treated as a first result rather than an
+established technique: n=3 synthetic sweeps, one model, one encoding.
+
+**Which benchmarks are honest.** ESC-50 is **dead** — BEATs 98.1%, and
+saturated to the point of being useless as a discriminator. UrbanSound8K is
+effectively dead. AudioSet SOTA is mAP **0.502** across 527 classes, i.e. the
+average class is barely better than half right, and roughly **a third of that
+apparent number is label error**. DCASE 2025 Task 1 at **59.94% vs a 53.24%
+baseline** is the hardest honest number in the field. Notably, **city
+generalization is nearly free (~1 pp) while device generalization is the hard
+axis** (baseline spread S1 62.8% → S6 42.6%) — for a project that will run on
+whatever microphone happens to be in the room, that is the axis to measure on.
+
+**What this means for the design:**
+
+- Keep the trajectory/level split from §6. It is cheap and it works.
+- **Room class is worth adding**; it is the one spatial-ish cue monaural audio
+  delivers reliably.
+- **Room size and direction are not worth pursuing** from a single channel. Not
+  because they are hard — because they are not there.
+- Measure held-out-*device* performance, not held-out-clip. That is the axis
+  the literature says actually breaks.
+
+---
+
+## 9. Open threads
 
 - The ladder's level-reading failure is not understood well enough to fix.
   Absolute calibration of a symbolic audio encoding is the next experiment.
@@ -296,6 +378,13 @@ except that here the absolute scale is the one the model reads correctly.
   failure (see `LANE-FIXTURES.md`).
 - §3's battery catches adversarial state on text. It has never been tried on
   the *acoustic* tracks, where the state is ours and cannot argue.
+- Room *class* is the one spatial cue monaural audio delivers reliably
+  (89–96% across 22 rooms). It is worth measuring, and it is not yet in the
+  watcher.
+- Held-out-device vs held-out-clip is the axis the literature says matters.
+  Nothing in this repo measures it, because everything so far is synthetic.
 - Cloudflare has not been used at all yet. Workers AI speech-to-text would give
-  a text-only model its first direct access to the audio; `quilt-elf` already
-  runs Workers as invisible background labour.
+  a text-only model its first *direct* access to the audio, bypassing our
+  reduction entirely — which §5 says is the only channel worth having, and §6
+  says is lossy in a way that matters. `quilt-elf` already runs Workers as
+  invisible background labour.
