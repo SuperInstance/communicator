@@ -193,6 +193,80 @@ INTENTION_INSTRUCTIONS = (
 ATTENTION_INSTRUCTIONS = "Where is this utterance's focus directed?"
 GESTURE_INSTRUCTIONS = "What kind of speech act is this utterance?"
 
+# -- the presence gates -----------------------------------------------------
+#
+# ADDED AFTER MEASUREMENT (Phase 2.7), and they are the whole point of that
+# phase. Three of the four questions were ill-posed: INTENTION and ATTENTION
+# scored HIGH spread-confidence on semantic garbage ("qwop zzz brxt"), i.e.
+# they were placing nonsense on the scale confidently rather than declining.
+#
+# The obvious fix -- re-word the scale, give it an escape hatch for non-speech
+# -- was MEASURED AND IT MADE THINGS WORSE:
+#
+#     reworded alone   INTENTION CC separation  +82 -> -59
+#                      ATTENTION  CC separation   -8 -> -27
+#
+# Because Score and Choice have no way to decline. Both primitives must commit
+# to a position, so an utterance with no such property is still forced onto the
+# scale, and adding a "not an utterance" level just gave the model somewhere to
+# put the garbage at full tilt.
+#
+# Noul is the one primitive here that can answer "I don't know": it returns the
+# PROBABILITY OF PRESENCE, and 0.5 is a legitimate answer. So each track gained
+# a gate, asked in the SAME request (one call rule -- the cost is one round
+# trip, not eight):
+#
+#     gated            ATTENTION  CC separation   -8 -> +53   garbage 107 -> 18
+#                      GESTURE    CC separation  +46 -> +86   garbage  80 -> 24
+#                      INTENTION  CC separation  +82 -> +70   garbage   3 ->  0.4
+#
+# The gate is MULTIPLIED into the CC, not thresholded: at gate 0.5 the
+# synthesiser gets half the value, which fades a voice it is not sure it heard
+# rather than clicking it off. Ambiguous real speech is held back, not erased.
+#
+# TIMBRE's gate reads ~0.15 on BOTH batteries -- the model correctly says the
+# words alone carry no vocal colour. That is the honest answer: TIMBRE is not
+# a text property, it lives in the measured acoustic tracks. Its gated CC is
+# therefore near zero by design, not by failure.
+
+GATE_INTENTION = (
+    "Does this utterance convey an intention to be acted upon by a listener "
+    "or system? Answer no for text with no communicative content."
+)
+GATE_ATTENTION = (
+    "Is this utterance's focus directed at an addressee -- a person, a "
+    "system, or the work in front of the speaker? Answer no for text with no "
+    "communicative content."
+)
+GATE_TIMBRE = (
+    "Does this utterance, judged from its words alone, convey a deliberate "
+    "vocal colour such as warm, cold or breathy?"
+)
+GATE_GESTURE = (
+    "Does this utterance perform a deliberate speech act toward someone -- "
+    "asking, instructing, greeting, reacting?"
+)
+
+# gate answer key -> track. The order matches judged.CC so a fingerprint diff
+# reads as a diff of the same tracks.
+GATES = {
+    "gate_intention": "INTENTION",
+    "gate_attention": "ATTENTION",
+    "gate_timbre": "TIMBRE",
+    "gate_gesture": "GESTURE",
+}
+
+# The wording, keyed the same way, so question_fingerprint() digests the text
+# the model actually reads. Folding the key map in without the wording would
+# mean a re-worded gate kept every cached verdict -- exactly the silent
+# invalidation failure the fingerprint exists to prevent.
+GATE_INSTRUCTIONS = {
+    "gate_intention": GATE_INTENTION,
+    "gate_attention": GATE_ATTENTION,
+    "gate_timbre": GATE_TIMBRE,
+    "gate_gesture": GATE_GESTURE,
+}
+
 
 def question_fingerprint() -> str:
     """
@@ -214,6 +288,11 @@ def question_fingerprint() -> str:
                       "criteria": ATTENTION_CHOICE},
         "gesture": {"instructions": GESTURE_INSTRUCTIONS,
                     "criteria": GESTURE_CHOICE},
+        # The gates are part of what the model is asked, so they belong in the
+        # fingerprint. Adding them CHANGED the fingerprint, which is correct:
+        # every verdict cached under the ungated questions is now invalid by
+        # construction, with no manual cache invalidation anywhere.
+        "gates": GATE_INSTRUCTIONS,
     }
     return hashlib.sha1(
         json.dumps(spec, sort_keys=True, ensure_ascii=True).encode()
@@ -222,13 +301,21 @@ def question_fingerprint() -> str:
 
 def build_questions():
     """
-    All four in one call. Parallel evaluation means this is roughly the price
-    of one question, and splitting it would be an architectural error in a
-    system whose latency budget is the reason it exists.
-    """
-    from typesafe_sdk import Choice, Score
+    All four scale questions AND the four presence gates, in ONE call.
 
-    return {
+    Parallel evaluation means this is roughly the price of one question, and
+    splitting it would be an architectural error in a system whose latency
+    budget is the reason it exists. The gates in particular must arrive WITH
+    the values they suppress: a gate fetched in a second call would describe
+    the previous utterance by the time it was used.
+
+    Eight questions now ride in one request. That number is asserted by a test,
+    because "let's split this for clarity" is exactly the kind of change that
+    doubles a voice loop's latency and looks like a refactor in the diff.
+    """
+    from typesafe_sdk import Choice, Noul, Score
+
+    qs = {
         "timbre": Score(instructions=TIMBRE_INSTRUCTIONS, criteria=TIMBRE_SCALE),
         "intention": Score(instructions=INTENTION_INSTRUCTIONS,
                            criteria=INTENTION_SCALE),
@@ -237,6 +324,13 @@ def build_questions():
         "gesture": Choice(instructions=GESTURE_INSTRUCTIONS,
                           criteria=GESTURE_CHOICE),
     }
+    # NoulCriteria's keys are `true`/`false`. Writing `yes`/`no` raises
+    # ValidationError: criteria.yes -- Extra inputs are not permitted, which
+    # reads like a library bug rather than a wrong keyword.
+    for key, text in GATE_INSTRUCTIONS.items():
+        qs[key] = Noul(instructions=text, criteria={
+            "false": "No such property is present in this utterance."})
+    return qs
 
 
 def read_tracks(text: str, *, model: str = DEFAULT_MODEL,
@@ -286,6 +380,24 @@ def read_tracks(text: str, *, model: str = DEFAULT_MODEL,
 
     resolved = str(getattr(resp, "model", model))
     out: list[TrackReading] = []
+    gate_by_track = {t: getattr(resp.answers.get(k), "noul", None)
+                     for k, t in GATES.items()}
+
+    def _gate(track: str):
+        """
+        The presence value for a track, and whether it was actually answered.
+
+        A MISSING gate is treated as 1.0 -- ungated -- because a network or
+        schema hiccup must not silence a real utterance. But it is recorded as
+        gated=False in the detail, so "this track ran ungated" is visible in
+        the score rather than being indistinguishable from a gate of 1.0 that
+        the model genuinely returned. Silently ungating is the direction that
+        lets garbage drive the synthesiser, so it may not be invisible.
+        """
+        g = gate_by_track.get(track)
+        if g is None:
+            return 1.0, False
+        return float(g), True
 
     for key, track, n_levels in (("timbre", "TIMBRE", len(TIMBRE_SCALE)),
                                  ("intention", "INTENTION", len(INTENTION_SCALE))):
@@ -301,10 +413,14 @@ def read_tracks(text: str, *, model: str = DEFAULT_MODEL,
         # The named level the mass actually sits on, kept for humans reading
         # the score. The CC uses the continuous position, not this label.
         nearest = max(probs, key=probs.get) if probs else None
-        out.append(TrackReading(track, _scale_position(pos, n_levels),
+        gate, gated = _gate(track)
+        out.append(TrackReading(track,
+                                int(round(_scale_position(pos, n_levels) * gate)),
                                 detail={"score": pos,
                                         "nearest_level": legend.get(nearest),
-                                        "confidence": getattr(a, "confidence", None)},
+                                        "confidence": getattr(a, "confidence", None),
+                                        "gate": gate_by_track.get(track),
+                                        "gated": gated},
                                 model=resolved))
 
     for key, track in (("attention", "ATTENTION"), ("gesture", "GESTURE")):
@@ -316,12 +432,16 @@ def read_tracks(text: str, *, model: str = DEFAULT_MODEL,
         # here would systematically under-drive the ambiguous cases, which are
         # exactly the ones where a controller wants to hold back.
         p = probs.get(chosen)
-        out.append(TrackReading(track, _scale(p) if p is not None else 0,
+        gate, gated = _gate(track)
+        out.append(TrackReading(track,
+                                int(round(_scale(p) * gate)) if p is not None else 0,
                                 detail={"choice": chosen, "probabilities": probs,
                                         # spread-confidence is NOT the CC, but
                                         # it is the question-health signal --
                                         # stored as provenance, never driven.
-                                        "confidence": getattr(a, "confidence", None)},
+                                        "confidence": getattr(a, "confidence", None),
+                                        "gate": gate_by_track.get(track),
+                                        "gated": gated},
                                 model=resolved))
 
     if cache is not None and all(r.ok for r in out):

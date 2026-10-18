@@ -162,10 +162,47 @@ class TestCcIsNotConfidence:
 
 class TestQuestions:
     def test_all_four_tracks_are_asked_in_one_call(self):
-        """Four round trips in a voice loop would be an architectural failure."""
+        """
+        Four round trips in a voice loop would be an architectural failure.
+
+        It is now EIGHT questions in one call: the four tracks plus the four
+        presence gates added in Phase 2.7. The rule is unchanged -- one request,
+        not one per question -- and the number is asserted so that "let's split
+        this for clarity", which reads like a refactor in the diff and doubles
+        the latency of the thing this system exists to make fast, fails here.
+
+        The gates must travel WITH the values they suppress: a gate fetched in
+        a second call would describe the previous utterance by the time the
+        synthesiser used it.
+        """
         q = judged.build_questions()
-        assert set(q) == {"timbre", "intention", "attention", "gesture"}
-        assert len(q) == 4
+        assert set(q) == {"timbre", "intention", "attention", "gesture",
+                          "gate_intention", "gate_attention",
+                          "gate_timbre", "gate_gesture"}
+        assert len(q) == 8
+
+    def test_gates_are_noul_and_scales_are_not(self):
+        """
+        Noul is the only primitive here that can answer "I don't know" -- it
+        returns the probability of PRESENCE, and 0.5 is a legitimate answer.
+        Score and Choice must commit to a position, which is precisely why
+        they placed garbage confidently.
+        """
+        from typesafe_sdk import Noul, Score
+        q = judged.build_questions()
+        for key in judged.GATES:
+            assert isinstance(q[key], Noul), f"{key} must be a Noul"
+            assert not isinstance(q[key], Score)
+
+    def test_every_gate_is_texted_and_mapped_to_a_track(self):
+        """
+        A gate with empty instructions still asks something; a gate mapped to
+        a track CC does not carry would silently gate nothing.
+        """
+        assert set(judged.GATES) == set(judged.GATE_INSTRUCTIONS)
+        for key, text in judged.GATE_INSTRUCTIONS.items():
+            assert len(text.strip()) > 40, f"{key} needs a real question"
+            assert judged.GATES[key] in judged.CC
 
     def test_spectra_use_score_and_categories_use_choice(self):
         """Choice is for a fixed option set; Score is for a position on a scale."""

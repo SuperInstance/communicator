@@ -352,3 +352,109 @@ precedent: pass 0.30 → sharp 0.97, with the before/after kept. That is the nex
 piece of work, and until it is done the honest summary of Phase 2 is:
 
     4 judged tracks built, 1 healthy, 3 ill-posed or degenerate.
+
+## Phase 2.7 — the rewrite was the wrong fix, and the gate was the right one
+
+Phase 2.6 left three broken questions and named the obvious repair: re-word
+them. That repair was measured before it was adopted. `src/rewrite_probe.py`
+runs four variants against the same 10 probes — baseline, reworded, gated,
+gated_reworded — probe-major, so model drift lands on all variants equally.
+40 calls, `jev-1.14.0`, 0.13 s each, recorded in
+`experiments/question_rewrite_results.json`.
+
+The decisive number is the **CC separation**, not the spread-confidence.
+question_health.py judges spread; a synthesiser plays the CC. They are
+different quantities and they disagree.
+
+### The measurement
+
+| variant | track | CC garbage | CC real | sep | verdict |
+|---|---|---|---|---|---|
+| baseline | ATTENTION | 107 | 99 | **−8** | ill-posed |
+| baseline | GESTURE | 80 | 126 | +46 | healthy |
+| baseline | INTENTION | 3 | 85 | +82 | healthy |
+| baseline | TIMBRE | 36 | 37 | +1 | weak |
+| reworded | ATTENTION | 126 | 99 | **−27** | ill-posed |
+| reworded | INTENTION | 123 | 64 | **−59** | ill-posed |
+| reworded | TIMBRE | 110 | 92 | **−18** | ill-posed |
+| **gated** | ATTENTION | 18 | 71 | **+53** | healthy |
+| **gated** | GESTURE | 24 | 111 | **+86** | healthy |
+| **gated** | INTENTION | 0.4 | 71 | **+70** | healthy |
+| gated | TIMBRE | 6 | 5 | −2 | ill-posed |
+
+### Re-wording made it worse, and that is the finding
+
+INTENTION went **+82 → −59**. Adding a "not an utterance" escape level to the
+scale gave the model somewhere to put garbage, and it put it there at full
+tilt. This is not a vocabulary problem:
+
+    Score and Choice have no way to decline. Both primitives must commit to a
+    position, so an utterance with no such property is still forced onto the
+    scale — confidently, because it was never given the option not to answer.
+
+The hypothesis was stated before the run (see `rewrite_probe`'s docstring) so
+it could fail. It did not fail; it was confirmed, in the direction that made
+the cheap fix worthless.
+
+### What actually fixed it
+
+`Noul` — a yes/no primitive returning the **probability of presence**, where
+0.5 is a legitimate answer. One gate per track, asked in the SAME request as
+the scales: 8 questions, one round trip. The gate is multiplied into the CC,
+not thresholded, so an ambiguous real utterance is faded rather than erased,
+and a CC that jumps 0 → full across adjacent gate values would click.
+
+    gates: garbage 0.12–0.38   real 0.85–0.97
+
+A detail that would have cost an evening: `NoulCriteria`' keys are `true` and
+`false`. The obvious `{"yes": ..., "no": ...}` raises
+`ValidationError: criteria.yes — Extra inputs are not permitted`, which reads
+like a library bug rather than a wrong keyword. There is a test for it.
+
+### TIMBRE is dead from text, confirmed twice
+
+Its gate reads 0.10–0.26 on **both** batteries. The model is right: warmth is
+in the delivery, not the words. `calibration.py` reached the same conclusion
+from a different direction. TIMBRE-from-text is now two instruments deep, so
+TIMBRE's gated CC is near zero **by design** and that track waits for the
+measured acoustic pipeline.
+
+### Phase 2.6's own INTENTION verdict was wrong, on the CC measure
+
+Phase 2.6 called INTENTION ill-posed from spread-confidence −0.05. On the CC
+it separates +82 and was never broken. ATTENTION really was inverted (−8).
+So one verdict of three was right, one was wrong, and the instrument that
+produced the wrong one is measuring a different quantity from the one that
+matters. Both numbers are kept; the CC is what a synthesiser plays.
+
+### A trap caught while adopting it
+
+`rewrite_probe.build_questions("baseline")` delegated to
+`judged.build_questions()`. The moment `judged.py` gained its gates, the
+experiment's *control* silently became today's production question set —
+"baseline" would have measured the gate against itself and the recorded
+numbers would have become unreproducible while still looking recorded. The
+control is now pinned to the scales, with a regression test that asserts
+`judged.build_questions()` has 8 questions and the probe's baseline still has
+4.
+
+### Also fixed here (not mine — the unsupervised agent's `question_health.py`)
+
+`_median_pos` can return `None`, and its caller did `round(None, 2)` →
+`TypeError: type NoneType doesn't define __round__ method`. The verdict
+branches two lines below already guarded `gp is not None`, so the author knew
+the value could be absent and the rounding above it did not.
+
+### Live, after adoption
+
+    qwop zzz brxt                TIMB=7  INTE= 0  ATTE=15  GEST=16
+    Run the tests.               TIMB=1  INTE=82  ATTE=74  GEST=119
+    STOP THE DEPLOY RIGHT NOW    TIMB=4  INTE=121 ATTE=93  GEST=122
+
+Garbage sits at 0–27 across all four tracks; real speech drives them; the
+emergency still reads loud. TIMBRE is near zero everywhere, which is correct.
+
+### Suite
+
+167 passed, 5 skipped. Negative control: sabotaging the gate multiplication
+`cc * g` → `cc + g*127` fails 4 tests; restoring returns 25/25.

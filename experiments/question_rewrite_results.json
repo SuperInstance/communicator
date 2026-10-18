@@ -1,0 +1,224 @@
+{
+  "model": "jev-1.14.0",
+  "calls": 40,
+  "seconds": 5.3,
+  "failures": 0,
+  "variants": {
+    "baseline": [
+      {
+        "track": "ATTENTION",
+        "cc_garbage": 107,
+        "cc_real": 99,
+        "cc_separation": -8,
+        "conf_garbage": 0.8,
+        "conf_real": 0.73,
+        "conf_separation": -0.07000000000000006,
+        "gate_garbage": null,
+        "gate_real": null,
+        "gate_separation": null,
+        "verdict": "ill-posed"
+      },
+      {
+        "track": "GESTURE",
+        "cc_garbage": 80,
+        "cc_real": 126,
+        "cc_separation": 46,
+        "conf_garbage": 0.54,
+        "conf_real": 0.99,
+        "conf_separation": 0.44999999999999996,
+        "gate_garbage": null,
+        "gate_real": null,
+        "gate_separation": null,
+        "verdict": "healthy"
+      },
+      {
+        "track": "INTENTION",
+        "cc_garbage": 3,
+        "cc_real": 85,
+        "cc_separation": 82,
+        "conf_garbage": 0.95,
+        "conf_real": 0.9,
+        "conf_separation": -0.04999999999999993,
+        "gate_garbage": null,
+        "gate_real": null,
+        "gate_separation": null,
+        "verdict": "healthy"
+      },
+      {
+        "track": "TIMBRE",
+        "cc_garbage": 36,
+        "cc_real": 37,
+        "cc_separation": 1,
+        "conf_garbage": 0.04,
+        "conf_real": 0.28,
+        "conf_separation": 0.24000000000000002,
+        "gate_garbage": null,
+        "gate_real": null,
+        "gate_separation": null,
+        "verdict": "healthy"
+      }
+    ],
+    "reworded": [
+      {
+        "track": "ATTENTION",
+        "cc_garbage": 126,
+        "cc_real": 99,
+        "cc_separation": -27,
+        "conf_garbage": 0.99,
+        "conf_real": 0.74,
+        "conf_separation": -0.25,
+        "gate_garbage": null,
+        "gate_real": null,
+        "gate_separation": null,
+        "verdict": "ill-posed"
+      },
+      {
+        "track": "GESTURE",
+        "cc_garbage": 76,
+        "cc_real": 126,
+        "cc_separation": 50,
+        "conf_garbage": 0.5,
+        "conf_real": 0.99,
+        "conf_separation": 0.49,
+        "gate_garbage": null,
+        "gate_real": null,
+        "gate_separation": null,
+        "verdict": "healthy"
+      },
+      {
+        "track": "INTENTION",
+        "cc_garbage": 123,
+        "cc_real": 64,
+        "cc_separation": -59,
+        "conf_garbage": 0.92,
+        "conf_real": 0.62,
+        "conf_separation": -0.30000000000000004,
+        "gate_garbage": null,
+        "gate_real": null,
+        "gate_separation": null,
+        "verdict": "ill-posed"
+      },
+      {
+        "track": "TIMBRE",
+        "cc_garbage": 110,
+        "cc_real": 92,
+        "cc_separation": -18,
+        "conf_garbage": 0.53,
+        "conf_real": 0.16,
+        "conf_separation": -0.37,
+        "gate_garbage": null,
+        "gate_real": null,
+        "gate_separation": null,
+        "verdict": "ill-posed"
+      }
+    ],
+    "gated": [
+      {
+        "track": "ATTENTION",
+        "cc_garbage": 18.09,
+        "cc_real": 71.38,
+        "cc_separation": 53.28999999999999,
+        "conf_garbage": 0.81,
+        "conf_real": 0.73,
+        "conf_separation": -0.08000000000000007,
+        "gate_garbage": 0.19,
+        "gate_real": 0.82,
+        "gate_separation": 0.6299999999999999,
+        "verdict": "healthy"
+      },
+      {
+        "track": "GESTURE",
+        "cc_garbage": 24.419999999999998,
+        "cc_real": 110.88,
+        "cc_separation": 86.46,
+        "conf_garbage": 0.46,
+        "conf_real": 0.99,
+        "conf_separation": 0.53,
+        "gate_garbage": 0.26,
+        "gate_real": 0.93,
+        "gate_separation": 0.67,
+        "verdict": "healthy"
+      },
+      {
+        "track": "INTENTION",
+        "cc_garbage": 0.42000000000000004,
+        "cc_real": 70.81,
+        "cc_separation": 70.39,
+        "conf_garbage": 0.93,
+        "conf_real": 0.81,
+        "conf_separation": -0.12,
+        "gate_garbage": 0.14,
+        "gate_real": 0.73,
+        "gate_separation": 0.59,
+        "verdict": "healthy"
+      },
+      {
+        "track": "TIMBRE",
+        "cc_garbage": 6.46,
+        "cc_real": 4.94,
+        "cc_separation": -1.5199999999999996,
+        "conf_garbage": 0.1,
+        "conf_real": 0.31,
+        "conf_separation": 0.21,
+        "gate_garbage": 0.19,
+        "gate_real": 0.13,
+        "gate_separation": -0.06,
+        "verdict": "ill-posed"
+      }
+    ],
+    "gated_reworded": [
+      {
+        "track": "ATTENTION",
+        "cc_garbage": 24.96,
+        "cc_real": 71.39999999999999,
+        "cc_separation": 46.43999999999999,
+        "conf_garbage": 0.99,
+        "conf_real": 0.69,
+        "conf_separation": -0.30000000000000004,
+        "gate_garbage": 0.21,
+        "gate_real": 0.82,
+        "gate_separation": 0.61,
+        "verdict": "healthy"
+      },
+      {
+        "track": "GESTURE",
+        "cc_garbage": 22.32,
+        "cc_real": 110.88,
+        "cc_separation": 88.56,
+        "conf_garbage": 0.5,
+        "conf_real": 0.99,
+        "conf_separation": 0.49,
+        "gate_garbage": 0.25,
+        "gate_real": 0.92,
+        "gate_separation": 0.67,
+        "verdict": "healthy"
+      },
+      {
+        "track": "INTENTION",
+        "cc_garbage": 15.99,
+        "cc_real": 51.8,
+        "cc_separation": 35.809999999999995,
+        "conf_garbage": 0.92,
+        "conf_real": 0.63,
+        "conf_separation": -0.29000000000000004,
+        "gate_garbage": 0.13,
+        "gate_real": 0.74,
+        "gate_separation": 0.61,
+        "verdict": "healthy"
+      },
+      {
+        "track": "TIMBRE",
+        "cc_garbage": 21.6,
+        "cc_real": 12.35,
+        "cc_separation": -9.250000000000002,
+        "conf_garbage": 0.49,
+        "conf_real": 0.13,
+        "conf_separation": -0.36,
+        "gate_garbage": 0.2,
+        "gate_real": 0.13,
+        "gate_separation": -0.07,
+        "verdict": "ill-posed"
+      }
+    ]
+  }
+}
