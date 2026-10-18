@@ -1,0 +1,3789 @@
+{
+  "stages": [
+    "acoustic",
+    "smartturn"
+  ],
+  "results": [
+    {
+      "case": "END/0/0.15",
+      "cell": "narration",
+      "truth": "end",
+      "silence_s": 0.15,
+      "speech_after": false,
+      "audio_s": 1.01,
+      "acoustic": {
+        "route": "acoustic",
+        "p_end": 0.005,
+        "longest_silence_s": 0.0,
+        "trailing_silence_s": 0.015,
+        "detail": "trailing 0.02s"
+      },
+      "smartturn": {
+        "route": "smartturn",
+        "p_end": 0.963355,
+        "detail": "p=0.9634"
+      },
+      "disagreement": 0.4792
+    },
+    {
+      "case": "MID/0/0.15",
+      "cell": "narration",
+      "truth": "mid",
+      "silence_s": 0.15,
+      "speech_after": true,
+      "audio_s": 1.01,
+      "acoustic": {
+        "route": "acoustic",
+        "p_end": 0.005,
+        "longest_silence_s": 0.0,
+        "trailing_silence_s": 0.015,
+        "detail": "trailing 0.02s"
+      },
+      "smartturn": {
+        "route": "smartturn",
+        "p_end": 0.942486,
+        "detail": "p=0.9425"
+      },
+      "disagreement": 0.4687
+    },
+    {
+      "case": "END/0/0.30",
+      "cell": "narration",
+      "truth": "end",
+      "silence_s": 0.3,
+      "speech_after": false,
+      "audio_s": 1.16,
+      "acoustic": {
+        "route": "acoustic",
+        "p_end": 0.095,
+        "longest_silence_s": 0.27,
+        "trailing_silence_s": 0.285,
+        "detail": "trailing 0.28s"
+      },
+      "smartturn": {
+        "route": "smartturn",
+        "p_end": 0.963355,
+        "detail": "p=0.9634"
+      },
+      "disagreement": 0.4342
+    },
+    {
+      "case": "MID/0/0.30",
+      "cell": "narration",
+      "truth": "mid",
+      "silence_s": 0.3,
+      "speech_after": true,
+      "audio_s": 1.16,
+      "acoustic": {
+        "route": "acoustic",
+        "p_end": 0.005,
+        "longest_silence_s": 0.25,
+        "trailing_silence_s": 0.015,
+        "detail": "trailing 0.01s"
+      },
+      "smartturn": {
+        "route": "smartturn",
+        "p_end": 0.948566,
+        "detail": "p=0.9486"
+      },
+      "disagreement": 0.4718
+    },
+    {
+      "case": "END/0/0.60",
+      "cell": "narration",
+      "truth": "end",
+      "silence_s": 0.6,
+      "speech_after": false,
+      "audio_s": 1.46,
+      "acoustic": {
+        "route": "acoustic",
+        "p_end": 0.195,
+        "longest_silence_s": 0.57,
+        "trailing_silence_s": 0.585,
+        "detail": "trailing 0.58s"
+      },
+      "smartturn": {
+        "route": "smartturn",
+        "p_end": 0.98426,
+        "detail": "p=0.9843"
+      },
+      "disagreement": 0.3946
+    },
+    {
+      "case": "MID/0/0.60",
+      "cell": "narration",
+      "truth": "mid",
+      "silence_s": 0.6,
+      "speech_after": true,
+      "audio_s": 1.46,
+      "acoustic": {
+        "route": "acoustic",
+        "p_end": 0.005,
+        "longest_silence_s": 0.55,
+        "trailing_silence_s": 0.015,
+        "detail": "trailing 0.01s"
+      },
+      "smartturn": {
+        "route": "smartturn",
+        "p_end": 0.907582,
+        "detail": "p=0.9076"
+      },
+      "disagreement": 0.4513
+    },
+    {
+      "case": "END/0/1.00",
+      "cell": "narration",
+      "truth": "end",
+      "silence_s": 1.0,
+      "speech_after": false,
+      "audio_s": 1.86,
+      "acoustic": {
+        "route": "acoustic",
+        "p_end": 0.3283,
+        "longest_silence_s": 0.97,
+        "trailing_silence_s": 0.985,
+        "detail": "trailing 0.99s"
+      },
+      "smartturn": {
+        "route": "smartturn",
+        "p_end": 0.988465,
+        "detail": "p=0.9885"
+      },
+      "disagreement": 0.3301
+    },
+    {
+      "case": "MID/0/1.00",
+      "cell": "narration",
+      "truth": "mid",
+      "silence_s": 1.0,
+      "speech_after": true,
+      "audio_s": 1.86,
+      "acoustic": {
+        "route": "acoustic",
+        "p_end": 0.005,
+        "longest_silence_s": 0.95,
+        "trailing_silence_s": 0.015,
+        "detail": "trailing 0.02s"
+      },
+      "smartturn": {
+        "route": "smartturn",
+        "p_end": 0.917027,
+        "detail": "p=0.9170"
+      },
+      "disagreement": 0.456
+    },
+    {
+      "case": "END/0/1.50",
+      "cell": "narration",
+      "truth": "end",
+      "silence_s": 1.5,
+      "speech_after": false,
+      "audio_s": 2.36,
+      "acoustic": {
+        "route": "acoustic",
+        "p_end": 0.495,
+        "longest_silence_s": 1.47,
+        "trailing_silence_s": 1.485,
+        "detail": "trailing 1.48s"
+      },
+      "smartturn": {
+        "route": "smartturn",
+        "p_end": 0.989737,
+        "detail": "p=0.9897"
+      },
+      "disagreement": 0.2474
+    },
+    {
+      "case": "MID/0/1.50",
+      "cell": "narration",
+      "truth": "mid",
+      "silence_s": 1.5,
+      "speech_after": true,
+      "audio_s": 2.36,
+      "acoustic": {
+        "route": "acoustic",
+        "p_end": 0.005,
+        "longest_silence_s": 1.45,
+        "trailing_silence_s": 0.015,
+        "detail": "trailing 0.02s"
+      },
+      "smartturn": {
+        "route": "smartturn",
+        "p_end": 0.779093,
+        "detail": "p=0.7791"
+      },
+      "disagreement": 0.387
+    },
+    {
+      "case": "END/1/0.15",
+      "cell": "narration",
+      "truth": "end",
+      "silence_s": 0.15,
+      "speech_after": false,
+      "audio_s": 1.21,
+      "acoustic": {
+        "route": "acoustic",
+        "p_end": 0.005,
+        "longest_silence_s": 0.0,
+        "trailing_silence_s": 0.015,
+        "detail": "trailing 0.01s"
+      },
+      "smartturn": {
+        "route": "smartturn",
+        "p_end": 0.704021,
+        "detail": "p=0.7040"
+      },
+      "disagreement": 0.3495
+    },
+    {
+      "case": "MID/1/0.15",
+      "cell": "narration",
+      "truth": "mid",
+      "silence_s": 0.15,
+      "speech_after": true,
+      "audio_s": 1.21,
+      "acoustic": {
+        "route": "acoustic",
+        "p_end": 0.005,
+        "longest_silence_s": 0.0,
+        "trailing_silence_s": 0.015,
+        "detail": "trailing 0.01s"
+      },
+      "smartturn": {
+        "route": "smartturn",
+        "p_end": 0.889684,
+        "detail": "p=0.8897"
+      },
+      "disagreement": 0.4423
+    },
+    {
+      "case": "END/1/0.30",
+      "cell": "narration",
+      "truth": "end",
+      "silence_s": 0.3,
+      "speech_after": false,
+      "audio_s": 1.36,
+      "acoustic": {
+        "route": "acoustic",
+        "p_end": 0.0983,
+        "longest_silence_s": 0.28,
+        "trailing_silence_s": 0.295,
+        "detail": "trailing 0.30s"
+      },
+      "smartturn": {
+        "route": "smartturn",
+        "p_end": 0.963355,
+        "detail": "p=0.9634"
+      },
+      "disagreement": 0.4325
+    },
+    {
+      "case": "MID/1/0.30",
+      "cell": "narration",
+      "truth": "mid",
+      "silence_s": 0.3,
+      "speech_after": true,
+      "audio_s": 1.36,
+      "acoustic": {
+        "route": "acoustic",
+        "p_end": 0.005,
+        "longest_silence_s": 0.25,
+        "trailing_silence_s": 0.015,
+        "detail": "trailing 0.02s"
+      },
+      "smartturn": {
+        "route": "smartturn",
+        "p_end": 0.889684,
+        "detail": "p=0.8897"
+      },
+      "disagreement": 0.4423
+    },
+    {
+      "case": "END/1/0.60",
+      "cell": "narration",
+      "truth": "end",
+      "silence_s": 0.6,
+      "speech_after": false,
+      "audio_s": 1.66,
+      "acoustic": {
+        "route": "acoustic",
+        "p_end": 0.1983,
+        "longest_silence_s": 0.58,
+        "trailing_silence_s": 0.595,
+        "detail": "trailing 0.59s"
+      },
+      "smartturn": {
+        "route": "smartturn",
+        "p_end": 0.985435,
+        "detail": "p=0.9854"
+      },
+      "disagreement": 0.3936
+    },
+    {
+      "case": "MID/1/0.60",
+      "cell": "narration",
+      "truth": "mid",
+      "silence_s": 0.6,
+      "speech_after": true,
+      "audio_s": 1.66,
+      "acoustic": {
+        "route": "acoustic",
+        "p_end": 0.005,
+        "longest_silence_s": 0.55,
+        "trailing_silence_s": 0.015,
+        "detail": "trailing 0.01s"
+      },
+      "smartturn": {
+        "route": "smartturn",
+        "p_end": 0.634465,
+        "detail": "p=0.6345"
+      },
+      "disagreement": 0.3147
+    },
+    {
+      "case": "END/1/1.00",
+      "cell": "narration",
+      "truth": "end",
+      "silence_s": 1.0,
+      "speech_after": false,
+      "audio_s": 2.06,
+      "acoustic": {
+        "route": "acoustic",
+        "p_end": 0.3317,
+        "longest_silence_s": 0.98,
+        "trailing_silence_s": 0.995,
+        "detail": "trailing 1.00s"
+      },
+      "smartturn": {
+        "route": "smartturn",
+        "p_end": 0.988465,
+        "detail": "p=0.9885"
+      },
+      "disagreement": 0.3284
+    },
+    {
+      "case": "MID/1/1.00",
+      "cell": "narration",
+      "truth": "mid",
+      "silence_s": 1.0,
+      "speech_after": true,
+      "audio_s": 2.06,
+      "acoustic": {
+        "route": "acoustic",
+        "p_end": 0.005,
+        "longest_silence_s": 0.95,
+        "trailing_silence_s": 0.015,
+        "detail": "trailing 0.02s"
+      },
+      "smartturn": {
+        "route": "smartturn",
+        "p_end": 0.587705,
+        "detail": "p=0.5877"
+      },
+      "disagreement": 0.2914
+    },
+    {
+      "case": "END/1/1.50",
+      "cell": "narration",
+      "truth": "end",
+      "silence_s": 1.5,
+      "speech_after": false,
+      "audio_s": 2.56,
+      "acoustic": {
+        "route": "acoustic",
+        "p_end": 0.4983,
+        "longest_silence_s": 1.48,
+        "trailing_silence_s": 1.495,
+        "detail": "trailing 1.50s"
+      },
+      "smartturn": {
+        "route": "smartturn",
+        "p_end": 0.989329,
+        "detail": "p=0.9893"
+      },
+      "disagreement": 0.2455
+    },
+    {
+      "case": "MID/1/1.50",
+      "cell": "narration",
+      "truth": "mid",
+      "silence_s": 1.5,
+      "speech_after": true,
+      "audio_s": 2.56,
+      "acoustic": {
+        "route": "acoustic",
+        "p_end": 0.005,
+        "longest_silence_s": 1.45,
+        "trailing_silence_s": 0.015,
+        "detail": "trailing 0.02s"
+      },
+      "smartturn": {
+        "route": "smartturn",
+        "p_end": 0.735764,
+        "detail": "p=0.7358"
+      },
+      "disagreement": 0.3654
+    },
+    {
+      "case": "END/2/0.15",
+      "cell": "narration",
+      "truth": "end",
+      "silence_s": 0.15,
+      "speech_after": false,
+      "audio_s": 1.47,
+      "acoustic": {
+        "route": "acoustic",
+        "p_end": 0.005,
+        "longest_silence_s": 0.0,
+        "trailing_silence_s": 0.015,
+        "detail": "trailing 0.01s"
+      },
+      "smartturn": {
+        "route": "smartturn",
+        "p_end": 0.031472,
+        "detail": "p=0.0315"
+      },
+      "disagreement": 0.0132
+    },
+    {
+      "case": "MID/2/0.15",
+      "cell": "narration",
+      "truth": "mid",
+      "silence_s": 0.15,
+      "speech_after": true,
+      "audio_s": 1.47,
+      "acoustic": {
+        "route": "acoustic",
+        "p_end": 0.005,
+        "longest_silence_s": 0.0,
+        "trailing_silence_s": 0.015,
+        "detail": "trailing 0.01s"
+      },
+      "smartturn": {
+        "route": "smartturn",
+        "p_end": 0.042632,
+        "detail": "p=0.0426"
+      },
+      "disagreement": 0.0188
+    },
+    {
+      "case": "END/2/0.30",
+      "cell": "narration",
+      "truth": "end",
+      "silence_s": 0.3,
+      "speech_after": false,
+      "audio_s": 1.62,
+      "acoustic": {
+        "route": "acoustic",
+        "p_end": 0.1017,
+        "longest_silence_s": 0.29,
+        "trailing_silence_s": 0.305,
+        "detail": "trailing 0.31s"
+      },
+      "smartturn": {
+        "route": "smartturn",
+        "p_end": 0.038061,
+        "detail": "p=0.0381"
+      },
+      "disagreement": 0.0318
+    },
+    {
+      "case": "MID/2/0.30",
+      "cell": "narration",
+      "truth": "mid",
+      "silence_s": 0.3,
+      "speech_after": true,
+      "audio_s": 1.62,
+      "acoustic": {
+        "route": "acoustic",
+        "p_end": 0.005,
+        "longest_silence_s": 0.3,
+        "trailing_silence_s": 0.015,
+        "detail": "trailing 0.02s"
+      },
+      "smartturn": {
+        "route": "smartturn",
+        "p_end": 0.055416,
+        "detail": "p=0.0554"
+      },
+      "disagreement": 0.0252
+    },
+    {
+      "case": "END/2/0.60",
+      "cell": "narration",
+      "truth": "end",
+      "silence_s": 0.6,
+      "speech_after": false,
+      "audio_s": 1.92,
+      "acoustic": {
+        "route": "acoustic",
+        "p_end": 0.2017,
+        "longest_silence_s": 0.59,
+        "trailing_silence_s": 0.605,
+        "detail": "trailing 0.60s"
+      },
+      "smartturn": {
+        "route": "smartturn",
+        "p_end": 0.441193,
+        "detail": "p=0.4412"
+      },
+      "disagreement": 0.1197
+    },
+    {
+      "case": "MID/2/0.60",
+      "cell": "narration",
+      "truth": "mid",
+      "silence_s": 0.6,
+      "speech_after": true,
+      "audio_s": 1.92,
+      "acoustic": {
+        "route": "acoustic",
+        "p_end": 0.005,
+        "longest_silence_s": 0.6,
+        "trailing_silence_s": 0.015,
+        "detail": "trailing 0.01s"
+      },
+      "smartturn": {
+        "route": "smartturn",
+        "p_end": 0.036645,
+        "detail": "p=0.0366"
+      },
+      "disagreement": 0.0158
+    },
+    {
+      "case": "END/2/1.00",
+      "cell": "narration",
+      "truth": "end",
+      "silence_s": 1.0,
+      "speech_after": false,
+      "audio_s": 2.32,
+      "acoustic": {
+        "route": "acoustic",
+        "p_end": 0.335,
+        "longest_silence_s": 0.99,
+        "trailing_silence_s": 1.005,
+        "detail": "trailing 1.00s"
+      },
+      "smartturn": {
+        "route": "smartturn",
+        "p_end": 0.160534,
+        "detail": "p=0.1605"
+      },
+      "disagreement": 0.0872
+    },
+    {
+      "case": "MID/2/1.00",
+      "cell": "narration",
+      "truth": "mid",
+      "silence_s": 1.0,
+      "speech_after": true,
+      "audio_s": 2.32,
+      "acoustic": {
+        "route": "acoustic",
+        "p_end": 0.005,
+        "longest_silence_s": 1.0,
+        "trailing_silence_s": 0.015,
+        "detail": "trailing 0.02s"
+      },
+      "smartturn": {
+        "route": "smartturn",
+        "p_end": 0.01768,
+        "detail": "p=0.0177"
+      },
+      "disagreement": 0.0063
+    },
+    {
+      "case": "END/2/1.50",
+      "cell": "narration",
+      "truth": "end",
+      "silence_s": 1.5,
+      "speech_after": false,
+      "audio_s": 2.82,
+      "acoustic": {
+        "route": "acoustic",
+        "p_end": 0.5017,
+        "longest_silence_s": 1.49,
+        "trailing_silence_s": 1.505,
+        "detail": "trailing 1.50s"
+      },
+      "smartturn": {
+        "route": "smartturn",
+        "p_end": 0.758089,
+        "detail": "p=0.7581"
+      },
+      "disagreement": 0.1282
+    },
+    {
+      "case": "MID/2/1.50",
+      "cell": "narration",
+      "truth": "mid",
+      "silence_s": 1.5,
+      "speech_after": true,
+      "audio_s": 2.82,
+      "acoustic": {
+        "route": "acoustic",
+        "p_end": 0.005,
+        "longest_silence_s": 1.5,
+        "trailing_silence_s": 0.015,
+        "detail": "trailing 0.02s"
+      },
+      "smartturn": {
+        "route": "smartturn",
+        "p_end": 0.010263,
+        "detail": "p=0.0103"
+      },
+      "disagreement": 0.0026
+    },
+    {
+      "case": "NONE/0",
+      "cell": "narration",
+      "truth": "none",
+      "silence_s": 0.0,
+      "speech_after": true,
+      "audio_s": 0.86,
+      "acoustic": {
+        "route": "acoustic",
+        "p_end": 0.005,
+        "longest_silence_s": 0.0,
+        "trailing_silence_s": 0.015,
+        "detail": "trailing 0.02s"
+      },
+      "smartturn": {
+        "route": "smartturn",
+        "p_end": 0.968528,
+        "detail": "p=0.9685"
+      },
+      "disagreement": 0.4818
+    },
+    {
+      "case": "NONE/1",
+      "cell": "narration",
+      "truth": "none",
+      "silence_s": 0.0,
+      "speech_after": true,
+      "audio_s": 1.06,
+      "acoustic": {
+        "route": "acoustic",
+        "p_end": 0.005,
+        "longest_silence_s": 0.0,
+        "trailing_silence_s": 0.015,
+        "detail": "trailing 0.02s"
+      },
+      "smartturn": {
+        "route": "smartturn",
+        "p_end": 0.922827,
+        "detail": "p=0.9228"
+      },
+      "disagreement": 0.4589
+    },
+    {
+      "case": "NONE/2",
+      "cell": "narration",
+      "truth": "none",
+      "silence_s": 0.0,
+      "speech_after": true,
+      "audio_s": 1.32,
+      "acoustic": {
+        "route": "acoustic",
+        "p_end": 0.005,
+        "longest_silence_s": 0.0,
+        "trailing_silence_s": 0.015,
+        "detail": "trailing 0.02s"
+      },
+      "smartturn": {
+        "route": "smartturn",
+        "p_end": 0.080025,
+        "detail": "p=0.0800"
+      },
+      "disagreement": 0.0375
+    },
+    {
+      "case": "RESUME/0/0.60",
+      "cell": "narration",
+      "truth": "resume",
+      "silence_s": 0.6,
+      "speech_after": true,
+      "audio_s": 1.46,
+      "acoustic": {
+        "route": "acoustic",
+        "p_end": 0.005,
+        "longest_silence_s": 0.64,
+        "trailing_silence_s": 0.015,
+        "detail": "trailing 0.01s"
+      },
+      "smartturn": {
+        "route": "smartturn",
+        "p_end": 0.96047,
+        "detail": "p=0.9605"
+      },
+      "disagreement": 0.4777
+    },
+    {
+      "case": "RESUME/0/1.00",
+      "cell": "narration",
+      "truth": "resume",
+      "silence_s": 1.0,
+      "speech_after": true,
+      "audio_s": 1.86,
+      "acoustic": {
+        "route": "acoustic",
+        "p_end": 0.005,
+        "longest_silence_s": 1.04,
+        "trailing_silence_s": 0.015,
+        "detail": "trailing 0.02s"
+      },
+      "smartturn": {
+        "route": "smartturn",
+        "p_end": 0.935736,
+        "detail": "p=0.9357"
+      },
+      "disagreement": 0.4654
+    },
+    {
+      "case": "RESUME/0/1.50",
+      "cell": "narration",
+      "truth": "resume",
+      "silence_s": 1.5,
+      "speech_after": true,
+      "audio_s": 2.36,
+      "acoustic": {
+        "route": "acoustic",
+        "p_end": 0.005,
+        "longest_silence_s": 1.54,
+        "trailing_silence_s": 0.015,
+        "detail": "trailing 0.02s"
+      },
+      "smartturn": {
+        "route": "smartturn",
+        "p_end": 0.940313,
+        "detail": "p=0.9403"
+      },
+      "disagreement": 0.4677
+    },
+    {
+      "case": "RESUME/0/2.00",
+      "cell": "narration",
+      "truth": "resume",
+      "silence_s": 2.0,
+      "speech_after": true,
+      "audio_s": 2.86,
+      "acoustic": {
+        "route": "acoustic",
+        "p_end": 0.005,
+        "longest_silence_s": 2.04,
+        "trailing_silence_s": 0.015,
+        "detail": "trailing 0.02s"
+      },
+      "smartturn": {
+        "route": "smartturn",
+        "p_end": 0.942486,
+        "detail": "p=0.9425"
+      },
+      "disagreement": 0.4687
+    },
+    {
+      "case": "RESUME/1/0.60",
+      "cell": "narration",
+      "truth": "resume",
+      "silence_s": 0.6,
+      "speech_after": true,
+      "audio_s": 1.66,
+      "acoustic": {
+        "route": "acoustic",
+        "p_end": 0.005,
+        "longest_silence_s": 0.66,
+        "trailing_silence_s": 0.015,
+        "detail": "trailing 0.01s"
+      },
+      "smartturn": {
+        "route": "smartturn",
+        "p_end": 0.839466,
+        "detail": "p=0.8395"
+      },
+      "disagreement": 0.4172
+    },
+    {
+      "case": "RESUME/1/1.00",
+      "cell": "narration",
+      "truth": "resume",
+      "silence_s": 1.0,
+      "speech_after": true,
+      "audio_s": 2.06,
+      "acoustic": {
+        "route": "acoustic",
+        "p_end": 0.005,
+        "longest_silence_s": 1.06,
+        "trailing_silence_s": 0.015,
+        "detail": "trailing 0.02s"
+      },
+      "smartturn": {
+        "route": "smartturn",
+        "p_end": 0.919975,
+        "detail": "p=0.9200"
+      },
+      "disagreement": 0.4575
+    },
+    {
+      "case": "RESUME/1/1.50",
+      "cell": "narration",
+      "truth": "resume",
+      "silence_s": 1.5,
+      "speech_after": true,
+      "audio_s": 2.56,
+      "acoustic": {
+        "route": "acoustic",
+        "p_end": 0.005,
+        "longest_silence_s": 1.56,
+        "trailing_silence_s": 0.015,
+        "detail": "trailing 0.02s"
+      },
+      "smartturn": {
+        "route": "smartturn",
+        "p_end": 0.950454,
+        "detail": "p=0.9505"
+      },
+      "disagreement": 0.4727
+    },
+    {
+      "case": "RESUME/1/2.00",
+      "cell": "narration",
+      "truth": "resume",
+      "silence_s": 2.0,
+      "speech_after": true,
+      "audio_s": 3.06,
+      "acoustic": {
+        "route": "acoustic",
+        "p_end": 0.005,
+        "longest_silence_s": 2.06,
+        "trailing_silence_s": 0.015,
+        "detail": "trailing 0.02s"
+      },
+      "smartturn": {
+        "route": "smartturn",
+        "p_end": 0.249208,
+        "detail": "p=0.2492"
+      },
+      "disagreement": 0.1221
+    },
+    {
+      "case": "RESUME/2/0.60",
+      "cell": "narration",
+      "truth": "resume",
+      "silence_s": 0.6,
+      "speech_after": true,
+      "audio_s": 1.92,
+      "acoustic": {
+        "route": "acoustic",
+        "p_end": 0.005,
+        "longest_silence_s": 0.55,
+        "trailing_silence_s": 0.015,
+        "detail": "trailing 0.01s"
+      },
+      "smartturn": {
+        "route": "smartturn",
+        "p_end": 0.027008,
+        "detail": "p=0.0270"
+      },
+      "disagreement": 0.011
+    },
+    {
+      "case": "RESUME/2/1.00",
+      "cell": "narration",
+      "truth": "resume",
+      "silence_s": 1.0,
+      "speech_after": true,
+      "audio_s": 2.32,
+      "acoustic": {
+        "route": "acoustic",
+        "p_end": 0.005,
+        "longest_silence_s": 0.95,
+        "trailing_silence_s": 0.015,
+        "detail": "trailing 0.02s"
+      },
+      "smartturn": {
+        "route": "smartturn",
+        "p_end": 0.021446,
+        "detail": "p=0.0214"
+      },
+      "disagreement": 0.0082
+    },
+    {
+      "case": "RESUME/2/1.50",
+      "cell": "narration",
+      "truth": "resume",
+      "silence_s": 1.5,
+      "speech_after": true,
+      "audio_s": 2.82,
+      "acoustic": {
+        "route": "acoustic",
+        "p_end": 0.005,
+        "longest_silence_s": 1.45,
+        "trailing_silence_s": 0.015,
+        "detail": "trailing 0.02s"
+      },
+      "smartturn": {
+        "route": "smartturn",
+        "p_end": 0.01768,
+        "detail": "p=0.0177"
+      },
+      "disagreement": 0.0063
+    },
+    {
+      "case": "RESUME/2/2.00",
+      "cell": "narration",
+      "truth": "resume",
+      "silence_s": 2.0,
+      "speech_after": true,
+      "audio_s": 3.32,
+      "acoustic": {
+        "route": "acoustic",
+        "p_end": 0.005,
+        "longest_silence_s": 1.95,
+        "trailing_silence_s": 0.015,
+        "detail": "trailing 0.02s"
+      },
+      "smartturn": {
+        "route": "smartturn",
+        "p_end": 0.018377,
+        "detail": "p=0.0184"
+      },
+      "disagreement": 0.0067
+    },
+    {
+      "case": "END/0/0.15",
+      "cell": "essay",
+      "truth": "end",
+      "silence_s": 0.15,
+      "speech_after": false,
+      "audio_s": 1.01,
+      "acoustic": {
+        "route": "acoustic",
+        "p_end": 0.005,
+        "longest_silence_s": 0.0,
+        "trailing_silence_s": 0.015,
+        "detail": "trailing 0.02s"
+      },
+      "smartturn": {
+        "route": "smartturn",
+        "p_end": 0.976837,
+        "detail": "p=0.9768"
+      },
+      "disagreement": 0.4859
+    },
+    {
+      "case": "MID/0/0.15",
+      "cell": "essay",
+      "truth": "mid",
+      "silence_s": 0.15,
+      "speech_after": true,
+      "audio_s": 1.01,
+      "acoustic": {
+        "route": "acoustic",
+        "p_end": 0.005,
+        "longest_silence_s": 0.0,
+        "trailing_silence_s": 0.015,
+        "detail": "trailing 0.02s"
+      },
+      "smartturn": {
+        "route": "smartturn",
+        "p_end": 0.735764,
+        "detail": "p=0.7358"
+      },
+      "disagreement": 0.3654
+    },
+    {
+      "case": "END/0/0.30",
+      "cell": "essay",
+      "truth": "end",
+      "silence_s": 0.3,
+      "speech_after": false,
+      "audio_s": 1.16,
+      "acoustic": {
+        "route": "acoustic",
+        "p_end": 0.095,
+        "longest_silence_s": 0.27,
+        "trailing_silence_s": 0.285,
+        "detail": "trailing 0.28s"
+      },
+      "smartturn": {
+        "route": "smartturn",
+        "p_end": 0.987531,
+        "detail": "p=0.9875"
+      },
+      "disagreement": 0.4463
+    },
+    {
+      "case": "MID/0/0.30",
+      "cell": "essay",
+      "truth": "mid",
+      "silence_s": 0.3,
+      "speech_after": true,
+      "audio_s": 1.16,
+      "acoustic": {
+        "route": "acoustic",
+        "p_end": 0.005,
+        "longest_silence_s": 0.26,
+        "trailing_silence_s": 0.015,
+        "detail": "trailing 0.01s"
+      },
+      "smartturn": {
+        "route": "smartturn",
+        "p_end": 0.750792,
+        "detail": "p=0.7508"
+      },
+      "disagreement": 0.3729
+    },
+    {
+      "case": "END/0/0.60",
+      "cell": "essay",
+      "truth": "end",
+      "silence_s": 0.6,
+      "speech_after": false,
+      "audio_s": 1.46,
+      "acoustic": {
+        "route": "acoustic",
+        "p_end": 0.195,
+        "longest_silence_s": 0.57,
+        "trailing_silence_s": 0.585,
+        "detail": "trailing 0.58s"
+      },
+      "smartturn": {
+        "route": "smartturn",
+        "p_end": 0.986523,
+        "detail": "p=0.9865"
+      },
+      "disagreement": 0.3958
+    },
+    {
+      "case": "MID/0/0.60",
+      "cell": "essay",
+      "truth": "mid",
+      "silence_s": 0.6,
+      "speech_after": true,
+      "audio_s": 1.46,
+      "acoustic": {
+        "route": "acoustic",
+        "p_end": 0.005,
+        "longest_silence_s": 0.56,
+        "trailing_silence_s": 0.015,
+        "detail": "trailing 0.01s"
+      },
+      "smartturn": {
+        "route": "smartturn",
+        "p_end": 0.490154,
+        "detail": "p=0.4902"
+      },
+      "disagreement": 0.2426
+    },
+    {
+      "case": "END/0/1.00",
+      "cell": "essay",
+      "truth": "end",
+      "silence_s": 1.0,
+      "speech_after": false,
+      "audio_s": 1.86,
+      "acoustic": {
+        "route": "acoustic",
+        "p_end": 0.3283,
+        "longest_silence_s": 0.97,
+        "trailing_silence_s": 0.985,
+        "detail": "trailing 0.99s"
+      },
+      "smartturn": {
+        "route": "smartturn",
+        "p_end": 0.982991,
+        "detail": "p=0.9830"
+      },
+      "disagreement": 0.3273
+    },
+    {
+      "case": "MID/0/1.00",
+      "cell": "essay",
+      "truth": "mid",
+      "silence_s": 1.0,
+      "speech_after": true,
+      "audio_s": 1.86,
+      "acoustic": {
+        "route": "acoustic",
+        "p_end": 0.005,
+        "longest_silence_s": 0.96,
+        "trailing_silence_s": 0.015,
+        "detail": "trailing 0.02s"
+      },
+      "smartturn": {
+        "route": "smartturn",
+        "p_end": 0.271964,
+        "detail": "p=0.2720"
+      },
+      "disagreement": 0.1335
+    },
+    {
+      "case": "END/0/1.50",
+      "cell": "essay",
+      "truth": "end",
+      "silence_s": 1.5,
+      "speech_after": false,
+      "audio_s": 2.36,
+      "acoustic": {
+        "route": "acoustic",
+        "p_end": 0.495,
+        "longest_silence_s": 1.47,
+        "trailing_silence_s": 1.485,
+        "detail": "trailing 1.48s"
+      },
+      "smartturn": {
+        "route": "smartturn",
+        "p_end": 0.988905,
+        "detail": "p=0.9889"
+      },
+      "disagreement": 0.247
+    },
+    {
+      "case": "MID/0/1.50",
+      "cell": "essay",
+      "truth": "mid",
+      "silence_s": 1.5,
+      "speech_after": true,
+      "audio_s": 2.36,
+      "acoustic": {
+        "route": "acoustic",
+        "p_end": 0.005,
+        "longest_silence_s": 1.46,
+        "trailing_silence_s": 0.015,
+        "detail": "trailing 0.02s"
+      },
+      "smartturn": {
+        "route": "smartturn",
+        "p_end": 0.160534,
+        "detail": "p=0.1605"
+      },
+      "disagreement": 0.0778
+    },
+    {
+      "case": "END/1/0.15",
+      "cell": "essay",
+      "truth": "end",
+      "silence_s": 0.15,
+      "speech_after": false,
+      "audio_s": 1.19,
+      "acoustic": {
+        "route": "acoustic",
+        "p_end": 0.005,
+        "longest_silence_s": 0.0,
+        "trailing_silence_s": 0.015,
+        "detail": "trailing 0.01s"
+      },
+      "smartturn": {
+        "route": "smartturn",
+        "p_end": 0.67882,
+        "detail": "p=0.6788"
+      },
+      "disagreement": 0.3369
+    },
+    {
+      "case": "MID/1/0.15",
+      "cell": "essay",
+      "truth": "mid",
+      "silence_s": 0.15,
+      "speech_after": true,
+      "audio_s": 1.19,
+      "acoustic": {
+        "route": "acoustic",
+        "p_end": 0.005,
+        "longest_silence_s": 0.0,
+        "trailing_silence_s": 0.015,
+        "detail": "trailing 0.01s"
+      },
+      "smartturn": {
+        "route": "smartturn",
+        "p_end": 0.249208,
+        "detail": "p=0.2492"
+      },
+      "disagreement": 0.1221
+    },
+    {
+      "case": "END/1/0.30",
+      "cell": "essay",
+      "truth": "end",
+      "silence_s": 0.3,
+      "speech_after": false,
+      "audio_s": 1.34,
+      "acoustic": {
+        "route": "acoustic",
+        "p_end": 0.0917,
+        "longest_silence_s": 0.26,
+        "trailing_silence_s": 0.275,
+        "detail": "trailing 0.28s"
+      },
+      "smartturn": {
+        "route": "smartturn",
+        "p_end": 0.67882,
+        "detail": "p=0.6788"
+      },
+      "disagreement": 0.2936
+    },
+    {
+      "case": "MID/1/0.30",
+      "cell": "essay",
+      "truth": "mid",
+      "silence_s": 0.3,
+      "speech_after": true,
+      "audio_s": 1.34,
+      "acoustic": {
+        "route": "acoustic",
+        "p_end": 0.005,
+        "longest_silence_s": 0.25,
+        "trailing_silence_s": 0.015,
+        "detail": "trailing 0.02s"
+      },
+      "smartturn": {
+        "route": "smartturn",
+        "p_end": 0.031472,
+        "detail": "p=0.0315"
+      },
+      "disagreement": 0.0132
+    },
+    {
+      "case": "END/1/0.60",
+      "cell": "essay",
+      "truth": "end",
+      "silence_s": 0.6,
+      "speech_after": false,
+      "audio_s": 1.64,
+      "acoustic": {
+        "route": "acoustic",
+        "p_end": 0.1917,
+        "longest_silence_s": 0.56,
+        "trailing_silence_s": 0.575,
+        "detail": "trailing 0.57s"
+      },
+      "smartturn": {
+        "route": "smartturn",
+        "p_end": 0.839466,
+        "detail": "p=0.8395"
+      },
+      "disagreement": 0.3239
+    },
+    {
+      "case": "MID/1/0.60",
+      "cell": "essay",
+      "truth": "mid",
+      "silence_s": 0.6,
+      "speech_after": true,
+      "audio_s": 1.64,
+      "acoustic": {
+        "route": "acoustic",
+        "p_end": 0.005,
+        "longest_silence_s": 0.55,
+        "trailing_silence_s": 0.015,
+        "detail": "trailing 0.01s"
+      },
+      "smartturn": {
+        "route": "smartturn",
+        "p_end": 0.031472,
+        "detail": "p=0.0315"
+      },
+      "disagreement": 0.0132
+    },
+    {
+      "case": "END/1/1.00",
+      "cell": "essay",
+      "truth": "end",
+      "silence_s": 1.0,
+      "speech_after": false,
+      "audio_s": 2.04,
+      "acoustic": {
+        "route": "acoustic",
+        "p_end": 0.325,
+        "longest_silence_s": 0.96,
+        "trailing_silence_s": 0.975,
+        "detail": "trailing 0.98s"
+      },
+      "smartturn": {
+        "route": "smartturn",
+        "p_end": 0.940313,
+        "detail": "p=0.9403"
+      },
+      "disagreement": 0.3077
+    },
+    {
+      "case": "MID/1/1.00",
+      "cell": "essay",
+      "truth": "mid",
+      "silence_s": 1.0,
+      "speech_after": true,
+      "audio_s": 2.04,
+      "acoustic": {
+        "route": "acoustic",
+        "p_end": 0.005,
+        "longest_silence_s": 0.95,
+        "trailing_silence_s": 0.015,
+        "detail": "trailing 0.02s"
+      },
+      "smartturn": {
+        "route": "smartturn",
+        "p_end": 0.025992,
+        "detail": "p=0.0260"
+      },
+      "disagreement": 0.0105
+    },
+    {
+      "case": "END/1/1.50",
+      "cell": "essay",
+      "truth": "end",
+      "silence_s": 1.5,
+      "speech_after": false,
+      "audio_s": 2.54,
+      "acoustic": {
+        "route": "acoustic",
+        "p_end": 0.4917,
+        "longest_silence_s": 1.46,
+        "trailing_silence_s": 1.475,
+        "detail": "trailing 1.48s"
+      },
+      "smartturn": {
+        "route": "smartturn",
+        "p_end": 0.844703,
+        "detail": "p=0.8447"
+      },
+      "disagreement": 0.1765
+    },
+    {
+      "case": "MID/1/1.50",
+      "cell": "essay",
+      "truth": "mid",
+      "silence_s": 1.5,
+      "speech_after": true,
+      "audio_s": 2.54,
+      "acoustic": {
+        "route": "acoustic",
+        "p_end": 0.005,
+        "longest_silence_s": 1.45,
+        "trailing_silence_s": 0.015,
+        "detail": "trailing 0.02s"
+      },
+      "smartturn": {
+        "route": "smartturn",
+        "p_end": 0.069167,
+        "detail": "p=0.0692"
+      },
+      "disagreement": 0.0321
+    },
+    {
+      "case": "END/2/0.15",
+      "cell": "essay",
+      "truth": "end",
+      "silence_s": 0.15,
+      "speech_after": false,
+      "audio_s": 1.7,
+      "acoustic": {
+        "route": "acoustic",
+        "p_end": 0.005,
+        "longest_silence_s": 0.0,
+        "trailing_silence_s": 0.015,
+        "detail": "trailing 0.01s"
+      },
+      "smartturn": {
+        "route": "smartturn",
+        "p_end": 0.877542,
+        "detail": "p=0.8775"
+      },
+      "disagreement": 0.4363
+    },
+    {
+      "case": "MID/2/0.15",
+      "cell": "essay",
+      "truth": "mid",
+      "silence_s": 0.15,
+      "speech_after": true,
+      "audio_s": 1.7,
+      "acoustic": {
+        "route": "acoustic",
+        "p_end": 0.005,
+        "longest_silence_s": 0.0,
+        "trailing_silence_s": 0.015,
+        "detail": "trailing 0.01s"
+      },
+      "smartturn": {
+        "route": "smartturn",
+        "p_end": 0.634465,
+        "detail": "p=0.6345"
+      },
+      "disagreement": 0.3147
+    },
+    {
+      "case": "END/2/0.30",
+      "cell": "essay",
+      "truth": "end",
+      "silence_s": 0.3,
+      "speech_after": false,
+      "audio_s": 1.85,
+      "acoustic": {
+        "route": "acoustic",
+        "p_end": 0.095,
+        "longest_silence_s": 0.27,
+        "trailing_silence_s": 0.285,
+        "detail": "trailing 0.29s"
+      },
+      "smartturn": {
+        "route": "smartturn",
+        "p_end": 0.970843,
+        "detail": "p=0.9708"
+      },
+      "disagreement": 0.4379
+    },
+    {
+      "case": "MID/2/0.30",
+      "cell": "essay",
+      "truth": "mid",
+      "silence_s": 0.3,
+      "speech_after": true,
+      "audio_s": 1.85,
+      "acoustic": {
+        "route": "acoustic",
+        "p_end": 0.005,
+        "longest_silence_s": 0.26,
+        "trailing_silence_s": 0.015,
+        "detail": "trailing 0.02s"
+      },
+      "smartturn": {
+        "route": "smartturn",
+        "p_end": 0.670173,
+        "detail": "p=0.6702"
+      },
+      "disagreement": 0.3326
+    },
+    {
+      "case": "END/2/0.60",
+      "cell": "essay",
+      "truth": "end",
+      "silence_s": 0.6,
+      "speech_after": false,
+      "audio_s": 2.15,
+      "acoustic": {
+        "route": "acoustic",
+        "p_end": 0.195,
+        "longest_silence_s": 0.57,
+        "trailing_silence_s": 0.585,
+        "detail": "trailing 0.58s"
+      },
+      "smartturn": {
+        "route": "smartturn",
+        "p_end": 0.988465,
+        "detail": "p=0.9885"
+      },
+      "disagreement": 0.3967
+    },
+    {
+      "case": "MID/2/0.60",
+      "cell": "essay",
+      "truth": "mid",
+      "silence_s": 0.6,
+      "speech_after": true,
+      "audio_s": 2.15,
+      "acoustic": {
+        "route": "acoustic",
+        "p_end": 0.005,
+        "longest_silence_s": 0.56,
+        "trailing_silence_s": 0.015,
+        "detail": "trailing 0.02s"
+      },
+      "smartturn": {
+        "route": "smartturn",
+        "p_end": 0.347466,
+        "detail": "p=0.3475"
+      },
+      "disagreement": 0.1712
+    },
+    {
+      "case": "END/2/1.00",
+      "cell": "essay",
+      "truth": "end",
+      "silence_s": 1.0,
+      "speech_after": false,
+      "audio_s": 2.55,
+      "acoustic": {
+        "route": "acoustic",
+        "p_end": 0.3283,
+        "longest_silence_s": 0.97,
+        "trailing_silence_s": 0.985,
+        "detail": "trailing 0.98s"
+      },
+      "smartturn": {
+        "route": "smartturn",
+        "p_end": 0.99013,
+        "detail": "p=0.9901"
+      },
+      "disagreement": 0.3309
+    },
+    {
+      "case": "MID/2/1.00",
+      "cell": "essay",
+      "truth": "mid",
+      "silence_s": 1.0,
+      "speech_after": true,
+      "audio_s": 2.55,
+      "acoustic": {
+        "route": "acoustic",
+        "p_end": 0.005,
+        "longest_silence_s": 0.96,
+        "trailing_silence_s": 0.015,
+        "detail": "trailing 0.02s"
+      },
+      "smartturn": {
+        "route": "smartturn",
+        "p_end": 0.214203,
+        "detail": "p=0.2142"
+      },
+      "disagreement": 0.1046
+    },
+    {
+      "case": "END/2/1.50",
+      "cell": "essay",
+      "truth": "end",
+      "silence_s": 1.5,
+      "speech_after": false,
+      "audio_s": 3.05,
+      "acoustic": {
+        "route": "acoustic",
+        "p_end": 0.495,
+        "longest_silence_s": 1.47,
+        "trailing_silence_s": 1.485,
+        "detail": "trailing 1.48s"
+      },
+      "smartturn": {
+        "route": "smartturn",
+        "p_end": 0.980899,
+        "detail": "p=0.9809"
+      },
+      "disagreement": 0.2429
+    },
+    {
+      "case": "MID/2/1.50",
+      "cell": "essay",
+      "truth": "mid",
+      "silence_s": 1.5,
+      "speech_after": true,
+      "audio_s": 3.05,
+      "acoustic": {
+        "route": "acoustic",
+        "p_end": 0.005,
+        "longest_silence_s": 1.46,
+        "trailing_silence_s": 0.015,
+        "detail": "trailing 0.02s"
+      },
+      "smartturn": {
+        "route": "smartturn",
+        "p_end": 0.018377,
+        "detail": "p=0.0184"
+      },
+      "disagreement": 0.0067
+    },
+    {
+      "case": "NONE/0",
+      "cell": "essay",
+      "truth": "none",
+      "silence_s": 0.0,
+      "speech_after": true,
+      "audio_s": 0.86,
+      "acoustic": {
+        "route": "acoustic",
+        "p_end": 0.005,
+        "longest_silence_s": 0.0,
+        "trailing_silence_s": 0.015,
+        "detail": "trailing 0.02s"
+      },
+      "smartturn": {
+        "route": "smartturn",
+        "p_end": 0.972992,
+        "detail": "p=0.9730"
+      },
+      "disagreement": 0.484
+    },
+    {
+      "case": "NONE/1",
+      "cell": "essay",
+      "truth": "none",
+      "silence_s": 0.0,
+      "speech_after": true,
+      "audio_s": 1.04,
+      "acoustic": {
+        "route": "acoustic",
+        "p_end": 0.005,
+        "longest_silence_s": 0.0,
+        "trailing_silence_s": 0.015,
+        "detail": "trailing 0.02s"
+      },
+      "smartturn": {
+        "route": "smartturn",
+        "p_end": 0.720167,
+        "detail": "p=0.7202"
+      },
+      "disagreement": 0.3576
+    },
+    {
+      "case": "NONE/2",
+      "cell": "essay",
+      "truth": "none",
+      "silence_s": 0.0,
+      "speech_after": true,
+      "audio_s": 1.55,
+      "acoustic": {
+        "route": "acoustic",
+        "p_end": 0.005,
+        "longest_silence_s": 0.0,
+        "trailing_silence_s": 0.015,
+        "detail": "trailing 0.02s"
+      },
+      "smartturn": {
+        "route": "smartturn",
+        "p_end": 0.779093,
+        "detail": "p=0.7791"
+      },
+      "disagreement": 0.387
+    },
+    {
+      "case": "RESUME/0/0.60",
+      "cell": "essay",
+      "truth": "resume",
+      "silence_s": 0.6,
+      "speech_after": true,
+      "audio_s": 1.46,
+      "acoustic": {
+        "route": "acoustic",
+        "p_end": 0.005,
+        "longest_silence_s": 0.68,
+        "trailing_silence_s": 0.015,
+        "detail": "trailing 0.01s"
+      },
+      "smartturn": {
+        "route": "smartturn",
+        "p_end": 0.928254,
+        "detail": "p=0.9283"
+      },
+      "disagreement": 0.4616
+    },
+    {
+      "case": "RESUME/0/1.00",
+      "cell": "essay",
+      "truth": "resume",
+      "silence_s": 1.0,
+      "speech_after": true,
+      "audio_s": 1.86,
+      "acoustic": {
+        "route": "acoustic",
+        "p_end": 0.005,
+        "longest_silence_s": 1.08,
+        "trailing_silence_s": 0.015,
+        "detail": "trailing 0.02s"
+      },
+      "smartturn": {
+        "route": "smartturn",
+        "p_end": 0.900759,
+        "detail": "p=0.9008"
+      },
+      "disagreement": 0.4479
+    },
+    {
+      "case": "RESUME/0/1.50",
+      "cell": "essay",
+      "truth": "resume",
+      "silence_s": 1.5,
+      "speech_after": true,
+      "audio_s": 2.36,
+      "acoustic": {
+        "route": "acoustic",
+        "p_end": 0.005,
+        "longest_silence_s": 1.58,
+        "trailing_silence_s": 0.015,
+        "detail": "trailing 0.02s"
+      },
+      "smartturn": {
+        "route": "smartturn",
+        "p_end": 0.877542,
+        "detail": "p=0.8775"
+      },
+      "disagreement": 0.4363
+    },
+    {
+      "case": "RESUME/0/2.00",
+      "cell": "essay",
+      "truth": "resume",
+      "silence_s": 2.0,
+      "speech_after": true,
+      "audio_s": 2.86,
+      "acoustic": {
+        "route": "acoustic",
+        "p_end": 0.005,
+        "longest_silence_s": 2.08,
+        "trailing_silence_s": 0.015,
+        "detail": "trailing 0.02s"
+      },
+      "smartturn": {
+        "route": "smartturn",
+        "p_end": 0.935736,
+        "detail": "p=0.9357"
+      },
+      "disagreement": 0.4654
+    },
+    {
+      "case": "RESUME/1/0.60",
+      "cell": "essay",
+      "truth": "resume",
+      "silence_s": 0.6,
+      "speech_after": true,
+      "audio_s": 1.64,
+      "acoustic": {
+        "route": "acoustic",
+        "p_end": 0.005,
+        "longest_silence_s": 0.55,
+        "trailing_silence_s": 0.015,
+        "detail": "trailing 0.01s"
+      },
+      "smartturn": {
+        "route": "smartturn",
+        "p_end": 0.431506,
+        "detail": "p=0.4315"
+      },
+      "disagreement": 0.2133
+    },
+    {
+      "case": "RESUME/1/1.00",
+      "cell": "essay",
+      "truth": "resume",
+      "silence_s": 1.0,
+      "speech_after": true,
+      "audio_s": 2.04,
+      "acoustic": {
+        "route": "acoustic",
+        "p_end": 0.005,
+        "longest_silence_s": 0.95,
+        "trailing_silence_s": 0.015,
+        "detail": "trailing 0.02s"
+      },
+      "smartturn": {
+        "route": "smartturn",
+        "p_end": 0.188877,
+        "detail": "p=0.1889"
+      },
+      "disagreement": 0.0919
+    },
+    {
+      "case": "RESUME/1/1.50",
+      "cell": "essay",
+      "truth": "resume",
+      "silence_s": 1.5,
+      "speech_after": true,
+      "audio_s": 2.54,
+      "acoustic": {
+        "route": "acoustic",
+        "p_end": 0.005,
+        "longest_silence_s": 1.45,
+        "trailing_silence_s": 0.015,
+        "detail": "trailing 0.02s"
+      },
+      "smartturn": {
+        "route": "smartturn",
+        "p_end": 0.304252,
+        "detail": "p=0.3043"
+      },
+      "disagreement": 0.1496
+    },
+    {
+      "case": "RESUME/1/2.00",
+      "cell": "essay",
+      "truth": "resume",
+      "silence_s": 2.0,
+      "speech_after": true,
+      "audio_s": 3.04,
+      "acoustic": {
+        "route": "acoustic",
+        "p_end": 0.005,
+        "longest_silence_s": 1.95,
+        "trailing_silence_s": 0.015,
+        "detail": "trailing 0.02s"
+      },
+      "smartturn": {
+        "route": "smartturn",
+        "p_end": 0.038061,
+        "detail": "p=0.0381"
+      },
+      "disagreement": 0.0165
+    },
+    {
+      "case": "RESUME/2/0.60",
+      "cell": "essay",
+      "truth": "resume",
+      "silence_s": 0.6,
+      "speech_after": true,
+      "audio_s": 2.15,
+      "acoustic": {
+        "route": "acoustic",
+        "p_end": 0.005,
+        "longest_silence_s": 0.56,
+        "trailing_silence_s": 0.015,
+        "detail": "trailing 0.02s"
+      },
+      "smartturn": {
+        "route": "smartturn",
+        "p_end": 0.735764,
+        "detail": "p=0.7358"
+      },
+      "disagreement": 0.3654
+    },
+    {
+      "case": "RESUME/2/1.00",
+      "cell": "essay",
+      "truth": "resume",
+      "silence_s": 1.0,
+      "speech_after": true,
+      "audio_s": 2.55,
+      "acoustic": {
+        "route": "acoustic",
+        "p_end": 0.005,
+        "longest_silence_s": 0.96,
+        "trailing_silence_s": 0.015,
+        "detail": "trailing 0.02s"
+      },
+      "smartturn": {
+        "route": "smartturn",
+        "p_end": 0.509845,
+        "detail": "p=0.5098"
+      },
+      "disagreement": 0.2524
+    },
+    {
+      "case": "RESUME/2/1.50",
+      "cell": "essay",
+      "truth": "resume",
+      "silence_s": 1.5,
+      "speech_after": true,
+      "audio_s": 3.05,
+      "acoustic": {
+        "route": "acoustic",
+        "p_end": 0.005,
+        "longest_silence_s": 1.46,
+        "trailing_silence_s": 0.015,
+        "detail": "trailing 0.02s"
+      },
+      "smartturn": {
+        "route": "smartturn",
+        "p_end": 0.025992,
+        "detail": "p=0.0260"
+      },
+      "disagreement": 0.0105
+    },
+    {
+      "case": "RESUME/2/2.00",
+      "cell": "essay",
+      "truth": "resume",
+      "silence_s": 2.0,
+      "speech_after": true,
+      "audio_s": 3.55,
+      "acoustic": {
+        "route": "acoustic",
+        "p_end": 0.005,
+        "longest_silence_s": 1.96,
+        "trailing_silence_s": 0.015,
+        "detail": "trailing 0.02s"
+      },
+      "smartturn": {
+        "route": "smartturn",
+        "p_end": 0.412295,
+        "detail": "p=0.4123"
+      },
+      "disagreement": 0.2036
+    },
+    {
+      "case": "END/0/0.15",
+      "cell": "dialogue",
+      "truth": "end",
+      "silence_s": 0.15,
+      "speech_after": false,
+      "audio_s": 1.21,
+      "acoustic": {
+        "route": "acoustic",
+        "p_end": 0.005,
+        "longest_silence_s": 0.0,
+        "trailing_silence_s": 0.015,
+        "detail": "trailing 0.01s"
+      },
+      "smartturn": {
+        "route": "smartturn",
+        "p_end": 0.958947,
+        "detail": "p=0.9589"
+      },
+      "disagreement": 0.477
+    },
+    {
+      "case": "MID/0/0.15",
+      "cell": "dialogue",
+      "truth": "mid",
+      "silence_s": 0.15,
+      "speech_after": true,
+      "audio_s": 1.21,
+      "acoustic": {
+        "route": "acoustic",
+        "p_end": 0.005,
+        "longest_silence_s": 0.0,
+        "trailing_silence_s": 0.015,
+        "detail": "trailing 0.01s"
+      },
+      "smartturn": {
+        "route": "smartturn",
+        "p_end": 0.854759,
+        "detail": "p=0.8548"
+      },
+      "disagreement": 0.4249
+    },
+    {
+      "case": "END/0/0.30",
+      "cell": "dialogue",
+      "truth": "end",
+      "silence_s": 0.3,
+      "speech_after": false,
+      "audio_s": 1.36,
+      "acoustic": {
+        "route": "acoustic",
+        "p_end": 0.095,
+        "longest_silence_s": 0.27,
+        "trailing_silence_s": 0.285,
+        "detail": "trailing 0.29s"
+      },
+      "smartturn": {
+        "route": "smartturn",
+        "p_end": 0.96047,
+        "detail": "p=0.9605"
+      },
+      "disagreement": 0.4327
+    },
+    {
+      "case": "MID/0/0.30",
+      "cell": "dialogue",
+      "truth": "mid",
+      "silence_s": 0.3,
+      "speech_after": true,
+      "audio_s": 1.36,
+      "acoustic": {
+        "route": "acoustic",
+        "p_end": 0.005,
+        "longest_silence_s": 0.25,
+        "trailing_silence_s": 0.015,
+        "detail": "trailing 0.02s"
+      },
+      "smartturn": {
+        "route": "smartturn",
+        "p_end": 0.889684,
+        "detail": "p=0.8897"
+      },
+      "disagreement": 0.4423
+    },
+    {
+      "case": "END/0/0.60",
+      "cell": "dialogue",
+      "truth": "end",
+      "silence_s": 0.6,
+      "speech_after": false,
+      "audio_s": 1.66,
+      "acoustic": {
+        "route": "acoustic",
+        "p_end": 0.195,
+        "longest_silence_s": 0.57,
+        "trailing_silence_s": 0.585,
+        "detail": "trailing 0.58s"
+      },
+      "smartturn": {
+        "route": "smartturn",
+        "p_end": 0.987037,
+        "detail": "p=0.9870"
+      },
+      "disagreement": 0.396
+    },
+    {
+      "case": "MID/0/0.60",
+      "cell": "dialogue",
+      "truth": "mid",
+      "silence_s": 0.6,
+      "speech_after": true,
+      "audio_s": 1.66,
+      "acoustic": {
+        "route": "acoustic",
+        "p_end": 0.005,
+        "longest_silence_s": 0.55,
+        "trailing_silence_s": 0.015,
+        "detail": "trailing 0.01s"
+      },
+      "smartturn": {
+        "route": "smartturn",
+        "p_end": 0.907582,
+        "detail": "p=0.9076"
+      },
+      "disagreement": 0.4513
+    },
+    {
+      "case": "END/0/1.00",
+      "cell": "dialogue",
+      "truth": "end",
+      "silence_s": 1.0,
+      "speech_after": false,
+      "audio_s": 2.06,
+      "acoustic": {
+        "route": "acoustic",
+        "p_end": 0.3283,
+        "longest_silence_s": 0.97,
+        "trailing_silence_s": 0.985,
+        "detail": "trailing 0.99s"
+      },
+      "smartturn": {
+        "route": "smartturn",
+        "p_end": 0.98426,
+        "detail": "p=0.9843"
+      },
+      "disagreement": 0.328
+    },
+    {
+      "case": "MID/0/1.00",
+      "cell": "dialogue",
+      "truth": "mid",
+      "silence_s": 1.0,
+      "speech_after": true,
+      "audio_s": 2.06,
+      "acoustic": {
+        "route": "acoustic",
+        "p_end": 0.005,
+        "longest_silence_s": 0.95,
+        "trailing_silence_s": 0.015,
+        "detail": "trailing 0.02s"
+      },
+      "smartturn": {
+        "route": "smartturn",
+        "p_end": 0.877542,
+        "detail": "p=0.8775"
+      },
+      "disagreement": 0.4363
+    },
+    {
+      "case": "END/0/1.50",
+      "cell": "dialogue",
+      "truth": "end",
+      "silence_s": 1.5,
+      "speech_after": false,
+      "audio_s": 2.56,
+      "acoustic": {
+        "route": "acoustic",
+        "p_end": 0.495,
+        "longest_silence_s": 1.47,
+        "trailing_silence_s": 1.485,
+        "detail": "trailing 1.49s"
+      },
+      "smartturn": {
+        "route": "smartturn",
+        "p_end": 0.984858,
+        "detail": "p=0.9849"
+      },
+      "disagreement": 0.2449
+    },
+    {
+      "case": "MID/0/1.50",
+      "cell": "dialogue",
+      "truth": "mid",
+      "silence_s": 1.5,
+      "speech_after": true,
+      "audio_s": 2.56,
+      "acoustic": {
+        "route": "acoustic",
+        "p_end": 0.005,
+        "longest_silence_s": 1.45,
+        "trailing_silence_s": 0.015,
+        "detail": "trailing 0.02s"
+      },
+      "smartturn": {
+        "route": "smartturn",
+        "p_end": 0.961939,
+        "detail": "p=0.9619"
+      },
+      "disagreement": 0.4785
+    },
+    {
+      "case": "END/1/0.15",
+      "cell": "dialogue",
+      "truth": "end",
+      "silence_s": 0.15,
+      "speech_after": false,
+      "audio_s": 2.12,
+      "acoustic": {
+        "route": "acoustic",
+        "p_end": 0.005,
+        "longest_silence_s": 0.0,
+        "trailing_silence_s": 0.015,
+        "detail": "trailing 0.02s"
+      },
+      "smartturn": {
+        "route": "smartturn",
+        "p_end": 0.98426,
+        "detail": "p=0.9843"
+      },
+      "disagreement": 0.4896
+    },
+    {
+      "case": "MID/1/0.15",
+      "cell": "dialogue",
+      "truth": "mid",
+      "silence_s": 0.15,
+      "speech_after": true,
+      "audio_s": 2.12,
+      "acoustic": {
+        "route": "acoustic",
+        "p_end": 0.005,
+        "longest_silence_s": 0.2,
+        "trailing_silence_s": 0.015,
+        "detail": "trailing 0.02s"
+      },
+      "smartturn": {
+        "route": "smartturn",
+        "p_end": 0.978554,
+        "detail": "p=0.9786"
+      },
+      "disagreement": 0.4868
+    },
+    {
+      "case": "END/1/0.30",
+      "cell": "dialogue",
+      "truth": "end",
+      "silence_s": 0.3,
+      "speech_after": false,
+      "audio_s": 2.27,
+      "acoustic": {
+        "route": "acoustic",
+        "p_end": 0.095,
+        "longest_silence_s": 0.27,
+        "trailing_silence_s": 0.285,
+        "detail": "trailing 0.28s"
+      },
+      "smartturn": {
+        "route": "smartturn",
+        "p_end": 0.987037,
+        "detail": "p=0.9870"
+      },
+      "disagreement": 0.446
+    },
+    {
+      "case": "MID/1/0.30",
+      "cell": "dialogue",
+      "truth": "mid",
+      "silence_s": 0.3,
+      "speech_after": true,
+      "audio_s": 2.27,
+      "acoustic": {
+        "route": "acoustic",
+        "p_end": 0.005,
+        "longest_silence_s": 0.35,
+        "trailing_silence_s": 0.015,
+        "detail": "trailing 0.02s"
+      },
+      "smartturn": {
+        "route": "smartturn",
+        "p_end": 0.977712,
+        "detail": "p=0.9777"
+      },
+      "disagreement": 0.4864
+    },
+    {
+      "case": "END/1/0.60",
+      "cell": "dialogue",
+      "truth": "end",
+      "silence_s": 0.6,
+      "speech_after": false,
+      "audio_s": 2.57,
+      "acoustic": {
+        "route": "acoustic",
+        "p_end": 0.195,
+        "longest_silence_s": 0.57,
+        "trailing_silence_s": 0.585,
+        "detail": "trailing 0.58s"
+      },
+      "smartturn": {
+        "route": "smartturn",
+        "p_end": 0.989329,
+        "detail": "p=0.9893"
+      },
+      "disagreement": 0.3972
+    },
+    {
+      "case": "MID/1/0.60",
+      "cell": "dialogue",
+      "truth": "mid",
+      "silence_s": 0.6,
+      "speech_after": true,
+      "audio_s": 2.57,
+      "acoustic": {
+        "route": "acoustic",
+        "p_end": 0.005,
+        "longest_silence_s": 0.65,
+        "trailing_silence_s": 0.015,
+        "detail": "trailing 0.02s"
+      },
+      "smartturn": {
+        "route": "smartturn",
+        "p_end": 0.970843,
+        "detail": "p=0.9708"
+      },
+      "disagreement": 0.4829
+    },
+    {
+      "case": "END/1/1.00",
+      "cell": "dialogue",
+      "truth": "end",
+      "silence_s": 1.0,
+      "speech_after": false,
+      "audio_s": 2.97,
+      "acoustic": {
+        "route": "acoustic",
+        "p_end": 0.3283,
+        "longest_silence_s": 0.97,
+        "trailing_silence_s": 0.985,
+        "detail": "trailing 0.99s"
+      },
+      "smartturn": {
+        "route": "smartturn",
+        "p_end": 0.989329,
+        "detail": "p=0.9893"
+      },
+      "disagreement": 0.3305
+    },
+    {
+      "case": "MID/1/1.00",
+      "cell": "dialogue",
+      "truth": "mid",
+      "silence_s": 1.0,
+      "speech_after": true,
+      "audio_s": 2.97,
+      "acoustic": {
+        "route": "acoustic",
+        "p_end": 0.005,
+        "longest_silence_s": 1.05,
+        "trailing_silence_s": 0.015,
+        "detail": "trailing 0.02s"
+      },
+      "smartturn": {
+        "route": "smartturn",
+        "p_end": 0.944584,
+        "detail": "p=0.9446"
+      },
+      "disagreement": 0.4698
+    },
+    {
+      "case": "END/1/1.50",
+      "cell": "dialogue",
+      "truth": "end",
+      "silence_s": 1.5,
+      "speech_after": false,
+      "audio_s": 3.47,
+      "acoustic": {
+        "route": "acoustic",
+        "p_end": 0.495,
+        "longest_silence_s": 1.47,
+        "trailing_silence_s": 1.485,
+        "detail": "trailing 1.49s"
+      },
+      "smartturn": {
+        "route": "smartturn",
+        "p_end": 0.989737,
+        "detail": "p=0.9897"
+      },
+      "disagreement": 0.2474
+    },
+    {
+      "case": "MID/1/1.50",
+      "cell": "dialogue",
+      "truth": "mid",
+      "silence_s": 1.5,
+      "speech_after": true,
+      "audio_s": 3.47,
+      "acoustic": {
+        "route": "acoustic",
+        "p_end": 0.005,
+        "longest_silence_s": 1.55,
+        "trailing_silence_s": 0.015,
+        "detail": "trailing 0.02s"
+      },
+      "smartturn": {
+        "route": "smartturn",
+        "p_end": 0.952276,
+        "detail": "p=0.9523"
+      },
+      "disagreement": 0.4736
+    },
+    {
+      "case": "END/2/0.15",
+      "cell": "dialogue",
+      "truth": "end",
+      "silence_s": 0.15,
+      "speech_after": false,
+      "audio_s": 2.41,
+      "acoustic": {
+        "route": "acoustic",
+        "p_end": 0.005,
+        "longest_silence_s": 0.0,
+        "trailing_silence_s": 0.015,
+        "detail": "trailing 0.02s"
+      },
+      "smartturn": {
+        "route": "smartturn",
+        "p_end": 0.933326,
+        "detail": "p=0.9333"
+      },
+      "disagreement": 0.4642
+    },
+    {
+      "case": "MID/2/0.15",
+      "cell": "dialogue",
+      "truth": "mid",
+      "silence_s": 0.15,
+      "speech_after": true,
+      "audio_s": 2.41,
+      "acoustic": {
+        "route": "acoustic",
+        "p_end": 0.005,
+        "longest_silence_s": 0.0,
+        "trailing_silence_s": 0.015,
+        "detail": "trailing 0.02s"
+      },
+      "smartturn": {
+        "route": "smartturn",
+        "p_end": 0.135732,
+        "detail": "p=0.1357"
+      },
+      "disagreement": 0.0654
+    },
+    {
+      "case": "END/2/0.30",
+      "cell": "dialogue",
+      "truth": "end",
+      "silence_s": 0.3,
+      "speech_after": false,
+      "audio_s": 2.56,
+      "acoustic": {
+        "route": "acoustic",
+        "p_end": 0.095,
+        "longest_silence_s": 0.27,
+        "trailing_silence_s": 0.285,
+        "detail": "trailing 0.29s"
+      },
+      "smartturn": {
+        "route": "smartturn",
+        "p_end": 0.948566,
+        "detail": "p=0.9486"
+      },
+      "disagreement": 0.4268
+    },
+    {
+      "case": "MID/2/0.30",
+      "cell": "dialogue",
+      "truth": "mid",
+      "silence_s": 0.3,
+      "speech_after": true,
+      "audio_s": 2.56,
+      "acoustic": {
+        "route": "acoustic",
+        "p_end": 0.005,
+        "longest_silence_s": 0.25,
+        "trailing_silence_s": 0.015,
+        "detail": "trailing 0.02s"
+      },
+      "smartturn": {
+        "route": "smartturn",
+        "p_end": 0.304252,
+        "detail": "p=0.3043"
+      },
+      "disagreement": 0.1496
+    },
+    {
+      "case": "END/2/0.60",
+      "cell": "dialogue",
+      "truth": "end",
+      "silence_s": 0.6,
+      "speech_after": false,
+      "audio_s": 2.86,
+      "acoustic": {
+        "route": "acoustic",
+        "p_end": 0.195,
+        "longest_silence_s": 0.57,
+        "trailing_silence_s": 0.585,
+        "detail": "trailing 0.58s"
+      },
+      "smartturn": {
+        "route": "smartturn",
+        "p_end": 0.980899,
+        "detail": "p=0.9809"
+      },
+      "disagreement": 0.3929
+    },
+    {
+      "case": "MID/2/0.60",
+      "cell": "dialogue",
+      "truth": "mid",
+      "silence_s": 0.6,
+      "speech_after": true,
+      "audio_s": 2.86,
+      "acoustic": {
+        "route": "acoustic",
+        "p_end": 0.005,
+        "longest_silence_s": 0.55,
+        "trailing_silence_s": 0.015,
+        "detail": "trailing 0.02s"
+      },
+      "smartturn": {
+        "route": "smartturn",
+        "p_end": 0.049546,
+        "detail": "p=0.0495"
+      },
+      "disagreement": 0.0223
+    },
+    {
+      "case": "END/2/1.00",
+      "cell": "dialogue",
+      "truth": "end",
+      "silence_s": 1.0,
+      "speech_after": false,
+      "audio_s": 3.26,
+      "acoustic": {
+        "route": "acoustic",
+        "p_end": 0.3283,
+        "longest_silence_s": 0.97,
+        "trailing_silence_s": 0.985,
+        "detail": "trailing 0.98s"
+      },
+      "smartturn": {
+        "route": "smartturn",
+        "p_end": 0.957368,
+        "detail": "p=0.9574"
+      },
+      "disagreement": 0.3145
+    },
+    {
+      "case": "MID/2/1.00",
+      "cell": "dialogue",
+      "truth": "mid",
+      "silence_s": 1.0,
+      "speech_after": true,
+      "audio_s": 3.26,
+      "acoustic": {
+        "route": "acoustic",
+        "p_end": 0.005,
+        "longest_silence_s": 0.95,
+        "trailing_silence_s": 0.015,
+        "detail": "trailing 0.02s"
+      },
+      "smartturn": {
+        "route": "smartturn",
+        "p_end": 0.013477,
+        "detail": "p=0.0135"
+      },
+      "disagreement": 0.0042
+    },
+    {
+      "case": "END/2/1.50",
+      "cell": "dialogue",
+      "truth": "end",
+      "silence_s": 1.5,
+      "speech_after": false,
+      "audio_s": 3.76,
+      "acoustic": {
+        "route": "acoustic",
+        "p_end": 0.495,
+        "longest_silence_s": 1.47,
+        "trailing_silence_s": 1.485,
+        "detail": "trailing 1.48s"
+      },
+      "smartturn": {
+        "route": "smartturn",
+        "p_end": 0.985989,
+        "detail": "p=0.9860"
+      },
+      "disagreement": 0.2455
+    },
+    {
+      "case": "MID/2/1.50",
+      "cell": "dialogue",
+      "truth": "mid",
+      "silence_s": 1.5,
+      "speech_after": true,
+      "audio_s": 3.76,
+      "acoustic": {
+        "route": "acoustic",
+        "p_end": 0.005,
+        "longest_silence_s": 1.45,
+        "trailing_silence_s": 0.015,
+        "detail": "trailing 0.02s"
+      },
+      "smartturn": {
+        "route": "smartturn",
+        "p_end": 0.03528,
+        "detail": "p=0.0353"
+      },
+      "disagreement": 0.0151
+    },
+    {
+      "case": "NONE/0",
+      "cell": "dialogue",
+      "truth": "none",
+      "silence_s": 0.0,
+      "speech_after": true,
+      "audio_s": 1.06,
+      "acoustic": {
+        "route": "acoustic",
+        "p_end": 0.005,
+        "longest_silence_s": 0.0,
+        "trailing_silence_s": 0.015,
+        "detail": "trailing 0.02s"
+      },
+      "smartturn": {
+        "route": "smartturn",
+        "p_end": 0.975929,
+        "detail": "p=0.9759"
+      },
+      "disagreement": 0.4855
+    },
+    {
+      "case": "NONE/1",
+      "cell": "dialogue",
+      "truth": "none",
+      "silence_s": 0.0,
+      "speech_after": true,
+      "audio_s": 1.97,
+      "acoustic": {
+        "route": "acoustic",
+        "p_end": 0.005,
+        "longest_silence_s": 0.0,
+        "trailing_silence_s": 0.015,
+        "detail": "trailing 0.01s"
+      },
+      "smartturn": {
+        "route": "smartturn",
+        "p_end": 0.983637,
+        "detail": "p=0.9836"
+      },
+      "disagreement": 0.4893
+    },
+    {
+      "case": "NONE/2",
+      "cell": "dialogue",
+      "truth": "none",
+      "silence_s": 0.0,
+      "speech_after": true,
+      "audio_s": 2.26,
+      "acoustic": {
+        "route": "acoustic",
+        "p_end": 0.005,
+        "longest_silence_s": 0.0,
+        "trailing_silence_s": 0.015,
+        "detail": "trailing 0.02s"
+      },
+      "smartturn": {
+        "route": "smartturn",
+        "p_end": 0.171436,
+        "detail": "p=0.1714"
+      },
+      "disagreement": 0.0832
+    },
+    {
+      "case": "RESUME/0/0.60",
+      "cell": "dialogue",
+      "truth": "resume",
+      "silence_s": 0.6,
+      "speech_after": true,
+      "audio_s": 1.66,
+      "acoustic": {
+        "route": "acoustic",
+        "p_end": 0.005,
+        "longest_silence_s": 0.61,
+        "trailing_silence_s": 0.015,
+        "detail": "trailing 0.01s"
+      },
+      "smartturn": {
+        "route": "smartturn",
+        "p_end": 0.94661,
+        "detail": "p=0.9466"
+      },
+      "disagreement": 0.4708
+    },
+    {
+      "case": "RESUME/0/1.00",
+      "cell": "dialogue",
+      "truth": "resume",
+      "silence_s": 1.0,
+      "speech_after": true,
+      "audio_s": 2.06,
+      "acoustic": {
+        "route": "acoustic",
+        "p_end": 0.005,
+        "longest_silence_s": 1.01,
+        "trailing_silence_s": 0.015,
+        "detail": "trailing 0.02s"
+      },
+      "smartturn": {
+        "route": "smartturn",
+        "p_end": 0.910833,
+        "detail": "p=0.9108"
+      },
+      "disagreement": 0.4529
+    },
+    {
+      "case": "RESUME/0/1.50",
+      "cell": "dialogue",
+      "truth": "resume",
+      "silence_s": 1.5,
+      "speech_after": true,
+      "audio_s": 2.56,
+      "acoustic": {
+        "route": "acoustic",
+        "p_end": 0.005,
+        "longest_silence_s": 1.51,
+        "trailing_silence_s": 0.015,
+        "detail": "trailing 0.02s"
+      },
+      "smartturn": {
+        "route": "smartturn",
+        "p_end": 0.922827,
+        "detail": "p=0.9228"
+      },
+      "disagreement": 0.4589
+    },
+    {
+      "case": "RESUME/0/2.00",
+      "cell": "dialogue",
+      "truth": "resume",
+      "silence_s": 2.0,
+      "speech_after": true,
+      "audio_s": 3.06,
+      "acoustic": {
+        "route": "acoustic",
+        "p_end": 0.005,
+        "longest_silence_s": 2.01,
+        "trailing_silence_s": 0.015,
+        "detail": "trailing 0.02s"
+      },
+      "smartturn": {
+        "route": "smartturn",
+        "p_end": 0.695748,
+        "detail": "p=0.6957"
+      },
+      "disagreement": 0.3454
+    },
+    {
+      "case": "RESUME/1/0.60",
+      "cell": "dialogue",
+      "truth": "resume",
+      "silence_s": 0.6,
+      "speech_after": true,
+      "audio_s": 2.57,
+      "acoustic": {
+        "route": "acoustic",
+        "p_end": 0.005,
+        "longest_silence_s": 0.55,
+        "trailing_silence_s": 0.015,
+        "detail": "trailing 0.02s"
+      },
+      "smartturn": {
+        "route": "smartturn",
+        "p_end": 0.958947,
+        "detail": "p=0.9589"
+      },
+      "disagreement": 0.477
+    },
+    {
+      "case": "RESUME/1/1.00",
+      "cell": "dialogue",
+      "truth": "resume",
+      "silence_s": 1.0,
+      "speech_after": true,
+      "audio_s": 2.97,
+      "acoustic": {
+        "route": "acoustic",
+        "p_end": 0.005,
+        "longest_silence_s": 0.95,
+        "trailing_silence_s": 0.015,
+        "detail": "trailing 0.02s"
+      },
+      "smartturn": {
+        "route": "smartturn",
+        "p_end": 0.798758,
+        "detail": "p=0.7988"
+      },
+      "disagreement": 0.3969
+    },
+    {
+      "case": "RESUME/1/1.50",
+      "cell": "dialogue",
+      "truth": "resume",
+      "silence_s": 1.5,
+      "speech_after": true,
+      "audio_s": 3.47,
+      "acoustic": {
+        "route": "acoustic",
+        "p_end": 0.005,
+        "longest_silence_s": 1.45,
+        "trailing_silence_s": 0.015,
+        "detail": "trailing 0.02s"
+      },
+      "smartturn": {
+        "route": "smartturn",
+        "p_end": 0.893491,
+        "detail": "p=0.8935"
+      },
+      "disagreement": 0.4442
+    },
+    {
+      "case": "RESUME/1/2.00",
+      "cell": "dialogue",
+      "truth": "resume",
+      "silence_s": 2.0,
+      "speech_after": true,
+      "audio_s": 3.97,
+      "acoustic": {
+        "route": "acoustic",
+        "p_end": 0.005,
+        "longest_silence_s": 1.95,
+        "trailing_silence_s": 0.015,
+        "detail": "trailing 0.02s"
+      },
+      "smartturn": {
+        "route": "smartturn",
+        "p_end": 0.954035,
+        "detail": "p=0.9540"
+      },
+      "disagreement": 0.4745
+    },
+    {
+      "case": "RESUME/2/0.60",
+      "cell": "dialogue",
+      "truth": "resume",
+      "silence_s": 0.6,
+      "speech_after": true,
+      "audio_s": 2.86,
+      "acoustic": {
+        "route": "acoustic",
+        "p_end": 0.005,
+        "longest_silence_s": 0.55,
+        "trailing_silence_s": 0.015,
+        "detail": "trailing 0.02s"
+      },
+      "smartturn": {
+        "route": "smartturn",
+        "p_end": 0.042632,
+        "detail": "p=0.0426"
+      },
+      "disagreement": 0.0188
+    },
+    {
+      "case": "RESUME/2/1.00",
+      "cell": "dialogue",
+      "truth": "resume",
+      "silence_s": 1.0,
+      "speech_after": true,
+      "audio_s": 3.26,
+      "acoustic": {
+        "route": "acoustic",
+        "p_end": 0.005,
+        "longest_silence_s": 0.95,
+        "trailing_silence_s": 0.015,
+        "detail": "trailing 0.02s"
+      },
+      "smartturn": {
+        "route": "smartturn",
+        "p_end": 0.013477,
+        "detail": "p=0.0135"
+      },
+      "disagreement": 0.0042
+    },
+    {
+      "case": "RESUME/2/1.50",
+      "cell": "dialogue",
+      "truth": "resume",
+      "silence_s": 1.5,
+      "speech_after": true,
+      "audio_s": 3.76,
+      "acoustic": {
+        "route": "acoustic",
+        "p_end": 0.005,
+        "longest_silence_s": 1.45,
+        "trailing_silence_s": 0.015,
+        "detail": "trailing 0.02s"
+      },
+      "smartturn": {
+        "route": "smartturn",
+        "p_end": 0.069167,
+        "detail": "p=0.0692"
+      },
+      "disagreement": 0.0321
+    },
+    {
+      "case": "RESUME/2/2.00",
+      "cell": "dialogue",
+      "truth": "resume",
+      "silence_s": 2.0,
+      "speech_after": true,
+      "audio_s": 4.26,
+      "acoustic": {
+        "route": "acoustic",
+        "p_end": 0.005,
+        "longest_silence_s": 1.95,
+        "trailing_silence_s": 0.015,
+        "detail": "trailing 0.01s"
+      },
+      "smartturn": {
+        "route": "smartturn",
+        "p_end": 0.08602,
+        "detail": "p=0.0860"
+      },
+      "disagreement": 0.0405
+    },
+    {
+      "case": "END/0/0.15",
+      "cell": "children",
+      "truth": "end",
+      "silence_s": 0.15,
+      "speech_after": false,
+      "audio_s": 1.36,
+      "acoustic": {
+        "route": "acoustic",
+        "p_end": 0.005,
+        "longest_silence_s": 0.0,
+        "trailing_silence_s": 0.015,
+        "detail": "trailing 0.02s"
+      },
+      "smartturn": {
+        "route": "smartturn",
+        "p_end": 0.122458,
+        "detail": "p=0.1225"
+      },
+      "disagreement": 0.0587
+    },
+    {
+      "case": "MID/0/0.15",
+      "cell": "children",
+      "truth": "mid",
+      "silence_s": 0.15,
+      "speech_after": true,
+      "audio_s": 1.36,
+      "acoustic": {
+        "route": "acoustic",
+        "p_end": 0.005,
+        "longest_silence_s": 0.2,
+        "trailing_silence_s": 0.015,
+        "detail": "trailing 0.02s"
+      },
+      "smartturn": {
+        "route": "smartturn",
+        "p_end": 0.010263,
+        "detail": "p=0.0103"
+      },
+      "disagreement": 0.0026
+    },
+    {
+      "case": "END/0/0.30",
+      "cell": "children",
+      "truth": "end",
+      "silence_s": 0.3,
+      "speech_after": false,
+      "audio_s": 1.51,
+      "acoustic": {
+        "route": "acoustic",
+        "p_end": 0.095,
+        "longest_silence_s": 0.27,
+        "trailing_silence_s": 0.285,
+        "detail": "trailing 0.28s"
+      },
+      "smartturn": {
+        "route": "smartturn",
+        "p_end": 0.066674,
+        "detail": "p=0.0667"
+      },
+      "disagreement": 0.0142
+    },
+    {
+      "case": "MID/0/0.30",
+      "cell": "children",
+      "truth": "mid",
+      "silence_s": 0.3,
+      "speech_after": true,
+      "audio_s": 1.51,
+      "acoustic": {
+        "route": "acoustic",
+        "p_end": 0.005,
+        "longest_silence_s": 0.35,
+        "trailing_silence_s": 0.015,
+        "detail": "trailing 0.01s"
+      },
+      "smartturn": {
+        "route": "smartturn",
+        "p_end": 0.00987,
+        "detail": "p=0.0099"
+      },
+      "disagreement": 0.0024
+    },
+    {
+      "case": "END/0/0.60",
+      "cell": "children",
+      "truth": "end",
+      "silence_s": 0.6,
+      "speech_after": false,
+      "audio_s": 1.81,
+      "acoustic": {
+        "route": "acoustic",
+        "p_end": 0.195,
+        "longest_silence_s": 0.57,
+        "trailing_silence_s": 0.585,
+        "detail": "trailing 0.58s"
+      },
+      "smartturn": {
+        "route": "smartturn",
+        "p_end": 0.940313,
+        "detail": "p=0.9403"
+      },
+      "disagreement": 0.3727
+    },
+    {
+      "case": "MID/0/0.60",
+      "cell": "children",
+      "truth": "mid",
+      "silence_s": 0.6,
+      "speech_after": true,
+      "audio_s": 1.81,
+      "acoustic": {
+        "route": "acoustic",
+        "p_end": 0.005,
+        "longest_silence_s": 0.65,
+        "trailing_silence_s": 0.015,
+        "detail": "trailing 0.02s"
+      },
+      "smartturn": {
+        "route": "smartturn",
+        "p_end": 0.011535,
+        "detail": "p=0.0115"
+      },
+      "disagreement": 0.0033
+    },
+    {
+      "case": "END/0/1.00",
+      "cell": "children",
+      "truth": "end",
+      "silence_s": 1.0,
+      "speech_after": false,
+      "audio_s": 2.21,
+      "acoustic": {
+        "route": "acoustic",
+        "p_end": 0.3283,
+        "longest_silence_s": 0.97,
+        "trailing_silence_s": 0.985,
+        "detail": "trailing 0.98s"
+      },
+      "smartturn": {
+        "route": "smartturn",
+        "p_end": 0.986523,
+        "detail": "p=0.9865"
+      },
+      "disagreement": 0.3291
+    },
+    {
+      "case": "MID/0/1.00",
+      "cell": "children",
+      "truth": "mid",
+      "silence_s": 1.0,
+      "speech_after": true,
+      "audio_s": 2.21,
+      "acoustic": {
+        "route": "acoustic",
+        "p_end": 0.005,
+        "longest_silence_s": 1.05,
+        "trailing_silence_s": 0.015,
+        "detail": "trailing 0.02s"
+      },
+      "smartturn": {
+        "route": "smartturn",
+        "p_end": 0.006945,
+        "detail": "p=0.0069"
+      },
+      "disagreement": 0.001
+    },
+    {
+      "case": "END/0/1.50",
+      "cell": "children",
+      "truth": "end",
+      "silence_s": 1.5,
+      "speech_after": false,
+      "audio_s": 2.71,
+      "acoustic": {
+        "route": "acoustic",
+        "p_end": 0.495,
+        "longest_silence_s": 1.47,
+        "trailing_silence_s": 1.485,
+        "detail": "trailing 1.48s"
+      },
+      "smartturn": {
+        "route": "smartturn",
+        "p_end": 0.980147,
+        "detail": "p=0.9801"
+      },
+      "disagreement": 0.2426
+    },
+    {
+      "case": "MID/0/1.50",
+      "cell": "children",
+      "truth": "mid",
+      "silence_s": 1.5,
+      "speech_after": true,
+      "audio_s": 2.71,
+      "acoustic": {
+        "route": "acoustic",
+        "p_end": 0.005,
+        "longest_silence_s": 1.55,
+        "trailing_silence_s": 0.015,
+        "detail": "trailing 0.02s"
+      },
+      "smartturn": {
+        "route": "smartturn",
+        "p_end": 0.009493,
+        "detail": "p=0.0095"
+      },
+      "disagreement": 0.0022
+    },
+    {
+      "case": "END/1/0.15",
+      "cell": "children",
+      "truth": "end",
+      "silence_s": 0.15,
+      "speech_after": false,
+      "audio_s": 1.76,
+      "acoustic": {
+        "route": "acoustic",
+        "p_end": 0.005,
+        "longest_silence_s": 0.0,
+        "trailing_silence_s": 0.015,
+        "detail": "trailing 0.01s"
+      },
+      "smartturn": {
+        "route": "smartturn",
+        "p_end": 0.140419,
+        "detail": "p=0.1404"
+      },
+      "disagreement": 0.0677
+    },
+    {
+      "case": "MID/1/0.15",
+      "cell": "children",
+      "truth": "mid",
+      "silence_s": 0.15,
+      "speech_after": true,
+      "audio_s": 1.76,
+      "acoustic": {
+        "route": "acoustic",
+        "p_end": 0.005,
+        "longest_silence_s": 0.0,
+        "trailing_silence_s": 0.015,
+        "detail": "trailing 0.01s"
+      },
+      "smartturn": {
+        "route": "smartturn",
+        "p_end": 0.470494,
+        "detail": "p=0.4705"
+      },
+      "disagreement": 0.2327
+    },
+    {
+      "case": "END/1/0.30",
+      "cell": "children",
+      "truth": "end",
+      "silence_s": 0.3,
+      "speech_after": false,
+      "audio_s": 1.91,
+      "acoustic": {
+        "route": "acoustic",
+        "p_end": 0.0917,
+        "longest_silence_s": 0.26,
+        "trailing_silence_s": 0.275,
+        "detail": "trailing 0.27s"
+      },
+      "smartturn": {
+        "route": "smartturn",
+        "p_end": 0.106509,
+        "detail": "p=0.1065"
+      },
+      "disagreement": 0.0074
+    },
+    {
+      "case": "MID/1/0.30",
+      "cell": "children",
+      "truth": "mid",
+      "silence_s": 0.3,
+      "speech_after": true,
+      "audio_s": 1.91,
+      "acoustic": {
+        "route": "acoustic",
+        "p_end": 0.005,
+        "longest_silence_s": 0.26,
+        "trailing_silence_s": 0.015,
+        "detail": "trailing 0.01s"
+      },
+      "smartturn": {
+        "route": "smartturn",
+        "p_end": 0.287839,
+        "detail": "p=0.2878"
+      },
+      "disagreement": 0.1414
+    },
+    {
+      "case": "END/1/0.60",
+      "cell": "children",
+      "truth": "end",
+      "silence_s": 0.6,
+      "speech_after": false,
+      "audio_s": 2.21,
+      "acoustic": {
+        "route": "acoustic",
+        "p_end": 0.1917,
+        "longest_silence_s": 0.56,
+        "trailing_silence_s": 0.575,
+        "detail": "trailing 0.57s"
+      },
+      "smartturn": {
+        "route": "smartturn",
+        "p_end": 0.854759,
+        "detail": "p=0.8548"
+      },
+      "disagreement": 0.3315
+    },
+    {
+      "case": "MID/1/0.60",
+      "cell": "children",
+      "truth": "mid",
+      "silence_s": 0.6,
+      "speech_after": true,
+      "audio_s": 2.21,
+      "acoustic": {
+        "route": "acoustic",
+        "p_end": 0.005,
+        "longest_silence_s": 0.56,
+        "trailing_silence_s": 0.015,
+        "detail": "trailing 0.02s"
+      },
+      "smartturn": {
+        "route": "smartturn",
+        "p_end": 0.110316,
+        "detail": "p=0.1103"
+      },
+      "disagreement": 0.0527
+    },
+    {
+      "case": "END/1/1.00",
+      "cell": "children",
+      "truth": "end",
+      "silence_s": 1.0,
+      "speech_after": false,
+      "audio_s": 2.61,
+      "acoustic": {
+        "route": "acoustic",
+        "p_end": 0.325,
+        "longest_silence_s": 0.96,
+        "trailing_silence_s": 0.975,
+        "detail": "trailing 0.97s"
+      },
+      "smartturn": {
+        "route": "smartturn",
+        "p_end": 0.96047,
+        "detail": "p=0.9605"
+      },
+      "disagreement": 0.3177
+    },
+    {
+      "case": "MID/1/1.00",
+      "cell": "children",
+      "truth": "mid",
+      "silence_s": 1.0,
+      "speech_after": true,
+      "audio_s": 2.61,
+      "acoustic": {
+        "route": "acoustic",
+        "p_end": 0.005,
+        "longest_silence_s": 0.96,
+        "trailing_silence_s": 0.015,
+        "detail": "trailing 0.02s"
+      },
+      "smartturn": {
+        "route": "smartturn",
+        "p_end": 0.241911,
+        "detail": "p=0.2419"
+      },
+      "disagreement": 0.1185
+    },
+    {
+      "case": "END/1/1.50",
+      "cell": "children",
+      "truth": "end",
+      "silence_s": 1.5,
+      "speech_after": false,
+      "audio_s": 3.11,
+      "acoustic": {
+        "route": "acoustic",
+        "p_end": 0.4917,
+        "longest_silence_s": 1.46,
+        "trailing_silence_s": 1.475,
+        "detail": "trailing 1.47s"
+      },
+      "smartturn": {
+        "route": "smartturn",
+        "p_end": 0.312653,
+        "detail": "p=0.3127"
+      },
+      "disagreement": 0.0895
+    },
+    {
+      "case": "MID/1/1.50",
+      "cell": "children",
+      "truth": "mid",
+      "silence_s": 1.5,
+      "speech_after": true,
+      "audio_s": 3.11,
+      "acoustic": {
+        "route": "acoustic",
+        "p_end": 0.005,
+        "longest_silence_s": 1.46,
+        "trailing_silence_s": 0.015,
+        "detail": "trailing 0.02s"
+      },
+      "smartturn": {
+        "route": "smartturn",
+        "p_end": 0.019101,
+        "detail": "p=0.0191"
+      },
+      "disagreement": 0.0071
+    },
+    {
+      "case": "END/2/0.15",
+      "cell": "children",
+      "truth": "end",
+      "silence_s": 0.15,
+      "speech_after": false,
+      "audio_s": 1.15,
+      "acoustic": {
+        "route": "acoustic",
+        "p_end": 0.005,
+        "longest_silence_s": 0.0,
+        "trailing_silence_s": 0.015,
+        "detail": "trailing 0.01s"
+      },
+      "smartturn": {
+        "route": "smartturn",
+        "p_end": 0.099241,
+        "detail": "p=0.0992"
+      },
+      "disagreement": 0.0471
+    },
+    {
+      "case": "MID/2/0.15",
+      "cell": "children",
+      "truth": "mid",
+      "silence_s": 0.15,
+      "speech_after": true,
+      "audio_s": 1.15,
+      "acoustic": {
+        "route": "acoustic",
+        "p_end": 0.005,
+        "longest_silence_s": 0.0,
+        "trailing_silence_s": 0.015,
+        "detail": "trailing 0.01s"
+      },
+      "smartturn": {
+        "route": "smartturn",
+        "p_end": 0.025013,
+        "detail": "p=0.0250"
+      },
+      "disagreement": 0.01
+    },
+    {
+      "case": "END/2/0.30",
+      "cell": "children",
+      "truth": "end",
+      "silence_s": 0.3,
+      "speech_after": false,
+      "audio_s": 1.3,
+      "acoustic": {
+        "route": "acoustic",
+        "p_end": 0.0917,
+        "longest_silence_s": 0.26,
+        "trailing_silence_s": 0.275,
+        "detail": "trailing 0.28s"
+      },
+      "smartturn": {
+        "route": "smartturn",
+        "p_end": 0.822897,
+        "detail": "p=0.8229"
+      },
+      "disagreement": 0.3656
+    },
+    {
+      "case": "MID/2/0.30",
+      "cell": "children",
+      "truth": "mid",
+      "silence_s": 0.3,
+      "speech_after": true,
+      "audio_s": 1.3,
+      "acoustic": {
+        "route": "acoustic",
+        "p_end": 0.005,
+        "longest_silence_s": 0.26,
+        "trailing_silence_s": 0.015,
+        "detail": "trailing 0.02s"
+      },
+      "smartturn": {
+        "route": "smartturn",
+        "p_end": 0.033964,
+        "detail": "p=0.0340"
+      },
+      "disagreement": 0.0145
+    },
+    {
+      "case": "END/2/0.60",
+      "cell": "children",
+      "truth": "end",
+      "silence_s": 0.6,
+      "speech_after": false,
+      "audio_s": 1.6,
+      "acoustic": {
+        "route": "acoustic",
+        "p_end": 0.1917,
+        "longest_silence_s": 0.56,
+        "trailing_silence_s": 0.575,
+        "detail": "trailing 0.58s"
+      },
+      "smartturn": {
+        "route": "smartturn",
+        "p_end": 0.64355,
+        "detail": "p=0.6436"
+      },
+      "disagreement": 0.2259
+    },
+    {
+      "case": "MID/2/0.60",
+      "cell": "children",
+      "truth": "mid",
+      "silence_s": 0.6,
+      "speech_after": true,
+      "audio_s": 1.6,
+      "acoustic": {
+        "route": "acoustic",
+        "p_end": 0.005,
+        "longest_silence_s": 0.56,
+        "trailing_silence_s": 0.015,
+        "detail": "trailing 0.02s"
+      },
+      "smartturn": {
+        "route": "smartturn",
+        "p_end": 0.00913,
+        "detail": "p=0.0091"
+      },
+      "disagreement": 0.0021
+    },
+    {
+      "case": "END/2/1.00",
+      "cell": "children",
+      "truth": "end",
+      "silence_s": 1.0,
+      "speech_after": false,
+      "audio_s": 2.0,
+      "acoustic": {
+        "route": "acoustic",
+        "p_end": 0.325,
+        "longest_silence_s": 0.96,
+        "trailing_silence_s": 0.975,
+        "detail": "trailing 0.98s"
+      },
+      "smartturn": {
+        "route": "smartturn",
+        "p_end": 0.893491,
+        "detail": "p=0.8935"
+      },
+      "disagreement": 0.2842
+    },
+    {
+      "case": "MID/2/1.00",
+      "cell": "children",
+      "truth": "mid",
+      "silence_s": 1.0,
+      "speech_after": true,
+      "audio_s": 2.0,
+      "acoustic": {
+        "route": "acoustic",
+        "p_end": 0.005,
+        "longest_silence_s": 0.96,
+        "trailing_silence_s": 0.015,
+        "detail": "trailing 0.01s"
+      },
+      "smartturn": {
+        "route": "smartturn",
+        "p_end": 0.014565,
+        "detail": "p=0.0146"
+      },
+      "disagreement": 0.0048
+    },
+    {
+      "case": "END/2/1.50",
+      "cell": "children",
+      "truth": "end",
+      "silence_s": 1.5,
+      "speech_after": false,
+      "audio_s": 2.5,
+      "acoustic": {
+        "route": "acoustic",
+        "p_end": 0.4917,
+        "longest_silence_s": 1.46,
+        "trailing_silence_s": 1.475,
+        "detail": "trailing 1.48s"
+      },
+      "smartturn": {
+        "route": "smartturn",
+        "p_end": 0.977712,
+        "detail": "p=0.9777"
+      },
+      "disagreement": 0.243
+    },
+    {
+      "case": "MID/2/1.50",
+      "cell": "children",
+      "truth": "mid",
+      "silence_s": 1.5,
+      "speech_after": true,
+      "audio_s": 2.5,
+      "acoustic": {
+        "route": "acoustic",
+        "p_end": 0.005,
+        "longest_silence_s": 1.46,
+        "trailing_silence_s": 0.015,
+        "detail": "trailing 0.02s"
+      },
+      "smartturn": {
+        "route": "smartturn",
+        "p_end": 0.014565,
+        "detail": "p=0.0146"
+      },
+      "disagreement": 0.0048
+    },
+    {
+      "case": "NONE/0",
+      "cell": "children",
+      "truth": "none",
+      "silence_s": 0.0,
+      "speech_after": true,
+      "audio_s": 1.21,
+      "acoustic": {
+        "route": "acoustic",
+        "p_end": 0.005,
+        "longest_silence_s": 0.0,
+        "trailing_silence_s": 0.015,
+        "detail": "trailing 0.01s"
+      },
+      "smartturn": {
+        "route": "smartturn",
+        "p_end": 0.007809,
+        "detail": "p=0.0078"
+      },
+      "disagreement": 0.0014
+    },
+    {
+      "case": "NONE/1",
+      "cell": "children",
+      "truth": "none",
+      "silence_s": 0.0,
+      "speech_after": true,
+      "audio_s": 1.61,
+      "acoustic": {
+        "route": "acoustic",
+        "p_end": 0.005,
+        "longest_silence_s": 0.0,
+        "trailing_silence_s": 0.015,
+        "detail": "trailing 0.02s"
+      },
+      "smartturn": {
+        "route": "smartturn",
+        "p_end": 0.114241,
+        "detail": "p=0.1142"
+      },
+      "disagreement": 0.0546
+    },
+    {
+      "case": "NONE/2",
+      "cell": "children",
+      "truth": "none",
+      "silence_s": 0.0,
+      "speech_after": true,
+      "audio_s": 1.0,
+      "acoustic": {
+        "route": "acoustic",
+        "p_end": 0.005,
+        "longest_silence_s": 0.0,
+        "trailing_silence_s": 0.015,
+        "detail": "trailing 0.02s"
+      },
+      "smartturn": {
+        "route": "smartturn",
+        "p_end": 0.019853,
+        "detail": "p=0.0199"
+      },
+      "disagreement": 0.0074
+    },
+    {
+      "case": "RESUME/0/0.60",
+      "cell": "children",
+      "truth": "resume",
+      "silence_s": 0.6,
+      "speech_after": true,
+      "audio_s": 1.81,
+      "acoustic": {
+        "route": "acoustic",
+        "p_end": 0.005,
+        "longest_silence_s": 0.55,
+        "trailing_silence_s": 0.015,
+        "detail": "trailing 0.02s"
+      },
+      "smartturn": {
+        "route": "smartturn",
+        "p_end": 0.00878,
+        "detail": "p=0.0088"
+      },
+      "disagreement": 0.0019
+    },
+    {
+      "case": "RESUME/0/1.00",
+      "cell": "children",
+      "truth": "resume",
+      "silence_s": 1.0,
+      "speech_after": true,
+      "audio_s": 2.21,
+      "acoustic": {
+        "route": "acoustic",
+        "p_end": 0.005,
+        "longest_silence_s": 0.95,
+        "trailing_silence_s": 0.015,
+        "detail": "trailing 0.02s"
+      },
+      "smartturn": {
+        "route": "smartturn",
+        "p_end": 0.006422,
+        "detail": "p=0.0064"
+      },
+      "disagreement": 0.0007
+    },
+    {
+      "case": "RESUME/0/1.50",
+      "cell": "children",
+      "truth": "resume",
+      "silence_s": 1.5,
+      "speech_after": true,
+      "audio_s": 2.71,
+      "acoustic": {
+        "route": "acoustic",
+        "p_end": 0.005,
+        "longest_silence_s": 1.45,
+        "trailing_silence_s": 0.015,
+        "detail": "trailing 0.02s"
+      },
+      "smartturn": {
+        "route": "smartturn",
+        "p_end": 0.00913,
+        "detail": "p=0.0091"
+      },
+      "disagreement": 0.0021
+    },
+    {
+      "case": "RESUME/0/2.00",
+      "cell": "children",
+      "truth": "resume",
+      "silence_s": 2.0,
+      "speech_after": true,
+      "audio_s": 3.21,
+      "acoustic": {
+        "route": "acoustic",
+        "p_end": 0.005,
+        "longest_silence_s": 1.95,
+        "trailing_silence_s": 0.015,
+        "detail": "trailing 0.02s"
+      },
+      "smartturn": {
+        "route": "smartturn",
+        "p_end": 0.00751,
+        "detail": "p=0.0075"
+      },
+      "disagreement": 0.0013
+    },
+    {
+      "case": "RESUME/1/0.60",
+      "cell": "children",
+      "truth": "resume",
+      "silence_s": 0.6,
+      "speech_after": true,
+      "audio_s": 2.21,
+      "acoustic": {
+        "route": "acoustic",
+        "p_end": 0.005,
+        "longest_silence_s": 0.56,
+        "trailing_silence_s": 0.015,
+        "detail": "trailing 0.02s"
+      },
+      "smartturn": {
+        "route": "smartturn",
+        "p_end": 0.077173,
+        "detail": "p=0.0772"
+      },
+      "disagreement": 0.0361
+    },
+    {
+      "case": "RESUME/1/1.00",
+      "cell": "children",
+      "truth": "resume",
+      "silence_s": 1.0,
+      "speech_after": true,
+      "audio_s": 2.61,
+      "acoustic": {
+        "route": "acoustic",
+        "p_end": 0.005,
+        "longest_silence_s": 1.07,
+        "trailing_silence_s": 0.015,
+        "detail": "trailing 0.02s"
+      },
+      "smartturn": {
+        "route": "smartturn",
+        "p_end": 0.207648,
+        "detail": "p=0.2076"
+      },
+      "disagreement": 0.1013
+    },
+    {
+      "case": "RESUME/1/1.50",
+      "cell": "children",
+      "truth": "resume",
+      "silence_s": 1.5,
+      "speech_after": true,
+      "audio_s": 3.11,
+      "acoustic": {
+        "route": "acoustic",
+        "p_end": 0.005,
+        "longest_silence_s": 1.46,
+        "trailing_silence_s": 0.015,
+        "detail": "trailing 0.02s"
+      },
+      "smartturn": {
+        "route": "smartturn",
+        "p_end": 0.019853,
+        "detail": "p=0.0199"
+      },
+      "disagreement": 0.0074
+    },
+    {
+      "case": "RESUME/1/2.00",
+      "cell": "children",
+      "truth": "resume",
+      "silence_s": 2.0,
+      "speech_after": true,
+      "audio_s": 3.61,
+      "acoustic": {
+        "route": "acoustic",
+        "p_end": 0.005,
+        "longest_silence_s": 1.96,
+        "trailing_silence_s": 0.015,
+        "detail": "trailing 0.02s"
+      },
+      "smartturn": {
+        "route": "smartturn",
+        "p_end": 0.201242,
+        "detail": "p=0.2012"
+      },
+      "disagreement": 0.0981
+    },
+    {
+      "case": "RESUME/2/0.60",
+      "cell": "children",
+      "truth": "resume",
+      "silence_s": 0.6,
+      "speech_after": true,
+      "audio_s": 1.6,
+      "acoustic": {
+        "route": "acoustic",
+        "p_end": 0.005,
+        "longest_silence_s": 0.56,
+        "trailing_silence_s": 0.015,
+        "detail": "trailing 0.02s"
+      },
+      "smartturn": {
+        "route": "smartturn",
+        "p_end": 0.00913,
+        "detail": "p=0.0091"
+      },
+      "disagreement": 0.0021
+    },
+    {
+      "case": "RESUME/2/1.00",
+      "cell": "children",
+      "truth": "resume",
+      "silence_s": 1.0,
+      "speech_after": true,
+      "audio_s": 2.0,
+      "acoustic": {
+        "route": "acoustic",
+        "p_end": 0.005,
+        "longest_silence_s": 0.96,
+        "trailing_silence_s": 0.015,
+        "detail": "trailing 0.01s"
+      },
+      "smartturn": {
+        "route": "smartturn",
+        "p_end": 0.00878,
+        "detail": "p=0.0088"
+      },
+      "disagreement": 0.0019
+    },
+    {
+      "case": "RESUME/2/1.50",
+      "cell": "children",
+      "truth": "resume",
+      "silence_s": 1.5,
+      "speech_after": true,
+      "audio_s": 2.5,
+      "acoustic": {
+        "route": "acoustic",
+        "p_end": 0.005,
+        "longest_silence_s": 1.46,
+        "trailing_silence_s": 0.015,
+        "detail": "trailing 0.02s"
+      },
+      "smartturn": {
+        "route": "smartturn",
+        "p_end": 0.00913,
+        "detail": "p=0.0091"
+      },
+      "disagreement": 0.0021
+    },
+    {
+      "case": "RESUME/2/2.00",
+      "cell": "children",
+      "truth": "resume",
+      "silence_s": 2.0,
+      "speech_after": true,
+      "audio_s": 3.0,
+      "acoustic": {
+        "route": "acoustic",
+        "p_end": 0.005,
+        "longest_silence_s": 1.96,
+        "trailing_silence_s": 0.015,
+        "detail": "trailing 0.02s"
+      },
+      "smartturn": {
+        "route": "smartturn",
+        "p_end": 0.00812,
+        "detail": "p=0.0081"
+      },
+      "disagreement": 0.0016
+    }
+  ],
+  "elapsed_s": 11.61
+}

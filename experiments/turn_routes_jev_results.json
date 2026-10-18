@@ -1,0 +1,250 @@
+{
+  "stages": [
+    "jev_leak",
+    "jev_neutral"
+  ],
+  "causal": true,
+  "results": [
+    {
+      "case": "END/0/0.15",
+      "cell": "narration",
+      "truth": "end",
+      "silence_s": 0.15,
+      "speech_after": false,
+      "audio_s": 1.01,
+      "jev_leak": {
+        "route": "jev_leak",
+        "p_end": 0.98,
+        "detail": "cc=0.98"
+      },
+      "jev_neutral": {
+        "route": "jev_neutral",
+        "p_end": 0.68,
+        "detail": "cc=0.68"
+      },
+      "jev_leak_gap": 0.3,
+      "disagreement": 0.15
+    },
+    {
+      "case": "MID/0/0.15",
+      "cell": "narration",
+      "truth": "mid",
+      "silence_s": 0.15,
+      "speech_after": true,
+      "audio_s": 1.01,
+      "jev_leak": {
+        "route": "jev_leak",
+        "p_end": 1.0,
+        "detail": "cc=1.0"
+      },
+      "jev_neutral": {
+        "route": "jev_neutral",
+        "p_end": 0.68,
+        "detail": "cc=0.68"
+      },
+      "jev_leak_gap": 0.32,
+      "disagreement": 0.16
+    },
+    {
+      "case": "END/0/0.30",
+      "cell": "narration",
+      "truth": "end",
+      "silence_s": 0.3,
+      "speech_after": false,
+      "audio_s": 0.875,
+      "jev_leak": {
+        "route": "jev_leak",
+        "p_end": 0.98,
+        "detail": "cc=0.98"
+      },
+      "jev_neutral": {
+        "route": "jev_neutral",
+        "p_end": 0.7,
+        "detail": "cc=0.7"
+      },
+      "jev_leak_gap": 0.28,
+      "disagreement": 0.14
+    },
+    {
+      "case": "MID/0/0.30",
+      "cell": "narration",
+      "truth": "mid",
+      "silence_s": 0.3,
+      "speech_after": true,
+      "audio_s": 0.545,
+      "jev_leak": {
+        "route": "jev_leak",
+        "p_end": 1.0,
+        "detail": "cc=1.0"
+      },
+      "jev_neutral": {
+        "route": "jev_neutral",
+        "p_end": 0.64,
+        "detail": "cc=0.64"
+      },
+      "jev_leak_gap": 0.36,
+      "disagreement": 0.18
+    },
+    {
+      "case": "END/0/0.60",
+      "cell": "narration",
+      "truth": "end",
+      "silence_s": 0.6,
+      "speech_after": false,
+      "audio_s": 0.875,
+      "jev_leak": {
+        "route": "jev_leak",
+        "p_end": 0.98,
+        "detail": "cc=0.98"
+      },
+      "jev_neutral": {
+        "route": "jev_neutral",
+        "p_end": 0.62,
+        "detail": "cc=0.62"
+      },
+      "jev_leak_gap": 0.36,
+      "disagreement": 0.18
+    },
+    {
+      "case": "MID/0/0.60",
+      "cell": "narration",
+      "truth": "mid",
+      "silence_s": 0.6,
+      "speech_after": true,
+      "audio_s": 0.545,
+      "jev_leak": {
+        "route": "jev_leak",
+        "p_end": 1.0,
+        "detail": "cc=1.0"
+      },
+      "jev_neutral": {
+        "route": "jev_neutral",
+        "p_end": 0.64,
+        "detail": "cc=0.64"
+      },
+      "jev_leak_gap": 0.36,
+      "disagreement": 0.18
+    },
+    {
+      "case": "END/0/1.00",
+      "cell": "narration",
+      "truth": "end",
+      "silence_s": 1.0,
+      "speech_after": false,
+      "audio_s": 0.875,
+      "jev_leak": {
+        "route": "jev_leak",
+        "p_end": 0.98,
+        "detail": "cc=0.98"
+      },
+      "jev_neutral": {
+        "route": "jev_neutral",
+        "p_end": 0.68,
+        "detail": "cc=0.68"
+      },
+      "jev_leak_gap": 0.3,
+      "disagreement": 0.15
+    },
+    {
+      "case": "MID/0/1.00",
+      "cell": "narration",
+      "truth": "mid",
+      "silence_s": 1.0,
+      "speech_after": true,
+      "audio_s": 0.545,
+      "jev_leak": {
+        "route": "jev_leak",
+        "p_end": 1.0,
+        "detail": "cc=1.0"
+      },
+      "jev_neutral": {
+        "route": "jev_neutral",
+        "p_end": 0.62,
+        "detail": "cc=0.62"
+      },
+      "jev_leak_gap": 0.38,
+      "disagreement": 0.19
+    },
+    {
+      "case": "END/0/1.50",
+      "cell": "narration",
+      "truth": "end",
+      "silence_s": 1.5,
+      "speech_after": false,
+      "audio_s": 0.875,
+      "jev_leak": {
+        "route": "jev_leak",
+        "p_end": 0.98,
+        "detail": "cc=0.98"
+      },
+      "jev_neutral": {
+        "route": "jev_neutral",
+        "p_end": 0.72,
+        "detail": "cc=0.72"
+      },
+      "jev_leak_gap": 0.26,
+      "disagreement": 0.13
+    },
+    {
+      "case": "MID/0/1.50",
+      "cell": "narration",
+      "truth": "mid",
+      "silence_s": 1.5,
+      "speech_after": true,
+      "audio_s": 0.545,
+      "jev_leak": {
+        "route": "jev_leak",
+        "p_end": 1.0,
+        "detail": "cc=1.0"
+      },
+      "jev_neutral": {
+        "route": "jev_neutral",
+        "p_end": 0.74,
+        "detail": "cc=0.74"
+      },
+      "jev_leak_gap": 0.26,
+      "disagreement": 0.13
+    },
+    {
+      "case": "END/1/0.15",
+      "cell": "narration",
+      "truth": "end",
+      "silence_s": 0.15,
+      "speech_after": false,
+      "audio_s": 1.57,
+      "jev_leak": {
+        "route": "jev_leak",
+        "p_end": 0.98,
+        "detail": "cc=0.98"
+      },
+      "jev_neutral": {
+        "route": "jev_neutral",
+        "p_end": 0.68,
+        "detail": "cc=0.68"
+      },
+      "jev_leak_gap": 0.3,
+      "disagreement": 0.15
+    },
+    {
+      "case": "MID/1/0.15",
+      "cell": "narration",
+      "truth": "mid",
+      "silence_s": 0.15,
+      "speech_after": true,
+      "audio_s": 1.57,
+      "jev_leak": {
+        "route": "jev_leak",
+        "p_end": 1.0,
+        "detail": "cc=1.0"
+      },
+      "jev_neutral": {
+        "route": "jev_neutral",
+        "p_end": 0.66,
+        "detail": "cc=0.66"
+      },
+      "jev_leak_gap": 0.34,
+      "disagreement": 0.17
+    }
+  ],
+  "elapsed_s": 3.85
+}
