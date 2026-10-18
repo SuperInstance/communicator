@@ -451,3 +451,28 @@ resumable, `/tmp/e7/`) is reusable for it as-is.
 llama-3.1-8b question 7/7 (garbage-yes 1/2), urgent 5/7; llama-3.2-3b
 4–5/7. Mid-tier: viable second-path, not a primary; tev1 and Jev keep
 the crown for these questions.
+
+## 3g. Day-3 — the cross-genre table: the measured tracks fingerprint genre
+
+Full pipeline over all six new cells (`corpus/cross_genre_table.py`):
+
+| cell | voiced% | F0 p10–p90 | octave% (contig/cross → after) | segs | median phrase | tempo SD% |
+|---|---|---|---|---|---|---|
+| children's | 53 | 151–233 | 5.2 (161/45 → 1.8) | 156 | 0.32 s | 22 |
+| essay (Kant) | 31 | 78–113 | 3.0 (10/59 → 0.3) | 66 | 1.03 s | 10 |
+| oration (JFK) | 64 | 137–270 | 7.1 (219/122 → 2.7) | 5 | **11.11 s** | **8** |
+| poetry | 39 | 159–254 | 2.7 (16/5 → 1.0) | 14 | 1.56 s | 15 |
+| shakespeare | 53 | **98–222** | 3.7 (91/56 → 1.3) | 124 | 0.45 s | **30** |
+| short story | 55 | 87–149 | 2.9 (76/46 → 0.8) | 70 | 1.61 s | 11 |
+
+The matrix did what it was designed to do — the axes bracket:
+**phrase length** (oration 11.1 s vs children's 0.32 s, 35×) and
+**tempo variance** (shakespeare 30% vs oration 8%, ~4×) separate the
+genres more cleanly than F0 does; F0 RANGE (shakespeare's 124-Hz-wide
+p10–p90 vs essay's 35) carries the dramatic-vs-lecture signal. Octave
+smoothing generalizes across genres (contiguous errors drop 30–90%
+everywhere), and the contig/cross split varies by genre — JFK's 122
+cross-gap jumps live at his long phrase boundaries (register shifts
+across rests, the Day-3 artifact class, at oratory scale). A boring
+classifier on these six features per cell would likely nail genre —
+E6's premise, now with a real table to stand on.
