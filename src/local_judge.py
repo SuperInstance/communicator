@@ -102,11 +102,20 @@ SYSTEM = (
     "For `timbre` and `intention` report `position`: a number from 0 to the "
     "highest index of the scale, as a decimal (0.0 is the first level, 1.0 "
     "the last). For `attention` and `gesture` report a probability for EVERY "
-    "listed option, which must sum to about 1. For each `gate_*` report the "
-    "probability that the property is genuinely present -- if the text is "
-    "gibberish, noise or has no such property, report a LOW number near 0.\n\n"
-    "Be honest about uncertainty. Do not invent structure that is not there."
+    "listed option, which must sum to about 1. For each `gate_*` report how "
+    "confident you are that the property is genuinely present in this "
+    "utterance. Decide from the utterance itself.\n\n"
+    "Be honest about uncertainty. Do not invent structure that is not there, "
+    "and do not answer with a constant."
 )
+
+# DEFECT 2: an example value in the instruction is not a harmless illustration.
+# A 0.5B model emits it verbatim -- qwen2.5:0.5b answered every gate 0.0 with
+# the old wording and every gate 0.9 with this one, on garbage and on real
+# speech alike. It was not answering the question, it was answering the
+# prompt. That is why the first sweep reported 0/4 healthy and would have had
+# us conclude "small models are blind" when the truth was "our prompt handed
+# them a constant".
 
 
 def build_prompt(text: str) -> str:

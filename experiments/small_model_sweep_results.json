@@ -1,0 +1,134 @@
+{
+  "bars": {
+    "latency_s": 1.0,
+    "separation": 0.3
+  },
+  "results": [
+    {
+      "model": "qwen2.5:0.5b",
+      "ok": true,
+      "load_s": 10.83,
+      "latency_s": 1.05,
+      "latency_max_s": 1.141,
+      "n_calls": 10,
+      "n_ok": 10,
+      "cc_garbage": {
+        "TIMBRE": 0,
+        "INTENTION": 0,
+        "ATTENTION": 0,
+        "GESTURE": 0
+      },
+      "cc_real": {
+        "TIMBRE": 0,
+        "INTENTION": 0,
+        "ATTENTION": 0,
+        "GESTURE": 0
+      },
+      "separation": {
+        "TIMBRE": 0.0,
+        "INTENTION": 0.0,
+        "ATTENTION": 0.0,
+        "GESTURE": 0.0
+      },
+      "n_healthy_tracks": 0,
+      "fast_enough": false,
+      "verdict": "neither"
+    },
+    {
+      "model": "qwen3:0.6b",
+      "ok": true,
+      "load_s": 48.92,
+      "latency_s": 10.679,
+      "latency_max_s": 42.62,
+      "n_calls": 10,
+      "n_ok": 10,
+      "cc_garbage": {
+        "TIMBRE": 0,
+        "INTENTION": 0,
+        "ATTENTION": 0,
+        "GESTURE": 127
+      },
+      "cc_real": {
+        "TIMBRE": 0,
+        "INTENTION": 0,
+        "ATTENTION": 0,
+        "GESTURE": 0
+      },
+      "separation": {
+        "TIMBRE": 0.0,
+        "INTENTION": 0.0,
+        "ATTENTION": 0.0,
+        "GESTURE": -1.0
+      },
+      "n_healthy_tracks": 0,
+      "fast_enough": false,
+      "verdict": "neither"
+    },
+    {
+      "model": "llama3.2:1b",
+      "ok": true,
+      "load_s": 12.5,
+      "latency_s": 4.752,
+      "latency_max_s": 5.912,
+      "n_calls": 10,
+      "n_ok": 10,
+      "cc_garbage": {
+        "TIMBRE": 4,
+        "INTENTION": 3,
+        "ATTENTION": 41,
+        "GESTURE": 80
+      },
+      "cc_real": {
+        "TIMBRE": 55,
+        "INTENTION": 56,
+        "ATTENTION": 41,
+        "GESTURE": 80
+      },
+      "separation": {
+        "TIMBRE": 0.402,
+        "INTENTION": 0.417,
+        "ATTENTION": 0.0,
+        "GESTURE": 0.0
+      },
+      "n_healthy_tracks": 2,
+      "fast_enough": false,
+      "verdict": "neither"
+    },
+    {
+      "model": "qwen2.5:1.5b",
+      "ok": false,
+      "why": "warmup: http404",
+      "load_s": 0.0
+    },
+    {
+      "model": "gemma2:2b",
+      "ok": true,
+      "load_s": 19.33,
+      "latency_s": 7.29,
+      "latency_max_s": 10.674,
+      "n_calls": 10,
+      "n_ok": 10,
+      "cc_garbage": {
+        "TIMBRE": 0,
+        "INTENTION": 0,
+        "ATTENTION": 0,
+        "GESTURE": 0
+      },
+      "cc_real": {
+        "TIMBRE": 0,
+        "INTENTION": 31,
+        "ATTENTION": 103,
+        "GESTURE": 0
+      },
+      "separation": {
+        "TIMBRE": 0.0,
+        "INTENTION": 0.244,
+        "ATTENTION": 0.811,
+        "GESTURE": 0.0
+      },
+      "n_healthy_tracks": 1,
+      "fast_enough": false,
+      "verdict": "neither"
+    }
+  ]
+}

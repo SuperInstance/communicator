@@ -645,3 +645,114 @@ patch, it fails 21.
 | track_name written as bytes | 21 failed |
 | bpm defaulted to 120 | 2 failed |
 | (restored) | 25 passed |
+
+## Phase 2.9 — the local judge exists, and it was not where I looked
+
+Phase 2.8 concluded that a local judge was 55x too slow and that `tev1` was
+a dead end because Ollama refused it on both text endpoints. **Both wrong.**
+`tev1` is not a chat model at all.
+
+    $ curl -s -X POST localhost:11434/v1/systemone -d '{"model":"tev1:latest",
+      "state":"STOP THE DEPLOY RIGHT NOW","questions":{"g":{"type":"noul",...}}}'
+    {"answers":{"g":{"type":"noul","noul":0.9489682743447703}}}
+
+`capabilities: ['decision']` means **System One** — an undocumented
+first-party Ollama route whose questions and answers are the SAME shapes as
+the TypeSafe SDK's: `score` (criteria list → score, legend, probabilities,
+confidence), `choice` (criteria map → choice, probabilities, confidence), and
+`noul` (→ probability). A general chat model posted there is refused:
+`"is not a llama.cpp decision model"`.
+
+So the SDK's own `model_dump()` on `judged.build_questions()` **is** the wire
+format. No translation layer, no second question set, no prompt engineering.
+
+**The hybrid seam was already built.** `judged.read_tracks` takes `client=`,
+so passing a `SystemOneClient` runs the entire judged stack locally with
+`judged.py` unmodified — same questions, same reduction, same CC scale, same
+gating. The module is ~150 lines and most of it is failure handling.
+
+### The trap that made it look broken
+
+`read_tracks` passes its own `model="jev-1.14.0"` down to whatever client it
+is given. Honouring that asks the local server for a model it has never heard
+of; it refuses, and **every track reads 0** — not a crash, a synth that has
+gone quiet on every utterance. The client now uses its own model and records
+the substitution in `last_requested_model`, because a local backend that
+quietly answers with something other than what was asked for is how a hybrid
+system reports cloud numbers as local ones.
+
+### It answers the gate correctly, and agrees with the cloud about TIMBRE
+
+| utterance | gate_intention | gate_attention | gate_timbre | gate_gesture |
+|---|---|---|---|---|
+| `qwop zzz brxt` | 0.13 | 0.14 | 0.17 | 0.27 |
+| `Run the tests.` | 0.93 | 0.79 | 0.02 | 0.90 |
+| `STOP THE DEPLOY RIGHT NOW` | 0.96 | 0.86 | 0.02 | 0.96 |
+| `The sky is clear today.` | 0.10 | 0.21 | 0.02 | 0.31 |
+
+Three instruments now agree that TIMBRE is not a text property: Jev's gate
+(0.13 on real speech), `calibration.py`, and a local model that was never
+told about either.
+
+### The one-call rule is not free locally, and that decides the design
+
+| question set | n | median | per question |
+|---|---|---|---|
+| 1 gate | 1 | 0.267 s | 267 ms |
+| 2 gates | 2 | 0.655 s | 328 ms |
+| **4 gates** | **4** | **0.967 s** | 242 ms |
+| 4 scales | 4 | 1.404 s | 351 ms |
+| 4 scales + 4 gates | 8 | 2.447 s | 306 ms |
+
+In the cloud all eight cost 0.13 s total, because questions evaluate in
+parallel and the one-call rule makes them free. Locally llama.cpp scores them
+**sequentially**, so eight questions cost eight times one. The rule was never
+about round trips being expensive; locally the cost is per question and the
+round trip is the cheap part.
+
+Which gives a design that is measured rather than guessed:
+
+    local  : the four GATES, 0.97 s -- inside the voice budget, and the gates
+             are the safety-critical half: they are what stopped garbage
+             driving the CC
+    cloud  : the four SCALES, 1.40 s, whenever it is reachable
+
+An UNO Q with 6 GB of RAM and no GPU will be slower still, so the honest
+version of this is "local-first means the gates", not "local-first means the
+judged half".
+
+### The sweep was measuring my prompt, not the model
+
+`qwen2.5:0.5b` answered every gate **exactly 0.0** — on gibberish and on real
+speech alike. The instruction said *"report a LOW number near 0"*. Remove that
+example value and it answers every gate **exactly 0.9**. It was not answering
+the question, it was answering the prompt.
+
+So the sweep's "0/4 healthy" for the small models was not blindness. The
+diagnosis is in `experiments/gate_prompt_diag.py`, which prints raw model
+JSON under both wordings.
+
+**llama3.2:1b was the informative one, and it is a negative result.** Its
+gates are *identical* on garbage and real speech (0.6/0.8/0.9 both). Its
+apparent 2/4 separation came from the SCALES, not the gates — and one of the
+two credits was TIMBRE, a dimension two instruments have shown is not in the
+text at all. No small model tested produces a gate that separates.
+
+**No local general-purpose model carries the judged half.** The decision model
+does. That is the finding.
+
+### Two defects in the sweep instrument itself
+
+* `present()` compared only the part of the name before the colon, so
+  `qwen2.5:1.5b` counted as installed because `qwen2.5-coder:7b` was. Its
+  pull was skipped and it 404'd — a missing row in a sweep reads as "measured
+  and failed" unless the check is exact.
+* The "healthy tracks" count rewarded separation on TIMBRE, which is a
+  **false positive by construction**. TIMBRE is now reported and never
+  counted; the metric rewarded the exact failure the instruments spent a
+  phase ruling out.
+
+### Suite
+
+229 passed, 5 skipped. Negative control on the local client: honouring the
+cloud model id fails 1; removing the partial-response guard fails 2.
