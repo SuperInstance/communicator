@@ -210,12 +210,27 @@ text-only model — now established by a control rather than assumed.**
 > | `low_150` (150 Hz) | low | low ✓ *(p=0.64)* | **low** ✓ |
 > | `mid_300` (300 Hz) | mid | low ✗ | **mid** ✓ |
 > | `high_450` (450 Hz) | high | low ✗ | **high** ✓ |
-> | blank grey | — | "low" | "low" |
+> | `bottom_only` (80 Hz of 600 Hz axis) | low | — | **low** ×3 ✓ |
+> | `top_only` (560 Hz of 600 Hz axis) | high | — | **high** ×3 ✓ |
+> | blank grey | — | "low" | "low" (see below) |
 >
-> **3/3 against Jev's 1/3, on identical bytes.** The blank control answers "low"
-> under both, which is a prior rather than a reading — so the meaningful
-> evidence is that the three structured images get three *different* answers
-> tracking the frequency axis, while the blank gets the default.
+> **3/3 against Jev's 1/3, on identical bytes, 21 calls, 7 conditions.**
+>
+> The two extremes are the decisive ones, because they kill the obvious
+> objection that the model is just answering "low" every time:
+> `bottom_only` → "low" ×3 and `top_only` → "high" ×3. A constant-answer
+> baseline fails one of those, so the frequency axis is being read.
+>
+> And the blank control shows the default *in the model's own words*, which is
+> the best evidence available that the difference is reading versus prior:
+>
+> > "Based on typical spoken utterances where the fundamental frequency and
+> > primary formants carry the bulk of acoustic power at the bottom of the
+> > frequency scale, the energy is concentrated at: **low**"
+>
+> It assumes it is looking at speech, reasons about typical formants, and lands
+> on "low" without seeing anything. That is a **prior**, and it is exactly what
+> would have masqueraded as a correct answer everywhere else in the set.
 >
 > So the honest statement of §5 is: **a text-only decision model does not read
 > images** — which we already knew, and which `clef-omni` already exploits by
