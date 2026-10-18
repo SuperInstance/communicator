@@ -458,3 +458,101 @@ emergency still reads loud. TIMBRE is near zero everywhere, which is correct.
 
 167 passed, 5 skipped. Negative control: sabotaging the gate multiplication
 `cc * g` → `cc + g*127` fails 4 tests; restoring returns 25/25.
+
+## Phase 2.8 — the local model, as an instrument rather than as a bill
+
+`src/local_judge.py`. Every judged track so far has been 100% cloud, so the
+"cloud / local / hybrid must be configurable" requirement had never been
+exercised once. A requirement that has never been tested is a wish.
+
+The reason to build it is not cost. A second model is an **independent
+instrument**, and only a second model can distinguish two failures that look
+identical from the outside:
+
+  * the QUESTION is ambiguous, and both models are inventing structure
+  * one model is bad at this question and the other is fine
+
+Nothing else in the repo can separate those. `experiments/local_vs_cloud.py`
+asks both the same questions of the same 10 probes and reduces both through
+the SAME `judged._scale_position` / `judged._scale`, so every difference below
+is a difference in the answers and never an accident of two implementations.
+
+### It independently reproduces the Phase 2.7 fix
+
+| Track | local garbage | local real | local sep | cloud sep |
+|---|---|---|---|---|
+| INTENTION | 0 | 76 | **0.598** | 0.512 |
+| ATTENTION | 11 | 62 | **0.402** | 0.386 |
+| GESTURE | 8 | 82 | **0.583** | 0.677 |
+| TIMBRE | 0 | 0 | 0.000 | −0.016 |
+
+Three tracks healthy in BOTH. A 7B coder model with no relationship to Jev,
+given the same scales and the same presence gates, lands on the same answer as
+the hosted model. The gate's effect is a property of the question, not an
+artefact of one vendor's model.
+
+### TIMBRE fails in both, for OPPOSITE reasons
+
+| | garbage | real |
+|---|---|---|
+| local gate | **0.90** | 0.80 |
+| cloud gate | **0.19** | 0.13 |
+
+The local model is confidently wrong — it says gibberish has a deliberate
+vocal colour. Jev is confidently right — it says neither does. Both agree the
+gate does not separate. Two instruments, same conclusion, no calibration
+claim: TIMBRE is not a text property and the judged track for it should be
+dropped rather than repaired. Its value comes from the measured acoustic
+tracks.
+
+### The number that decides the architecture
+
+    cloud   jev-1.14.0     0.13 s per turn
+    local   qwen2.5-coder  7.17 s per turn   (warm -- not model load)
+
+7.17 s is the steady state: a second pass with the model resident measured
+6.3–7.7 s, so this is not first-call weight loading. **55x slower**, and a
+voice loop needs well under a second. So on this hardware:
+
+  * local-as-the-control-surface is NOT viable at this model size;
+  * local-as-a-presence-detector or slow adjudicator IS viable, and it is
+    what the model is actually good at -- its garbage/real separation is as
+    good as the cloud's;
+  * the UNO Q (6 GB RAM, no GPU) will be slower still.
+
+The hybrid shape that follows: measured acoustic tracks locally (they are
+already arithmetic, not a model), the judged tracks from the cloud, and the
+local model as a fallback presence gate when the network is gone. That is a
+design decision, not a measurement, and it is recorded as one.
+
+### Local values are coarse, and that is a limit not a detail
+
+ATTENTION reads exactly 11 on all five garbage probes and 61–62 on all five
+real ones. INTENTION reads 76 three times. The local model is emitting a few
+discrete levels, not calibrated probabilities. Its separation is good; its
+resolution is not there. ECE against it would be uninformative — there is
+almost no spread to bin.
+
+### `tev1:latest` is a decision-only model this Ollama cannot serve
+
+`capabilities: ['decision']`. It refuses **both** endpoints:
+
+    /api/generate  ->  "tev1:latest" does not support generate
+    /api/chat      ->  "tev1:latest" does not support chat
+
+No `/api/decision` exists in Ollama 0.40.5 (404). If a local TypeSafe-style
+judge is wanted, this model is the obvious candidate and the serving path is
+the missing piece — worth a look before building anything else locally.
+
+### Failure is loud by construction
+
+A local model that is absent, refuses, or answers half a question yields
+`ok=False` with a reason and **no CC at all**. In a voice instrument, silence
+and a deliberate CC 0 are the same signal; conflating them reports a dead
+instrument as a quiet room. That is tested for every path, including the
+tev1-style error body, which arrives with an `error` key and no `message`.
+
+### Suite
+
+188 passed, 5 skipped. Negative control: gate multiplication `cc*g` ->
+`cc+g*127` in the local reducer fails 5 tests.

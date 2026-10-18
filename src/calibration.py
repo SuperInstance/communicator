@@ -203,6 +203,12 @@ def score(rows: dict) -> list[TrackCalibration]:
     out = []
 
     # Choice tracks: accuracy + ECE on p(chosen) vs correctness.
+    #
+    # p is PLACEMENT probability (probabilities[chosen]), deliberately NOT
+    # the gated CC fraction: the presence gate (Phase 2.7) multiplies a
+    # "is this property here at all" factor into the controller value, and
+    # folding that in would conflate presence with placement. Placement is
+    # the well-defined calibrated quantity; presence is question_health's.
     for track, items in (("GESTURE", GESTURE_ITEMS),
                          ("ATTENTION", ATTENTION_ITEMS)):
         truth = {t: label for label, ts in items.items() for t in ts}
@@ -212,9 +218,11 @@ def score(rows: dict) -> list[TrackCalibration]:
             if r is None or not r.ok:
                 continue
             chosen = r.detail.get("choice")
+            probs = r.detail.get("probabilities") or {}
             y = 1 if chosen == label else 0
             hits += y
-            p = max(0.0, min(1.0, r.value / 127.0))
+            p = float(probs.get(chosen)) if chosen in probs \
+                else max(0.0, min(1.0, r.value / 127.0))
             cal_rows.append({"text": text, "p": p, "y": y,
                              "chosen": chosen, "label": label})
             c = per_class.setdefault(label, {"n": 0, "hit": 0})
