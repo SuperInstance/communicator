@@ -95,23 +95,29 @@ def rms_series(samples: list[float], frame_len: int, hop: int,
 
 def segment(frames: list[EnergyFrame], hop_s: float,
             min_silence_s: float = MIN_SILENCE_S,
-            min_speech_s: float = MIN_SPEECH_S) -> list[Segment]:
+            min_speech_s: float = MIN_SPEECH_S,
+            peak_rms: float | None = None) -> list[Segment]:
     """Speech/silence segments over the frame grid, with hysteresis.
 
-    The speech-on threshold is 10% of the file's peak frame RMS (never below
+    The speech-on threshold is 10% of the peak frame RMS (never below
     ABS_FLOOR). Peak, not percentile, because Phase 1 clips are single
     utterances: the loudest frame is the voice by construction; a longer
-    recording with applause would need a percentile instead — stated limit.
+    recording with applause would need a percentile instead -- stated limit.
 
-    Frames at or above `on` enter speech; frames below `on/2` exit it; the
-    band in between holds the current state. Runs are then filtered by the
-    minimum durations: tiny silences are merged into the surrounding speech,
-    tiny speech blips into silence. `hop_s` is the frame step in seconds,
-    used to place the final segment's end after the last frame center.
+    `peak_rms` OVERRIDES that peak, for callers analysing a sliding window.
+    The watcher (src/watcher.py) needs exactly that: it re-segments a moving
+    buffer on every push, so a per-call peak would make the speech threshold
+    drift with the window contents. A quiet stretch of buffer would lower the
+    bar and turn the silence around it into "speech", and the drift would be
+    invisible because every individual segmentation looked self-consistent.
+    The watcher therefore keeps a running peak and passes it in, which is the
+    reference-percentile idea above, implemented as the cheapest version that
+    works. Default None keeps the original single-clip behaviour exactly.
     """
     if not frames:
         return []
-    peak_rms = max(f.rms for f in frames)
+    if peak_rms is None:
+        peak_rms = max(f.rms for f in frames)
     on = max(ABS_FLOOR, RELATIVE_ON * peak_rms)
     off = on / 2.0
 

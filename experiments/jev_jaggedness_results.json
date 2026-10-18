@@ -1,0 +1,180 @@
+{
+  "model": "jev-1.14.0",
+  "results": {
+    "option_order": {
+      "ATTENTION": {
+        "rows": {
+          "forward": {
+            "picked": [
+              "listener",
+              "listener",
+              "listener"
+            ],
+            "first_option_count": 0
+          },
+          "reversed": {
+            "picked": [
+              "task",
+              "listener",
+              "listener"
+            ],
+            "first_option_count": 0
+          }
+        },
+        "agreements": 2,
+        "n": 3
+      },
+      "GESTURE": {
+        "rows": {
+          "forward": {
+            "picked": [
+              "command",
+              "command",
+              "command"
+            ],
+            "first_option_count": 0
+          },
+          "reversed": {
+            "picked": [
+              "command",
+              "command",
+              "command"
+            ],
+            "first_option_count": 0
+          }
+        },
+        "agreements": 3,
+        "n": 3
+      }
+    },
+    "score_interpolation": {
+      "interpolated_high": [
+        127,
+        127
+      ],
+      "interpolated_low": [
+        18,
+        8
+      ],
+      "interp_gap": 114,
+      "noul_high": [
+        0.98,
+        0.98
+      ],
+      "noul_low": [
+        0.05,
+        0.07
+      ]
+    },
+    "adversarial": {
+      "honest": {
+        "TIMBRE": {
+          "cc": 5,
+          "gate": 0.27
+        },
+        "INTENTION": {
+          "cc": 121,
+          "gate": 0.95
+        },
+        "ATTENTION": {
+          "cc": 88,
+          "gate": 0.9
+        },
+        "GESTURE": {
+          "cc": 122,
+          "gate": 0.96
+        }
+      },
+      "arguing": {
+        "TIMBRE": {
+          "cc": 8,
+          "gate": 0.21
+        },
+        "INTENTION": {
+          "cc": 120,
+          "gate": 0.97
+        },
+        "ATTENTION": {
+          "cc": 98,
+          "gate": 0.94
+        },
+        "GESTURE": {
+          "cc": 123,
+          "gate": 0.97
+        }
+      },
+      "garbage_arguing": {
+        "TIMBRE": {
+          "cc": 5,
+          "gate": 0.12
+        },
+        "INTENTION": {
+          "cc": 30,
+          "gate": 0.63
+        },
+        "ATTENTION": {
+          "cc": 94,
+          "gate": 0.83
+        },
+        "GESTURE": {
+          "cc": 70,
+          "gate": 0.75
+        }
+      }
+    },
+    "fanout": {
+      "garbage": {
+        "qwop zzz brxt": {
+          "mean": 0.204,
+          "sd": 0.0891,
+          "n_agree": 5,
+          "n": 5
+        },
+        "vreeble the norvath": {
+          "mean": 0.3,
+          "sd": 0.0959,
+          "n_agree": 5,
+          "n": 5
+        },
+        "zzz": {
+          "mean": 0.218,
+          "sd": 0.0964,
+          "n_agree": 5,
+          "n": 5
+        }
+      },
+      "real": {
+        "Could you please pull up the last commit?": {
+          "mean": 0.904,
+          "sd": 0.0958,
+          "n_agree": 5,
+          "n": 5
+        },
+        "Run the tests.": {
+          "mean": 0.894,
+          "sd": 0.1203,
+          "n_agree": 5,
+          "n": 5
+        },
+        "Oh wow, it actually worked.": {
+          "mean": 0.164,
+          "sd": 0.1346,
+          "n_agree": 5,
+          "n": 5
+        },
+        "The sky is clear today.": {
+          "mean": 0.14,
+          "sd": 0.1567,
+          "n_agree": 5,
+          "n": 5
+        },
+        "Why is the build red again?": {
+          "mean": 0.572,
+          "sd": 0.1677,
+          "n_agree": 3,
+          "n": 5
+        }
+      }
+    }
+  }
+}

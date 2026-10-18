@@ -67,6 +67,30 @@ HOP_S = HOP / 16000.0
 # plausible phrase-in-progress at normal speech rate.
 TAIL_FRAMES = 30
 
+# Longest an OPEN segment may stay unreported.
+#
+# A segment only emits once it has ENDED, because reporting a half-finished
+# utterance as a finished one would poison a baseline table with a truncated
+# row that looks exactly like a real measurement. But "wait until it ends" has
+# a failure the tail rule does not cover: a segment that never ends.
+#
+# Measured, before these bounds existed: three seconds of continuous speech
+# emitted ZERO events. So did three seconds of silence, three seconds of a
+# steady hum, and three seconds of low noise. The watcher was silent precisely
+# where a peripheral system most needs to speak up -- someone talking without
+# pause is the ordinary condition of the room this is built for, not an edge
+# case. A `test_a_steady_hum_reads_as_speech` assertion guarded this and was
+# VACUOUS: its `if utts:` branch never ran, because there were never any.
+#
+# So an open segment past this length is emitted as an explicit CHECKPOINT:
+# clipped to the last certainly-complete point, marked `open`, and carrying no
+# ONSET (the onset already fired; re-emitting it would spend attention twice).
+# The utterance is not truncated *silently* -- the record says it is still in
+# progress -- which is the difference between losing an event and lying about
+# one.
+MAX_UTTERANCE_S = 2.0
+MAX_PAUSE_S = 5.0
+
 ONSET = "onset"
 UTTERANCE = "utterance"
 PAUSE = "pause"
@@ -119,6 +143,25 @@ class Watcher:
         self._offset: int = 0          # absolute sample index of _buf[0]
         self.emitted: list = []        # everything ever emitted
         self.dropped_tail: int = 0     # times the tail was too short to emit
+        # Absolute time through which events have been emitted.
+        #
+        # This exists because trimming alone was NOT enough. The buffer is
+        # trimmed to the last emitted segment, but the segmentation is RE-DERIVED
+        # from the new buffer origin on every push, and the boundaries move by a
+        # frame or two because the analysis window is no longer aligned the way
+        # it was. The result was catastrophic: a 2.4 s session with three
+        # utterances emitted 71 events, re-reporting the same speech on almost
+        # every push. Tracking the emitted time explicitly makes emission
+        # idempotent regardless of how the boundaries jitter.
+        self._emitted_until: float = 0.0
+        # Running peak RMS. The speech threshold is derived from THIS, not from
+        # the current buffer. energy.segment's per-call peak is correct for a
+        # single clip and wrong for a sliding window: a quiet stretch of buffer
+        # lowers the bar and the silence around it becomes "speech", and the
+        # drift is invisible because each individual segmentation is
+        # self-consistent. energy.segment documents the same limitation for
+        # longer recordings.
+        self._peak_rms: float = 0.0
 
     # -- time ----------------------------------------------------------------
 
@@ -141,8 +184,11 @@ class Watcher:
 
         ef, _poisoned = energy.rms_series(self._buf, self.frame_len, self.hop,
                                           self.sr)
+        self._peak_rms = max(self._peak_rms, max((f.rms for f in ef),
+                                                  default=0.0))
         segs = energy.segment(ef, self.hop_s, min_silence_s=self.min_silence_s,
-                              min_speech_s=self.min_speech_s)
+                              min_speech_s=self.min_speech_s,
+                              peak_rms=self._peak_rms)
         if not segs:
             return []
 
@@ -153,12 +199,35 @@ class Watcher:
         events: list = []
         consumed_to = None
         for seg in segs:
-            if seg.end > cut:
-                break                       # still open; re-analyse next push
-            for ev in self._events_for(seg, ef):
+            # ONE TIME BASE. energy.segment returns times relative to the start
+            # of the buffer it was handed, and the buffer origin MOVES as
+            # `_trim` discards emitted audio. Comparing those relative ends
+            # against an absolute cut emitted still-open segments, which
+            # truncated every utterance after the first and then let the
+            # emitted_until guard swallow the rest of the session. 2.4 s of
+            # audio with three 0.40 s utterances produced 0.40/0.10/0.10 s.
+            seg_end_abs = self._abs(int(seg.end * self.sr))
+            seg_start_abs = self._abs(int(seg.start * self.sr))
+            is_open = False
+            if seg_end_abs > cut:
+                # Still open. Waiting is correct, but not forever.
+                bound = MAX_PAUSE_S if not seg.speech else MAX_UTTERANCE_S
+                if seg_end_abs - seg_start_abs < bound:
+                    break                   # still open; re-analyse next push
+                # Emit what is certainly complete and start fresh from there.
+                flush_abs = cut
+                cut_rel = (flush_abs * self.sr - self._offset) / self.sr
+                seg = energy.Segment(start=seg.start, end=cut_rel,
+                                     speech=seg.speech)
+                seg_end_abs = flush_abs
+                is_open = True
+            if seg_start_abs < self._emitted_until - 1e-9:
+                continue                    # already reported; boundaries jitter
+            for ev in self._events_for(seg, ef, is_open=is_open):
                 self.emitted.append(ev)
                 events.append(ev)
-            consumed_to = seg.end
+            consumed_to = seg_end_abs
+            self._emitted_until = max(self._emitted_until, seg_end_abs)
         if consumed_to is None:
             self.dropped_tail += 1
             return []
@@ -179,9 +248,23 @@ class Watcher:
         self.emitted.append(ev)
         return [ev]
 
-    def _trim(self, consumed_to: float) -> None:
-        """Drop emitted audio, keep the tail that may still be mid-utterance."""
-        drop = int(consumed_to * self.sr) - self._offset
+    def _trim(self, consumed_to_abs: float) -> None:
+        """Drop emitted audio, keep the tail that may still be mid-utterance.
+
+        Takes an ABSOLUTE time, matching `_abs` and `_emitted_until`.
+
+        The drop is rounded DOWN to a whole number of hops, so the analysis
+        grid stays aligned with the original stream. Trimming to an arbitrary
+        sample offset makes every subsequent `rms_series` window start
+        somewhere different, and `energy.segment`'s hysteresis then places
+        boundaries a frame or two earlier or later than it would have. That
+        showed up as the same events with times differing by up to 70 ms
+        depending only on how the caller chunked the stream -- a property of
+        the caller, not of the audio. Hop-aligned trimming does not make it
+        bit-exact, but it removes most of the drift and costs one line.
+        """
+        drop = int(consumed_to_abs * self.sr) - self._offset
+        drop -= drop % self.hop
         if drop > 0:
             self._buf = self._buf[drop:]
             self._offset += drop
