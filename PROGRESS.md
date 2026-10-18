@@ -281,3 +281,74 @@ that exists the calibration number must not be quoted as if it stood alone.
 No Platt scaling. `decision-ledger` measured it making an already-calibrated
 model worse (ECE 0.033 → 0.053), and "apply a correction" is the reflex this
 repo keeps having to unlearn.
+
+---
+
+## Phase 2.6 — three of the four questions are ill-posed
+
+`src/question_health.py` exists to catch the defect decision-ledger's
+`pass_detector` catches from the other side. Garbage in, LOW spread-confidence
+out. Real in, meaningful out.
+
+It had **never been run**. The moment it was, it failed:
+
+```python
+vals = [_conf(rs[track]) for rs in readings_by_text if all(r.ok for r in rs)]
+```
+
+`rs` is a **dict**, so `r` was the track *name* and every entry raised
+`AttributeError: 'str' object has no attribute 'ok'`. A 161-line module, fully
+written, fully committed, zero tests, and it could not execute. The fix is
+`.values()`, plus a `track in rs` guard so one dropped call skips a probe
+instead of crashing.
+
+Then, against the live model:
+
+| Track | garbage median | real median | separation | verdict |
+|---|---|---|---|---|
+| INTENTION | **0.95** | 0.88 | **−0.07** | **ill-posed** |
+| ATTENTION | **0.80** | 0.70 | **−0.10** | **ill-posed** |
+| TIMBRE | 0.04 | 0.27 | +0.23 | degenerate |
+| GESTURE | 0.47 | 0.99 | **+0.52** | healthy |
+
+**One of four tracks is healthy.**
+
+INTENTION scores *higher* on `"qwop zzz brxt"` than on `"Could you please pull
+up the last commit?"`. It is not declining to place garbage on a scale; it is
+placing it confidently, in the wrong direction.
+
+## The result that matters, and it invalidates part of Phase 2
+
+INTENTION was calibrated at **ECE 0.0565** an hour ago. That measurement is
+correct and it means nothing on its own.
+
+**A perfectly calibrated answer to an ill-posed question is still a wrong
+answer.** Calibration asks "when it says 0.8, is it right 80% of the time?"
+Well-posedness asks "is 0.8 even the right thing to be estimating?" A question
+can satisfy the first perfectly while failing the second completely.
+
+So the CC values on INTENTION, ATTENTION and TIMBRE **should not be trusted yet**,
+however well calibrated they are. Only GESTURE has earned a number.
+
+## What this says about the measurement stack so far
+
+Three independent instruments have now each found something, and the pattern is
+consistent:
+
+| instrument | what it found |
+|---|---|
+| wiring audit | an acknowledgement blaming a credential instead of naming a missing caller |
+| calibration (ECE) | well-calibrated numbers from a question that does not work |
+| question health | three of four questions are ill-posed |
+
+None of them would have been found by the one above it. That is the argument for
+keeping all three rather than trusting whichever ran last.
+
+## What has to happen to the three broken questions
+
+They need rewriting, and each rewrite must be re-measured by this same probe —
+not asserted to be better. decision-ledger's QUESTION-REWRITE.md is the
+precedent: pass 0.30 → sharp 0.97, with the before/after kept. That is the next
+piece of work, and until it is done the honest summary of Phase 2 is:
+
+    4 judged tracks built, 1 healthy, 3 ill-posed or degenerate.
