@@ -89,7 +89,7 @@ TAIL_FRAMES = 30
 # progress -- which is the difference between losing an event and lying about
 # one.
 MAX_UTTERANCE_S = 2.0
-MAX_PAUSE_S = 5.0
+MAX_PAUSE_S = 3.0
 
 ONSET = "onset"
 UTTERANCE = "utterance"
@@ -162,6 +162,10 @@ class Watcher:
         # self-consistent. energy.segment documents the same limitation for
         # longer recordings.
         self._peak_rms: float = 0.0
+        # Whether the currently-open speech run has already fired its ONSET.
+        # Checkpoints of a long run must not re-charge attention, but the first
+        # checkpoint of a run whose segment never closed still owes one.
+        self._open_run_onset_done: bool = False
 
     # -- time ----------------------------------------------------------------
 
@@ -254,14 +258,26 @@ class Watcher:
         Takes an ABSOLUTE time, matching `_abs` and `_emitted_until`.
 
         The drop is rounded DOWN to a whole number of hops, so the analysis
-        grid stays aligned with the original stream. Trimming to an arbitrary
-        sample offset makes every subsequent `rms_series` window start
-        somewhere different, and `energy.segment`'s hysteresis then places
-        boundaries a frame or two earlier or later than it would have. That
-        showed up as the same events with times differing by up to 70 ms
-        depending only on how the caller chunked the stream -- a property of
-        the caller, not of the audio. Hop-aligned trimming does not make it
-        bit-exact, but it removes most of the drift and costs one line.
+        grid stays aligned with the original stream.
+
+        This is load-bearing, and the reason is not obvious. `energy.segment`
+        places segment boundaries at frame TIMES -- window CENTRES --
+        which are `(index * hop + frame_len / 2) / sr`. With FRAME_LEN = 800
+        that is an offset of 400 samples, and 400 mod 160 = 80: half a hop.
+        So the natural drop lands on the half-hop lattice, not the hop
+        lattice.
+
+        Measured by sabotage: removing this rounding does not change any
+        utterance boundary the tests check -- it shifts `_offset` onto 80 mod
+        160, which then makes every subsequent `rms_series` window start
+        somewhere different. The first version of that sabotage test asserted
+        the *wrong* thing (that no offset could ever be 0 again) and so
+        reported a failure that had nothing to do with the real effect. The
+        correct guard is that the lattice must be broken SOMEWHERE.
+
+        Hop-aligned trimming does not make segmentation bit-exact across
+        chunkings -- the chunking test's four-frame tolerance is what that
+        concession costs -- but it keeps the analysis grid from migrating.
         """
         drop = int(consumed_to_abs * self.sr) - self._offset
         drop -= drop % self.hop
@@ -271,7 +287,7 @@ class Watcher:
 
     # -- per-segment summary -------------------------------------------------
 
-    def _events_for(self, seg, ef) -> list:
+    def _events_for(self, seg, ef, is_open: bool = False) -> list:
         """
         One segment -> its events, carrying the summary the baseline table
         needs so nothing downstream has to re-analyse the audio.
@@ -281,13 +297,24 @@ class Watcher:
         is the record. They are separate because they go to different layers:
         the onset to the judged layer, the utterance to the tables.
 
+        A CHECKPOINT (`is_open`) yields only the UTTERANCE, marked `open`.
+        Emitting an ONSET again would be a real defect rather than a cosmetic
+        one: design v3 §2 makes the onset the event that spends attention, so
+        a 30 s monologue flushing every 2 s would re-charge attention five
+        times for one occasion. The onset was already reported; the
+        checkpoint only carries the record forward.
+
         A pause yields one, carrying only its duration, because there is
         nothing else to summarise about silence.
         """
         t0 = self._abs(int(seg.start * self.sr))
         t1 = self._abs(int(seg.end * self.sr))
         if not seg.speech:
-            return [Event(PAUSE, t0, t1, {"duration_s": seg.duration()})]
+            # Any pause ends the current speech run, so the next one owes an
+            # onset of its own.
+            self._open_run_onset_done = False
+            return [Event(PAUSE, t0, t1, {"duration_s": seg.duration(),
+                                           "open": is_open})]
 
         i0 = max(0, int(seg.start / self.hop_s) - 1)
         i1 = min(len(ef), int(seg.end / self.hop_s) + 1)
@@ -301,21 +328,29 @@ class Watcher:
         rms = [f.rms for f in frames]
         peak = max(rms) if rms else 0.0
 
-        return [
-            Event(ONSET, t0, t0, {"speech": True}),
-            Event(UTTERANCE, t0, t1, {
-                "duration_s": round(seg.duration(), 4),
-                "energy_peak": round(peak, 6),
-                "energy_mean": round(sum(rms) / len(rms), 6) if rms else 0.0,
-                "voiced_frames": len(hz),
-                "total_frames": len(pf),
-                "voiced_ratio": round(len(hz) / len(pf), 4) if pf else 0.0,
-                "hz_p05": round(_pct(hz, 0.05), 2) if hz else None,
-                "hz_p95": round(_pct(hz, 0.95), 2) if hz else None,
-                "inflections": len(inflections),
-                "quiet_frames": tracker.quiet_frames,
-            }),
-        ]
+        record = Event(UTTERANCE, t0, t1, {
+            "duration_s": round(seg.duration(), 4),
+            "open": is_open,
+            "energy_peak": round(peak, 6),
+            "energy_mean": round(sum(rms) / len(rms), 6) if rms else 0.0,
+            "voiced_frames": len(hz),
+            "total_frames": len(pf),
+            "voiced_ratio": round(len(hz) / len(pf), 4) if pf else 0.0,
+            "hz_p05": round(_pct(hz, 0.05), 2) if hz else None,
+            "hz_p95": round(_pct(hz, 0.95), 2) if hz else None,
+            "inflections": len(inflections),
+            "quiet_frames": tracker.quiet_frames,
+        })
+        if is_open and self._open_run_onset_done:
+            # Second and later checkpoints of the SAME run. The onset already
+            # fired; design v3 §2 makes it the event that spends attention, so
+            # re-emitting it would charge one occasion several times.
+            return [record]
+        onset = Event(ONSET, t0, t0, {"speech": True})
+        # Remember only while the run is still open, so a checkpoint that
+        # arrives without ever having closed its segment still gets its onset.
+        self._open_run_onset_done = is_open
+        return [onset, record]
 
 
 def _pct(values, q: float):

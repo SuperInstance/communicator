@@ -93,7 +93,7 @@ def varying_amplitude_session():
     """
     return (tone(200.0, 0.5, 0.80) + silence(0.4)
             + tone(260.0, 0.5, 0.15) + silence(0.4)
-            + noise(1.5, 0.018))
+            + noise(2.5, 0.018))
 
 
 def drain(w, samples, chunk=1600):
@@ -297,17 +297,23 @@ class TestDeclaredLimits:
         This is the most likely real-world failure of the whole measured
         stack, and it is not fixed. It is declared, and LANE-FIXTURES.md
         exists to get real speech (and real rooms) in front of it.
+
+        This assertion was VACUOUS until the checkpoint bounds were added: the
+        hum never ends, so its segment never closed, so the watcher emitted
+        nothing at all and `if utts:` was never entered. A guard that never
+        executes is not a guard. The count is asserted unconditionally now, so
+        a future change that stops reporting the hum has to say so out loud.
         """
         w = watcher.Watcher(SR)
-        evs = drain(w, tone(120.0, 2.0, 0.05))
+        evs = drain(w, tone(120.0, 3.0, 0.05))
         utts = [e for e in evs if e.kind == watcher.UTTERANCE]
-        # Either outcome is acceptable in the test; what is NOT acceptable is
-        # the claim that this is handled. If a future fix makes hum read as
-        # silence, this test fails and forces the docstring to be updated.
-        assert isinstance(utts, list)
-        if utts:
-            assert utts[0].duration_s > 1.5, \
-                "if hum is segmented as speech it should be one long run"
+        assert utts, \
+            "the hum should now be REPORTED (as an open checkpoint) even " \
+            "though it is still misread as speech -- previously it vanished"
+        assert all(u.data["open"] for u in utts), \
+            "a never-ending segment can only ever be a checkpoint"
+        assert utts[0].duration_s > 1.5, \
+            "if hum is segmented as speech it should be a long run"
 
     def test_true_silence_is_still_rejected(self):
         """
@@ -331,10 +337,9 @@ class TestGridAlignment:
         This is asserted directly rather than through a downstream symptom
         because the symptom is weak: a misaligned window shifts hysteresis
         boundaries by a frame or two, which the chunking test's four-frame
-        tolerance absorbs. An earlier version of this file relied on that
-        tolerance alone, and a sabotage that removed the alignment still passed
-        all 20 tests. The invariant itself is cheap and exact, so it is checked
-        exactly.
+        tolerance absorbs. The invariant itself is cheap and exact, so it is
+        checked exactly -- and `test_sabotage_unaligned_trim_is_caught` below
+        confirms it has teeth.
         """
         w = watcher.Watcher(SR)
         seen = []
@@ -346,10 +351,18 @@ class TestGridAlignment:
 
     def test_sabotage_unaligned_trim_is_caught(self):
         """
-        Removing the hop rounding must turn the test above red.
+        Removing the hop rounding must break the lattice above.
 
-        Sabotage-and-revert, because a guard nobody has seen fail is not a
-        guard -- it is an assertion that happens to be true today.
+        The first version of this test asserted `0 not in offsets[1:]` -- that
+        no offset could EVER be 0 again once sabotaged. That is stronger than
+        the truth and it failed for the wrong reason: the offsets came back
+        `[0,0,0,0,0,0,0,80,80,80,0,...]`, which is broken, but not broken
+        *everywhere*. The guard is that the lattice breaks SOMEWHERE.
+
+        The 80 is the whole story. `energy.segment` puts boundaries at window
+        CENTRES, `(index*hop + frame_len/2)/sr`, and FRAME_LEN/2 = 400 samples
+        = half a hop, so the natural drop lands on the half-hop lattice.
+        Without the rounding the grid migrates there instead of staying put.
         """
         original = watcher.Watcher._trim
 
@@ -359,11 +372,11 @@ class TestGridAlignment:
                 self._buf = self._buf[drop:]
                 self._offset += drop
 
-        w = watcher.Watcher(SR)
         samples = session()
+        w = watcher.Watcher(SR)
         for i in range(0, len(samples), 1600):
             w.push(samples[i:i + 1600])
-        assert w._offset % w.hop == 0, "precondition: aligned before sabotage"
+        assert set([w._offset % w.hop]) == {0}, "precondition: aligned"
 
         watcher.Watcher._trim = unaligned
         try:
@@ -374,8 +387,9 @@ class TestGridAlignment:
                 offsets.append(w2._offset % w2.hop)
         finally:
             watcher.Watcher._trim = original
-        assert 0 not in offsets[1:], \
-            "sabotage should have knocked the grid off the hop lattice"
+        assert set(offsets) - {0}, \
+            "sabotage left the analysis grid on the hop lattice -- the " \
+            "rounding would be redundant"
 
 
 class TestThresholdDrift:
@@ -427,6 +441,57 @@ class TestThresholdDrift:
         assert len(drifted) > 2, \
             (f"a drifting threshold should invent utterances in the noise "
              f"tail; found {len(drifted)}")
+
+
+# -- segments that never end ------------------------------------------------
+
+class TestCheckpoints:
+    """
+    A segment only emits once it ends, so a segment that never ends must
+    otherwise never emit. Measured before this existed: three seconds of
+    continuous speech produced ZERO events -- as did trailing silence, a
+    steady hum, and a low noise floor. A peripheral system that is silent
+    whenever the person in front of it talks without pausing is silent in the
+    one case it exists for.
+    """
+
+    def test_continuous_speech_is_reported_not_swallowed(self):
+        w = watcher.Watcher(SR)
+        utts = [e for e in drain(w, tone(200.0, 3.0, 0.3))
+                if e.kind == watcher.UTTERANCE]
+        assert utts, "3 s of unbroken speech produced no events at all"
+        assert all(u.data["open"] for u in utts), \
+            "an unclosed segment must be marked open, never presented as final"
+
+    def test_a_long_run_pays_attention_once_not_once_per_checkpoint(self):
+        """
+        Design v3 §2 makes the ONSET the event that spends attention. A 30 s
+        monologue flushing every 2 s would re-charge one occasion many times.
+        """
+        w = watcher.Watcher(SR)
+        evs = drain(w, tone(200.0, 6.0, 0.3))
+        utts = [e for e in evs if e.kind == watcher.UTTERANCE]
+        onsets = [e for e in evs if e.kind == watcher.ONSET]
+        assert len(utts) >= 2, "6 s should take more than one checkpoint"
+        assert len(onsets) == 1, \
+            f"one continuous run owes one onset, got {len(onsets)}"
+
+    def test_a_silence_long_enough_to_mean_something_is_reported(self):
+        w = watcher.Watcher(SR)
+        pauses = [e for e in drain(w, silence(4.0)) if e.kind == watcher.PAUSE]
+        assert pauses, "4 s of quiet is information; it produced nothing"
+        assert pauses[0].data["open"] is True
+
+    def test_ordinary_utterances_are_never_marked_open(self):
+        """
+        The checkpoint mechanism must not leak into normal operation -- a row
+        flagged `open` means "this may still be growing" and a table would
+        otherwise carry that uncertainty for every utterance.
+        """
+        w = watcher.Watcher(SR)
+        utts = [e for e in drain(w, session()) if e.kind == watcher.UTTERANCE]
+        assert utts and not any(u.data["open"] for u in utts), \
+            "short, complete utterances must be reported as final"
 
 
 # -- negative control --------------------------------------------------------
