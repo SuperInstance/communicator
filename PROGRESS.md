@@ -756,3 +756,35 @@ does. That is the finding.
 
 229 passed, 5 skipped. Negative control on the local client: honouring the
 cloud model id fails 1; removing the partial-response guard fails 2.
+
+### Does the local model need the gate too? Yes — and it is weaker on ATTENTION
+
+`experiments/local_question_health.py` runs the Phase 2.7 probe through
+`tev1`, same batteries, same reduction, same normalisation.
+
+| Track | local CC sep | cloud CC sep (Phase 2.7) | local gate garbage → real | verdict |
+|---|---|---|---|---|
+| INTENTION | **+0.425** | +0.554 | 19% → 70% | healthy |
+| GESTURE | **+0.386** | +0.681 | 27% → 89% | healthy |
+| ATTENTION | +0.189 | **+0.420** | 19% → 41% | weak |
+| TIMBRE | −0.031 | −0.012 | 19% → 2% | null in both |
+
+Two readings, and both matter:
+
+**The gate is a property of the question, not a patch for one model.**
+`tev1` needed it exactly as the cloud model did — its garbage gates sit at
+0.19 and its real gates at 0.70-0.89. A second model, with no relationship to
+Jev, arriving at the same requirement is the strongest evidence in this repo
+that the diagnosis in Phase 2.7 was structural rather than a vendor quirk.
+
+**The local model is genuinely weaker on ATTENTION**, and not by a little:
++0.189 against the cloud's +0.420, with a gate that reaches only 0.41 on real
+speech where the cloud reaches 0.82. So local-first cannot simply replace the
+cloud for every track. The measured split is:
+
+    local  (0.97 s)   GESTURE, INTENTION      — healthy at 0.97 s
+    cloud  (1.40 s)   ATTENTION               — weak locally, healthy in cloud
+    neither           TIMBRE                  — not in the text, per 3 instruments
+
+That is a hybrid decided by measurement rather than by preference, and it is
+the first concrete shape "configurable cloud/local/hybrid" has taken.
