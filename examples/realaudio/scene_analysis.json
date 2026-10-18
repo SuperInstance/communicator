@@ -1,0 +1,226 @@
+[
+ {
+  "a": 0.0,
+  "inten": 8,
+  "gest": "statement",
+  "rms_med": 0.021258282397675757,
+  "syll_s": 4.52,
+  "text": "Act One of Alice in Wonderland by Alice "
+ },
+ {
+  "a": 68.0,
+  "inten": 65,
+  "gest": "reaction",
+  "rms_med": 0.039773883369481663,
+  "syll_s": 4.17,
+  "text": "Here, you're spoiling the game."
+ },
+ {
+  "a": 135.0,
+  "inten": 30,
+  "gest": "question",
+  "rms_med": 0.02759737899080603,
+  "syll_s": 5.02,
+  "text": "Does a nice little girl like you cheat w"
+ },
+ {
+  "a": 204.0,
+  "inten": 8,
+  "gest": "statement",
+  "rms_med": 0.022618988484363396,
+  "syll_s": 5.01,
+  "text": "Only the things go the other way."
+ },
+ {
+  "a": 275.0,
+  "inten": 2,
+  "gest": "statement",
+  "rms_med": 0.025349809526289777,
+  "syll_s": 4.58,
+  "text": "I heard my mom tell the cook not to pepp"
+ },
+ {
+  "a": 377.0,
+  "inten": 55,
+  "gest": "question",
+  "rms_med": 0.016059841824557664,
+  "syll_s": 4.85,
+  "text": "Is scene one reversed?"
+ },
+ {
+  "a": 459.0,
+  "inten": 29,
+  "gest": "statement",
+  "rms_med": 0.03324248009185205,
+  "syll_s": 4.84,
+  "text": "That would never do I'm sure."
+ },
+ {
+  "a": 536.0,
+  "inten": 118,
+  "gest": "command",
+  "rms_med": 0.014252878060180881,
+  "syll_s": 4.28,
+  "text": "Faster, don't try to talk."
+ },
+ {
+  "a": 602.0,
+  "inten": 4,
+  "gest": "statement",
+  "rms_med": 0.026561880079824515,
+  "syll_s": 5.62,
+  "text": "She takes a ribbon out of her pocket and"
+ },
+ {
+  "a": 697.0,
+  "inten": 3,
+  "gest": "statement",
+  "rms_med": 0.018954377845983895,
+  "syll_s": 4.51,
+  "text": "Alice catches the shawl and looks about "
+ },
+ {
+  "a": 766.0,
+  "inten": 61,
+  "gest": "command",
+  "rms_med": 0.028597753575862958,
+  "syll_s": 5.26,
+  "text": "But really, you should have a lady's mai"
+ },
+ {
+  "a": 828.0,
+  "inten": 9,
+  "gest": "statement",
+  "rms_med": 0.022408313541866856,
+  "syll_s": 5.7,
+  "text": "It's a poor sort of memory that only wor"
+ },
+ {
+  "a": 883.0,
+  "inten": 8,
+  "gest": "reaction",
+  "rms_med": 0.027161135605571055,
+  "syll_s": 5.07,
+  "text": "Better and better and better."
+ },
+ {
+  "a": 951.0,
+  "inten": 13,
+  "gest": "statement",
+  "rms_med": 0.03477074977224782,
+  "syll_s": 4.89,
+  "text": "Everything's black before my eyes."
+ },
+ {
+  "a": 1051.0,
+  "inten": 13,
+  "gest": "statement",
+  "rms_med": 0.02988855449156646,
+  "syll_s": 3.89,
+  "text": "She'll get me executed as sure as ferret"
+ },
+ {
+  "a": 1113.0,
+  "inten": 84,
+  "gest": "command",
+  "rms_med": 0.03643361369654839,
+  "syll_s": 4.29,
+  "text": "Don't stand chattering to yourself like "
+ },
+ {
+  "a": 1170.0,
+  "inten": 54,
+  "gest": "question",
+  "rms_med": 0.03065486471543171,
+  "syll_s": 4.51,
+  "text": "What's tremendously easy riddles you ask"
+ },
+ {
+  "a": 1232.0,
+  "inten": 57,
+  "gest": "reaction",
+  "rms_med": 0.016707132031161455,
+  "syll_s": 5.41,
+  "text": "No, a belt, I mean."
+ },
+ {
+  "a": 1297.0,
+  "inten": 10,
+  "gest": "statement",
+  "rms_med": 0.055727365290100125,
+  "syll_s": 4.39,
+  "text": "I always pay it extra."
+ },
+ {
+  "a": 1359.0,
+  "inten": 3,
+  "gest": "statement",
+  "rms_med": 0.0272119389506967,
+  "syll_s": 5.0,
+  "text": "She walks weeping to a high glass table "
+ },
+ {
+  "a": 1469.0,
+  "inten": 50,
+  "gest": "question",
+  "rms_med": 0.019166122554113173,
+  "syll_s": 4.47,
+  "text": "What is his sorrow?"
+ },
+ {
+  "a": 1576.0,
+  "inten": 6,
+  "gest": "statement",
+  "rms_med": 0.032046479602783735,
+  "syll_s": 4.29,
+  "text": "In fact we went to school every day."
+ },
+ {
+  "a": 1665.0,
+  "inten": 1,
+  "gest": "statement",
+  "rms_med": 0.034906612082362974,
+  "syll_s": 4.57,
+  "text": "Well, there was mystery, mystery ancient"
+ },
+ {
+  "a": 1747.0,
+  "inten": 76,
+  "gest": "command",
+  "rms_med": 0.01685715371510048,
+  "syll_s": 4.6,
+  "text": "That's enough about lessons."
+ },
+ {
+  "a": 1843.0,
+  "inten": 10,
+  "gest": "statement",
+  "rms_med": 0.004909296762638012,
+  "syll_s": 4.17,
+  "text": "Then, you know, you throw the..."
+ },
+ {
+  "a": 1917.0,
+  "inten": 79,
+  "gest": "question",
+  "rms_med": 0.07386587198188568,
+  "syll_s": 4.58,
+  "text": "Will you come and join the dance?"
+ },
+ {
+  "a": 2054.0,
+  "inten": 7,
+  "gest": "statement",
+  "rms_med": 0.019668244185977728,
+  "syll_s": 4.82,
+  "text": "The reason is that they would go with th"
+ },
+ {
+  "a": 2130.0,
+  "inten": 10,
+  "gest": "question",
+  "rms_med": 0.042228499668318986,
+  "syll_s": 4.46,
+  "text": "Why, if a fish came to me and told me he"
+ }
+]

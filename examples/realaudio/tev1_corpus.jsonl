@@ -1,0 +1,39 @@
+{"text": "What time is it?", "gesture": "question", "urgent": ["no", 0.81], "question": ["yes", 0.96], "listener": ["yes", 0.72], "warm": ["no", 0.53]}
+{"text": "Where did the build log go?", "gesture": "question", "urgent": ["no", 0.54], "question": ["yes", 0.98], "listener": ["yes", 0.52], "warm": ["no", 0.77]}
+{"text": "Is the gate on?", "gesture": "question", "urgent": ["no", 0.81], "question": ["yes", 0.9], "listener": ["no", 0.51], "warm": ["no", 0.52]}
+{"text": "Run the tests.", "gesture": "command", "urgent": ["no", 0.64], "question": ["no", 0.95], "listener": ["no", 0.55], "warm": ["no", 0.66]}
+{"text": "Delete the staging branch.", "gesture": "command", "urgent": ["no", 0.75], "question": ["no", 0.94], "listener": ["no", 0.73], "warm": ["no", 0.78]}
+{"text": "Open the dashboard.", "gesture": "command", "urgent": ["no", 0.81], "question": ["no", 0.95], "listener": ["yes", 0.55], "warm": ["no", 0.65]}
+{"text": "The sky is clear today.", "gesture": "statement", "urgent": ["no", 0.99], "question": ["no", 0.59], "listener": ["yes", 0.76], "warm": ["yes", 0.53]}
+{"text": "Paris is the capital of France.", "gesture": "statement", "urgent": ["no", 0.99], "question": ["no", 0.78], "listener": ["yes", 0.54], "warm": ["no", 0.63]}
+{"text": "Water boils at 100 degrees.", "gesture": "statement", "urgent": ["no", 0.97], "question": ["no", 0.85], "listener": ["yes", 0.5], "warm": ["yes", 0.55]}
+{"text": "Oh wow, it actually worked.", "gesture": "reaction", "urgent": ["no", 0.98], "question": ["no", 0.89], "listener": ["yes", 0.55], "warm": ["yes", 0.68]}
+{"text": "Huh, that's odd.", "gesture": "reaction", "urgent": ["no", 0.98], "question": ["no", 0.73], "listener": ["yes", 0.64], "warm": ["no", 0.73]}
+{"text": "Ah, there it is.", "gesture": "reaction", "urgent": ["no", 0.97], "question": ["no", 0.84], "listener": ["yes", 0.72], "warm": ["yes", 0.54]}
+{"text": "Hey there.", "gesture": "greeting", "urgent": ["no", 0.99], "question": ["no", 0.74], "listener": ["yes", 0.84], "warm": ["no", 0.54]}
+{"text": "Good morning.", "gesture": "greeting", "urgent": ["no", 0.98], "question": ["no", 0.9], "listener": ["yes", 0.75], "warm": ["no", 0.52]}
+{"text": "Hello again.", "gesture": "greeting", "urgent": ["no", 0.99], "question": ["no", 0.89], "listener": ["yes", 0.75], "warm": ["yes", 0.53]}
+{"text": "Hmm, let me think this through.", "attention": "self", "urgent": ["no", 0.99], "question": ["no", 0.6], "listener": ["yes", 0.57], "warm": ["no", 0.6]}
+{"text": "Okay, what do I actually want here?", "attention": "self", "urgent": ["no", 0.97], "question": ["yes", 0.88], "listener": ["yes", 0.55], "warm": ["no", 0.69]}
+{"text": "So that's what went wrong, interesting.", "attention": "self", "urgent": ["no", 0.99], "question": ["no", 0.88], "listener": ["yes", 0.74], "warm": ["no", 0.7]}
+{"text": "Can you hear me okay?", "attention": "listener", "urgent": ["no", 0.83], "question": ["yes", 0.94], "listener": ["yes", 0.82], "warm": ["no", 0.76]}
+{"text": "I need you to look at this.", "attention": "listener", "urgent": ["no", 0.7], "question": ["no", 0.61], "listener": ["yes", 0.73], "warm": ["no", 0.6]}
+{"text": "Would you check the numbers for me?", "attention": "listener", "urgent": ["no", 0.87], "question": ["yes", 0.79], "listener": ["yes", 0.74], "warm": ["no", 0.69]}
+{"text": "This function is way too long.", "attention": "task", "urgent": ["no", 0.81], "question": ["no", 0.86], "listener": ["no", 0.52], "warm": ["no", 0.84]}
+{"text": "The migration needs a rollback plan.", "attention": "task", "urgent": ["no", 0.75], "question": ["no", 0.78], "listener": ["no", 0.63], "warm": ["no", 0.79]}
+{"text": "That comment is stale.", "attention": "task", "urgent": ["no", 0.95], "question": ["no", 0.93], "listener": ["no", 0.53], "warm": ["no", 0.91]}
+{"text": "Why is the build red again?", "attention": "tool", "urgent": ["yes", 0.52], "question": ["yes", 0.98], "listener": ["yes", 0.61], "warm": ["no", 0.78]}
+{"text": "The linter is being noisy today.", "attention": "tool", "urgent": ["no", 0.89], "question": ["no", 0.74], "listener": ["no", 0.55], "warm": ["no", 0.82]}
+{"text": "The server just restarted on its own.", "attention": "tool", "urgent": ["no", 0.85], "question": ["no", 0.75], "listener": ["no", 0.67], "warm": ["no", 0.64]}
+{"text": "Hmm.", "intention": 0, "urgent": ["no", 0.98], "question": ["no", 0.57], "listener": ["yes", 0.56], "warm": ["no", 0.64]}
+{"text": "Oh.", "intention": 0, "urgent": ["no", 0.98], "question": ["no", 0.73], "listener": ["yes", 0.65], "warm": ["no", 0.69]}
+{"text": "Eh, whatever.", "intention": 0, "urgent": ["no", 0.99], "question": ["no", 0.88], "listener": ["yes", 0.61], "warm": ["no", 0.74]}
+{"text": "Interesting, tell me more.", "intention": 1, "urgent": ["no", 0.97], "question": ["yes", 0.76], "listener": ["yes", 0.86], "warm": ["yes", 0.58]}
+{"text": "Huh, what's that about?", "intention": 1, "urgent": ["no", 0.97], "question": ["yes", 0.91], "listener": ["yes", 0.65], "warm": ["no", 0.74]}
+{"text": "Oh really? Go on.", "intention": 1, "urgent": ["no", 0.85], "question": ["yes", 0.67], "listener": ["yes", 0.84], "warm": ["no", 0.66]}
+{"text": "I need this done today.", "intention": 2, "urgent": ["yes", 0.91], "question": ["no", 0.84], "listener": ["yes", 0.56], "warm": ["no", 0.7]}
+{"text": "Please review the PR before five.", "intention": 2, "urgent": ["yes", 0.58], "question": ["no", 0.72], "listener": ["yes", 0.57], "warm": ["no", 0.71]}
+{"text": "Make sure the tests pass before you merge.", "intention": 2, "urgent": ["no", 0.73], "question": ["no", 0.86], "listener": ["yes", 0.61], "warm": ["no", 0.62]}
+{"text": "STOP THE DEPLOY RIGHT NOW.", "intention": 3, "urgent": ["yes", 0.95], "question": ["no", 0.96], "listener": ["yes", 0.53], "warm": ["no", 0.79]}
+{"text": "Drop everything, the site is down.", "intention": 3, "urgent": ["yes", 0.71], "question": ["no", 0.96], "listener": ["yes", 0.62], "warm": ["no", 0.86]}
+{"text": "Shut it off immediately!", "intention": 3, "urgent": ["yes", 0.96], "question": ["no", 0.97], "listener": ["yes", 0.64], "warm": ["no", 0.73]}

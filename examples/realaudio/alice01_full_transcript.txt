@@ -1,0 +1,467 @@
+[    0.0-   13.0] Act One of Alice in Wonderland by Alice Gernstenberg. This is a LibriVox recording. All LibriVox recordings are in the public domain. For more information or to volunteer, please visit LibriVox.org.
+[   13.0-   25.0] Scene One. Alice is home. Lewis Carroll is discovered, playing chess. Golden-haired Alice in a little blue dress, a black kitten in her arms, stands watching him.
+[   26.0-   29.0] That's a funny game, uncle. What did you do then?
+[   30.0-   46.0] A red pawn took a white pawn. This way, you see Alice? The chessboard is divided into sixty-four squares. Red and white. And the white army tries to win. And the red army tries to win. It's like a battle.
+[   47.0-   48.0] With soldiers?
+[   49.0-   56.0] Yes. Here are the kings and queens they are fighting for. That's the red queen, and here's the white queen.
+[   57.0-   58.0] How funny they look.
+[   59.0-   62.0] See the crowns on their heads, and look at their big feet.
+[   63.0-   67.0] It's a photo piece, that's what it is. Do they hump along like this?
+[   68.0-   72.0] Here, you're spoiling the game. You must keep them in their right squares.
+[   73.0-   74.0] I want to be a queen.
+[   75.0-   76.0] Here you are.
+[   76.0-   78.0] He points to a small white pawn.
+[   79.0-   82.0] Here you are in your little stiff skirt.
+[   83.0-   84.0] How do you do, Alice?
+[   85.0-   87.0] And now you are going to move here.
+[   88.0-   89.0] Let me move myself.
+[   90.0-   97.0] When you travel all along the board this way, and you haven't been taken by the enemy, you may be a queen.
+[   98.0-  104.0] Why do people always play with kings and queens? Mother has them in her playing cards too. Look.
+[  105.0-  110.0] Alice goes to the mantel, and takes a pack of playing cards from the ledge.
+[  111.0-  115.0] Here's the king of hearts, and here's his wife. She's the queen of hearts.
+[  116.0-  119.0] Isn't she cross looking? Wants to bite one's head off.
+[  120.0-  121.0] Carol moves upon.
+[  122.0-  124.0] You're playing against yourself, aren't you?
+[  125.0-  131.0] That's one way of keeping in practice, Alice. I have friends in the university who want to beat me.
+[  131.0-  134.0] But if you play against yourself, I should think you'd want to cheat.
+[  135.0-  139.0] Does a nice little girl like you cheat when she's playing against herself?
+[  140.0-  148.0] Oh, I never do. I'd scold myself hard. I always pretend I'm two people too. It's lots of fun, isn't it?
+[  149.0-  153.0] Sometimes, when I'm all alone, I walk up to the looking-glass and talk to the other Alice.
+[  154.0-  160.0] She's so silly, that Alice. She can't do anything by herself. She just mucks me all the time.
+[  161.0-  166.0] She laughs. She laughs. When I point my finger at her, she points her finger at me.
+[  167.0-  170.0] And when I stick my tongue out at her, she sticks her tongue out at me.
+[  171.0-  173.0] Kitty has a twin too, haven't you, darling?
+[  174.0-  176.0] Alice goes to the mirror to show Kitty her twin.
+[  177.0-  181.0] I'll have to write a book some day about Alice. Alice in Wonderland.
+[  182.0-  186.0] Child of the pure, unclouded brow and dreaming eyes of wonder.
+[  187.0-  189.0] Or Alice through the looking-glass.
+[  190.0-  194.0] Don't you wish sometimes you could go into looking-glass house? See?
+[  195.0-  198.0] Alice stands on an armchair and looks into the mirror.
+[  199.0-  203.0] There's the room you can see through the glass. It's just the same as our living-room here.
+[  204.0-  210.0] Only the things go the other way. I can see all of it. All but the bit just behind the fireplace.
+[  211.0-  215.0] Oh, I do wish I could see that bit. I want so much to know if they've a fire there.
+[  216.0-  218.0] You never can tell, you know, unless our fire smokes.
+[  219.0-  225.0] Then smoke comes up in that room, too. But that may be just to make it look as if they had a fire, just to pretend they had.
+[  226.0-  229.0] The books are something like our books. Only the words go the wrong way.
+[  230.0-  232.0] Won't there ever be any way of our getting through, Uncle?
+[  233.0-  237.0] Do you think Kitty would find looking-glass milk digestible?
+[  238.0-  241.0] It doesn't sound awful good, does it? But I might leave her at home.
+[  242.0-  244.0] She's been into an awful lot of mischief today.
+[  244.0-  250.0] She found Sister's knitting and chased the ball all over the garden where Sister was playing croquet with the neighbors.
+[  251.0-  256.0] And I ran and ran after the naughty little thing until I was all out of breath and so tired.
+[  257.0-  259.0] I am tired.
+[  260.0-  262.0] She yawns and makes herself comfortable in the armchair.
+[  263.0-  267.0] Kale replaces the playing cards on the mantel and consults his watch.
+[  268.0-  271.0] Take a nap. Yes. You have time before tea.
+[  271.0-  274.0] We're going to have mock turtle soup for supper.
+[  275.0-  278.0] I heard my mom tell the cook not to pepper it too much.
+[  279.0-  283.0] What a funny little rabbit it is, nibbling all the time.
+[  284.0-  291.0] He leans gently over the back of her chair and seeing that she is going to sleep puts out the lamp light and leaves the room.
+[  292.0-  294.0] A red glow from the fireplace illumines Alice.
+[  295.0-  296.0] Dream music.
+[  297.0-  300.0] A bluish light reveals the red chest queen and the white chest queen in the mirror.
+[  301.0-  304.0] The red queen points to Alice and says in a mysterious voice.
+[  305.0-  308.0] There she is. Let's call her over.
+[  309.0-  310.0] Do you think she'll come?
+[  311.0-  313.0] I'll call softly. Alice.
+[  314.0-  316.0] Hissed. Alice.
+[  317.0-  318.0] Alice.
+[  319.0-  320.0] Hush.
+[  321.0-  322.0] If she wakes and catches us.
+[  323.0-  326.0] Alice comes through into looking glass house.
+[  327.0-  328.0] Their hands beckon her.
+[  328.0-  332.0] Alice rises and talks sleepily. The queens disappear.
+[  333.0-  341.0] Alice climbs from the arm of the chair to the back of another and so on up to the mantel edge where she picks her way daintily between the vases.
+[  342.0-  346.0] I don't know how I can get through.
+[  347.0-  354.0] I've tried before but the glass was hard and I was afraid of cutting my fingers.
+[  355.0-  359.0] She feels the glass and is amazed to find it like gauze.
+[  360.0-  365.0] Why? His staff like gauze? It's turning into a sort of mist.
+[  366.0-  372.0] Why? It's easy to get through. Why? Why? I'm going through.
+[  373.0-  374.0] She disappears.
+[  375.0-  376.0] Scene two.
+[  377.0-  382.0] Is scene one reversed? The portiers are black and red squares like a chess board.
+[  383.0-  386.0] A soft radiance follows the characters mysteriously.
+[  387.0-  395.0] As the curtain rises Alice comes through the looking glass, steps down, looks about in wonderment and goes to see if there is a fire.
+[  396.0-  399.0] The red queen rises out of the grate and faces her hotly.
+[  400.0-  402.0] Why? You're the red queen.
+[  403.0-  411.0] Of course I am. Where do you come from and where are you going? Look up, speak nicely and don't twiddle your fingers.
+[  412.0-  416.0] I only wanted to see what the looking glass was like. Perhaps I've lost my way.
+[  417.0-  422.0] I don't know what you mean by your way. All the ways about here belong to me.
+[  423.0-  425.0] Curtsy while you're thinking what to say, it saves time.
+[  426.0-  429.0] I'll try it when I go home. The next time I'm a little late for dinner.
+[  430.0-  439.0] It's time for you to answer now. Open your mouth a little wider when you speak and always say your Majesty. I suppose you don't want to lose your name.
+[  440.0-  441.0] No indeed.
+[  442.0-  447.0] And yet I don't know. Only think how convenient it would be if you could manage to go home without it.
+[  448.0-  452.0] For instance, if the governess wanted to call you to your lessons she would call out, come here.
+[  453.0-  458.0] And there she would have to leave off because there wouldn't be any name for her to call and of course she wouldn't have to go, you know.
+[  459.0-  464.0] That would never do I'm sure. The governess would never think of excusing me from lessons for that.
+[  465.0-  468.0] If she couldn't remember my name she'd call me Miss, as the servants do.
+[  469.0-  477.0] Well if she said Miss and didn't say anything more of course you'd miss your lessons. I daresay you can't even read this book.
+[  478.0-  487.0] It's all in some language I don't know. Why, it's a looking glass book of course. And if I hold it up to a glass the words will all go the right way, Cain.
+[  487.0-  498.0] Jebelwocky, Twas Brillig, and the Slythy Toes, did Gaia and Gimble in the Wabe, all Mimsy were the burrow-goves, and the Moam Wraiths outgrabe.
+[  499.0-  508.0] It seems very pretty, but it's rather hard to understand. Somehow it seems to fill my head with ideas. Only I don't exactly know what they are.
+[  509.0-  513.0] I daresay you don't know your geography either. Look at the map.
+[  513.0-  518.0] She takes a right angle course to the portiers and points to them with her scepter.
+[  519.0-  526.0] It's marked out just like a big chessboard. I wouldn't mind being a pawn, though of course I should like to be a red queen best.
+[  527.0-  535.0] That's easily managed. When you get to the eighth square you'll be a queen. It's a huge game of chess that's being played all over the world.
+[  536.0-  539.0] Come on, we've got to run. Faster, don't try to talk.
+[  540.0-  541.0] I can't.
+[  541.0-  543.0] Faster, faster.
+[  544.0-  545.0] Are we nearly there?
+[  546.0-  551.0] Nearly there. Why, we passed it ten minutes ago. Faster. You may rest a little now.
+[  552.0-  556.0] Why, I do believe we're in the same place. Everything's just as it was.
+[  557.0-  560.0] Of course it is. What would you have it?
+[  561.0-  567.0] Well, in our country you generally get to somewhere else. If you ran very fast for a long time as we've been doing.
+[  568.0-  574.0] A slow sort of country. Now here you see it takes all the running you can do to keep in the same place.
+[  575.0-  578.0] If you want to get somewhere else you must run at least twice as fast as that.
+[  579.0-  585.0] I'd rather not try, please. I'm quite content to stay here. Only I am so hot and thirsty.
+[  586.0-  587.0] I know what you'd like.
+[  588.0-  590.0] She takes a little box out of her pocket.
+[  591.0-  592.0] Have a biscuit?
+[  592.0-  597.0] Alice, not liking to refuse, curtsies as she takes the biscuit and chokes.
+[  598.0-  601.0] While you're refreshing yourself I'll just take the measurements.
+[  602.0-  605.0] She takes a ribbon out of her pocket and measures the map with it.
+[  606.0-  610.0] At the end of two yards I shall give you your directions. Have another biscuit?
+[  611.0-  613.0] No, thank you. One's quite enough.
+[  614.0-  615.0] Thirst quenched, I hope.
+[  616.0-  619.0] At the end of three yards I shall repeat them, for fear of your forgetting them.
+[  619.0-  624.0] At the end of four I shall say good-bye, and at the end of five I shall go.
+[  625.0-  631.0] That square belongs to Humpty Dumpty, and that square to the Griffin and Mock Turtle, and that square to the Queen of Hearts.
+[  632.0-  633.0] But you make no remark?
+[  634.0-  637.0] I-I didn't know I had to make one, just then.
+[  638.0-  643.0] You should have said, it's extremely kind of you to tell me all this.
+[  644.0-  648.0] However we'll suppose it said, four, good-bye, five.
+[  649.0-  652.0] Red Queen vanishes in a gust of wind behind the portiers.
+[  653.0-  654.0] Rabbit music.
+[  655.0-  658.0] White Rabbit comes out of the fireplace and walks about the room hurriedly.
+[  659.0-  666.0] He wears a checked coat, carries white kid gloves in one hand, a fan in the other, and takes out his watch to look at it anxiously.
+[  667.0-  674.0] Oh, the Duchess! The Duchess! Oh, won't she be savage if I've kept her waiting?
+[  675.0-  681.0] I've never seen a rabbit with a waistcoat and a watch and a waistcoat pocket! If you please, sir.
+[  682.0-  683.0] Oh!
+[  684.0-  688.0] He drops fan and gloves in fright and dashes out by way of the portiers in a gust of wind.
+[  689.0-  692.0] Alice picks up the fan and playfully puts on the gloves.
+[  693.0-  696.0] The portiers flap in a breeze and the shawl flies in.
+[  697.0-  701.0] Alice catches the shawl and looks about for the owner, then meets the White Queen.
+[  701.0-  704.0] I'm very glad I happened to be in the way.
+[  705.0-  712.0] The White Queen runs in wildly, both arms stretched out wide as if she were flying, and cries in a helpless, frightened way.
+[  713.0-  715.0] Bread and butter! Bread and butter!
+[  716.0-  718.0] Am I addressing the White Queen?
+[  719.0-  723.0] Well, yes, if you call that a dressing. It isn't my notion of the thing at all.
+[  724.0-  729.0] If your Majesty will only tell me the right way to begin, I'll do it as well as I can.
+[  729.0-  735.0] But I don't want it done at all. I've been addressing myself for the last two hours.
+[  736.0-  741.0] Every single thing's crooked, and you're all over pins. May I put your shawl straight for you?
+[  742.0-  749.0] I don't know what's the matter with it. It's out of temper. I've pinned it here and I've pinned it there, but there's no pleasing it.
+[  750.0-  756.0] It can't go straight, you know, if you pin it all on one side. And dear me, what a state your hair is in!
+[  756.0-  761.0] The brush has got entangled in it, and I lost the comb yesterday.
+[  762.0-  765.0] Alice takes out a brush and arranges the Queen's hair.
+[  766.0-  769.0] You look better now. But really, you should have a lady's maid.
+[  770.0-  775.0] I'm sure I'll take you with pleasure. Top it's a week in jam every other day.
+[  776.0-  780.0] I don't want you to hire me, and I don't care for jam.
+[  781.0-  782.0] It's very good, jam.
+[  783.0-  785.0] Well, I don't want any today at any rate.
+[  786.0-  793.0] You couldn't have it if you did want it. The rule is, jam tomorrow and jam yesterday, but never jam today.
+[  794.0-  796.0] It must come sometimes to jam today.
+[  797.0-  802.0] No, it can't. It's jam every other day. Today isn't any other day, you know.
+[  803.0-  806.0] I don't understand you. It's dreadfully confusing.
+[  807.0-  812.0] That's the effect of living backwards. It always makes one a little giddy at first.
+[  813.0-  816.0] Living backwards? I never heard of such a thing.
+[  817.0-  822.0] But there's one great advantage in it, that one's memory works both ways.
+[  823.0-  827.0] I'm sure mine only works one way. I can't remember things before they happen.
+[  828.0-  831.0] It's a poor sort of memory that only works backwards.
+[  832.0-  834.0] What sort of things do you remember best?
+[  835.0-  839.0] Oh, things that happened the week after next. For instance now.
+[  840.0-  843.0] She sticks a large piece of plaster on her finger.
+[  844.0-  850.0] There's the king's messenger. He's in prison being punished, and the trial doesn't even begin till next Wednesday.
+[  851.0-  853.0] And of course the crime comes last of all.
+[  854.0-  856.0] Suppose he never commits the crime?
+[  857.0-  859.0] The white queen binds the plaster with ribbon.
+[  860.0-  862.0] That would be all the better, wouldn't it?
+[  863.0-  867.0] Of course it would be all the better. But it wouldn't be all the better, his being punished.
+[  868.0-  871.0] You're wrong there at any rate. Were you ever punished?
+[  872.0-  873.0] Only for faults.
+[  874.0-  876.0] And you were all the better for it, I know.
+[  877.0-  882.0] Yes, but then I had done the things I was punished for. That makes all the difference.
+[  883.0-  888.0] But if you hadn't done them, that would have been better still. Better and better and better.
+[  889.0-  890.0] There's a mistake somewhere.
+[  891.0-  895.0] The white queen screams like an engine whistle and shakes her hand.
+[  896.0-  897.0] Ho!
+[  899.0-  901.0] Oh, my finger's bleeding.
+[  902.0-  903.0] Ho!
+[  904.0-  907.0] What is the matter? Have you pricked your finger?
+[  908.0-  910.0] I haven't pricked it yet, but I soon shall.
+[  911.0-  912.0] Ho!
+[  914.0-  915.0] When do you expect to do it?
+[  916.0-  920.0] When I fasten my shawl again, the brooch will come undone directly. Ho!
+[  920.0-  921.0] Ho!
+[  922.0-  925.0] Brooch flies open and she clutches it wildly.
+[  926.0-  928.0] Take care! You're holding an old crooked.
+[  929.0-  932.0] The white queen pricks her finger and smiles.
+[  933.0-  937.0] That accounts for the bleeding, you see. Now you understand the way things happen here.
+[  938.0-  940.0] But why don't you scream now?
+[  941.0-  946.0] Why, I've done all the screaming already. What would be the good of having it all over again?
+[  946.0-  950.0] Oh, it's time to run if you want to stay in the same place. Come on.
+[  951.0-  957.0] No, no, not so fast. I'm getting dizzy. Everything's black before my eyes.
+[  958.0-  963.0] There is music and the sound of rushing wind and in the darkness the white queen cries.
+[  964.0-  965.0] Faster, faster!
+[  966.0-  967.0] Alice gasps.
+[  968.0-  970.0] I can't. Please, stop.
+[  971.0-  972.0] And the queen replies,
+[  973.0-  977.0] Then you can't stay in the same place. I'll have to drop you behind.
+[  978.0-  981.0] Faster, faster! Goodbye!
+[  983.0-  984.0] Scene 3
+[  985.0-  992.0] When the curtain rises one sees nothing but old black lanterns with orange lights hanging presumably from the sky.
+[  993.0-  997.0] The scene lights up slowly revealing Alice seated on two large cushions.
+[  997.0- 1007.0] She has been dropped behind by the white queen and is dazed to find herself in a strange hall with many peculiar doors and knobs too high to reach.
+[ 1008.0- 1014.0] Oh, my head. Where am I? Oh, dear. Oh, dear.
+[ 1015.0- 1019.0] She saggers up and to her amazement finds herself smaller than the table.
+[ 1020.0- 1024.0] I've never been smaller than any table before. I've always been able to reach the knobs.
+[ 1024.0- 1026.0] What a curious feeling.
+[ 1027.0- 1031.0] Oh, I'm shrinking. It's the fan. The gloves.
+[ 1032.0- 1036.0] She throws them away, feels her head and measures herself against the table and doors.
+[ 1037.0- 1041.0] Oh, saved in time. But I never, never.
+[ 1042.0- 1045.0] Oh, my fan and gloves. Where am I?
+[ 1046.0- 1051.0] Oh, Mr. Rabbit. Please help me out. I want to go home. I want to go home.
+[ 1051.0- 1061.0] Oh, the Duchess. Oh, my fur and whiskers. She'll get me executed as sure as ferrets are ferrets. Oh, you have them.
+[ 1062.0- 1064.0] I'm sorry. You dropped them, you know.
+[ 1065.0- 1068.0] The white rabbit picks up fan and gloves and patters off.
+[ 1069.0- 1071.0] She'll chop off your head.
+[ 1072.0- 1078.0] If you please, sir. Where am I? Won't you please tell me how to get out? I want to get out.
+[ 1078.0- 1080.0] The white rabbit looks at his watch.
+[ 1081.0- 1084.0] Oh, my ears and whiskers. How late it's getting.
+[ 1085.0- 1092.0] A trapdoor gives way and rabbit disappears. Alice dashes after only in time to have the trapdoor bang in her face.
+[ 1093.0- 1101.0] It's a rabbit hole. I'm small enough to fit it too. If I shrink any more it might end in my going out altogether like a candle.
+[ 1102.0- 1110.0] I wonder what I would be like then. What does the flame of a candle look like after the candle is blown out? I've never seen such a thing.
+[ 1111.0- 1112.0] Humpty Dumpty sits on a wall.
+[ 1113.0- 1118.0] Don't stand chattering to yourself like that but tell me your name and your business.
+[ 1119.0- 1121.0] My name is Alice, but...
+[ 1122.0- 1124.0] It's a stupid name enough. What does it mean?
+[ 1125.0- 1127.0] Must a name mean something?
+[ 1127.0- 1137.0] Of course it must. My name means the shape I am. And a good handsome shape it is too. With a name like yours you might be any shape, almost.
+[ 1138.0- 1141.0] You're Humpty Dumpty. Just like an egg.
+[ 1142.0- 1146.0] It's very provoking to be called an egg. Very.
+[ 1147.0- 1151.0] I said you looked like an egg, sir. And some eggs are very pretty, you know.
+[ 1152.0- 1155.0] Some people have no more sense than a baby.
+[ 1155.0- 1157.0] Why do you sit here all alone?
+[ 1158.0- 1164.0] Why, because there's nobody with me. Did you think I didn't know the answer to that? Ask another.
+[ 1165.0- 1169.0] Don't you think you'd be safer down on the ground? That wall's so very narrow.
+[ 1170.0- 1179.0] What's tremendously easy riddles you ask? Of course I don't think so. Take a good look at me. I'm one that has spoken to a king I am.
+[ 1180.0- 1183.0] And to show you I'm not proud you may shake hands with me.
+[ 1183.0- 1187.0] He leans forward to offer Alice his hand, but she is too small to reach it.
+[ 1188.0- 1195.0] However, this conversation is going on a little too fast. Let's go back to the last remark, but one.
+[ 1196.0- 1198.0] I'm afraid I can't remember it.
+[ 1199.0- 1203.0] In that case we start fresh. And it's my turn to choose a subject.
+[ 1204.0- 1206.0] You talk about it just as if it were a game.
+[ 1207.0- 1212.0] So here's the question for you. How old did you say you were?
+[ 1213.0- 1215.0] Seven years and six months.
+[ 1216.0- 1222.0] Wrong! You never said a word about it. Now if you'd asked my advice I'd have said leave off at seven, but...
+[ 1223.0- 1225.0] I never asked advice about growing.
+[ 1226.0- 1227.0] Too proud?
+[ 1228.0- 1232.0] What a beautiful belt you've got on. At least, a beautiful cravat I should have said.
+[ 1232.0- 1239.0] No, a belt, I mean. I beg your pardon. If only I knew which was neck and which was waist.
+[ 1240.0- 1246.0] It is a most provoking thing when a person doesn't know a cravat from a belt.
+[ 1247.0- 1249.0] I know it's very ignorant of me.
+[ 1250.0- 1255.0] It's a cravat, child, and a beautiful one as you say. There's glory for you.
+[ 1256.0- 1258.0] I don't know what you mean by glory.
+[ 1259.0- 1265.0] When I use the word it means just what I choose it to mean. Neither more nor less.
+[ 1266.0- 1269.0] The question is whether you can make words mean different things.
+[ 1270.0- 1277.0] The question is which is to be master. That's all. Impenetrability. That's what I say.
+[ 1278.0- 1280.0] Would you tell me please what that means?
+[ 1281.0- 1285.0] I meant by impenetrability that we've had enough of that subject.
+[ 1285.0- 1288.0] And it would be just as well if you'd mention what you meant to do next.
+[ 1289.0- 1292.0] As I suppose you don't mean to stop here all the rest of your life.
+[ 1294.0- 1296.0] That's a great deal to make one word mean.
+[ 1297.0- 1302.0] When I make a word do a lot of work like that. I always pay it extra.
+[ 1303.0- 1304.0] Oh.
+[ 1305.0- 1310.0] You should see them come round me of a Saturday night. For to get their wages, you know.
+[ 1311.0- 1312.0] That's all. Goodbye.
+[ 1313.0- 1315.0] Goodbye till we meet again.
+[ 1316.0- 1321.0] I shouldn't know you again if we did meet. You're so exactly like other people.
+[ 1322.0- 1324.0] The face is what one goes by generally.
+[ 1325.0- 1330.0] That's just what I complain of. Your face is the same as everybody has.
+[ 1331.0- 1336.0] The two eyes, so nose in the middle, mouth under. It's always the same.
+[ 1337.0- 1340.0] Now if you had the two eyes on the same side of the nose for instance.
+[ 1340.0- 1342.0] For the mouth at the top that would be some help.
+[ 1343.0- 1344.0] It wouldn't look nice.
+[ 1345.0- 1348.0] Wait till you've tried. Goodbye.
+[ 1349.0- 1350.0] He disappears as he came.
+[ 1351.0- 1353.0] Oh. I forgot to ask him how to.
+[ 1354.0- 1358.0] She tries to open the doors. They are all locked. She begins to weep.
+[ 1359.0- 1362.0] She walks weeping to a high glass table and sits down on the slower ledge.
+[ 1363.0- 1366.0] She sits on a big golden key and picks it up in surprise.
+[ 1367.0- 1369.0] She tries it on all the doors but it does not fit.
+[ 1370.0- 1371.0] She beeps and weeps.
+[ 1372.0- 1374.0] And Wonderland grows dark to her in her despair.
+[ 1375.0- 1376.0] In the darkness she cries,
+[ 1377.0- 1382.0] Oh. I'm slipping. Oh. Oh. It's a lake. Oh. My tears. I'm floating.
+[ 1383.0- 1387.0] A mysterious light shows a drink me sign around a bottle on the top of the table.
+[ 1388.0- 1393.0] Alice floats up to it panting and holding onto the edge of the table takes up the bottle.
+[ 1394.0- 1396.0] It isn't marked poison.
+[ 1397.0- 1398.0] She sips at it.
+[ 1398.0- 1408.0] This is good. Tastes like cherry tart, custard, pineapple, roast turkey, toffee and hot butter toast all together.
+[ 1409.0- 1411.0] Oh. Oh. I'm letting out like a telescope.
+[ 1412.0- 1416.0] A mysterious light shows her lengthening out. Music.
+[ 1417.0- 1419.0] But the lake is rising too.
+[ 1420.0- 1426.0] Oh. Oh. It's deep. I'm drowning. Help. Help. I'm drowning. I'm drowning in my tears.
+[ 1427.0- 1430.0] Yitzker. Yitzker.
+[ 1431.0- 1440.0] The griffin, a huge green creature with big glittering wings, appears where Humpty Dumpty had been and reaches glittering claws over to grab and save Alice.
+[ 1441.0- 1449.0] Scene four is symbolic of a wet and rocky shore in a weird green light. The mock turtle is weeping dismally.
+[ 1450.0- 1454.0] Yitzker. Yitzker. Yitzker.
+[ 1455.0- 1457.0] The mock turtle answers with his weeping.
+[ 1463.0- 1465.0] The griffin drags Alice in.
+[ 1466.0- 1468.0] Drop your tears into the sea with his.
+[ 1469.0- 1476.0] He sobs as if he had a bone in his throat. He sighs as if his heart were break. What is his sorrow?
+[ 1477.0- 1480.0] Oh, griffin. It's terrible.
+[ 1480.0- 1485.0] It's all his fancy that mock turtle hasn't got no sorrow.
+[ 1486.0- 1491.0] It's here young lady. She wants for to know your history she do.
+[ 1492.0- 1500.0] I'll tell her to sit down both of you and don't speak a word till I've finished.
+[ 1501.0- 1504.0] I don't see how you can ever finish if you don't begin.
+[ 1505.0- 1509.0] Once I was a real turtle.
+[ 1512.0- 1518.0] A long silence is broken only by the exclamations of the griffin and the heavy sobbing of the mock turtle.
+[ 1519.0- 1540.0] When we were little we went to school in the sea. The master was an old turtle. We used to call him tortoise.
+[ 1541.0- 1544.0] Why did you call him tortoise if he wasn't one?
+[ 1544.0- 1554.0] We called him tortoise because he tortoise. Really, you are very dull.
+[ 1555.0- 1558.0] You ought to be ashamed of yourself for asking such a simple question.
+[ 1559.0- 1562.0] Right, little old fellow. Won't be all day about it.
+[ 1563.0- 1569.0] Yes, we went to school in the sea, though you might believe it.
+[ 1570.0- 1571.0] I never said I didn't.
+[ 1571.0- 1573.0] You did?
+[ 1574.0- 1575.0] Hold your tongue.
+[ 1576.0- 1583.0] We are the best of educations. In fact we went to school every day.
+[ 1584.0- 1588.0] I've been to a day school too. You needn't be so proud as all that.
+[ 1589.0- 1590.0] With extras?
+[ 1591.0- 1594.0] Yes, we learned French and music.
+[ 1595.0- 1596.0] And washing?
+[ 1597.0- 1598.0] Certainly not.
+[ 1599.0- 1603.0] Ah, then yours wasn't a really good school.
+[ 1604.0- 1613.0] Now at hours we had at the end of the bill French, music and washing. Extra!
+[ 1614.0- 1618.0] You couldn't have wondered it much, moving at the bottom of the sea.
+[ 1619.0- 1624.0] I couldn't afford to learn it. I only took the regular course.
+[ 1625.0- 1626.0] What was that?
+[ 1627.0- 1630.0] Reeling and writhing, of course, to begin with.
+[ 1631.0- 1637.0] And then the different branches of arithmetic. Ambition, distraction,
+[ 1638.0- 1641.0] aglification and derision.
+[ 1642.0- 1645.0] I never heard of aglification. What is it?
+[ 1646.0- 1651.0] Never heard of aglifying? You know what a beautify is, I suppose.
+[ 1652.0- 1656.0] Yes, it means to make anything prettier.
+[ 1657.0- 1662.0] Well then, you don't know what aglify is. You are a simpleton.
+[ 1663.0- 1664.0] What else had you to learn?
+[ 1665.0- 1673.0] Well, there was mystery, mystery ancient and modern, with seeography,
+[ 1674.0- 1679.0] then drawing. The drawing master was an old conger eel.
+[ 1680.0- 1686.0] It used to come once a week. What he taught us was drawing, stretching
+[ 1687.0- 1690.0] and fainting in coils.
+[ 1691.0- 1692.0] What was that like?
+[ 1693.0- 1697.0] Well, I can't show it to you myself. I'm too stiff.
+[ 1698.0- 1701.0] And the Griffin never learned it.
+[ 1701.0- 1708.0] Hadn't time. I went to the classical master though. He was an old crab, he was.
+[ 1709.0- 1715.0] I never went to him. He taught laughing and grief, they used to say.
+[ 1716.0- 1719.0] So he did, so he did.
+[ 1720.0- 1722.0] And how many hours a day did you do lessons?
+[ 1723.0- 1729.0] Ten hours the first day, nine the next, and so on.
+[ 1729.0- 1731.0] What a curious plan.
+[ 1732.0- 1738.0] That's the reason they're called lessons, because they lesson from day to day.
+[ 1739.0- 1741.0] Then the eleventh day must have been a holiday.
+[ 1742.0- 1744.0] Of course it was.
+[ 1745.0- 1746.0] And how did you manage on the twelfth?
+[ 1747.0- 1752.0] That's enough about lessons. Tell us something about the games now.
+[ 1752.0- 1757.0] Mock Turtle sighs deeply, draws back one flapper across his eyes.
+[ 1758.0- 1761.0] He looks at Alice and tries to speak, but sobs choke his voice.
+[ 1773.0- 1775.0] Griffin punches him on the back.
+[ 1776.0- 1778.0] Same as if he had a bone in his throat.
+[ 1779.0- 1782.0] The Mock Turtle with tears running down his cheeks.
+[ 1784.0- 1787.0] You made heart have lived much under the sea.
+[ 1788.0- 1789.0] I haven't.
+[ 1790.0- 1794.0] And perhaps you were never even introduced to a lobster.
+[ 1795.0- 1798.0] I once tasted, no, never.
+[ 1799.0- 1807.0] So you can have no idea what a delightful thing a lobster quadril is.
+[ 1808.0- 1810.0] No, indeed. What sort of a dance is it?
+[ 1811.0- 1815.0] Why, you first form into a line along the seashore.
+[ 1816.0- 1821.0] Two lines, seals, turtles, salmon, and so on.
+[ 1822.0- 1826.0] Then when you've cleared all the jellyfish out of the way.
+[ 1827.0- 1829.0] That generally takes some time.
+[ 1830.0- 1832.0] You advance twice?
+[ 1833.0- 1835.0] Each with a lobster as a partner.
+[ 1836.0- 1839.0] Of course, advance twice set to partners.
+[ 1840.0- 1842.0] Change lobsters and retire in same order.
+[ 1843.0- 1846.0] Then, you know, you throw the...
+[ 1847.0- 1848.0] The lobsters.
+[ 1849.0- 1852.0] As far out to sea as you can.
+[ 1853.0- 1854.0] Swim after them.
+[ 1855.0- 1857.0] Turn a somersault into sea.
+[ 1858.0- 1859.0] Change lobsters again.
+[ 1860.0- 1862.0] Back to land again.
+[ 1862.0- 1865.0] And that's all the first figure.
+[ 1866.0- 1868.0] It must be a very pretty dance.
+[ 1869.0- 1871.0] Would you like to see a little of it?
+[ 1872.0- 1873.0] Very much indeed.
+[ 1874.0- 1877.0] Come, let's try the first figure.
+[ 1878.0- 1880.0] We can do it without the lobsters, you know.
+[ 1881.0- 1882.0] Which shall sing?
+[ 1883.0- 1887.0] Oh, you sing. I've forgotten the words.
+[ 1888.0- 1890.0] Creature solemnly dance round and round Alice,
+[ 1891.0- 1895.0] treading on her toes, waving four paws to mark time while Mock Turtle sings.
+[ 1896.0- 1903.0] Will you walk a little faster, said a whiting to a snail?
+[ 1904.0- 1910.0] There's a porpoise clear behind us, and he's treading on my tail.
+[ 1911.0- 1916.0] See how eagerly the lobsters and the turtles all advance.
+[ 1917.0- 1924.0] They are whiting on the shingle. Will you come and join the dance?
+[ 1925.0- 1932.0] Will you won't you, will you won't you, will you join the dance?
+[ 1933.0- 1941.0] Will you won't you, will you won't you, won't you join the dance?
+[ 1942.0- 1949.0] You can really have no notion how delightful it will be
+[ 1950.0- 1957.0] when they take us up and throw us with the lobsters out to sea.
+[ 1958.0- 1966.0] But the snail replied too far, too far, and gave a look askance.
+[ 1966.0- 1975.0] Said he thanked the whiting kindly, but he would not join the dance.
+[ 1976.0- 1983.0] Would not, could not, would not, could not, would not join the dance.
+[ 1984.0- 1992.0] Would not, could not, would not, could not, could not join the dance.
+[ 1992.0- 1996.0] The creatures dance against Alice, pushing her back and forth between them.
+[ 1997.0- 2000.0] She protests and finally escapes. They bump against each other.
+[ 2001.0- 2007.0] Thank you. It's a very interesting dance to watch, and I do so like that curious song about the whiting.
+[ 2008.0- 2012.0] Oh, as to the whiting, eh? You've seen them, of course.
+[ 2013.0- 2016.0] Yes, I've often seen them at din, checks herself hastily.
+[ 2017.0- 2025.0] Well, I don't know where din may be, but if you've seen them so often, of course, you know what they're like.
+[ 2026.0- 2030.0] I believe so. They have their tails in their mouths, and they're all over crumbs.
+[ 2031.0- 2041.0] You're wrong about the crumbs. Crumbs would all wash off in the sea, but they have their tails in their mouths, and the reason is...
+[ 2042.0- 2044.0] Mock turtle yawns and shuts his eyes.
+[ 2048.0- 2051.0] Tell her about the reason and all that.
+[ 2054.0- 2058.0] The reason is that they would go with the lobsters to the dance.
+[ 2059.0- 2070.0] So they got thrown out to sea, so they had to fall a long way, so they got their tails fast in their mouths, so they couldn't get them out again.
+[ 2071.0- 2072.0] That's all.
+[ 2073.0- 2077.0] Thank you. It's very interesting. I never knew so much about whiting before.
+[ 2078.0- 2083.0] I can tell you more of that if you'd like. Do you know why it's called a whiting?
+[ 2084.0- 2086.0] I never thought about it. Why?
+[ 2087.0- 2089.0] It does the boots and shoes.
+[ 2090.0- 2092.0] Does the boots and shoes?
+[ 2093.0- 2098.0] Why, what are your shoes done with? I mean, what makes them so shiny?
+[ 2098.0- 2100.0] They're done with blacking, I believe.
+[ 2101.0- 2104.0] Boots and shoes under the sea are done with whiting.
+[ 2105.0- 2106.0] Now you know.
+[ 2107.0- 2108.0] And what are they made of?
+[ 2109.0- 2112.0] Souls and eels, of course. Any shrimp could have told you that.
+[ 2113.0- 2119.0] If I'd been the whiting, I'd have said to the porpoise, keep back, please. We don't want you with us.
+[ 2120.0- 2127.0] They were obliged to have him with them. No wise fish would go anywhere without a porpoise.
+[ 2128.0- 2129.0] Wouldn't it really?
+[ 2130.0- 2141.0] Of course not. Why, if a fish came to me and told me he was going on a journey, I should say, with what porpoise?
+[ 2142.0- 2143.0] Don't you mean purpose?
+[ 2144.0- 2146.0] I mean what I say.
+[ 2147.0- 2154.0] Shall we try another figure of the lobster quadril? Or would you like the Mark Turter to sing you a song?
+[ 2155.0- 2158.0] A song, please, if the Mark Turter would be so kind.
+[ 2159.0- 2165.0] They were counting for tastes. Sing her turtle soup, would you, old fellow?
+[ 2166.0- 2170.0] The Mark Turter sighs deeply and sometimes choked with sob's sings.
+[ 2171.0- 2178.0] Beautiful soup, so rich and green,
+[ 2179.0- 2186.0] Waiting in a hot terrain.
+[ 2187.0- 2192.0] Who for such dainty's would not stoop?
+[ 2193.0- 2200.0] Soup of the evening, beautiful soup.
+[ 2200.0- 2209.0] Soup of the evening, beautiful soup.
+[ 2210.0- 2223.0] Beautiful soup, beautiful soup.
+[ 2223.0- 2236.0] Soup of the evening, beautiful, beautiful soup.
+[ 2237.0- 2243.0] The white rabbit enters, stretching out a red and white checked sash with which he separates Alice from the creatures.
+[ 2244.0- 2245.0] Check!
+[ 2246.0- 2248.0] They won't let her stay in our square.
+[ 2249.0- 2251.0] The queen is coming this way.
+[ 2251.0- 2256.0] She'll chop our heads off. Come on, come on, let's fly.
+[ 2257.0- 2260.0] The Mark Turtle and the Griffin grab Alice and fly into the air.
+[ 2261.0- 2262.0] Curtain.
+[ 2263.0- 2269.0] The curtain rises to reveal small silhouettes of the Griffin, Mark Turtle and Alice in an orange-colored moon far away in the sky.
+[ 2270.0- 2272.0] Down below, the white rabbit is shouting to them.
+[ 2273.0- 2275.0] You'll be safe in the March Hares Garden.
+[ 2276.0- 2277.0] Curtain.
+[ 2278.0- 2279.0] End of Act One.
+[ 2281.0- 2284.0] End of Act Two.

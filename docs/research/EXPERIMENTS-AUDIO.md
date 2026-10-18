@@ -288,3 +288,46 @@ response with vs without variance-primed delivery) live in
 `docs/research/TIMING.md` §4 with the timing theory that motivates them
 (capture point, T-minus scheduling, priming as receiver calibration).
 
+
+## 3b. Day-2 (2026-10-18) — GPU stretch: full scene, formal E3, tev1 table
+
+**E3 formally PASSED (existence level).** 2-Gaussian EM on pooled log-F0
+(5 windows, n=23,911): BIC difference **1933** vs one Gaussian (decisive
+>10). Components: **124 Hz (20% share) and 235 Hz (80%)** — two voices
+from pitch alone, no training, no labels. Remaining for full E3 pass:
+cluster purity against known turn boundaries (`bimodality_probe.py`).
+
+**tev1 full corpus** (39 texts × 4 binary questions, 68 s on GPU):
+GESTURE question-vs-other **15/15 = 1.000** (matches Jev); INTENTION
+yes-rate monotone across designed levels 0.00 / 0.00 / 0.67 / 1.00;
+ATTENTION listener-vs-other 0.667 (weak vs Jev's 0.917); warm yes-rate
+6/39 (conservative). **Flip stress 5×3 texts: byte-identical every time**
+— and the borderline line "It's like a battle." answers *yes @53%*,
+identically on every ask: tev1 states near-coin uncertainty
+DETERMINISTICALLY. A stable-uncertainty model is exactly what a
+controller wants from a fallback. Interface: `ollama run tev1 --ask
+"<question>"` with state on stdin (0.4 s/ask).
+
+**Whole-scene run** (28 sentence-lines sampled across the full 38-minute
+transcript, Jev on text + measured tracks on the aligned audio windows,
+`scene_analysis.json`):
+
+    intent vs line RMS median   r = +0.070   (nothing)
+    intent vs syllable rate     r = −0.181   (nothing)
+    E7 proxy: RMS rise in the 2 s BEFORE a top-quartile-intent line:
+    6/7 = 86%  (against ~50% chance, one-sided p≈0.06, n=7 — suggestive,
+    not conclusive)
+
+The dissociation IS the finding: **within-line delivery intensity does
+not carry word-intent — but intensity RISES INTO high-intent lines.**
+The signal is in the approach, not the utterance: the pedal-swing law
+(TIMING.md §2) observed in real dramatic audio, while the naive
+"loud = urgent" hypothesis is refuted on the same data. Honest caveats:
+n=7 high-intent lines; narration/dialogue confound unseparated; 2 s RMS
+windows are crude; a staged replication on more scenes is required
+before this is a result, and it is designed above (E7 proper needs
+annotated punchlines, not quartile cutoffs).
+
+Also: full transcript committed (`alice01_full_transcript.txt`, 467
+timestamped segments, 247 s CPU); gesture distribution across the real
+scene — statements 15, questions 6, commands 4, reactions 3.
