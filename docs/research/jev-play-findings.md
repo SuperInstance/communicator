@@ -197,6 +197,71 @@ for a test whose labels depend on the axis being used.
 **Design consequence: the measured acoustic tracks are the right interface to a
 text-only model — now established by a control rather than assumed.**
 
+> ### 5a. CORRECTION — "pixels are dead" was a property of *Jev*, not of spectrograms
+>
+> Everything in §5 above was measured on Jev, and the conclusion was written as
+> though it were about the input format. It is not. A general vision model
+> reads the **same PNG files** correctly.
+>
+> Same 640×480 spectrograms, same three-question prompt, different model:
+>
+> | spectrogram | truth | Jev (`Choice`) | vision model |
+> |---|---|---|---|
+> | `low_150` (150 Hz) | low | low ✓ *(p=0.64)* | **low** ✓ |
+> | `mid_300` (300 Hz) | mid | low ✗ | **mid** ✓ |
+> | `high_450` (450 Hz) | high | low ✗ | **high** ✓ |
+> | blank grey | — | "low" | "low" |
+>
+> **3/3 against Jev's 1/3, on identical bytes.** The blank control answers "low"
+> under both, which is a prior rather than a reading — so the meaningful
+> evidence is that the three structured images get three *different* answers
+> tracking the frequency axis, while the blank gets the default.
+>
+> So the honest statement of §5 is: **a text-only decision model does not read
+> images** — which we already knew, and which `clef-omni` already exploits by
+> accepting audio directly. Spectrograms were never the problem. Writing it the
+> way §5 did would have killed the right idea for the wrong reason, and
+> "text is the only live channel" is only true *of models that only take text*.
+>
+> Cost, for the record: the vision path costs one HTTP call per clip and no
+> special handling; `clef-omni` costs ~$0.007/hour at 285 tokens per 6 s. Both
+> are viable. Neither is free enough to run on the watcher's hot path, which is
+> what the neuron accountant in `workers/` exists to answer.
+
+---
+
+## 5b. And a generative audio model is a fourth option
+
+`matrix.audios_understand` on the same two real clips:
+
+| question | oration (JFK) | essay (Kant) |
+|---|---|---|
+| recognisable human speech? | Yes | Yes |
+| asking for something DONE? | no | No |
+| urgent / emotional / neutral? | neutral | neutral |
+| **how many phrases can you hear?** | **8** | **13** |
+
+It agrees with `clef-omni` and with our reduction on all three categorical
+questions — three independent models, same answers — and then does something the
+decision models **cannot**: it counts.
+
+That is the documented limitation, not a surprise: TypeSafe's own docs say Jev
+does no generation and you should "count in code." `clef-omni` is also a
+decision model. This one is not.
+
+So the four routes are not competitors:
+
+| route | gives you | cannot |
+|---|---|---|
+| our reduction → Jev | 0.12–0.39 s, offline, ours | content questions, counting |
+| raw audio → clef-omni | typed probabilities, audio-native | counting, generation |
+| raw audio → generative audio | open questions, counting, tone | calibrated typed probabilities |
+| spectrogram → vision model | spatial reading of time-frequency | calibrated probabilities |
+
+The last two are new and neither was in the design. The design assumed one
+judge; there are four, and they fail in *different* directions — which makes
+disagreement between them a usable signal rather than an inconvenience.
+
 ---
 
 ## 6. Symbolic encoding: shape survives language, level does not
@@ -459,7 +524,210 @@ whatever microphone happens to be in the room, that is the axis to measure on.
 
 ---
 
-## 10. Open threads
+## 10. JEPA — what harmonizes, and what is already known to fail
+
+Deep research on whether JEPA fits this stack. The short answer: **mostly it
+does not, and the one place it might has already been tested by someone else
+and failed in exactly our regime.**
+
+### 10a. JEPA is largely superseded, and was never state of the art
+
+- **I-JEPA is real and peer-reviewed** (CVPR 2023), and it did beat pixel
+  reconstruction (MAE) at matched budget — 72.9 vs 68.0 at ViT-B, 79.3 vs 77.2 at
+  ViT-H/14 — in ~1200 GPU-hours. That much holds.
+- **"Predict in latent space" was not new.** `data2vec` (2022) is a JEPA for
+  audio: student regresses an EMA teacher's latents, no negatives. It predates
+  every audio-JEPA paper by one to two years.
+- **JEPA lost its own flagship years ago.** Under matched budget, DINOv2 beats
+  I-JEPA by **+13.9 ImageNet-1K points**, ranking first in all six evaluations
+  against I-JEPA's second in all six. A **21M** distilled DINOv2 outscores
+  I-JEPA's **632M** flagship.
+- The "no negatives" property is a side effect of a **BYOL-derived** EMA /
+  stop-gradient hack. Meta's own lead author now says the EMA mechanism
+  "sucks." And `C-JEPA` reports removing stop-grad **guarantees** collapse to
+  zero, meaning the simple loss is insufficient and needs a VICReg regularizer
+  bolted on — which is a contrastive term in disguise.
+
+**"I-JEPA: 72% ImageNet" is a widely-repeated non-number.** 72.9 is the
+*smallest* config; the paper's headline is 79.3 (ViT-H/14) and 81.1 (ViT-H/16
+@448).
+
+### 10b. Audio JEPA exists — and is bad at speech, which is our domain
+
+`Audio-JEPA`, **ICME 2025, peer-reviewed**, ViT-B, ~85M params, trained on
+5,338 h AudioSet in **4×V100 × 14 h (~56 GPU-hours)**, weights at
+`github.com/LudovicTuncay/Audio-JEPA`. It is genuinely small, genuinely cheap,
+genuinely downloadable — and on Speech Commands it scores **0.025 against
+data2vec's 0.978**. The authors' own summary: *"first or second place on
+several benchmarks but falls to last on roughly half of them."*
+
+A separate result (ICASSP 2024) found the masking choices that make vision
+JEPA work **fail in audio**, because audio events span wide frequency bands. So
+the domain-specific fix breaks the architecture's central inductive bias.
+
+### 10c. The use we wanted has already been tested, and failed in our regime
+
+The obvious harmonization — "embed two frames, compare in latent space, get a
+scalar *something changed*" — is the closest thing in the literature to our
+tables-plane growth gate. It has been tested directly.
+
+**"Asleep at the Wheel" (arXiv:2608.01336)** used a frozen JEPA encoder, trained
+a predictor head on masked clip embeddings with an L1 latent loss, and scored
+novelty by cosine distance between predicted and true embedding. Result:
+
+- **Cross-dataset: looks excellent.**
+- **Within a single dataset: "collapses to chance," on par with no-training
+  baselines.**
+- A lightly-supervised logistic probe on the *same frozen embeddings* achieved
+  **almost double the average precision** — the representation was fine; the
+  self-supervised prediction-error objective was the bottleneck.
+- The failure is **silent**: the same pipeline looked good under the wrong
+  protocol.
+
+Our gate — grow tables when measured surprise *declines* over time, for **one
+speaker, one device, one longitudinal stream** — is precisely the
+single-distribution condition where this collapsed. The danger is not that it
+would fail loudly; it is that a cross-session split would make it look
+excellent first.
+
+Separately: **no published correlation exists between JEPA embedding distance
+and human-perceived change.** The theoretical claim ("probabilistic awareness
+of its own training distribution") is asserted in tutorials and measured
+nowhere.
+
+### 10d. V-JEPA 2's robot numbers will not bear weight
+
+Unrefereed preprint by the authors' own team; a third party
+(arXiv:2512.24497) reports **a bug in the released code that reproduces the
+official results** (the 2-step rollout loss is miscomputed). Success cells are
+**n=10** with no confidence intervals, and the "65–80% success on unseen robots"
+figure is a **Meta blog claim**, not a paper number. The same reproduction
+paper's strongest baseline is **DINO-WM — DINOv2, self-distillation, not JEPA**,
+which is a substantial dent in "the JEPA encoder is the active ingredient."
+
+### 10e. What DOES harmonize: distillation, and it has nothing to do with JEPA
+
+Casey's "larger JEV calls calibrate smaller models" is the best-supported idea
+in this whole section, and it is independent of JEPA entirely.
+
+- Soft-label distillation retains **90–95%** typically; an **ensemble of 10
+  speech models at 61.1% frame accuracy distills to a single model at 60.8% —
+  99.5% retention** at identical WER.
+- **Distil the teacher's calibrated distribution at T ≈ 1.** Calibrated teachers
+  yield calibrated students; uncalibrated ones propagate their own
+  miscalibration (ACCV 2024).
+- **Do NOT transfer a temperature across scales.** Temperature fitted on a big
+  teacher does not describe a small student, and it does not survive domain
+  shift (NeurIPS 2021; Ovadia 2019). In the closest analogue to us — per-subject
+  calibration on **wearable** data — a single global recalibration helped only
+  **38% of subjects**, and temperature scaling was the *worst* recalibrator.
+
+That last number is the one to remember: our setting is the longitudinal
+single-user shift regime where calibration transfer is known to fail.
+
+### 10f. The embedding-to-text bottleneck is real and unsolved
+
+Every method for getting non-text signals into an LLM trains a projector
+against that LLM (PocketTSLM, E2P, Pref-LSTM, LLINK, DiffLM). Training against
+the model is exactly what breaks the "frozen text-only decision model" property
+that defines our stack. **There is no recipe for verbalizing a JEPA latent into
+tokens** — and our own measurement says the symbolic-text path already scores
+**3/3** where scalars are structurally blind. A JEPA embedding is *further* from
+text than Hz is.
+
+**Verdict: do not build a JEPA world model. If a JEPA is ever built here, it is
+as a scalar change detector, and it must be tested against the failure above —
+within-session splits only, compared against the existing scalar stack, and
+killed if it does not beat it.** Given that a vision model already reads our
+spectrograms 3/3, and a JEPA's input is a spectrogram, the marginal value is
+unproven and plausibly negative.
+
+### 10g. Our own JEPA repos — the fleet audit, and it is worse than expected
+
+Re-audited against HEAD. The pattern documented in the prior-art audit is
+consistent and, in three cases, worse than "scaffolding outruns execution."
+
+| repo | code | md | md:code | weights | verdict |
+|---|---|---|---|---|---|
+| `plato-audio-jepa` | 5 | 4 | 0.24× | none | **no model at all** |
+| `project-JEPA` | 15 | 23 | **1.62×** | none | **not a JEPA** |
+| `fleet-jepa-midi` | 31 | 16 | **1.90×** | 21 MB | real code, dead model |
+| `plato-room-context` | 6 | 2 | 0.10× | none | scaffold; CI is `\|\| true` |
+| `quilt-jepa` | 106 | 21 | 0.07× | **none** | real, tiny, honestly failing |
+| `intuition` | 24 | 1 | 0.00× | `.pt` + `.onnx` | **real weights, not a JEPA** |
+
+The four findings that matter:
+
+1. **`plato-audio-jepa` contains zero neural network.** Its README's signal
+   chain reads `AudioDeadband → **Audio-1.5B JEPA** → RoomAudioState`. Its
+   `Cargo.toml` dependencies are `serde` and `uuid` — no torch, no ONNX, no
+   model loader. `src/lib.rs` is 276 lines of hand-written DSP, including a
+   naive 16-bin DFT. The repo's 23 MB is **not weights**: a commit deleted 620
+   lines of committed `target/` build artifacts.
+2. **`project-JEPA` is an NVML GPU power profiler.** Its own
+   `REAL_GPU_VALIDATION.md:115` records **103% prediction error** and a failed
+   mirror test — while `README.md:26` still claims "Real GPU validation
+   pending." The two documents contradict each other inside one repo.
+3. **`fleet-jepa-midi` has a correct BYOL/JEPA architecture** — proper
+   `Predictor`, proper EMA target encoder — and a model trained on **16 clips**
+   for **8 GPU-minutes** (`train_log.csv`: 10,000 steps × 0.048 s). Its README
+   describes a different product: 18.7M params, a 4-layer Conformer, a
+   `scripts/` directory and a `tests/` directory **neither of which exist**,
+   and 12,000 h of Lakh MIDI against `eval_output.json:3`'s `"clip_count": 16`.
+   Its embedding std per dim is **0.0473 against its own stated collapse gate
+   of ≥1.0** — twenty times below its own criterion. Measured
+   `kendall_tau_directional: 0.1167`.
+4. **`intuition` is the only repo with real deployable weights** (`.pt` and a
+   50 MB `.onnx`), and it is **not a JEPA** — it is a BPE + 8-layer Transformer
+   classifier distilling soft probabilities from the TypeSafe `jev-preview` LLM
+   API. Zero self-supervision. It does export ONNX and probe CPU latency,
+   which is the one piece of measurement discipline anywhere in the fleet.
+
+`quilt-jepa` deserves credit: it reports **"3/6 PASS"** and states outright that
+its learning and anomaly-detection claims failed. It has real code, no weights,
+and no data beyond a synthetic 16×16 grid. That is what honest failure looks
+like, and it is worth more than the 705-line spec in `fleet-jepa-midi`.
+
+### 10h. A second independent negative on JEPA for speech
+
+`indicSSL` (n=3 seeds, matched encoder and conditions) trained a JEPA and a
+plain masked-reconstruction model on the **same** speech data:
+
+| | JEPA | masked reconstruction |
+|---|---|---|
+| language ID | 56.10 ± 3.74 | **64.51 ± 0.28** |
+| speaker ID | 77.77 | **85.58** |
+
+**JEPA lost to reconstruction on speech.** The authors' reading: spectrogram
+local structure *is* the task-relevant signal, so reconstructing it beats
+predicting it. That is now the second independent result saying the same thing
+as Audio-JEPA's own concession and the "Asleep at the Wheel" novelty collapse.
+
+### 10i. What actually exists to download
+
+| checkpoint | params | size | note |
+|---|---|---|---|
+| `ltuncay/BEST-RQ-2.2-base-2M` | 85,689,376 | 342 MB | **X-ARES 58.77**, MIT, ungated |
+| `ltuncay/Audio-JEPA-base` | 85.5M | 342 MB | X-ARES **31.18** — worse than data2vec |
+| `labhamlet/speech-jepa-base` | 89.7M | 359 MB | speech-specific, no benchmarks, 5 days old |
+| `braindecode/signal-jepa` | **3.46M** | 13.8 MB | **EEG, not audio** |
+
+**Naming trap:** `BEST-RQ-2.2-base-2M` is not 2M parameters — it is 85,689,376,
+byte-identical in size to the non-"2M" model. "2M" means two million optimizer
+steps.
+
+There is **no** nano/tiny *audio* JEPA: the released scaling recipes contain only
+`vit_b`, `vit_h`, `vit_l`. And **no JEPA implementation runs in a browser via
+ONNX or WebGPU** — verified by four independent searches returning zero.
+
+Temporal resolution, which is what actually matters for a continuous stream:
+Audio-JEPA (ICME) emits **1.6 positions/second**, which is useless for speech.
+BEST-RQ-2.2 emits **12.8/second** and ships an `overlap50_two_phase` extraction
+preset built for sliding-window output.
+
+---
+
+## 11. Open threads
 
 - **`clef-omni` and Jev have never been run on the same real decisions.** They
   are different models, so agreement is not a correctness check -- but a
