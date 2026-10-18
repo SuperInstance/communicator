@@ -299,8 +299,12 @@ Pitch. arXiv:2203.09893 · lightweight instrument-agnostic transcription
 *Findings of ACL*, arXiv:2106.05630 · MIDI tokens made LM-friendly.
 
 **Prosody/emotion representation.** Yang, S.-W. et al. (2021). SUPERB.
-*Interspeech*, arXiv:2105.01051 — its prosody tasks ARE our inflection/
-emphasis tracks. Lin, J. et al. (2022). SUPERB-Prosody. *IEEE SLT* (Best
+*Interspeech*, arXiv:2105.01051. **CORRECTION (Day-3, verified against
+the paper itself): SUPERB contains NO question/statement prosody task —
+"PR" is Phoneme Recognition, and a search-engine claim that it holds an
+intonation task was hallucinated and propagated here by an earlier
+research lane. The verified prosody-adjacent line is Lin et al. below
+and the audio-only speech-act results in §14.** Lin, J. et al. (2022). SUPERB-Prosody. *IEEE SLT* (Best
 Paper) — middle wav2vec/HuBERT layers carry prosody. Ma, Z. et al.
 (2024). emotion2vec. *ACL Findings*, arXiv:2312.15185 + EmoBox
 (arXiv:2406.01655): IEMOCAP SOTA ~73–77%, MSP-Podcast ~0.38 macro-F1 —
@@ -333,3 +337,46 @@ DecisionRobust arXiv:2610.19118 (injection robustness — validates our
 presence-gate posture); multi-family arXiv:2610.00346. Microsoft
 Decision-1 announced 2026-10-09 (vendor-only, unflagged). Ollaya:
 github.com/ollaya-dev/ollaya (Apache-2.0).
+
+
+## 14. The open questions, answered from the record (Day-3 lane)
+
+**Per-utterance reliability.** Jiang et al. (2018). To trust or not to
+trust a classifier. *NeurIPS*, arXiv:1805.11783 — the per-instance trust
+score. Vovk, Gammerman & Shafer (2005). *Algorithmic Learning in a
+Random World* — conformal prediction; Campos et al., TACL 2024 survey
+(arXiv:2405.01976); Quach et al., Conformal Language Modeling, ICLR 2024.
+**The ceiling: Gupta, Podkopaev & Ramdas, NeurIPS 2020 (arXiv:2006.10564,
+Thm. 3) — distribution-free instance-conditional calibration is
+IMPOSSIBLE except trivially.** So: per-utterance guarantees exist only as
+prediction-SET coverage; the controller's per-item trust signal is the
+set size. That is the implementable answer to PROGRESS's "per-utterance
+reliability unmeasured."
+
+**Speech acts from acoustics, no ASR.** Chen et al. (2022). WavLM.
+arXiv:2110.13900 — 98.6% intent (SLURP), 70.2% emotion (IEMOCAP) audio-
+only. Abdulrahman et al. (2025). SQEBSP dataset. *Data in Brief* — ~88%
+three-way question/statement/exclamation from pitch. Dang et al.
+(2020). arXiv:2004.11419 — speech-to-dialog-act end-to-end. So yes,
+published, and our measured tracks are the hand-rolled version.
+
+**Per-item stability.** Kuhn, Gal & Farquhar (2023). Semantic
+uncertainty. *ICLR*, arXiv:2302.09664; Farquhar et al. (2024). *Nature*
+630 — per-question entropy over meaning clusters predicts confabulation.
+Recipe for our flip measurements: resample the same utterance N times,
+cluster, stability = 1 − normalized cluster entropy. tev1's stable-coin
+behavior is the degenerate (zero-entropy) case.
+
+**F0-only diarization.** No canonical clean comparison exists (open).
+Anguera et al. (2012). Diarization review. *IEEE TASLP* 20(2) — pitch
+unreliable as a feature; Honorof & Whalen (2005). *JASA* — F0 is
+relative to the speaker's own range. Our Alice bimodality works because
+the cast is mixed-voice; same-gender overlap is the known killer.
+
+**Prosody→intent causality.** Hellier et al. (2002). Perceived urgency of
+speech warnings: semantics versus acoustics. *Human Factors* 44(1) —
+orthogonal manipulation, causal acoustic effect (the published form of
+our Day-2 dissociation). Kobayashi, Hamada & Akagi (2022). *Speech
+Communication* 139 — F0 mean + dynamics drive evacuation-announcement
+urgency. Bänziger & Scherer (2005). *Speech Communication* 46 —
+intonation resynthesis changes emotion recognition.
