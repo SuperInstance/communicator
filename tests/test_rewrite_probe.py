@@ -149,7 +149,11 @@ class TestOneCall:
 
         The control is pinned to the scales, not to the module.
         """
-        assert len(judged.build_questions()) == 8, "judged.py should have gates"
+        # Production has grown twice since this regression was written: 4 ->
+        # 8 (Phase 2.7 gates) -> 13 (the five adversarial-battery questions).
+        # What must stay fixed is the CONTROL at 4, never the production count.
+        assert len(judged.build_questions()) == 13, \
+            "judged.py should have gates and the adversarial battery"
         assert len(rp.build_questions("baseline")) == 4, \
             "the experiment's baseline must stay ungated"
 

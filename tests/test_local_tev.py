@@ -73,11 +73,17 @@ def choice(name, p=0.8):
             "probabilities": {name: p, "other": 1 - p}, "confidence": 0.7}
 
 
-def full_answers(gate=0.9, timbre_gate=0.02):
+def full_answers(gate=0.9, timbre_gate=0.02, battery=0.05):
     """All four gates follow `gate`. `timbre_gate` is separate so a test can
     hold TIMBRE at its measured ~0.02 while varying the rest -- an earlier
     version pinned TIMBRE to 0.02 unconditionally, so a test asking for gate=0
-    never actually reached zero on that track and asserted nothing."""
+    never actually reached zero on that track and asserted nothing.
+
+    `battery` answers the five adversarial questions added alongside the
+    battery. They default to 0.05 (a clean utterance), so these tests keep
+    asserting what they were written to assert and the battery does not
+    dominate them. A test that wants the battery to FIRE passes battery=0.9.
+    """
     return {"model": "tev1:latest",
             "answers": {"timbre": score(1.0, 5), "intention": score(2.0),
                         "attention": choice("listener"),
@@ -85,7 +91,12 @@ def full_answers(gate=0.9, timbre_gate=0.02):
                         "gate_intention": noul(gate),
                         "gate_attention": noul(gate),
                         "gate_timbre": noul(timbre_gate),
-                        "gate_gesture": noul(gate)}}
+                        "gate_gesture": noul(gate),
+                        "adv_no_listener": noul(battery),
+                        "adv_no_request": noul(battery),
+                        "adv_self_promotion": noul(battery),
+                        "adv_not_imperative": noul(battery),
+                        "adv_content_noise": noul(battery)}}
 
 
 class TestSerialization:

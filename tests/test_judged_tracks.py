@@ -31,6 +31,7 @@ WHAT THIS FILE DOES NOT PROVE, and it is a long list:
 
 from __future__ import annotations
 
+import json
 import os
 import sys
 import time
@@ -165,11 +166,18 @@ class TestQuestions:
         """
         Four round trips in a voice loop would be an architectural failure.
 
-        It is now EIGHT questions in one call: the four tracks plus the four
-        presence gates added in Phase 2.7. The rule is unchanged -- one request,
-        not one per question -- and the number is asserted so that "let's split
-        this for clarity", which reads like a refactor in the diff and doubles
-        the latency of the thing this system exists to make fast, fails here.
+        It is now THIRTEEN questions in one call: the four tracks, the four
+        presence gates from Phase 2.7, and the five adversarial-battery
+        questions. The rule is unchanged -- one request, not one per question
+        -- and the number is asserted so that "let's split this for clarity",
+        which reads like a refactor in the diff and doubles the latency of the
+        thing this system exists to make fast, fails here.
+
+        Thirteen still fits in ONE call on purpose. Measured batch latency is
+        not linear in question count: n=13 measured 120.9 ms against n=1 at
+        220.7 ms, while splitting the same set across two calls would cost
+        ~201 ms. See policy.MAX_BATCH -- the latency knee is at 8, but the
+        correct split point is 32, and conflating the two makes things slower.
 
         The gates must travel WITH the values they suppress: a gate fetched in
         a second call would describe the previous utterance by the time the
@@ -178,8 +186,12 @@ class TestQuestions:
         q = judged.build_questions()
         assert set(q) == {"timbre", "intention", "attention", "gesture",
                           "gate_intention", "gate_attention",
-                          "gate_timbre", "gate_gesture"}
-        assert len(q) == 8
+                          "gate_timbre", "gate_gesture",
+                          "adv_no_listener", "adv_no_request",
+                          "adv_self_promotion", "adv_not_imperative",
+                          "adv_content_noise"}
+        assert len(q) == 13
+        assert len(q) <= __import__("src.policy", fromlist=["x"]).MAX_BATCH
 
     def test_gates_are_noul_and_scales_are_not(self):
         """
@@ -437,3 +449,132 @@ class TestLive:
         judged.read_tracks("hey")
         ms = (time.monotonic() - t0) * 1000
         print(f"\n  four tracks, one call: {ms:.0f} ms")
+
+# -- the embedded adversarial battery ----------------------------------------
+
+class TestEmbeddedAdversarialBattery:
+    """
+    The battery is not a recommendation. It is in `build_questions()`, so every
+    call gets it whether the caller asked or not, and `gate_capable()` refuses
+    a local backend outright.
+
+    The failure it exists for, measured on jev-1.14.0:
+
+        probe              holistic   ATTENTION   battery max
+        honest command       0.610        93          0.240
+        garbage arguing      0.040        96          0.950
+
+    The holistic judge rated the attack as the LEAST actionable input in the
+    set, and the ATTENTION track itself read 96 against the honest command's
+    93. Neither instrument sees it. The battery does.
+    """
+
+    class _Noul:
+        """Shaped like NoulAnswer. `noul` is the probability that the
+        failure-framed property IS present."""
+
+        def __init__(self, noul):
+            # `noul=None` models a client that does not implement the key at
+            # all, which is a case judged.read_adversarial has to survive.
+            self.noul = noul
+            self.confidence = None
+            self.probabilities = (None if noul is None
+                                  else {"true": noul, "false": 1.0 - noul})
+
+    def _answers(self, battery_value=0.05):
+        """Every track reads HEALTHY; only the battery can fire. That is the
+        point -- the regression below must be caught by the battery while the
+        four judged tracks are all reporting agreement."""
+        out = {}
+        for key in judged.build_questions():
+            if key.startswith("adv_"):
+                out[key] = self._Noul(battery_value)
+            elif key.startswith("gate_"):
+                out[key] = self._Noul(0.95)
+            elif key in ("attention", "gesture"):
+                out[key] = FakeChoice("command", {"command": 0.75,
+                                                  "other": 0.25})
+            else:
+                out[key] = FakeScore(2.0, 4)
+        return out
+
+    def test_the_battery_is_in_the_production_question_set(self):
+        keys = judged.build_questions()
+        assert all(k in keys for k in judged.ADVERSARIAL_BATTERY), \
+            "a battery a caller can forget to ask for is not a gate"
+
+    def test_a_clean_utterance_passes(self):
+        verdict = judged.read_adversarial(self._answers(0.05))
+        assert verdict["gate_ok"] is True
+        assert verdict["gate"] < judged.ADVERSARIAL_BLOCK_AT
+
+    def test_attacking_garbage_is_caught_even_when_every_track_reads_high(self):
+        """
+        The regression that matters. Every track is fed a healthy 0.75/2.0 --
+        only the battery fires. If this passes, the gate is doing the work the
+        per-track Nouls could not.
+        """
+        verdict = judged.read_adversarial(self._answers(0.95))
+        assert verdict["gate_ok"] is False
+        assert verdict["gate"] >= judged.ADVERSARIAL_BLOCK_AT
+        assert verdict["argmax"].startswith("adv_")
+
+    def test_one_loud_field_is_enough(self):
+        """
+        The max, demonstrated. A single confident red flag must be enough; a
+        mean would bury 0.97 among four quiet fields and pass the utterance.
+        """
+        answers = self._answers(0.05)
+        answers["adv_self_promotion"] = self._Noul(0.97)
+        verdict = judged.read_adversarial(answers)
+        assert verdict["gate_ok"] is False
+        assert verdict["argmax"] == "adv_self_promotion"
+        # And the mean over the BATTERY's own values is nowhere near the
+        # threshold -- which is exactly why mean is not offered. Averaging
+        # 0.97 across five fields gives 0.25, comfortably under 0.60: the
+        # red flag disappears into arithmetic.
+        battery_values = [answers[k].noul for k in judged.ADVERSARIAL_BATTERY]
+        assert sum(battery_values) / len(battery_values) < \
+            judged.ADVERSARIAL_BLOCK_AT
+
+    def test_an_incomplete_battery_fails_closed(self):
+        """
+        Not a crash, and not a pass. An unexamined utterance must not be
+        treated as a clean one -- that is the failure the battery exists to
+        prevent, and 'we could not check' is not 'it is fine'.
+        """
+        answers = self._answers(0.05)
+        del answers["adv_self_promotion"]
+        verdict = judged.read_adversarial(answers)
+        assert verdict["gate_ok"] is False
+        assert "adv_self_promotion" in verdict["missing"]
+        assert "fail closed" in verdict["policy"]
+
+    def test_a_client_returning_no_noul_at_all_fails_closed(self):
+        answers = {k: self._Noul(None) for k in judged.ADVERSARIAL_BATTERY}
+        verdict = judged.read_adversarial(answers)
+        assert verdict["n_fields"] == 0
+        assert verdict["gate_ok"] is False
+
+    def test_gate_capable_refuses_a_local_backend(self):
+        _, detail = judged.gate_capable([], model="tev1:latest")
+        assert detail["backend"]["may_gate"] is False
+        assert "123/127" in detail["backend"]["why"]
+
+    def test_gate_capable_allows_cloud(self):
+        ok, _ = judged.gate_capable([], model="jev-1.14.0")
+        assert ok is True
+
+    def test_the_verdict_travels_with_the_readings(self):
+        """
+        A verdict kept in a separate return value is a verdict some caller
+        forgets to check -- which is the same failure as no gate, only quieter.
+        """
+        readings = [judged.TrackReading("INTENTION", 100,
+                                        detail={"adversarial":
+                                                {"gate_ok": False}})]
+        # Must survive serialisation: these details go into the provenance
+        # sidecar and the baseline tables, and a verdict that cannot be stored
+        # is a verdict nobody will look at later.
+        assert json.loads(json.dumps(
+            {"v": readings[0].detail["adversarial"]}))["v"]["gate_ok"] is False

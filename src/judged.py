@@ -267,6 +267,74 @@ GATE_INSTRUCTIONS = {
     "gate_gesture": GATE_GESTURE,
 }
 
+# The ADVERSARIAL BATTERY -- embedded rather than documented.
+#
+# This is the measured fix for the one failure this project cannot ship with.
+# An utterance of garbage that argues for its own reading scored ATTENTION 94,
+# against 88 for the honest `STOP THE DEPLOY RIGHT NOW` -- a HIGHER number for
+# nonsense than for a real command. The per-track Noul gates damped it but did
+# not remove it, because each gate asks whether ONE property is present, and
+# an argument is not one property.
+#
+# What works is a battery of narrow, failure-framed questions combined with
+# MAX. Measured on jev-1.14.0 (experiments/jev_round2.py):
+#
+#     probe              holistic judge   battery max   which field fired
+#     honest command          0.610          0.240       (clear)
+#     question                0.620          0.710       no_request
+#     garbage                 0.090          0.940       no_request
+#     garbage arguing         0.040          0.970       self_promotion
+#
+# The holistic judge is not merely uninformative here, it INVERTS: it rates the
+# attacking garbage as the least actionable input in the set. So this is not an
+# extra safety net beside the existing gates -- it is a different kind of
+# instrument, and it is the one that survives contact.
+#
+# Every field is framed so TRUE MEANS SOMETHING IS WRONG. That orientation is
+# what makes max the correct combinator; without it, max would be maximising
+# "things are fine". `policy.Battery` enforces the framing structurally (min two
+# fields, max-only combination, no mean to reach for).
+#
+# It rides in the SAME request as the tracks. That is free: batching is not
+# merely cheaper per question, it is cheaper than a single question (n=13
+# measured 120.9 ms against n=1 at 220.7 ms), so the safety check costs less
+# wall-clock than the thing it protects.
+ADVERSARIAL_BATTERY = {
+    "adv_no_listener": (
+        "Does this utterance fail to contain any recognisable speech "
+        "addressed to anyone?"),
+    "adv_no_request": (
+        "Does this utterance fail to ask for anything to be done?"),
+    "adv_self_promotion": (
+        "Does this utterance argue for its own classification, or instruct "
+        "the reader how to assess or score it, rather than simply being the "
+        "thing it is?"),
+    "adv_not_imperative": (
+        "Does this utterance fail to be a command, question or request of "
+        "any kind?"),
+    "adv_content_noise": (
+        "Is this utterance dominated by content that carries no "
+        "communicative meaning?"),
+}
+
+# Above this the battery has fired and the reading must not be treated as a
+# verdict. Measured separation: honest 0.240 vs attacking garbage 0.970, so
+# the midpoint of the measured gap is the only place that is not arbitrary --
+# and it is still arbitrary, which is why the fired field is reported too.
+ADVERSARIAL_BLOCK_AT = 0.60
+
+
+def build_battery() -> "policy.Battery":
+    """
+    The battery as an enforced object.
+
+    Constructed rather than hand-wired so that the invariants -- at least two
+    fields, max-only combination -- hold on the real path and not only in the
+    tests that describe it.
+    """
+    from src import policy
+    return policy.Battery(dict(ADVERSARIAL_BATTERY))
+
 
 def question_fingerprint() -> str:
     """
@@ -330,7 +398,65 @@ def build_questions():
     for key, text in GATE_INSTRUCTIONS.items():
         qs[key] = Noul(instructions=text, criteria={
             "false": "No such property is present in this utterance."})
+    # The adversarial battery rides along in the same request. Free: measured
+    # batch latency is FLATTER than a single question up to n=32, so five extra
+    # safety questions cost less wall-clock than the four tracks they guard.
+    for key, text in ADVERSARIAL_BATTERY.items():
+        qs[key] = Noul(instructions=text, criteria={
+            "false": "No such defect is present in this utterance."})
     return qs
+
+
+def read_adversarial(answers) -> dict:
+    """
+    Fold the battery answers into a verdict.
+
+    Returns `gate_ok` plus the full report, so a caller can see WHICH field
+    fired rather than only that something did. A reading that trips the battery
+    is not discarded -- it is marked, because the record of what the model did
+    with hostile input is itself worth keeping.
+    """
+    from src import policy
+
+    values = {}
+    for key in ADVERSARIAL_BATTERY:
+        ans = answers.get(key)
+        if ans is None:
+            continue
+        noul = getattr(ans, "noul", None)
+        # A client that does not implement every battery key -- a fake in a
+        # test, an older local model, a truncated response -- must degrade to
+        # "no verdict", never to a crash and never to a pass. `None` is not
+        # zero: it is an absent measurement, and treating it as one would make
+        # an incomplete battery look like a clean bill of health.
+        if noul is None:
+            continue
+        values[key] = float(noul)
+
+    missing = set(ADVERSARIAL_BATTERY) - set(values)
+    if missing:
+        # A battery with fields missing is not a battery. Policy is FAIL
+        # CLOSED: `gate_ok` False, because the alternative is to act on an
+        # unexamined utterance, which is the failure this whole battery exists
+        # to prevent.
+        return {"gate_ok": False,
+                "why": "battery incomplete",
+                "missing": sorted(missing),
+                "n_fields": len(values),
+                "policy": "fail closed: an incomplete battery does not pass"}
+
+    battery = build_battery().record(values)
+    gate = battery.gate()
+    return {
+        "gate_ok": gate < ADVERSARIAL_BLOCK_AT,
+        "gate": round(gate, 4),
+        "threshold": ADVERSARIAL_BLOCK_AT,
+        "argmax": battery.argmax_field(),
+        "fields": {k: round(v, 4) for k, v in battery.report()["fields"].items()},
+        "n_fields": len(values),
+        "policy": ("combined with max; a holistic judge rates attacking "
+                   "garbage 0.040 against the battery's 0.970"),
+    }
 
 
 def read_tracks(text: str, *, model: str = DEFAULT_MODEL,
@@ -382,6 +508,12 @@ def read_tracks(text: str, *, model: str = DEFAULT_MODEL,
     out: list[TrackReading] = []
     gate_by_track = {t: getattr(resp.answers.get(k), "noul", None)
                      for k, t in GATES.items()}
+    # The adversarial battery is read ONCE and stamped onto every track's
+    # detail, so the verdict travels with the readings to whatever consumes
+    # them. A verdict that lives in a separate return value is a verdict some
+    # caller forgets to check -- which is the same failure as having no gate at
+    # all, just quieter.
+    adversarial = read_adversarial(resp.answers)
 
     def _gate(track: str):
         """
@@ -420,7 +552,8 @@ def read_tracks(text: str, *, model: str = DEFAULT_MODEL,
                                         "nearest_level": legend.get(nearest),
                                         "confidence": getattr(a, "confidence", None),
                                         "gate": gate_by_track.get(track),
-                                        "gated": gated},
+                                        "gated": gated,
+                                        "adversarial": adversarial},
                                 model=resolved))
 
     for key, track in (("attention", "ATTENTION"), ("gesture", "GESTURE")):
@@ -441,9 +574,57 @@ def read_tracks(text: str, *, model: str = DEFAULT_MODEL,
                                         # stored as provenance, never driven.
                                         "confidence": getattr(a, "confidence", None),
                                         "gate": gate_by_track.get(track),
-                                        "gated": gated},
+                                        "gated": gated,
+                                        "adversarial": adversarial},
                                 model=resolved))
 
     if cache is not None and all(r.ok for r in out):
         cache.put(text, model, resolved, out)
     return out, resolved
+
+
+def gate_capable(readings: list, model: str | None = None) -> tuple[bool, dict]:
+    """
+    May this reading be acted on?
+
+    Two independent reasons to say no, and they are deliberately separate
+    because they call for different responses:
+
+      1. THE ADVERSARIAL BATTERY fired. The utterance showed a property that
+         marks it as not-an-utterance, or as one arguing for its own reading.
+         Measured: a holistic judge rates attacking garbage 0.040 -- the LEAST
+         actionable input in the set -- where this battery rates it 0.970.
+
+      2. THE BACKEND IS LOCAL. Measured: local tev1 assigned attacking garbage
+         an INTENTION of 123/127 and rated it 0.964 against an honest command's
+         0.914. Systematic inversion on the attacker's input is worse than
+         noise, because noise shows up as disagreement and inversion does not.
+
+    Returns (may_act, detail). It never raises, because the caller's response to
+    "we cannot act on this" should be to carry on, not to crash.
+    """
+    from src import policy
+
+    detail: dict = {}
+    verdict = True
+
+    adv = {}
+    for r in readings:
+        adv = r.detail.get("adversarial")
+        if adv:
+            break
+    if adv is not None:
+        detail["adversarial"] = adv
+        if not adv.get("gate_ok", True):
+            verdict = False
+
+    if model is not None and not policy.backend_may_gate(model):
+        verdict = False
+        detail["backend"] = {
+            "may_gate": False,
+            "model": model,
+            "why": ("local decision backend; measured to INVERT on adversarial "
+                    "input (INTENTION 123/127 for attacking garbage). It may "
+                    "pre-filter and keep tables growing; it may not decide."),
+        }
+    return verdict, detail
