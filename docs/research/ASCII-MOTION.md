@@ -1,5 +1,28 @@
 # ASCII motion: the character delta is half threshold dither, and the tone channel is a dead end
 
+> ## ⚠ PARTIALLY RETRACTED — read `EMPTY-ROOM-CONTROL.md` first
+>
+> This document's central mechanism claim — "roughly half the delta is threshold
+> dither, and the structured far-from-threshold residual is real motion" — **does
+> not survive its control.**
+>
+> `EMPTY-ROOM-CONTROL.md` ran the same measurement with **nobody in the room**.
+> Empty-room dot flip rate: **50.00%** (the theoretical maximum). Occupied:
+> **48.19%**. The empty room flips *more*. So the structured residual is not
+> motion — it is camera exposure drift plus the threshold, and an empty room
+> produces the same maximal change.
+>
+> Additionally, the **3.1× dither gradient in §6 does not reproduce**: on a
+> different capture of the same scene (`A.nv12`) the gradient is **0.94×, flat**.
+> It was a property of one recording, not of the pipeline.
+>
+> What survives here: the ladder never operates (24/24 frames pinned at the
+> coarsest rung), the rotated-null control shows it consumes only a change count
+> (100.0% rung agreement), and the tone channel is worse than the mask at
+> 70.91% — the control that killed my own proposed fix.
+>
+> What does not survive: the motion interpretation, and the gradient.
+
 **Status: measured. The representation idea survives; two of its load-bearing
 assumptions do not.**
 

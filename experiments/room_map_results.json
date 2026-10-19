@@ -1,0 +1,79 @@
+{
+  "question": "what does this room sound and look like with nobody in it?",
+  "confounds": [
+    "one room, one night, one machine -- nothing here generalises",
+    "onsets in the tail analysis include door and chair events; they are transients, not calibrated reverberation events",
+    "the median composite assumes a static scene; its sliding window drift is reported so that assumption can be checked"
+  ],
+  "audio": {
+    "path": "/home/proart/projects/glasses/.capture_keep/empty1.wav",
+    "sample_rate": 16000,
+    "duration_s": 149.90625,
+    "rms_amplitude": 6.928661713302038,
+    "peak_95pct": 12,
+    "rms_dbfs": -73.49601154420377,
+    "loudest_bin_hz": 245,
+    "top_bins_hz": [
+      245,
+      240,
+      300,
+      325,
+      320,
+      65,
+      330,
+      250,
+      370,
+      395,
+      50,
+      210
+    ],
+    "hum_harmonics_db": [
+      [
+        50,
+        57.25006016182203
+      ],
+      [
+        100,
+        52.494356295136875
+      ],
+      [
+        150,
+        50.62836796472847
+      ],
+      [
+        200,
+        36.02166765723584
+      ],
+      [
+        60,
+        53.40428264252818
+      ],
+      [
+        120,
+        53.61080693276804
+      ],
+      [
+        180,
+        53.59211294176886
+      ],
+      [
+        240,
+        65.83661786546139
+      ]
+    ],
+    "n_transients": 119,
+    "rt60_estimates_ms": [],
+    "rt60_median_ms": null
+  },
+  "vision": {
+    "path": "/home/proart/projects/glasses/.capture_keep/empty1.nv12",
+    "n_frames": 2000,
+    "mean_luma": 49.70077926432292,
+    "adjacent_mad_raw": 39.315094363588045,
+    "adjacent_mad_gain_normalised": 0.808906145981632,
+    "median_map_windows": 9,
+    "median_map_step_drift_mean": 0.0001708984375,
+    "median_map_step_drift_max": 0.00048828125,
+    "median_map_pgm": "/home/proart/projects/communicator/experiments/room_median_map.pgm"
+  }
+}

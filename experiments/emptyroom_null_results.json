@@ -1,0 +1,102 @@
+{
+  "question": "does the character delta measure the subject, or the camera? An empty room is the control that was missing.",
+  "captures": [
+    {
+      "label": "OCCUPIED (subject present, mostly still)",
+      "path": "/mnt/c/proart_capture/A.nv12",
+      "n_frames_used": 400,
+      "n_frames_available": 750,
+      "mean_luma": 111.17517106119791,
+      "adjacent_mad_raw": 43.68600162515664,
+      "adjacent_mad_gain_normalised": 0.39397797487733327,
+      "dot_flip_rate_median_pct": 48.190104166666664,
+      "dot_flip_rate_min_pct": 33.932291666666664,
+      "dot_flip_rate_max_pct": 56.822916666666664,
+      "dither_gradient": [
+        {
+          "abs_dluma": "0-0",
+          "flip_rate_pct": 45.71394952050362,
+          "dots": 33994
+        },
+        {
+          "abs_dluma": "1-2",
+          "flip_rate_pct": 45.56061509812764,
+          "dots": 137474
+        },
+        {
+          "abs_dluma": "3-5",
+          "flip_rate_pct": 46.24189120350544,
+          "dots": 221827
+        },
+        {
+          "abs_dluma": "6-10",
+          "flip_rate_pct": 46.44532095528993,
+          "dots": 415790
+        },
+        {
+          "abs_dluma": "11-20",
+          "flip_rate_pct": 47.414897621268224,
+          "dots": 1078642
+        },
+        {
+          "abs_dluma": "21-40",
+          "flip_rate_pct": 48.21463921086326,
+          "dots": 1899392
+        },
+        {
+          "abs_dluma": "41-200",
+          "flip_rate_pct": 48.38047576767409,
+          "dots": 2341521
+        }
+      ],
+      "gradient_on_to_far": 0.9448842491757359
+    },
+    {
+      "label": "EMPTY (no subject)",
+      "path": "/home/proart/projects/glasses/.capture_keep/empty1.nv12",
+      "n_frames_used": 400,
+      "n_frames_available": 3750,
+      "mean_luma": 49.69857259114583,
+      "adjacent_mad_raw": 39.34364181939223,
+      "adjacent_mad_gain_normalised": 0.8092197017047326,
+      "dot_flip_rate_median_pct": 50.0,
+      "dot_flip_rate_min_pct": 25.0,
+      "dot_flip_rate_max_pct": 50.0,
+      "dither_gradient": [
+        {
+          "abs_dluma": "1-2",
+          "flip_rate_pct": 47.72727272727273,
+          "dots": 44
+        },
+        {
+          "abs_dluma": "3-5",
+          "flip_rate_pct": 50.204081632653065,
+          "dots": 245
+        },
+        {
+          "abs_dluma": "6-10",
+          "flip_rate_pct": 53.333333333333336,
+          "dots": 30
+        },
+        {
+          "abs_dluma": "21-40",
+          "flip_rate_pct": 43.74086607314949,
+          "dots": 1229619
+        },
+        {
+          "abs_dluma": "41-200",
+          "flip_rate_pct": 39.10737987328072,
+          "dots": 4898702
+        }
+      ],
+      "gradient_on_to_far": 1.2204160156452046
+    }
+  ],
+  "empty_over_occupied_flip_rate": 1.0375574169143476,
+  "verdict": "The delta SURVIVES an empty room. Most of what the character field reports as change is produced by the camera and the threshold, not by a person in the room.",
+  "confounds_not_removable": [
+    "the two recordings differ in overall lighting as well as occupancy; per-frame gain normalisation removes frame-to-frame drift but cannot undo a global difference between recordings",
+    "one capture per condition, no error bars -- suggestive, not a significance test",
+    "the occupied capture's A-vs-B vision condition failed separately (0 of 96 windows); it is valid for 'subject present and mostly still', not for 'subject moving'"
+  ]
+}
