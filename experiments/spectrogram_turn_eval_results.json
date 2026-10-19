@@ -1,0 +1,5234 @@
+{
+  "question": "Can jev classify SAME vs CHANGE speaker at a turn boundary from a spectrogram image?",
+  "model": "jev-1.14.0",
+  "image": {
+    "size": [
+      640,
+      480
+    ],
+    "window_s": 4.0,
+    "fmax_hz": 4000.0,
+    "centre_marker_px": 2,
+    "per_window_db_norm": true,
+    "phase": "discarded by construction (magnitude spectrogram)"
+  },
+  "population_check": {
+    "pooled_pairs": 1396,
+    "pooled_base_rate_change": 0.6225,
+    "turn_eval_reference": {
+      "n": 1396,
+      "base_rate_change": 0.6225
+    }
+  },
+  "sample": {
+    "n": 120,
+    "n_change": 60,
+    "n_same": 60,
+    "seed": 11,
+    "balanced": true,
+    "min_window_separation_s": 2.0,
+    "group_rel_counts": {
+      "cross": 39,
+      "within": 21
+    }
+  },
+  "preflight": {
+    "input_tokens_with_image": 328,
+    "input_tokens_without": 296,
+    "image_on_the_wire": true
+  },
+  "positive_control_pitch_bands": {
+    "rows": [
+      {
+        "case": "low_150hz",
+        "truth": "low",
+        "picked": "low",
+        "row": {
+          "choice": "low",
+          "confidence": 0.43,
+          "probabilities": {
+            "low": 0.62,
+            "mid": 0.34,
+            "high": 0.04
+          },
+          "input_tokens": 439,
+          "latency_s": 0.13,
+          "error": null,
+          "cached": true
+        }
+      },
+      {
+        "case": "mid_300hz",
+        "truth": "mid",
+        "picked": "low",
+        "row": {
+          "choice": "low",
+          "confidence": 0.48,
+          "probabilities": {
+            "low": 0.65,
+            "mid": 0.31,
+            "high": 0.04
+          },
+          "input_tokens": 438,
+          "latency_s": 0.19,
+          "error": null,
+          "cached": true
+        }
+      },
+      {
+        "case": "high_450hz",
+        "truth": "high",
+        "picked": "low",
+        "row": {
+          "choice": "low",
+          "confidence": 0.46,
+          "probabilities": {
+            "low": 0.64,
+            "mid": 0.32,
+            "high": 0.04
+          },
+          "input_tokens": 438,
+          "latency_s": 0.11,
+          "error": null,
+          "cached": true
+        }
+      }
+    ],
+    "accuracy": "1/3",
+    "random_floor": "1/3"
+  },
+  "main": {
+    "tag": "main",
+    "n": 120,
+    "n_scored": 120,
+    "n_api_error": 0,
+    "accuracy_balanced_sample": 0.5,
+    "on_sample_always_change_baseline": 0.5,
+    "pooled_corpus_baseline_1396": 0.6225,
+    "accuracy_reweighted_to_pooled_base_rate": 0.6225,
+    "tpr_change": 1.0,
+    "tnr_same": 0.0,
+    "auc_p_different": 0.4567,
+    "auc_bootstrap95": [
+      0.3564,
+      0.5589
+    ],
+    "distinct_choices": [
+      "different"
+    ],
+    "constant_answer": true,
+    "p_diff_mean": 0.6124,
+    "p_diff_std": 0.0172,
+    "beats_pooled_baseline": false,
+    "rows": [
+      {
+        "meeting": "ami_sdm_EN2002a_turns",
+        "idx": 680,
+        "label": "CHANGE",
+        "from": "MEE073",
+        "to": "FEO072",
+        "group_rel": "cross",
+        "gap_s": 0.05,
+        "mid_s": 412.8,
+        "img_mean_brightness": 41.22,
+        "img_left_bright_frac": 0.2239,
+        "img_right_bright_frac": 0.2963,
+        "resp": {
+          "choice": "different",
+          "confidence": 0.22,
+          "probabilities": {
+            "same": 0.39,
+            "different": 0.61
+          },
+          "input_tokens": 506,
+          "latency_s": 0.12,
+          "error": null,
+          "cached": true
+        }
+      },
+      {
+        "meeting": "ami_sdm_EN2002b_turns",
+        "idx": 646,
+        "label": "CHANGE",
+        "from": "MEE073",
+        "to": "FEO072",
+        "group_rel": "cross",
+        "gap_s": 0.06,
+        "mid_s": 380.195,
+        "img_mean_brightness": 54.76,
+        "img_left_bright_frac": 0.3525,
+        "img_right_bright_frac": 0.3572,
+        "resp": {
+          "choice": "different",
+          "confidence": 0.26,
+          "probabilities": {
+            "same": 0.37,
+            "different": 0.63
+          },
+          "input_tokens": 502,
+          "latency_s": 0.1,
+          "error": null,
+          "cached": true
+        }
+      },
+      {
+        "meeting": "ami_sdm_EN2002a_turns",
+        "idx": 276,
+        "label": "CHANGE",
+        "from": "FEO072",
+        "to": "FEO070",
+        "group_rel": "within",
+        "gap_s": 0.56,
+        "mid_s": 164.445,
+        "img_mean_brightness": 54.81,
+        "img_left_bright_frac": 0.3892,
+        "img_right_bright_frac": 0.3724,
+        "resp": {
+          "choice": "different",
+          "confidence": 0.16,
+          "probabilities": {
+            "same": 0.42,
+            "different": 0.58
+          },
+          "input_tokens": 500,
+          "latency_s": 0.12,
+          "error": null,
+          "cached": true
+        }
+      },
+      {
+        "meeting": "ami_sdm_EN2002a_turns",
+        "idx": 481,
+        "label": "CHANGE",
+        "from": "MEE073",
+        "to": "FEO072",
+        "group_rel": "cross",
+        "gap_s": 0.43,
+        "mid_s": 298.97,
+        "img_mean_brightness": 71.8,
+        "img_left_bright_frac": 0.2727,
+        "img_right_bright_frac": 0.7992,
+        "resp": {
+          "choice": "different",
+          "confidence": 0.22,
+          "probabilities": {
+            "same": 0.39,
+            "different": 0.61
+          },
+          "input_tokens": 502,
+          "latency_s": 0.11,
+          "error": null,
+          "cached": true
+        }
+      },
+      {
+        "meeting": "ami_sdm_EN2002a_turns",
+        "idx": 676,
+        "label": "CHANGE",
+        "from": "MEE073",
+        "to": "MEE071",
+        "group_rel": "within",
+        "gap_s": 1.64,
+        "mid_s": 409.505,
+        "img_mean_brightness": 68.25,
+        "img_left_bright_frac": 0.5007,
+        "img_right_bright_frac": 0.4502,
+        "resp": {
+          "choice": "different",
+          "confidence": 0.18,
+          "probabilities": {
+            "same": 0.41,
+            "different": 0.59
+          },
+          "input_tokens": 503,
+          "latency_s": 0.11,
+          "error": null,
+          "cached": true
+        }
+      },
+      {
+        "meeting": "ami_sdm_EN2002b_turns",
+        "idx": 75,
+        "label": "CHANGE",
+        "from": "FEO070",
+        "to": "FEO072",
+        "group_rel": "within",
+        "gap_s": 0.18,
+        "mid_s": 42.675,
+        "img_mean_brightness": 57.7,
+        "img_left_bright_frac": 0.3704,
+        "img_right_bright_frac": 0.4983,
+        "resp": {
+          "choice": "different",
+          "confidence": 0.18,
+          "probabilities": {
+            "same": 0.41,
+            "different": 0.59
+          },
+          "input_tokens": 503,
+          "latency_s": 0.1,
+          "error": null,
+          "cached": true
+        }
+      },
+      {
+        "meeting": "ami_sdm_EN2002b_turns",
+        "idx": 491,
+        "label": "CHANGE",
+        "from": "FEO072",
+        "to": "MEE073",
+        "group_rel": "cross",
+        "gap_s": 0.24,
+        "mid_s": 285.625,
+        "img_mean_brightness": 44.65,
+        "img_left_bright_frac": 0.3382,
+        "img_right_bright_frac": 0.2532,
+        "resp": {
+          "choice": "different",
+          "confidence": 0.24,
+          "probabilities": {
+            "same": 0.38,
+            "different": 0.62
+          },
+          "input_tokens": 503,
+          "latency_s": 0.21,
+          "error": null,
+          "cached": true
+        }
+      },
+      {
+        "meeting": "ami_sdm_EN2002a_turns",
+        "idx": 444,
+        "label": "CHANGE",
+        "from": "MEE071",
+        "to": "FEO072",
+        "group_rel": "cross",
+        "gap_s": 0.24,
+        "mid_s": 273.955,
+        "img_mean_brightness": 53.32,
+        "img_left_bright_frac": 0.3488,
+        "img_right_bright_frac": 0.3683,
+        "resp": {
+          "choice": "different",
+          "confidence": 0.24,
+          "probabilities": {
+            "same": 0.38,
+            "different": 0.62
+          },
+          "input_tokens": 500,
+          "latency_s": 0.11,
+          "error": null,
+          "cached": true
+        }
+      },
+      {
+        "meeting": "ami_sdm_EN2002b_turns",
+        "idx": 708,
+        "label": "CHANGE",
+        "from": "FEO072",
+        "to": "MEE071",
+        "group_rel": "cross",
+        "gap_s": 0.07,
+        "mid_s": 416.5,
+        "img_mean_brightness": 58.3,
+        "img_left_bright_frac": 0.6528,
+        "img_right_bright_frac": 0.2282,
+        "resp": {
+          "choice": "different",
+          "confidence": 0.26,
+          "probabilities": {
+            "same": 0.37,
+            "different": 0.63
+          },
+          "input_tokens": 501,
+          "latency_s": 0.11,
+          "error": null,
+          "cached": true
+        }
+      },
+      {
+        "meeting": "ami_sdm_EN2002a_turns",
+        "idx": 85,
+        "label": "CHANGE",
+        "from": "FEO072",
+        "to": "MEE071",
+        "group_rel": "cross",
+        "gap_s": 0.77,
+        "mid_s": 59.49,
+        "img_mean_brightness": 45.14,
+        "img_left_bright_frac": 0.3638,
+        "img_right_bright_frac": 0.2578,
+        "resp": {
+          "choice": "different",
+          "confidence": 0.22,
+          "probabilities": {
+            "same": 0.39,
+            "different": 0.61
+          },
+          "input_tokens": 501,
+          "latency_s": 0.12,
+          "error": null,
+          "cached": true
+        }
+      },
+      {
+        "meeting": "ami_sdm_EN2002b_turns",
+        "idx": 504,
+        "label": "CHANGE",
+        "from": "FEO072",
+        "to": "MEE073",
+        "group_rel": "cross",
+        "gap_s": 0.01,
+        "mid_s": 290.6,
+        "img_mean_brightness": 67.54,
+        "img_left_bright_frac": 0.4367,
+        "img_right_bright_frac": 0.5295,
+        "resp": {
+          "choice": "different",
+          "confidence": 0.26,
+          "probabilities": {
+            "same": 0.37,
+            "different": 0.63
+          },
+          "input_tokens": 501,
+          "latency_s": 0.11,
+          "error": null,
+          "cached": true
+        }
+      },
+      {
+        "meeting": "ami_sdm_EN2002a_turns",
+        "idx": 216,
+        "label": "CHANGE",
+        "from": "FEO070",
+        "to": "FEO072",
+        "group_rel": "within",
+        "gap_s": 0.26,
+        "mid_s": 128.575,
+        "img_mean_brightness": 57.51,
+        "img_left_bright_frac": 0.2668,
+        "img_right_bright_frac": 0.5292,
+        "resp": {
+          "choice": "different",
+          "confidence": 0.18,
+          "probabilities": {
+            "same": 0.41,
+            "different": 0.59
+          },
+          "input_tokens": 503,
+          "latency_s": 0.11,
+          "error": null,
+          "cached": true
+        }
+      },
+      {
+        "meeting": "ami_sdm_EN2002a_turns",
+        "idx": 549,
+        "label": "CHANGE",
+        "from": "MEE071",
+        "to": "FEO072",
+        "group_rel": "cross",
+        "gap_s": 0.32,
+        "mid_s": 331.115,
+        "img_mean_brightness": 71.6,
+        "img_left_bright_frac": 0.5709,
+        "img_right_bright_frac": 0.5334,
+        "resp": {
+          "choice": "different",
+          "confidence": 0.18,
+          "probabilities": {
+            "same": 0.41,
+            "different": 0.59
+          },
+          "input_tokens": 501,
+          "latency_s": 0.19,
+          "error": null,
+          "cached": true
+        }
+      },
+      {
+        "meeting": "ami_sdm_EN2002a_turns",
+        "idx": 449,
+        "label": "CHANGE",
+        "from": "MEE073",
+        "to": "FEO070",
+        "group_rel": "cross",
+        "gap_s": 0.04,
+        "mid_s": 276.965,
+        "img_mean_brightness": 49.65,
+        "img_left_bright_frac": 0.2795,
+        "img_right_bright_frac": 0.3682,
+        "resp": {
+          "choice": "different",
+          "confidence": 0.2,
+          "probabilities": {
+            "same": 0.4,
+            "different": 0.6
+          },
+          "input_tokens": 504,
+          "latency_s": 0.11,
+          "error": null,
+          "cached": true
+        }
+      },
+      {
+        "meeting": "ami_sdm_EN2002b_turns",
+        "idx": 338,
+        "label": "CHANGE",
+        "from": "MEE071",
+        "to": "FEO072",
+        "group_rel": "cross",
+        "gap_s": 0.06,
+        "mid_s": 191.635,
+        "img_mean_brightness": 26.03,
+        "img_left_bright_frac": 0.0836,
+        "img_right_bright_frac": 0.2241,
+        "resp": {
+          "choice": "different",
+          "confidence": 0.22,
+          "probabilities": {
+            "same": 0.39,
+            "different": 0.61
+          },
+          "input_tokens": 501,
+          "latency_s": 0.13,
+          "error": null,
+          "cached": true
+        }
+      },
+      {
+        "meeting": "ami_sdm_EN2002b_turns",
+        "idx": 57,
+        "label": "CHANGE",
+        "from": "MEE071",
+        "to": "FEO072",
+        "group_rel": "cross",
+        "gap_s": 0.26,
+        "mid_s": 36.505,
+        "img_mean_brightness": 36.29,
+        "img_left_bright_frac": 0.0486,
+        "img_right_bright_frac": 0.4534,
+        "resp": {
+          "choice": "different",
+          "confidence": 0.24,
+          "probabilities": {
+            "same": 0.38,
+            "different": 0.62
+          },
+          "input_tokens": 500,
+          "latency_s": 0.13,
+          "error": null,
+          "cached": true
+        }
+      },
+      {
+        "meeting": "ami_sdm_EN2002a_turns",
+        "idx": 470,
+        "label": "CHANGE",
+        "from": "FEO072",
+        "to": "MEE073",
+        "group_rel": "cross",
+        "gap_s": 0.62,
+        "mid_s": 293.345,
+        "img_mean_brightness": 51.55,
+        "img_left_bright_frac": 0.3591,
+        "img_right_bright_frac": 0.3579,
+        "resp": {
+          "choice": "different",
+          "confidence": 0.26,
+          "probabilities": {
+            "same": 0.37,
+            "different": 0.63
+          },
+          "input_tokens": 503,
+          "latency_s": 0.12,
+          "error": null,
+          "cached": true
+        }
+      },
+      {
+        "meeting": "ami_sdm_EN2002a_turns",
+        "idx": 20,
+        "label": "CHANGE",
+        "from": "MEE071",
+        "to": "MEE073",
+        "group_rel": "within",
+        "gap_s": 0.18,
+        "mid_s": 17.285,
+        "img_mean_brightness": 43.71,
+        "img_left_bright_frac": 0.2243,
+        "img_right_bright_frac": 0.3819,
+        "resp": {
+          "choice": "different",
+          "confidence": 0.22,
+          "probabilities": {
+            "same": 0.39,
+            "different": 0.61
+          },
+          "input_tokens": 500,
+          "latency_s": 0.12,
+          "error": null,
+          "cached": true
+        }
+      },
+      {
+        "meeting": "ami_sdm_EN2002b_turns",
+        "idx": 45,
+        "label": "CHANGE",
+        "from": "MEE073",
+        "to": "FEO072",
+        "group_rel": "cross",
+        "gap_s": 0.8,
+        "mid_s": 26.675,
+        "img_mean_brightness": 57.66,
+        "img_left_bright_frac": 0.4098,
+        "img_right_bright_frac": 0.375,
+        "resp": {
+          "choice": "different",
+          "confidence": 0.18,
+          "probabilities": {
+            "same": 0.41,
+            "different": 0.59
+          },
+          "input_tokens": 501,
+          "latency_s": 0.2,
+          "error": null,
+          "cached": true
+        }
+      },
+      {
+        "meeting": "ami_sdm_EN2002b_turns",
+        "idx": 385,
+        "label": "CHANGE",
+        "from": "MEE071",
+        "to": "FEO072",
+        "group_rel": "cross",
+        "gap_s": 0.44,
+        "mid_s": 218.975,
+        "img_mean_brightness": 58.21,
+        "img_left_bright_frac": 0.3732,
+        "img_right_bright_frac": 0.4117,
+        "resp": {
+          "choice": "different",
+          "confidence": 0.26,
+          "probabilities": {
+            "same": 0.37,
+            "different": 0.63
+          },
+          "input_tokens": 500,
+          "latency_s": 0.11,
+          "error": null,
+          "cached": true
+        }
+      },
+      {
+        "meeting": "ami_sdm_EN2002b_turns",
+        "idx": 260,
+        "label": "CHANGE",
+        "from": "FEO072",
+        "to": "FEO070",
+        "group_rel": "within",
+        "gap_s": 0.11,
+        "mid_s": 142.95,
+        "img_mean_brightness": 49.59,
+        "img_left_bright_frac": 0.5131,
+        "img_right_bright_frac": 0.1943,
+        "resp": {
+          "choice": "different",
+          "confidence": 0.2,
+          "probabilities": {
+            "same": 0.4,
+            "different": 0.6
+          },
+          "input_tokens": 504,
+          "latency_s": 0.11,
+          "error": null,
+          "cached": true
+        }
+      },
+      {
+        "meeting": "ami_sdm_EN2002b_turns",
+        "idx": 154,
+        "label": "CHANGE",
+        "from": "FEO070",
+        "to": "FEO072",
+        "group_rel": "within",
+        "gap_s": 0.28,
+        "mid_s": 86.395,
+        "img_mean_brightness": 72.23,
+        "img_left_bright_frac": 0.4727,
+        "img_right_bright_frac": 0.5926,
+        "resp": {
+          "choice": "different",
+          "confidence": 0.24,
+          "probabilities": {
+            "same": 0.38,
+            "different": 0.62
+          },
+          "input_tokens": 501,
+          "latency_s": 0.18,
+          "error": null,
+          "cached": true
+        }
+      },
+      {
+        "meeting": "ami_sdm_EN2002b_turns",
+        "idx": 121,
+        "label": "CHANGE",
+        "from": "MEE073",
+        "to": "MEE071",
+        "group_rel": "within",
+        "gap_s": 0.31,
+        "mid_s": 66.63,
+        "img_mean_brightness": 66.67,
+        "img_left_bright_frac": 0.4086,
+        "img_right_bright_frac": 0.5546,
+        "resp": {
+          "choice": "different",
+          "confidence": 0.2,
+          "probabilities": {
+            "same": 0.4,
+            "different": 0.6
+          },
+          "input_tokens": 503,
+          "latency_s": 0.14,
+          "error": null,
+          "cached": true
+        }
+      },
+      {
+        "meeting": "ami_sdm_EN2002a_turns",
+        "idx": 488,
+        "label": "CHANGE",
+        "from": "MEE073",
+        "to": "FEO072",
+        "group_rel": "cross",
+        "gap_s": 0.22,
+        "mid_s": 302.255,
+        "img_mean_brightness": 48.56,
+        "img_left_bright_frac": 0.5762,
+        "img_right_bright_frac": 0.1615,
+        "resp": {
+          "choice": "different",
+          "confidence": 0.24,
+          "probabilities": {
+            "same": 0.38,
+            "different": 0.62
+          },
+          "input_tokens": 500,
+          "latency_s": 0.11,
+          "error": null,
+          "cached": true
+        }
+      },
+      {
+        "meeting": "ami_sdm_EN2002a_turns",
+        "idx": 454,
+        "label": "CHANGE",
+        "from": "FEO070",
+        "to": "MEE073",
+        "group_rel": "cross",
+        "gap_s": 0.45,
+        "mid_s": 280.38,
+        "img_mean_brightness": 53.61,
+        "img_left_bright_frac": 0.3318,
+        "img_right_bright_frac": 0.3581,
+        "resp": {
+          "choice": "different",
+          "confidence": 0.2,
+          "probabilities": {
+            "same": 0.4,
+            "different": 0.6
+          },
+          "input_tokens": 503,
+          "latency_s": 0.11,
+          "error": null,
+          "cached": true
+        }
+      },
+      {
+        "meeting": "ami_sdm_EN2002a_turns",
+        "idx": 127,
+        "label": "CHANGE",
+        "from": "MEE073",
+        "to": "MEE071",
+        "group_rel": "within",
+        "gap_s": 0.77,
+        "mid_s": 82.86,
+        "img_mean_brightness": 38.86,
+        "img_left_bright_frac": 0.3282,
+        "img_right_bright_frac": 0.2036,
+        "resp": {
+          "choice": "different",
+          "confidence": 0.2,
+          "probabilities": {
+            "same": 0.4,
+            "different": 0.6
+          },
+          "input_tokens": 504,
+          "latency_s": 0.1,
+          "error": null,
+          "cached": true
+        }
+      },
+      {
+        "meeting": "ami_sdm_EN2002a_turns",
+        "idx": 457,
+        "label": "CHANGE",
+        "from": "FEO070",
+        "to": "FEO072",
+        "group_rel": "within",
+        "gap_s": 1.56,
+        "mid_s": 283.295,
+        "img_mean_brightness": 38.57,
+        "img_left_bright_frac": 0.1998,
+        "img_right_bright_frac": 0.2794,
+        "resp": {
+          "choice": "different",
+          "confidence": 0.26,
+          "probabilities": {
+            "same": 0.37,
+            "different": 0.63
+          },
+          "input_tokens": 502,
+          "latency_s": 0.11,
+          "error": null,
+          "cached": true
+        }
+      },
+      {
+        "meeting": "ami_sdm_EN2002b_turns",
+        "idx": 572,
+        "label": "CHANGE",
+        "from": "MEE073",
+        "to": "FEO072",
+        "group_rel": "cross",
+        "gap_s": 0.12,
+        "mid_s": 337.735,
+        "img_mean_brightness": 43.01,
+        "img_left_bright_frac": 0.2093,
+        "img_right_bright_frac": 0.3723,
+        "resp": {
+          "choice": "different",
+          "confidence": 0.22,
+          "probabilities": {
+            "same": 0.39,
+            "different": 0.61
+          },
+          "input_tokens": 505,
+          "latency_s": 0.18,
+          "error": null,
+          "cached": true
+        }
+      },
+      {
+        "meeting": "ami_sdm_EN2002a_turns",
+        "idx": 254,
+        "label": "CHANGE",
+        "from": "FEO070",
+        "to": "MEE073",
+        "group_rel": "cross",
+        "gap_s": 0.04,
+        "mid_s": 154.025,
+        "img_mean_brightness": 54.58,
+        "img_left_bright_frac": 0.4064,
+        "img_right_bright_frac": 0.3403,
+        "resp": {
+          "choice": "different",
+          "confidence": 0.2,
+          "probabilities": {
+            "same": 0.4,
+            "different": 0.6
+          },
+          "input_tokens": 505,
+          "latency_s": 0.19,
+          "error": null,
+          "cached": true
+        }
+      },
+      {
+        "meeting": "ami_sdm_EN2002b_turns",
+        "idx": 672,
+        "label": "CHANGE",
+        "from": "MEE073",
+        "to": "MEE071",
+        "group_rel": "within",
+        "gap_s": 0.05,
+        "mid_s": 394.69,
+        "img_mean_brightness": 40.72,
+        "img_left_bright_frac": 0.2049,
+        "img_right_bright_frac": 0.3275,
+        "resp": {
+          "choice": "different",
+          "confidence": 0.26,
+          "probabilities": {
+            "same": 0.37,
+            "different": 0.63
+          },
+          "input_tokens": 502,
+          "latency_s": 0.11,
+          "error": null,
+          "cached": true
+        }
+      },
+      {
+        "meeting": "ami_sdm_EN2002a_turns",
+        "idx": 175,
+        "label": "CHANGE",
+        "from": "FEO070",
+        "to": "MEE071",
+        "group_rel": "cross",
+        "gap_s": 0.14,
+        "mid_s": 106.975,
+        "img_mean_brightness": 49.78,
+        "img_left_bright_frac": 0.3186,
+        "img_right_bright_frac": 0.3466,
+        "resp": {
+          "choice": "different",
+          "confidence": 0.24,
+          "probabilities": {
+            "same": 0.38,
+            "different": 0.62
+          },
+          "input_tokens": 504,
+          "latency_s": 0.1,
+          "error": null,
+          "cached": true
+        }
+      },
+      {
+        "meeting": "ami_sdm_EN2002a_turns",
+        "idx": 530,
+        "label": "CHANGE",
+        "from": "FEO072",
+        "to": "MEE071",
+        "group_rel": "cross",
+        "gap_s": 0.65,
+        "mid_s": 321.82,
+        "img_mean_brightness": 28.06,
+        "img_left_bright_frac": 0.1595,
+        "img_right_bright_frac": 0.1885,
+        "resp": {
+          "choice": "different",
+          "confidence": 0.16,
+          "probabilities": {
+            "same": 0.42,
+            "different": 0.58
+          },
+          "input_tokens": 503,
+          "latency_s": 0.18,
+          "error": null,
+          "cached": true
+        }
+      },
+      {
+        "meeting": "ami_sdm_EN2002a_turns",
+        "idx": 572,
+        "label": "CHANGE",
+        "from": "FEO072",
+        "to": "MEE071",
+        "group_rel": "cross",
+        "gap_s": 0.23,
+        "mid_s": 347.39,
+        "img_mean_brightness": 39.37,
+        "img_left_bright_frac": 0.2744,
+        "img_right_bright_frac": 0.2358,
+        "resp": {
+          "choice": "different",
+          "confidence": 0.24,
+          "probabilities": {
+            "same": 0.38,
+            "different": 0.62
+          },
+          "input_tokens": 504,
+          "latency_s": 0.1,
+          "error": null,
+          "cached": true
+        }
+      },
+      {
+        "meeting": "ami_sdm_EN2002a_turns",
+        "idx": 361,
+        "label": "CHANGE",
+        "from": "FEO072",
+        "to": "FEO070",
+        "group_rel": "within",
+        "gap_s": 0.2,
+        "mid_s": 225.505,
+        "img_mean_brightness": 26.49,
+        "img_left_bright_frac": 0.2058,
+        "img_right_bright_frac": 0.113,
+        "resp": {
+          "choice": "different",
+          "confidence": 0.22,
+          "probabilities": {
+            "same": 0.39,
+            "different": 0.61
+          },
+          "input_tokens": 502,
+          "latency_s": 0.12,
+          "error": null,
+          "cached": true
+        }
+      },
+      {
+        "meeting": "ami_sdm_EN2002a_turns",
+        "idx": 152,
+        "label": "CHANGE",
+        "from": "MEE071",
+        "to": "MEE073",
+        "group_rel": "within",
+        "gap_s": 0.54,
+        "mid_s": 95.405,
+        "img_mean_brightness": 60.92,
+        "img_left_bright_frac": 0.4725,
+        "img_right_bright_frac": 0.3899,
+        "resp": {
+          "choice": "different",
+          "confidence": 0.24,
+          "probabilities": {
+            "same": 0.38,
+            "different": 0.62
+          },
+          "input_tokens": 503,
+          "latency_s": 0.18,
+          "error": null,
+          "cached": true
+        }
+      },
+      {
+        "meeting": "ami_sdm_EN2002b_turns",
+        "idx": 611,
+        "label": "CHANGE",
+        "from": "FEO072",
+        "to": "MEE073",
+        "group_rel": "cross",
+        "gap_s": 0.05,
+        "mid_s": 364.19,
+        "img_mean_brightness": 32.39,
+        "img_left_bright_frac": 0.003,
+        "img_right_bright_frac": 0.4442,
+        "resp": {
+          "choice": "different",
+          "confidence": 0.2,
+          "probabilities": {
+            "same": 0.4,
+            "different": 0.6
+          },
+          "input_tokens": 502,
+          "latency_s": 0.11,
+          "error": null,
+          "cached": true
+        }
+      },
+      {
+        "meeting": "ami_sdm_EN2002b_turns",
+        "idx": 69,
+        "label": "CHANGE",
+        "from": "FEO070",
+        "to": "FEO072",
+        "group_rel": "within",
+        "gap_s": 0.16,
+        "mid_s": 40.415,
+        "img_mean_brightness": 57.91,
+        "img_left_bright_frac": 0.3918,
+        "img_right_bright_frac": 0.4299,
+        "resp": {
+          "choice": "different",
+          "confidence": 0.22,
+          "probabilities": {
+            "same": 0.39,
+            "different": 0.61
+          },
+          "input_tokens": 503,
+          "latency_s": 0.12,
+          "error": null,
+          "cached": true
+        }
+      },
+      {
+        "meeting": "ami_sdm_EN2002a_turns",
+        "idx": 159,
+        "label": "CHANGE",
+        "from": "MEE071",
+        "to": "FEO070",
+        "group_rel": "cross",
+        "gap_s": 0.16,
+        "mid_s": 98.775,
+        "img_mean_brightness": 35.95,
+        "img_left_bright_frac": 0.1518,
+        "img_right_bright_frac": 0.3199,
+        "resp": {
+          "choice": "different",
+          "confidence": 0.28,
+          "probabilities": {
+            "same": 0.36,
+            "different": 0.64
+          },
+          "input_tokens": 503,
+          "latency_s": 0.11,
+          "error": null,
+          "cached": true
+        }
+      },
+      {
+        "meeting": "ami_sdm_EN2002b_turns",
+        "idx": 209,
+        "label": "CHANGE",
+        "from": "FEO070",
+        "to": "MEE073",
+        "group_rel": "cross",
+        "gap_s": 0.08,
+        "mid_s": 118.525,
+        "img_mean_brightness": 50.09,
+        "img_left_bright_frac": 0.2636,
+        "img_right_bright_frac": 0.4114,
+        "resp": {
+          "choice": "different",
+          "confidence": 0.22,
+          "probabilities": {
+            "same": 0.39,
+            "different": 0.61
+          },
+          "input_tokens": 500,
+          "latency_s": 0.12,
+          "error": null,
+          "cached": true
+        }
+      },
+      {
+        "meeting": "ami_sdm_EN2002a_turns",
+        "idx": 410,
+        "label": "CHANGE",
+        "from": "FEO070",
+        "to": "MEE073",
+        "group_rel": "cross",
+        "gap_s": 0.42,
+        "mid_s": 253.425,
+        "img_mean_brightness": 44.32,
+        "img_left_bright_frac": 0.3023,
+        "img_right_bright_frac": 0.2639,
+        "resp": {
+          "choice": "different",
+          "confidence": 0.28,
+          "probabilities": {
+            "same": 0.36,
+            "different": 0.64
+          },
+          "input_tokens": 502,
+          "latency_s": 0.12,
+          "error": null,
+          "cached": true
+        }
+      },
+      {
+        "meeting": "ami_sdm_EN2002b_turns",
+        "idx": 204,
+        "label": "CHANGE",
+        "from": "FEO070",
+        "to": "MEE071",
+        "group_rel": "cross",
+        "gap_s": 0.28,
+        "mid_s": 116.255,
+        "img_mean_brightness": 46.15,
+        "img_left_bright_frac": 0.3442,
+        "img_right_bright_frac": 0.2624,
+        "resp": {
+          "choice": "different",
+          "confidence": 0.28,
+          "probabilities": {
+            "same": 0.36,
+            "different": 0.64
+          },
+          "input_tokens": 504,
+          "latency_s": 0.13,
+          "error": null,
+          "cached": true
+        }
+      },
+      {
+        "meeting": "ami_sdm_EN2002a_turns",
+        "idx": 289,
+        "label": "CHANGE",
+        "from": "FEO070",
+        "to": "FEO072",
+        "group_rel": "within",
+        "gap_s": 0.27,
+        "mid_s": 177.57,
+        "img_mean_brightness": 43.27,
+        "img_left_bright_frac": 0.2845,
+        "img_right_bright_frac": 0.2898,
+        "resp": {
+          "choice": "different",
+          "confidence": 0.18,
+          "probabilities": {
+            "same": 0.41,
+            "different": 0.59
+          },
+          "input_tokens": 500,
+          "latency_s": 0.11,
+          "error": null,
+          "cached": true
+        }
+      },
+      {
+        "meeting": "ami_sdm_EN2002b_turns",
+        "idx": 115,
+        "label": "CHANGE",
+        "from": "FEO070",
+        "to": "MEE073",
+        "group_rel": "cross",
+        "gap_s": 0.2,
+        "mid_s": 64.115,
+        "img_mean_brightness": 63.73,
+        "img_left_bright_frac": 0.4214,
+        "img_right_bright_frac": 0.4739,
+        "resp": {
+          "choice": "different",
+          "confidence": 0.2,
+          "probabilities": {
+            "same": 0.4,
+            "different": 0.6
+          },
+          "input_tokens": 501,
+          "latency_s": 0.12,
+          "error": null,
+          "cached": true
+        }
+      },
+      {
+        "meeting": "ami_sdm_EN2002a_turns",
+        "idx": 328,
+        "label": "CHANGE",
+        "from": "FEO070",
+        "to": "MEE073",
+        "group_rel": "cross",
+        "gap_s": 0.16,
+        "mid_s": 207.735,
+        "img_mean_brightness": 50.4,
+        "img_left_bright_frac": 0.3753,
+        "img_right_bright_frac": 0.3186,
+        "resp": {
+          "choice": "different",
+          "confidence": 0.22,
+          "probabilities": {
+            "same": 0.39,
+            "different": 0.61
+          },
+          "input_tokens": 503,
+          "latency_s": 0.14,
+          "error": null,
+          "cached": true
+        }
+      },
+      {
+        "meeting": "ami_sdm_EN2002a_turns",
+        "idx": 69,
+        "label": "CHANGE",
+        "from": "FEO072",
+        "to": "FEO070",
+        "group_rel": "within",
+        "gap_s": 0.06,
+        "mid_s": 50.635,
+        "img_mean_brightness": 32.79,
+        "img_left_bright_frac": 0.1589,
+        "img_right_bright_frac": 0.2617,
+        "resp": {
+          "choice": "different",
+          "confidence": 0.22,
+          "probabilities": {
+            "same": 0.39,
+            "different": 0.61
+          },
+          "input_tokens": 503,
+          "latency_s": 0.12,
+          "error": null,
+          "cached": true
+        }
+      },
+      {
+        "meeting": "ami_sdm_EN2002b_turns",
+        "idx": 439,
+        "label": "CHANGE",
+        "from": "MEE073",
+        "to": "MEE071",
+        "group_rel": "within",
+        "gap_s": 0.1,
+        "mid_s": 247.195,
+        "img_mean_brightness": 55.91,
+        "img_left_bright_frac": 0.4954,
+        "img_right_bright_frac": 0.2915,
+        "resp": {
+          "choice": "different",
+          "confidence": 0.2,
+          "probabilities": {
+            "same": 0.4,
+            "different": 0.6
+          },
+          "input_tokens": 501,
+          "latency_s": 0.11,
+          "error": null,
+          "cached": true
+        }
+      },
+      {
+        "meeting": "ami_sdm_EN2002a_turns",
+        "idx": 322,
+        "label": "CHANGE",
+        "from": "MEE071",
+        "to": "FEO072",
+        "group_rel": "cross",
+        "gap_s": 0.09,
+        "mid_s": 201.19,
+        "img_mean_brightness": 21.65,
+        "img_left_bright_frac": 0.0021,
+        "img_right_bright_frac": 0.2856,
+        "resp": {
+          "choice": "different",
+          "confidence": 0.24,
+          "probabilities": {
+            "same": 0.38,
+            "different": 0.62
+          },
+          "input_tokens": 502,
+          "latency_s": 0.11,
+          "error": null,
+          "cached": true
+        }
+      },
+      {
+        "meeting": "ami_sdm_EN2002a_turns",
+        "idx": 117,
+        "label": "CHANGE",
+        "from": "FEO070",
+        "to": "MEE073",
+        "group_rel": "cross",
+        "gap_s": 0.04,
+        "mid_s": 78.715,
+        "img_mean_brightness": 59.54,
+        "img_left_bright_frac": 0.3068,
+        "img_right_bright_frac": 0.5386,
+        "resp": {
+          "choice": "different",
+          "confidence": 0.26,
+          "probabilities": {
+            "same": 0.37,
+            "different": 0.63
+          },
+          "input_tokens": 501,
+          "latency_s": 0.12,
+          "error": null,
+          "cached": true
+        }
+      },
+      {
+        "meeting": "ami_sdm_EN2002a_turns",
+        "idx": 9,
+        "label": "CHANGE",
+        "from": "FEO072",
+        "to": "MEE071",
+        "group_rel": "cross",
+        "gap_s": 1.01,
+        "mid_s": 6.4,
+        "img_mean_brightness": 64.9,
+        "img_left_bright_frac": 0.3897,
+        "img_right_bright_frac": 0.5466,
+        "resp": {
+          "choice": "different",
+          "confidence": 0.22,
+          "probabilities": {
+            "same": 0.39,
+            "different": 0.61
+          },
+          "input_tokens": 505,
+          "latency_s": 0.11,
+          "error": null,
+          "cached": true
+        }
+      },
+      {
+        "meeting": "ami_sdm_EN2002a_turns",
+        "idx": 339,
+        "label": "CHANGE",
+        "from": "FEO070",
+        "to": "MEE071",
+        "group_rel": "cross",
+        "gap_s": 0.09,
+        "mid_s": 214.43,
+        "img_mean_brightness": 57.69,
+        "img_left_bright_frac": 0.2403,
+        "img_right_bright_frac": 0.5903,
+        "resp": {
+          "choice": "different",
+          "confidence": 0.22,
+          "probabilities": {
+            "same": 0.39,
+            "different": 0.61
+          },
+          "input_tokens": 503,
+          "latency_s": 0.12,
+          "error": null,
+          "cached": true
+        }
+      },
+      {
+        "meeting": "ami_sdm_EN2002a_turns",
+        "idx": 75,
+        "label": "CHANGE",
+        "from": "MEE071",
+        "to": "FEO070",
+        "group_rel": "cross",
+        "gap_s": 0.33,
+        "mid_s": 54.29,
+        "img_mean_brightness": 30.36,
+        "img_left_bright_frac": 0.0717,
+        "img_right_bright_frac": 0.3241,
+        "resp": {
+          "choice": "different",
+          "confidence": 0.24,
+          "probabilities": {
+            "same": 0.38,
+            "different": 0.62
+          },
+          "input_tokens": 502,
+          "latency_s": 0.19,
+          "error": null,
+          "cached": true
+        }
+      },
+      {
+        "meeting": "ami_sdm_EN2002a_turns",
+        "idx": 109,
+        "label": "CHANGE",
+        "from": "MEE073",
+        "to": "FEO070",
+        "group_rel": "cross",
+        "gap_s": 0.96,
+        "mid_s": 75.115,
+        "img_mean_brightness": 37.35,
+        "img_left_bright_frac": 0.042,
+        "img_right_bright_frac": 0.4808,
+        "resp": {
+          "choice": "different",
+          "confidence": 0.24,
+          "probabilities": {
+            "same": 0.38,
+            "different": 0.62
+          },
+          "input_tokens": 501,
+          "latency_s": 0.13,
+          "error": null,
+          "cached": true
+        }
+      },
+      {
+        "meeting": "ami_sdm_EN2002b_turns",
+        "idx": 25,
+        "label": "CHANGE",
+        "from": "MEE071",
+        "to": "MEE073",
+        "group_rel": "within",
+        "gap_s": 0.13,
+        "mid_s": 14.62,
+        "img_mean_brightness": 46.89,
+        "img_left_bright_frac": 0.3357,
+        "img_right_bright_frac": 0.2759,
+        "resp": {
+          "choice": "different",
+          "confidence": 0.2,
+          "probabilities": {
+            "same": 0.4,
+            "different": 0.6
+          },
+          "input_tokens": 506,
+          "latency_s": 0.11,
+          "error": null,
+          "cached": true
+        }
+      },
+      {
+        "meeting": "ami_sdm_EN2002b_turns",
+        "idx": 252,
+        "label": "CHANGE",
+        "from": "FEO072",
+        "to": "MEE071",
+        "group_rel": "cross",
+        "gap_s": 0.55,
+        "mid_s": 140.33,
+        "img_mean_brightness": 46.38,
+        "img_left_bright_frac": 0.1968,
+        "img_right_bright_frac": 0.4707,
+        "resp": {
+          "choice": "different",
+          "confidence": 0.22,
+          "probabilities": {
+            "same": 0.39,
+            "different": 0.61
+          },
+          "input_tokens": 503,
+          "latency_s": 0.1,
+          "error": null,
+          "cached": true
+        }
+      },
+      {
+        "meeting": "ami_sdm_EN2002a_turns",
+        "idx": 271,
+        "label": "CHANGE",
+        "from": "MEE073",
+        "to": "FEO072",
+        "group_rel": "cross",
+        "gap_s": 0.26,
+        "mid_s": 161.005,
+        "img_mean_brightness": 53.62,
+        "img_left_bright_frac": 0.4124,
+        "img_right_bright_frac": 0.3001,
+        "resp": {
+          "choice": "different",
+          "confidence": 0.22,
+          "probabilities": {
+            "same": 0.39,
+            "different": 0.61
+          },
+          "input_tokens": 502,
+          "latency_s": 0.11,
+          "error": null,
+          "cached": true
+        }
+      },
+      {
+        "meeting": "ami_sdm_EN2002b_turns",
+        "idx": 183,
+        "label": "CHANGE",
+        "from": "MEE071",
+        "to": "MEE073",
+        "group_rel": "within",
+        "gap_s": 0.32,
+        "mid_s": 104.215,
+        "img_mean_brightness": 42.73,
+        "img_left_bright_frac": 0.3432,
+        "img_right_bright_frac": 0.2019,
+        "resp": {
+          "choice": "different",
+          "confidence": 0.2,
+          "probabilities": {
+            "same": 0.4,
+            "different": 0.6
+          },
+          "input_tokens": 502,
+          "latency_s": 0.11,
+          "error": null,
+          "cached": true
+        }
+      },
+      {
+        "meeting": "ami_sdm_EN2002b_turns",
+        "idx": 430,
+        "label": "CHANGE",
+        "from": "MEE073",
+        "to": "MEE071",
+        "group_rel": "within",
+        "gap_s": 0.22,
+        "mid_s": 243.265,
+        "img_mean_brightness": 39.68,
+        "img_left_bright_frac": 0.2287,
+        "img_right_bright_frac": 0.2926,
+        "resp": {
+          "choice": "different",
+          "confidence": 0.2,
+          "probabilities": {
+            "same": 0.4,
+            "different": 0.6
+          },
+          "input_tokens": 504,
+          "latency_s": 0.18,
+          "error": null,
+          "cached": true
+        }
+      },
+      {
+        "meeting": "ami_sdm_EN2002b_turns",
+        "idx": 664,
+        "label": "CHANGE",
+        "from": "MEE073",
+        "to": "FEO072",
+        "group_rel": "cross",
+        "gap_s": 0.52,
+        "mid_s": 389.195,
+        "img_mean_brightness": 51.74,
+        "img_left_bright_frac": 0.369,
+        "img_right_bright_frac": 0.2811,
+        "resp": {
+          "choice": "different",
+          "confidence": 0.16,
+          "probabilities": {
+            "same": 0.42,
+            "different": 0.58
+          },
+          "input_tokens": 504,
+          "latency_s": 0.13,
+          "error": null,
+          "cached": true
+        }
+      },
+      {
+        "meeting": "ami_sdm_EN2002b_turns",
+        "idx": 582,
+        "label": "CHANGE",
+        "from": "FEO072",
+        "to": "FEO070",
+        "group_rel": "within",
+        "gap_s": 0.02,
+        "mid_s": 341.895,
+        "img_mean_brightness": 44.6,
+        "img_left_bright_frac": 0.2474,
+        "img_right_bright_frac": 0.3604,
+        "resp": {
+          "choice": "different",
+          "confidence": 0.26,
+          "probabilities": {
+            "same": 0.37,
+            "different": 0.63
+          },
+          "input_tokens": 503,
+          "latency_s": 0.12,
+          "error": null,
+          "cached": true
+        }
+      },
+      {
+        "meeting": "ami_sdm_EN2002a_turns",
+        "idx": 507,
+        "label": "CHANGE",
+        "from": "FEO070",
+        "to": "MEE071",
+        "group_rel": "cross",
+        "gap_s": 0.04,
+        "mid_s": 311.015,
+        "img_mean_brightness": 34.73,
+        "img_left_bright_frac": 0.273,
+        "img_right_bright_frac": 0.2014,
+        "resp": {
+          "choice": "different",
+          "confidence": 0.24,
+          "probabilities": {
+            "same": 0.38,
+            "different": 0.62
+          },
+          "input_tokens": 505,
+          "latency_s": 0.12,
+          "error": null,
+          "cached": true
+        }
+      },
+      {
+        "meeting": "ami_sdm_EN2002b_turns",
+        "idx": 655,
+        "label": "SAME",
+        "from": "MEE073",
+        "to": "MEE073",
+        "group_rel": "within",
+        "gap_s": 0.15,
+        "mid_s": 385.01,
+        "img_mean_brightness": 37.51,
+        "img_left_bright_frac": 0.1684,
+        "img_right_bright_frac": 0.3423,
+        "resp": {
+          "choice": "different",
+          "confidence": 0.2,
+          "probabilities": {
+            "same": 0.4,
+            "different": 0.6
+          },
+          "input_tokens": 503,
+          "latency_s": 0.12,
+          "error": null,
+          "cached": true
+        }
+      },
+      {
+        "meeting": "ami_sdm_EN2002a_turns",
+        "idx": 242,
+        "label": "SAME",
+        "from": "FEO072",
+        "to": "FEO072",
+        "group_rel": "within",
+        "gap_s": 0.2,
+        "mid_s": 146.635,
+        "img_mean_brightness": 40.59,
+        "img_left_bright_frac": 0.2319,
+        "img_right_bright_frac": 0.2683,
+        "resp": {
+          "choice": "different",
+          "confidence": 0.26,
+          "probabilities": {
+            "same": 0.37,
+            "different": 0.63
+          },
+          "input_tokens": 498,
+          "latency_s": 0.11,
+          "error": null,
+          "cached": true
+        }
+      },
+      {
+        "meeting": "ami_sdm_EN2002b_turns",
+        "idx": 466,
+        "label": "SAME",
+        "from": "MEE073",
+        "to": "MEE073",
+        "group_rel": "within",
+        "gap_s": 0.25,
+        "mid_s": 262.39,
+        "img_mean_brightness": 48.08,
+        "img_left_bright_frac": 0.2481,
+        "img_right_bright_frac": 0.3943,
+        "resp": {
+          "choice": "different",
+          "confidence": 0.22,
+          "probabilities": {
+            "same": 0.39,
+            "different": 0.61
+          },
+          "input_tokens": 503,
+          "latency_s": 0.11,
+          "error": null,
+          "cached": true
+        }
+      },
+      {
+        "meeting": "ami_sdm_EN2002a_turns",
+        "idx": 61,
+        "label": "SAME",
+        "from": "MEE071",
+        "to": "MEE071",
+        "group_rel": "within",
+        "gap_s": 0.11,
+        "mid_s": 46.1,
+        "img_mean_brightness": 32.24,
+        "img_left_bright_frac": 0.2473,
+        "img_right_bright_frac": 0.1609,
+        "resp": {
+          "choice": "different",
+          "confidence": 0.18,
+          "probabilities": {
+            "same": 0.41,
+            "different": 0.59
+          },
+          "input_tokens": 502,
+          "latency_s": 0.12,
+          "error": null,
+          "cached": true
+        }
+      },
+      {
+        "meeting": "ami_sdm_EN2002b_turns",
+        "idx": 49,
+        "label": "SAME",
+        "from": "MEE071",
+        "to": "MEE071",
+        "group_rel": "within",
+        "gap_s": 0.79,
+        "mid_s": 30.2,
+        "img_mean_brightness": 68.19,
+        "img_left_bright_frac": 0.4803,
+        "img_right_bright_frac": 0.4909,
+        "resp": {
+          "choice": "different",
+          "confidence": 0.2,
+          "probabilities": {
+            "same": 0.4,
+            "different": 0.6
+          },
+          "input_tokens": 501,
+          "latency_s": 0.2,
+          "error": null,
+          "cached": true
+        }
+      },
+      {
+        "meeting": "ami_sdm_EN2002b_turns",
+        "idx": 235,
+        "label": "SAME",
+        "from": "MEE071",
+        "to": "MEE071",
+        "group_rel": "within",
+        "gap_s": 0.11,
+        "mid_s": 131.48,
+        "img_mean_brightness": 33.27,
+        "img_left_bright_frac": 0.1711,
+        "img_right_bright_frac": 0.2405,
+        "resp": {
+          "choice": "different",
+          "confidence": 0.34,
+          "probabilities": {
+            "same": 0.33,
+            "different": 0.67
+          },
+          "input_tokens": 502,
+          "latency_s": 0.24,
+          "error": null,
+          "cached": true
+        }
+      },
+      {
+        "meeting": "ami_sdm_EN2002a_turns",
+        "idx": 29,
+        "label": "SAME",
+        "from": "MEE073",
+        "to": "MEE073",
+        "group_rel": "within",
+        "gap_s": 0.14,
+        "mid_s": 23.175,
+        "img_mean_brightness": 51.54,
+        "img_left_bright_frac": 0.2177,
+        "img_right_bright_frac": 0.4824,
+        "resp": {
+          "choice": "different",
+          "confidence": 0.22,
+          "probabilities": {
+            "same": 0.39,
+            "different": 0.61
+          },
+          "input_tokens": 504,
+          "latency_s": 0.17,
+          "error": null,
+          "cached": true
+        }
+      },
+      {
+        "meeting": "ami_sdm_EN2002a_turns",
+        "idx": 540,
+        "label": "SAME",
+        "from": "MEE073",
+        "to": "MEE073",
+        "group_rel": "within",
+        "gap_s": 0.2,
+        "mid_s": 326.605,
+        "img_mean_brightness": 40.68,
+        "img_left_bright_frac": 0.2362,
+        "img_right_bright_frac": 0.3028,
+        "resp": {
+          "choice": "different",
+          "confidence": 0.26,
+          "probabilities": {
+            "same": 0.37,
+            "different": 0.63
+          },
+          "input_tokens": 502,
+          "latency_s": 0.18,
+          "error": null,
+          "cached": true
+        }
+      },
+      {
+        "meeting": "ami_sdm_EN2002b_turns",
+        "idx": 414,
+        "label": "SAME",
+        "from": "MEE073",
+        "to": "MEE073",
+        "group_rel": "within",
+        "gap_s": 0.14,
+        "mid_s": 232.365,
+        "img_mean_brightness": 45.42,
+        "img_left_bright_frac": 0.3518,
+        "img_right_bright_frac": 0.2262,
+        "resp": {
+          "choice": "different",
+          "confidence": 0.22,
+          "probabilities": {
+            "same": 0.39,
+            "different": 0.61
+          },
+          "input_tokens": 500,
+          "latency_s": 0.18,
+          "error": null,
+          "cached": true
+        }
+      },
+      {
+        "meeting": "ami_sdm_EN2002a_turns",
+        "idx": 421,
+        "label": "SAME",
+        "from": "MEE073",
+        "to": "MEE073",
+        "group_rel": "within",
+        "gap_s": 0.47,
+        "mid_s": 258.55,
+        "img_mean_brightness": 48.32,
+        "img_left_bright_frac": 0.318,
+        "img_right_bright_frac": 0.2986,
+        "resp": {
+          "choice": "different",
+          "confidence": 0.26,
+          "probabilities": {
+            "same": 0.37,
+            "different": 0.63
+          },
+          "input_tokens": 505,
+          "latency_s": 0.12,
+          "error": null,
+          "cached": true
+        }
+      },
+      {
+        "meeting": "ami_sdm_EN2002b_turns",
+        "idx": 528,
+        "label": "SAME",
+        "from": "MEE073",
+        "to": "MEE073",
+        "group_rel": "within",
+        "gap_s": 0.62,
+        "mid_s": 308.855,
+        "img_mean_brightness": 58.56,
+        "img_left_bright_frac": 0.4001,
+        "img_right_bright_frac": 0.394,
+        "resp": {
+          "choice": "different",
+          "confidence": 0.22,
+          "probabilities": {
+            "same": 0.39,
+            "different": 0.61
+          },
+          "input_tokens": 501,
+          "latency_s": 0.11,
+          "error": null,
+          "cached": true
+        }
+      },
+      {
+        "meeting": "ami_sdm_EN2002b_turns",
+        "idx": 425,
+        "label": "SAME",
+        "from": "MEE073",
+        "to": "MEE073",
+        "group_rel": "within",
+        "gap_s": 0.12,
+        "mid_s": 239.715,
+        "img_mean_brightness": 41.82,
+        "img_left_bright_frac": 0.2773,
+        "img_right_bright_frac": 0.245,
+        "resp": {
+          "choice": "different",
+          "confidence": 0.3,
+          "probabilities": {
+            "same": 0.35,
+            "different": 0.65
+          },
+          "input_tokens": 504,
+          "latency_s": 0.12,
+          "error": null,
+          "cached": true
+        }
+      },
+      {
+        "meeting": "ami_sdm_EN2002b_turns",
+        "idx": 20,
+        "label": "SAME",
+        "from": "MEE071",
+        "to": "MEE071",
+        "group_rel": "within",
+        "gap_s": 0.19,
+        "mid_s": 12.35,
+        "img_mean_brightness": 40.23,
+        "img_left_bright_frac": 0.2797,
+        "img_right_bright_frac": 0.2377,
+        "resp": {
+          "choice": "different",
+          "confidence": 0.2,
+          "probabilities": {
+            "same": 0.4,
+            "different": 0.6
+          },
+          "input_tokens": 500,
+          "latency_s": 0.11,
+          "error": null,
+          "cached": true
+        }
+      },
+      {
+        "meeting": "ami_sdm_EN2002b_turns",
+        "idx": 444,
+        "label": "SAME",
+        "from": "MEE073",
+        "to": "MEE073",
+        "group_rel": "within",
+        "gap_s": 0.17,
+        "mid_s": 250.78,
+        "img_mean_brightness": 47.04,
+        "img_left_bright_frac": 0.2523,
+        "img_right_bright_frac": 0.3913,
+        "resp": {
+          "choice": "different",
+          "confidence": 0.24,
+          "probabilities": {
+            "same": 0.38,
+            "different": 0.62
+          },
+          "input_tokens": 500,
+          "latency_s": 0.12,
+          "error": null,
+          "cached": true
+        }
+      },
+      {
+        "meeting": "ami_sdm_EN2002a_turns",
+        "idx": 146,
+        "label": "SAME",
+        "from": "MEE071",
+        "to": "MEE071",
+        "group_rel": "within",
+        "gap_s": 0.01,
+        "mid_s": 92.84,
+        "img_mean_brightness": 46.76,
+        "img_left_bright_frac": 0.3187,
+        "img_right_bright_frac": 0.3039,
+        "resp": {
+          "choice": "different",
+          "confidence": 0.2,
+          "probabilities": {
+            "same": 0.4,
+            "different": 0.6
+          },
+          "input_tokens": 500,
+          "latency_s": 0.12,
+          "error": null,
+          "cached": true
+        }
+      },
+      {
+        "meeting": "ami_sdm_EN2002a_turns",
+        "idx": 264,
+        "label": "SAME",
+        "from": "FEO070",
+        "to": "FEO070",
+        "group_rel": "within",
+        "gap_s": 0.22,
+        "mid_s": 158.615,
+        "img_mean_brightness": 51.09,
+        "img_left_bright_frac": 0.2361,
+        "img_right_bright_frac": 0.4443,
+        "resp": {
+          "choice": "different",
+          "confidence": 0.24,
+          "probabilities": {
+            "same": 0.38,
+            "different": 0.62
+          },
+          "input_tokens": 503,
+          "latency_s": 0.2,
+          "error": null,
+          "cached": true
+        }
+      },
+      {
+        "meeting": "ami_sdm_EN2002a_turns",
+        "idx": 536,
+        "label": "SAME",
+        "from": "MEE071",
+        "to": "MEE071",
+        "group_rel": "within",
+        "gap_s": 0.23,
+        "mid_s": 324.56,
+        "img_mean_brightness": 33.95,
+        "img_left_bright_frac": 0.197,
+        "img_right_bright_frac": 0.2383,
+        "resp": {
+          "choice": "different",
+          "confidence": 0.26,
+          "probabilities": {
+            "same": 0.37,
+            "different": 0.63
+          },
+          "input_tokens": 506,
+          "latency_s": 0.11,
+          "error": null,
+          "cached": true
+        }
+      },
+      {
+        "meeting": "ami_sdm_EN2002a_turns",
+        "idx": 557,
+        "label": "SAME",
+        "from": "MEE071",
+        "to": "MEE071",
+        "group_rel": "within",
+        "gap_s": 0.79,
+        "mid_s": 335.47,
+        "img_mean_brightness": 61.26,
+        "img_left_bright_frac": 0.5103,
+        "img_right_bright_frac": 0.3671,
+        "resp": {
+          "choice": "different",
+          "confidence": 0.2,
+          "probabilities": {
+            "same": 0.4,
+            "different": 0.6
+          },
+          "input_tokens": 503,
+          "latency_s": 0.11,
+          "error": null,
+          "cached": true
+        }
+      },
+      {
+        "meeting": "ami_sdm_EN2002a_turns",
+        "idx": 137,
+        "label": "SAME",
+        "from": "MEE073",
+        "to": "MEE073",
+        "group_rel": "within",
+        "gap_s": 0.25,
+        "mid_s": 88.8,
+        "img_mean_brightness": 46.89,
+        "img_left_bright_frac": 0.3667,
+        "img_right_bright_frac": 0.2339,
+        "resp": {
+          "choice": "different",
+          "confidence": 0.16,
+          "probabilities": {
+            "same": 0.42,
+            "different": 0.58
+          },
+          "input_tokens": 504,
+          "latency_s": 0.12,
+          "error": null,
+          "cached": true
+        }
+      },
+      {
+        "meeting": "ami_sdm_EN2002b_turns",
+        "idx": 244,
+        "label": "SAME",
+        "from": "MEE071",
+        "to": "MEE071",
+        "group_rel": "within",
+        "gap_s": 0.41,
+        "mid_s": 135.82,
+        "img_mean_brightness": 48.96,
+        "img_left_bright_frac": 0.4774,
+        "img_right_bright_frac": 0.2172,
+        "resp": {
+          "choice": "different",
+          "confidence": 0.2,
+          "probabilities": {
+            "same": 0.4,
+            "different": 0.6
+          },
+          "input_tokens": 504,
+          "latency_s": 0.11,
+          "error": null,
+          "cached": true
+        }
+      },
+      {
+        "meeting": "ami_sdm_EN2002a_turns",
+        "idx": 588,
+        "label": "SAME",
+        "from": "FEO070",
+        "to": "FEO070",
+        "group_rel": "within",
+        "gap_s": 0.05,
+        "mid_s": 357.38,
+        "img_mean_brightness": 33.46,
+        "img_left_bright_frac": 0.322,
+        "img_right_bright_frac": 0.1473,
+        "resp": {
+          "choice": "different",
+          "confidence": 0.26,
+          "probabilities": {
+            "same": 0.37,
+            "different": 0.63
+          },
+          "input_tokens": 503,
+          "latency_s": 0.11,
+          "error": null,
+          "cached": true
+        }
+      },
+      {
+        "meeting": "ami_sdm_EN2002b_turns",
+        "idx": 325,
+        "label": "SAME",
+        "from": "FEO072",
+        "to": "FEO072",
+        "group_rel": "within",
+        "gap_s": 0.21,
+        "mid_s": 183.42,
+        "img_mean_brightness": 49.39,
+        "img_left_bright_frac": 0.3594,
+        "img_right_bright_frac": 0.3091,
+        "resp": {
+          "choice": "different",
+          "confidence": 0.24,
+          "probabilities": {
+            "same": 0.38,
+            "different": 0.62
+          },
+          "input_tokens": 501,
+          "latency_s": 0.11,
+          "error": null,
+          "cached": true
+        }
+      },
+      {
+        "meeting": "ami_sdm_EN2002a_turns",
+        "idx": 659,
+        "label": "SAME",
+        "from": "MEE071",
+        "to": "MEE071",
+        "group_rel": "within",
+        "gap_s": 0.23,
+        "mid_s": 400.51,
+        "img_mean_brightness": 77.6,
+        "img_left_bright_frac": 0.5276,
+        "img_right_bright_frac": 0.6296,
+        "resp": {
+          "choice": "different",
+          "confidence": 0.26,
+          "probabilities": {
+            "same": 0.37,
+            "different": 0.63
+          },
+          "input_tokens": 504,
+          "latency_s": 0.13,
+          "error": null,
+          "cached": true
+        }
+      },
+      {
+        "meeting": "ami_sdm_EN2002a_turns",
+        "idx": 306,
+        "label": "SAME",
+        "from": "FEO072",
+        "to": "FEO072",
+        "group_rel": "within",
+        "gap_s": 0.17,
+        "mid_s": 188.91,
+        "img_mean_brightness": 49.42,
+        "img_left_bright_frac": 0.172,
+        "img_right_bright_frac": 0.5275,
+        "resp": {
+          "choice": "different",
+          "confidence": 0.24,
+          "probabilities": {
+            "same": 0.38,
+            "different": 0.62
+          },
+          "input_tokens": 504,
+          "latency_s": 0.2,
+          "error": null,
+          "cached": true
+        }
+      },
+      {
+        "meeting": "ami_sdm_EN2002b_turns",
+        "idx": 603,
+        "label": "SAME",
+        "from": "MEE073",
+        "to": "MEE073",
+        "group_rel": "within",
+        "gap_s": 0.13,
+        "mid_s": 353.76,
+        "img_mean_brightness": 57.68,
+        "img_left_bright_frac": 0.2823,
+        "img_right_bright_frac": 0.4999,
+        "resp": {
+          "choice": "different",
+          "confidence": 0.3,
+          "probabilities": {
+            "same": 0.35,
+            "different": 0.65
+          },
+          "input_tokens": 503,
+          "latency_s": 0.19,
+          "error": null,
+          "cached": true
+        }
+      },
+      {
+        "meeting": "ami_sdm_EN2002b_turns",
+        "idx": 317,
+        "label": "SAME",
+        "from": "FEO072",
+        "to": "FEO072",
+        "group_rel": "within",
+        "gap_s": 0.12,
+        "mid_s": 179.955,
+        "img_mean_brightness": 51.18,
+        "img_left_bright_frac": 0.316,
+        "img_right_bright_frac": 0.3885,
+        "resp": {
+          "choice": "different",
+          "confidence": 0.2,
+          "probabilities": {
+            "same": 0.4,
+            "different": 0.6
+          },
+          "input_tokens": 501,
+          "latency_s": 0.13,
+          "error": null,
+          "cached": true
+        }
+      },
+      {
+        "meeting": "ami_sdm_EN2002b_turns",
+        "idx": 224,
+        "label": "SAME",
+        "from": "FEO070",
+        "to": "FEO070",
+        "group_rel": "within",
+        "gap_s": 0.1,
+        "mid_s": 125.755,
+        "img_mean_brightness": 53.26,
+        "img_left_bright_frac": 0.3134,
+        "img_right_bright_frac": 0.4394,
+        "resp": {
+          "choice": "different",
+          "confidence": 0.22,
+          "probabilities": {
+            "same": 0.39,
+            "different": 0.61
+          },
+          "input_tokens": 502,
+          "latency_s": 0.2,
+          "error": null,
+          "cached": true
+        }
+      },
+      {
+        "meeting": "ami_sdm_EN2002b_turns",
+        "idx": 630,
+        "label": "SAME",
+        "from": "MEE073",
+        "to": "MEE073",
+        "group_rel": "within",
+        "gap_s": 0.22,
+        "mid_s": 374.235,
+        "img_mean_brightness": 44.07,
+        "img_left_bright_frac": 0.2262,
+        "img_right_bright_frac": 0.3577,
+        "resp": {
+          "choice": "different",
+          "confidence": 0.22,
+          "probabilities": {
+            "same": 0.39,
+            "different": 0.61
+          },
+          "input_tokens": 498,
+          "latency_s": 0.13,
+          "error": null,
+          "cached": true
+        }
+      },
+      {
+        "meeting": "ami_sdm_EN2002a_turns",
+        "idx": 475,
+        "label": "SAME",
+        "from": "MEE073",
+        "to": "MEE073",
+        "group_rel": "within",
+        "gap_s": 0.16,
+        "mid_s": 296.245,
+        "img_mean_brightness": 59.94,
+        "img_left_bright_frac": 0.3819,
+        "img_right_bright_frac": 0.5038,
+        "resp": {
+          "choice": "different",
+          "confidence": 0.14,
+          "probabilities": {
+            "same": 0.43,
+            "different": 0.57
+          },
+          "input_tokens": 504,
+          "latency_s": 0.13,
+          "error": null,
+          "cached": true
+        }
+      },
+      {
+        "meeting": "ami_sdm_EN2002b_turns",
+        "idx": 625,
+        "label": "SAME",
+        "from": "MEE073",
+        "to": "MEE073",
+        "group_rel": "within",
+        "gap_s": 0.77,
+        "mid_s": 371.65,
+        "img_mean_brightness": 36.86,
+        "img_left_bright_frac": 0.2485,
+        "img_right_bright_frac": 0.219,
+        "resp": {
+          "choice": "different",
+          "confidence": 0.18,
+          "probabilities": {
+            "same": 0.41,
+            "different": 0.59
+          },
+          "input_tokens": 505,
+          "latency_s": 0.11,
+          "error": null,
+          "cached": true
+        }
+      },
+      {
+        "meeting": "ami_sdm_EN2002b_turns",
+        "idx": 151,
+        "label": "SAME",
+        "from": "FEO070",
+        "to": "FEO070",
+        "group_rel": "within",
+        "gap_s": 0.39,
+        "mid_s": 80.72,
+        "img_mean_brightness": 35.87,
+        "img_left_bright_frac": 0.365,
+        "img_right_bright_frac": 0.1288,
+        "resp": {
+          "choice": "different",
+          "confidence": 0.22,
+          "probabilities": {
+            "same": 0.39,
+            "different": 0.61
+          },
+          "input_tokens": 502,
+          "latency_s": 0.11,
+          "error": null,
+          "cached": true
+        }
+      },
+      {
+        "meeting": "ami_sdm_EN2002a_turns",
+        "idx": 654,
+        "label": "SAME",
+        "from": "MEE071",
+        "to": "MEE071",
+        "group_rel": "within",
+        "gap_s": 0.58,
+        "mid_s": 397.555,
+        "img_mean_brightness": 80.45,
+        "img_left_bright_frac": 0.5802,
+        "img_right_bright_frac": 0.6479,
+        "resp": {
+          "choice": "different",
+          "confidence": 0.24,
+          "probabilities": {
+            "same": 0.38,
+            "different": 0.62
+          },
+          "input_tokens": 503,
+          "latency_s": 0.12,
+          "error": null,
+          "cached": true
+        }
+      },
+      {
+        "meeting": "ami_sdm_EN2002b_turns",
+        "idx": 106,
+        "label": "SAME",
+        "from": "MEE071",
+        "to": "MEE071",
+        "group_rel": "within",
+        "gap_s": 0.35,
+        "mid_s": 57.37,
+        "img_mean_brightness": 56.12,
+        "img_left_bright_frac": 0.2883,
+        "img_right_bright_frac": 0.4994,
+        "resp": {
+          "choice": "different",
+          "confidence": 0.26,
+          "probabilities": {
+            "same": 0.37,
+            "different": 0.63
+          },
+          "input_tokens": 501,
+          "latency_s": 0.25,
+          "error": null,
+          "cached": true
+        }
+      },
+      {
+        "meeting": "ami_sdm_EN2002a_turns",
+        "idx": 44,
+        "label": "SAME",
+        "from": "FEO072",
+        "to": "FEO072",
+        "group_rel": "within",
+        "gap_s": 0.46,
+        "mid_s": 32.465,
+        "img_mean_brightness": 46.58,
+        "img_left_bright_frac": 0.5382,
+        "img_right_bright_frac": 0.1376,
+        "resp": {
+          "choice": "different",
+          "confidence": 0.24,
+          "probabilities": {
+            "same": 0.38,
+            "different": 0.62
+          },
+          "input_tokens": 503,
+          "latency_s": 0.12,
+          "error": null,
+          "cached": true
+        }
+      },
+      {
+        "meeting": "ami_sdm_EN2002b_turns",
+        "idx": 127,
+        "label": "SAME",
+        "from": "MEE071",
+        "to": "MEE071",
+        "group_rel": "within",
+        "gap_s": 0.15,
+        "mid_s": 68.71,
+        "img_mean_brightness": 61.86,
+        "img_left_bright_frac": 0.5528,
+        "img_right_bright_frac": 0.3476,
+        "resp": {
+          "choice": "different",
+          "confidence": 0.28,
+          "probabilities": {
+            "same": 0.36,
+            "different": 0.64
+          },
+          "input_tokens": 504,
+          "latency_s": 0.2,
+          "error": null,
+          "cached": true
+        }
+      },
+      {
+        "meeting": "ami_sdm_EN2002b_turns",
+        "idx": 406,
+        "label": "SAME",
+        "from": "MEE073",
+        "to": "MEE073",
+        "group_rel": "within",
+        "gap_s": 0.02,
+        "mid_s": 228.345,
+        "img_mean_brightness": 44.26,
+        "img_left_bright_frac": 0.3254,
+        "img_right_bright_frac": 0.2384,
+        "resp": {
+          "choice": "different",
+          "confidence": 0.2,
+          "probabilities": {
+            "same": 0.4,
+            "different": 0.6
+          },
+          "input_tokens": 504,
+          "latency_s": 0.13,
+          "error": null,
+          "cached": true
+        }
+      },
+      {
+        "meeting": "ami_sdm_EN2002a_turns",
+        "idx": 260,
+        "label": "SAME",
+        "from": "FEO070",
+        "to": "FEO070",
+        "group_rel": "within",
+        "gap_s": 0.11,
+        "mid_s": 156.47,
+        "img_mean_brightness": 53.16,
+        "img_left_bright_frac": 0.3545,
+        "img_right_bright_frac": 0.3596,
+        "resp": {
+          "choice": "different",
+          "confidence": 0.14,
+          "probabilities": {
+            "same": 0.43,
+            "different": 0.57
+          },
+          "input_tokens": 504,
+          "latency_s": 0.13,
+          "error": null,
+          "cached": true
+        }
+      },
+      {
+        "meeting": "ami_sdm_EN2002b_turns",
+        "idx": 351,
+        "label": "SAME",
+        "from": "FEO072",
+        "to": "FEO072",
+        "group_rel": "within",
+        "gap_s": 0.13,
+        "mid_s": 197.84,
+        "img_mean_brightness": 65.54,
+        "img_left_bright_frac": 0.5149,
+        "img_right_bright_frac": 0.434,
+        "resp": {
+          "choice": "different",
+          "confidence": 0.2,
+          "probabilities": {
+            "same": 0.4,
+            "different": 0.6
+          },
+          "input_tokens": 501,
+          "latency_s": 0.12,
+          "error": null,
+          "cached": true
+        }
+      },
+      {
+        "meeting": "ami_sdm_EN2002b_turns",
+        "idx": 137,
+        "label": "SAME",
+        "from": "MEE071",
+        "to": "MEE071",
+        "group_rel": "within",
+        "gap_s": 0.04,
+        "mid_s": 72.405,
+        "img_mean_brightness": 40.25,
+        "img_left_bright_frac": 0.312,
+        "img_right_bright_frac": 0.2085,
+        "resp": {
+          "choice": "different",
+          "confidence": 0.22,
+          "probabilities": {
+            "same": 0.39,
+            "different": 0.61
+          },
+          "input_tokens": 502,
+          "latency_s": 0.12,
+          "error": null,
+          "cached": true
+        }
+      },
+      {
+        "meeting": "ami_sdm_EN2002b_turns",
+        "idx": 33,
+        "label": "SAME",
+        "from": "MEE073",
+        "to": "MEE073",
+        "group_rel": "within",
+        "gap_s": 0.34,
+        "mid_s": 19.675,
+        "img_mean_brightness": 33.3,
+        "img_left_bright_frac": 0.0811,
+        "img_right_bright_frac": 0.3507,
+        "resp": {
+          "choice": "different",
+          "confidence": 0.24,
+          "probabilities": {
+            "same": 0.38,
+            "different": 0.62
+          },
+          "input_tokens": 503,
+          "latency_s": 0.18,
+          "error": null,
+          "cached": true
+        }
+      },
+      {
+        "meeting": "ami_sdm_EN2002b_turns",
+        "idx": 617,
+        "label": "SAME",
+        "from": "FEO072",
+        "to": "FEO072",
+        "group_rel": "within",
+        "gap_s": 0.32,
+        "mid_s": 367.115,
+        "img_mean_brightness": 63.73,
+        "img_left_bright_frac": 0.4231,
+        "img_right_bright_frac": 0.4571,
+        "resp": {
+          "choice": "different",
+          "confidence": 0.28,
+          "probabilities": {
+            "same": 0.36,
+            "different": 0.64
+          },
+          "input_tokens": 503,
+          "latency_s": 0.14,
+          "error": null,
+          "cached": true
+        }
+      },
+      {
+        "meeting": "ami_sdm_EN2002b_turns",
+        "idx": 551,
+        "label": "SAME",
+        "from": "MEE073",
+        "to": "MEE073",
+        "group_rel": "within",
+        "gap_s": 0.25,
+        "mid_s": 328.74,
+        "img_mean_brightness": 38.79,
+        "img_left_bright_frac": 0.2859,
+        "img_right_bright_frac": 0.2233,
+        "resp": {
+          "choice": "different",
+          "confidence": 0.2,
+          "probabilities": {
+            "same": 0.4,
+            "different": 0.6
+          },
+          "input_tokens": 500,
+          "latency_s": 0.13,
+          "error": null,
+          "cached": true
+        }
+      },
+      {
+        "meeting": "ami_sdm_EN2002b_turns",
+        "idx": 346,
+        "label": "SAME",
+        "from": "FEO072",
+        "to": "FEO072",
+        "group_rel": "within",
+        "gap_s": 0.3,
+        "mid_s": 195.715,
+        "img_mean_brightness": 64.46,
+        "img_left_bright_frac": 0.4362,
+        "img_right_bright_frac": 0.4973,
+        "resp": {
+          "choice": "different",
+          "confidence": 0.16,
+          "probabilities": {
+            "same": 0.42,
+            "different": 0.58
+          },
+          "input_tokens": 503,
+          "latency_s": 0.26,
+          "error": null,
+          "cached": true
+        }
+      },
+      {
+        "meeting": "ami_sdm_EN2002a_turns",
+        "idx": 518,
+        "label": "SAME",
+        "from": "MEE071",
+        "to": "MEE071",
+        "group_rel": "within",
+        "gap_s": 0.23,
+        "mid_s": 316.62,
+        "img_mean_brightness": 56.03,
+        "img_left_bright_frac": 0.5483,
+        "img_right_bright_frac": 0.251,
+        "resp": {
+          "choice": "different",
+          "confidence": 0.28,
+          "probabilities": {
+            "same": 0.36,
+            "different": 0.64
+          },
+          "input_tokens": 496,
+          "latency_s": 0.19,
+          "error": null,
+          "cached": true
+        }
+      },
+      {
+        "meeting": "ami_sdm_EN2002b_turns",
+        "idx": 241,
+        "label": "SAME",
+        "from": "MEE071",
+        "to": "MEE071",
+        "group_rel": "within",
+        "gap_s": 0.59,
+        "mid_s": 133.5,
+        "img_mean_brightness": 54.66,
+        "img_left_bright_frac": 0.3717,
+        "img_right_bright_frac": 0.3504,
+        "resp": {
+          "choice": "different",
+          "confidence": 0.18,
+          "probabilities": {
+            "same": 0.41,
+            "different": 0.59
+          },
+          "input_tokens": 503,
+          "latency_s": 0.2,
+          "error": null,
+          "cached": true
+        }
+      },
+      {
+        "meeting": "ami_sdm_EN2002a_turns",
+        "idx": 672,
+        "label": "SAME",
+        "from": "MEE071",
+        "to": "MEE071",
+        "group_rel": "within",
+        "gap_s": 0.91,
+        "mid_s": 405.76,
+        "img_mean_brightness": 51.28,
+        "img_left_bright_frac": 0.438,
+        "img_right_bright_frac": 0.2664,
+        "resp": {
+          "choice": "different",
+          "confidence": 0.26,
+          "probabilities": {
+            "same": 0.37,
+            "different": 0.63
+          },
+          "input_tokens": 502,
+          "latency_s": 0.17,
+          "error": null,
+          "cached": true
+        }
+      },
+      {
+        "meeting": "ami_sdm_EN2002b_turns",
+        "idx": 304,
+        "label": "SAME",
+        "from": "FEO072",
+        "to": "FEO072",
+        "group_rel": "within",
+        "gap_s": 0.15,
+        "mid_s": 173.94,
+        "img_mean_brightness": 36.89,
+        "img_left_bright_frac": 0.2111,
+        "img_right_bright_frac": 0.2318,
+        "resp": {
+          "choice": "different",
+          "confidence": 0.24,
+          "probabilities": {
+            "same": 0.38,
+            "different": 0.62
+          },
+          "input_tokens": 503,
+          "latency_s": 0.12,
+          "error": null,
+          "cached": true
+        }
+      },
+      {
+        "meeting": "ami_sdm_EN2002b_turns",
+        "idx": 637,
+        "label": "SAME",
+        "from": "MEE073",
+        "to": "MEE073",
+        "group_rel": "within",
+        "gap_s": 0.15,
+        "mid_s": 376.74,
+        "img_mean_brightness": 44.62,
+        "img_left_bright_frac": 0.2615,
+        "img_right_bright_frac": 0.322,
+        "resp": {
+          "choice": "different",
+          "confidence": 0.24,
+          "probabilities": {
+            "same": 0.38,
+            "different": 0.62
+          },
+          "input_tokens": 503,
+          "latency_s": 0.14,
+          "error": null,
+          "cached": true
+        }
+      },
+      {
+        "meeting": "ami_sdm_EN2002b_turns",
+        "idx": 524,
+        "label": "SAME",
+        "from": "MEE073",
+        "to": "MEE073",
+        "group_rel": "within",
+        "gap_s": 0.01,
+        "mid_s": 306.18,
+        "img_mean_brightness": 44.13,
+        "img_left_bright_frac": 0.1714,
+        "img_right_bright_frac": 0.4537,
+        "resp": {
+          "choice": "different",
+          "confidence": 0.24,
+          "probabilities": {
+            "same": 0.38,
+            "different": 0.62
+          },
+          "input_tokens": 498,
+          "latency_s": 0.2,
+          "error": null,
+          "cached": true
+        }
+      },
+      {
+        "meeting": "ami_sdm_EN2002b_turns",
+        "idx": 541,
+        "label": "SAME",
+        "from": "MEE073",
+        "to": "MEE073",
+        "group_rel": "within",
+        "gap_s": 0.42,
+        "mid_s": 318.775,
+        "img_mean_brightness": 34.71,
+        "img_left_bright_frac": 0.0703,
+        "img_right_bright_frac": 0.4025,
+        "resp": {
+          "choice": "different",
+          "confidence": 0.24,
+          "probabilities": {
+            "same": 0.38,
+            "different": 0.62
+          },
+          "input_tokens": 502,
+          "latency_s": 0.13,
+          "error": null,
+          "cached": true
+        }
+      },
+      {
+        "meeting": "ami_sdm_EN2002a_turns",
+        "idx": 183,
+        "label": "SAME",
+        "from": "MEE071",
+        "to": "MEE071",
+        "group_rel": "within",
+        "gap_s": 0.07,
+        "mid_s": 113.23,
+        "img_mean_brightness": 41.92,
+        "img_left_bright_frac": 0.1001,
+        "img_right_bright_frac": 0.4857,
+        "resp": {
+          "choice": "different",
+          "confidence": 0.26,
+          "probabilities": {
+            "same": 0.37,
+            "different": 0.63
+          },
+          "input_tokens": 500,
+          "latency_s": 0.14,
+          "error": null,
+          "cached": true
+        }
+      },
+      {
+        "meeting": "ami_sdm_EN2002a_turns",
+        "idx": 415,
+        "label": "SAME",
+        "from": "MEE073",
+        "to": "MEE073",
+        "group_rel": "within",
+        "gap_s": 0.01,
+        "mid_s": 256.12,
+        "img_mean_brightness": 59.05,
+        "img_left_bright_frac": 0.3473,
+        "img_right_bright_frac": 0.4271,
+        "resp": {
+          "choice": "different",
+          "confidence": 0.26,
+          "probabilities": {
+            "same": 0.37,
+            "different": 0.63
+          },
+          "input_tokens": 501,
+          "latency_s": 0.12,
+          "error": null,
+          "cached": true
+        }
+      },
+      {
+        "meeting": "ami_sdm_EN2002b_turns",
+        "idx": 16,
+        "label": "SAME",
+        "from": "MEE071",
+        "to": "MEE071",
+        "group_rel": "within",
+        "gap_s": 0.41,
+        "mid_s": 9.97,
+        "img_mean_brightness": 47.29,
+        "img_left_bright_frac": 0.3105,
+        "img_right_bright_frac": 0.2992,
+        "resp": {
+          "choice": "different",
+          "confidence": 0.22,
+          "probabilities": {
+            "same": 0.39,
+            "different": 0.61
+          },
+          "input_tokens": 503,
+          "latency_s": 0.12,
+          "error": null,
+          "cached": true
+        }
+      },
+      {
+        "meeting": "ami_sdm_EN2002b_turns",
+        "idx": 536,
+        "label": "SAME",
+        "from": "MEE073",
+        "to": "MEE073",
+        "group_rel": "within",
+        "gap_s": 0.33,
+        "mid_s": 314.09,
+        "img_mean_brightness": 47.71,
+        "img_left_bright_frac": 0.2599,
+        "img_right_bright_frac": 0.3349,
+        "resp": {
+          "choice": "different",
+          "confidence": 0.24,
+          "probabilities": {
+            "same": 0.38,
+            "different": 0.62
+          },
+          "input_tokens": 504,
+          "latency_s": 0.39,
+          "error": null,
+          "cached": true
+        }
+      },
+      {
+        "meeting": "ami_sdm_EN2002b_turns",
+        "idx": 332,
+        "label": "SAME",
+        "from": "FEO072",
+        "to": "FEO072",
+        "group_rel": "within",
+        "gap_s": 1.86,
+        "mid_s": 186.485,
+        "img_mean_brightness": 58.8,
+        "img_left_bright_frac": 0.4678,
+        "img_right_bright_frac": 0.3458,
+        "resp": {
+          "choice": "different",
+          "confidence": 0.24,
+          "probabilities": {
+            "same": 0.38,
+            "different": 0.62
+          },
+          "input_tokens": 504,
+          "latency_s": 0.12,
+          "error": null,
+          "cached": true
+        }
+      },
+      {
+        "meeting": "ami_sdm_EN2002b_turns",
+        "idx": 380,
+        "label": "SAME",
+        "from": "MEE071",
+        "to": "MEE071",
+        "group_rel": "within",
+        "gap_s": 0.41,
+        "mid_s": 216.68,
+        "img_mean_brightness": 51.57,
+        "img_left_bright_frac": 0.3321,
+        "img_right_bright_frac": 0.3543,
+        "resp": {
+          "choice": "different",
+          "confidence": 0.22,
+          "probabilities": {
+            "same": 0.39,
+            "different": 0.61
+          },
+          "input_tokens": 501,
+          "latency_s": 0.11,
+          "error": null,
+          "cached": true
+        }
+      },
+      {
+        "meeting": "ami_sdm_EN2002b_turns",
+        "idx": 669,
+        "label": "SAME",
+        "from": "MEE073",
+        "to": "MEE073",
+        "group_rel": "within",
+        "gap_s": 0.41,
+        "mid_s": 392.22,
+        "img_mean_brightness": 48.68,
+        "img_left_bright_frac": 0.3253,
+        "img_right_bright_frac": 0.3148,
+        "resp": {
+          "choice": "different",
+          "confidence": 0.2,
+          "probabilities": {
+            "same": 0.4,
+            "different": 0.6
+          },
+          "input_tokens": 503,
+          "latency_s": 0.12,
+          "error": null,
+          "cached": true
+        }
+      },
+      {
+        "meeting": "ami_sdm_EN2002b_turns",
+        "idx": 368,
+        "label": "SAME",
+        "from": "MEE073",
+        "to": "MEE073",
+        "group_rel": "within",
+        "gap_s": 0.16,
+        "mid_s": 212.095,
+        "img_mean_brightness": 49.99,
+        "img_left_bright_frac": 0.3568,
+        "img_right_bright_frac": 0.2776,
+        "resp": {
+          "choice": "different",
+          "confidence": 0.22,
+          "probabilities": {
+            "same": 0.39,
+            "different": 0.61
+          },
+          "input_tokens": 501,
+          "latency_s": 0.12,
+          "error": null,
+          "cached": true
+        }
+      },
+      {
+        "meeting": "ami_sdm_EN2002b_turns",
+        "idx": 472,
+        "label": "SAME",
+        "from": "MEE073",
+        "to": "MEE073",
+        "group_rel": "within",
+        "gap_s": 0.98,
+        "mid_s": 266.775,
+        "img_mean_brightness": 48.45,
+        "img_left_bright_frac": 0.399,
+        "img_right_bright_frac": 0.2555,
+        "resp": {
+          "choice": "different",
+          "confidence": 0.2,
+          "probabilities": {
+            "same": 0.4,
+            "different": 0.6
+          },
+          "input_tokens": 499,
+          "latency_s": 0.11,
+          "error": null,
+          "cached": true
+        }
+      },
+      {
+        "meeting": "ami_sdm_EN2002b_turns",
+        "idx": 420,
+        "label": "SAME",
+        "from": "MEE073",
+        "to": "MEE073",
+        "group_rel": "within",
+        "gap_s": 2.65,
+        "mid_s": 236.33,
+        "img_mean_brightness": 40.63,
+        "img_left_bright_frac": 0.2612,
+        "img_right_bright_frac": 0.2281,
+        "resp": {
+          "choice": "different",
+          "confidence": 0.2,
+          "probabilities": {
+            "same": 0.4,
+            "different": 0.6
+          },
+          "input_tokens": 505,
+          "latency_s": 0.2,
+          "error": null,
+          "cached": true
+        }
+      }
+    ]
+  },
+  "no_information_control": {
+    "tag": "blank_control",
+    "n": 120,
+    "n_scored": 120,
+    "n_api_error": 0,
+    "accuracy_balanced_sample": 0.5,
+    "on_sample_always_change_baseline": 0.5,
+    "pooled_corpus_baseline_1396": 0.6225,
+    "accuracy_reweighted_to_pooled_base_rate": 0.6225,
+    "tpr_change": 1.0,
+    "tnr_same": 0.0,
+    "auc_p_different": 0.5,
+    "auc_bootstrap95": [
+      0.5,
+      0.5
+    ],
+    "distinct_choices": [
+      "different"
+    ],
+    "constant_answer": true,
+    "p_diff_mean": 0.62,
+    "p_diff_std": 0.0,
+    "beats_pooled_baseline": false,
+    "rows": [
+      {
+        "meeting": "ami_sdm_EN2002a_turns",
+        "idx": 680,
+        "label": "CHANGE",
+        "resp": {
+          "choice": "different",
+          "confidence": 0.24,
+          "probabilities": {
+            "same": 0.38,
+            "different": 0.62
+          },
+          "input_tokens": 503,
+          "latency_s": 0.13,
+          "error": null,
+          "cached": true
+        }
+      },
+      {
+        "meeting": "ami_sdm_EN2002b_turns",
+        "idx": 646,
+        "label": "CHANGE",
+        "resp": {
+          "choice": "different",
+          "confidence": 0.24,
+          "probabilities": {
+            "same": 0.38,
+            "different": 0.62
+          },
+          "input_tokens": 503,
+          "latency_s": 0.13,
+          "error": null,
+          "cached": true
+        }
+      },
+      {
+        "meeting": "ami_sdm_EN2002a_turns",
+        "idx": 276,
+        "label": "CHANGE",
+        "resp": {
+          "choice": "different",
+          "confidence": 0.24,
+          "probabilities": {
+            "same": 0.38,
+            "different": 0.62
+          },
+          "input_tokens": 503,
+          "latency_s": 0.13,
+          "error": null,
+          "cached": true
+        }
+      },
+      {
+        "meeting": "ami_sdm_EN2002a_turns",
+        "idx": 481,
+        "label": "CHANGE",
+        "resp": {
+          "choice": "different",
+          "confidence": 0.24,
+          "probabilities": {
+            "same": 0.38,
+            "different": 0.62
+          },
+          "input_tokens": 503,
+          "latency_s": 0.13,
+          "error": null,
+          "cached": true
+        }
+      },
+      {
+        "meeting": "ami_sdm_EN2002a_turns",
+        "idx": 676,
+        "label": "CHANGE",
+        "resp": {
+          "choice": "different",
+          "confidence": 0.24,
+          "probabilities": {
+            "same": 0.38,
+            "different": 0.62
+          },
+          "input_tokens": 503,
+          "latency_s": 0.13,
+          "error": null,
+          "cached": true
+        }
+      },
+      {
+        "meeting": "ami_sdm_EN2002b_turns",
+        "idx": 75,
+        "label": "CHANGE",
+        "resp": {
+          "choice": "different",
+          "confidence": 0.24,
+          "probabilities": {
+            "same": 0.38,
+            "different": 0.62
+          },
+          "input_tokens": 503,
+          "latency_s": 0.13,
+          "error": null,
+          "cached": true
+        }
+      },
+      {
+        "meeting": "ami_sdm_EN2002b_turns",
+        "idx": 491,
+        "label": "CHANGE",
+        "resp": {
+          "choice": "different",
+          "confidence": 0.24,
+          "probabilities": {
+            "same": 0.38,
+            "different": 0.62
+          },
+          "input_tokens": 503,
+          "latency_s": 0.13,
+          "error": null,
+          "cached": true
+        }
+      },
+      {
+        "meeting": "ami_sdm_EN2002a_turns",
+        "idx": 444,
+        "label": "CHANGE",
+        "resp": {
+          "choice": "different",
+          "confidence": 0.24,
+          "probabilities": {
+            "same": 0.38,
+            "different": 0.62
+          },
+          "input_tokens": 503,
+          "latency_s": 0.13,
+          "error": null,
+          "cached": true
+        }
+      },
+      {
+        "meeting": "ami_sdm_EN2002b_turns",
+        "idx": 708,
+        "label": "CHANGE",
+        "resp": {
+          "choice": "different",
+          "confidence": 0.24,
+          "probabilities": {
+            "same": 0.38,
+            "different": 0.62
+          },
+          "input_tokens": 503,
+          "latency_s": 0.13,
+          "error": null,
+          "cached": true
+        }
+      },
+      {
+        "meeting": "ami_sdm_EN2002a_turns",
+        "idx": 85,
+        "label": "CHANGE",
+        "resp": {
+          "choice": "different",
+          "confidence": 0.24,
+          "probabilities": {
+            "same": 0.38,
+            "different": 0.62
+          },
+          "input_tokens": 503,
+          "latency_s": 0.13,
+          "error": null,
+          "cached": true
+        }
+      },
+      {
+        "meeting": "ami_sdm_EN2002b_turns",
+        "idx": 504,
+        "label": "CHANGE",
+        "resp": {
+          "choice": "different",
+          "confidence": 0.24,
+          "probabilities": {
+            "same": 0.38,
+            "different": 0.62
+          },
+          "input_tokens": 503,
+          "latency_s": 0.13,
+          "error": null,
+          "cached": true
+        }
+      },
+      {
+        "meeting": "ami_sdm_EN2002a_turns",
+        "idx": 216,
+        "label": "CHANGE",
+        "resp": {
+          "choice": "different",
+          "confidence": 0.24,
+          "probabilities": {
+            "same": 0.38,
+            "different": 0.62
+          },
+          "input_tokens": 503,
+          "latency_s": 0.13,
+          "error": null,
+          "cached": true
+        }
+      },
+      {
+        "meeting": "ami_sdm_EN2002a_turns",
+        "idx": 549,
+        "label": "CHANGE",
+        "resp": {
+          "choice": "different",
+          "confidence": 0.24,
+          "probabilities": {
+            "same": 0.38,
+            "different": 0.62
+          },
+          "input_tokens": 503,
+          "latency_s": 0.13,
+          "error": null,
+          "cached": true
+        }
+      },
+      {
+        "meeting": "ami_sdm_EN2002a_turns",
+        "idx": 449,
+        "label": "CHANGE",
+        "resp": {
+          "choice": "different",
+          "confidence": 0.24,
+          "probabilities": {
+            "same": 0.38,
+            "different": 0.62
+          },
+          "input_tokens": 503,
+          "latency_s": 0.13,
+          "error": null,
+          "cached": true
+        }
+      },
+      {
+        "meeting": "ami_sdm_EN2002b_turns",
+        "idx": 338,
+        "label": "CHANGE",
+        "resp": {
+          "choice": "different",
+          "confidence": 0.24,
+          "probabilities": {
+            "same": 0.38,
+            "different": 0.62
+          },
+          "input_tokens": 503,
+          "latency_s": 0.13,
+          "error": null,
+          "cached": true
+        }
+      },
+      {
+        "meeting": "ami_sdm_EN2002b_turns",
+        "idx": 57,
+        "label": "CHANGE",
+        "resp": {
+          "choice": "different",
+          "confidence": 0.24,
+          "probabilities": {
+            "same": 0.38,
+            "different": 0.62
+          },
+          "input_tokens": 503,
+          "latency_s": 0.13,
+          "error": null,
+          "cached": true
+        }
+      },
+      {
+        "meeting": "ami_sdm_EN2002a_turns",
+        "idx": 470,
+        "label": "CHANGE",
+        "resp": {
+          "choice": "different",
+          "confidence": 0.24,
+          "probabilities": {
+            "same": 0.38,
+            "different": 0.62
+          },
+          "input_tokens": 503,
+          "latency_s": 0.13,
+          "error": null,
+          "cached": true
+        }
+      },
+      {
+        "meeting": "ami_sdm_EN2002a_turns",
+        "idx": 20,
+        "label": "CHANGE",
+        "resp": {
+          "choice": "different",
+          "confidence": 0.24,
+          "probabilities": {
+            "same": 0.38,
+            "different": 0.62
+          },
+          "input_tokens": 503,
+          "latency_s": 0.13,
+          "error": null,
+          "cached": true
+        }
+      },
+      {
+        "meeting": "ami_sdm_EN2002b_turns",
+        "idx": 45,
+        "label": "CHANGE",
+        "resp": {
+          "choice": "different",
+          "confidence": 0.24,
+          "probabilities": {
+            "same": 0.38,
+            "different": 0.62
+          },
+          "input_tokens": 503,
+          "latency_s": 0.13,
+          "error": null,
+          "cached": true
+        }
+      },
+      {
+        "meeting": "ami_sdm_EN2002b_turns",
+        "idx": 385,
+        "label": "CHANGE",
+        "resp": {
+          "choice": "different",
+          "confidence": 0.24,
+          "probabilities": {
+            "same": 0.38,
+            "different": 0.62
+          },
+          "input_tokens": 503,
+          "latency_s": 0.13,
+          "error": null,
+          "cached": true
+        }
+      },
+      {
+        "meeting": "ami_sdm_EN2002b_turns",
+        "idx": 260,
+        "label": "CHANGE",
+        "resp": {
+          "choice": "different",
+          "confidence": 0.24,
+          "probabilities": {
+            "same": 0.38,
+            "different": 0.62
+          },
+          "input_tokens": 503,
+          "latency_s": 0.13,
+          "error": null,
+          "cached": true
+        }
+      },
+      {
+        "meeting": "ami_sdm_EN2002b_turns",
+        "idx": 154,
+        "label": "CHANGE",
+        "resp": {
+          "choice": "different",
+          "confidence": 0.24,
+          "probabilities": {
+            "same": 0.38,
+            "different": 0.62
+          },
+          "input_tokens": 503,
+          "latency_s": 0.13,
+          "error": null,
+          "cached": true
+        }
+      },
+      {
+        "meeting": "ami_sdm_EN2002b_turns",
+        "idx": 121,
+        "label": "CHANGE",
+        "resp": {
+          "choice": "different",
+          "confidence": 0.24,
+          "probabilities": {
+            "same": 0.38,
+            "different": 0.62
+          },
+          "input_tokens": 503,
+          "latency_s": 0.13,
+          "error": null,
+          "cached": true
+        }
+      },
+      {
+        "meeting": "ami_sdm_EN2002a_turns",
+        "idx": 488,
+        "label": "CHANGE",
+        "resp": {
+          "choice": "different",
+          "confidence": 0.24,
+          "probabilities": {
+            "same": 0.38,
+            "different": 0.62
+          },
+          "input_tokens": 503,
+          "latency_s": 0.13,
+          "error": null,
+          "cached": true
+        }
+      },
+      {
+        "meeting": "ami_sdm_EN2002a_turns",
+        "idx": 454,
+        "label": "CHANGE",
+        "resp": {
+          "choice": "different",
+          "confidence": 0.24,
+          "probabilities": {
+            "same": 0.38,
+            "different": 0.62
+          },
+          "input_tokens": 503,
+          "latency_s": 0.13,
+          "error": null,
+          "cached": true
+        }
+      },
+      {
+        "meeting": "ami_sdm_EN2002a_turns",
+        "idx": 127,
+        "label": "CHANGE",
+        "resp": {
+          "choice": "different",
+          "confidence": 0.24,
+          "probabilities": {
+            "same": 0.38,
+            "different": 0.62
+          },
+          "input_tokens": 503,
+          "latency_s": 0.13,
+          "error": null,
+          "cached": true
+        }
+      },
+      {
+        "meeting": "ami_sdm_EN2002a_turns",
+        "idx": 457,
+        "label": "CHANGE",
+        "resp": {
+          "choice": "different",
+          "confidence": 0.24,
+          "probabilities": {
+            "same": 0.38,
+            "different": 0.62
+          },
+          "input_tokens": 503,
+          "latency_s": 0.13,
+          "error": null,
+          "cached": true
+        }
+      },
+      {
+        "meeting": "ami_sdm_EN2002b_turns",
+        "idx": 572,
+        "label": "CHANGE",
+        "resp": {
+          "choice": "different",
+          "confidence": 0.24,
+          "probabilities": {
+            "same": 0.38,
+            "different": 0.62
+          },
+          "input_tokens": 503,
+          "latency_s": 0.13,
+          "error": null,
+          "cached": true
+        }
+      },
+      {
+        "meeting": "ami_sdm_EN2002a_turns",
+        "idx": 254,
+        "label": "CHANGE",
+        "resp": {
+          "choice": "different",
+          "confidence": 0.24,
+          "probabilities": {
+            "same": 0.38,
+            "different": 0.62
+          },
+          "input_tokens": 503,
+          "latency_s": 0.13,
+          "error": null,
+          "cached": true
+        }
+      },
+      {
+        "meeting": "ami_sdm_EN2002b_turns",
+        "idx": 672,
+        "label": "CHANGE",
+        "resp": {
+          "choice": "different",
+          "confidence": 0.24,
+          "probabilities": {
+            "same": 0.38,
+            "different": 0.62
+          },
+          "input_tokens": 503,
+          "latency_s": 0.13,
+          "error": null,
+          "cached": true
+        }
+      },
+      {
+        "meeting": "ami_sdm_EN2002a_turns",
+        "idx": 175,
+        "label": "CHANGE",
+        "resp": {
+          "choice": "different",
+          "confidence": 0.24,
+          "probabilities": {
+            "same": 0.38,
+            "different": 0.62
+          },
+          "input_tokens": 503,
+          "latency_s": 0.13,
+          "error": null,
+          "cached": true
+        }
+      },
+      {
+        "meeting": "ami_sdm_EN2002a_turns",
+        "idx": 530,
+        "label": "CHANGE",
+        "resp": {
+          "choice": "different",
+          "confidence": 0.24,
+          "probabilities": {
+            "same": 0.38,
+            "different": 0.62
+          },
+          "input_tokens": 503,
+          "latency_s": 0.13,
+          "error": null,
+          "cached": true
+        }
+      },
+      {
+        "meeting": "ami_sdm_EN2002a_turns",
+        "idx": 572,
+        "label": "CHANGE",
+        "resp": {
+          "choice": "different",
+          "confidence": 0.24,
+          "probabilities": {
+            "same": 0.38,
+            "different": 0.62
+          },
+          "input_tokens": 503,
+          "latency_s": 0.13,
+          "error": null,
+          "cached": true
+        }
+      },
+      {
+        "meeting": "ami_sdm_EN2002a_turns",
+        "idx": 361,
+        "label": "CHANGE",
+        "resp": {
+          "choice": "different",
+          "confidence": 0.24,
+          "probabilities": {
+            "same": 0.38,
+            "different": 0.62
+          },
+          "input_tokens": 503,
+          "latency_s": 0.13,
+          "error": null,
+          "cached": true
+        }
+      },
+      {
+        "meeting": "ami_sdm_EN2002a_turns",
+        "idx": 152,
+        "label": "CHANGE",
+        "resp": {
+          "choice": "different",
+          "confidence": 0.24,
+          "probabilities": {
+            "same": 0.38,
+            "different": 0.62
+          },
+          "input_tokens": 503,
+          "latency_s": 0.13,
+          "error": null,
+          "cached": true
+        }
+      },
+      {
+        "meeting": "ami_sdm_EN2002b_turns",
+        "idx": 611,
+        "label": "CHANGE",
+        "resp": {
+          "choice": "different",
+          "confidence": 0.24,
+          "probabilities": {
+            "same": 0.38,
+            "different": 0.62
+          },
+          "input_tokens": 503,
+          "latency_s": 0.13,
+          "error": null,
+          "cached": true
+        }
+      },
+      {
+        "meeting": "ami_sdm_EN2002b_turns",
+        "idx": 69,
+        "label": "CHANGE",
+        "resp": {
+          "choice": "different",
+          "confidence": 0.24,
+          "probabilities": {
+            "same": 0.38,
+            "different": 0.62
+          },
+          "input_tokens": 503,
+          "latency_s": 0.13,
+          "error": null,
+          "cached": true
+        }
+      },
+      {
+        "meeting": "ami_sdm_EN2002a_turns",
+        "idx": 159,
+        "label": "CHANGE",
+        "resp": {
+          "choice": "different",
+          "confidence": 0.24,
+          "probabilities": {
+            "same": 0.38,
+            "different": 0.62
+          },
+          "input_tokens": 503,
+          "latency_s": 0.13,
+          "error": null,
+          "cached": true
+        }
+      },
+      {
+        "meeting": "ami_sdm_EN2002b_turns",
+        "idx": 209,
+        "label": "CHANGE",
+        "resp": {
+          "choice": "different",
+          "confidence": 0.24,
+          "probabilities": {
+            "same": 0.38,
+            "different": 0.62
+          },
+          "input_tokens": 503,
+          "latency_s": 0.13,
+          "error": null,
+          "cached": true
+        }
+      },
+      {
+        "meeting": "ami_sdm_EN2002a_turns",
+        "idx": 410,
+        "label": "CHANGE",
+        "resp": {
+          "choice": "different",
+          "confidence": 0.24,
+          "probabilities": {
+            "same": 0.38,
+            "different": 0.62
+          },
+          "input_tokens": 503,
+          "latency_s": 0.13,
+          "error": null,
+          "cached": true
+        }
+      },
+      {
+        "meeting": "ami_sdm_EN2002b_turns",
+        "idx": 204,
+        "label": "CHANGE",
+        "resp": {
+          "choice": "different",
+          "confidence": 0.24,
+          "probabilities": {
+            "same": 0.38,
+            "different": 0.62
+          },
+          "input_tokens": 503,
+          "latency_s": 0.13,
+          "error": null,
+          "cached": true
+        }
+      },
+      {
+        "meeting": "ami_sdm_EN2002a_turns",
+        "idx": 289,
+        "label": "CHANGE",
+        "resp": {
+          "choice": "different",
+          "confidence": 0.24,
+          "probabilities": {
+            "same": 0.38,
+            "different": 0.62
+          },
+          "input_tokens": 503,
+          "latency_s": 0.13,
+          "error": null,
+          "cached": true
+        }
+      },
+      {
+        "meeting": "ami_sdm_EN2002b_turns",
+        "idx": 115,
+        "label": "CHANGE",
+        "resp": {
+          "choice": "different",
+          "confidence": 0.24,
+          "probabilities": {
+            "same": 0.38,
+            "different": 0.62
+          },
+          "input_tokens": 503,
+          "latency_s": 0.13,
+          "error": null,
+          "cached": true
+        }
+      },
+      {
+        "meeting": "ami_sdm_EN2002a_turns",
+        "idx": 328,
+        "label": "CHANGE",
+        "resp": {
+          "choice": "different",
+          "confidence": 0.24,
+          "probabilities": {
+            "same": 0.38,
+            "different": 0.62
+          },
+          "input_tokens": 503,
+          "latency_s": 0.13,
+          "error": null,
+          "cached": true
+        }
+      },
+      {
+        "meeting": "ami_sdm_EN2002a_turns",
+        "idx": 69,
+        "label": "CHANGE",
+        "resp": {
+          "choice": "different",
+          "confidence": 0.24,
+          "probabilities": {
+            "same": 0.38,
+            "different": 0.62
+          },
+          "input_tokens": 503,
+          "latency_s": 0.13,
+          "error": null,
+          "cached": true
+        }
+      },
+      {
+        "meeting": "ami_sdm_EN2002b_turns",
+        "idx": 439,
+        "label": "CHANGE",
+        "resp": {
+          "choice": "different",
+          "confidence": 0.24,
+          "probabilities": {
+            "same": 0.38,
+            "different": 0.62
+          },
+          "input_tokens": 503,
+          "latency_s": 0.13,
+          "error": null,
+          "cached": true
+        }
+      },
+      {
+        "meeting": "ami_sdm_EN2002a_turns",
+        "idx": 322,
+        "label": "CHANGE",
+        "resp": {
+          "choice": "different",
+          "confidence": 0.24,
+          "probabilities": {
+            "same": 0.38,
+            "different": 0.62
+          },
+          "input_tokens": 503,
+          "latency_s": 0.13,
+          "error": null,
+          "cached": true
+        }
+      },
+      {
+        "meeting": "ami_sdm_EN2002a_turns",
+        "idx": 117,
+        "label": "CHANGE",
+        "resp": {
+          "choice": "different",
+          "confidence": 0.24,
+          "probabilities": {
+            "same": 0.38,
+            "different": 0.62
+          },
+          "input_tokens": 503,
+          "latency_s": 0.13,
+          "error": null,
+          "cached": true
+        }
+      },
+      {
+        "meeting": "ami_sdm_EN2002a_turns",
+        "idx": 9,
+        "label": "CHANGE",
+        "resp": {
+          "choice": "different",
+          "confidence": 0.24,
+          "probabilities": {
+            "same": 0.38,
+            "different": 0.62
+          },
+          "input_tokens": 503,
+          "latency_s": 0.13,
+          "error": null,
+          "cached": true
+        }
+      },
+      {
+        "meeting": "ami_sdm_EN2002a_turns",
+        "idx": 339,
+        "label": "CHANGE",
+        "resp": {
+          "choice": "different",
+          "confidence": 0.24,
+          "probabilities": {
+            "same": 0.38,
+            "different": 0.62
+          },
+          "input_tokens": 503,
+          "latency_s": 0.13,
+          "error": null,
+          "cached": true
+        }
+      },
+      {
+        "meeting": "ami_sdm_EN2002a_turns",
+        "idx": 75,
+        "label": "CHANGE",
+        "resp": {
+          "choice": "different",
+          "confidence": 0.24,
+          "probabilities": {
+            "same": 0.38,
+            "different": 0.62
+          },
+          "input_tokens": 503,
+          "latency_s": 0.13,
+          "error": null,
+          "cached": true
+        }
+      },
+      {
+        "meeting": "ami_sdm_EN2002a_turns",
+        "idx": 109,
+        "label": "CHANGE",
+        "resp": {
+          "choice": "different",
+          "confidence": 0.24,
+          "probabilities": {
+            "same": 0.38,
+            "different": 0.62
+          },
+          "input_tokens": 503,
+          "latency_s": 0.13,
+          "error": null,
+          "cached": true
+        }
+      },
+      {
+        "meeting": "ami_sdm_EN2002b_turns",
+        "idx": 25,
+        "label": "CHANGE",
+        "resp": {
+          "choice": "different",
+          "confidence": 0.24,
+          "probabilities": {
+            "same": 0.38,
+            "different": 0.62
+          },
+          "input_tokens": 503,
+          "latency_s": 0.13,
+          "error": null,
+          "cached": true
+        }
+      },
+      {
+        "meeting": "ami_sdm_EN2002b_turns",
+        "idx": 252,
+        "label": "CHANGE",
+        "resp": {
+          "choice": "different",
+          "confidence": 0.24,
+          "probabilities": {
+            "same": 0.38,
+            "different": 0.62
+          },
+          "input_tokens": 503,
+          "latency_s": 0.13,
+          "error": null,
+          "cached": true
+        }
+      },
+      {
+        "meeting": "ami_sdm_EN2002a_turns",
+        "idx": 271,
+        "label": "CHANGE",
+        "resp": {
+          "choice": "different",
+          "confidence": 0.24,
+          "probabilities": {
+            "same": 0.38,
+            "different": 0.62
+          },
+          "input_tokens": 503,
+          "latency_s": 0.13,
+          "error": null,
+          "cached": true
+        }
+      },
+      {
+        "meeting": "ami_sdm_EN2002b_turns",
+        "idx": 183,
+        "label": "CHANGE",
+        "resp": {
+          "choice": "different",
+          "confidence": 0.24,
+          "probabilities": {
+            "same": 0.38,
+            "different": 0.62
+          },
+          "input_tokens": 503,
+          "latency_s": 0.13,
+          "error": null,
+          "cached": true
+        }
+      },
+      {
+        "meeting": "ami_sdm_EN2002b_turns",
+        "idx": 430,
+        "label": "CHANGE",
+        "resp": {
+          "choice": "different",
+          "confidence": 0.24,
+          "probabilities": {
+            "same": 0.38,
+            "different": 0.62
+          },
+          "input_tokens": 503,
+          "latency_s": 0.13,
+          "error": null,
+          "cached": true
+        }
+      },
+      {
+        "meeting": "ami_sdm_EN2002b_turns",
+        "idx": 664,
+        "label": "CHANGE",
+        "resp": {
+          "choice": "different",
+          "confidence": 0.24,
+          "probabilities": {
+            "same": 0.38,
+            "different": 0.62
+          },
+          "input_tokens": 503,
+          "latency_s": 0.13,
+          "error": null,
+          "cached": true
+        }
+      },
+      {
+        "meeting": "ami_sdm_EN2002b_turns",
+        "idx": 582,
+        "label": "CHANGE",
+        "resp": {
+          "choice": "different",
+          "confidence": 0.24,
+          "probabilities": {
+            "same": 0.38,
+            "different": 0.62
+          },
+          "input_tokens": 503,
+          "latency_s": 0.13,
+          "error": null,
+          "cached": true
+        }
+      },
+      {
+        "meeting": "ami_sdm_EN2002a_turns",
+        "idx": 507,
+        "label": "CHANGE",
+        "resp": {
+          "choice": "different",
+          "confidence": 0.24,
+          "probabilities": {
+            "same": 0.38,
+            "different": 0.62
+          },
+          "input_tokens": 503,
+          "latency_s": 0.13,
+          "error": null,
+          "cached": true
+        }
+      },
+      {
+        "meeting": "ami_sdm_EN2002b_turns",
+        "idx": 655,
+        "label": "SAME",
+        "resp": {
+          "choice": "different",
+          "confidence": 0.24,
+          "probabilities": {
+            "same": 0.38,
+            "different": 0.62
+          },
+          "input_tokens": 503,
+          "latency_s": 0.13,
+          "error": null,
+          "cached": true
+        }
+      },
+      {
+        "meeting": "ami_sdm_EN2002a_turns",
+        "idx": 242,
+        "label": "SAME",
+        "resp": {
+          "choice": "different",
+          "confidence": 0.24,
+          "probabilities": {
+            "same": 0.38,
+            "different": 0.62
+          },
+          "input_tokens": 503,
+          "latency_s": 0.13,
+          "error": null,
+          "cached": true
+        }
+      },
+      {
+        "meeting": "ami_sdm_EN2002b_turns",
+        "idx": 466,
+        "label": "SAME",
+        "resp": {
+          "choice": "different",
+          "confidence": 0.24,
+          "probabilities": {
+            "same": 0.38,
+            "different": 0.62
+          },
+          "input_tokens": 503,
+          "latency_s": 0.13,
+          "error": null,
+          "cached": true
+        }
+      },
+      {
+        "meeting": "ami_sdm_EN2002a_turns",
+        "idx": 61,
+        "label": "SAME",
+        "resp": {
+          "choice": "different",
+          "confidence": 0.24,
+          "probabilities": {
+            "same": 0.38,
+            "different": 0.62
+          },
+          "input_tokens": 503,
+          "latency_s": 0.13,
+          "error": null,
+          "cached": true
+        }
+      },
+      {
+        "meeting": "ami_sdm_EN2002b_turns",
+        "idx": 49,
+        "label": "SAME",
+        "resp": {
+          "choice": "different",
+          "confidence": 0.24,
+          "probabilities": {
+            "same": 0.38,
+            "different": 0.62
+          },
+          "input_tokens": 503,
+          "latency_s": 0.13,
+          "error": null,
+          "cached": true
+        }
+      },
+      {
+        "meeting": "ami_sdm_EN2002b_turns",
+        "idx": 235,
+        "label": "SAME",
+        "resp": {
+          "choice": "different",
+          "confidence": 0.24,
+          "probabilities": {
+            "same": 0.38,
+            "different": 0.62
+          },
+          "input_tokens": 503,
+          "latency_s": 0.13,
+          "error": null,
+          "cached": true
+        }
+      },
+      {
+        "meeting": "ami_sdm_EN2002a_turns",
+        "idx": 29,
+        "label": "SAME",
+        "resp": {
+          "choice": "different",
+          "confidence": 0.24,
+          "probabilities": {
+            "same": 0.38,
+            "different": 0.62
+          },
+          "input_tokens": 503,
+          "latency_s": 0.13,
+          "error": null,
+          "cached": true
+        }
+      },
+      {
+        "meeting": "ami_sdm_EN2002a_turns",
+        "idx": 540,
+        "label": "SAME",
+        "resp": {
+          "choice": "different",
+          "confidence": 0.24,
+          "probabilities": {
+            "same": 0.38,
+            "different": 0.62
+          },
+          "input_tokens": 503,
+          "latency_s": 0.13,
+          "error": null,
+          "cached": true
+        }
+      },
+      {
+        "meeting": "ami_sdm_EN2002b_turns",
+        "idx": 414,
+        "label": "SAME",
+        "resp": {
+          "choice": "different",
+          "confidence": 0.24,
+          "probabilities": {
+            "same": 0.38,
+            "different": 0.62
+          },
+          "input_tokens": 503,
+          "latency_s": 0.13,
+          "error": null,
+          "cached": true
+        }
+      },
+      {
+        "meeting": "ami_sdm_EN2002a_turns",
+        "idx": 421,
+        "label": "SAME",
+        "resp": {
+          "choice": "different",
+          "confidence": 0.24,
+          "probabilities": {
+            "same": 0.38,
+            "different": 0.62
+          },
+          "input_tokens": 503,
+          "latency_s": 0.13,
+          "error": null,
+          "cached": true
+        }
+      },
+      {
+        "meeting": "ami_sdm_EN2002b_turns",
+        "idx": 528,
+        "label": "SAME",
+        "resp": {
+          "choice": "different",
+          "confidence": 0.24,
+          "probabilities": {
+            "same": 0.38,
+            "different": 0.62
+          },
+          "input_tokens": 503,
+          "latency_s": 0.13,
+          "error": null,
+          "cached": true
+        }
+      },
+      {
+        "meeting": "ami_sdm_EN2002b_turns",
+        "idx": 425,
+        "label": "SAME",
+        "resp": {
+          "choice": "different",
+          "confidence": 0.24,
+          "probabilities": {
+            "same": 0.38,
+            "different": 0.62
+          },
+          "input_tokens": 503,
+          "latency_s": 0.13,
+          "error": null,
+          "cached": true
+        }
+      },
+      {
+        "meeting": "ami_sdm_EN2002b_turns",
+        "idx": 20,
+        "label": "SAME",
+        "resp": {
+          "choice": "different",
+          "confidence": 0.24,
+          "probabilities": {
+            "same": 0.38,
+            "different": 0.62
+          },
+          "input_tokens": 503,
+          "latency_s": 0.13,
+          "error": null,
+          "cached": true
+        }
+      },
+      {
+        "meeting": "ami_sdm_EN2002b_turns",
+        "idx": 444,
+        "label": "SAME",
+        "resp": {
+          "choice": "different",
+          "confidence": 0.24,
+          "probabilities": {
+            "same": 0.38,
+            "different": 0.62
+          },
+          "input_tokens": 503,
+          "latency_s": 0.13,
+          "error": null,
+          "cached": true
+        }
+      },
+      {
+        "meeting": "ami_sdm_EN2002a_turns",
+        "idx": 146,
+        "label": "SAME",
+        "resp": {
+          "choice": "different",
+          "confidence": 0.24,
+          "probabilities": {
+            "same": 0.38,
+            "different": 0.62
+          },
+          "input_tokens": 503,
+          "latency_s": 0.13,
+          "error": null,
+          "cached": true
+        }
+      },
+      {
+        "meeting": "ami_sdm_EN2002a_turns",
+        "idx": 264,
+        "label": "SAME",
+        "resp": {
+          "choice": "different",
+          "confidence": 0.24,
+          "probabilities": {
+            "same": 0.38,
+            "different": 0.62
+          },
+          "input_tokens": 503,
+          "latency_s": 0.13,
+          "error": null,
+          "cached": true
+        }
+      },
+      {
+        "meeting": "ami_sdm_EN2002a_turns",
+        "idx": 536,
+        "label": "SAME",
+        "resp": {
+          "choice": "different",
+          "confidence": 0.24,
+          "probabilities": {
+            "same": 0.38,
+            "different": 0.62
+          },
+          "input_tokens": 503,
+          "latency_s": 0.13,
+          "error": null,
+          "cached": true
+        }
+      },
+      {
+        "meeting": "ami_sdm_EN2002a_turns",
+        "idx": 557,
+        "label": "SAME",
+        "resp": {
+          "choice": "different",
+          "confidence": 0.24,
+          "probabilities": {
+            "same": 0.38,
+            "different": 0.62
+          },
+          "input_tokens": 503,
+          "latency_s": 0.13,
+          "error": null,
+          "cached": true
+        }
+      },
+      {
+        "meeting": "ami_sdm_EN2002a_turns",
+        "idx": 137,
+        "label": "SAME",
+        "resp": {
+          "choice": "different",
+          "confidence": 0.24,
+          "probabilities": {
+            "same": 0.38,
+            "different": 0.62
+          },
+          "input_tokens": 503,
+          "latency_s": 0.13,
+          "error": null,
+          "cached": true
+        }
+      },
+      {
+        "meeting": "ami_sdm_EN2002b_turns",
+        "idx": 244,
+        "label": "SAME",
+        "resp": {
+          "choice": "different",
+          "confidence": 0.24,
+          "probabilities": {
+            "same": 0.38,
+            "different": 0.62
+          },
+          "input_tokens": 503,
+          "latency_s": 0.13,
+          "error": null,
+          "cached": true
+        }
+      },
+      {
+        "meeting": "ami_sdm_EN2002a_turns",
+        "idx": 588,
+        "label": "SAME",
+        "resp": {
+          "choice": "different",
+          "confidence": 0.24,
+          "probabilities": {
+            "same": 0.38,
+            "different": 0.62
+          },
+          "input_tokens": 503,
+          "latency_s": 0.13,
+          "error": null,
+          "cached": true
+        }
+      },
+      {
+        "meeting": "ami_sdm_EN2002b_turns",
+        "idx": 325,
+        "label": "SAME",
+        "resp": {
+          "choice": "different",
+          "confidence": 0.24,
+          "probabilities": {
+            "same": 0.38,
+            "different": 0.62
+          },
+          "input_tokens": 503,
+          "latency_s": 0.13,
+          "error": null,
+          "cached": true
+        }
+      },
+      {
+        "meeting": "ami_sdm_EN2002a_turns",
+        "idx": 659,
+        "label": "SAME",
+        "resp": {
+          "choice": "different",
+          "confidence": 0.24,
+          "probabilities": {
+            "same": 0.38,
+            "different": 0.62
+          },
+          "input_tokens": 503,
+          "latency_s": 0.13,
+          "error": null,
+          "cached": true
+        }
+      },
+      {
+        "meeting": "ami_sdm_EN2002a_turns",
+        "idx": 306,
+        "label": "SAME",
+        "resp": {
+          "choice": "different",
+          "confidence": 0.24,
+          "probabilities": {
+            "same": 0.38,
+            "different": 0.62
+          },
+          "input_tokens": 503,
+          "latency_s": 0.13,
+          "error": null,
+          "cached": true
+        }
+      },
+      {
+        "meeting": "ami_sdm_EN2002b_turns",
+        "idx": 603,
+        "label": "SAME",
+        "resp": {
+          "choice": "different",
+          "confidence": 0.24,
+          "probabilities": {
+            "same": 0.38,
+            "different": 0.62
+          },
+          "input_tokens": 503,
+          "latency_s": 0.13,
+          "error": null,
+          "cached": true
+        }
+      },
+      {
+        "meeting": "ami_sdm_EN2002b_turns",
+        "idx": 317,
+        "label": "SAME",
+        "resp": {
+          "choice": "different",
+          "confidence": 0.24,
+          "probabilities": {
+            "same": 0.38,
+            "different": 0.62
+          },
+          "input_tokens": 503,
+          "latency_s": 0.13,
+          "error": null,
+          "cached": true
+        }
+      },
+      {
+        "meeting": "ami_sdm_EN2002b_turns",
+        "idx": 224,
+        "label": "SAME",
+        "resp": {
+          "choice": "different",
+          "confidence": 0.24,
+          "probabilities": {
+            "same": 0.38,
+            "different": 0.62
+          },
+          "input_tokens": 503,
+          "latency_s": 0.13,
+          "error": null,
+          "cached": true
+        }
+      },
+      {
+        "meeting": "ami_sdm_EN2002b_turns",
+        "idx": 630,
+        "label": "SAME",
+        "resp": {
+          "choice": "different",
+          "confidence": 0.24,
+          "probabilities": {
+            "same": 0.38,
+            "different": 0.62
+          },
+          "input_tokens": 503,
+          "latency_s": 0.13,
+          "error": null,
+          "cached": true
+        }
+      },
+      {
+        "meeting": "ami_sdm_EN2002a_turns",
+        "idx": 475,
+        "label": "SAME",
+        "resp": {
+          "choice": "different",
+          "confidence": 0.24,
+          "probabilities": {
+            "same": 0.38,
+            "different": 0.62
+          },
+          "input_tokens": 503,
+          "latency_s": 0.13,
+          "error": null,
+          "cached": true
+        }
+      },
+      {
+        "meeting": "ami_sdm_EN2002b_turns",
+        "idx": 625,
+        "label": "SAME",
+        "resp": {
+          "choice": "different",
+          "confidence": 0.24,
+          "probabilities": {
+            "same": 0.38,
+            "different": 0.62
+          },
+          "input_tokens": 503,
+          "latency_s": 0.13,
+          "error": null,
+          "cached": true
+        }
+      },
+      {
+        "meeting": "ami_sdm_EN2002b_turns",
+        "idx": 151,
+        "label": "SAME",
+        "resp": {
+          "choice": "different",
+          "confidence": 0.24,
+          "probabilities": {
+            "same": 0.38,
+            "different": 0.62
+          },
+          "input_tokens": 503,
+          "latency_s": 0.13,
+          "error": null,
+          "cached": true
+        }
+      },
+      {
+        "meeting": "ami_sdm_EN2002a_turns",
+        "idx": 654,
+        "label": "SAME",
+        "resp": {
+          "choice": "different",
+          "confidence": 0.24,
+          "probabilities": {
+            "same": 0.38,
+            "different": 0.62
+          },
+          "input_tokens": 503,
+          "latency_s": 0.13,
+          "error": null,
+          "cached": true
+        }
+      },
+      {
+        "meeting": "ami_sdm_EN2002b_turns",
+        "idx": 106,
+        "label": "SAME",
+        "resp": {
+          "choice": "different",
+          "confidence": 0.24,
+          "probabilities": {
+            "same": 0.38,
+            "different": 0.62
+          },
+          "input_tokens": 503,
+          "latency_s": 0.13,
+          "error": null,
+          "cached": true
+        }
+      },
+      {
+        "meeting": "ami_sdm_EN2002a_turns",
+        "idx": 44,
+        "label": "SAME",
+        "resp": {
+          "choice": "different",
+          "confidence": 0.24,
+          "probabilities": {
+            "same": 0.38,
+            "different": 0.62
+          },
+          "input_tokens": 503,
+          "latency_s": 0.13,
+          "error": null,
+          "cached": true
+        }
+      },
+      {
+        "meeting": "ami_sdm_EN2002b_turns",
+        "idx": 127,
+        "label": "SAME",
+        "resp": {
+          "choice": "different",
+          "confidence": 0.24,
+          "probabilities": {
+            "same": 0.38,
+            "different": 0.62
+          },
+          "input_tokens": 503,
+          "latency_s": 0.13,
+          "error": null,
+          "cached": true
+        }
+      },
+      {
+        "meeting": "ami_sdm_EN2002b_turns",
+        "idx": 406,
+        "label": "SAME",
+        "resp": {
+          "choice": "different",
+          "confidence": 0.24,
+          "probabilities": {
+            "same": 0.38,
+            "different": 0.62
+          },
+          "input_tokens": 503,
+          "latency_s": 0.13,
+          "error": null,
+          "cached": true
+        }
+      },
+      {
+        "meeting": "ami_sdm_EN2002a_turns",
+        "idx": 260,
+        "label": "SAME",
+        "resp": {
+          "choice": "different",
+          "confidence": 0.24,
+          "probabilities": {
+            "same": 0.38,
+            "different": 0.62
+          },
+          "input_tokens": 503,
+          "latency_s": 0.13,
+          "error": null,
+          "cached": true
+        }
+      },
+      {
+        "meeting": "ami_sdm_EN2002b_turns",
+        "idx": 351,
+        "label": "SAME",
+        "resp": {
+          "choice": "different",
+          "confidence": 0.24,
+          "probabilities": {
+            "same": 0.38,
+            "different": 0.62
+          },
+          "input_tokens": 503,
+          "latency_s": 0.13,
+          "error": null,
+          "cached": true
+        }
+      },
+      {
+        "meeting": "ami_sdm_EN2002b_turns",
+        "idx": 137,
+        "label": "SAME",
+        "resp": {
+          "choice": "different",
+          "confidence": 0.24,
+          "probabilities": {
+            "same": 0.38,
+            "different": 0.62
+          },
+          "input_tokens": 503,
+          "latency_s": 0.13,
+          "error": null,
+          "cached": true
+        }
+      },
+      {
+        "meeting": "ami_sdm_EN2002b_turns",
+        "idx": 33,
+        "label": "SAME",
+        "resp": {
+          "choice": "different",
+          "confidence": 0.24,
+          "probabilities": {
+            "same": 0.38,
+            "different": 0.62
+          },
+          "input_tokens": 503,
+          "latency_s": 0.13,
+          "error": null,
+          "cached": true
+        }
+      },
+      {
+        "meeting": "ami_sdm_EN2002b_turns",
+        "idx": 617,
+        "label": "SAME",
+        "resp": {
+          "choice": "different",
+          "confidence": 0.24,
+          "probabilities": {
+            "same": 0.38,
+            "different": 0.62
+          },
+          "input_tokens": 503,
+          "latency_s": 0.13,
+          "error": null,
+          "cached": true
+        }
+      },
+      {
+        "meeting": "ami_sdm_EN2002b_turns",
+        "idx": 551,
+        "label": "SAME",
+        "resp": {
+          "choice": "different",
+          "confidence": 0.24,
+          "probabilities": {
+            "same": 0.38,
+            "different": 0.62
+          },
+          "input_tokens": 503,
+          "latency_s": 0.13,
+          "error": null,
+          "cached": true
+        }
+      },
+      {
+        "meeting": "ami_sdm_EN2002b_turns",
+        "idx": 346,
+        "label": "SAME",
+        "resp": {
+          "choice": "different",
+          "confidence": 0.24,
+          "probabilities": {
+            "same": 0.38,
+            "different": 0.62
+          },
+          "input_tokens": 503,
+          "latency_s": 0.13,
+          "error": null,
+          "cached": true
+        }
+      },
+      {
+        "meeting": "ami_sdm_EN2002a_turns",
+        "idx": 518,
+        "label": "SAME",
+        "resp": {
+          "choice": "different",
+          "confidence": 0.24,
+          "probabilities": {
+            "same": 0.38,
+            "different": 0.62
+          },
+          "input_tokens": 503,
+          "latency_s": 0.13,
+          "error": null,
+          "cached": true
+        }
+      },
+      {
+        "meeting": "ami_sdm_EN2002b_turns",
+        "idx": 241,
+        "label": "SAME",
+        "resp": {
+          "choice": "different",
+          "confidence": 0.24,
+          "probabilities": {
+            "same": 0.38,
+            "different": 0.62
+          },
+          "input_tokens": 503,
+          "latency_s": 0.13,
+          "error": null,
+          "cached": true
+        }
+      },
+      {
+        "meeting": "ami_sdm_EN2002a_turns",
+        "idx": 672,
+        "label": "SAME",
+        "resp": {
+          "choice": "different",
+          "confidence": 0.24,
+          "probabilities": {
+            "same": 0.38,
+            "different": 0.62
+          },
+          "input_tokens": 503,
+          "latency_s": 0.13,
+          "error": null,
+          "cached": true
+        }
+      },
+      {
+        "meeting": "ami_sdm_EN2002b_turns",
+        "idx": 304,
+        "label": "SAME",
+        "resp": {
+          "choice": "different",
+          "confidence": 0.24,
+          "probabilities": {
+            "same": 0.38,
+            "different": 0.62
+          },
+          "input_tokens": 503,
+          "latency_s": 0.13,
+          "error": null,
+          "cached": true
+        }
+      },
+      {
+        "meeting": "ami_sdm_EN2002b_turns",
+        "idx": 637,
+        "label": "SAME",
+        "resp": {
+          "choice": "different",
+          "confidence": 0.24,
+          "probabilities": {
+            "same": 0.38,
+            "different": 0.62
+          },
+          "input_tokens": 503,
+          "latency_s": 0.13,
+          "error": null,
+          "cached": true
+        }
+      },
+      {
+        "meeting": "ami_sdm_EN2002b_turns",
+        "idx": 524,
+        "label": "SAME",
+        "resp": {
+          "choice": "different",
+          "confidence": 0.24,
+          "probabilities": {
+            "same": 0.38,
+            "different": 0.62
+          },
+          "input_tokens": 503,
+          "latency_s": 0.13,
+          "error": null,
+          "cached": true
+        }
+      },
+      {
+        "meeting": "ami_sdm_EN2002b_turns",
+        "idx": 541,
+        "label": "SAME",
+        "resp": {
+          "choice": "different",
+          "confidence": 0.24,
+          "probabilities": {
+            "same": 0.38,
+            "different": 0.62
+          },
+          "input_tokens": 503,
+          "latency_s": 0.13,
+          "error": null,
+          "cached": true
+        }
+      },
+      {
+        "meeting": "ami_sdm_EN2002a_turns",
+        "idx": 183,
+        "label": "SAME",
+        "resp": {
+          "choice": "different",
+          "confidence": 0.24,
+          "probabilities": {
+            "same": 0.38,
+            "different": 0.62
+          },
+          "input_tokens": 503,
+          "latency_s": 0.13,
+          "error": null,
+          "cached": true
+        }
+      },
+      {
+        "meeting": "ami_sdm_EN2002a_turns",
+        "idx": 415,
+        "label": "SAME",
+        "resp": {
+          "choice": "different",
+          "confidence": 0.24,
+          "probabilities": {
+            "same": 0.38,
+            "different": 0.62
+          },
+          "input_tokens": 503,
+          "latency_s": 0.13,
+          "error": null,
+          "cached": true
+        }
+      },
+      {
+        "meeting": "ami_sdm_EN2002b_turns",
+        "idx": 16,
+        "label": "SAME",
+        "resp": {
+          "choice": "different",
+          "confidence": 0.24,
+          "probabilities": {
+            "same": 0.38,
+            "different": 0.62
+          },
+          "input_tokens": 503,
+          "latency_s": 0.13,
+          "error": null,
+          "cached": true
+        }
+      },
+      {
+        "meeting": "ami_sdm_EN2002b_turns",
+        "idx": 536,
+        "label": "SAME",
+        "resp": {
+          "choice": "different",
+          "confidence": 0.24,
+          "probabilities": {
+            "same": 0.38,
+            "different": 0.62
+          },
+          "input_tokens": 503,
+          "latency_s": 0.13,
+          "error": null,
+          "cached": true
+        }
+      },
+      {
+        "meeting": "ami_sdm_EN2002b_turns",
+        "idx": 332,
+        "label": "SAME",
+        "resp": {
+          "choice": "different",
+          "confidence": 0.24,
+          "probabilities": {
+            "same": 0.38,
+            "different": 0.62
+          },
+          "input_tokens": 503,
+          "latency_s": 0.13,
+          "error": null,
+          "cached": true
+        }
+      },
+      {
+        "meeting": "ami_sdm_EN2002b_turns",
+        "idx": 380,
+        "label": "SAME",
+        "resp": {
+          "choice": "different",
+          "confidence": 0.24,
+          "probabilities": {
+            "same": 0.38,
+            "different": 0.62
+          },
+          "input_tokens": 503,
+          "latency_s": 0.13,
+          "error": null,
+          "cached": true
+        }
+      },
+      {
+        "meeting": "ami_sdm_EN2002b_turns",
+        "idx": 669,
+        "label": "SAME",
+        "resp": {
+          "choice": "different",
+          "confidence": 0.24,
+          "probabilities": {
+            "same": 0.38,
+            "different": 0.62
+          },
+          "input_tokens": 503,
+          "latency_s": 0.13,
+          "error": null,
+          "cached": true
+        }
+      },
+      {
+        "meeting": "ami_sdm_EN2002b_turns",
+        "idx": 368,
+        "label": "SAME",
+        "resp": {
+          "choice": "different",
+          "confidence": 0.24,
+          "probabilities": {
+            "same": 0.38,
+            "different": 0.62
+          },
+          "input_tokens": 503,
+          "latency_s": 0.13,
+          "error": null,
+          "cached": true
+        }
+      },
+      {
+        "meeting": "ami_sdm_EN2002b_turns",
+        "idx": 472,
+        "label": "SAME",
+        "resp": {
+          "choice": "different",
+          "confidence": 0.24,
+          "probabilities": {
+            "same": 0.38,
+            "different": 0.62
+          },
+          "input_tokens": 503,
+          "latency_s": 0.13,
+          "error": null,
+          "cached": true
+        }
+      },
+      {
+        "meeting": "ami_sdm_EN2002b_turns",
+        "idx": 420,
+        "label": "SAME",
+        "resp": {
+          "choice": "different",
+          "confidence": 0.24,
+          "probabilities": {
+            "same": 0.38,
+            "different": 0.62
+          },
+          "input_tokens": 503,
+          "latency_s": 0.13,
+          "error": null,
+          "cached": true
+        }
+      }
+    ]
+  },
+  "change_split_by_f0_group": {
+    "cross": {
+      "n_change": 39,
+      "mean_p_different": 0.6141,
+      "frac_predicted_different": 1.0
+    },
+    "within": {
+      "n_change": 21,
+      "mean_p_different": 0.6052,
+      "frac_predicted_different": 1.0
+    },
+    "same_class": {
+      "n_same": 60,
+      "mean_p_different": 0.6138
+    }
+  },
+  "sanity": {
+    "auc_mean_brightness": 0.5103,
+    "auc_gap_seconds_on_sample": 0.4839,
+    "pooled_gap_auc_reference": 0.529,
+    "image_dropped_calls": [],
+    "speech_presence_audit": {
+      "per_side_bright_frac_range": [
+        0.0021,
+        0.7992
+      ],
+      "by_class": {
+        "CHANGE": {
+          "n": 60,
+          "windows_with_side_below_0.05": 4,
+          "min_side_frac": 0.0021
+        },
+        "SAME": {
+          "n": 60,
+          "windows_with_side_below_0.05": 0,
+          "min_side_frac": 0.0703
+        }
+      },
+      "threshold": "fraction of half-window pixels above -37 dB"
+    }
+  },
+  "reproduce": "set -a && . /home/proart/projects/glasses/.env && set +a && /home/proart/projects/glasses/.venv/bin/python experiments/spectrogram_turn_eval.py --n-per-class 60 --seed 11 --model jev-1.14.0"
+}
