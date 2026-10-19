@@ -1,0 +1,4094 @@
+{
+  "note": "The \u00a78 experiment from docs/research/IN-THE-WILD-AUDIO.md, run. Primary metric: emitted hz_p05 on speech+hum mixtures. Regression metric: emitted hz_p05 on clean real speech. The notch is applied to the sample array before push() because src/ must not be edited; see the module docstring.",
+  "pre_registered_decision_rule": {
+    "written": "before any arm was run; not edited afterwards",
+    "clean_med_reference": "median emitted hz_p05 over utterances of clean 6 s speech under arm `none`",
+    "recovery": "R(A) = frac of mixture emitted hz_p05 within 100 cents of CLEAN_MED",
+    "clean_shift": "SHIFT(A) = median |cents(clean hz_p05 A vs none)|, both clean clips",
+    "clean_max_shift": "MAXSHIFT(A) = max of the same, both clean clips",
+    "delivery": "dUTT(A) = utterances with hz_p05 A - none; dVOX = median voiced_ratio diff",
+    "coverage": "dCELLS(A) = mixture cells emitting >=1 hz_p05, A - none",
+    "ship": {
+      "S1": "R(A) >= 0.90",
+      "S2": "SHIFT(A) < 10.0 cents on BOTH clean clips",
+      "S3": "MAXSHIFT(A) < 50.0 cents on BOTH clean clips",
+      "S4": "dUTT(A) == 0 and |dVOX(A)| < 0.02 on BOTH clean clips",
+      "S5": "dCELLS(A) >= 0"
+    },
+    "void_if": {
+      "V1": "R(hpf60) >= 0.90 -- the deliberately-losing control passed",
+      "V2": "no-op arm does not reproduce arm `none` bit for bit",
+      "V3": "any arm emits zero utterances on clean speech"
+    }
+  },
+  "methods": {
+    "sr": 16000,
+    "dur_s": 6.0,
+    "fixtures_reused_from": "experiments/inthewild_probe.py",
+    "fixtures": {
+      "speech_clip": "6 s of examples/realaudio/alice01_excerpt.wav, peak-norm",
+      "harm12": "harmonic_stack(f0, 1.0) -- 12 harmonics, 1/k, peak-norm",
+      "testvad": "harmonic_stack(f0, 0.3, harms=(1,2,3), normalise=False) -- tests/test_vad.py::TestDeclaredLimits fixture",
+      "mix": "mix(speech, hum, snr_db) -- speech-RMS to hum-RMS",
+      "fundamentals": [
+        50,
+        60,
+        100,
+        120,
+        150,
+        175,
+        200
+      ],
+      "snrs_db": [
+        20.0,
+        10.0,
+        0.0
+      ],
+      "gate": "one ONNX session, reset per signal; GATE_SPEECH=0.5"
+    },
+    "filter": "RBJ biquads imported from experiments/mic_filter_sim.py; notch Q=10, high-pass Q=0.707 x2 sections",
+    "arms": {
+      "none": {
+        "kind": "identity",
+        "hz": []
+      },
+      "noop_control": {
+        "kind": "identity",
+        "hz": []
+      },
+      "notch_mains": {
+        "kind": "notch",
+        "hz": [
+          50.0,
+          60.0,
+          100.0,
+          120.0
+        ]
+      },
+      "notch_mains_plus_speech": {
+        "kind": "notch",
+        "hz": [
+          50.0,
+          60.0,
+          100.0,
+          120.0,
+          150.0,
+          200.0
+        ]
+      },
+      "hpf60": {
+        "kind": "highpass",
+        "hz": [
+          60.0
+        ]
+      }
+    },
+    "clean_clips": {
+      "speech6": "the 6 s inthewild clip (n=4 utterances)",
+      "alice_full": "the full 90 s alice01_excerpt.wav (n~20)"
+    },
+    "clean_med_hz": 184.16
+  },
+  "controls": {
+    "reproduced": {
+      "clean_speech_hz_p05": [
+        194.49,
+        189.28,
+        163.61,
+        179.04
+      ],
+      "testvad_150Hz_hz_p05": [
+        150.0,
+        150.0,
+        150.0
+      ],
+      "testvad_200Hz_hz_p05": [
+        200.01,
+        200.01,
+        200.01
+      ],
+      "mixture_150Hz_10dB_hz_p05": [
+        74.97,
+        79.86,
+        74.99
+      ],
+      "note": "arm `none`, the unmodified pipeline. These are the numbers from IN-THE-WILD-AUDIO.md \u00a74.3; if they do not reproduce, the harness is not the harness that found the bug."
+    },
+    "attenuation_db": {
+      "notch_mains": {
+        "50": -15.5,
+        "60": -16.44,
+        "100": -18.63,
+        "120": -19.45,
+        "150": -0.3,
+        "200": -0.07
+      },
+      "notch_mains_plus_speech": {
+        "50": -15.51,
+        "60": -16.46,
+        "100": -18.75,
+        "120": -19.88,
+        "150": -20.58,
+        "200": -21.44
+      },
+      "hpf60": {
+        "50": -9.79,
+        "60": -6.06,
+        "100": -1.08,
+        "120": -0.54,
+        "150": -0.23,
+        "200": -0.08
+      }
+    },
+    "attenuation_note": "measured by pushing a unit sine through the same filter code, not asserted from the design",
+    "V2_noop_control_bit_identical": true
+  },
+  "clean": {
+    "speech6": {
+      "none": {
+        "utterances": 4,
+        "utts_with_hz": 4,
+        "hz_p05_values": [
+          163.61,
+          179.04,
+          189.28,
+          194.49
+        ],
+        "hz_p05_sequence": [
+          194.49,
+          189.28,
+          163.61,
+          179.04
+        ],
+        "voiced_ratio_median": 0.8842,
+        "gate_prob_max": 0.9999980926513672
+      },
+      "noop_control": {
+        "utterances": 4,
+        "utts_with_hz": 4,
+        "hz_p05_values": [
+          163.61,
+          179.04,
+          189.28,
+          194.49
+        ],
+        "hz_p05_sequence": [
+          194.49,
+          189.28,
+          163.61,
+          179.04
+        ],
+        "voiced_ratio_median": 0.8842,
+        "gate_prob_max": 0.9999980926513672
+      },
+      "notch_mains": {
+        "utterances": 4,
+        "utts_with_hz": 4,
+        "hz_p05_values": [
+          163.6,
+          179.05,
+          189.29,
+          194.51
+        ],
+        "hz_p05_sequence": [
+          194.51,
+          189.29,
+          163.6,
+          179.05
+        ],
+        "voiced_ratio_median": 0.8842,
+        "gate_prob_max": 0.9999982714653015
+      },
+      "notch_mains_plus_speech": {
+        "utterances": 4,
+        "utts_with_hz": 4,
+        "hz_p05_values": [
+          167.17,
+          177.43,
+          190.36,
+          193.26
+        ],
+        "hz_p05_sequence": [
+          193.26,
+          190.36,
+          167.17,
+          177.43
+        ],
+        "voiced_ratio_median": 0.8848,
+        "gate_prob_max": 0.9999986886978149
+      },
+      "hpf60": {
+        "utterances": 4,
+        "utts_with_hz": 4,
+        "hz_p05_values": [
+          163.6,
+          179.12,
+          189.26,
+          194.53
+        ],
+        "hz_p05_sequence": [
+          194.53,
+          189.26,
+          163.6,
+          179.12
+        ],
+        "voiced_ratio_median": 0.8842,
+        "gate_prob_max": 0.9999983906745911
+      }
+    },
+    "alice_full": {
+      "none": {
+        "utterances": 53,
+        "utts_with_hz": 52,
+        "hz_p05_values": [
+          81.73,
+          94.44,
+          99.67,
+          105.77,
+          108.56,
+          120.71,
+          130.91,
+          133.76,
+          135.05,
+          137.88,
+          149.29,
+          159.36,
+          159.46,
+          163.6,
+          164.44,
+          168.47,
+          168.74,
+          173.73,
+          175.87,
+          179.04,
+          179.64,
+          179.7,
+          180.58,
+          182.64,
+          182.81,
+          183.64,
+          184.11,
+          184.44,
+          189.28,
+          189.36,
+          189.97,
+          190.03,
+          190.79,
+          192.11,
+          193.56,
+          194.49,
+          199.1,
+          199.35,
+          205.49,
+          207.01,
+          207.79,
+          208.8,
+          209.32,
+          210.21,
+          210.65,
+          211.36,
+          213.3,
+          213.33,
+          217.45,
+          220.94,
+          230.99,
+          280.75
+        ],
+        "hz_p05_sequence": [
+          194.49,
+          189.28,
+          149.29,
+          179.04,
+          190.03,
+          193.56,
+          159.46,
+          135.05,
+          180.58,
+          179.7,
+          130.91,
+          182.81,
+          137.88,
+          213.3,
+          164.44,
+          94.44,
+          192.11,
+          81.73,
+          159.36,
+          230.99,
+          173.73,
+          210.65,
+          99.67,
+          189.36,
+          211.36,
+          207.79,
+          205.49,
+          179.64,
+          209.32,
+          108.56,
+          220.94,
+          105.77,
+          280.75,
+          207.01,
+          182.64,
+          168.74,
+          133.76,
+          189.97,
+          183.64,
+          213.33,
+          184.44,
+          208.8,
+          210.21,
+          168.47,
+          175.87,
+          120.71,
+          217.45,
+          184.11,
+          199.35,
+          199.1,
+          163.6,
+          190.79
+        ],
+        "voiced_ratio_median": 0.7537,
+        "gate_prob_max": 0.9999991655349731
+      },
+      "noop_control": {
+        "utterances": 53,
+        "utts_with_hz": 52,
+        "hz_p05_values": [
+          81.73,
+          94.44,
+          99.67,
+          105.77,
+          108.56,
+          120.71,
+          130.91,
+          133.76,
+          135.05,
+          137.88,
+          149.29,
+          159.36,
+          159.46,
+          163.6,
+          164.44,
+          168.47,
+          168.74,
+          173.73,
+          175.87,
+          179.04,
+          179.64,
+          179.7,
+          180.58,
+          182.64,
+          182.81,
+          183.64,
+          184.11,
+          184.44,
+          189.28,
+          189.36,
+          189.97,
+          190.03,
+          190.79,
+          192.11,
+          193.56,
+          194.49,
+          199.1,
+          199.35,
+          205.49,
+          207.01,
+          207.79,
+          208.8,
+          209.32,
+          210.21,
+          210.65,
+          211.36,
+          213.3,
+          213.33,
+          217.45,
+          220.94,
+          230.99,
+          280.75
+        ],
+        "hz_p05_sequence": [
+          194.49,
+          189.28,
+          149.29,
+          179.04,
+          190.03,
+          193.56,
+          159.46,
+          135.05,
+          180.58,
+          179.7,
+          130.91,
+          182.81,
+          137.88,
+          213.3,
+          164.44,
+          94.44,
+          192.11,
+          81.73,
+          159.36,
+          230.99,
+          173.73,
+          210.65,
+          99.67,
+          189.36,
+          211.36,
+          207.79,
+          205.49,
+          179.64,
+          209.32,
+          108.56,
+          220.94,
+          105.77,
+          280.75,
+          207.01,
+          182.64,
+          168.74,
+          133.76,
+          189.97,
+          183.64,
+          213.33,
+          184.44,
+          208.8,
+          210.21,
+          168.47,
+          175.87,
+          120.71,
+          217.45,
+          184.11,
+          199.35,
+          199.1,
+          163.6,
+          190.79
+        ],
+        "voiced_ratio_median": 0.7537,
+        "gate_prob_max": 0.9999991655349731
+      },
+      "notch_mains": {
+        "utterances": 53,
+        "utts_with_hz": 52,
+        "hz_p05_values": [
+          81.73,
+          94.42,
+          99.67,
+          105.77,
+          108.56,
+          120.76,
+          130.9,
+          133.77,
+          135.98,
+          137.88,
+          149.29,
+          159.37,
+          159.46,
+          163.6,
+          164.46,
+          168.47,
+          168.74,
+          173.7,
+          179.05,
+          179.63,
+          179.89,
+          180.58,
+          181.1,
+          182.7,
+          182.81,
+          183.7,
+          184.13,
+          184.44,
+          189.29,
+          189.36,
+          189.96,
+          190.07,
+          190.78,
+          191.6,
+          193.49,
+          194.51,
+          199.1,
+          199.34,
+          205.49,
+          207.01,
+          207.8,
+          208.81,
+          209.32,
+          210.21,
+          210.65,
+          210.66,
+          213.33,
+          213.35,
+          216.92,
+          221.0,
+          230.99,
+          280.79
+        ],
+        "hz_p05_sequence": [
+          194.51,
+          189.29,
+          149.29,
+          179.05,
+          190.07,
+          193.49,
+          159.46,
+          135.98,
+          180.58,
+          179.89,
+          130.9,
+          182.81,
+          137.88,
+          213.35,
+          164.46,
+          94.42,
+          191.6,
+          81.73,
+          159.37,
+          230.99,
+          173.7,
+          210.65,
+          99.67,
+          189.36,
+          210.66,
+          207.8,
+          205.49,
+          179.63,
+          209.32,
+          108.56,
+          221.0,
+          105.77,
+          280.79,
+          207.01,
+          182.7,
+          168.74,
+          133.77,
+          189.96,
+          183.7,
+          213.33,
+          184.44,
+          208.81,
+          210.21,
+          168.47,
+          181.1,
+          120.76,
+          216.92,
+          184.13,
+          199.34,
+          199.1,
+          163.6,
+          190.78
+        ],
+        "voiced_ratio_median": 0.7537,
+        "gate_prob_max": 0.9999992251396179
+      },
+      "notch_mains_plus_speech": {
+        "utterances": 53,
+        "utts_with_hz": 52,
+        "hz_p05_values": [
+          81.73,
+          97.31,
+          102.38,
+          108.84,
+          109.1,
+          119.24,
+          130.65,
+          133.78,
+          137.84,
+          156.43,
+          160.49,
+          163.59,
+          164.43,
+          168.49,
+          168.73,
+          169.57,
+          177.43,
+          178.53,
+          179.69,
+          180.05,
+          180.56,
+          181.67,
+          182.81,
+          183.63,
+          183.73,
+          184.16,
+          184.43,
+          188.97,
+          190.24,
+          190.31,
+          190.36,
+          190.77,
+          191.4,
+          193.26,
+          193.48,
+          199.33,
+          203.46,
+          204.02,
+          205.45,
+          207.5,
+          207.79,
+          208.75,
+          208.87,
+          210.2,
+          210.64,
+          212.1,
+          213.37,
+          217.04,
+          217.56,
+          221.18,
+          230.99,
+          281.12
+        ],
+        "hz_p05_sequence": [
+          193.26,
+          190.36,
+          156.43,
+          177.43,
+          190.31,
+          193.48,
+          160.49,
+          119.24,
+          180.05,
+          179.69,
+          130.65,
+          182.81,
+          137.84,
+          217.04,
+          164.43,
+          204.02,
+          191.4,
+          81.73,
+          97.31,
+          230.99,
+          109.1,
+          210.64,
+          169.57,
+          188.97,
+          212.1,
+          207.79,
+          205.45,
+          178.53,
+          208.87,
+          108.84,
+          221.18,
+          102.38,
+          281.12,
+          207.5,
+          183.73,
+          168.73,
+          133.78,
+          190.24,
+          183.63,
+          213.37,
+          184.43,
+          208.75,
+          210.2,
+          168.49,
+          180.56,
+          181.67,
+          217.56,
+          184.16,
+          199.33,
+          203.46,
+          163.59,
+          190.77
+        ],
+        "voiced_ratio_median": 0.7372,
+        "gate_prob_max": 0.9999988079071045
+      },
+      "hpf60": {
+        "utterances": 53,
+        "utts_with_hz": 52,
+        "hz_p05_values": [
+          80.72,
+          99.62,
+          105.77,
+          108.56,
+          120.97,
+          121.0,
+          130.75,
+          133.73,
+          135.98,
+          137.89,
+          149.28,
+          159.37,
+          159.47,
+          163.59,
+          164.43,
+          168.74,
+          171.12,
+          173.6,
+          175.6,
+          179.12,
+          179.62,
+          179.73,
+          180.58,
+          182.71,
+          182.8,
+          183.71,
+          184.1,
+          184.44,
+          189.26,
+          189.36,
+          190.0,
+          190.01,
+          190.75,
+          191.52,
+          193.5,
+          194.53,
+          199.1,
+          199.34,
+          205.49,
+          207.01,
+          207.8,
+          208.77,
+          209.32,
+          210.2,
+          210.65,
+          210.68,
+          213.31,
+          213.33,
+          216.92,
+          220.66,
+          231.0,
+          280.8
+        ],
+        "hz_p05_sequence": [
+          194.53,
+          189.26,
+          149.28,
+          179.12,
+          190.0,
+          193.5,
+          159.47,
+          135.98,
+          180.58,
+          179.73,
+          130.75,
+          182.8,
+          137.89,
+          213.31,
+          164.43,
+          120.97,
+          191.52,
+          80.72,
+          159.37,
+          231.0,
+          173.6,
+          210.65,
+          99.62,
+          189.36,
+          210.68,
+          207.8,
+          205.49,
+          179.62,
+          209.32,
+          108.56,
+          220.66,
+          105.77,
+          280.8,
+          207.01,
+          182.71,
+          168.74,
+          133.73,
+          190.01,
+          183.71,
+          213.33,
+          184.44,
+          208.77,
+          210.2,
+          171.12,
+          175.6,
+          121.0,
+          216.92,
+          184.1,
+          199.34,
+          199.1,
+          163.59,
+          190.75
+        ],
+        "voiced_ratio_median": 0.7463,
+        "gate_prob_max": 0.9999990463256836
+      }
+    }
+  },
+  "clean_regression": {
+    "speech6": {
+      "none": {
+        "paired_utts": 4,
+        "shift_median_abs_cents": 0.0,
+        "shift_p90_abs_cents": 0.0,
+        "shift_max_abs_cents": 0.0,
+        "shift_signed_median_cents": 0.0,
+        "shift_max_signed_cents": 0.0,
+        "shift_min_signed_cents": 0.0,
+        "dUTT": 0,
+        "dVOX": 0.0
+      },
+      "noop_control": {
+        "paired_utts": 4,
+        "shift_median_abs_cents": 0.0,
+        "shift_p90_abs_cents": 0.0,
+        "shift_max_abs_cents": 0.0,
+        "shift_signed_median_cents": 0.0,
+        "shift_max_signed_cents": 0.0,
+        "shift_min_signed_cents": 0.0,
+        "dUTT": 0,
+        "dVOX": 0.0
+      },
+      "notch_mains": {
+        "paired_utts": 4,
+        "shift_median_abs_cents": 0.101,
+        "shift_p90_abs_cents": 0.178,
+        "shift_max_abs_cents": 0.178,
+        "shift_signed_median_cents": 0.094,
+        "shift_max_signed_cents": 0.178,
+        "shift_min_signed_cents": -0.106,
+        "dUTT": 0,
+        "dVOX": 0.0
+      },
+      "notch_mains_plus_speech": {
+        "paired_utts": 4,
+        "shift_median_abs_cents": 13.311,
+        "shift_p90_abs_cents": 37.266,
+        "shift_max_abs_cents": 37.266,
+        "shift_signed_median_cents": -0.567,
+        "shift_max_signed_cents": 37.266,
+        "shift_min_signed_cents": -15.638,
+        "dUTT": 0,
+        "dVOX": 0.0006
+      },
+      "hpf60": {
+        "paired_utts": 4,
+        "shift_median_abs_cents": 0.269,
+        "shift_p90_abs_cents": 0.773,
+        "shift_max_abs_cents": 0.773,
+        "shift_signed_median_cents": 0.125,
+        "shift_max_signed_cents": 0.773,
+        "shift_min_signed_cents": -0.183,
+        "dUTT": 0,
+        "dVOX": 0.0
+      }
+    },
+    "alice_full": {
+      "none": {
+        "paired_utts": 52,
+        "shift_median_abs_cents": 0.0,
+        "shift_p90_abs_cents": 0.0,
+        "shift_max_abs_cents": 0.0,
+        "shift_signed_median_cents": 0.0,
+        "shift_max_signed_cents": 0.0,
+        "shift_min_signed_cents": 0.0,
+        "dUTT": 0,
+        "dVOX": 0.0
+      },
+      "noop_control": {
+        "paired_utts": 52,
+        "shift_median_abs_cents": 0.0,
+        "shift_p90_abs_cents": 0.0,
+        "shift_max_abs_cents": 0.0,
+        "shift_signed_median_cents": 0.0,
+        "shift_max_signed_cents": 0.0,
+        "shift_min_signed_cents": 0.0,
+        "dUTT": 0,
+        "dVOX": 0.0
+      },
+      "notch_mains": {
+        "paired_utts": 52,
+        "shift_median_abs_cents": 0.091,
+        "shift_p90_abs_cents": 1.829,
+        "shift_max_abs_cents": 50.733,
+        "shift_signed_median_cents": 0.0,
+        "shift_max_signed_cents": 50.733,
+        "shift_min_signed_cents": -5.743,
+        "dUTT": 0,
+        "dVOX": 0.0
+      },
+      "notch_mains_plus_speech": {
+        "paired_utts": 52,
+        "shift_median_abs_cents": 2.504,
+        "shift_p90_abs_cents": 215.55,
+        "shift_max_abs_cents": 1333.489,
+        "shift_signed_median_cents": -0.041,
+        "shift_max_signed_cents": 1333.489,
+        "shift_min_signed_cents": -853.955,
+        "dUTT": 0,
+        "dVOX": -0.0165
+      },
+      "hpf60": {
+        "paired_utts": 52,
+        "shift_median_abs_cents": 0.188,
+        "shift_p90_abs_cents": 5.325,
+        "shift_max_abs_cents": 428.615,
+        "shift_signed_median_cents": 0.0,
+        "shift_max_signed_cents": 428.615,
+        "shift_min_signed_cents": -21.527,
+        "dUTT": 0,
+        "dVOX": -0.0074
+      }
+    }
+  },
+  "mixtures": {
+    "mix12_12harm_hum": [
+      {
+        "family": "mix12",
+        "hum_hz": 50,
+        "snr_db": 20.0,
+        "signal": "mix12_hum50Hz_20dB",
+        "arms": {
+          "none": {
+            "utterances": 4,
+            "utts_with_hz": 4,
+            "hz_p05_values": [
+              178.64,
+              185.09,
+              189.28,
+              194.17
+            ],
+            "hz_p05_sequence": [
+              194.17,
+              189.28,
+              185.09,
+              178.64
+            ],
+            "voiced_ratio_median": 0.8336,
+            "gate_prob_max": 0.9999978542327881,
+            "hum_residual_db": 0.0
+          },
+          "noop_control": {
+            "utterances": 4,
+            "utts_with_hz": 4,
+            "hz_p05_values": [
+              178.64,
+              185.09,
+              189.28,
+              194.17
+            ],
+            "hz_p05_sequence": [
+              194.17,
+              189.28,
+              185.09,
+              178.64
+            ],
+            "voiced_ratio_median": 0.8336,
+            "gate_prob_max": 0.9999978542327881,
+            "hum_residual_db": 0.0
+          },
+          "notch_mains": {
+            "utterances": 4,
+            "utts_with_hz": 4,
+            "hz_p05_values": [
+              142.14,
+              179.0,
+              189.05,
+              193.77
+            ],
+            "hz_p05_sequence": [
+              193.77,
+              189.05,
+              142.14,
+              179.0
+            ],
+            "voiced_ratio_median": 0.8572,
+            "gate_prob_max": 0.9999974966049194,
+            "hum_residual_db": -39.57
+          },
+          "notch_mains_plus_speech": {
+            "utterances": 4,
+            "utts_with_hz": 4,
+            "hz_p05_values": [
+              152.85,
+              177.47,
+              190.45,
+              192.32
+            ],
+            "hz_p05_sequence": [
+              192.32,
+              190.45,
+              152.85,
+              177.47
+            ],
+            "voiced_ratio_median": 0.8726,
+            "gate_prob_max": 0.9999983906745911,
+            "hum_residual_db": -39.65
+          },
+          "hpf60": {
+            "utterances": 4,
+            "utts_with_hz": 4,
+            "hz_p05_values": [
+              125.97,
+              138.55,
+              189.22,
+              193.65
+            ],
+            "hz_p05_sequence": [
+              193.65,
+              189.22,
+              138.55,
+              125.97
+            ],
+            "voiced_ratio_median": 0.8537,
+            "gate_prob_max": 0.9999978542327881,
+            "hum_residual_db": -9.77
+          }
+        }
+      },
+      {
+        "family": "mix12",
+        "hum_hz": 50,
+        "snr_db": 10.0,
+        "signal": "mix12_hum50Hz_10dB",
+        "arms": {
+          "none": {
+            "utterances": 3,
+            "utts_with_hz": 3,
+            "hz_p05_values": [
+              184.0,
+              185.22,
+              190.89
+            ],
+            "hz_p05_sequence": [
+              190.89,
+              185.22,
+              184.0
+            ],
+            "voiced_ratio_median": 0.3873,
+            "gate_prob_max": 0.9999971389770508,
+            "hum_residual_db": 0.0
+          },
+          "noop_control": {
+            "utterances": 3,
+            "utts_with_hz": 3,
+            "hz_p05_values": [
+              184.0,
+              185.22,
+              190.89
+            ],
+            "hz_p05_sequence": [
+              190.89,
+              185.22,
+              184.0
+            ],
+            "voiced_ratio_median": 0.3873,
+            "gate_prob_max": 0.9999971389770508,
+            "hum_residual_db": 0.0
+          },
+          "notch_mains": {
+            "utterances": 3,
+            "utts_with_hz": 3,
+            "hz_p05_values": [
+              175.94,
+              185.05,
+              188.72
+            ],
+            "hz_p05_sequence": [
+              188.72,
+              185.05,
+              175.94
+            ],
+            "voiced_ratio_median": 0.7619,
+            "gate_prob_max": 0.9999974966049194,
+            "hum_residual_db": -39.66
+          },
+          "notch_mains_plus_speech": {
+            "utterances": 3,
+            "utts_with_hz": 3,
+            "hz_p05_values": [
+              140.57,
+              178.51,
+              190.53
+            ],
+            "hz_p05_sequence": [
+              190.53,
+              140.57,
+              178.51
+            ],
+            "voiced_ratio_median": 0.7683,
+            "gate_prob_max": 0.9999977350234985,
+            "hum_residual_db": -39.74
+          },
+          "hpf60": {
+            "utterances": 3,
+            "utts_with_hz": 3,
+            "hz_p05_values": [
+              92.33,
+              98.14,
+              133.16
+            ],
+            "hz_p05_sequence": [
+              133.16,
+              98.14,
+              92.33
+            ],
+            "voiced_ratio_median": 0.4509,
+            "gate_prob_max": 0.9999983310699463,
+            "hum_residual_db": -9.77
+          }
+        }
+      },
+      {
+        "family": "mix12",
+        "hum_hz": 50,
+        "snr_db": 0.0,
+        "signal": "mix12_hum50Hz_0dB",
+        "arms": {
+          "none": {
+            "utterances": 3,
+            "utts_with_hz": 3,
+            "hz_p05_values": [
+              72.77,
+              72.8,
+              218.58
+            ],
+            "hz_p05_sequence": [
+              72.8,
+              72.77,
+              218.58
+            ],
+            "voiced_ratio_median": 0.1908,
+            "gate_prob_max": 0.9999853372573853,
+            "hum_residual_db": 0.0
+          },
+          "noop_control": {
+            "utterances": 3,
+            "utts_with_hz": 3,
+            "hz_p05_values": [
+              72.77,
+              72.8,
+              218.58
+            ],
+            "hz_p05_sequence": [
+              72.8,
+              72.77,
+              218.58
+            ],
+            "voiced_ratio_median": 0.1908,
+            "gate_prob_max": 0.9999853372573853,
+            "hum_residual_db": 0.0
+          },
+          "notch_mains": {
+            "utterances": 3,
+            "utts_with_hz": 3,
+            "hz_p05_values": [
+              104.64,
+              174.25,
+              188.87
+            ],
+            "hz_p05_sequence": [
+              188.87,
+              104.64,
+              174.25
+            ],
+            "voiced_ratio_median": 0.3873,
+            "gate_prob_max": 0.9999933242797852,
+            "hum_residual_db": -39.68
+          },
+          "notch_mains_plus_speech": {
+            "utterances": 3,
+            "utts_with_hz": 3,
+            "hz_p05_values": [
+              90.88,
+              184.94,
+              190.96
+            ],
+            "hz_p05_sequence": [
+              190.96,
+              184.94,
+              90.88
+            ],
+            "voiced_ratio_median": 0.3988,
+            "gate_prob_max": 0.9999955892562866,
+            "hum_residual_db": -39.76
+          },
+          "hpf60": {
+            "utterances": 3,
+            "utts_with_hz": 3,
+            "hz_p05_values": [
+              97.23,
+              109.03,
+              218.53
+            ],
+            "hz_p05_sequence": [
+              109.03,
+              97.23,
+              218.53
+            ],
+            "voiced_ratio_median": 0.3468,
+            "gate_prob_max": 0.9999942779541016,
+            "hum_residual_db": -9.77
+          }
+        }
+      },
+      {
+        "family": "mix12",
+        "hum_hz": 60,
+        "snr_db": 20.0,
+        "signal": "mix12_hum60Hz_20dB",
+        "arms": {
+          "none": {
+            "utterances": 4,
+            "utts_with_hz": 4,
+            "hz_p05_values": [
+              134.95,
+              176.93,
+              189.33,
+              195.22
+            ],
+            "hz_p05_sequence": [
+              195.22,
+              189.33,
+              134.95,
+              176.93
+            ],
+            "voiced_ratio_median": 0.8276,
+            "gate_prob_max": 0.9999978542327881,
+            "hum_residual_db": 0.0
+          },
+          "noop_control": {
+            "utterances": 4,
+            "utts_with_hz": 4,
+            "hz_p05_values": [
+              134.95,
+              176.93,
+              189.33,
+              195.22
+            ],
+            "hz_p05_sequence": [
+              195.22,
+              189.33,
+              134.95,
+              176.93
+            ],
+            "voiced_ratio_median": 0.8276,
+            "gate_prob_max": 0.9999978542327881,
+            "hum_residual_db": 0.0
+          },
+          "notch_mains": {
+            "utterances": 4,
+            "utts_with_hz": 4,
+            "hz_p05_values": [
+              142.11,
+              178.65,
+              189.07,
+              195.0
+            ],
+            "hz_p05_sequence": [
+              195.0,
+              189.07,
+              142.11,
+              178.65
+            ],
+            "voiced_ratio_median": 0.8565,
+            "gate_prob_max": 0.9999977350234985,
+            "hum_residual_db": -41.53
+          },
+          "notch_mains_plus_speech": {
+            "utterances": 4,
+            "utts_with_hz": 4,
+            "hz_p05_values": [
+              145.69,
+              177.34,
+              190.45,
+              194.06
+            ],
+            "hz_p05_sequence": [
+              194.06,
+              190.45,
+              145.69,
+              177.34
+            ],
+            "voiced_ratio_median": 0.8683,
+            "gate_prob_max": 0.999997615814209,
+            "hum_residual_db": -41.52
+          },
+          "hpf60": {
+            "utterances": 4,
+            "utts_with_hz": 4,
+            "hz_p05_values": [
+              138.52,
+              177.15,
+              189.07,
+              195.06
+            ],
+            "hz_p05_sequence": [
+              195.06,
+              189.07,
+              138.52,
+              177.15
+            ],
+            "voiced_ratio_median": 0.8464,
+            "gate_prob_max": 0.9999977946281433,
+            "hum_residual_db": -6.03
+          }
+        }
+      },
+      {
+        "family": "mix12",
+        "hum_hz": 60,
+        "snr_db": 10.0,
+        "signal": "mix12_hum60Hz_10dB",
+        "arms": {
+          "none": {
+            "utterances": 3,
+            "utts_with_hz": 3,
+            "hz_p05_values": [
+              91.47,
+              129.86,
+              190.81
+            ],
+            "hz_p05_sequence": [
+              190.81,
+              129.86,
+              91.47
+            ],
+            "voiced_ratio_median": 0.3931,
+            "gate_prob_max": 0.9999973177909851,
+            "hum_residual_db": 0.0
+          },
+          "noop_control": {
+            "utterances": 3,
+            "utts_with_hz": 3,
+            "hz_p05_values": [
+              91.47,
+              129.86,
+              190.81
+            ],
+            "hz_p05_sequence": [
+              190.81,
+              129.86,
+              91.47
+            ],
+            "voiced_ratio_median": 0.3931,
+            "gate_prob_max": 0.9999973177909851,
+            "hum_residual_db": 0.0
+          },
+          "notch_mains": {
+            "utterances": 3,
+            "utts_with_hz": 3,
+            "hz_p05_values": [
+              138.48,
+              178.87,
+              189.24
+            ],
+            "hz_p05_sequence": [
+              189.24,
+              138.48,
+              178.87
+            ],
+            "voiced_ratio_median": 0.7619,
+            "gate_prob_max": 0.999998927116394,
+            "hum_residual_db": -41.47
+          },
+          "notch_mains_plus_speech": {
+            "utterances": 3,
+            "utts_with_hz": 3,
+            "hz_p05_values": [
+              142.09,
+              176.5,
+              190.46
+            ],
+            "hz_p05_sequence": [
+              190.46,
+              142.09,
+              176.5
+            ],
+            "voiced_ratio_median": 0.747,
+            "gate_prob_max": 0.9999982118606567,
+            "hum_residual_db": -41.46
+          },
+          "hpf60": {
+            "utterances": 3,
+            "utts_with_hz": 3,
+            "hz_p05_values": [
+              93.43,
+              99.59,
+              190.24
+            ],
+            "hz_p05_sequence": [
+              190.24,
+              99.59,
+              93.43
+            ],
+            "voiced_ratio_median": 0.4335,
+            "gate_prob_max": 0.9999979734420776,
+            "hum_residual_db": -6.03
+          }
+        }
+      },
+      {
+        "family": "mix12",
+        "hum_hz": 60,
+        "snr_db": 0.0,
+        "signal": "mix12_hum60Hz_0dB",
+        "arms": {
+          "none": {
+            "utterances": 3,
+            "utts_with_hz": 3,
+            "hz_p05_values": [
+              71.15,
+              72.64,
+              138.32
+            ],
+            "hz_p05_sequence": [
+              71.15,
+              72.64,
+              138.32
+            ],
+            "voiced_ratio_median": 0.1792,
+            "gate_prob_max": 0.9999730587005615,
+            "hum_residual_db": 0.0
+          },
+          "noop_control": {
+            "utterances": 3,
+            "utts_with_hz": 3,
+            "hz_p05_values": [
+              71.15,
+              72.64,
+              138.32
+            ],
+            "hz_p05_sequence": [
+              71.15,
+              72.64,
+              138.32
+            ],
+            "voiced_ratio_median": 0.1792,
+            "gate_prob_max": 0.9999730587005615,
+            "hum_residual_db": 0.0
+          },
+          "notch_mains": {
+            "utterances": 3,
+            "utts_with_hz": 3,
+            "hz_p05_values": [
+              122.75,
+              185.25,
+              191.26
+            ],
+            "hz_p05_sequence": [
+              191.26,
+              185.25,
+              122.75
+            ],
+            "voiced_ratio_median": 0.4046,
+            "gate_prob_max": 0.9999925494194031,
+            "hum_residual_db": -41.46
+          },
+          "notch_mains_plus_speech": {
+            "utterances": 3,
+            "utts_with_hz": 3,
+            "hz_p05_values": [
+              93.25,
+              185.17,
+              190.99
+            ],
+            "hz_p05_sequence": [
+              190.99,
+              185.17,
+              93.25
+            ],
+            "voiced_ratio_median": 0.3815,
+            "gate_prob_max": 0.999991774559021,
+            "hum_residual_db": -41.45
+          },
+          "hpf60": {
+            "utterances": 3,
+            "utts_with_hz": 3,
+            "hz_p05_values": [
+              100.76,
+              108.72,
+              218.55
+            ],
+            "hz_p05_sequence": [
+              108.72,
+              100.76,
+              218.55
+            ],
+            "voiced_ratio_median": 0.3179,
+            "gate_prob_max": 0.9999887943267822,
+            "hum_residual_db": -6.03
+          }
+        }
+      },
+      {
+        "family": "mix12",
+        "hum_hz": 100,
+        "snr_db": 20.0,
+        "signal": "mix12_hum100Hz_20dB",
+        "arms": {
+          "none": {
+            "utterances": 4,
+            "utts_with_hz": 4,
+            "hz_p05_values": [
+              94.09,
+              97.81,
+              99.72,
+              100.49
+            ],
+            "hz_p05_sequence": [
+              97.81,
+              100.49,
+              99.72,
+              94.09
+            ],
+            "voiced_ratio_median": 0.8981,
+            "gate_prob_max": 0.9999973773956299,
+            "hum_residual_db": 0.0
+          },
+          "noop_control": {
+            "utterances": 4,
+            "utts_with_hz": 4,
+            "hz_p05_values": [
+              94.09,
+              97.81,
+              99.72,
+              100.49
+            ],
+            "hz_p05_sequence": [
+              97.81,
+              100.49,
+              99.72,
+              94.09
+            ],
+            "voiced_ratio_median": 0.8981,
+            "gate_prob_max": 0.9999973773956299,
+            "hum_residual_db": 0.0
+          },
+          "notch_mains": {
+            "utterances": 4,
+            "utts_with_hz": 4,
+            "hz_p05_values": [
+              99.78,
+              176.2,
+              188.83,
+              194.14
+            ],
+            "hz_p05_sequence": [
+              194.14,
+              188.83,
+              99.78,
+              176.2
+            ],
+            "voiced_ratio_median": 0.8849,
+            "gate_prob_max": 0.9999971389770508,
+            "hum_residual_db": -45.85
+          },
+          "notch_mains_plus_speech": {
+            "utterances": 4,
+            "utts_with_hz": 4,
+            "hz_p05_values": [
+              99.73,
+              175.82,
+              190.36,
+              193.68
+            ],
+            "hz_p05_sequence": [
+              193.68,
+              190.36,
+              99.73,
+              175.82
+            ],
+            "voiced_ratio_median": 0.8748,
+            "gate_prob_max": 0.9999984502792358,
+            "hum_residual_db": -45.96
+          },
+          "hpf60": {
+            "utterances": 4,
+            "utts_with_hz": 4,
+            "hz_p05_values": [
+              93.3,
+              97.81,
+              99.72,
+              103.54
+            ],
+            "hz_p05_sequence": [
+              97.81,
+              103.54,
+              99.72,
+              93.3
+            ],
+            "voiced_ratio_median": 0.8816,
+            "gate_prob_max": 0.9999973177909851,
+            "hum_residual_db": -1.06
+          }
+        }
+      },
+      {
+        "family": "mix12",
+        "hum_hz": 100,
+        "snr_db": 10.0,
+        "signal": "mix12_hum100Hz_10dB",
+        "arms": {
+          "none": {
+            "utterances": 3,
+            "utts_with_hz": 3,
+            "hz_p05_values": [
+              94.94,
+              97.2,
+              99.61
+            ],
+            "hz_p05_sequence": [
+              99.61,
+              97.2,
+              94.94
+            ],
+            "voiced_ratio_median": 0.948,
+            "gate_prob_max": 0.9999980926513672,
+            "hum_residual_db": 0.0
+          },
+          "noop_control": {
+            "utterances": 3,
+            "utts_with_hz": 3,
+            "hz_p05_values": [
+              94.94,
+              97.2,
+              99.61
+            ],
+            "hz_p05_sequence": [
+              99.61,
+              97.2,
+              94.94
+            ],
+            "voiced_ratio_median": 0.948,
+            "gate_prob_max": 0.9999980926513672,
+            "hum_residual_db": 0.0
+          },
+          "notch_mains": {
+            "utterances": 3,
+            "utts_with_hz": 3,
+            "hz_p05_values": [
+              99.58,
+              99.64,
+              99.93
+            ],
+            "hz_p05_sequence": [
+              99.64,
+              99.58,
+              99.93
+            ],
+            "voiced_ratio_median": 0.9422,
+            "gate_prob_max": 0.9999973773956299,
+            "hum_residual_db": -45.78
+          },
+          "notch_mains_plus_speech": {
+            "utterances": 3,
+            "utts_with_hz": 3,
+            "hz_p05_values": [
+              99.57,
+              99.6,
+              99.68
+            ],
+            "hz_p05_sequence": [
+              99.6,
+              99.57,
+              99.68
+            ],
+            "voiced_ratio_median": 0.8824,
+            "gate_prob_max": 0.9999978542327881,
+            "hum_residual_db": -45.88
+          },
+          "hpf60": {
+            "utterances": 3,
+            "utts_with_hz": 3,
+            "hz_p05_values": [
+              94.74,
+              97.11,
+              99.6
+            ],
+            "hz_p05_sequence": [
+              99.6,
+              97.11,
+              94.74
+            ],
+            "voiced_ratio_median": 0.948,
+            "gate_prob_max": 0.9999985694885254,
+            "hum_residual_db": -1.07
+          }
+        }
+      },
+      {
+        "family": "mix12",
+        "hum_hz": 100,
+        "snr_db": 0.0,
+        "signal": "mix12_hum100Hz_0dB",
+        "arms": {
+          "none": {
+            "utterances": 3,
+            "utts_with_hz": 3,
+            "hz_p05_values": [
+              97.54,
+              99.46,
+              99.78
+            ],
+            "hz_p05_sequence": [
+              99.78,
+              97.54,
+              99.46
+            ],
+            "voiced_ratio_median": 0.9711,
+            "gate_prob_max": 0.9999706149101257,
+            "hum_residual_db": 0.0
+          },
+          "noop_control": {
+            "utterances": 3,
+            "utts_with_hz": 3,
+            "hz_p05_values": [
+              97.54,
+              99.46,
+              99.78
+            ],
+            "hz_p05_sequence": [
+              99.78,
+              97.54,
+              99.46
+            ],
+            "voiced_ratio_median": 0.9711,
+            "gate_prob_max": 0.9999706149101257,
+            "hum_residual_db": 0.0
+          },
+          "notch_mains": {
+            "utterances": 3,
+            "utts_with_hz": 3,
+            "hz_p05_values": [
+              99.5,
+              99.91,
+              99.93
+            ],
+            "hz_p05_sequence": [
+              99.93,
+              99.91,
+              99.5
+            ],
+            "voiced_ratio_median": 0.948,
+            "gate_prob_max": 0.9999839067459106,
+            "hum_residual_db": -45.76
+          },
+          "notch_mains_plus_speech": {
+            "utterances": 3,
+            "utts_with_hz": 3,
+            "hz_p05_values": [
+              99.81,
+              99.94,
+              99.94
+            ],
+            "hz_p05_sequence": [
+              99.94,
+              99.94,
+              99.81
+            ],
+            "voiced_ratio_median": 0.9405,
+            "gate_prob_max": 0.999991774559021,
+            "hum_residual_db": -45.86
+          },
+          "hpf60": {
+            "utterances": 3,
+            "utts_with_hz": 3,
+            "hz_p05_values": [
+              97.52,
+              99.47,
+              99.84
+            ],
+            "hz_p05_sequence": [
+              99.84,
+              97.52,
+              99.47
+            ],
+            "voiced_ratio_median": 0.9711,
+            "gate_prob_max": 0.9999861717224121,
+            "hum_residual_db": -1.07
+          }
+        }
+      },
+      {
+        "family": "mix12",
+        "hum_hz": 120,
+        "snr_db": 20.0,
+        "signal": "mix12_hum120Hz_20dB",
+        "arms": {
+          "none": {
+            "utterances": 4,
+            "utts_with_hz": 4,
+            "hz_p05_values": [
+              106.33,
+              111.81,
+              188.06,
+              194.71
+            ],
+            "hz_p05_sequence": [
+              194.71,
+              188.06,
+              111.81,
+              106.33
+            ],
+            "voiced_ratio_median": 0.8855,
+            "gate_prob_max": 0.9999980926513672,
+            "hum_residual_db": 0.0
+          },
+          "noop_control": {
+            "utterances": 4,
+            "utts_with_hz": 4,
+            "hz_p05_values": [
+              106.33,
+              111.81,
+              188.06,
+              194.71
+            ],
+            "hz_p05_sequence": [
+              194.71,
+              188.06,
+              111.81,
+              106.33
+            ],
+            "voiced_ratio_median": 0.8855,
+            "gate_prob_max": 0.9999980926513672,
+            "hum_residual_db": 0.0
+          },
+          "notch_mains": {
+            "utterances": 4,
+            "utts_with_hz": 4,
+            "hz_p05_values": [
+              117.55,
+              176.39,
+              189.36,
+              194.82
+            ],
+            "hz_p05_sequence": [
+              194.82,
+              189.36,
+              117.55,
+              176.39
+            ],
+            "voiced_ratio_median": 0.8797,
+            "gate_prob_max": 0.9999979734420776,
+            "hum_residual_db": -48.05
+          },
+          "notch_mains_plus_speech": {
+            "utterances": 4,
+            "utts_with_hz": 4,
+            "hz_p05_values": [
+              113.83,
+              176.2,
+              190.38,
+              194.06
+            ],
+            "hz_p05_sequence": [
+              194.06,
+              190.38,
+              113.83,
+              176.2
+            ],
+            "voiced_ratio_median": 0.8748,
+            "gate_prob_max": 0.9999980926513672,
+            "hum_residual_db": -48.04
+          },
+          "hpf60": {
+            "utterances": 4,
+            "utts_with_hz": 4,
+            "hz_p05_values": [
+              111.46,
+              112.14,
+              188.6,
+              194.81
+            ],
+            "hz_p05_sequence": [
+              194.81,
+              188.6,
+              111.46,
+              112.14
+            ],
+            "voiced_ratio_median": 0.8809,
+            "gate_prob_max": 0.9999977946281433,
+            "hum_residual_db": -0.53
+          }
+        }
+      },
+      {
+        "family": "mix12",
+        "hum_hz": 120,
+        "snr_db": 10.0,
+        "signal": "mix12_hum120Hz_10dB",
+        "arms": {
+          "none": {
+            "utterances": 3,
+            "utts_with_hz": 3,
+            "hz_p05_values": [
+              103.47,
+              118.78,
+              118.88
+            ],
+            "hz_p05_sequence": [
+              118.78,
+              103.47,
+              118.88
+            ],
+            "voiced_ratio_median": 0.9244,
+            "gate_prob_max": 0.9999985098838806,
+            "hum_residual_db": 0.0
+          },
+          "noop_control": {
+            "utterances": 3,
+            "utts_with_hz": 3,
+            "hz_p05_values": [
+              103.47,
+              118.78,
+              118.88
+            ],
+            "hz_p05_sequence": [
+              118.78,
+              103.47,
+              118.88
+            ],
+            "voiced_ratio_median": 0.9244,
+            "gate_prob_max": 0.9999985098838806,
+            "hum_residual_db": 0.0
+          },
+          "notch_mains": {
+            "utterances": 3,
+            "utts_with_hz": 3,
+            "hz_p05_values": [
+              119.63,
+              119.75,
+              120.0
+            ],
+            "hz_p05_sequence": [
+              119.75,
+              119.63,
+              120.0
+            ],
+            "voiced_ratio_median": 0.9364,
+            "gate_prob_max": 0.9999984502792358,
+            "hum_residual_db": -47.75
+          },
+          "notch_mains_plus_speech": {
+            "utterances": 3,
+            "utts_with_hz": 3,
+            "hz_p05_values": [
+              119.62,
+              119.74,
+              119.88
+            ],
+            "hz_p05_sequence": [
+              119.74,
+              119.62,
+              119.88
+            ],
+            "voiced_ratio_median": 0.9244,
+            "gate_prob_max": 0.9999980330467224,
+            "hum_residual_db": -47.74
+          },
+          "hpf60": {
+            "utterances": 3,
+            "utts_with_hz": 3,
+            "hz_p05_values": [
+              103.8,
+              117.76,
+              119.35
+            ],
+            "hz_p05_sequence": [
+              117.76,
+              103.8,
+              119.35
+            ],
+            "voiced_ratio_median": 0.936,
+            "gate_prob_max": 0.9999982118606567,
+            "hum_residual_db": -0.53
+          }
+        }
+      },
+      {
+        "family": "mix12",
+        "hum_hz": 120,
+        "snr_db": 0.0,
+        "signal": "mix12_hum120Hz_0dB",
+        "arms": {
+          "none": {
+            "utterances": 3,
+            "utts_with_hz": 3,
+            "hz_p05_values": [
+              98.97,
+              107.63,
+              113.76
+            ],
+            "hz_p05_sequence": [
+              107.63,
+              98.97,
+              113.76
+            ],
+            "voiced_ratio_median": 0.9762,
+            "gate_prob_max": 0.9999961853027344,
+            "hum_residual_db": 0.0
+          },
+          "noop_control": {
+            "utterances": 3,
+            "utts_with_hz": 3,
+            "hz_p05_values": [
+              98.97,
+              107.63,
+              113.76
+            ],
+            "hz_p05_sequence": [
+              107.63,
+              98.97,
+              113.76
+            ],
+            "voiced_ratio_median": 0.9762,
+            "gate_prob_max": 0.9999961853027344,
+            "hum_residual_db": 0.0
+          },
+          "notch_mains": {
+            "utterances": 3,
+            "utts_with_hz": 3,
+            "hz_p05_values": [
+              119.62,
+              119.76,
+              119.9
+            ],
+            "hz_p05_sequence": [
+              119.76,
+              119.62,
+              119.9
+            ],
+            "voiced_ratio_median": 0.9419,
+            "gate_prob_max": 0.9999893307685852,
+            "hum_residual_db": -47.65
+          },
+          "notch_mains_plus_speech": {
+            "utterances": 3,
+            "utts_with_hz": 3,
+            "hz_p05_values": [
+              119.8,
+              119.84,
+              119.86
+            ],
+            "hz_p05_sequence": [
+              119.84,
+              119.8,
+              119.86
+            ],
+            "voiced_ratio_median": 0.9583,
+            "gate_prob_max": 0.9999914169311523,
+            "hum_residual_db": -47.65
+          },
+          "hpf60": {
+            "utterances": 3,
+            "utts_with_hz": 3,
+            "hz_p05_values": [
+              98.96,
+              108.42,
+              115.28
+            ],
+            "hz_p05_sequence": [
+              108.42,
+              98.96,
+              115.28
+            ],
+            "voiced_ratio_median": 0.9762,
+            "gate_prob_max": 0.9999942779541016,
+            "hum_residual_db": -0.53
+          }
+        }
+      },
+      {
+        "family": "mix12",
+        "hum_hz": 150,
+        "snr_db": 20.0,
+        "signal": "mix12_hum150Hz_20dB",
+        "arms": {
+          "none": {
+            "utterances": 4,
+            "utts_with_hz": 4,
+            "hz_p05_values": [
+              74.79,
+              97.74,
+              177.8,
+              191.22
+            ],
+            "hz_p05_sequence": [
+              191.22,
+              177.8,
+              97.74,
+              74.79
+            ],
+            "voiced_ratio_median": 0.9031,
+            "gate_prob_max": 0.9999979734420776,
+            "hum_residual_db": 0.0
+          },
+          "noop_control": {
+            "utterances": 4,
+            "utts_with_hz": 4,
+            "hz_p05_values": [
+              74.79,
+              97.74,
+              177.8,
+              191.22
+            ],
+            "hz_p05_sequence": [
+              191.22,
+              177.8,
+              97.74,
+              74.79
+            ],
+            "voiced_ratio_median": 0.9031,
+            "gate_prob_max": 0.9999979734420776,
+            "hum_residual_db": 0.0
+          },
+          "notch_mains": {
+            "utterances": 4,
+            "utts_with_hz": 4,
+            "hz_p05_values": [
+              74.79,
+              97.74,
+              187.7,
+              191.26
+            ],
+            "hz_p05_sequence": [
+              191.26,
+              187.7,
+              97.74,
+              74.79
+            ],
+            "voiced_ratio_median": 0.897,
+            "gate_prob_max": 0.9999979734420776,
+            "hum_residual_db": -0.29
+          },
+          "notch_mains_plus_speech": {
+            "utterances": 4,
+            "utts_with_hz": 4,
+            "hz_p05_values": [
+              96.9,
+              105.49,
+              190.36,
+              194.25
+            ],
+            "hz_p05_sequence": [
+              194.25,
+              190.36,
+              96.9,
+              105.49
+            ],
+            "voiced_ratio_median": 0.884,
+            "gate_prob_max": 0.9999982714653015,
+            "hum_residual_db": -49.45
+          },
+          "hpf60": {
+            "utterances": 4,
+            "utts_with_hz": 4,
+            "hz_p05_values": [
+              74.78,
+              97.74,
+              187.63,
+              191.22
+            ],
+            "hz_p05_sequence": [
+              191.22,
+              187.63,
+              97.74,
+              74.78
+            ],
+            "voiced_ratio_median": 0.8915,
+            "gate_prob_max": 0.999997615814209,
+            "hum_residual_db": -0.22
+          }
+        }
+      },
+      {
+        "family": "mix12",
+        "hum_hz": 150,
+        "snr_db": 10.0,
+        "signal": "mix12_hum150Hz_10dB",
+        "arms": {
+          "none": {
+            "utterances": 3,
+            "utts_with_hz": 3,
+            "hz_p05_values": [
+              74.97,
+              74.99,
+              79.86
+            ],
+            "hz_p05_sequence": [
+              74.97,
+              79.86,
+              74.99
+            ],
+            "voiced_ratio_median": 0.948,
+            "gate_prob_max": 0.9999976754188538,
+            "hum_residual_db": 0.0
+          },
+          "noop_control": {
+            "utterances": 3,
+            "utts_with_hz": 3,
+            "hz_p05_values": [
+              74.97,
+              74.99,
+              79.86
+            ],
+            "hz_p05_sequence": [
+              74.97,
+              79.86,
+              74.99
+            ],
+            "voiced_ratio_median": 0.948,
+            "gate_prob_max": 0.9999976754188538,
+            "hum_residual_db": 0.0
+          },
+          "notch_mains": {
+            "utterances": 3,
+            "utts_with_hz": 3,
+            "hz_p05_values": [
+              74.96,
+              74.99,
+              79.89
+            ],
+            "hz_p05_sequence": [
+              74.96,
+              79.89,
+              74.99
+            ],
+            "voiced_ratio_median": 0.948,
+            "gate_prob_max": 0.9999975562095642,
+            "hum_residual_db": -0.29
+          },
+          "notch_mains_plus_speech": {
+            "utterances": 3,
+            "utts_with_hz": 3,
+            "hz_p05_values": [
+              74.84,
+              74.96,
+              75.02
+            ],
+            "hz_p05_sequence": [
+              74.84,
+              75.02,
+              74.96
+            ],
+            "voiced_ratio_median": 0.9191,
+            "gate_prob_max": 0.9999983310699463,
+            "hum_residual_db": -49.49
+          },
+          "hpf60": {
+            "utterances": 3,
+            "utts_with_hz": 3,
+            "hz_p05_values": [
+              74.96,
+              74.98,
+              79.9
+            ],
+            "hz_p05_sequence": [
+              74.96,
+              79.9,
+              74.98
+            ],
+            "voiced_ratio_median": 0.948,
+            "gate_prob_max": 0.9999972581863403,
+            "hum_residual_db": -0.22
+          }
+        }
+      },
+      {
+        "family": "mix12",
+        "hum_hz": 150,
+        "snr_db": 0.0,
+        "signal": "mix12_hum150Hz_0dB",
+        "arms": {
+          "none": {
+            "utterances": 3,
+            "utts_with_hz": 3,
+            "hz_p05_values": [
+              72.7,
+              72.89,
+              148.81
+            ],
+            "hz_p05_sequence": [
+              72.7,
+              72.89,
+              148.81
+            ],
+            "voiced_ratio_median": 0.9821,
+            "gate_prob_max": 0.9999913573265076,
+            "hum_residual_db": 0.0
+          },
+          "noop_control": {
+            "utterances": 3,
+            "utts_with_hz": 3,
+            "hz_p05_values": [
+              72.7,
+              72.89,
+              148.81
+            ],
+            "hz_p05_sequence": [
+              72.7,
+              72.89,
+              148.81
+            ],
+            "voiced_ratio_median": 0.9821,
+            "gate_prob_max": 0.9999913573265076,
+            "hum_residual_db": 0.0
+          },
+          "notch_mains": {
+            "utterances": 3,
+            "utts_with_hz": 3,
+            "hz_p05_values": [
+              72.7,
+              72.92,
+              149.04
+            ],
+            "hz_p05_sequence": [
+              72.7,
+              72.92,
+              149.04
+            ],
+            "voiced_ratio_median": 0.9702,
+            "gate_prob_max": 0.9999880790710449,
+            "hum_residual_db": -0.29
+          },
+          "notch_mains_plus_speech": {
+            "utterances": 3,
+            "utts_with_hz": 3,
+            "hz_p05_values": [
+              74.96,
+              75.13,
+              149.77
+            ],
+            "hz_p05_sequence": [
+              74.96,
+              75.13,
+              149.77
+            ],
+            "voiced_ratio_median": 0.9643,
+            "gate_prob_max": 0.9999926686286926,
+            "hum_residual_db": -49.5
+          },
+          "hpf60": {
+            "utterances": 3,
+            "utts_with_hz": 3,
+            "hz_p05_values": [
+              72.71,
+              72.92,
+              148.7
+            ],
+            "hz_p05_sequence": [
+              72.71,
+              72.92,
+              148.7
+            ],
+            "voiced_ratio_median": 0.9762,
+            "gate_prob_max": 0.9999885559082031,
+            "hum_residual_db": -0.22
+          }
+        }
+      },
+      {
+        "family": "mix12",
+        "hum_hz": 175,
+        "snr_db": 20.0,
+        "signal": "mix12_hum175Hz_20dB",
+        "arms": {
+          "none": {
+            "utterances": 4,
+            "utts_with_hz": 4,
+            "hz_p05_values": [
+              98.14,
+              175.37,
+              182.58,
+              194.6
+            ],
+            "hz_p05_sequence": [
+              194.6,
+              182.58,
+              98.14,
+              175.37
+            ],
+            "voiced_ratio_median": 0.9134,
+            "gate_prob_max": 0.9999979138374329,
+            "hum_residual_db": 0.0
+          },
+          "noop_control": {
+            "utterances": 4,
+            "utts_with_hz": 4,
+            "hz_p05_values": [
+              98.14,
+              175.37,
+              182.58,
+              194.6
+            ],
+            "hz_p05_sequence": [
+              194.6,
+              182.58,
+              98.14,
+              175.37
+            ],
+            "voiced_ratio_median": 0.9134,
+            "gate_prob_max": 0.9999979138374329,
+            "hum_residual_db": 0.0
+          },
+          "notch_mains": {
+            "utterances": 4,
+            "utts_with_hz": 4,
+            "hz_p05_values": [
+              98.14,
+              175.37,
+              182.55,
+              194.64
+            ],
+            "hz_p05_sequence": [
+              194.64,
+              182.55,
+              98.14,
+              175.37
+            ],
+            "voiced_ratio_median": 0.9134,
+            "gate_prob_max": 0.9999979138374329,
+            "hum_residual_db": -0.12
+          },
+          "notch_mains_plus_speech": {
+            "utterances": 3,
+            "utts_with_hz": 3,
+            "hz_p05_values": [
+              98.12,
+              174.45,
+              175.43
+            ],
+            "hz_p05_sequence": [
+              174.45,
+              98.12,
+              175.43
+            ],
+            "voiced_ratio_median": 0.8659,
+            "gate_prob_max": 0.9999980926513672,
+            "hum_residual_db": -1.12
+          },
+          "hpf60": {
+            "utterances": 4,
+            "utts_with_hz": 4,
+            "hz_p05_values": [
+              98.14,
+              175.35,
+              182.86,
+              194.59
+            ],
+            "hz_p05_sequence": [
+              194.59,
+              182.86,
+              98.14,
+              175.35
+            ],
+            "voiced_ratio_median": 0.9134,
+            "gate_prob_max": 0.9999977350234985,
+            "hum_residual_db": -0.12
+          }
+        }
+      },
+      {
+        "family": "mix12",
+        "hum_hz": 175,
+        "snr_db": 10.0,
+        "signal": "mix12_hum175Hz_10dB",
+        "arms": {
+          "none": {
+            "utterances": 3,
+            "utts_with_hz": 3,
+            "hz_p05_values": [
+              97.97,
+              174.56,
+              174.83
+            ],
+            "hz_p05_sequence": [
+              174.56,
+              97.97,
+              174.83
+            ],
+            "voiced_ratio_median": 0.9653,
+            "gate_prob_max": 0.9999979734420776,
+            "hum_residual_db": 0.0
+          },
+          "noop_control": {
+            "utterances": 3,
+            "utts_with_hz": 3,
+            "hz_p05_values": [
+              97.97,
+              174.56,
+              174.83
+            ],
+            "hz_p05_sequence": [
+              174.56,
+              97.97,
+              174.83
+            ],
+            "voiced_ratio_median": 0.9653,
+            "gate_prob_max": 0.9999979734420776,
+            "hum_residual_db": 0.0
+          },
+          "notch_mains": {
+            "utterances": 3,
+            "utts_with_hz": 3,
+            "hz_p05_values": [
+              97.97,
+              174.57,
+              174.82
+            ],
+            "hz_p05_sequence": [
+              174.57,
+              97.97,
+              174.82
+            ],
+            "voiced_ratio_median": 0.9653,
+            "gate_prob_max": 0.9999978542327881,
+            "hum_residual_db": -0.12
+          },
+          "notch_mains_plus_speech": {
+            "utterances": 3,
+            "utts_with_hz": 3,
+            "hz_p05_values": [
+              114.91,
+              174.49,
+              174.84
+            ],
+            "hz_p05_sequence": [
+              174.49,
+              114.91,
+              174.84
+            ],
+            "voiced_ratio_median": 0.9595,
+            "gate_prob_max": 0.9999969005584717,
+            "hum_residual_db": -1.12
+          },
+          "hpf60": {
+            "utterances": 3,
+            "utts_with_hz": 3,
+            "hz_p05_values": [
+              97.97,
+              174.57,
+              174.8
+            ],
+            "hz_p05_sequence": [
+              174.57,
+              97.97,
+              174.8
+            ],
+            "voiced_ratio_median": 0.9653,
+            "gate_prob_max": 0.9999977946281433,
+            "hum_residual_db": -0.12
+          }
+        }
+      },
+      {
+        "family": "mix12",
+        "hum_hz": 175,
+        "snr_db": 0.0,
+        "signal": "mix12_hum175Hz_0dB",
+        "arms": {
+          "none": {
+            "utterances": 3,
+            "utts_with_hz": 3,
+            "hz_p05_values": [
+              173.62,
+              174.85,
+              174.94
+            ],
+            "hz_p05_sequence": [
+              174.85,
+              173.62,
+              174.94
+            ],
+            "voiced_ratio_median": 0.9595,
+            "gate_prob_max": 0.999980092048645,
+            "hum_residual_db": 0.0
+          },
+          "noop_control": {
+            "utterances": 3,
+            "utts_with_hz": 3,
+            "hz_p05_values": [
+              173.62,
+              174.85,
+              174.94
+            ],
+            "hz_p05_sequence": [
+              174.85,
+              173.62,
+              174.94
+            ],
+            "voiced_ratio_median": 0.9595,
+            "gate_prob_max": 0.999980092048645,
+            "hum_residual_db": 0.0
+          },
+          "notch_mains": {
+            "utterances": 3,
+            "utts_with_hz": 3,
+            "hz_p05_values": [
+              173.59,
+              174.85,
+              174.94
+            ],
+            "hz_p05_sequence": [
+              174.85,
+              173.59,
+              174.94
+            ],
+            "voiced_ratio_median": 0.9595,
+            "gate_prob_max": 0.9999834895133972,
+            "hum_residual_db": -0.12
+          },
+          "notch_mains_plus_speech": {
+            "utterances": 3,
+            "utts_with_hz": 3,
+            "hz_p05_values": [
+              171.18,
+              174.8,
+              174.95
+            ],
+            "hz_p05_sequence": [
+              174.8,
+              171.18,
+              174.95
+            ],
+            "voiced_ratio_median": 0.9595,
+            "gate_prob_max": 0.9999884963035583,
+            "hum_residual_db": -1.12
+          },
+          "hpf60": {
+            "utterances": 3,
+            "utts_with_hz": 3,
+            "hz_p05_values": [
+              173.53,
+              174.85,
+              174.94
+            ],
+            "hz_p05_sequence": [
+              174.85,
+              173.53,
+              174.94
+            ],
+            "voiced_ratio_median": 0.9643,
+            "gate_prob_max": 0.999973475933075,
+            "hum_residual_db": -0.12
+          }
+        }
+      },
+      {
+        "family": "mix12",
+        "hum_hz": 200,
+        "snr_db": 20.0,
+        "signal": "mix12_hum200Hz_20dB",
+        "arms": {
+          "none": {
+            "utterances": 4,
+            "utts_with_hz": 4,
+            "hz_p05_values": [
+              110.77,
+              178.32,
+              189.41,
+              195.5
+            ],
+            "hz_p05_sequence": [
+              195.5,
+              189.41,
+              110.77,
+              178.32
+            ],
+            "voiced_ratio_median": 0.9148,
+            "gate_prob_max": 0.9999983310699463,
+            "hum_residual_db": 0.0
+          },
+          "noop_control": {
+            "utterances": 4,
+            "utts_with_hz": 4,
+            "hz_p05_values": [
+              110.77,
+              178.32,
+              189.41,
+              195.5
+            ],
+            "hz_p05_sequence": [
+              195.5,
+              189.41,
+              110.77,
+              178.32
+            ],
+            "voiced_ratio_median": 0.9148,
+            "gate_prob_max": 0.9999983310699463,
+            "hum_residual_db": 0.0
+          },
+          "notch_mains": {
+            "utterances": 4,
+            "utts_with_hz": 4,
+            "hz_p05_values": [
+              110.77,
+              178.31,
+              189.42,
+              195.54
+            ],
+            "hz_p05_sequence": [
+              195.54,
+              189.42,
+              110.77,
+              178.31
+            ],
+            "voiced_ratio_median": 0.9148,
+            "gate_prob_max": 0.9999983906745911,
+            "hum_residual_db": -0.07
+          },
+          "notch_mains_plus_speech": {
+            "utterances": 4,
+            "utts_with_hz": 4,
+            "hz_p05_values": [
+              99.96,
+              179.34,
+              190.46,
+              195.6
+            ],
+            "hz_p05_sequence": [
+              195.6,
+              190.46,
+              99.96,
+              179.34
+            ],
+            "voiced_ratio_median": 0.8901,
+            "gate_prob_max": 0.9999985098838806,
+            "hum_residual_db": -50.32
+          },
+          "hpf60": {
+            "utterances": 4,
+            "utts_with_hz": 4,
+            "hz_p05_values": [
+              110.77,
+              178.31,
+              189.13,
+              195.6
+            ],
+            "hz_p05_sequence": [
+              195.6,
+              189.13,
+              110.77,
+              178.31
+            ],
+            "voiced_ratio_median": 0.9148,
+            "gate_prob_max": 0.999998152256012,
+            "hum_residual_db": -0.07
+          }
+        }
+      },
+      {
+        "family": "mix12",
+        "hum_hz": 200,
+        "snr_db": 10.0,
+        "signal": "mix12_hum200Hz_10dB",
+        "arms": {
+          "none": {
+            "utterances": 3,
+            "utts_with_hz": 3,
+            "hz_p05_values": [
+              187.8,
+              189.62,
+              193.65
+            ],
+            "hz_p05_sequence": [
+              193.65,
+              187.8,
+              189.62
+            ],
+            "voiced_ratio_median": 0.9595,
+            "gate_prob_max": 0.9999980926513672,
+            "hum_residual_db": 0.0
+          },
+          "noop_control": {
+            "utterances": 3,
+            "utts_with_hz": 3,
+            "hz_p05_values": [
+              187.8,
+              189.62,
+              193.65
+            ],
+            "hz_p05_sequence": [
+              193.65,
+              187.8,
+              189.62
+            ],
+            "voiced_ratio_median": 0.9595,
+            "gate_prob_max": 0.9999980926513672,
+            "hum_residual_db": 0.0
+          },
+          "notch_mains": {
+            "utterances": 3,
+            "utts_with_hz": 3,
+            "hz_p05_values": [
+              187.81,
+              189.72,
+              193.63
+            ],
+            "hz_p05_sequence": [
+              193.63,
+              187.81,
+              189.72
+            ],
+            "voiced_ratio_median": 0.9595,
+            "gate_prob_max": 0.9999980926513672,
+            "hum_residual_db": -0.07
+          },
+          "notch_mains_plus_speech": {
+            "utterances": 3,
+            "utts_with_hz": 3,
+            "hz_p05_values": [
+              100.02,
+              102.51,
+              190.34
+            ],
+            "hz_p05_sequence": [
+              100.02,
+              102.51,
+              190.34
+            ],
+            "voiced_ratio_median": 0.9422,
+            "gate_prob_max": 0.9999987483024597,
+            "hum_residual_db": -51.41
+          },
+          "hpf60": {
+            "utterances": 3,
+            "utts_with_hz": 3,
+            "hz_p05_values": [
+              187.9,
+              189.98,
+              193.46
+            ],
+            "hz_p05_sequence": [
+              193.46,
+              187.9,
+              189.98
+            ],
+            "voiced_ratio_median": 0.9653,
+            "gate_prob_max": 0.999998152256012,
+            "hum_residual_db": -0.07
+          }
+        }
+      },
+      {
+        "family": "mix12",
+        "hum_hz": 200,
+        "snr_db": 0.0,
+        "signal": "mix12_hum200Hz_0dB",
+        "arms": {
+          "none": {
+            "utterances": 3,
+            "utts_with_hz": 3,
+            "hz_p05_values": [
+              100.52,
+              198.85,
+              199.14
+            ],
+            "hz_p05_sequence": [
+              198.85,
+              100.52,
+              199.14
+            ],
+            "voiced_ratio_median": 0.9881,
+            "gate_prob_max": 0.9999808073043823,
+            "hum_residual_db": 0.0
+          },
+          "noop_control": {
+            "utterances": 3,
+            "utts_with_hz": 3,
+            "hz_p05_values": [
+              100.52,
+              198.85,
+              199.14
+            ],
+            "hz_p05_sequence": [
+              198.85,
+              100.52,
+              199.14
+            ],
+            "voiced_ratio_median": 0.9881,
+            "gate_prob_max": 0.9999808073043823,
+            "hum_residual_db": 0.0
+          },
+          "notch_mains": {
+            "utterances": 3,
+            "utts_with_hz": 3,
+            "hz_p05_values": [
+              100.52,
+              198.81,
+              199.15
+            ],
+            "hz_p05_sequence": [
+              198.81,
+              100.52,
+              199.15
+            ],
+            "voiced_ratio_median": 0.9827,
+            "gate_prob_max": 0.9999834299087524,
+            "hum_residual_db": -0.07
+          },
+          "notch_mains_plus_speech": {
+            "utterances": 3,
+            "utts_with_hz": 3,
+            "hz_p05_values": [
+              100.08,
+              199.15,
+              199.57
+            ],
+            "hz_p05_sequence": [
+              199.57,
+              100.08,
+              199.15
+            ],
+            "voiced_ratio_median": 0.9653,
+            "gate_prob_max": 0.9999919533729553,
+            "hum_residual_db": -51.73
+          },
+          "hpf60": {
+            "utterances": 3,
+            "utts_with_hz": 3,
+            "hz_p05_values": [
+              100.51,
+              198.81,
+              199.16
+            ],
+            "hz_p05_sequence": [
+              198.81,
+              100.51,
+              199.16
+            ],
+            "voiced_ratio_median": 0.9827,
+            "gate_prob_max": 0.999985933303833,
+            "hum_residual_db": -0.07
+          }
+        }
+      }
+    ],
+    "mix_testvad_fixture": [
+      {
+        "family": "mixtestvad",
+        "hum_hz": 150,
+        "snr_db": 20.0,
+        "signal": "mixtestvad_hum150Hz_20dB",
+        "arms": {
+          "none": {
+            "utterances": 4,
+            "utts_with_hz": 4,
+            "hz_p05_values": [
+              74.5,
+              98.08,
+              179.9,
+              193.77
+            ],
+            "hz_p05_sequence": [
+              193.77,
+              179.9,
+              98.08,
+              74.5
+            ],
+            "voiced_ratio_median": 0.8976,
+            "gate_prob_max": 0.9999973773956299,
+            "hum_residual_db": 0.0
+          },
+          "noop_control": {
+            "utterances": 4,
+            "utts_with_hz": 4,
+            "hz_p05_values": [
+              74.5,
+              98.08,
+              179.9,
+              193.77
+            ],
+            "hz_p05_sequence": [
+              193.77,
+              179.9,
+              98.08,
+              74.5
+            ],
+            "voiced_ratio_median": 0.8976,
+            "gate_prob_max": 0.9999973773956299,
+            "hum_residual_db": 0.0
+          },
+          "notch_mains": {
+            "utterances": 4,
+            "utts_with_hz": 4,
+            "hz_p05_values": [
+              74.47,
+              97.73,
+              181.3,
+              191.0
+            ],
+            "hz_p05_sequence": [
+              191.0,
+              181.3,
+              97.73,
+              74.47
+            ],
+            "voiced_ratio_median": 0.8981,
+            "gate_prob_max": 0.9999974966049194,
+            "hum_residual_db": -0.29
+          },
+          "notch_mains_plus_speech": {
+            "utterances": 4,
+            "utts_with_hz": 4,
+            "hz_p05_values": [
+              92.6,
+              97.78,
+              190.36,
+              192.75
+            ],
+            "hz_p05_sequence": [
+              192.75,
+              190.36,
+              97.78,
+              92.6
+            ],
+            "voiced_ratio_median": 0.8794,
+            "gate_prob_max": 0.9999978542327881,
+            "hum_residual_db": -49.42
+          },
+          "hpf60": {
+            "utterances": 4,
+            "utts_with_hz": 4,
+            "hz_p05_values": [
+              74.07,
+              97.76,
+              181.1,
+              190.94
+            ],
+            "hz_p05_sequence": [
+              190.94,
+              181.1,
+              97.76,
+              74.07
+            ],
+            "voiced_ratio_median": 0.8982,
+            "gate_prob_max": 0.9999973773956299,
+            "hum_residual_db": -0.22
+          }
+        }
+      },
+      {
+        "family": "mixtestvad",
+        "hum_hz": 150,
+        "snr_db": 10.0,
+        "signal": "mixtestvad_hum150Hz_10dB",
+        "arms": {
+          "none": {
+            "utterances": 3,
+            "utts_with_hz": 3,
+            "hz_p05_values": [
+              74.62,
+              74.78,
+              79.21
+            ],
+            "hz_p05_sequence": [
+              74.78,
+              79.21,
+              74.62
+            ],
+            "voiced_ratio_median": 0.9595,
+            "gate_prob_max": 0.999998152256012,
+            "hum_residual_db": 0.0
+          },
+          "noop_control": {
+            "utterances": 3,
+            "utts_with_hz": 3,
+            "hz_p05_values": [
+              74.62,
+              74.78,
+              79.21
+            ],
+            "hz_p05_sequence": [
+              74.78,
+              79.21,
+              74.62
+            ],
+            "voiced_ratio_median": 0.9595,
+            "gate_prob_max": 0.999998152256012,
+            "hum_residual_db": 0.0
+          },
+          "notch_mains": {
+            "utterances": 3,
+            "utts_with_hz": 3,
+            "hz_p05_values": [
+              74.61,
+              74.78,
+              79.76
+            ],
+            "hz_p05_sequence": [
+              74.78,
+              79.76,
+              74.61
+            ],
+            "voiced_ratio_median": 0.9538,
+            "gate_prob_max": 0.9999979138374329,
+            "hum_residual_db": -0.29
+          },
+          "notch_mains_plus_speech": {
+            "utterances": 3,
+            "utts_with_hz": 3,
+            "hz_p05_values": [
+              74.78,
+              74.86,
+              75.04
+            ],
+            "hz_p05_sequence": [
+              74.86,
+              75.04,
+              74.78
+            ],
+            "voiced_ratio_median": 0.9364,
+            "gate_prob_max": 0.9999979734420776,
+            "hum_residual_db": -49.46
+          },
+          "hpf60": {
+            "utterances": 3,
+            "utts_with_hz": 3,
+            "hz_p05_values": [
+              74.74,
+              74.78,
+              79.77
+            ],
+            "hz_p05_sequence": [
+              74.78,
+              79.77,
+              74.74
+            ],
+            "voiced_ratio_median": 0.9538,
+            "gate_prob_max": 0.9999967813491821,
+            "hum_residual_db": -0.22
+          }
+        }
+      },
+      {
+        "family": "mixtestvad",
+        "hum_hz": 150,
+        "snr_db": 0.0,
+        "signal": "mixtestvad_hum150Hz_0dB",
+        "arms": {
+          "none": {
+            "utterances": 3,
+            "utts_with_hz": 3,
+            "hz_p05_values": [
+              72.65,
+              72.72,
+              76.01
+            ],
+            "hz_p05_sequence": [
+              72.65,
+              72.72,
+              76.01
+            ],
+            "voiced_ratio_median": 0.9821,
+            "gate_prob_max": 0.9999948740005493,
+            "hum_residual_db": 0.0
+          },
+          "noop_control": {
+            "utterances": 3,
+            "utts_with_hz": 3,
+            "hz_p05_values": [
+              72.65,
+              72.72,
+              76.01
+            ],
+            "hz_p05_sequence": [
+              72.65,
+              72.72,
+              76.01
+            ],
+            "voiced_ratio_median": 0.9821,
+            "gate_prob_max": 0.9999948740005493,
+            "hum_residual_db": 0.0
+          },
+          "notch_mains": {
+            "utterances": 3,
+            "utts_with_hz": 3,
+            "hz_p05_values": [
+              72.65,
+              72.78,
+              76.01
+            ],
+            "hz_p05_sequence": [
+              72.65,
+              72.78,
+              76.01
+            ],
+            "voiced_ratio_median": 0.9821,
+            "gate_prob_max": 0.9999947547912598,
+            "hum_residual_db": -0.29
+          },
+          "notch_mains_plus_speech": {
+            "utterances": 3,
+            "utts_with_hz": 3,
+            "hz_p05_values": [
+              74.89,
+              75.6,
+              118.93
+            ],
+            "hz_p05_sequence": [
+              74.89,
+              75.6,
+              118.93
+            ],
+            "voiced_ratio_median": 0.9643,
+            "gate_prob_max": 0.9999960064888,
+            "hum_residual_db": -49.47
+          },
+          "hpf60": {
+            "utterances": 3,
+            "utts_with_hz": 3,
+            "hz_p05_values": [
+              72.67,
+              72.79,
+              76.02
+            ],
+            "hz_p05_sequence": [
+              72.67,
+              72.79,
+              76.02
+            ],
+            "voiced_ratio_median": 0.9762,
+            "gate_prob_max": 0.9999905824661255,
+            "hum_residual_db": -0.22
+          }
+        }
+      },
+      {
+        "family": "mixtestvad",
+        "hum_hz": 175,
+        "snr_db": 20.0,
+        "signal": "mixtestvad_hum175Hz_20dB",
+        "arms": {
+          "none": {
+            "utterances": 4,
+            "utts_with_hz": 4,
+            "hz_p05_values": [
+              98.14,
+              175.23,
+              184.25,
+              193.54
+            ],
+            "hz_p05_sequence": [
+              193.54,
+              184.25,
+              98.14,
+              175.23
+            ],
+            "voiced_ratio_median": 0.9198,
+            "gate_prob_max": 0.9999970197677612,
+            "hum_residual_db": 0.0
+          },
+          "noop_control": {
+            "utterances": 4,
+            "utts_with_hz": 4,
+            "hz_p05_values": [
+              98.14,
+              175.23,
+              184.25,
+              193.54
+            ],
+            "hz_p05_sequence": [
+              193.54,
+              184.25,
+              98.14,
+              175.23
+            ],
+            "voiced_ratio_median": 0.9198,
+            "gate_prob_max": 0.9999970197677612,
+            "hum_residual_db": 0.0
+          },
+          "notch_mains": {
+            "utterances": 4,
+            "utts_with_hz": 4,
+            "hz_p05_values": [
+              98.14,
+              175.16,
+              184.26,
+              193.59
+            ],
+            "hz_p05_sequence": [
+              193.59,
+              184.26,
+              98.14,
+              175.16
+            ],
+            "voiced_ratio_median": 0.9198,
+            "gate_prob_max": 0.9999969601631165,
+            "hum_residual_db": -0.12
+          },
+          "notch_mains_plus_speech": {
+            "utterances": 3,
+            "utts_with_hz": 3,
+            "hz_p05_values": [
+              173.86,
+              174.81,
+              174.83
+            ],
+            "hz_p05_sequence": [
+              173.86,
+              174.81,
+              174.83
+            ],
+            "voiced_ratio_median": 0.8659,
+            "gate_prob_max": 0.9999972581863403,
+            "hum_residual_db": -1.12
+          },
+          "hpf60": {
+            "utterances": 4,
+            "utts_with_hz": 4,
+            "hz_p05_values": [
+              98.14,
+              175.0,
+              178.69,
+              193.53
+            ],
+            "hz_p05_sequence": [
+              193.53,
+              178.69,
+              98.14,
+              175.0
+            ],
+            "voiced_ratio_median": 0.9194,
+            "gate_prob_max": 0.999997079372406,
+            "hum_residual_db": -0.12
+          }
+        }
+      },
+      {
+        "family": "mixtestvad",
+        "hum_hz": 175,
+        "snr_db": 10.0,
+        "signal": "mixtestvad_hum175Hz_10dB",
+        "arms": {
+          "none": {
+            "utterances": 3,
+            "utts_with_hz": 3,
+            "hz_p05_values": [
+              97.99,
+              174.41,
+              174.44
+            ],
+            "hz_p05_sequence": [
+              174.44,
+              97.99,
+              174.41
+            ],
+            "voiced_ratio_median": 0.9711,
+            "gate_prob_max": 0.9999972581863403,
+            "hum_residual_db": 0.0
+          },
+          "noop_control": {
+            "utterances": 3,
+            "utts_with_hz": 3,
+            "hz_p05_values": [
+              97.99,
+              174.41,
+              174.44
+            ],
+            "hz_p05_sequence": [
+              174.44,
+              97.99,
+              174.41
+            ],
+            "voiced_ratio_median": 0.9711,
+            "gate_prob_max": 0.9999972581863403,
+            "hum_residual_db": 0.0
+          },
+          "notch_mains": {
+            "utterances": 3,
+            "utts_with_hz": 3,
+            "hz_p05_values": [
+              97.99,
+              174.4,
+              174.44
+            ],
+            "hz_p05_sequence": [
+              174.44,
+              97.99,
+              174.4
+            ],
+            "voiced_ratio_median": 0.9711,
+            "gate_prob_max": 0.9999968409538269,
+            "hum_residual_db": -0.12
+          },
+          "notch_mains_plus_speech": {
+            "utterances": 3,
+            "utts_with_hz": 3,
+            "hz_p05_values": [
+              114.88,
+              174.36,
+              174.46
+            ],
+            "hz_p05_sequence": [
+              174.36,
+              114.88,
+              174.46
+            ],
+            "voiced_ratio_median": 0.9595,
+            "gate_prob_max": 0.9999971389770508,
+            "hum_residual_db": -1.12
+          },
+          "hpf60": {
+            "utterances": 3,
+            "utts_with_hz": 3,
+            "hz_p05_values": [
+              97.99,
+              174.38,
+              174.41
+            ],
+            "hz_p05_sequence": [
+              174.38,
+              97.99,
+              174.41
+            ],
+            "voiced_ratio_median": 0.9711,
+            "gate_prob_max": 0.999996542930603,
+            "hum_residual_db": -0.12
+          }
+        }
+      },
+      {
+        "family": "mixtestvad",
+        "hum_hz": 175,
+        "snr_db": 0.0,
+        "signal": "mixtestvad_hum175Hz_0dB",
+        "arms": {
+          "none": {
+            "utterances": 3,
+            "utts_with_hz": 3,
+            "hz_p05_values": [
+              162.1,
+              174.39,
+              174.82
+            ],
+            "hz_p05_sequence": [
+              174.39,
+              162.1,
+              174.82
+            ],
+            "voiced_ratio_median": 0.9769,
+            "gate_prob_max": 0.9999933242797852,
+            "hum_residual_db": 0.0
+          },
+          "noop_control": {
+            "utterances": 3,
+            "utts_with_hz": 3,
+            "hz_p05_values": [
+              162.1,
+              174.39,
+              174.82
+            ],
+            "hz_p05_sequence": [
+              174.39,
+              162.1,
+              174.82
+            ],
+            "voiced_ratio_median": 0.9769,
+            "gate_prob_max": 0.9999933242797852,
+            "hum_residual_db": 0.0
+          },
+          "notch_mains": {
+            "utterances": 3,
+            "utts_with_hz": 3,
+            "hz_p05_values": [
+              162.11,
+              174.47,
+              174.82
+            ],
+            "hz_p05_sequence": [
+              174.47,
+              162.11,
+              174.82
+            ],
+            "voiced_ratio_median": 0.9769,
+            "gate_prob_max": 0.9999918937683105,
+            "hum_residual_db": -0.12
+          },
+          "notch_mains_plus_speech": {
+            "utterances": 3,
+            "utts_with_hz": 3,
+            "hz_p05_values": [
+              116.25,
+              174.02,
+              174.83
+            ],
+            "hz_p05_sequence": [
+              174.02,
+              116.25,
+              174.83
+            ],
+            "voiced_ratio_median": 0.9769,
+            "gate_prob_max": 0.9999954104423523,
+            "hum_residual_db": -1.12
+          },
+          "hpf60": {
+            "utterances": 3,
+            "utts_with_hz": 3,
+            "hz_p05_values": [
+              162.16,
+              174.47,
+              174.81
+            ],
+            "hz_p05_sequence": [
+              174.47,
+              162.16,
+              174.81
+            ],
+            "voiced_ratio_median": 0.9769,
+            "gate_prob_max": 0.999991774559021,
+            "hum_residual_db": -0.12
+          }
+        }
+      },
+      {
+        "family": "mixtestvad",
+        "hum_hz": 200,
+        "snr_db": 20.0,
+        "signal": "mixtestvad_hum200Hz_20dB",
+        "arms": {
+          "none": {
+            "utterances": 4,
+            "utts_with_hz": 4,
+            "hz_p05_values": [
+              170.83,
+              177.3,
+              189.38,
+              193.97
+            ],
+            "hz_p05_sequence": [
+              193.97,
+              189.38,
+              170.83,
+              177.3
+            ],
+            "voiced_ratio_median": 0.9152,
+            "gate_prob_max": 0.9999978542327881,
+            "hum_residual_db": 0.0
+          },
+          "noop_control": {
+            "utterances": 4,
+            "utts_with_hz": 4,
+            "hz_p05_values": [
+              170.83,
+              177.3,
+              189.38,
+              193.97
+            ],
+            "hz_p05_sequence": [
+              193.97,
+              189.38,
+              170.83,
+              177.3
+            ],
+            "voiced_ratio_median": 0.9152,
+            "gate_prob_max": 0.9999978542327881,
+            "hum_residual_db": 0.0
+          },
+          "notch_mains": {
+            "utterances": 4,
+            "utts_with_hz": 4,
+            "hz_p05_values": [
+              170.82,
+              177.31,
+              189.38,
+              194.02
+            ],
+            "hz_p05_sequence": [
+              194.02,
+              189.38,
+              170.82,
+              177.31
+            ],
+            "voiced_ratio_median": 0.9152,
+            "gate_prob_max": 0.9999978542327881,
+            "hum_residual_db": -0.07
+          },
+          "notch_mains_plus_speech": {
+            "utterances": 4,
+            "utts_with_hz": 4,
+            "hz_p05_values": [
+              110.82,
+              179.39,
+              190.45,
+              194.09
+            ],
+            "hz_p05_sequence": [
+              194.09,
+              190.45,
+              110.82,
+              179.39
+            ],
+            "voiced_ratio_median": 0.8901,
+            "gate_prob_max": 0.9999984502792358,
+            "hum_residual_db": -50.38
+          },
+          "hpf60": {
+            "utterances": 4,
+            "utts_with_hz": 4,
+            "hz_p05_values": [
+              170.82,
+              177.32,
+              189.38,
+              194.07
+            ],
+            "hz_p05_sequence": [
+              194.07,
+              189.38,
+              170.82,
+              177.32
+            ],
+            "voiced_ratio_median": 0.9152,
+            "gate_prob_max": 0.9999973773956299,
+            "hum_residual_db": -0.07
+          }
+        }
+      },
+      {
+        "family": "mixtestvad",
+        "hum_hz": 200,
+        "snr_db": 10.0,
+        "signal": "mixtestvad_hum200Hz_10dB",
+        "arms": {
+          "none": {
+            "utterances": 3,
+            "utts_with_hz": 3,
+            "hz_p05_values": [
+              185.57,
+              186.73,
+              193.87
+            ],
+            "hz_p05_sequence": [
+              193.87,
+              186.73,
+              185.57
+            ],
+            "voiced_ratio_median": 0.9711,
+            "gate_prob_max": 0.9999983310699463,
+            "hum_residual_db": 0.0
+          },
+          "noop_control": {
+            "utterances": 3,
+            "utts_with_hz": 3,
+            "hz_p05_values": [
+              185.57,
+              186.73,
+              193.87
+            ],
+            "hz_p05_sequence": [
+              193.87,
+              186.73,
+              185.57
+            ],
+            "voiced_ratio_median": 0.9711,
+            "gate_prob_max": 0.9999983310699463,
+            "hum_residual_db": 0.0
+          },
+          "notch_mains": {
+            "utterances": 3,
+            "utts_with_hz": 3,
+            "hz_p05_values": [
+              185.56,
+              186.73,
+              193.91
+            ],
+            "hz_p05_sequence": [
+              193.91,
+              186.73,
+              185.56
+            ],
+            "voiced_ratio_median": 0.9711,
+            "gate_prob_max": 0.9999984502792358,
+            "hum_residual_db": -0.07
+          },
+          "notch_mains_plus_speech": {
+            "utterances": 3,
+            "utts_with_hz": 3,
+            "hz_p05_values": [
+              100.04,
+              100.54,
+              188.87
+            ],
+            "hz_p05_sequence": [
+              100.04,
+              100.54,
+              188.87
+            ],
+            "voiced_ratio_median": 0.9306,
+            "gate_prob_max": 0.9999986290931702,
+            "hum_residual_db": -51.38
+          },
+          "hpf60": {
+            "utterances": 3,
+            "utts_with_hz": 3,
+            "hz_p05_values": [
+              185.69,
+              187.94,
+              193.98
+            ],
+            "hz_p05_sequence": [
+              193.98,
+              187.94,
+              185.69
+            ],
+            "voiced_ratio_median": 0.9711,
+            "gate_prob_max": 0.9999979734420776,
+            "hum_residual_db": -0.07
+          }
+        }
+      },
+      {
+        "family": "mixtestvad",
+        "hum_hz": 200,
+        "snr_db": 0.0,
+        "signal": "mixtestvad_hum200Hz_0dB",
+        "arms": {
+          "none": {
+            "utterances": 3,
+            "utts_with_hz": 3,
+            "hz_p05_values": [
+              101.52,
+              197.58,
+              197.59
+            ],
+            "hz_p05_sequence": [
+              197.59,
+              101.52,
+              197.58
+            ],
+            "voiced_ratio_median": 0.9942,
+            "gate_prob_max": 0.9999966025352478,
+            "hum_residual_db": 0.0
+          },
+          "noop_control": {
+            "utterances": 3,
+            "utts_with_hz": 3,
+            "hz_p05_values": [
+              101.52,
+              197.58,
+              197.59
+            ],
+            "hz_p05_sequence": [
+              197.59,
+              101.52,
+              197.58
+            ],
+            "voiced_ratio_median": 0.9942,
+            "gate_prob_max": 0.9999966025352478,
+            "hum_residual_db": 0.0
+          },
+          "notch_mains": {
+            "utterances": 3,
+            "utts_with_hz": 3,
+            "hz_p05_values": [
+              101.51,
+              197.58,
+              197.69
+            ],
+            "hz_p05_sequence": [
+              197.69,
+              101.51,
+              197.58
+            ],
+            "voiced_ratio_median": 0.9942,
+            "gate_prob_max": 0.9999969005584717,
+            "hum_residual_db": -0.07
+          },
+          "notch_mains_plus_speech": {
+            "utterances": 3,
+            "utts_with_hz": 3,
+            "hz_p05_values": [
+              100.39,
+              195.87,
+              198.01
+            ],
+            "hz_p05_sequence": [
+              198.01,
+              100.39,
+              195.87
+            ],
+            "voiced_ratio_median": 0.9711,
+            "gate_prob_max": 0.9999961256980896,
+            "hum_residual_db": -51.68
+          },
+          "hpf60": {
+            "utterances": 3,
+            "utts_with_hz": 3,
+            "hz_p05_values": [
+              101.49,
+              197.66,
+              198.29
+            ],
+            "hz_p05_sequence": [
+              198.29,
+              101.49,
+              197.66
+            ],
+            "voiced_ratio_median": 0.9942,
+            "gate_prob_max": 0.999997615814209,
+            "hum_residual_db": -0.07
+          }
+        }
+      }
+    ]
+  },
+  "hum_alone_testvad": [
+    {
+      "hum_hz": 150,
+      "arms": {
+        "none": {
+          "utterances": 3,
+          "utts_with_hz": 3,
+          "hz_p05_values": [
+            150.0,
+            150.0,
+            150.0
+          ],
+          "hz_p05_sequence": [
+            150.0,
+            150.0,
+            150.0
+          ],
+          "voiced_ratio_median": 1.0,
+          "gate_prob_max": 0.9850487112998962
+        },
+        "noop_control": {
+          "utterances": 3,
+          "utts_with_hz": 3,
+          "hz_p05_values": [
+            150.0,
+            150.0,
+            150.0
+          ],
+          "hz_p05_sequence": [
+            150.0,
+            150.0,
+            150.0
+          ],
+          "voiced_ratio_median": 1.0,
+          "gate_prob_max": 0.9850487112998962
+        },
+        "notch_mains": {
+          "utterances": 3,
+          "utts_with_hz": 3,
+          "hz_p05_values": [
+            150.0,
+            150.0,
+            150.0
+          ],
+          "hz_p05_sequence": [
+            150.0,
+            150.0,
+            150.0
+          ],
+          "voiced_ratio_median": 1.0,
+          "gate_prob_max": 0.9846888184547424
+        },
+        "notch_mains_plus_speech": {
+          "utterances": 3,
+          "utts_with_hz": 1,
+          "hz_p05_values": [
+            150.0
+          ],
+          "hz_p05_sequence": [
+            150.0
+          ],
+          "voiced_ratio_median": 0.0,
+          "gate_prob_max": 0.8643649816513062
+        },
+        "hpf60": {
+          "utterances": 3,
+          "utts_with_hz": 3,
+          "hz_p05_values": [
+            150.0,
+            150.0,
+            150.0
+          ],
+          "hz_p05_sequence": [
+            150.0,
+            150.0,
+            150.0
+          ],
+          "voiced_ratio_median": 1.0,
+          "gate_prob_max": 0.9973524212837219
+        }
+      }
+    },
+    {
+      "hum_hz": 200,
+      "arms": {
+        "none": {
+          "utterances": 3,
+          "utts_with_hz": 3,
+          "hz_p05_values": [
+            200.01,
+            200.01,
+            200.01
+          ],
+          "hz_p05_sequence": [
+            200.01,
+            200.01,
+            200.01
+          ],
+          "voiced_ratio_median": 1.0,
+          "gate_prob_max": 0.9729323387145996
+        },
+        "noop_control": {
+          "utterances": 3,
+          "utts_with_hz": 3,
+          "hz_p05_values": [
+            200.01,
+            200.01,
+            200.01
+          ],
+          "hz_p05_sequence": [
+            200.01,
+            200.01,
+            200.01
+          ],
+          "voiced_ratio_median": 1.0,
+          "gate_prob_max": 0.9729323387145996
+        },
+        "notch_mains": {
+          "utterances": 3,
+          "utts_with_hz": 3,
+          "hz_p05_values": [
+            200.01,
+            200.01,
+            200.01
+          ],
+          "hz_p05_sequence": [
+            200.01,
+            200.01,
+            200.01
+          ],
+          "voiced_ratio_median": 1.0,
+          "gate_prob_max": 0.9764716625213623
+        },
+        "notch_mains_plus_speech": {
+          "utterances": 3,
+          "utts_with_hz": 1,
+          "hz_p05_values": [
+            200.01
+          ],
+          "hz_p05_sequence": [
+            200.01
+          ],
+          "voiced_ratio_median": 0.0,
+          "gate_prob_max": 0.6259266138076782
+        },
+        "hpf60": {
+          "utterances": 3,
+          "utts_with_hz": 3,
+          "hz_p05_values": [
+            200.01,
+            200.01,
+            200.01
+          ],
+          "hz_p05_sequence": [
+            200.01,
+            200.01,
+            200.01
+          ],
+          "voiced_ratio_median": 1.0,
+          "gate_prob_max": 0.9879447221755981
+        }
+      }
+    }
+  ],
+  "verdict": {
+    "none": {
+      "R_recovery": 0.41,
+      "mixture_values": 100,
+      "within_100c": 41,
+      "cents_vs_clean_median": {
+        "median": -175.5,
+        "p10": -1564.0,
+        "p90": 89.8
+      },
+      "cells_with_hz": 30,
+      "dCELLS": 0,
+      "checks": {
+        "S1_recovery": false,
+        "S2_clean_median": true,
+        "S3_clean_max": true,
+        "S4_delivery": true,
+        "S5_coverage": true
+      },
+      "SHIPS": false
+    },
+    "noop_control": {
+      "R_recovery": 0.41,
+      "mixture_values": 100,
+      "within_100c": 41,
+      "cents_vs_clean_median": {
+        "median": -175.5,
+        "p10": -1564.0,
+        "p90": 89.8
+      },
+      "cells_with_hz": 30,
+      "dCELLS": 0,
+      "checks": {
+        "S1_recovery": false,
+        "S2_clean_median": true,
+        "S3_clean_max": true,
+        "S4_delivery": true,
+        "S5_coverage": true
+      },
+      "SHIPS": false
+    },
+    "notch_mains": {
+      "R_recovery": 0.5,
+      "mixture_values": 100,
+      "within_100c": 50,
+      "cents_vs_clean_median": {
+        "median": -91.3,
+        "p10": -1555.4,
+        "p90": 89.3
+      },
+      "cells_with_hz": 30,
+      "dCELLS": 0,
+      "checks": {
+        "S1_recovery": false,
+        "S2_clean_median": true,
+        "S3_clean_max": false,
+        "S4_delivery": true,
+        "S5_coverage": true
+      },
+      "SHIPS": false
+    },
+    "notch_mains_plus_speech": {
+      "R_recovery": 0.449,
+      "mixture_values": 98,
+      "within_100c": 44,
+      "cents_vs_clean_median": {
+        "median": -113.1,
+        "p10": -1541.4,
+        "p90": 78.9
+      },
+      "cells_with_hz": 30,
+      "dCELLS": 0,
+      "checks": {
+        "S1_recovery": false,
+        "S2_clean_median": false,
+        "S3_clean_max": false,
+        "S4_delivery": true,
+        "S5_coverage": true
+      },
+      "SHIPS": false
+    },
+    "hpf60": {
+      "R_recovery": 0.37,
+      "mixture_values": 100,
+      "within_100c": 37,
+      "cents_vs_clean_median": {
+        "median": -527.2,
+        "p10": -1555.7,
+        "p90": 90.7
+      },
+      "cells_with_hz": 30,
+      "dCELLS": 0,
+      "checks": {
+        "S1_recovery": false,
+        "S2_clean_median": true,
+        "S3_clean_max": false,
+        "S4_delivery": true,
+        "S5_coverage": true
+      },
+      "SHIPS": false
+    }
+  },
+  "run_validity": {
+    "V1_deliberately_losing_hpf60_passed": false,
+    "V2_noop_control_bit_identical": true,
+    "V3_any_arm_zero_clean_utterances": false,
+    "VOID": false,
+    "note": "VOID means the numbers above exist but must not be used to decide anything. V1 means the harness cannot detect the failure it was built to detect."
+  },
+  "shipped_arms": []
+}
