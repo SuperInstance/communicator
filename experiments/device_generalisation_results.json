@@ -1,0 +1,383 @@
+{
+  "note": "Does the silero gate's advantage over the ungated watcher survive cache pressure? Percent of one core to push 30 s of audio through a Watcher, warm (no flush) and cold (L1/L2/L3 flushed before every 100 ms chunk, flush time excluded). The RATIO ungated/gated is the portable quantity; the absolute percentages are machine-specific.",
+  "machine": {
+    "cpu": "AMD Ryzen AI 9 HX 370 w/ Radeon 890M",
+    "l3": "16 MiB (1 instance)",
+    "flush_buffer_mb": 256,
+    "threads": "gate pinned to 1 (vad.py intra_op_num_threads=1)"
+  },
+  "protocol": {
+    "audio_s": 30.0,
+    "chunk_samples": 1600,
+    "repeats": 5,
+    "warmup_passes": 1,
+    "gate_threshold": 0.5
+  },
+  "flush_verification": {
+    "claim": "A deliberately L1-resident control loop must measurably slow under the same flush, or 'cold' is an unverified label and the cold column means nothing.",
+    "control_bytes": 32768,
+    "control_warm_us": {
+      "median": 0.951,
+      "min": 0.931,
+      "max": 88.719,
+      "stdev": 11.338,
+      "runs": [
+        88.719,
+        5.01,
+        1.573,
+        1.032,
+        0.962,
+        1.012,
+        0.962,
+        0.952,
+        0.931,
+        0.951,
+        0.931,
+        0.931,
+        0.932,
+        0.932,
+        0.932,
+        0.942,
+        0.942,
+        0.942,
+        0.942,
+        0.952,
+        0.932,
+        0.962,
+        0.961,
+        0.951,
+        0.951,
+        0.961,
+        0.941,
+        0.932,
+        0.952,
+        0.942,
+        0.952,
+        0.932,
+        0.942,
+        0.942,
+        0.952,
+        5.54,
+        1.001,
+        0.961,
+        0.962,
+        0.942,
+        0.952,
+        0.942,
+        0.942,
+        0.952,
+        0.942,
+        0.952,
+        0.952,
+        0.942,
+        0.952,
+        0.951,
+        0.951,
+        0.941,
+        0.942,
+        1.102,
+        0.952,
+        0.942,
+        0.962,
+        0.942,
+        0.942,
+        0.942
+      ]
+    },
+    "control_cold_us": {
+      "median": 18.34,
+      "min": 16.692,
+      "max": 47.481,
+      "stdev": 4.058,
+      "runs": [
+        20.398,
+        18.595,
+        19.818,
+        18.575,
+        16.692,
+        18.065,
+        17.964,
+        18.295,
+        19.237,
+        18.135,
+        18.284,
+        18.545,
+        18.275,
+        18.215,
+        17.934,
+        18.395,
+        18.165,
+        17.753,
+        26.01,
+        18.716,
+        18.195,
+        17.443,
+        19.347,
+        20.059,
+        19.066,
+        18.315,
+        17.293,
+        18.024,
+        18.285,
+        19.957,
+        17.964,
+        17.944,
+        18.215,
+        18.726,
+        18.736,
+        17.183,
+        18.615,
+        23.855,
+        18.095,
+        18.055,
+        22.733,
+        19.316,
+        23.735,
+        17.603,
+        18.435,
+        17.914,
+        18.104,
+        18.505,
+        18.055,
+        17.874,
+        18.997,
+        18.305,
+        18.254,
+        18.556,
+        47.481,
+        18.766,
+        18.365,
+        19.207,
+        19.076,
+        22.903
+      ]
+    },
+    "control_slowdown_x": 19.285,
+    "flush_is_real": true
+  },
+  "signals": {
+    "speech_alice01": {
+      "gate_stats": {
+        "mean": 0.6854,
+        "frac": 0.6809
+      },
+      "warm_gated": {
+        "median": 38.345,
+        "min": 34.464,
+        "max": 39.566,
+        "stdev": 2.124,
+        "runs": [
+          39.566,
+          39.226,
+          34.464,
+          36.53,
+          38.345
+        ],
+        "flush_s_per_run": 0.0
+      },
+      "cold_gated": {
+        "median": 36.398,
+        "min": 34.341,
+        "max": 42.438,
+        "stdev": 3.081,
+        "runs": [
+          36.398,
+          34.341,
+          36.016,
+          36.642,
+          42.438
+        ],
+        "flush_s_per_run": 3.25
+      },
+      "warm_ungated": {
+        "median": 39.252,
+        "min": 33.721,
+        "max": 42.713,
+        "stdev": 3.257,
+        "runs": [
+          39.815,
+          39.252,
+          42.713,
+          33.721,
+          38.509
+        ],
+        "flush_s_per_run": 0.0
+      },
+      "cold_ungated": {
+        "median": 39.287,
+        "min": 37.896,
+        "max": 40.747,
+        "stdev": 1.032,
+        "runs": [
+          39.08,
+          39.287,
+          39.694,
+          37.896,
+          40.747
+        ],
+        "flush_s_per_run": 3.37
+      },
+      "ratio_warm": 1.02,
+      "ratio_cold": 1.08,
+      "gated_inflation": 0.949,
+      "ungated_inflation": 1.001,
+      "relative_cache_penalty": 0.948,
+      "ratio_degrades": false
+    },
+    "hum_120_harmonic_0.05": {
+      "gate_stats": {
+        "mean": 0.0236,
+        "frac": 0.0011
+      },
+      "warm_gated": {
+        "median": 3.319,
+        "min": 3.072,
+        "max": 3.76,
+        "stdev": 0.259,
+        "runs": [
+          3.201,
+          3.072,
+          3.76,
+          3.344,
+          3.319
+        ],
+        "flush_s_per_run": 0.0
+      },
+      "cold_gated": {
+        "median": 3.946,
+        "min": 3.438,
+        "max": 4.404,
+        "stdev": 0.378,
+        "runs": [
+          4.404,
+          4.153,
+          3.698,
+          3.946,
+          3.438
+        ],
+        "flush_s_per_run": 3.43
+      },
+      "warm_ungated": {
+        "median": 61.268,
+        "min": 56.82,
+        "max": 62.385,
+        "stdev": 2.482,
+        "runs": [
+          62.147,
+          56.82,
+          61.268,
+          58.33,
+          62.385
+        ],
+        "flush_s_per_run": 0.0
+      },
+      "cold_ungated": {
+        "median": 65.831,
+        "min": 62.103,
+        "max": 70.061,
+        "stdev": 3.358,
+        "runs": [
+          70.061,
+          69.893,
+          65.831,
+          62.103,
+          65.384
+        ],
+        "flush_s_per_run": 3.53
+      },
+      "ratio_warm": 18.46,
+      "ratio_cold": 16.68,
+      "gated_inflation": 1.189,
+      "ungated_inflation": 1.074,
+      "relative_cache_penalty": 1.107,
+      "ratio_degrades": false
+    }
+  },
+  "gate_alone": {
+    "speech_alice01": {
+      "warm": {
+        "median": 0.414,
+        "min": 0.377,
+        "max": 0.419,
+        "stdev": 0.018,
+        "runs": [
+          0.377,
+          0.419,
+          0.416,
+          0.414,
+          0.412
+        ],
+        "flush_s_per_run": 0.0
+      },
+      "cold": {
+        "median": 0.756,
+        "min": 0.678,
+        "max": 0.853,
+        "stdev": 0.078,
+        "runs": [
+          0.678,
+          0.724,
+          0.853,
+          0.756,
+          0.853
+        ],
+        "flush_s_per_run": 3.47
+      }
+    },
+    "hum_120_harmonic_0.05": {
+      "warm": {
+        "median": 0.511,
+        "min": 0.471,
+        "max": 0.533,
+        "stdev": 0.027,
+        "runs": [
+          0.533,
+          0.533,
+          0.511,
+          0.471,
+          0.493
+        ],
+        "flush_s_per_run": 0.0
+      },
+      "cold": {
+        "median": 0.818,
+        "min": 0.75,
+        "max": 0.836,
+        "stdev": 0.037,
+        "runs": [
+          0.818,
+          0.819,
+          0.767,
+          0.836,
+          0.75
+        ],
+        "flush_s_per_run": 3.49
+      }
+    }
+  },
+  "cross_architecture": {
+    "qemu-aarch64": null,
+    "qemu-aarch64-static": null,
+    "qemu-user-static": null,
+    "qemu-arm": null,
+    "qemu-riscv64": null,
+    "qemu-x86_64": null,
+    "qemu_packages_installed": null,
+    "binfmt_misc_handlers": [
+      "WSLInterop",
+      "python3.14",
+      "register",
+      "status"
+    ],
+    "docker_cli_present": true,
+    "docker_usable": false,
+    "docker_detail": "The command 'docker' could not be found in this WSL 2 distro.\nWe recommend to activate the WSL integration in Docker Desktop settings.\n\nFor details about using Docker Desktop with WSL 2, visit:\n\nhttps://docs.docker.com/go/wsl2/"
+  },
+  "limits": [
+    "Cache-size proxy, NOT a held-out device. Perturbs working set vs cache only; leaves core count, memory latency, ISA, ORT kernels and thermal behaviour untouched.",
+    "Can falsify the 15x claim under cache pressure; cannot confirm generalisation to a device nobody ran it on.",
+    "Absolute percent-of-a-core figures are specific to a Ryzen AI 9 HX 370 under WSL2 and are not portable; the ratio is.",
+    "The flush evicts the watcher's own buffers as well as the gate's weights, so it is a harsher regime than a device that only has a small model competing for cache."
+  ],
+  "elapsed_s": 652.0
+}
