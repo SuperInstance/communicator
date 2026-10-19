@@ -1,0 +1,58 @@
+{
+ "question": "Is speaker identity present in this audio for a cheap spectral front-end?",
+ "feature": "20-band log LTAS, 25ms/10ms, 100-4000 Hz, L2-normalised, cosine similarity",
+ "cost": "numpy only; 4x90s WAV already in tree; no model, no network, no GPU",
+ "n_segments_total": 34,
+ "note_on_overlap": "empty by construction: AMI audible turns tile (0.0% overlap, TWO-SPEAKER-TURNS.md) -- not measured here",
+ "meta": {
+  "meeting_window": [
+   640.3700000047684,
+   1060.3700000047684
+  ],
+  "clean_channel_window_s": [
+   700.3700000047684,
+   790.3700000047684
+  ],
+  "n_segments_in_420s": 177,
+  "n_segments_in_paired_90s": 34,
+  "overlap_slice_status": "empty by construction: AMI audible turns tile (0.0% overlap, TWO-SPEAKER-TURNS.md) -- not measured here"
+ },
+ "results": [
+  {
+   "slice": "ceiling: own clean headset channel",
+   "n_segments": 34,
+   "n_speakers": 4,
+   "n_pairs": 561,
+   "n_positive_pairs": 417,
+   "speaker_id_LOO_accuracy": 0.0,
+   "speaker_id_chance": 0.25,
+   "auc_different_speaker": 0.3338,
+   "auc_different_speaker_UNCENTRED": 0.3988
+  },
+  {
+   "slice": "farfield: single mic, same 90 s window",
+   "n_segments": 34,
+   "n_speakers": 4,
+   "n_pairs": 561,
+   "n_positive_pairs": 417,
+   "speaker_id_LOO_accuracy": 0.0,
+   "speaker_id_chance": 0.25,
+   "auc_different_speaker": 0.451,
+   "auc_different_speaker_UNCENTRED": 0.4611
+  }
+ ],
+ "verdict": "NEGATIVE: a trivial magnitude-only spectral statistic fails even on CLEAN single-speaker audio. This probe cannot support the architecture question. A learned embedding may still work, but nothing here licenses the claim that a cheap spectral front-end can carry speaker identity.",
+ "positive_control": {
+  "what": "F0 separates the two voice classes (MEE vs FEO) in this same harness",
+  "n_segments": 14,
+  "median_abs_f0_difference_between_classes_hz": 98.5,
+  "f0_median_by_speaker": {
+   "FEO070": 200.2,
+   "FEO072": 207.6,
+   "MEE071": 109.0,
+   "MEE073": 103.0
+  },
+  "verdict": "harness is sound: it resolves a signal known to be present"
+ },
+ "interpretation_caveat": "Both AUCs land BELOW 0.5, i.e. inverted rather than merely flat. An inverted result is a harness signature -- exactly the shape of the 0.289 overlap inversion already caught in TWO-SPEAKER-TURNS.md. Duration control (AUC gets MORE inverted as segments get longer, 0.33 -> 0.13) and temporal-drift control (corr(cos,|dt|) = -0.05) did not explain it, and the F0 positive control proves the code path resolves a real signal. The defensible reading is therefore the WEAK one: a magnitude-only log-spectrogram statistic does not carry usable speaker identity in this corpus. The inversion itself is NOT claimed as a result -- it is flagged as unexplained."
+}
