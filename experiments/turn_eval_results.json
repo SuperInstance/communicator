@@ -40,6 +40,16 @@
       },
       "annotation_auc": 0.2893,
       "overlapping_turns": 165,
+      "annotation_structure": {
+        "n_pairs": 313,
+        "n_with_audible_bounds": 132,
+        "raw_overlap_frac": 0.5272,
+        "audible_overlap_frac": 0.0,
+        "raw_median_gap": -0.06,
+        "audible_median_gap": 0.0,
+        "audible_segments": 203,
+        "segments_total": 314
+      },
       "watcher_pairs": {
         "n": 685,
         "base_rate_change": 0.7022,
@@ -169,6 +179,16 @@
       },
       "annotation_auc": 0.3557,
       "overlapping_turns": 92,
+      "annotation_structure": {
+        "n_pairs": 229,
+        "n_with_audible_bounds": 108,
+        "raw_overlap_frac": 0.4017,
+        "audible_overlap_frac": 0.0,
+        "raw_median_gap": 0.0,
+        "audible_median_gap": 0.0,
+        "audible_segments": 158,
+        "segments_total": 230
+      },
       "watcher_pairs": {
         "n": 711,
         "base_rate_change": 0.5457,
