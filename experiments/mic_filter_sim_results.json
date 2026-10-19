@@ -1,0 +1,174 @@
+{
+  "note": "Measured effect of a hardware high-pass on this repo's own F0 tracker. Cut-off, measured attenuation at mains harmonics, and pitch error against the UNFILTERED tracker on the same frames. No gate is loaded and no hardware is modelled.",
+  "audio": {
+    "path": "examples/realaudio/alice01_excerpt.wav",
+    "sample_rate": 16000,
+    "seconds": 90.0,
+    "frames_available": 8996,
+    "frame_stride": 3,
+    "frames_analysed": 2999,
+    "pitch_range_hz": [
+      70.0,
+      400.0
+    ],
+    "energy_floor_rms": 0.001
+  },
+  "filter": "RBJ biquad high-pass, 2 cascaded sections (4th order), Q=0.707",
+  "rows": [
+    {
+      "cutoff_hz": null,
+      "note": "unfiltered reference",
+      "voiced_frames": 1484,
+      "median_hz": 228.915,
+      "atten_db": {
+        "50": null,
+        "100": null,
+        "150": null,
+        "200": null
+      }
+    },
+    {
+      "cutoff_hz": 60,
+      "sections": 2,
+      "voiced_frames": 1486,
+      "median_hz": 228.987,
+      "seconds": 15.7,
+      "compared_frames": 1482,
+      "median_abs_cents": 0.14,
+      "p90_abs_cents": 1.43,
+      "max_abs_cents": 1212.77,
+      "frac_over_20_cents": 0.0054,
+      "frac_over_50_cents": 0.0034,
+      "octave_error_rate": 0.0007,
+      "median_hz_shift": 0.001,
+      "voiced_frames_lost_to_filter": 2,
+      "atten_db": {
+        "50": -9.79,
+        "100": -1.08,
+        "150": -0.23,
+        "200": -0.08
+      }
+    },
+    {
+      "cutoff_hz": 100,
+      "sections": 2,
+      "voiced_frames": 1488,
+      "median_hz": 229.093,
+      "seconds": 15.6,
+      "compared_frames": 1481,
+      "median_abs_cents": 0.24,
+      "p90_abs_cents": 2.57,
+      "max_abs_cents": 1256.8,
+      "frac_over_20_cents": 0.0135,
+      "frac_over_50_cents": 0.0054,
+      "octave_error_rate": 0.002,
+      "median_hz_shift": 0.003,
+      "voiced_frames_lost_to_filter": 3,
+      "atten_db": {
+        "50": -24.49,
+        "100": -6.04,
+        "150": -1.58,
+        "200": -0.53
+      }
+    },
+    {
+      "cutoff_hz": 150,
+      "sections": 2,
+      "voiced_frames": 1476,
+      "median_hz": 229.437,
+      "seconds": 15.3,
+      "compared_frames": 1467,
+      "median_abs_cents": 0.47,
+      "p90_abs_cents": 4.82,
+      "max_abs_cents": 1263.2,
+      "frac_over_20_cents": 0.0259,
+      "frac_over_50_cents": 0.0136,
+      "octave_error_rate": 0.0041,
+      "median_hz_shift": 0.008,
+      "voiced_frames_lost_to_filter": 17,
+      "atten_db": {
+        "50": -37.56,
+        "100": -15.65,
+        "150": -6.04,
+        "200": -2.4
+      }
+    },
+    {
+      "cutoff_hz": 200,
+      "sections": 2,
+      "voiced_frames": 1448,
+      "median_hz": 229.541,
+      "seconds": 16.2,
+      "compared_frames": 1442,
+      "median_abs_cents": 0.73,
+      "p90_abs_cents": 8.73,
+      "max_abs_cents": 2084.66,
+      "frac_over_20_cents": 0.0506,
+      "frac_over_50_cents": 0.0257,
+      "octave_error_rate": 0.0055,
+      "median_hz_shift": 0.009,
+      "voiced_frames_lost_to_filter": 42,
+      "atten_db": {
+        "50": -45.98,
+        "100": -24.56,
+        "150": -12.4,
+        "200": -6.03
+      }
+    },
+    {
+      "cutoff_hz": null,
+      "notch_hz": [
+        200.0
+      ],
+      "q": 10.0,
+      "sections": 1,
+      "voiced_frames": 1479,
+      "median_hz": 229.202,
+      "seconds": 15.0,
+      "compared_frames": 1466,
+      "median_abs_cents": 0.18,
+      "p90_abs_cents": 4.54,
+      "max_abs_cents": 2083.45,
+      "frac_over_20_cents": 0.0402,
+      "frac_over_50_cents": 0.0198,
+      "octave_error_rate": 0.0034,
+      "median_hz_shift": 0.003,
+      "voiced_frames_lost_to_filter": 18,
+      "atten_db": {
+        "50": -0.0,
+        "100": -0.02,
+        "150": -0.13,
+        "200": -20.99
+      }
+    },
+    {
+      "cutoff_hz": null,
+      "notch_hz": [
+        50.0,
+        100.0,
+        150.0,
+        200.0
+      ],
+      "q": 10.0,
+      "sections": 4,
+      "voiced_frames": 1479,
+      "median_hz": 229.205,
+      "seconds": 15.7,
+      "compared_frames": 1465,
+      "median_abs_cents": 0.24,
+      "p90_abs_cents": 5.0,
+      "max_abs_cents": 2083.41,
+      "frac_over_20_cents": 0.0403,
+      "frac_over_50_cents": 0.0184,
+      "octave_error_rate": 0.0034,
+      "median_hz_shift": 0.004,
+      "voiced_frames_lost_to_filter": 19,
+      "atten_db": {
+        "50": -15.01,
+        "100": -18.17,
+        "150": -20.12,
+        "200": -21.33
+      }
+    }
+  ]
+}
