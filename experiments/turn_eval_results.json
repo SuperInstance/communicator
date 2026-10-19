@@ -1,0 +1,353 @@
+{
+  "meetings": {
+    "ami_sdm_EN2002a_turns": {
+      "speakers": [
+        "FEO070",
+        "FEO072",
+        "MEE071",
+        "MEE073"
+      ],
+      "config": "SDM",
+      "audio_s": 420.0,
+      "n_annotated_turns": 314,
+      "n_watcher_utterances": 487,
+      "annotation_pairs": {
+        "n": 685,
+        "base_rate_change": 0.7022,
+        "always_predict_change_accuracy": 0.7022
+      },
+      "annotation_gap": {
+        "SAME": {
+          "n": 63,
+          "min": 0.0,
+          "p10": 0.0,
+          "p25": 0.0,
+          "median": 0.0,
+          "p75": 0.0,
+          "p90": 1.32,
+          "max": 6.19
+        },
+        "CHANGE": {
+          "n": 250,
+          "min": -10.1,
+          "p10": -2.38,
+          "p25": -1.26,
+          "median": -0.28,
+          "p75": 0.22,
+          "p90": 1.09,
+          "max": 7.87
+        }
+      },
+      "annotation_auc": 0.2893,
+      "overlapping_turns": 165,
+      "watcher_pairs": {
+        "n": 685,
+        "base_rate_change": 0.7022,
+        "always_predict_change_accuracy": 0.7022
+      },
+      "watcher_auc": 0.5567,
+      "threshold_sweep": [
+        {
+          "bar_s": 0.15,
+          "n": 685,
+          "accuracy": 0.6029,
+          "precision": 0.7257,
+          "recall": 0.6985,
+          "false_interrupt": 127
+        },
+        {
+          "bar_s": 0.2,
+          "n": 685,
+          "accuracy": 0.5518,
+          "precision": 0.7266,
+          "recall": 0.58,
+          "false_interrupt": 105
+        },
+        {
+          "bar_s": 0.3,
+          "n": 685,
+          "accuracy": 0.4934,
+          "precision": 0.7376,
+          "recall": 0.4324,
+          "false_interrupt": 74
+        },
+        {
+          "bar_s": 0.45,
+          "n": 685,
+          "accuracy": 0.4336,
+          "precision": 0.7385,
+          "recall": 0.2994,
+          "false_interrupt": 51
+        },
+        {
+          "bar_s": 0.6,
+          "n": 685,
+          "accuracy": 0.4,
+          "precision": 0.7652,
+          "recall": 0.21,
+          "false_interrupt": 31
+        },
+        {
+          "bar_s": 0.8,
+          "n": 685,
+          "accuracy": 0.365,
+          "precision": 0.7805,
+          "recall": 0.1331,
+          "false_interrupt": 18
+        },
+        {
+          "bar_s": 1.0,
+          "n": 685,
+          "accuracy": 0.346,
+          "precision": 0.8,
+          "recall": 0.0915,
+          "false_interrupt": 11
+        },
+        {
+          "bar_s": 1.5,
+          "n": 685,
+          "accuracy": 0.3226,
+          "precision": 0.8696,
+          "recall": 0.0416,
+          "false_interrupt": 3
+        },
+        {
+          "bar_s": 2.0,
+          "n": 685,
+          "accuracy": 0.308,
+          "precision": 0.8182,
+          "recall": 0.0187,
+          "false_interrupt": 2
+        },
+        {
+          "bar_s": 3.0,
+          "n": 685,
+          "accuracy": 0.2978,
+          "precision": null,
+          "recall": 0.0,
+          "false_interrupt": 0
+        }
+      ]
+    },
+    "ami_sdm_EN2002b_turns": {
+      "speakers": [
+        "FEO070",
+        "FEO072",
+        "MEE071",
+        "MEE073"
+      ],
+      "config": "SDM",
+      "audio_s": 420.0,
+      "n_annotated_turns": 230,
+      "n_watcher_utterances": 517,
+      "annotation_pairs": {
+        "n": 711,
+        "base_rate_change": 0.5457,
+        "always_predict_change_accuracy": 0.5457
+      },
+      "annotation_gap": {
+        "SAME": {
+          "n": 65,
+          "min": 0.0,
+          "p10": 0.0,
+          "p25": 0.0,
+          "median": 0.0,
+          "p75": 0.0,
+          "p90": 1.52,
+          "max": 3.0
+        },
+        "CHANGE": {
+          "n": 164,
+          "min": -8.32,
+          "p10": -3.29,
+          "p25": -1.2,
+          "median": -0.15,
+          "p75": 0.58,
+          "p90": 1.61,
+          "max": 8.24
+        }
+      },
+      "annotation_auc": 0.3557,
+      "overlapping_turns": 92,
+      "watcher_pairs": {
+        "n": 711,
+        "base_rate_change": 0.5457,
+        "always_predict_change_accuracy": 0.5457
+      },
+      "watcher_auc": 0.5028,
+      "threshold_sweep": [
+        {
+          "bar_s": 0.15,
+          "n": 711,
+          "accuracy": 0.5401,
+          "precision": 0.5667,
+          "recall": 0.6675,
+          "false_interrupt": 198
+        },
+        {
+          "bar_s": 0.2,
+          "n": 711,
+          "accuracy": 0.5021,
+          "precision": 0.5445,
+          "recall": 0.5361,
+          "false_interrupt": 174
+        },
+        {
+          "bar_s": 0.3,
+          "n": 711,
+          "accuracy": 0.4838,
+          "precision": 0.5376,
+          "recall": 0.3866,
+          "false_interrupt": 129
+        },
+        {
+          "bar_s": 0.45,
+          "n": 711,
+          "accuracy": 0.4641,
+          "precision": 0.52,
+          "recall": 0.2345,
+          "false_interrupt": 84
+        },
+        {
+          "bar_s": 0.6,
+          "n": 711,
+          "accuracy": 0.4571,
+          "precision": 0.5088,
+          "recall": 0.1495,
+          "false_interrupt": 56
+        },
+        {
+          "bar_s": 0.8,
+          "n": 711,
+          "accuracy": 0.4571,
+          "precision": 0.5147,
+          "recall": 0.0902,
+          "false_interrupt": 33
+        },
+        {
+          "bar_s": 1.0,
+          "n": 711,
+          "accuracy": 0.4529,
+          "precision": 0.4894,
+          "recall": 0.0593,
+          "false_interrupt": 24
+        },
+        {
+          "bar_s": 1.5,
+          "n": 711,
+          "accuracy": 0.4557,
+          "precision": 0.5294,
+          "recall": 0.0232,
+          "false_interrupt": 8
+        },
+        {
+          "bar_s": 2.0,
+          "n": 711,
+          "accuracy": 0.4543,
+          "precision": 0.5,
+          "recall": 0.0052,
+          "false_interrupt": 2
+        },
+        {
+          "bar_s": 3.0,
+          "n": 711,
+          "accuracy": 0.4543,
+          "precision": null,
+          "recall": 0.0,
+          "false_interrupt": 0
+        }
+      ]
+    }
+  },
+  "pooled": {
+    "watcher_pairs": {
+      "n": 1396,
+      "base_rate_change": 0.6225,
+      "always_predict_change_accuracy": 0.6225
+    },
+    "auc": 0.529,
+    "threshold_sweep": [
+      {
+        "bar_s": 0.15,
+        "n": 1396,
+        "accuracy": 0.5709,
+        "precision": 0.6467,
+        "recall": 0.6847,
+        "false_interrupt": 325
+      },
+      {
+        "bar_s": 0.2,
+        "n": 1396,
+        "accuracy": 0.5265,
+        "precision": 0.6358,
+        "recall": 0.5604,
+        "false_interrupt": 279
+      },
+      {
+        "bar_s": 0.3,
+        "n": 1396,
+        "accuracy": 0.4885,
+        "precision": 0.6381,
+        "recall": 0.412,
+        "false_interrupt": 203
+      },
+      {
+        "bar_s": 0.45,
+        "n": 1396,
+        "accuracy": 0.4491,
+        "precision": 0.6351,
+        "recall": 0.2704,
+        "false_interrupt": 135
+      },
+      {
+        "bar_s": 0.6,
+        "n": 1396,
+        "accuracy": 0.4291,
+        "precision": 0.6463,
+        "recall": 0.183,
+        "false_interrupt": 87
+      },
+      {
+        "bar_s": 0.8,
+        "n": 1396,
+        "accuracy": 0.4119,
+        "precision": 0.66,
+        "recall": 0.1139,
+        "false_interrupt": 51
+      },
+      {
+        "bar_s": 1.0,
+        "n": 1396,
+        "accuracy": 0.4004,
+        "precision": 0.6569,
+        "recall": 0.0771,
+        "false_interrupt": 35
+      },
+      {
+        "bar_s": 1.5,
+        "n": 1396,
+        "accuracy": 0.3904,
+        "precision": 0.725,
+        "recall": 0.0334,
+        "false_interrupt": 11
+      },
+      {
+        "bar_s": 2.0,
+        "n": 1396,
+        "accuracy": 0.3825,
+        "precision": 0.7333,
+        "recall": 0.0127,
+        "false_interrupt": 4
+      },
+      {
+        "bar_s": 3.0,
+        "n": 1396,
+        "accuracy": 0.3775,
+        "precision": null,
+        "recall": 0.0,
+        "false_interrupt": 0
+      }
+    ]
+  },
+  "note": "Ground truth is AMI speaker_id. Gap is measured from the watcher's own events, so this is the number the turn stage would consume. `always_predict_change_accuracy` is the baseline any method must beat; on the old single-speaker corpus it was ~1.00, which is why that corpus could not falsify anything."
+}

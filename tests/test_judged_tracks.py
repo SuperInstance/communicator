@@ -30,6 +30,8 @@ WHAT THIS FILE DOES NOT PROVE, and it is a long list:
 """
 
 from __future__ import annotations
+import pytest as _pytest  # noqa: E402
+_pytest.importorskip("typesafe_sdk")  # noqa: E402
 
 import json
 import os

@@ -1,0 +1,3299 @@
+{
+  "generated_by": "experiments/twospeaker_verify.py",
+  "purpose": "prove >=2 distinct speakers exist by measurement, so the positive class (a speaker yields the floor) is representable",
+  "corpus_dir": "examples/realtwospeaker",
+  "tracker": {
+    "source": "src/pitch.py algorithm, vectorised with numpy",
+    "frame_len": 800,
+    "hop": 160,
+    "sample_rate": 16000,
+    "fmin": 70.0,
+    "fmax": 400.0,
+    "yin_threshold": 0.15,
+    "min_confidence": 0.5,
+    "energy_floor": 0.001
+  },
+  "slices": {
+    "ami_sdm_EN2002a_turns.wav": {
+      "file": "ami_sdm_EN2002a_turns.wav",
+      "meeting_id": "EN2002a",
+      "duration_s": 420.0,
+      "measurement_scope": "non-overlapped segments only: a far-field segment overlapping another speaker carries two voices on one channel, so its median f0 describes neither speaker",
+      "speakers": {
+        "FEO070": {
+          "n": 552,
+          "median_hz": 196.91,
+          "mad_sigma_hz": 27.92,
+          "p05_hz": 73.98,
+          "p95_hz": 250.72,
+          "min_hz": 70.08,
+          "max_hz": 397.42,
+          "inlier_rate": 0.6304,
+          "segments_with_voicing": 49,
+          "voiced_frames_per_segment": {
+            "min": 0,
+            "median": 58,
+            "max": 526
+          }
+        },
+        "FEO072": {
+          "n": 1661,
+          "median_hz": 207.5,
+          "mad_sigma_hz": 31.58,
+          "p05_hz": 73.73,
+          "p95_hz": 266.39,
+          "min_hz": 70.03,
+          "max_hz": 344.32,
+          "inlier_rate": 0.7387,
+          "segments_with_voicing": 54,
+          "voiced_frames_per_segment": {
+            "min": 0,
+            "median": 94,
+            "max": 427
+          }
+        },
+        "MEE071": {
+          "n": 778,
+          "median_hz": 111.3,
+          "mad_sigma_hz": 9.85,
+          "p05_hz": 98.59,
+          "p95_hz": 147.06,
+          "min_hz": 70.06,
+          "max_hz": 276.14,
+          "inlier_rate": 0.8895,
+          "segments_with_voicing": 58,
+          "voiced_frames_per_segment": {
+            "min": 0,
+            "median": 44,
+            "max": 578
+          }
+        },
+        "MEE073": {
+          "n": 914,
+          "median_hz": 103.97,
+          "mad_sigma_hz": 10.57,
+          "p05_hz": 93.03,
+          "p95_hz": 145.56,
+          "min_hz": 71.48,
+          "max_hz": 185.76,
+          "inlier_rate": 0.8895,
+          "segments_with_voicing": 42,
+          "voiced_frames_per_segment": {
+            "min": 0,
+            "median": 63,
+            "max": 451
+          }
+        }
+      },
+      "pooled_within_speaker_mad_sigma_hz": 22.28,
+      "pairwise_separation": [
+        {
+          "a": "MEE071",
+          "b": "MEE073",
+          "median_delta_hz": 7.33,
+          "within_speaker_mad_sigma_hz": {
+            "MEE071": 9.85,
+            "MEE073": 10.57
+          },
+          "separation_in_mad_sigmas": 0.33
+        },
+        {
+          "a": "FEO070",
+          "b": "FEO072",
+          "median_delta_hz": 10.59,
+          "within_speaker_mad_sigma_hz": {
+            "FEO070": 27.92,
+            "FEO072": 31.58
+          },
+          "separation_in_mad_sigmas": 0.48
+        },
+        {
+          "a": "FEO070",
+          "b": "MEE071",
+          "median_delta_hz": 85.61,
+          "within_speaker_mad_sigma_hz": {
+            "FEO070": 27.92,
+            "MEE071": 9.85
+          },
+          "separation_in_mad_sigmas": 3.84
+        },
+        {
+          "a": "FEO070",
+          "b": "MEE073",
+          "median_delta_hz": 92.94,
+          "within_speaker_mad_sigma_hz": {
+            "FEO070": 27.92,
+            "MEE073": 10.57
+          },
+          "separation_in_mad_sigmas": 4.17
+        },
+        {
+          "a": "FEO072",
+          "b": "MEE071",
+          "median_delta_hz": 96.2,
+          "within_speaker_mad_sigma_hz": {
+            "FEO072": 31.58,
+            "MEE071": 9.85
+          },
+          "separation_in_mad_sigmas": 4.32
+        },
+        {
+          "a": "FEO072",
+          "b": "MEE073",
+          "median_delta_hz": 103.53,
+          "within_speaker_mad_sigma_hz": {
+            "FEO072": 31.58,
+            "MEE073": 10.57
+          },
+          "separation_in_mad_sigmas": 4.65
+        }
+      ],
+      "f0_resolves": {
+        "groups": 2,
+        "threshold_hz": 66.84,
+        "threshold_sigma": 3.0,
+        "assignment": {
+          "MEE073": 0,
+          "MEE071": 0,
+          "FEO070": 1,
+          "FEO072": 1
+        },
+        "speakers_resolvable_individually": 0,
+        "note": "groups = how many distinct voices median f0 can tell apart; speakers_resolvable_individually = how many speakers are far enough from EVERY other speaker to be identified on pitch alone"
+      },
+      "clustering": {
+        "method": "2-means on f0 only; speaker_id never used",
+        "centre_hz": [
+          104.35,
+          219.51
+        ],
+        "centre_separation_hz": 115.16,
+        "frames": 3905,
+        "composition": {
+          "cluster_0": {
+            "frames": 2164,
+            "speakers_present": {
+              "FEO070": 175,
+              "FEO072": 335,
+              "MEE071": 762,
+              "MEE073": 892
+            },
+            "dominant_speaker": "MEE073",
+            "dominant_share": 0.4122
+          },
+          "cluster_1": {
+            "frames": 1741,
+            "speakers_present": {
+              "FEO070": 377,
+              "FEO072": 1326,
+              "MEE071": 16,
+              "MEE073": 22
+            },
+            "dominant_speaker": "FEO072",
+            "dominant_share": 0.7616
+          }
+        },
+        "dominant_speaker_purity": 0.568
+      },
+      "crosstalk_control": {
+        "why": "same measurement on the overlapping segments, kept so the choice of subset is visible rather than asserted",
+        "speakers_in_overlapped_segments": {
+          "FEO070": {
+            "n": 4625,
+            "median_hz": 186.24,
+            "mad_sigma_hz": 83.31,
+            "p05_hz": 74.42,
+            "p95_hz": 283.38,
+            "min_hz": 70.05,
+            "max_hz": 399.37,
+            "inlier_rate": 0.4246,
+            "segments_with_voicing": 49,
+            "voiced_frames_per_segment": {
+              "min": 0,
+              "median": 58,
+              "max": 526
+            }
+          },
+          "FEO072": {
+            "n": 3604,
+            "median_hz": 191.18,
+            "mad_sigma_hz": 83.14,
+            "p05_hz": 73.85,
+            "p95_hz": 267.95,
+            "min_hz": 70.02,
+            "max_hz": 396.2,
+            "inlier_rate": 0.4315,
+            "segments_with_voicing": 54,
+            "voiced_frames_per_segment": {
+              "min": 0,
+              "median": 94,
+              "max": 427
+            }
+          },
+          "MEE071": {
+            "n": 3821,
+            "median_hz": 113.16,
+            "mad_sigma_hz": 17.72,
+            "p05_hz": 75.89,
+            "p95_hz": 270.39,
+            "min_hz": 70.03,
+            "max_hz": 398.78,
+            "inlier_rate": 0.6676,
+            "segments_with_voicing": 58,
+            "voiced_frames_per_segment": {
+              "min": 0,
+              "median": 44,
+              "max": 578
+            }
+          },
+          "MEE073": {
+            "n": 3350,
+            "median_hz": 107.11,
+            "mad_sigma_hz": 16.44,
+            "p05_hz": 85.3,
+            "p95_hz": 253.07,
+            "min_hz": 70.02,
+            "max_hz": 399.15,
+            "inlier_rate": 0.7334,
+            "segments_with_voicing": 42,
+            "voiced_frames_per_segment": {
+              "min": 0,
+              "median": 63,
+              "max": 451
+            }
+          }
+        },
+        "solo_segments": 53,
+        "overlapped_segments": 150
+      },
+      "per_segment_voiced_frames": {
+        "segments_measured": 203,
+        "total_voiced_frames": 19305,
+        "min": 0,
+        "median": 62,
+        "max": 578
+      },
+      "turn_ground_truth": {
+        "scope": "slice (window chosen for turn density)",
+        "segments": 314,
+        "turns": 263,
+        "gaps": 262,
+        "gaps_at_least_0p6s": 61,
+        "followed_by_a_DIFFERENT_speaker": 49,
+        "different_speaker_rate": 0.8033,
+        "note": "gap measured between annotated segment edges; a gap here is not necessarily a silence in the meeting, because unannotated stretches were written as digital silence by the fetcher"
+      },
+      "segments_detail": [
+        {
+          "speaker_id": "FEO072",
+          "audio_id": "AMI_EN2002a_sdm_FEO072_0063967_0064139",
+          "duration_s": 1.02,
+          "solo": true,
+          "voiced_frames": 67
+        },
+        {
+          "speaker_id": "FEO072",
+          "audio_id": "AMI_EN2002a_sdm_FEO072_0064139_0064653",
+          "duration_s": 5.14,
+          "solo": false,
+          "voiced_frames": 256
+        },
+        {
+          "speaker_id": "MEE071",
+          "audio_id": "AMI_EN2002a_sdm_MEE071_0064621_0064717",
+          "duration_s": 0.64,
+          "solo": false,
+          "voiced_frames": 35
+        },
+        {
+          "speaker_id": "FEO072",
+          "audio_id": "AMI_EN2002a_sdm_FEO072_0064653_0064783",
+          "duration_s": 0.66,
+          "solo": false,
+          "voiced_frames": 23
+        },
+        {
+          "speaker_id": "MEE071",
+          "audio_id": "AMI_EN2002a_sdm_MEE071_0064717_0064841",
+          "duration_s": 0.58,
+          "solo": false,
+          "voiced_frames": 29
+        },
+        {
+          "speaker_id": "FEO070",
+          "audio_id": "AMI_EN2002a_sdm_FEO070_0064834_0065636",
+          "duration_s": 7.95,
+          "solo": false,
+          "voiced_frames": 420
+        },
+        {
+          "speaker_id": "FEO070",
+          "audio_id": "AMI_EN2002a_sdm_FEO070_0065756_0066343",
+          "duration_s": 5.87,
+          "solo": false,
+          "voiced_frames": 260
+        },
+        {
+          "speaker_id": "MEE073",
+          "audio_id": "AMI_EN2002a_sdm_MEE073_0066363_0066473",
+          "duration_s": 1.1,
+          "solo": false,
+          "voiced_frames": 63
+        },
+        {
+          "speaker_id": "FEO072",
+          "audio_id": "AMI_EN2002a_sdm_FEO072_0066465_0066707",
+          "duration_s": 2.34,
+          "solo": false,
+          "voiced_frames": 79
+        },
+        {
+          "speaker_id": "FEO070",
+          "audio_id": "AMI_EN2002a_sdm_FEO070_0066650_0066792",
+          "duration_s": 0.85,
+          "solo": false,
+          "voiced_frames": 13
+        },
+        {
+          "speaker_id": "FEO070",
+          "audio_id": "AMI_EN2002a_sdm_FEO070_0066792_0066942",
+          "duration_s": 1.5,
+          "solo": false,
+          "voiced_frames": 47
+        },
+        {
+          "speaker_id": "MEE071",
+          "audio_id": "AMI_EN2002a_sdm_MEE071_0066914_0066991",
+          "duration_s": 0.49,
+          "solo": false,
+          "voiced_frames": 34
+        },
+        {
+          "speaker_id": "FEO070",
+          "audio_id": "AMI_EN2002a_sdm_FEO070_0066942_0067089",
+          "duration_s": 0.98,
+          "solo": false,
+          "voiced_frames": 51
+        },
+        {
+          "speaker_id": "MEE071",
+          "audio_id": "AMI_EN2002a_sdm_MEE071_0066991_0067105",
+          "duration_s": 0.16,
+          "solo": false,
+          "voiced_frames": 0
+        },
+        {
+          "speaker_id": "FEO070",
+          "audio_id": "AMI_EN2002a_sdm_FEO070_0067089_0067346",
+          "duration_s": 2.41,
+          "solo": false,
+          "voiced_frames": 120
+        },
+        {
+          "speaker_id": "FEO072",
+          "audio_id": "AMI_EN2002a_sdm_FEO072_0067298_0067356",
+          "duration_s": 0.1,
+          "solo": false,
+          "voiced_frames": 0
+        },
+        {
+          "speaker_id": "FEO072",
+          "audio_id": "AMI_EN2002a_sdm_FEO072_0067356_0067509",
+          "duration_s": 1.53,
+          "solo": false,
+          "voiced_frames": 100
+        },
+        {
+          "speaker_id": "FEO070",
+          "audio_id": "AMI_EN2002a_sdm_FEO070_0067488_0067598",
+          "duration_s": 0.89,
+          "solo": false,
+          "voiced_frames": 80
+        },
+        {
+          "speaker_id": "MEE071",
+          "audio_id": "AMI_EN2002a_sdm_MEE071_0067517_0067620",
+          "duration_s": 0.22,
+          "solo": false,
+          "voiced_frames": 10
+        },
+        {
+          "speaker_id": "FEO070",
+          "audio_id": "AMI_EN2002a_sdm_FEO070_0067598_0067821",
+          "duration_s": 2.01,
+          "solo": false,
+          "voiced_frames": 114
+        },
+        {
+          "speaker_id": "MEE071",
+          "audio_id": "AMI_EN2002a_sdm_MEE071_0067699_0067902",
+          "duration_s": 0.81,
+          "solo": false,
+          "voiced_frames": 47
+        },
+        {
+          "speaker_id": "MEE073",
+          "audio_id": "AMI_EN2002a_sdm_MEE073_0067707_0067992",
+          "duration_s": 0.9,
+          "solo": false,
+          "voiced_frames": 73
+        },
+        {
+          "speaker_id": "FEO072",
+          "audio_id": "AMI_EN2002a_sdm_FEO072_0067816_0068028",
+          "duration_s": 0.36,
+          "solo": false,
+          "voiced_frames": 16
+        },
+        {
+          "speaker_id": "MEE073",
+          "audio_id": "AMI_EN2002a_sdm_MEE073_0067992_0068134",
+          "duration_s": 1.06,
+          "solo": false,
+          "voiced_frames": 39
+        },
+        {
+          "speaker_id": "MEE071",
+          "audio_id": "AMI_EN2002a_sdm_MEE071_0068026_0068178",
+          "duration_s": 0.44,
+          "solo": false,
+          "voiced_frames": 27
+        },
+        {
+          "speaker_id": "MEE073",
+          "audio_id": "AMI_EN2002a_sdm_MEE073_0068134_0068297",
+          "duration_s": 1.19,
+          "solo": false,
+          "voiced_frames": 36
+        },
+        {
+          "speaker_id": "MEE071",
+          "audio_id": "AMI_EN2002a_sdm_MEE071_0068294_0068404",
+          "duration_s": 1.07,
+          "solo": false,
+          "voiced_frames": 97
+        },
+        {
+          "speaker_id": "MEE071",
+          "audio_id": "AMI_EN2002a_sdm_MEE071_0068404_0068460",
+          "duration_s": 0.56,
+          "solo": true,
+          "voiced_frames": 52
+        },
+        {
+          "speaker_id": "MEE071",
+          "audio_id": "AMI_EN2002a_sdm_MEE071_0068460_0068785",
+          "duration_s": 3.25,
+          "solo": true,
+          "voiced_frames": 144
+        },
+        {
+          "speaker_id": "MEE071",
+          "audio_id": "AMI_EN2002a_sdm_MEE071_0068785_0069057",
+          "duration_s": 2.72,
+          "solo": false,
+          "voiced_frames": 116
+        },
+        {
+          "speaker_id": "FEO070",
+          "audio_id": "AMI_EN2002a_sdm_FEO070_0069097_0069130",
+          "duration_s": 0.33,
+          "solo": true,
+          "voiced_frames": 25
+        },
+        {
+          "speaker_id": "FEO072",
+          "audio_id": "AMI_EN2002a_sdm_FEO072_0069193_0069280",
+          "duration_s": 0.87,
+          "solo": true,
+          "voiced_frames": 60
+        },
+        {
+          "speaker_id": "MEE071",
+          "audio_id": "AMI_EN2002a_sdm_MEE071_0069414_0069445",
+          "duration_s": 0.31,
+          "solo": true,
+          "voiced_frames": 15
+        },
+        {
+          "speaker_id": "FEO070",
+          "audio_id": "AMI_EN2002a_sdm_FEO070_0069484_0069530",
+          "duration_s": 0.46,
+          "solo": true,
+          "voiced_frames": 21
+        },
+        {
+          "speaker_id": "FEO070",
+          "audio_id": "AMI_EN2002a_sdm_FEO070_0069530_0069723",
+          "duration_s": 1.93,
+          "solo": false,
+          "voiced_frames": 107
+        },
+        {
+          "speaker_id": "FEO072",
+          "audio_id": "AMI_EN2002a_sdm_FEO072_0069694_0069876",
+          "duration_s": 1.53,
+          "solo": false,
+          "voiced_frames": 130
+        },
+        {
+          "speaker_id": "FEO070",
+          "audio_id": "AMI_EN2002a_sdm_FEO070_0069723_0070329",
+          "duration_s": 4.53,
+          "solo": false,
+          "voiced_frames": 192
+        },
+        {
+          "speaker_id": "MEE071",
+          "audio_id": "AMI_EN2002a_sdm_MEE071_0070435_0070466",
+          "duration_s": 0.31,
+          "solo": false,
+          "voiced_frames": 17
+        },
+        {
+          "speaker_id": "FEO070",
+          "audio_id": "AMI_EN2002a_sdm_FEO070_0070453_0070496",
+          "duration_s": 0.3,
+          "solo": false,
+          "voiced_frames": 3
+        },
+        {
+          "speaker_id": "FEO070",
+          "audio_id": "AMI_EN2002a_sdm_FEO070_0070629_0070651",
+          "duration_s": 0.22,
+          "solo": true,
+          "voiced_frames": 1
+        },
+        {
+          "speaker_id": "MEE073",
+          "audio_id": "AMI_EN2002a_sdm_MEE073_0070776_0071251",
+          "duration_s": 4.75,
+          "solo": true,
+          "voiced_frames": 231
+        },
+        {
+          "speaker_id": "FEO072",
+          "audio_id": "AMI_EN2002a_sdm_FEO072_0071314_0071348",
+          "duration_s": 0.34,
+          "solo": true,
+          "voiced_frames": 29
+        },
+        {
+          "speaker_id": "MEE073",
+          "audio_id": "AMI_EN2002a_sdm_MEE073_0071444_0071496",
+          "duration_s": 0.52,
+          "solo": true,
+          "voiced_frames": 27
+        },
+        {
+          "speaker_id": "FEO070",
+          "audio_id": "AMI_EN2002a_sdm_FEO070_0071598_0071661",
+          "duration_s": 0.63,
+          "solo": false,
+          "voiced_frames": 40
+        },
+        {
+          "speaker_id": "MEE073",
+          "audio_id": "AMI_EN2002a_sdm_MEE073_0071604_0071899",
+          "duration_s": 2.38,
+          "solo": false,
+          "voiced_frames": 176
+        },
+        {
+          "speaker_id": "MEE073",
+          "audio_id": "AMI_EN2002a_sdm_MEE073_0071899_0072058",
+          "duration_s": 1.59,
+          "solo": false,
+          "voiced_frames": 94
+        },
+        {
+          "speaker_id": "FEO070",
+          "audio_id": "AMI_EN2002a_sdm_FEO070_0071903_0072556",
+          "duration_s": 4.98,
+          "solo": false,
+          "voiced_frames": 216
+        },
+        {
+          "speaker_id": "MEE073",
+          "audio_id": "AMI_EN2002a_sdm_MEE073_0072507_0072576",
+          "duration_s": 0.2,
+          "solo": false,
+          "voiced_frames": 0
+        },
+        {
+          "speaker_id": "MEE073",
+          "audio_id": "AMI_EN2002a_sdm_MEE073_0072576_0072925",
+          "duration_s": 3.49,
+          "solo": false,
+          "voiced_frames": 251
+        },
+        {
+          "speaker_id": "MEE071",
+          "audio_id": "AMI_EN2002a_sdm_MEE071_0072615_0073007",
+          "duration_s": 0.82,
+          "solo": false,
+          "voiced_frames": 59
+        },
+        {
+          "speaker_id": "MEE071",
+          "audio_id": "AMI_EN2002a_sdm_MEE071_0073007_0073095",
+          "duration_s": 0.88,
+          "solo": true,
+          "voiced_frames": 22
+        },
+        {
+          "speaker_id": "MEE071",
+          "audio_id": "AMI_EN2002a_sdm_MEE071_0073095_0073445",
+          "duration_s": 3.5,
+          "solo": true,
+          "voiced_frames": 147
+        },
+        {
+          "speaker_id": "MEE071",
+          "audio_id": "AMI_EN2002a_sdm_MEE071_0073445_0073665",
+          "duration_s": 2.2,
+          "solo": false,
+          "voiced_frames": 165
+        },
+        {
+          "speaker_id": "MEE073",
+          "audio_id": "AMI_EN2002a_sdm_MEE073_0073617_0073677",
+          "duration_s": 0.12,
+          "solo": false,
+          "voiced_frames": 4
+        },
+        {
+          "speaker_id": "MEE071",
+          "audio_id": "AMI_EN2002a_sdm_MEE071_0073665_0073815",
+          "duration_s": 1.38,
+          "solo": false,
+          "voiced_frames": 87
+        },
+        {
+          "speaker_id": "MEE071",
+          "audio_id": "AMI_EN2002a_sdm_MEE071_0073815_0073845",
+          "duration_s": 0.3,
+          "solo": true,
+          "voiced_frames": 3
+        },
+        {
+          "speaker_id": "FEO070",
+          "audio_id": "AMI_EN2002a_sdm_FEO070_0073906_0073967",
+          "duration_s": 0.61,
+          "solo": true,
+          "voiced_frames": 10
+        },
+        {
+          "speaker_id": "FEO070",
+          "audio_id": "AMI_EN2002a_sdm_FEO070_0073967_0074082",
+          "duration_s": 1.15,
+          "solo": false,
+          "voiced_frames": 58
+        },
+        {
+          "speaker_id": "FEO072",
+          "audio_id": "AMI_EN2002a_sdm_FEO072_0074042_0074793",
+          "duration_s": 7.11,
+          "solo": false,
+          "voiced_frames": 427
+        },
+        {
+          "speaker_id": "MEE071",
+          "audio_id": "AMI_EN2002a_sdm_MEE071_0074777_0074938",
+          "duration_s": 1.45,
+          "solo": false,
+          "voiced_frames": 62
+        },
+        {
+          "speaker_id": "MEE071",
+          "audio_id": "AMI_EN2002a_sdm_MEE071_0074938_0074967",
+          "duration_s": 0.29,
+          "solo": false,
+          "voiced_frames": 23
+        },
+        {
+          "speaker_id": "MEE073",
+          "audio_id": "AMI_EN2002a_sdm_MEE073_0074945_0074970",
+          "duration_s": 0.03,
+          "solo": false,
+          "voiced_frames": 0
+        },
+        {
+          "speaker_id": "MEE073",
+          "audio_id": "AMI_EN2002a_sdm_MEE073_0075180_0075206",
+          "duration_s": 0.26,
+          "solo": false,
+          "voiced_frames": 12
+        },
+        {
+          "speaker_id": "MEE071",
+          "audio_id": "AMI_EN2002a_sdm_MEE071_0075205_0075352",
+          "duration_s": 1.46,
+          "solo": false,
+          "voiced_frames": 41
+        },
+        {
+          "speaker_id": "MEE071",
+          "audio_id": "AMI_EN2002a_sdm_MEE071_0075352_0075888",
+          "duration_s": 5.36,
+          "solo": false,
+          "voiced_frames": 308
+        },
+        {
+          "speaker_id": "MEE071",
+          "audio_id": "AMI_EN2002a_sdm_MEE071_0075888_0076047",
+          "duration_s": 1.59,
+          "solo": true,
+          "voiced_frames": 43
+        },
+        {
+          "speaker_id": "MEE071",
+          "audio_id": "AMI_EN2002a_sdm_MEE071_0076047_0076088",
+          "duration_s": 0.41,
+          "solo": true,
+          "voiced_frames": 7
+        },
+        {
+          "speaker_id": "MEE071",
+          "audio_id": "AMI_EN2002a_sdm_MEE071_0076088_0076284",
+          "duration_s": 1.96,
+          "solo": false,
+          "voiced_frames": 87
+        },
+        {
+          "speaker_id": "MEE073",
+          "audio_id": "AMI_EN2002a_sdm_MEE073_0076219_0076581",
+          "duration_s": 2.97,
+          "solo": false,
+          "voiced_frames": 200
+        },
+        {
+          "speaker_id": "MEE073",
+          "audio_id": "AMI_EN2002a_sdm_MEE073_0076581_0077006",
+          "duration_s": 4.25,
+          "solo": false,
+          "voiced_frames": 138
+        },
+        {
+          "speaker_id": "FEO072",
+          "audio_id": "AMI_EN2002a_sdm_FEO072_0076972_0077180",
+          "duration_s": 1.74,
+          "solo": false,
+          "voiced_frames": 124
+        },
+        {
+          "speaker_id": "MEE073",
+          "audio_id": "AMI_EN2002a_sdm_MEE073_0077098_0077878",
+          "duration_s": 6.98,
+          "solo": false,
+          "voiced_frames": 451
+        },
+        {
+          "speaker_id": "FEO072",
+          "audio_id": "AMI_EN2002a_sdm_FEO072_0077822_0077961",
+          "duration_s": 0.83,
+          "solo": false,
+          "voiced_frames": 2
+        },
+        {
+          "speaker_id": "FEO072",
+          "audio_id": "AMI_EN2002a_sdm_FEO072_0077961_0078225",
+          "duration_s": 2.64,
+          "solo": false,
+          "voiced_frames": 209
+        },
+        {
+          "speaker_id": "FEO072",
+          "audio_id": "AMI_EN2002a_sdm_FEO072_0078225_0078273",
+          "duration_s": 0.48,
+          "solo": true,
+          "voiced_frames": 27
+        },
+        {
+          "speaker_id": "FEO072",
+          "audio_id": "AMI_EN2002a_sdm_FEO072_0078405_0078674",
+          "duration_s": 2.69,
+          "solo": true,
+          "voiced_frames": 154
+        },
+        {
+          "speaker_id": "FEO072",
+          "audio_id": "AMI_EN2002a_sdm_FEO072_0078674_0078914",
+          "duration_s": 2.4,
+          "solo": true,
+          "voiced_frames": 141
+        },
+        {
+          "speaker_id": "FEO072",
+          "audio_id": "AMI_EN2002a_sdm_FEO072_0079024_0079145",
+          "duration_s": 1.21,
+          "solo": false,
+          "voiced_frames": 49
+        },
+        {
+          "speaker_id": "FEO070",
+          "audio_id": "AMI_EN2002a_sdm_FEO070_0079078_0079370",
+          "duration_s": 2.25,
+          "solo": false,
+          "voiced_frames": 49
+        },
+        {
+          "speaker_id": "FEO070",
+          "audio_id": "AMI_EN2002a_sdm_FEO070_0079370_0079997",
+          "duration_s": 6.27,
+          "solo": false,
+          "voiced_frames": 276
+        },
+        {
+          "speaker_id": "FEO070",
+          "audio_id": "AMI_EN2002a_sdm_FEO070_0079997_0080387",
+          "duration_s": 3.9,
+          "solo": false,
+          "voiced_frames": 178
+        },
+        {
+          "speaker_id": "FEO072",
+          "audio_id": "AMI_EN2002a_sdm_FEO072_0080321_0080411",
+          "duration_s": 0.24,
+          "solo": false,
+          "voiced_frames": 1
+        },
+        {
+          "speaker_id": "FEO072",
+          "audio_id": "AMI_EN2002a_sdm_FEO072_0080411_0080636",
+          "duration_s": 2.25,
+          "solo": false,
+          "voiced_frames": 155
+        },
+        {
+          "speaker_id": "FEO072",
+          "audio_id": "AMI_EN2002a_sdm_FEO072_0080636_0080663",
+          "duration_s": 0.27,
+          "solo": true,
+          "voiced_frames": 21
+        },
+        {
+          "speaker_id": "MEE071",
+          "audio_id": "AMI_EN2002a_sdm_MEE071_0080687_0080793",
+          "duration_s": 1.06,
+          "solo": true,
+          "voiced_frames": 36
+        },
+        {
+          "speaker_id": "FEO070",
+          "audio_id": "AMI_EN2002a_sdm_FEO070_0081037_0081143",
+          "duration_s": 1.06,
+          "solo": true,
+          "voiced_frames": 29
+        },
+        {
+          "speaker_id": "FEO072",
+          "audio_id": "AMI_EN2002a_sdm_FEO072_0081658_0082025",
+          "duration_s": 3.67,
+          "solo": true,
+          "voiced_frames": 181
+        },
+        {
+          "speaker_id": "FEO072",
+          "audio_id": "AMI_EN2002a_sdm_FEO072_0082025_0082238",
+          "duration_s": 2.13,
+          "solo": true,
+          "voiced_frames": 134
+        },
+        {
+          "speaker_id": "MEE073",
+          "audio_id": "AMI_EN2002a_sdm_MEE073_0082308_0082395",
+          "duration_s": 0.87,
+          "solo": true,
+          "voiced_frames": 74
+        },
+        {
+          "speaker_id": "FEO072",
+          "audio_id": "AMI_EN2002a_sdm_FEO072_0082427_0082876",
+          "duration_s": 4.49,
+          "solo": false,
+          "voiced_frames": 339
+        },
+        {
+          "speaker_id": "MEE073",
+          "audio_id": "AMI_EN2002a_sdm_MEE073_0082870_0083007",
+          "duration_s": 1.31,
+          "solo": false,
+          "voiced_frames": 88
+        },
+        {
+          "speaker_id": "FEO072",
+          "audio_id": "AMI_EN2002a_sdm_FEO072_0082966_0083521",
+          "duration_s": 5.14,
+          "solo": false,
+          "voiced_frames": 190
+        },
+        {
+          "speaker_id": "FEO072",
+          "audio_id": "AMI_EN2002a_sdm_FEO072_0083521_0083648",
+          "duration_s": 1.27,
+          "solo": true,
+          "voiced_frames": 64
+        },
+        {
+          "speaker_id": "MEE071",
+          "audio_id": "AMI_EN2002a_sdm_MEE071_0083778_0083904",
+          "duration_s": 1.26,
+          "solo": true,
+          "voiced_frames": 83
+        },
+        {
+          "speaker_id": "FEO072",
+          "audio_id": "AMI_EN2002a_sdm_FEO072_0084151_0084417",
+          "duration_s": 2.66,
+          "solo": true,
+          "voiced_frames": 104
+        },
+        {
+          "speaker_id": "FEO072",
+          "audio_id": "AMI_EN2002a_sdm_FEO072_0084417_0084676",
+          "duration_s": 2.59,
+          "solo": false,
+          "voiced_frames": 74
+        },
+        {
+          "speaker_id": "FEO070",
+          "audio_id": "AMI_EN2002a_sdm_FEO070_0084663_0084719",
+          "duration_s": 0.43,
+          "solo": false,
+          "voiced_frames": 39
+        },
+        {
+          "speaker_id": "FEO070",
+          "audio_id": "AMI_EN2002a_sdm_FEO070_0084719_0085603",
+          "duration_s": 8.84,
+          "solo": false,
+          "voiced_frames": 526
+        },
+        {
+          "speaker_id": "MEE071",
+          "audio_id": "AMI_EN2002a_sdm_MEE071_0085470_0085653",
+          "duration_s": 0.5,
+          "solo": false,
+          "voiced_frames": 16
+        },
+        {
+          "speaker_id": "FEO072",
+          "audio_id": "AMI_EN2002a_sdm_FEO072_0085650_0085682",
+          "duration_s": 0.29,
+          "solo": false,
+          "voiced_frames": 21
+        },
+        {
+          "speaker_id": "MEE071",
+          "audio_id": "AMI_EN2002a_sdm_MEE071_0085653_0085983",
+          "duration_s": 3.01,
+          "solo": false,
+          "voiced_frames": 225
+        },
+        {
+          "speaker_id": "MEE073",
+          "audio_id": "AMI_EN2002a_sdm_MEE073_0085854_0085988",
+          "duration_s": 0.05,
+          "solo": false,
+          "voiced_frames": 0
+        },
+        {
+          "speaker_id": "FEO070",
+          "audio_id": "AMI_EN2002a_sdm_FEO070_0085882_0086008",
+          "duration_s": 0.2,
+          "solo": false,
+          "voiced_frames": 16
+        },
+        {
+          "speaker_id": "MEE071",
+          "audio_id": "AMI_EN2002a_sdm_MEE071_0085983_0086017",
+          "duration_s": 0.09,
+          "solo": false,
+          "voiced_frames": 0
+        },
+        {
+          "speaker_id": "FEO070",
+          "audio_id": "AMI_EN2002a_sdm_FEO070_0086008_0086073",
+          "duration_s": 0.56,
+          "solo": false,
+          "voiced_frames": 7
+        },
+        {
+          "speaker_id": "FEO070",
+          "audio_id": "AMI_EN2002a_sdm_FEO070_0086073_0086473",
+          "duration_s": 4.0,
+          "solo": true,
+          "voiced_frames": 144
+        },
+        {
+          "speaker_id": "FEO072",
+          "audio_id": "AMI_EN2002a_sdm_FEO072_0086512_0086575",
+          "duration_s": 0.63,
+          "solo": false,
+          "voiced_frames": 52
+        },
+        {
+          "speaker_id": "MEE071",
+          "audio_id": "AMI_EN2002a_sdm_MEE071_0086536_0086642",
+          "duration_s": 0.67,
+          "solo": false,
+          "voiced_frames": 28
+        },
+        {
+          "speaker_id": "FEO070",
+          "audio_id": "AMI_EN2002a_sdm_FEO070_0086684_0086751",
+          "duration_s": 0.67,
+          "solo": true,
+          "voiced_frames": 22
+        },
+        {
+          "speaker_id": "MEE073",
+          "audio_id": "AMI_EN2002a_sdm_MEE073_0086845_0086889",
+          "duration_s": 0.44,
+          "solo": false,
+          "voiced_frames": 23
+        },
+        {
+          "speaker_id": "FEO070",
+          "audio_id": "AMI_EN2002a_sdm_FEO070_0086888_0087101",
+          "duration_s": 2.12,
+          "solo": false,
+          "voiced_frames": 69
+        },
+        {
+          "speaker_id": "MEE071",
+          "audio_id": "AMI_EN2002a_sdm_MEE071_0087094_0087314",
+          "duration_s": 2.13,
+          "solo": false,
+          "voiced_frames": 123
+        },
+        {
+          "speaker_id": "MEE071",
+          "audio_id": "AMI_EN2002a_sdm_MEE071_0087314_0087615",
+          "duration_s": 3.01,
+          "solo": true,
+          "voiced_frames": 91
+        },
+        {
+          "speaker_id": "FEO072",
+          "audio_id": "AMI_EN2002a_sdm_FEO072_0087635_0087724",
+          "duration_s": 0.89,
+          "solo": true,
+          "voiced_frames": 44
+        },
+        {
+          "speaker_id": "FEO072",
+          "audio_id": "AMI_EN2002a_sdm_FEO072_0087724_0087747",
+          "duration_s": 0.23,
+          "solo": true,
+          "voiced_frames": 0
+        },
+        {
+          "speaker_id": "MEE073",
+          "audio_id": "AMI_EN2002a_sdm_MEE073_0087767_0087797",
+          "duration_s": 0.3,
+          "solo": true,
+          "voiced_frames": 9
+        },
+        {
+          "speaker_id": "MEE071",
+          "audio_id": "AMI_EN2002a_sdm_MEE071_0087802_0087921",
+          "duration_s": 1.19,
+          "solo": true,
+          "voiced_frames": 42
+        },
+        {
+          "speaker_id": "FEO070",
+          "audio_id": "AMI_EN2002a_sdm_FEO070_0087932_0088004",
+          "duration_s": 0.72,
+          "solo": true,
+          "voiced_frames": 19
+        },
+        {
+          "speaker_id": "FEO070",
+          "audio_id": "AMI_EN2002a_sdm_FEO070_0088004_0088628",
+          "duration_s": 6.24,
+          "solo": true,
+          "voiced_frames": 190
+        },
+        {
+          "speaker_id": "FEO070",
+          "audio_id": "AMI_EN2002a_sdm_FEO070_0088628_0088867",
+          "duration_s": 2.39,
+          "solo": false,
+          "voiced_frames": 124
+        },
+        {
+          "speaker_id": "MEE071",
+          "audio_id": "AMI_EN2002a_sdm_MEE071_0088721_0088976",
+          "duration_s": 1.09,
+          "solo": false,
+          "voiced_frames": 41
+        },
+        {
+          "speaker_id": "FEO070",
+          "audio_id": "AMI_EN2002a_sdm_FEO070_0089084_0089120",
+          "duration_s": 0.36,
+          "solo": true,
+          "voiced_frames": 17
+        },
+        {
+          "speaker_id": "MEE073",
+          "audio_id": "AMI_EN2002a_sdm_MEE073_0089197_0089641",
+          "duration_s": 4.44,
+          "solo": true,
+          "voiced_frames": 297
+        },
+        {
+          "speaker_id": "MEE073",
+          "audio_id": "AMI_EN2002a_sdm_MEE073_0089641_0090010",
+          "duration_s": 3.69,
+          "solo": true,
+          "voiced_frames": 189
+        },
+        {
+          "speaker_id": "MEE073",
+          "audio_id": "AMI_EN2002a_sdm_MEE073_0090010_0090601",
+          "duration_s": 5.91,
+          "solo": false,
+          "voiced_frames": 417
+        },
+        {
+          "speaker_id": "MEE071",
+          "audio_id": "AMI_EN2002a_sdm_MEE071_0090504_0090785",
+          "duration_s": 1.84,
+          "solo": false,
+          "voiced_frames": 127
+        },
+        {
+          "speaker_id": "MEE073",
+          "audio_id": "AMI_EN2002a_sdm_MEE073_0090732_0091278",
+          "duration_s": 4.93,
+          "solo": false,
+          "voiced_frames": 274
+        },
+        {
+          "speaker_id": "FEO072",
+          "audio_id": "AMI_EN2002a_sdm_FEO072_0091245_0091452",
+          "duration_s": 1.74,
+          "solo": false,
+          "voiced_frames": 67
+        },
+        {
+          "speaker_id": "MEE073",
+          "audio_id": "AMI_EN2002a_sdm_MEE073_0091362_0091506",
+          "duration_s": 0.54,
+          "solo": false,
+          "voiced_frames": 41
+        },
+        {
+          "speaker_id": "FEO072",
+          "audio_id": "AMI_EN2002a_sdm_FEO072_0091452_0091735",
+          "duration_s": 2.29,
+          "solo": false,
+          "voiced_frames": 94
+        },
+        {
+          "speaker_id": "MEE071",
+          "audio_id": "AMI_EN2002a_sdm_MEE071_0091683_0091941",
+          "duration_s": 2.06,
+          "solo": false,
+          "voiced_frames": 107
+        },
+        {
+          "speaker_id": "MEE073",
+          "audio_id": "AMI_EN2002a_sdm_MEE073_0091705_0091985",
+          "duration_s": 0.44,
+          "solo": false,
+          "voiced_frames": 10
+        },
+        {
+          "speaker_id": "MEE071",
+          "audio_id": "AMI_EN2002a_sdm_MEE071_0091941_0092409",
+          "duration_s": 4.24,
+          "solo": false,
+          "voiced_frames": 204
+        },
+        {
+          "speaker_id": "FEO072",
+          "audio_id": "AMI_EN2002a_sdm_FEO072_0092363_0092422",
+          "duration_s": 0.13,
+          "solo": false,
+          "voiced_frames": 2
+        },
+        {
+          "speaker_id": "MEE071",
+          "audio_id": "AMI_EN2002a_sdm_MEE071_0092409_0092544",
+          "duration_s": 1.22,
+          "solo": false,
+          "voiced_frames": 35
+        },
+        {
+          "speaker_id": "FEO072",
+          "audio_id": "AMI_EN2002a_sdm_FEO072_0092557_0092632",
+          "duration_s": 0.75,
+          "solo": false,
+          "voiced_frames": 31
+        },
+        {
+          "speaker_id": "MEE073",
+          "audio_id": "AMI_EN2002a_sdm_MEE073_0092565_0092653",
+          "duration_s": 0.21,
+          "solo": false,
+          "voiced_frames": 9
+        },
+        {
+          "speaker_id": "FEO072",
+          "audio_id": "AMI_EN2002a_sdm_FEO072_0092632_0092884",
+          "duration_s": 2.31,
+          "solo": false,
+          "voiced_frames": 110
+        },
+        {
+          "speaker_id": "FEO072",
+          "audio_id": "AMI_EN2002a_sdm_FEO072_0092884_0093251",
+          "duration_s": 3.67,
+          "solo": true,
+          "voiced_frames": 134
+        },
+        {
+          "speaker_id": "MEE073",
+          "audio_id": "AMI_EN2002a_sdm_MEE073_0093261_0093398",
+          "duration_s": 1.37,
+          "solo": true,
+          "voiced_frames": 80
+        },
+        {
+          "speaker_id": "MEE073",
+          "audio_id": "AMI_EN2002a_sdm_MEE073_0093398_0093531",
+          "duration_s": 1.33,
+          "solo": false,
+          "voiced_frames": 118
+        },
+        {
+          "speaker_id": "FEO072",
+          "audio_id": "AMI_EN2002a_sdm_FEO072_0093469_0093781",
+          "duration_s": 2.5,
+          "solo": false,
+          "voiced_frames": 145
+        },
+        {
+          "speaker_id": "FEO072",
+          "audio_id": "AMI_EN2002a_sdm_FEO072_0093781_0093953",
+          "duration_s": 1.72,
+          "solo": false,
+          "voiced_frames": 102
+        },
+        {
+          "speaker_id": "MEE073",
+          "audio_id": "AMI_EN2002a_sdm_MEE073_0093919_0094050",
+          "duration_s": 0.97,
+          "solo": false,
+          "voiced_frames": 48
+        },
+        {
+          "speaker_id": "FEO072",
+          "audio_id": "AMI_EN2002a_sdm_FEO072_0093953_0094325",
+          "duration_s": 2.75,
+          "solo": false,
+          "voiced_frames": 174
+        },
+        {
+          "speaker_id": "MEE073",
+          "audio_id": "AMI_EN2002a_sdm_MEE073_0094050_0094374",
+          "duration_s": 0.49,
+          "solo": false,
+          "voiced_frames": 3
+        },
+        {
+          "speaker_id": "FEO072",
+          "audio_id": "AMI_EN2002a_sdm_FEO072_0094325_0094677",
+          "duration_s": 3.03,
+          "solo": false,
+          "voiced_frames": 105
+        },
+        {
+          "speaker_id": "FEO072",
+          "audio_id": "AMI_EN2002a_sdm_FEO072_0094852_0094906",
+          "duration_s": 0.54,
+          "solo": true,
+          "voiced_frames": 4
+        },
+        {
+          "speaker_id": "FEO070",
+          "audio_id": "AMI_EN2002a_sdm_FEO070_0094981_0095082",
+          "duration_s": 1.01,
+          "solo": false,
+          "voiced_frames": 64
+        },
+        {
+          "speaker_id": "FEO072",
+          "audio_id": "AMI_EN2002a_sdm_FEO072_0095076_0095254",
+          "duration_s": 1.72,
+          "solo": false,
+          "voiced_frames": 99
+        },
+        {
+          "speaker_id": "MEE071",
+          "audio_id": "AMI_EN2002a_sdm_MEE071_0095296_0095388",
+          "duration_s": 0.92,
+          "solo": true,
+          "voiced_frames": 39
+        },
+        {
+          "speaker_id": "FEO072",
+          "audio_id": "AMI_EN2002a_sdm_FEO072_0095493_0095832",
+          "duration_s": 3.39,
+          "solo": true,
+          "voiced_frames": 246
+        },
+        {
+          "speaker_id": "MEE071",
+          "audio_id": "AMI_EN2002a_sdm_MEE071_0095883_0095940",
+          "duration_s": 0.57,
+          "solo": true,
+          "voiced_frames": 22
+        },
+        {
+          "speaker_id": "FEO072",
+          "audio_id": "AMI_EN2002a_sdm_FEO072_0095954_0096182",
+          "duration_s": 2.28,
+          "solo": true,
+          "voiced_frames": 131
+        },
+        {
+          "speaker_id": "MEE071",
+          "audio_id": "AMI_EN2002a_sdm_MEE071_0096253_0096476",
+          "duration_s": 2.23,
+          "solo": false,
+          "voiced_frames": 90
+        },
+        {
+          "speaker_id": "FEO072",
+          "audio_id": "AMI_EN2002a_sdm_FEO072_0096372_0096633",
+          "duration_s": 1.57,
+          "solo": false,
+          "voiced_frames": 114
+        },
+        {
+          "speaker_id": "MEE071",
+          "audio_id": "AMI_EN2002a_sdm_MEE071_0096603_0096861",
+          "duration_s": 2.28,
+          "solo": false,
+          "voiced_frames": 152
+        },
+        {
+          "speaker_id": "MEE071",
+          "audio_id": "AMI_EN2002a_sdm_MEE071_0096861_0096996",
+          "duration_s": 1.35,
+          "solo": true,
+          "voiced_frames": 32
+        },
+        {
+          "speaker_id": "MEE071",
+          "audio_id": "AMI_EN2002a_sdm_MEE071_0096996_0098011",
+          "duration_s": 10.15,
+          "solo": false,
+          "voiced_frames": 578
+        },
+        {
+          "speaker_id": "MEE071",
+          "audio_id": "AMI_EN2002a_sdm_MEE071_0098011_0098236",
+          "duration_s": 2.25,
+          "solo": false,
+          "voiced_frames": 106
+        },
+        {
+          "speaker_id": "MEE073",
+          "audio_id": "AMI_EN2002a_sdm_MEE073_0098487_0098500",
+          "duration_s": 0.13,
+          "solo": true,
+          "voiced_frames": 7
+        },
+        {
+          "speaker_id": "FEO070",
+          "audio_id": "AMI_EN2002a_sdm_FEO070_0098633_0098673",
+          "duration_s": 0.4,
+          "solo": false,
+          "voiced_frames": 24
+        },
+        {
+          "speaker_id": "FEO072",
+          "audio_id": "AMI_EN2002a_sdm_FEO072_0098653_0098772",
+          "duration_s": 0.99,
+          "solo": false,
+          "voiced_frames": 58
+        },
+        {
+          "speaker_id": "FEO072",
+          "audio_id": "AMI_EN2002a_sdm_FEO072_0098772_0098929",
+          "duration_s": 1.57,
+          "solo": true,
+          "voiced_frames": 120
+        },
+        {
+          "speaker_id": "MEE071",
+          "audio_id": "AMI_EN2002a_sdm_MEE071_0099194_0099473",
+          "duration_s": 2.79,
+          "solo": false,
+          "voiced_frames": 172
+        },
+        {
+          "speaker_id": "FEO070",
+          "audio_id": "AMI_EN2002a_sdm_FEO070_0099449_0099697",
+          "duration_s": 2.24,
+          "solo": false,
+          "voiced_frames": 163
+        },
+        {
+          "speaker_id": "MEE071",
+          "audio_id": "AMI_EN2002a_sdm_MEE071_0099650_0099878",
+          "duration_s": 1.81,
+          "solo": false,
+          "voiced_frames": 113
+        },
+        {
+          "speaker_id": "MEE073",
+          "audio_id": "AMI_EN2002a_sdm_MEE073_0099664_0099913",
+          "duration_s": 0.35,
+          "solo": false,
+          "voiced_frames": 2
+        },
+        {
+          "speaker_id": "FEO070",
+          "audio_id": "AMI_EN2002a_sdm_FEO070_0099998_0100130",
+          "duration_s": 1.32,
+          "solo": true,
+          "voiced_frames": 62
+        },
+        {
+          "speaker_id": "FEO070",
+          "audio_id": "AMI_EN2002a_sdm_FEO070_0100130_0101160",
+          "duration_s": 10.3,
+          "solo": false,
+          "voiced_frames": 372
+        },
+        {
+          "speaker_id": "FEO072",
+          "audio_id": "AMI_EN2002a_sdm_FEO072_0101141_0101294",
+          "duration_s": 1.34,
+          "solo": false,
+          "voiced_frames": 104
+        },
+        {
+          "speaker_id": "FEO070",
+          "audio_id": "AMI_EN2002a_sdm_FEO070_0101288_0101585",
+          "duration_s": 2.91,
+          "solo": false,
+          "voiced_frames": 166
+        },
+        {
+          "speaker_id": "MEE071",
+          "audio_id": "AMI_EN2002a_sdm_MEE071_0101383_0101731",
+          "duration_s": 1.46,
+          "solo": false,
+          "voiced_frames": 67
+        },
+        {
+          "speaker_id": "MEE073",
+          "audio_id": "AMI_EN2002a_sdm_MEE073_0101489_0101940",
+          "duration_s": 2.09,
+          "solo": false,
+          "voiced_frames": 93
+        },
+        {
+          "speaker_id": "FEO070",
+          "audio_id": "AMI_EN2002a_sdm_FEO070_0101792_0102458",
+          "duration_s": 5.18,
+          "solo": false,
+          "voiced_frames": 289
+        },
+        {
+          "speaker_id": "MEE073",
+          "audio_id": "AMI_EN2002a_sdm_MEE073_0102357_0102731",
+          "duration_s": 2.73,
+          "solo": false,
+          "voiced_frames": 184
+        },
+        {
+          "speaker_id": "FEO070",
+          "audio_id": "AMI_EN2002a_sdm_FEO070_0102714_0102868",
+          "duration_s": 1.37,
+          "solo": false,
+          "voiced_frames": 33
+        },
+        {
+          "speaker_id": "MEE073",
+          "audio_id": "AMI_EN2002a_sdm_MEE073_0102731_0103149",
+          "duration_s": 2.81,
+          "solo": false,
+          "voiced_frames": 190
+        },
+        {
+          "speaker_id": "FEO072",
+          "audio_id": "AMI_EN2002a_sdm_FEO072_0103097_0103239",
+          "duration_s": 0.9,
+          "solo": false,
+          "voiced_frames": 36
+        },
+        {
+          "speaker_id": "MEE071",
+          "audio_id": "AMI_EN2002a_sdm_MEE071_0103100_0103274",
+          "duration_s": 0.35,
+          "solo": false,
+          "voiced_frames": 16
+        },
+        {
+          "speaker_id": "MEE071",
+          "audio_id": "AMI_EN2002a_sdm_MEE071_0103274_0103343",
+          "duration_s": 0.69,
+          "solo": false,
+          "voiced_frames": 20
+        },
+        {
+          "speaker_id": "FEO070",
+          "audio_id": "AMI_EN2002a_sdm_FEO070_0103281_0103473",
+          "duration_s": 1.3,
+          "solo": false,
+          "voiced_frames": 92
+        },
+        {
+          "speaker_id": "FEO070",
+          "audio_id": "AMI_EN2002a_sdm_FEO070_0103473_0103608",
+          "duration_s": 1.35,
+          "solo": false,
+          "voiced_frames": 79
+        },
+        {
+          "speaker_id": "MEE073",
+          "audio_id": "AMI_EN2002a_sdm_MEE073_0103558_0103624",
+          "duration_s": 0.16,
+          "solo": false,
+          "voiced_frames": 4
+        },
+        {
+          "speaker_id": "FEO070",
+          "audio_id": "AMI_EN2002a_sdm_FEO070_0103608_0104072",
+          "duration_s": 4.48,
+          "solo": false,
+          "voiced_frames": 275
+        },
+        {
+          "speaker_id": "MEE071",
+          "audio_id": "AMI_EN2002a_sdm_MEE071_0103977_0104086",
+          "duration_s": 0.14,
+          "solo": false,
+          "voiced_frames": 8
+        },
+        {
+          "speaker_id": "FEO072",
+          "audio_id": "AMI_EN2002a_sdm_FEO072_0104071_0104139",
+          "duration_s": 0.53,
+          "solo": false,
+          "voiced_frames": 22
+        },
+        {
+          "speaker_id": "MEE071",
+          "audio_id": "AMI_EN2002a_sdm_MEE071_0104086_0104146",
+          "duration_s": 0.07,
+          "solo": false,
+          "voiced_frames": 0
+        },
+        {
+          "speaker_id": "FEO070",
+          "audio_id": "AMI_EN2002a_sdm_FEO070_0104133_0104149",
+          "duration_s": 0.03,
+          "solo": false,
+          "voiced_frames": 0
+        },
+        {
+          "speaker_id": "MEE071",
+          "audio_id": "AMI_EN2002a_sdm_MEE071_0104146_0104463",
+          "duration_s": 3.14,
+          "solo": false,
+          "voiced_frames": 204
+        },
+        {
+          "speaker_id": "MEE073",
+          "audio_id": "AMI_EN2002a_sdm_MEE073_0104422_0104524",
+          "duration_s": 0.61,
+          "solo": false,
+          "voiced_frames": 17
+        },
+        {
+          "speaker_id": "FEO070",
+          "audio_id": "AMI_EN2002a_sdm_FEO070_0104458_0104529",
+          "duration_s": 0.05,
+          "solo": false,
+          "voiced_frames": 0
+        },
+        {
+          "speaker_id": "MEE073",
+          "audio_id": "AMI_EN2002a_sdm_MEE073_0104524_0104872",
+          "duration_s": 3.43,
+          "solo": false,
+          "voiced_frames": 217
+        },
+        {
+          "speaker_id": "MEE071",
+          "audio_id": "AMI_EN2002a_sdm_MEE071_0104833_0104923",
+          "duration_s": 0.51,
+          "solo": false,
+          "voiced_frames": 44
+        },
+        {
+          "speaker_id": "MEE073",
+          "audio_id": "AMI_EN2002a_sdm_MEE073_0104872_0105003",
+          "duration_s": 0.8,
+          "solo": false,
+          "voiced_frames": 47
+        },
+        {
+          "speaker_id": "MEE071",
+          "audio_id": "AMI_EN2002a_sdm_MEE071_0104999_0105058",
+          "duration_s": 0.55,
+          "solo": false,
+          "voiced_frames": 30
+        },
+        {
+          "speaker_id": "MEE071",
+          "audio_id": "AMI_EN2002a_sdm_MEE071_0105058_0105219",
+          "duration_s": 1.61,
+          "solo": false,
+          "voiced_frames": 71
+        },
+        {
+          "speaker_id": "FEO070",
+          "audio_id": "AMI_EN2002a_sdm_FEO070_0105200_0105244",
+          "duration_s": 0.25,
+          "solo": false,
+          "voiced_frames": 11
+        },
+        {
+          "speaker_id": "FEO072",
+          "audio_id": "AMI_EN2002a_sdm_FEO072_0105314_0105391",
+          "duration_s": 0.77,
+          "solo": false,
+          "voiced_frames": 34
+        },
+        {
+          "speaker_id": "MEE073",
+          "audio_id": "AMI_EN2002a_sdm_MEE073_0105376_0105513",
+          "duration_s": 1.22,
+          "solo": false,
+          "voiced_frames": 28
+        },
+        {
+          "speaker_id": "FEO070",
+          "audio_id": "AMI_EN2002a_sdm_FEO070_0105467_0105681",
+          "duration_s": 1.68,
+          "solo": false,
+          "voiced_frames": 52
+        },
+        {
+          "speaker_id": "FEO072",
+          "audio_id": "AMI_EN2002a_sdm_FEO072_0105647_0105801",
+          "duration_s": 1.2,
+          "solo": false,
+          "voiced_frames": 60
+        },
+        {
+          "speaker_id": "FEO070",
+          "audio_id": "AMI_EN2002a_sdm_FEO070_0106017_0106053",
+          "duration_s": 0.2,
+          "solo": true,
+          "voiced_frames": 12
+        }
+      ]
+    },
+    "ami_sdm_EN2002b_turns.wav": {
+      "file": "ami_sdm_EN2002b_turns.wav",
+      "meeting_id": "EN2002b",
+      "duration_s": 420.0,
+      "measurement_scope": "non-overlapped segments only: a far-field segment overlapping another speaker carries two voices on one channel, so its median f0 describes neither speaker",
+      "speakers": {
+        "FEO070": {
+          "n": 353,
+          "median_hz": 198.0,
+          "mad_sigma_hz": 50.6,
+          "p05_hz": 71.19,
+          "p95_hz": 246.62,
+          "min_hz": 70.03,
+          "max_hz": 306.86,
+          "inlier_rate": 0.5722,
+          "segments_with_voicing": 13,
+          "voiced_frames_per_segment": {
+            "min": 5,
+            "median": 68,
+            "max": 197
+          }
+        },
+        "FEO072": {
+          "n": 2145,
+          "median_hz": 205.47,
+          "mad_sigma_hz": 26.1,
+          "p05_hz": 88.24,
+          "p95_hz": 252.72,
+          "min_hz": 70.26,
+          "max_hz": 325.1,
+          "inlier_rate": 0.7837,
+          "segments_with_voicing": 39,
+          "voiced_frames_per_segment": {
+            "min": 3,
+            "median": 95,
+            "max": 475
+          }
+        },
+        "MEE071": {
+          "n": 711,
+          "median_hz": 109.64,
+          "mad_sigma_hz": 6.06,
+          "p05_hz": 94.83,
+          "p95_hz": 124.43,
+          "min_hz": 70.04,
+          "max_hz": 245.94,
+          "inlier_rate": 0.9367,
+          "segments_with_voicing": 48,
+          "voiced_frames_per_segment": {
+            "min": 0,
+            "median": 70,
+            "max": 304
+          }
+        },
+        "MEE073": {
+          "n": 4212,
+          "median_hz": 97.38,
+          "mad_sigma_hz": 8.62,
+          "p05_hz": 75.48,
+          "p95_hz": 134.85,
+          "min_hz": 70.03,
+          "max_hz": 399.55,
+          "inlier_rate": 0.8526,
+          "segments_with_voicing": 58,
+          "voiced_frames_per_segment": {
+            "min": 0,
+            "median": 155,
+            "max": 570
+          }
+        }
+      },
+      "pooled_within_speaker_mad_sigma_hz": 28.95,
+      "pairwise_separation": [
+        {
+          "a": "FEO070",
+          "b": "FEO072",
+          "median_delta_hz": 7.47,
+          "within_speaker_mad_sigma_hz": {
+            "FEO070": 50.6,
+            "FEO072": 26.1
+          },
+          "separation_in_mad_sigmas": 0.26
+        },
+        {
+          "a": "MEE071",
+          "b": "MEE073",
+          "median_delta_hz": 12.26,
+          "within_speaker_mad_sigma_hz": {
+            "MEE071": 6.06,
+            "MEE073": 8.62
+          },
+          "separation_in_mad_sigmas": 0.42
+        },
+        {
+          "a": "FEO070",
+          "b": "MEE071",
+          "median_delta_hz": 88.36,
+          "within_speaker_mad_sigma_hz": {
+            "FEO070": 50.6,
+            "MEE071": 6.06
+          },
+          "separation_in_mad_sigmas": 3.05
+        },
+        {
+          "a": "FEO072",
+          "b": "MEE071",
+          "median_delta_hz": 95.83,
+          "within_speaker_mad_sigma_hz": {
+            "FEO072": 26.1,
+            "MEE071": 6.06
+          },
+          "separation_in_mad_sigmas": 3.31
+        },
+        {
+          "a": "FEO070",
+          "b": "MEE073",
+          "median_delta_hz": 100.62,
+          "within_speaker_mad_sigma_hz": {
+            "FEO070": 50.6,
+            "MEE073": 8.62
+          },
+          "separation_in_mad_sigmas": 3.48
+        },
+        {
+          "a": "FEO072",
+          "b": "MEE073",
+          "median_delta_hz": 108.09,
+          "within_speaker_mad_sigma_hz": {
+            "FEO072": 26.1,
+            "MEE073": 8.62
+          },
+          "separation_in_mad_sigmas": 3.73
+        }
+      ],
+      "f0_resolves": {
+        "groups": 2,
+        "threshold_hz": 86.85,
+        "threshold_sigma": 3.0,
+        "assignment": {
+          "MEE073": 0,
+          "MEE071": 0,
+          "FEO070": 1,
+          "FEO072": 1
+        },
+        "speakers_resolvable_individually": 0,
+        "note": "groups = how many distinct voices median f0 can tell apart; speakers_resolvable_individually = how many speakers are far enough from EVERY other speaker to be identified on pitch alone"
+      },
+      "clustering": {
+        "method": "2-means on f0 only; speaker_id never used",
+        "centre_hz": [
+          99.62,
+          214.22
+        ],
+        "centre_separation_hz": 114.6,
+        "frames": 7421,
+        "composition": {
+          "cluster_0": {
+            "frames": 5338,
+            "speakers_present": {
+              "FEO070": 134,
+              "FEO072": 375,
+              "MEE071": 710,
+              "MEE073": 4119
+            },
+            "dominant_speaker": "MEE073",
+            "dominant_share": 0.7716
+          },
+          "cluster_1": {
+            "frames": 2083,
+            "speakers_present": {
+              "FEO070": 219,
+              "FEO072": 1770,
+              "MEE071": 1,
+              "MEE073": 93
+            },
+            "dominant_speaker": "FEO072",
+            "dominant_share": 0.8497
+          }
+        },
+        "dominant_speaker_purity": 0.7935
+      },
+      "crosstalk_control": {
+        "why": "same measurement on the overlapping segments, kept so the choice of subset is visible rather than asserted",
+        "speakers_in_overlapped_segments": {
+          "FEO070": {
+            "n": 721,
+            "median_hz": 216.7,
+            "mad_sigma_hz": 45.92,
+            "p05_hz": 76.19,
+            "p95_hz": 296.41,
+            "min_hz": 70.12,
+            "max_hz": 375.53,
+            "inlier_rate": 0.6033,
+            "segments_with_voicing": 13,
+            "voiced_frames_per_segment": {
+              "min": 5,
+              "median": 68,
+              "max": 197
+            }
+          },
+          "FEO072": {
+            "n": 3191,
+            "median_hz": 191.81,
+            "mad_sigma_hz": 71.85,
+            "p05_hz": 75.46,
+            "p95_hz": 261.38,
+            "min_hz": 70.04,
+            "max_hz": 344.34,
+            "inlier_rate": 0.5045,
+            "segments_with_voicing": 39,
+            "voiced_frames_per_segment": {
+              "min": 3,
+              "median": 95,
+              "max": 475
+            }
+          },
+          "MEE071": {
+            "n": 4220,
+            "median_hz": 111.17,
+            "mad_sigma_hz": 12.72,
+            "p05_hz": 81.22,
+            "p95_hz": 226.81,
+            "min_hz": 70.12,
+            "max_hz": 392.17,
+            "inlier_rate": 0.8007,
+            "segments_with_voicing": 48,
+            "voiced_frames_per_segment": {
+              "min": 0,
+              "median": 70,
+              "max": 304
+            }
+          },
+          "MEE073": {
+            "n": 4703,
+            "median_hz": 103.15,
+            "mad_sigma_hz": 12.49,
+            "p05_hz": 88.57,
+            "p95_hz": 203.51,
+            "min_hz": 70.03,
+            "max_hz": 299.15,
+            "inlier_rate": 0.8637,
+            "segments_with_voicing": 58,
+            "voiced_frames_per_segment": {
+              "min": 0,
+              "median": 155,
+              "max": 570
+            }
+          }
+        },
+        "solo_segments": 59,
+        "overlapped_segments": 99
+      },
+      "per_segment_voiced_frames": {
+        "segments_measured": 158,
+        "total_voiced_frames": 20256,
+        "min": 0,
+        "median": 92,
+        "max": 570
+      },
+      "turn_ground_truth": {
+        "scope": "slice (window chosen for turn density)",
+        "segments": 230,
+        "turns": 181,
+        "gaps": 180,
+        "gaps_at_least_0p6s": 56,
+        "followed_by_a_DIFFERENT_speaker": 40,
+        "different_speaker_rate": 0.7143,
+        "note": "gap measured between annotated segment edges; a gap here is not necessarily a silence in the meeting, because unannotated stretches were written as digital silence by the fetcher"
+      },
+      "segments_detail": [
+        {
+          "speaker_id": "MEE071",
+          "audio_id": "AMI_EN2002b_sdm_MEE071_0118766_0119675",
+          "duration_s": 2.27,
+          "solo": true,
+          "voiced_frames": 123
+        },
+        {
+          "speaker_id": "MEE073",
+          "audio_id": "AMI_EN2002b_sdm_MEE073_0119828_0119870",
+          "duration_s": 0.42,
+          "solo": false,
+          "voiced_frames": 14
+        },
+        {
+          "speaker_id": "MEE071",
+          "audio_id": "AMI_EN2002b_sdm_MEE071_0119829_0119979",
+          "duration_s": 1.09,
+          "solo": false,
+          "voiced_frames": 49
+        },
+        {
+          "speaker_id": "MEE073",
+          "audio_id": "AMI_EN2002b_sdm_MEE073_0119968_0120335",
+          "duration_s": 3.56,
+          "solo": false,
+          "voiced_frames": 230
+        },
+        {
+          "speaker_id": "MEE073",
+          "audio_id": "AMI_EN2002b_sdm_MEE073_0120335_0121016",
+          "duration_s": 6.81,
+          "solo": false,
+          "voiced_frames": 379
+        },
+        {
+          "speaker_id": "MEE073",
+          "audio_id": "AMI_EN2002b_sdm_MEE073_0121016_0121339",
+          "duration_s": 3.23,
+          "solo": true,
+          "voiced_frames": 231
+        },
+        {
+          "speaker_id": "MEE071",
+          "audio_id": "AMI_EN2002b_sdm_MEE071_0121398_0121828",
+          "duration_s": 4.3,
+          "solo": false,
+          "voiced_frames": 244
+        },
+        {
+          "speaker_id": "MEE071",
+          "audio_id": "AMI_EN2002b_sdm_MEE071_0121828_0122215",
+          "duration_s": 3.87,
+          "solo": false,
+          "voiced_frames": 235
+        },
+        {
+          "speaker_id": "FEO072",
+          "audio_id": "AMI_EN2002b_sdm_FEO072_0122144_0122353",
+          "duration_s": 1.38,
+          "solo": false,
+          "voiced_frames": 93
+        },
+        {
+          "speaker_id": "FEO072",
+          "audio_id": "AMI_EN2002b_sdm_FEO072_0122353_0122857",
+          "duration_s": 5.04,
+          "solo": true,
+          "voiced_frames": 299
+        },
+        {
+          "speaker_id": "MEE071",
+          "audio_id": "AMI_EN2002b_sdm_MEE071_0123028_0123081",
+          "duration_s": 0.53,
+          "solo": true,
+          "voiced_frames": 14
+        },
+        {
+          "speaker_id": "FEO072",
+          "audio_id": "AMI_EN2002b_sdm_FEO072_0123113_0123303",
+          "duration_s": 1.9,
+          "solo": false,
+          "voiced_frames": 119
+        },
+        {
+          "speaker_id": "MEE071",
+          "audio_id": "AMI_EN2002b_sdm_MEE071_0123311_0123783",
+          "duration_s": 4.72,
+          "solo": false,
+          "voiced_frames": 290
+        },
+        {
+          "speaker_id": "FEO072",
+          "audio_id": "AMI_EN2002b_sdm_FEO072_0123720_0124313",
+          "duration_s": 5.3,
+          "solo": false,
+          "voiced_frames": 304
+        },
+        {
+          "speaker_id": "FEO072",
+          "audio_id": "AMI_EN2002b_sdm_FEO072_0124313_0124485",
+          "duration_s": 1.72,
+          "solo": false,
+          "voiced_frames": 116
+        },
+        {
+          "speaker_id": "MEE071",
+          "audio_id": "AMI_EN2002b_sdm_MEE071_0124458_0124617",
+          "duration_s": 1.32,
+          "solo": false,
+          "voiced_frames": 90
+        },
+        {
+          "speaker_id": "FEO072",
+          "audio_id": "AMI_EN2002b_sdm_FEO072_0124485_0124910",
+          "duration_s": 2.93,
+          "solo": false,
+          "voiced_frames": 165
+        },
+        {
+          "speaker_id": "MEE071",
+          "audio_id": "AMI_EN2002b_sdm_MEE071_0124801_0124917",
+          "duration_s": 0.07,
+          "solo": false,
+          "voiced_frames": 0
+        },
+        {
+          "speaker_id": "FEO072",
+          "audio_id": "AMI_EN2002b_sdm_FEO072_0124910_0125118",
+          "duration_s": 2.01,
+          "solo": false,
+          "voiced_frames": 95
+        },
+        {
+          "speaker_id": "MEE071",
+          "audio_id": "AMI_EN2002b_sdm_MEE071_0125123_0125199",
+          "duration_s": 0.76,
+          "solo": true,
+          "voiced_frames": 28
+        },
+        {
+          "speaker_id": "MEE071",
+          "audio_id": "AMI_EN2002b_sdm_MEE071_0125199_0125249",
+          "duration_s": 0.5,
+          "solo": true,
+          "voiced_frames": 22
+        },
+        {
+          "speaker_id": "MEE073",
+          "audio_id": "AMI_EN2002b_sdm_MEE073_0125252_0125286",
+          "duration_s": 0.34,
+          "solo": true,
+          "voiced_frames": 26
+        },
+        {
+          "speaker_id": "MEE073",
+          "audio_id": "AMI_EN2002b_sdm_MEE073_0125286_0125531",
+          "duration_s": 2.45,
+          "solo": false,
+          "voiced_frames": 172
+        },
+        {
+          "speaker_id": "MEE071",
+          "audio_id": "AMI_EN2002b_sdm_MEE071_0125458_0125580",
+          "duration_s": 0.49,
+          "solo": false,
+          "voiced_frames": 45
+        },
+        {
+          "speaker_id": "MEE073",
+          "audio_id": "AMI_EN2002b_sdm_MEE073_0125531_0125664",
+          "duration_s": 0.84,
+          "solo": false,
+          "voiced_frames": 44
+        },
+        {
+          "speaker_id": "FEO070",
+          "audio_id": "AMI_EN2002b_sdm_FEO070_0125650_0125683",
+          "duration_s": 0.19,
+          "solo": false,
+          "voiced_frames": 13
+        },
+        {
+          "speaker_id": "MEE073",
+          "audio_id": "AMI_EN2002b_sdm_MEE073_0125664_0125902",
+          "duration_s": 2.19,
+          "solo": false,
+          "voiced_frames": 176
+        },
+        {
+          "speaker_id": "MEE071",
+          "audio_id": "AMI_EN2002b_sdm_MEE071_0125789_0125942",
+          "duration_s": 0.4,
+          "solo": false,
+          "voiced_frames": 26
+        },
+        {
+          "speaker_id": "MEE073",
+          "audio_id": "AMI_EN2002b_sdm_MEE073_0125902_0126033",
+          "duration_s": 0.91,
+          "solo": false,
+          "voiced_frames": 75
+        },
+        {
+          "speaker_id": "MEE071",
+          "audio_id": "AMI_EN2002b_sdm_MEE071_0125942_0126120",
+          "duration_s": 0.87,
+          "solo": false,
+          "voiced_frames": 56
+        },
+        {
+          "speaker_id": "MEE071",
+          "audio_id": "AMI_EN2002b_sdm_MEE071_0126120_0126533",
+          "duration_s": 4.13,
+          "solo": false,
+          "voiced_frames": 304
+        },
+        {
+          "speaker_id": "MEE071",
+          "audio_id": "AMI_EN2002b_sdm_MEE071_0126533_0126623",
+          "duration_s": 0.9,
+          "solo": true,
+          "voiced_frames": 63
+        },
+        {
+          "speaker_id": "MEE073",
+          "audio_id": "AMI_EN2002b_sdm_MEE073_0126624_0126989",
+          "duration_s": 3.65,
+          "solo": false,
+          "voiced_frames": 282
+        },
+        {
+          "speaker_id": "FEO070",
+          "audio_id": "AMI_EN2002b_sdm_FEO070_0126896_0127147",
+          "duration_s": 1.58,
+          "solo": false,
+          "voiced_frames": 68
+        },
+        {
+          "speaker_id": "FEO070",
+          "audio_id": "AMI_EN2002b_sdm_FEO070_0127290_0127571",
+          "duration_s": 2.81,
+          "solo": true,
+          "voiced_frames": 156
+        },
+        {
+          "speaker_id": "FEO070",
+          "audio_id": "AMI_EN2002b_sdm_FEO070_0127716_0128450",
+          "duration_s": 7.34,
+          "solo": true,
+          "voiced_frames": 197
+        },
+        {
+          "speaker_id": "FEO072",
+          "audio_id": "AMI_EN2002b_sdm_FEO072_0128546_0128574",
+          "duration_s": 0.28,
+          "solo": true,
+          "voiced_frames": 20
+        },
+        {
+          "speaker_id": "MEE073",
+          "audio_id": "AMI_EN2002b_sdm_MEE073_0128629_0128658",
+          "duration_s": 0.29,
+          "solo": false,
+          "voiced_frames": 18
+        },
+        {
+          "speaker_id": "FEO070",
+          "audio_id": "AMI_EN2002b_sdm_FEO070_0128644_0128816",
+          "duration_s": 1.58,
+          "solo": false,
+          "voiced_frames": 64
+        },
+        {
+          "speaker_id": "MEE071",
+          "audio_id": "AMI_EN2002b_sdm_MEE071_0128953_0128989",
+          "duration_s": 0.36,
+          "solo": true,
+          "voiced_frames": 22
+        },
+        {
+          "speaker_id": "FEO070",
+          "audio_id": "AMI_EN2002b_sdm_FEO070_0128989_0129377",
+          "duration_s": 3.88,
+          "solo": false,
+          "voiced_frames": 138
+        },
+        {
+          "speaker_id": "MEE071",
+          "audio_id": "AMI_EN2002b_sdm_MEE071_0129316_0129464",
+          "duration_s": 0.87,
+          "solo": false,
+          "voiced_frames": 70
+        },
+        {
+          "speaker_id": "FEO070",
+          "audio_id": "AMI_EN2002b_sdm_FEO070_0129377_0129503",
+          "duration_s": 0.39,
+          "solo": false,
+          "voiced_frames": 34
+        },
+        {
+          "speaker_id": "FEO072",
+          "audio_id": "AMI_EN2002b_sdm_FEO072_0129404_0129617",
+          "duration_s": 1.14,
+          "solo": false,
+          "voiced_frames": 79
+        },
+        {
+          "speaker_id": "FEO070",
+          "audio_id": "AMI_EN2002b_sdm_FEO070_0129606_0129633",
+          "duration_s": 0.16,
+          "solo": false,
+          "voiced_frames": 5
+        },
+        {
+          "speaker_id": "FEO072",
+          "audio_id": "AMI_EN2002b_sdm_FEO072_0129617_0129694",
+          "duration_s": 0.61,
+          "solo": false,
+          "voiced_frames": 22
+        },
+        {
+          "speaker_id": "MEE071",
+          "audio_id": "AMI_EN2002b_sdm_MEE071_0129659_0129757",
+          "duration_s": 0.63,
+          "solo": false,
+          "voiced_frames": 44
+        },
+        {
+          "speaker_id": "MEE073",
+          "audio_id": "AMI_EN2002b_sdm_MEE073_0129704_0130120",
+          "duration_s": 3.63,
+          "solo": false,
+          "voiced_frames": 179
+        },
+        {
+          "speaker_id": "MEE073",
+          "audio_id": "AMI_EN2002b_sdm_MEE073_0130120_0130471",
+          "duration_s": 3.51,
+          "solo": false,
+          "voiced_frames": 146
+        },
+        {
+          "speaker_id": "MEE071",
+          "audio_id": "AMI_EN2002b_sdm_MEE071_0130301_0130473",
+          "duration_s": 0.02,
+          "solo": false,
+          "voiced_frames": 0
+        },
+        {
+          "speaker_id": "MEE071",
+          "audio_id": "AMI_EN2002b_sdm_MEE071_0130473_0130975",
+          "duration_s": 5.02,
+          "solo": false,
+          "voiced_frames": 265
+        },
+        {
+          "speaker_id": "MEE073",
+          "audio_id": "AMI_EN2002b_sdm_MEE073_0130967_0131486",
+          "duration_s": 5.11,
+          "solo": false,
+          "voiced_frames": 397
+        },
+        {
+          "speaker_id": "MEE071",
+          "audio_id": "AMI_EN2002b_sdm_MEE071_0131287_0131598",
+          "duration_s": 1.12,
+          "solo": false,
+          "voiced_frames": 74
+        },
+        {
+          "speaker_id": "MEE073",
+          "audio_id": "AMI_EN2002b_sdm_MEE073_0131568_0131631",
+          "duration_s": 0.33,
+          "solo": false,
+          "voiced_frames": 24
+        },
+        {
+          "speaker_id": "MEE071",
+          "audio_id": "AMI_EN2002b_sdm_MEE071_0131598_0131725",
+          "duration_s": 0.94,
+          "solo": false,
+          "voiced_frames": 50
+        },
+        {
+          "speaker_id": "FEO070",
+          "audio_id": "AMI_EN2002b_sdm_FEO070_0131677_0131891",
+          "duration_s": 1.66,
+          "solo": false,
+          "voiced_frames": 91
+        },
+        {
+          "speaker_id": "FEO070",
+          "audio_id": "AMI_EN2002b_sdm_FEO070_0131891_0132149",
+          "duration_s": 2.58,
+          "solo": false,
+          "voiced_frames": 177
+        },
+        {
+          "speaker_id": "FEO072",
+          "audio_id": "AMI_EN2002b_sdm_FEO072_0131930_0132233",
+          "duration_s": 0.84,
+          "solo": false,
+          "voiced_frames": 51
+        },
+        {
+          "speaker_id": "FEO070",
+          "audio_id": "AMI_EN2002b_sdm_FEO070_0132149_0132290",
+          "duration_s": 0.57,
+          "solo": false,
+          "voiced_frames": 38
+        },
+        {
+          "speaker_id": "MEE071",
+          "audio_id": "AMI_EN2002b_sdm_MEE071_0132163_0132382",
+          "duration_s": 0.92,
+          "solo": false,
+          "voiced_frames": 61
+        },
+        {
+          "speaker_id": "FEO072",
+          "audio_id": "AMI_EN2002b_sdm_FEO072_0132233_0133122",
+          "duration_s": 7.4,
+          "solo": false,
+          "voiced_frames": 394
+        },
+        {
+          "speaker_id": "MEE071",
+          "audio_id": "AMI_EN2002b_sdm_MEE071_0133236_0133358",
+          "duration_s": 1.22,
+          "solo": true,
+          "voiced_frames": 84
+        },
+        {
+          "speaker_id": "MEE071",
+          "audio_id": "AMI_EN2002b_sdm_MEE071_0133358_0133385",
+          "duration_s": 0.27,
+          "solo": true,
+          "voiced_frames": 0
+        },
+        {
+          "speaker_id": "FEO072",
+          "audio_id": "AMI_EN2002b_sdm_FEO072_0133408_0133449",
+          "duration_s": 0.41,
+          "solo": true,
+          "voiced_frames": 30
+        },
+        {
+          "speaker_id": "MEE071",
+          "audio_id": "AMI_EN2002b_sdm_MEE071_0133510_0133859",
+          "duration_s": 3.49,
+          "solo": false,
+          "voiced_frames": 250
+        },
+        {
+          "speaker_id": "FEO070",
+          "audio_id": "AMI_EN2002b_sdm_FEO070_0133932_0133950",
+          "duration_s": 0.18,
+          "solo": false,
+          "voiced_frames": 8
+        },
+        {
+          "speaker_id": "FEO072",
+          "audio_id": "AMI_EN2002b_sdm_FEO072_0133947_0133974",
+          "duration_s": 0.24,
+          "solo": false,
+          "voiced_frames": 20
+        },
+        {
+          "speaker_id": "FEO072",
+          "audio_id": "AMI_EN2002b_sdm_FEO072_0134095_0134148",
+          "duration_s": 0.53,
+          "solo": true,
+          "voiced_frames": 36
+        },
+        {
+          "speaker_id": "MEE071",
+          "audio_id": "AMI_EN2002b_sdm_MEE071_0134183_0134337",
+          "duration_s": 1.54,
+          "solo": true,
+          "voiced_frames": 68
+        },
+        {
+          "speaker_id": "FEO072",
+          "audio_id": "AMI_EN2002b_sdm_FEO072_0134416_0135016",
+          "duration_s": 6.0,
+          "solo": false,
+          "voiced_frames": 277
+        },
+        {
+          "speaker_id": "FEO072",
+          "audio_id": "AMI_EN2002b_sdm_FEO072_0135186_0135590",
+          "duration_s": 4.04,
+          "solo": true,
+          "voiced_frames": 184
+        },
+        {
+          "speaker_id": "FEO072",
+          "audio_id": "AMI_EN2002b_sdm_FEO072_0135590_0136024",
+          "duration_s": 4.34,
+          "solo": true,
+          "voiced_frames": 188
+        },
+        {
+          "speaker_id": "FEO072",
+          "audio_id": "AMI_EN2002b_sdm_FEO072_0136024_0136232",
+          "duration_s": 2.08,
+          "solo": false,
+          "voiced_frames": 92
+        },
+        {
+          "speaker_id": "FEO072",
+          "audio_id": "AMI_EN2002b_sdm_FEO072_0136493_0136570",
+          "duration_s": 0.77,
+          "solo": false,
+          "voiced_frames": 60
+        },
+        {
+          "speaker_id": "MEE071",
+          "audio_id": "AMI_EN2002b_sdm_MEE071_0136501_0136598",
+          "duration_s": 0.28,
+          "solo": false,
+          "voiced_frames": 12
+        },
+        {
+          "speaker_id": "MEE071",
+          "audio_id": "AMI_EN2002b_sdm_MEE071_0136598_0136789",
+          "duration_s": 1.91,
+          "solo": false,
+          "voiced_frames": 107
+        },
+        {
+          "speaker_id": "MEE071",
+          "audio_id": "AMI_EN2002b_sdm_MEE071_0136789_0136955",
+          "duration_s": 1.66,
+          "solo": false,
+          "voiced_frames": 80
+        },
+        {
+          "speaker_id": "FEO072",
+          "audio_id": "AMI_EN2002b_sdm_FEO072_0136952_0137075",
+          "duration_s": 1.2,
+          "solo": false,
+          "voiced_frames": 58
+        },
+        {
+          "speaker_id": "MEE071",
+          "audio_id": "AMI_EN2002b_sdm_MEE071_0136955_0137127",
+          "duration_s": 0.52,
+          "solo": false,
+          "voiced_frames": 46
+        },
+        {
+          "speaker_id": "FEO072",
+          "audio_id": "AMI_EN2002b_sdm_FEO072_0137075_0137136",
+          "duration_s": 0.09,
+          "solo": false,
+          "voiced_frames": 4
+        },
+        {
+          "speaker_id": "FEO072",
+          "audio_id": "AMI_EN2002b_sdm_FEO072_0137251_0138184",
+          "duration_s": 9.33,
+          "solo": true,
+          "voiced_frames": 449
+        },
+        {
+          "speaker_id": "FEO072",
+          "audio_id": "AMI_EN2002b_sdm_FEO072_0138184_0138407",
+          "duration_s": 2.23,
+          "solo": false,
+          "voiced_frames": 108
+        },
+        {
+          "speaker_id": "MEE071",
+          "audio_id": "AMI_EN2002b_sdm_MEE071_0138300_0138507",
+          "duration_s": 1.0,
+          "solo": false,
+          "voiced_frames": 1
+        },
+        {
+          "speaker_id": "FEO072",
+          "audio_id": "AMI_EN2002b_sdm_FEO072_0138548_0138826",
+          "duration_s": 2.78,
+          "solo": true,
+          "voiced_frames": 109
+        },
+        {
+          "speaker_id": "FEO072",
+          "audio_id": "AMI_EN2002b_sdm_FEO072_0138826_0139583",
+          "duration_s": 7.57,
+          "solo": true,
+          "voiced_frames": 475
+        },
+        {
+          "speaker_id": "FEO072",
+          "audio_id": "AMI_EN2002b_sdm_FEO072_0139583_0140140",
+          "duration_s": 5.57,
+          "solo": false,
+          "voiced_frames": 212
+        },
+        {
+          "speaker_id": "MEE071",
+          "audio_id": "AMI_EN2002b_sdm_MEE071_0140051_0140536",
+          "duration_s": 3.96,
+          "solo": false,
+          "voiced_frames": 266
+        },
+        {
+          "speaker_id": "MEE073",
+          "audio_id": "AMI_EN2002b_sdm_MEE073_0140531_0141101",
+          "duration_s": 5.65,
+          "solo": false,
+          "voiced_frames": 253
+        },
+        {
+          "speaker_id": "MEE073",
+          "audio_id": "AMI_EN2002b_sdm_MEE073_0141101_0141775",
+          "duration_s": 6.74,
+          "solo": false,
+          "voiced_frames": 383
+        },
+        {
+          "speaker_id": "MEE073",
+          "audio_id": "AMI_EN2002b_sdm_MEE073_0141775_0142195",
+          "duration_s": 4.2,
+          "solo": true,
+          "voiced_frames": 274
+        },
+        {
+          "speaker_id": "MEE073",
+          "audio_id": "AMI_EN2002b_sdm_MEE073_0142195_0142837",
+          "duration_s": 6.42,
+          "solo": true,
+          "voiced_frames": 222
+        },
+        {
+          "speaker_id": "MEE073",
+          "audio_id": "AMI_EN2002b_sdm_MEE073_0142837_0143107",
+          "duration_s": 2.7,
+          "solo": true,
+          "voiced_frames": 101
+        },
+        {
+          "speaker_id": "MEE073",
+          "audio_id": "AMI_EN2002b_sdm_MEE073_0143107_0143373",
+          "duration_s": 2.66,
+          "solo": true,
+          "voiced_frames": 179
+        },
+        {
+          "speaker_id": "MEE073",
+          "audio_id": "AMI_EN2002b_sdm_MEE073_0143373_0143725",
+          "duration_s": 3.52,
+          "solo": true,
+          "voiced_frames": 231
+        },
+        {
+          "speaker_id": "MEE073",
+          "audio_id": "AMI_EN2002b_sdm_MEE073_0143725_0143963",
+          "duration_s": 2.38,
+          "solo": false,
+          "voiced_frames": 177
+        },
+        {
+          "speaker_id": "MEE071",
+          "audio_id": "AMI_EN2002b_sdm_MEE071_0143934_0144261",
+          "duration_s": 2.98,
+          "solo": false,
+          "voiced_frames": 190
+        },
+        {
+          "speaker_id": "MEE071",
+          "audio_id": "AMI_EN2002b_sdm_MEE071_0144261_0144569",
+          "duration_s": 3.08,
+          "solo": false,
+          "voiced_frames": 198
+        },
+        {
+          "speaker_id": "MEE073",
+          "audio_id": "AMI_EN2002b_sdm_MEE073_0144532_0144657",
+          "duration_s": 0.88,
+          "solo": false,
+          "voiced_frames": 49
+        },
+        {
+          "speaker_id": "MEE071",
+          "audio_id": "AMI_EN2002b_sdm_MEE071_0144569_0145137",
+          "duration_s": 4.8,
+          "solo": false,
+          "voiced_frames": 241
+        },
+        {
+          "speaker_id": "FEO072",
+          "audio_id": "AMI_EN2002b_sdm_FEO072_0145146_0145185",
+          "duration_s": 0.39,
+          "solo": true,
+          "voiced_frames": 24
+        },
+        {
+          "speaker_id": "MEE071",
+          "audio_id": "AMI_EN2002b_sdm_MEE071_0145283_0145518",
+          "duration_s": 2.35,
+          "solo": false,
+          "voiced_frames": 140
+        },
+        {
+          "speaker_id": "MEE073",
+          "audio_id": "AMI_EN2002b_sdm_MEE073_0145444_0145524",
+          "duration_s": 0.06,
+          "solo": false,
+          "voiced_frames": 2
+        },
+        {
+          "speaker_id": "MEE071",
+          "audio_id": "AMI_EN2002b_sdm_MEE071_0145518_0145969",
+          "duration_s": 4.45,
+          "solo": false,
+          "voiced_frames": 233
+        },
+        {
+          "speaker_id": "MEE073",
+          "audio_id": "AMI_EN2002b_sdm_MEE073_0145900_0146161",
+          "duration_s": 1.92,
+          "solo": false,
+          "voiced_frames": 47
+        },
+        {
+          "speaker_id": "MEE073",
+          "audio_id": "AMI_EN2002b_sdm_MEE073_0146161_0146192",
+          "duration_s": 0.31,
+          "solo": false,
+          "voiced_frames": 23
+        },
+        {
+          "speaker_id": "MEE071",
+          "audio_id": "AMI_EN2002b_sdm_MEE071_0146180_0146289",
+          "duration_s": 0.97,
+          "solo": false,
+          "voiced_frames": 57
+        },
+        {
+          "speaker_id": "MEE071",
+          "audio_id": "AMI_EN2002b_sdm_MEE071_0146289_0147004",
+          "duration_s": 7.15,
+          "solo": false,
+          "voiced_frames": 231
+        },
+        {
+          "speaker_id": "MEE071",
+          "audio_id": "AMI_EN2002b_sdm_MEE071_0147004_0147093",
+          "duration_s": 0.89,
+          "solo": true,
+          "voiced_frames": 23
+        },
+        {
+          "speaker_id": "MEE073",
+          "audio_id": "AMI_EN2002b_sdm_MEE073_0147168_0147522",
+          "duration_s": 3.54,
+          "solo": true,
+          "voiced_frames": 102
+        },
+        {
+          "speaker_id": "MEE073",
+          "audio_id": "AMI_EN2002b_sdm_MEE073_0147522_0147857",
+          "duration_s": 3.35,
+          "solo": false,
+          "voiced_frames": 132
+        },
+        {
+          "speaker_id": "MEE073",
+          "audio_id": "AMI_EN2002b_sdm_MEE073_0147857_0148685",
+          "duration_s": 8.28,
+          "solo": true,
+          "voiced_frames": 430
+        },
+        {
+          "speaker_id": "MEE073",
+          "audio_id": "AMI_EN2002b_sdm_MEE073_0148685_0148921",
+          "duration_s": 2.36,
+          "solo": true,
+          "voiced_frames": 147
+        },
+        {
+          "speaker_id": "MEE073",
+          "audio_id": "AMI_EN2002b_sdm_MEE073_0148921_0149202",
+          "duration_s": 2.81,
+          "solo": true,
+          "voiced_frames": 166
+        },
+        {
+          "speaker_id": "MEE073",
+          "audio_id": "AMI_EN2002b_sdm_MEE073_0149202_0149408",
+          "duration_s": 2.06,
+          "solo": true,
+          "voiced_frames": 99
+        },
+        {
+          "speaker_id": "MEE073",
+          "audio_id": "AMI_EN2002b_sdm_MEE073_0149408_0149827",
+          "duration_s": 4.19,
+          "solo": true,
+          "voiced_frames": 168
+        },
+        {
+          "speaker_id": "MEE073",
+          "audio_id": "AMI_EN2002b_sdm_MEE073_0149964_0150225",
+          "duration_s": 2.61,
+          "solo": true,
+          "voiced_frames": 77
+        },
+        {
+          "speaker_id": "MEE073",
+          "audio_id": "AMI_EN2002b_sdm_MEE073_0150225_0150542",
+          "duration_s": 3.17,
+          "solo": true,
+          "voiced_frames": 195
+        },
+        {
+          "speaker_id": "MEE073",
+          "audio_id": "AMI_EN2002b_sdm_MEE073_0150688_0151137",
+          "duration_s": 4.49,
+          "solo": true,
+          "voiced_frames": 220
+        },
+        {
+          "speaker_id": "MEE073",
+          "audio_id": "AMI_EN2002b_sdm_MEE073_0151304_0151743",
+          "duration_s": 4.39,
+          "solo": true,
+          "voiced_frames": 169
+        },
+        {
+          "speaker_id": "MEE073",
+          "audio_id": "AMI_EN2002b_sdm_MEE073_0151743_0151772",
+          "duration_s": 0.29,
+          "solo": true,
+          "voiced_frames": 0
+        },
+        {
+          "speaker_id": "FEO072",
+          "audio_id": "AMI_EN2002b_sdm_FEO072_0151881_0152103",
+          "duration_s": 2.22,
+          "solo": false,
+          "voiced_frames": 95
+        },
+        {
+          "speaker_id": "MEE073",
+          "audio_id": "AMI_EN2002b_sdm_MEE073_0152034_0152305",
+          "duration_s": 2.02,
+          "solo": false,
+          "voiced_frames": 155
+        },
+        {
+          "speaker_id": "MEE073",
+          "audio_id": "AMI_EN2002b_sdm_MEE073_0152305_0152397",
+          "duration_s": 0.92,
+          "solo": true,
+          "voiced_frames": 75
+        },
+        {
+          "speaker_id": "MEE073",
+          "audio_id": "AMI_EN2002b_sdm_MEE073_0152397_0153316",
+          "duration_s": 9.19,
+          "solo": false,
+          "voiced_frames": 570
+        },
+        {
+          "speaker_id": "FEO072",
+          "audio_id": "AMI_EN2002b_sdm_FEO072_0153266_0153323",
+          "duration_s": 0.07,
+          "solo": false,
+          "voiced_frames": 3
+        },
+        {
+          "speaker_id": "MEE073",
+          "audio_id": "AMI_EN2002b_sdm_MEE073_0153316_0153441",
+          "duration_s": 1.18,
+          "solo": false,
+          "voiced_frames": 82
+        },
+        {
+          "speaker_id": "MEE073",
+          "audio_id": "AMI_EN2002b_sdm_MEE073_0153441_0153811",
+          "duration_s": 3.7,
+          "solo": true,
+          "voiced_frames": 140
+        },
+        {
+          "speaker_id": "FEO070",
+          "audio_id": "AMI_EN2002b_sdm_FEO070_0153855_0154032",
+          "duration_s": 1.77,
+          "solo": false,
+          "voiced_frames": 85
+        },
+        {
+          "speaker_id": "FEO072",
+          "audio_id": "AMI_EN2002b_sdm_FEO072_0154087_0154810",
+          "duration_s": 7.23,
+          "solo": false,
+          "voiced_frames": 377
+        },
+        {
+          "speaker_id": "FEO072",
+          "audio_id": "AMI_EN2002b_sdm_FEO072_0154810_0154970",
+          "duration_s": 1.6,
+          "solo": false,
+          "voiced_frames": 67
+        },
+        {
+          "speaker_id": "FEO072",
+          "audio_id": "AMI_EN2002b_sdm_FEO072_0154970_0155409",
+          "duration_s": 4.39,
+          "solo": false,
+          "voiced_frames": 247
+        },
+        {
+          "speaker_id": "FEO072",
+          "audio_id": "AMI_EN2002b_sdm_FEO072_0155409_0155526",
+          "duration_s": 1.17,
+          "solo": true,
+          "voiced_frames": 49
+        },
+        {
+          "speaker_id": "MEE073",
+          "audio_id": "AMI_EN2002b_sdm_MEE073_0155864_0156372",
+          "duration_s": 5.08,
+          "solo": false,
+          "voiced_frames": 325
+        },
+        {
+          "speaker_id": "MEE073",
+          "audio_id": "AMI_EN2002b_sdm_MEE073_0156372_0156430",
+          "duration_s": 0.58,
+          "solo": true,
+          "voiced_frames": 17
+        },
+        {
+          "speaker_id": "MEE073",
+          "audio_id": "AMI_EN2002b_sdm_MEE073_0156430_0156582",
+          "duration_s": 1.52,
+          "solo": true,
+          "voiced_frames": 82
+        },
+        {
+          "speaker_id": "MEE073",
+          "audio_id": "AMI_EN2002b_sdm_MEE073_0156582_0157089",
+          "duration_s": 5.07,
+          "solo": true,
+          "voiced_frames": 220
+        },
+        {
+          "speaker_id": "MEE073",
+          "audio_id": "AMI_EN2002b_sdm_MEE073_0157089_0157402",
+          "duration_s": 3.13,
+          "solo": true,
+          "voiced_frames": 175
+        },
+        {
+          "speaker_id": "MEE073",
+          "audio_id": "AMI_EN2002b_sdm_MEE073_0157402_0157749",
+          "duration_s": 3.47,
+          "solo": true,
+          "voiced_frames": 225
+        },
+        {
+          "speaker_id": "FEO072",
+          "audio_id": "AMI_EN2002b_sdm_FEO072_0157806_0157848",
+          "duration_s": 0.42,
+          "solo": true,
+          "voiced_frames": 34
+        },
+        {
+          "speaker_id": "MEE071",
+          "audio_id": "AMI_EN2002b_sdm_MEE071_0157867_0157939",
+          "duration_s": 0.72,
+          "solo": false,
+          "voiced_frames": 45
+        },
+        {
+          "speaker_id": "MEE073",
+          "audio_id": "AMI_EN2002b_sdm_MEE073_0157956_0158182",
+          "duration_s": 2.26,
+          "solo": true,
+          "voiced_frames": 165
+        },
+        {
+          "speaker_id": "MEE073",
+          "audio_id": "AMI_EN2002b_sdm_MEE073_0158182_0158649",
+          "duration_s": 4.67,
+          "solo": false,
+          "voiced_frames": 243
+        },
+        {
+          "speaker_id": "FEO072",
+          "audio_id": "AMI_EN2002b_sdm_FEO072_0158643_0158795",
+          "duration_s": 1.46,
+          "solo": false,
+          "voiced_frames": 106
+        },
+        {
+          "speaker_id": "MEE073",
+          "audio_id": "AMI_EN2002b_sdm_MEE073_0158808_0158836",
+          "duration_s": 0.28,
+          "solo": true,
+          "voiced_frames": 21
+        },
+        {
+          "speaker_id": "MEE071",
+          "audio_id": "AMI_EN2002b_sdm_MEE071_0158908_0159085",
+          "duration_s": 1.77,
+          "solo": true,
+          "voiced_frames": 68
+        },
+        {
+          "speaker_id": "MEE073",
+          "audio_id": "AMI_EN2002b_sdm_MEE073_0159120_0159140",
+          "duration_s": 0.2,
+          "solo": true,
+          "voiced_frames": 0
+        },
+        {
+          "speaker_id": "MEE071",
+          "audio_id": "AMI_EN2002b_sdm_MEE071_0159237_0159400",
+          "duration_s": 1.63,
+          "solo": true,
+          "voiced_frames": 76
+        },
+        {
+          "speaker_id": "MEE071",
+          "audio_id": "AMI_EN2002b_sdm_MEE071_0159400_0159494",
+          "duration_s": 0.94,
+          "solo": false,
+          "voiced_frames": 72
+        },
+        {
+          "speaker_id": "MEE073",
+          "audio_id": "AMI_EN2002b_sdm_MEE073_0159423_0159496",
+          "duration_s": 0.02,
+          "solo": false,
+          "voiced_frames": 0
+        },
+        {
+          "speaker_id": "FEO072",
+          "audio_id": "AMI_EN2002b_sdm_FEO072_0159484_0159509",
+          "duration_s": 0.13,
+          "solo": false,
+          "voiced_frames": 5
+        },
+        {
+          "speaker_id": "MEE073",
+          "audio_id": "AMI_EN2002b_sdm_MEE073_0159496_0159838",
+          "duration_s": 3.29,
+          "solo": false,
+          "voiced_frames": 126
+        },
+        {
+          "speaker_id": "MEE073",
+          "audio_id": "AMI_EN2002b_sdm_MEE073_0159838_0159870",
+          "duration_s": 0.32,
+          "solo": true,
+          "voiced_frames": 25
+        },
+        {
+          "speaker_id": "MEE073",
+          "audio_id": "AMI_EN2002b_sdm_MEE073_0160022_0160068",
+          "duration_s": 0.46,
+          "solo": true,
+          "voiced_frames": 30
+        },
+        {
+          "speaker_id": "FEO072",
+          "audio_id": "AMI_EN2002b_sdm_FEO072_0160386_0160730",
+          "duration_s": 3.44,
+          "solo": true,
+          "voiced_frames": 248
+        },
+        {
+          "speaker_id": "MEE071",
+          "audio_id": "AMI_EN2002b_sdm_MEE071_0160891_0161131",
+          "duration_s": 2.4,
+          "solo": false,
+          "voiced_frames": 148
+        },
+        {
+          "speaker_id": "MEE071",
+          "audio_id": "AMI_EN2002b_sdm_MEE071_0161131_0161161",
+          "duration_s": 0.3,
+          "solo": true,
+          "voiced_frames": 2
+        },
+        {
+          "speaker_id": "FEO072",
+          "audio_id": "AMI_EN2002b_sdm_FEO072_0161180_0161213",
+          "duration_s": 0.33,
+          "solo": false,
+          "voiced_frames": 22
+        },
+        {
+          "speaker_id": "MEE071",
+          "audio_id": "AMI_EN2002b_sdm_MEE071_0161282_0162274",
+          "duration_s": 1.66,
+          "solo": true,
+          "voiced_frames": 118
+        }
+      ]
+    }
+  },
+  "headset_channels": {
+    "ihm_EN2002a_channels_90s": {
+      "directory": "ihm_EN2002a_channels_90s",
+      "channels": {
+        "FEO070": {
+          "file": "spk_FEO070.wav",
+          "duration_s": 90.0,
+          "n": 924,
+          "median_hz": 212.45,
+          "mad_sigma_hz": 27.23,
+          "p05_hz": 102.77,
+          "p95_hz": 268.65,
+          "min_hz": 70.26,
+          "max_hz": 398.87,
+          "inlier_rate": 0.8323
+        },
+        "FEO072": {
+          "file": "spk_FEO072.wav",
+          "duration_s": 90.0,
+          "n": 1659,
+          "median_hz": 208.74,
+          "mad_sigma_hz": 27.42,
+          "p05_hz": 179.99,
+          "p95_hz": 275.84,
+          "min_hz": 72.52,
+          "max_hz": 396.28,
+          "inlier_rate": 0.8855
+        },
+        "MEE071": {
+          "file": "spk_MEE071.wav",
+          "duration_s": 90.0,
+          "n": 1594,
+          "median_hz": 110.79,
+          "mad_sigma_hz": 10.39,
+          "p05_hz": 98.79,
+          "p95_hz": 179.32,
+          "min_hz": 70.54,
+          "max_hz": 332.15,
+          "inlier_rate": 0.8651
+        },
+        "MEE073": {
+          "file": "spk_MEE073.wav",
+          "duration_s": 90.0,
+          "n": 2044,
+          "median_hz": 102.33,
+          "mad_sigma_hz": 8.58,
+          "p05_hz": 91.66,
+          "p95_hz": 125.22,
+          "min_hz": 78.45,
+          "max_hz": 312.1,
+          "inlier_rate": 0.9614
+        }
+      },
+      "pooled_within_channel_mad_sigma_hz": 20.46,
+      "pairwise_separation": [
+        {
+          "a": "FEO070",
+          "b": "FEO072",
+          "median_delta_hz": 3.71,
+          "separation_in_mad_sigmas": 0.18
+        },
+        {
+          "a": "MEE071",
+          "b": "MEE073",
+          "median_delta_hz": 8.46,
+          "separation_in_mad_sigmas": 0.41
+        },
+        {
+          "a": "FEO072",
+          "b": "MEE071",
+          "median_delta_hz": 97.95,
+          "separation_in_mad_sigmas": 4.79
+        },
+        {
+          "a": "FEO070",
+          "b": "MEE071",
+          "median_delta_hz": 101.66,
+          "separation_in_mad_sigmas": 4.97
+        },
+        {
+          "a": "FEO072",
+          "b": "MEE073",
+          "median_delta_hz": 106.41,
+          "separation_in_mad_sigmas": 5.2
+        },
+        {
+          "a": "FEO070",
+          "b": "MEE073",
+          "median_delta_hz": 110.12,
+          "separation_in_mad_sigmas": 5.38
+        }
+      ],
+      "note": "each file is one AMI headset microphone over the same time window, so the speakers are separated by the RECORDING and not by any measurement taken here"
+    }
+  },
+  "crosscheck": {
+    "reference": "src.pitch.PitchTracker.estimate (pure stdlib)",
+    "engine_under_test": "numpy yin_batch (same algorithm, vectorised)",
+    "frames_checked": 150,
+    "frames_scored_by_both": 150,
+    "agreement_rate": 1.0,
+    "median_abs_deviation_cents": 0.0,
+    "max_abs_deviation_cents": 0.0
+  },
+  "meeting_wide_turn_ground_truth": {
+    "EN2002a": {
+      "scope": "whole meeting (all annotated segments)",
+      "segments": 1367,
+      "turns": 1109,
+      "gaps": 1108,
+      "gaps_at_least_0p6s": 260,
+      "followed_by_a_DIFFERENT_speaker": 191,
+      "different_speaker_rate": 0.7346,
+      "note": "gap measured between annotated segment edges; a gap here is not necessarily a silence in the meeting, because unannotated stretches were written as digital silence by the fetcher"
+    },
+    "EN2002b": {
+      "scope": "whole meeting (all annotated segments)",
+      "segments": 955,
+      "turns": 734,
+      "gaps": 733,
+      "gaps_at_least_0p6s": 191,
+      "followed_by_a_DIFFERENT_speaker": 129,
+      "different_speaker_rate": 0.6754,
+      "note": "gap measured between annotated segment edges; a gap here is not necessarily a silence in the meeting, because unannotated stretches were written as digital silence by the fetcher"
+    },
+    "EN2002c": {
+      "scope": "whole meeting (all annotated segments)",
+      "segments": 78,
+      "turns": 74,
+      "gaps": 73,
+      "gaps_at_least_0p6s": 69,
+      "followed_by_a_DIFFERENT_speaker": 43,
+      "different_speaker_rate": 0.6232,
+      "note": "gap measured between annotated segment edges; a gap here is not necessarily a silence in the meeting, because unannotated stretches were written as digital silence by the fetcher"
+    }
+  },
+  "pitch_limitations": {
+    "what_pitch_proves": "two or more physically distinct voices, separated by far more than the within-speaker spread, in channel-separated audio",
+    "what_pitch_does_NOT_prove": "that every speaker is identifiable. Median f0 groups these speakers by voice range; WITHIN a group the median difference is smaller than the measurement's own noise floor, so a hand-off between those two produces no reliable pitch jump. A turn-taking stage must not assume 'the speaker changed' == 'f0 jumped'.",
+    "not_resolvable": [
+      {
+        "file": "ami_sdm_EN2002a_turns.wav",
+        "speakers": 4,
+        "f0_resolves_these_groups": 2,
+        "resolvable_individually_on_pitch": 0,
+        "closest_pairs": [
+          {
+            "a": "MEE071",
+            "b": "MEE073",
+            "delta_hz": 7.33,
+            "separation_in_mad_sigmas": 0.33
+          },
+          {
+            "a": "FEO070",
+            "b": "FEO072",
+            "delta_hz": 10.59,
+            "separation_in_mad_sigmas": 0.48
+          }
+        ]
+      },
+      {
+        "file": "ami_sdm_EN2002b_turns.wav",
+        "speakers": 4,
+        "f0_resolves_these_groups": 2,
+        "resolvable_individually_on_pitch": 0,
+        "closest_pairs": [
+          {
+            "a": "FEO070",
+            "b": "FEO072",
+            "delta_hz": 7.47,
+            "separation_in_mad_sigmas": 0.26
+          },
+          {
+            "a": "MEE071",
+            "b": "MEE073",
+            "delta_hz": 12.26,
+            "separation_in_mad_sigmas": 0.42
+          }
+        ]
+      }
+    ]
+  },
+  "criteria": [
+    {
+      "name": "at least two speakers with usable voicing",
+      "pass": true,
+      "detail": "4 speakers with >= 25 voiced frames"
+    },
+    {
+      "name": "some speaker pair separated by >= 3x the within-speaker MAD sigma",
+      "pass": true,
+      "detail": "best separation 4.7 MAD sigmas (FEO072 vs MEE073, delta 103.53 Hz) in ami_sdm_EN2002a_turns.wav"
+    },
+    {
+      "name": "f0 alone is bimodal: the 2-means centres sit >= 3x the pooled within-speaker MAD sigma apart (no labels used)",
+      "pass": true,
+      "detail": "best centre separation 5.17 pooled sigmas; dominant-speaker purity 0.7935 (bounded below 1.0 by construction -- each pitch group holds two speakers, see pitch_limitations)"
+    },
+    {
+      "name": "headset channels differ (channel-separated speaker identity)",
+      "pass": true,
+      "detail": "best channel separation 5.4 MAD sigmas (FEO070 vs MEE073, delta 110.12 Hz)"
+    },
+    {
+      "name": "positive class present: a >=0.6s silence is often followed by a DIFFERENT speaker (meeting-wide)",
+      "pass": true,
+      "detail": "lowest meeting-wide rate 0.6232 (the existing single-speaker corpus is 0.981-1.0, i.e. the floor is essentially never handed over there)"
+    }
+  ],
+  "verdict": "TWO_OR_MORE_DISTINCT_SPEAKERS_CONFIRMED"
+}

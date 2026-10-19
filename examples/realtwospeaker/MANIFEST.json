@@ -1,0 +1,182 @@
+{
+  "corpus": "realtwospeaker",
+  "material_class": "CONVERSATIONAL",
+  "material_class_declaration": "This material is SPONTANEOUS CONVERSATIONAL multi-party meeting audio. It is NOT read speech, NOT narration, and NOT dramatic reading. It is the material the project was missing: several people genuinely taking turns inside one file, including handing the floor over to somebody else.",
+  "not_to_be_confused_with": "examples/realaudio/corpus/ (single-speaker read speech) and with LibriVox multi-narrator dramatizations (two actors alternating, but still READ). Neither of those contains a real speaker hand-off, and this corpus is not a substitute for them; it is a different thing.",
+  "created": "2026-10-18",
+
+  "why_this_corpus_exists": "Measured on the pre-existing corpus (docs/research/ADOPTION-PLAN.md, commit 17ae46a): after any silence >= 0.6 s the SAME speaker resumes 98.1-100% of the time. The positive class -- a speaker yields the floor and someone else takes it -- was unrepresentable, so turn-taking accuracy could not be measured at all. Measured here on the full AMI annotations: after a >= 0.6 s gap a DIFFERENT speaker takes the floor 73.5% (EN2002a), 67.5% (EN2002b) and 62.3% (EN2002c, partial) of the time.",
+
+  "source": {
+    "dataset_id": "edinburghcstr/ami",
+    "dataset_name": "AMI Meeting Corpus (HuggingFace mirror of the Edinburgh AMI corpus)",
+    "hf_repo": "https://huggingface.co/datasets/edinburghcstr/ami",
+    "upstream_project": "https://groups.inf.ed.ac.uk/ami/corpus/",
+    "split": "test",
+    "configs_used": {
+      "SDM": "single far-field microphone, the whole meeting on one channel -- what a tabletop peripheral actually hears",
+      "IHM": "one headset microphone per speaker -- physically separate channels, the strongest speaker ground truth available"
+    },
+    "retrieval": "public HuggingFace datasets-server rows endpoint. No token, no account, no registration form, no licence click-through, no paywall. Only urllib from the stdlib; no pip dependency was added to this project.",
+    "retrieval_endpoint": "https://datasets-server.huggingface.co/rows?dataset=edinburghcstr%2Fami&config={sdm|ihm}&split=test&offset={n}&length=100",
+    "retrieval_note": "the HF mirror is parquet-only (~250 MB/shard, needs pyarrow), so the rows endpoint was used instead: it serves the SAME rows as individual 16 kHz WAV assets. Per-clip asset URLs are signed and expire, so the reproducible reference is the dataset id + meeting id + the segment list in each sidecar, not a stored clip URL.",
+    "licence": "CC-BY-4.0",
+    "licence_evidence": "declared in the HuggingFace dataset card YAML frontmatter: `license: - cc-by-4.0` (https://huggingface.co/datasets/edinburghcstr/ami/raw/main/README.md). The card's prose 'Licensing Information' and 'Terms of Usage' sections are EMPTY, so attribution should cite the upstream Edinburgh corpus rather than rely on this mirror's card.",
+    "attribution_required": "AMI Meeting Corpus, University of Edinburgh (J. Carletta et al.). Attribution share-alike under CC-BY-4.0; this corpus is a derivative and stays under the same terms."
+  },
+
+  "totals": {
+    "audio_files": 6,
+    "total_audio_seconds": 1200.0,
+    "total_audio_minutes": 20.0,
+    "meetings": 2,
+    "distinct_speakers": 4,
+    "sample_rate": 16000,
+    "bytes_on_disk": 39860106
+  },
+
+  "files": [
+    {
+      "file": "ami_sdm_EN2002a_turns.wav",
+      "sidecar": "ami_sdm_EN2002a_turns.segments.json",
+      "role": "far-field single-channel meeting slice",
+      "config": "SDM",
+      "meeting_id": "EN2002a",
+      "meeting_window_s": [640.37, 1060.37],
+      "duration_s": 420.0,
+      "sample_rate": 16000,
+      "channels": 1,
+      "encoding": "PCM 16-bit little-endian WAV (readable by src/wavio.py)",
+      "bytes": 13440044,
+      "speakers": ["FEO070", "FEO072", "MEE071", "MEE073"],
+      "annotated_segments": 314,
+      "segments_audible_in_audio": 203,
+      "segments_not_audible": 111,
+      "why_fewer_audible_than_annotated": "SDM is ONE microphone, so two people talking at once are two slices of the SAME signal. The fetcher paints them in order rather than summing them, so a segment lying wholly inside an already-painted region contributes zero samples. Those utterances are still fully labelled in the sidecar; they are simply not separately audible.",
+      "speaker_change_ground_truth": "per-utterance diarization in the sidecar: speaker_id, microphone_id, begin_time, end_time on the meeting timeline, and the transcript text, for all 314 annotated segments"
+    },
+    {
+      "file": "ami_sdm_EN2002b_turns.wav",
+      "sidecar": "ami_sdm_EN2002b_turns.segments.json",
+      "role": "far-field single-channel meeting slice",
+      "config": "SDM",
+      "meeting_id": "EN2002b",
+      "meeting_window_s": [1194.48, 1614.48],
+      "duration_s": 420.0,
+      "sample_rate": 16000,
+      "channels": 1,
+      "encoding": "PCM 16-bit little-endian WAV (readable by src/wavio.py)",
+      "bytes": 13440044,
+      "speakers": ["FEO070", "FEO072", "MEE071", "MEE073"],
+      "annotated_segments": 230,
+      "segments_audible_in_audio": 158,
+      "segments_not_audible": 72,
+      "why_fewer_audible_than_annotated": "same single-channel painting rule as EN2002a",
+      "speaker_change_ground_truth": "per-utterance diarization in the sidecar: speaker_id, microphone_id, begin_time, end_time, transcript text, for all 230 annotated segments"
+    },
+    {
+      "file": "ihm_EN2002a_channels_90s/spk_FEO070.wav",
+      "sidecar": "ihm_EN2002a_channels_90s/spk_FEO070.segments.json",
+      "role": "per-speaker headset-microphone channel reference",
+      "config": "IHM",
+      "meeting_id": "EN2002a",
+      "meeting_window_s": [700.37, 790.37],
+      "duration_s": 90.0,
+      "sample_rate": 16000,
+      "channels": 1,
+      "encoding": "PCM 16-bit little-endian WAV (readable by src/wavio.py)",
+      "bytes": 2880044,
+      "speaker_id": "FEO070",
+      "annotated_segments": 12,
+      "speaker_change_ground_truth": "channel separation by construction: this file IS one speaker's microphone. Speaker identity needs no inference."
+    },
+    {
+      "file": "ihm_EN2002a_channels_90s/spk_FEO072.wav",
+      "sidecar": "ihm_EN2002a_channels_90s/spk_FEO072.segments.json",
+      "role": "per-speaker headset-microphone channel reference",
+      "config": "IHM",
+      "meeting_id": "EN2002a",
+      "meeting_window_s": [700.37, 790.37],
+      "duration_s": 90.0,
+      "sample_rate": 16000,
+      "channels": 1,
+      "encoding": "PCM 16-bit little-endian WAV (readable by src/wavio.py)",
+      "bytes": 2880044,
+      "speaker_id": "FEO072",
+      "annotated_segments": 13,
+      "speaker_change_ground_truth": "channel separation by construction"
+    },
+    {
+      "file": "ihm_EN2002a_channels_90s/spk_MEE071.wav",
+      "sidecar": "ihm_EN2002a_channels_90s/spk_MEE071.segments.json",
+      "role": "per-speaker headset-microphone channel reference",
+      "config": "IHM",
+      "meeting_id": "EN2002a",
+      "meeting_window_s": [700.37, 790.37],
+      "duration_s": 90.0,
+      "sample_rate": 16000,
+      "channels": 1,
+      "encoding": "PCM 16-bit little-endian WAV (readable by src/wavio.py)",
+      "bytes": 2880044,
+      "speaker_id": "MEE071",
+      "annotated_segments": 17,
+      "speaker_change_ground_truth": "channel separation by construction"
+    },
+    {
+      "file": "ihm_EN2002a_channels_90s/spk_MEE073.wav",
+      "sidecar": "ihm_EN2002a_channels_90s/spk_MEE073.segments.json",
+      "role": "per-speaker headset-microphone channel reference",
+      "config": "IHM",
+      "meeting_id": "EN2002a",
+      "meeting_window_s": [700.37, 790.37],
+      "duration_s": 90.0,
+      "sample_rate": 16000,
+      "channels": 1,
+      "encoding": "PCM 16-bit little-endian WAV (readable by src/wavio.py)",
+      "bytes": 2880044,
+      "speaker_id": "MEE073",
+      "annotated_segments": 25,
+      "speaker_change_ground_truth": "channel separation by construction"
+    }
+  ],
+
+  "supporting_files": [
+    {
+      "file": "_downloads/fetch_ami.py",
+      "role": "the fetcher. Reproduces every byte in this directory from the public endpoints above. stdlib + numpy only.",
+      "how_to_run": "python _downloads/fetch_ami.py --analyse-only   # report the positive-class counts from the annotations, no audio downloaded\npython _downloads/fetch_ami.py --meeting EN2002a --length 420 --ihm-length 90 --out ../ami_sdm_EN2002a_turns.wav"
+    },
+    {
+      "file": "_downloads/meta_sdm_test.json",
+      "role": "cached segment annotations for the SDM config (minus the signed audio URLs), kept so the turn statistics can be recomputed without hitting the network. Covers EN2002a and EN2002b in full and a prefix of EN2002c."
+    },
+    {
+      "file": "_downloads/meta_ihm_test.json",
+      "role": "cached segment annotations for the IHM config, same purpose."
+    }
+  ],
+
+  "speaker_change_ground_truth_summary": {
+    "form": "per-utterance diarization segments (speaker_id + begin_time + end_time + transcript text), PLUS physically separate per-speaker microphone channels for one 90 s window",
+    "inferred_by_me": "nothing. No diarizer was run and no label was guessed. Every speaker identity comes from the AMI annotation.",
+    "how_to_use": "each .wav has a same-named .segments.json whose `segments` array is ground truth for that file; `audible: true/false` says whether that utterance is separately audible in the audio, and `audible_start_s`/`audible_end_s` give where to measure it"
+  },
+
+  "limitations": [
+    "UNANNOTATED STRETCHES ARE WRITTEN AS DIGITAL SILENCE. AMI publishes per-utterance slices, not continuous channels. Where no segment exists, this corpus has zeros. We do not claim those were silent in the meeting. CONSEQUENCE: a gap measured in these WAVs is a lower bound on the real gap, and any 'silence then a different speaker' rate computed from the audio alone is optimistic.",
+    "OVERLAPPED UTTERANCES ARE NOT SEPARATELY AUDIBLE. One far-field mic carries two voices at once; the fetcher paints rather than sums (summing two slices of one signal comb-filters), so 111 of 314 annotated segments in EN2002a and 72 of 230 in EN2002b contribute no samples. Their labels are still in the sidecar.",
+    "THE WINDOWS WERE CHOSEN FOR TURN DENSITY. Each slice is the 420 s stretch of its meeting with the most 'silence then different speaker' events, so the slice-level rate (0.803 / 0.714) OVERSTATES the meeting. The unbiased meeting-wide rates are 0.735 (EN2002a) and 0.675 (EN2002b), measured over all annotated segments. Use the meeting-wide number when reporting anything about how often people hand over the floor.",
+    "PARTIAL COVERAGE IN THE ANNOTATION CACHE. EN2002a and EN2002b are cached in full; EN2002c is only a prefix (74 turns), which is why it is quoted only as corroboration.",
+    "FOUR SPEAKERS, ONE MEETING SERIES. Both meetings are the same four people (FEO070, FEO072, MEE071, MEE073). This corpus proves the class is representable; it does not establish demographic or room variety.",
+    "FAR-FIELD F0 IS CONTAMINATED BY OVERLAP. Measured: pooling overlapped segments inflates the within-speaker spread from 22.3 Hz to 52.8 Hz and drops the best speaker separation from 4.7 to 1.8 MAD sigmas. Any speaker test on this material should exclude overlapped segments, or use the channel-separated IHM files.",
+    "MEDIAN F0 DOES NOT IDENTIFY INDIVIDUAL SPEAKERS HERE. FEO070 and FEO072 differ by ~10 Hz (0.5 MAD sigmas) and MEE071 by MEE073 by ~7 Hz (0.3 MAD sigmas). Pitch resolves TWO voice groups, not four people. A hand-off within a group produces no reliable pitch jump. See `experiments/twospeaker_verify_results.json` -> `pitch_limitations`."
+  ],
+
+  "verification": {
+    "script": "experiments/twospeaker_verify.py",
+    "results": "experiments/twospeaker_verify_results.json",
+    "how_to_rerun": "/home/proart/projects/glasses/.venv/bin/python experiments/twospeaker_verify.py",
+    "verdict": "TWO_OR_MORE_DISTINCT_SPEAKERS_CONFIRMED",
+    "measures": "per-speaker median f0 with voiced-frame counts, the within-speaker MAD sigma as the noise floor, the separation of every speaker pair in units of that noise floor, a label-free 2-means bimodality test, and the channel-separated headset reference. The fast vectorised YIN is cross-checked frame-by-frame against src/pitch.py every run and the agreement rate is written into the results."
+  }
+}

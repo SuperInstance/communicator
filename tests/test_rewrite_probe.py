@@ -16,6 +16,8 @@ each load-bearing line in turn and asserts the suite notices.
 """
 
 from __future__ import annotations
+import pytest as _pytest  # noqa: E402
+_pytest.importorskip("typesafe_sdk")  # noqa: E402
 
 import sys
 from pathlib import Path
