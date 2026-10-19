@@ -1,0 +1,115 @@
+{
+  "question": "is the label resolvable in this corpus, and how many sessions per class would it take?",
+  "n_sessions": 3,
+  "sessions": [
+    {
+      "name": "A",
+      "label": "SPEAK",
+      "n_windows": 99,
+      "means": {
+        "conc_mean": 0.18687447695076675,
+        "conc_std": 0.013708772204809398,
+        "conc_max": 0.20346923166799166,
+        "persistence": 0.3128787878787878
+      }
+    },
+    {
+      "name": "B",
+      "label": "SPEAK",
+      "n_windows": 99,
+      "means": {
+        "conc_mean": 0.17242356510368362,
+        "conc_std": 0.010222914420150359,
+        "conc_max": 0.1884129560194034,
+        "persistence": 0.14572811447811446
+      }
+    },
+    {
+      "name": "C",
+      "label": "SILENT",
+      "n_windows": 99,
+      "means": {
+        "conc_mean": 0.17598783993345335,
+        "conc_std": 0.012249526784641371,
+        "conc_max": 0.19351906682255832,
+        "persistence": 0.2585753367003368
+      }
+    }
+  ],
+  "features": {
+    "conc_mean": {
+      "within_session_sd": 0.002587980199700451,
+      "between_session_sd_within_label": 0.010218337761401523,
+      "between_session_sd_by_label": {
+        "SPEAK": 0.010218337761401523
+      },
+      "between_label_separation": 0.0036611810937717815,
+      "label_resolvable": false,
+      "n_per_class_estimate": {
+        "n_per_class_for_z2": 63,
+        "n_per_class_for_z3": 141
+      },
+      "per_label_means": {
+        "SPEAK": 0.1796490210272252,
+        "SILENT": 0.1759878399334534
+      }
+    },
+    "conc_std": {
+      "within_session_sd": 0.0011911550084363102,
+      "between_session_sd_within_label": 0.0024648736777843215,
+      "between_session_sd_by_label": {
+        "SPEAK": 0.0024648736777843215
+      },
+      "between_label_separation": 0.0002836834721614903,
+      "label_resolvable": false,
+      "n_per_class_estimate": {
+        "n_per_class_for_z2": 604,
+        "n_per_class_for_z3": 1359
+      },
+      "per_label_means": {
+        "SPEAK": 0.011965843312479879,
+        "SILENT": 0.01224952678464137
+      }
+    },
+    "conc_max": {
+      "within_session_sd": 0.0017253061311471325,
+      "between_session_sd_within_label": 0.010646394610530633,
+      "between_session_sd_by_label": {
+        "SPEAK": 0.010646394610530633
+      },
+      "between_label_separation": 0.0024220270211390282,
+      "label_resolvable": false,
+      "n_per_class_estimate": {
+        "n_per_class_for_z2": 155,
+        "n_per_class_for_z3": 348
+      },
+      "per_label_means": {
+        "SPEAK": 0.19594109384369746,
+        "SILENT": 0.19351906682255843
+      }
+    },
+    "persistence": {
+      "within_session_sd": 0.007247580861726111,
+      "between_session_sd_within_label": 0.11819337464151403,
+      "between_session_sd_by_label": {
+        "SPEAK": 0.11819337464151403
+      },
+      "between_label_separation": 0.029271885521885477,
+      "label_resolvable": false,
+      "n_per_class_estimate": {
+        "n_per_class_for_z2": 131,
+        "n_per_class_for_z3": 294
+      },
+      "per_label_means": {
+        "SPEAK": 0.2293034511784512,
+        "SILENT": 0.25857533670033667
+      }
+    }
+  },
+  "verdict": "The label is NOT resolvable in this corpus. The between-label separation is smaller than the between-session spread among sessions of the SAME label, so no classifier can separate them and more features will not help. The only fix is more sessions, and the n_per_class_estimate says how many.",
+  "limits": [
+    "the between-session spread is estimated from very few sessions and is itself unreliable -- the n_per_class_estimate improves as the corpus grows, and the number printed today is a floor, not a forecast",
+    "one speaker, one room, one lighting state",
+    "this measures RESOLVABILITY, not accuracy; a corpus that cannot support the claim makes any accuracy meaningless"
+  ]
+}

@@ -103,6 +103,52 @@ def frame_feats(m: np.ndarray) -> np.ndarray:
     return np.array([tot / 1e4, len(ys) / m.size, cx, cy, spread])
 
 
+def region_feats(maps: np.ndarray, top_frac: float = 0.05) -> np.ndarray:
+    """Features that CANNOT be reduced to an energy statistic.
+
+    TEACHER-PIPELINE.md and COMBINED-FILTER.md both ended at the same place:
+    the model was reading a GLOBAL ENERGY STATISTIC, because that is what
+    survives the spatially-scrambled control. And the global statistic is
+    worthless here -- total change is 3128 / 3209 / 3268 for speaking /
+    speaking / SILENT.
+
+    So the features have to describe WHERE the change is and whether it stays
+    there. Two of them:
+
+      CONCENTRATION -- the fraction of all change that falls inside the most
+        active `top_frac` of pixels. A uniform field gives top_frac (0.05); a
+        mouth moving gives far more. This is scale-free: it is a shape, not
+        an amount, so pixel-rolling cannot change it.
+
+      PERSISTENCE -- the overlap of the active region between consecutive
+        frames. Real speech keeps moving in the same small place; a person
+        shifting in their chair, or camera noise, does not. This is the
+        feature that says "a specific thing is moving", which is the thing
+        the whole project is trying to detect.
+    """
+    conc, pers = [], []
+    for m in maps:
+        tot = float(m.sum())
+        if tot <= 0:
+            conc.append(0.0)
+            pers.append(0.0)
+            continue
+        k = max(1, int(m.size * top_frac))
+        idx = np.argpartition(m.ravel(), -k)[-k:]
+        conc.append(float(m.ravel()[idx].sum() / tot))
+        act = np.zeros(m.size, bool)
+        act[idx] = True
+        pers.append(act.reshape(m.shape))
+    conc = np.array(conc)
+    if len(pers) > 1:
+        ov = [float((pers[i] & pers[i + 1]).sum() / max(pers[i].sum(), 1))
+              for i in range(len(pers) - 1)]
+        persistence = float(np.mean(ov)) if ov else 0.0
+    else:
+        persistence = 0.0
+    return np.array([conc.mean(), conc.std(), conc.max(), persistence])
+
+
 def window_feats(maps: np.ndarray, mode: str = "summary") -> np.ndarray:
     """A window of consecutive motion frames -> one feature vector.
 
@@ -133,9 +179,14 @@ def window_feats(maps: np.ndarray, mode: str = "summary") -> np.ndarray:
     grid = (mean_map.reshape(6, mean_map.shape[0] // 6, 8,
                              mean_map.shape[1] // 8)
                   .mean(axis=(1, 3))).ravel()               # 48 numbers
+    reg = region_feats(maps)
     if mode == "map":
         return np.concatenate([grid, vel])
-    return np.concatenate([summ, grid])
+    if mode == "region":
+        return np.concatenate([reg, vel])
+    if mode == "region+map":
+        return np.concatenate([reg, grid, vel])
+    return np.concatenate([summ, grid, reg])
 
 
 # -- logistic regression, numpy only ------------------------------------------
@@ -203,7 +254,8 @@ def main():
     ap.add_argument("--max-per", type=int, default=40)
     ap.add_argument("--train-frac", type=float, default=0.6)
     ap.add_argument("--features", default="both",
-                    choices=("summary", "map", "both"))
+                    choices=("summary", "map", "both", "region",
+                             "region+map"))
     ap.add_argument("--out", default=str(ROOT / "experiments"))
     a = ap.parse_args()
 

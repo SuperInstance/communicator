@@ -1,0 +1,39 @@
+{
+  "task": "speaking",
+  "k_frames": 6,
+  "n_windows": 120,
+  "train_windows": 72,
+  "test_windows": 48,
+  "classes_in_train": [
+    0,
+    1
+  ],
+  "acc_train": 0.9722222222222222,
+  "acc_test": 1.0,
+  "base_rate_test": 0.6666666666666666,
+  "acc_test_spatially_scrambled": 0.6875,
+  "acc_test_spatially_scrambled_train": 0.7361111111111112,
+  "acc_test_blank": 0.6666666666666666,
+  "leave_one_session_out": [
+    {
+      "held_out": "A",
+      "acc": 0.0,
+      "n": 40
+    },
+    {
+      "held_out": "B",
+      "acc": 0.0,
+      "n": 40
+    }
+  ],
+  "margin_over_best_control": 0.3125,
+  "usable": true,
+  "limits": [
+    "two labelled sessions, one speaker, one room, one lighting state",
+    "the temporal split is over a ~20 s window, so train and test are highly correlated in time",
+    "leave-one-session-out is reported but with two sessions it means training on one class only for a binary task, so it is a sanity check, not a measurement",
+    "no error bars; one number from one split",
+    "this validates the PIPELINE and the CONTROLS. It is not evidence that the task is solved."
+  ],
+  "features": "region"
+}
