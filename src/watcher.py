@@ -8,17 +8,40 @@ The measurements forced that: judged tracks cost 0.97 s for four gates and
 continuous path.
 
 THE FIRST LINE OF THIS DOCSTRING USED TO SAY "MICROSECONDS". IT WAS WRONG, and
-the way it was wrong is the whole point.
+the way it was wrong is the whole point. Then it said "39.13 ms per 100 ms",
+and later "31.8% of a core", and both of those were wrong too, in a quieter
+way: THERE IS NO SINGLE NUMBER FOR THIS, and quoting one bare is the mistake
+this section kept making. The cost depends on the fixture and on the clip
+length, and both must be named (docs/research/WATCHER-COST.md):
 
-Measured here, single thread, one core:
+    30 s of real speech, no gate          29.9% of a core
+    30 s of a continuous 200 Hz tone      43.0%
+    30 s of a 120 Hz hum, no gate         43.8%; with the gate 2.8%
+                                           (5.3% before the transient-frame
+                                           fix -- the residue was one full
+                                           YIN pass per run cleared by a
+                                           single start-up gate frame)
+    30 s of digital silence                3.3%
 
-    watcher.py, 100 ms of audio      39.13 ms     39.1% of a core
-    with the VAD gate in front        1.2 ms      1.2% of a core
+The old "31.8%" WAS NOT A MEASUREMENT ANYONE CAN POINT AT. The same commit
+that introduced it recorded "39.13 ms per 100 ms" beside it, which is
+39.13%, and 39.3% re-measures on 30 s of the same fixture today. Quote a
+length AND a fixture, or quote nothing.
 
-A peripheral cannot spend 39% of a core deciding whether someone is talking.
-That is affordable on a laptop and impossible on the device this is built for.
-The number is now asserted: `test_skipping_yin_actually_saves_the_cpu_it_
-claims_to` fails if gating ever stops saving the work.
+THE GROWTH IS BOUNDED, NOT QUADRATIC. On a signal with no pauses the
+retained buffer grows until the open segment reaches MAX_UTTERANCE_S and is
+flushed, so it plateaus at ~2.0 s (32,160 samples measured) and `_trim`
+runs every ~1.9 s indefinitely -- 33 flushes over 60 s, per-second cost
+unchanged between 30 s and 60 s, growth exponent 0.01 beyond 4 s. What a
+short clip shows as "it gets worse with length" is the startup ramp
+amortising plus one YIN pass landing inside the clip: cost steps 36x
+between a 2.00 s clip (2.0%) and a 2.10 s clip (35.0%), which is the
+checkpoint switching on, not a slope.
+
+A peripheral cannot spend 40% of a core deciding whether someone is talking.
+That is affordable on a laptop and impossible on the device this is built
+for. The saving is asserted, not assumed: `test_skipping_yin_actually_saves_
+the_cpu_it_claims_to` fails if gating ever stops saving the work.
 
 WHAT "WATCH" MEANS HERE IS NOT A PASS OVER A FILE.
 
@@ -70,12 +93,16 @@ and a room with a fan emits no pause events at all.
 
 What changed: the gate answers that question properly (a 120 Hz hum at
 amplitude 0.05 scores 0.356 against 0.998 for real speech), so the YIN work is
-skipped and the failure is contained. What did NOT change: the energy
+skipped and the failure is contained. What ALSO changed, for the case the gate
+cannot reject (a 200 Hz stack scores 0.97): a mains-locked F0 is no longer
+emitted -- `pitch.locked_runs` suppresses voiced runs long enough that a real
+voice would have moved, that did not move. What did NOT change: the energy
 segmentation still cannot tell a fan from a person, so such a segment is still
-emitted as an utterance -- marked `pitch_skipped`, with the probability
-attached. It is DOWNGRADED, not corrected. The honest framing is that the gate
-makes the failure cheap rather than making it go away. Asserted in
-`tests/test_vad.py::TestDeclaredLimits`.
+emitted as an utterance -- marked `pitch_skipped` when the gate dismissed it,
+`pitch_locked_runs` when its pitch was a lock, with the probability attached
+either way. The segmentation failure is DOWNGRADED, not corrected; the pitch
+failure now is. Asserted in `tests/test_vad.py::TestDeclaredLimits` and
+`tests/test_pitch_periodicity.py`.
 
 Everything here is arithmetic, or one small ONNX graph. No network, no clock.
 """
@@ -148,6 +175,27 @@ GATE_FIELD = "gate_speech_prob"
 # energy-only segmenter). It is a constant here so a reader can see that the
 # watcher is not inventing a second, differently-tuned number.
 GATE_SPEECH = 0.5
+
+# The gate must say speech more than once before YIN is spent on a segment.
+#
+# A peak is one frame's opinion, and the one frame can be a start-up
+# transient: on the 120 Hz 12-harmonic hum fixture at peak 0.05 the gate
+# passes EXACTLY 1 frame in 937 (0.50388, index 2), and under a peak-only
+# rule that single frame cleared YIN for the whole first 2 s checkpoint of
+# every run -- gated hum cost 5.4% of a core against 2.6% for the pure tone
+# where no transient occurs. The measured gap this sits in: the weakest
+# real-speech segment on the alice01 fixture holds 8 frames >= GATE_SPEECH
+# at 0, -20 and -30 dB (45 segments at each level), and the 150 Hz stack
+# the gate genuinely passes holds 187. Four is 2x below the weakest real
+# segment and 4x above the transient.
+#
+# The rule SATURATES on short segments: a segment that contains fewer gate
+# frames than this in total is judged against how many it actually has, not
+# against four it never had. Measured reason: the alice01 fixture emits two
+# pre-speech slivers of 0.04-0.07 s carrying 2-3 frames at 0.998 peak --
+# demanding four there is not a speech test, and YIN over a 0.07 s window
+# is cheap and had produced nothing anyway.
+GATE_MIN_FRAMES = 4
 
 # Cadence for reporting a pause that has not closed yet, in seconds of
 # accumulated silence. See Watcher._pause_reported_at.
@@ -527,9 +575,11 @@ class Watcher:
 
     # -- gate ---------------------------------------------------------------
 
-    def _gate_peak(self, seg) -> float | None:
+    def _gate_stats(self, seg) -> tuple:
         """
-        The gate's peak probability over a segment, or None if no gate ran.
+        The gate's peak probability and its count of passing frames over a
+        SEGMENT -- the record's own [t0, t1] interval, not the whole run and
+        not the retained tail -- or (None, None) if no gate ran.
 
         `seg` times are RELATIVE to the current buffer, so they are converted
         to ABSOLUTE samples with `self._offset` before being indexed against
@@ -538,9 +588,25 @@ class Watcher:
         hops versus 512-sample frames), so an index that is right in one is
         wrong in the other. Both are addressed absolutely and neither is
         assumed to agree with the other.
+
+        Coverage is per RECORD, and it is exact: `_trim` never drops
+        probability frames past the last CLOSED segment's end, and the next
+        segment starts exactly there. GATE-PEAK-COVERAGE.md alleged a 14.5x
+        understatement from `_trim`; measured per record, the ratio is 1.00x
+        on that doc's own fixture and on real speech -- the 14.5x divided the
+        whole-signal max by the LAST record's value, two different intervals.
+        Asserted in tests/test_gate_interval.py so retention cannot silently
+        fall behind the open segment.
+
+        The count of frames >= GATE_SPEECH is the DECISION statistic; the
+        peak remains the AUDIT statistic. They are deliberately separate: a
+        peak is one frame's opinion and that frame can be a start-up
+        transient, while a count of one-in-937 is not a voice. The window
+        length is returned too, so the decision can saturate on segments
+        too short to contain GATE_MIN_FRAMES at all.
         """
         if self.gate is None or not self._gate_probs:
-            return None
+            return None, None, None
         a0 = self._offset + int(seg.start * self.sr)
         a1 = self._offset + int(seg.end * self.sr)
         i0 = (a0 - self._gate_probs_base) // vad.FRAME_SAMPLES
@@ -548,8 +614,10 @@ class Watcher:
         i0 = max(0, i0)
         i1 = min(len(self._gate_probs), i1)
         if i1 <= i0:
-            return None
-        return max(self._gate_probs[i0:i1])
+            return None, None, None
+        window = self._gate_probs[i0:i1]
+        return (max(window), sum(1 for p in window if p >= GATE_SPEECH),
+                len(window))
 
     # -- per-segment summary -------------------------------------------------
 
@@ -629,14 +697,18 @@ class Watcher:
         # as one. The verdict is recorded either way, so a segment the gate
         # dismissed can be audited afterwards.
         #
-        # `max` over the segment's frames, not `mean`: measured over 20 real
-        # speech segments, `max` vetoed 0/20 and `mean` vetoed 1/20, because a
-        # segment's own quiet edges drag its average down. The cost is that a
-        # single spurious frame can clear the threshold -- which is the safe
-        # direction, since it means we do the work we did not need to rather
-        # than skip the work that mattered.
-        gate_prob = self._gate_peak(seg)
-        skip_pitch = gate_prob is not None and gate_prob < GATE_SPEECH
+        # TWO statistics over the same interval, deliberately separate. The
+        # PEAK is the audit number: `max` and not `mean`, because measured
+        # over 20 real speech segments `max` vetoed 0/20 where `mean` vetoed
+        # 1/20 -- a segment's own quiet edges drag its average down. The
+        # COUNT of passing frames is the decision number: a peak is one
+        # frame's opinion, and on the hum fixture the one frame is a start-up
+        # transient (0.50388 at index 2, one frame in 937) that used to clear
+        # YIN for an entire 2 s window. Fewer than GATE_MIN_FRAMES passing
+        # frames is not a voice; see that constant for the measured gap.
+        gate_prob, gate_frames, gate_window = self._gate_stats(seg)
+        skip_pitch = (gate_prob is not None
+                      and gate_frames < min(GATE_MIN_FRAMES, gate_window))
 
         tracker = None
         pf = []
@@ -646,7 +718,27 @@ class Watcher:
             pf = tracker.track(window)
         elif not window:
             pass
+        # Voicedness counts BEFORE lock suppression: "voiced" is a statement
+        # about periodic energy, which hum has -- only the F0 of a locked run
+        # is untrustworthy, and the record says so separately.
+        voiced_n = sum(1 for f in pf if f.hz is not None)
         hz = [f.hz for f in pf if f.hz is not None]
+        # The periodicity-consistency test YIN cannot be (NOTCH-AB.md: YIN
+        # measures period, so a mains lock survives any linear filter). A
+        # voiced run long enough that a real voice would have moved, that did
+        # not move, is a lock: its hz is a statement about the mains, not the
+        # speaker, and a gap is strictly better than a wrong number. Supplied
+        # per run, so a moving utterance next to a locked one keeps its pitch.
+        locks = pitch.locked_runs(pf, self.hop_s)
+        locked_frames = 0
+        if locks:
+            locked = set()
+            for a, b in locks:
+                locked.update(range(a, b))
+            locked_frames = sum(1 for k, f in enumerate(pf)
+                                if f.hz is not None and k in locked)
+            hz = [f.hz for k, f in enumerate(pf)
+                  if f.hz is not None and k not in locked]
         inflections = inflection.contour_events(pf) if pf else []
         rms = [f.rms for f in frames]
         peak = max(rms) if rms else 0.0
@@ -656,18 +748,28 @@ class Watcher:
             "open": is_open,
             "energy_peak": round(peak, 6),
             "energy_mean": round(sum(rms) / len(rms), 6) if rms else 0.0,
-            "voiced_frames": len(hz),
+            "voiced_frames": voiced_n,
             "total_frames": len(pf),
-            "voiced_ratio": round(len(hz) / len(pf), 4) if pf else 0.0,
+            "voiced_ratio": round(voiced_n / len(pf), 4) if pf else 0.0,
             "hz_p05": round(_pct(hz, 0.05), 2) if hz else None,
             "hz_p95": round(_pct(hz, 0.95), 2) if hz else None,
             "inflections": len(inflections),
             "quiet_frames": tracker.quiet_frames if tracker is not None else 0,
             # Always present, even when the gate was off. `None` means "no gate
             # ran", which is a different fact from 0.0 meaning "the gate ran
-            # and saw silence".
+            # and saw silence". The frame count travels with the peak because
+            # the decision is made on the count -- a record that says
+            # `gate_speech_prob 0.6, pitch_skipped True` is only auditable if
+            # it also says the gate said so exactly once.
             GATE_FIELD: gate_prob,
+            "gate_speech_frames": gate_frames,
             "pitch_skipped": skip_pitch,
+            # How much of this segment's pitch was suppressed as mains-locked.
+            # Zero on real speech (measured: the tightest >=0.5 s run in
+            # alice01 + both AMI meetings still moves 104 cents); >0 means
+            # hz_p05/hz_p95 describe only the unlocked remainder.
+            "pitch_locked_runs": len(locks),
+            "pitch_locked_frames": locked_frames,
         })
         if is_open and self._open_run_onset_done:
             # Second and later checkpoints of the SAME run. The onset already

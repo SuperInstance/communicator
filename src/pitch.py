@@ -260,6 +260,70 @@ def smooth_octaves(
 SMOOTH_HALF_WIDTH = 5    # +-5 frames = +-50 ms of context at the 10 ms hop
 
 
+# -- the periodicity-consistency test YIN cannot be --------------------------
+#
+# IN-THE-WILD-AUDIO.md §5.1 named this as the fix for the mains lock, and
+# NOTCH-AB.md proved nothing cheaper can work: YIN measures PERIOD, so
+# deleting the fundamental of a harmonic stack leaves the surviving
+# harmonics with an unchanged period and the same emitted F0. Real voice F0
+# moves continuously; a mains-locked estimate does not.
+#
+# Measured on this machine, the two distributions this threshold separates:
+#
+#   locked runs (120 Hz tone 30 s; 150/200 Hz 3-harmonic stacks 6 s):
+#       peak-to-peak excursion over 1.73 s runs: <= 0.01 cents
+#   real voice (alice01 90 s + both AMI meetings, 1409 voiced runs):
+#       runs >= 0.5 s: minimum excursion 104 cents (n=36)
+#       every run under 20 cents is shorter than 0.05 s
+#
+# The minimum run length is forced by the data, not chosen for comfort: on
+# runs shorter than ~0.05 s real voice is as flat as a mains lock, so there
+# is no evidence either way and the detector must not fire. Every lock in
+# the failure corpus is >= 1.73 s. The excursion threshold carries a 10x
+# margin to the tightest real run on the far side.
+#
+# WHAT THIS DOES NOT CATCH: a drifting subharmonic lock. Measured
+# speech+150 Hz-stack tracks wander 161-1318 cents while being wrong --
+# wrong-but-moving is a different defect and needs a different test.
+
+LOCK_MIN_RUN_S = 0.5
+LOCK_MAX_EXCURSION_CENTS = 10.0
+
+
+def locked_runs(frames: list[PitchFrame], hop_s: float,
+                min_run_s: float = LOCK_MIN_RUN_S,
+                max_excursion_cents: float = LOCK_MAX_EXCURSION_CENTS
+                ) -> list[tuple[int, int]]:
+    """
+    Contiguous voiced runs that are mains-locked: long enough that a real
+    voice would have moved (>= `min_run_s`) and it did not (peak-to-peak
+    excursion <= `max_excursion_cents`). Returns [(i, j), ...) half-open
+    index ranges into `frames`; empty means nothing looked like a lock.
+
+    The excursion is peak-to-peak in cents rather than a standard deviation
+    because the failure signature is a hard ceiling on movement, not a
+    spread: a synthetic stack repeats to within 0.01 cents while the
+    tightest real >=0.5 s run in the corpus moves 104.
+    """
+    out: list[tuple[int, int]] = []
+    i = 0
+    n = len(frames)
+    while i < n:
+        if frames[i].hz is None:
+            i += 1
+            continue
+        j = i
+        while j < n and frames[j].hz is not None:
+            j += 1
+        if (j - i) * hop_s >= min_run_s:
+            hz = [f.hz for f in frames[i:j]]
+            cents = 1200.0 * math.log2(max(hz) / min(hz))
+            if cents <= max_excursion_cents:
+                out.append((i, j))
+        i = j
+    return out
+
+
 def _smooth_run(frames, out, start, end, max_semitone_jump, hold):
     """Correct octave outliers inside one voiced run [start, end)."""
     if end - start < hold:
