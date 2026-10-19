@@ -1,0 +1,50 @@
+{
+  "question": "does a temporal median before thresholding remove LED banding and leave real motion?",
+  "operator_results": {
+    "median1": {
+      "occupied": 48.190104166666664,
+      "empty": 50.0
+    },
+    "median3": {
+      "occupied": 21.42578125,
+      "empty": 0.0
+    },
+    "median5": {
+      "occupied": 0.48177083333333337,
+      "empty": 0.0
+    },
+    "median7": {
+      "occupied": 12.180989583333334,
+      "empty": 0.0
+    },
+    "mean1": {
+      "occupied": 48.190104166666664,
+      "empty": 50.0
+    },
+    "mean3": {
+      "occupied": 25.774739583333332,
+      "empty": 0.0
+    },
+    "mean5": {
+      "occupied": 0.78125,
+      "empty": 0.0
+    },
+    "mean7": {
+      "occupied": 12.805989583333332,
+      "empty": 0.0
+    }
+  },
+  "best_median_window": [
+    "median3",
+    0.0,
+    21.42578125
+  ],
+  "limits": [
+    "the empty capture is later and darker than the occupied one (mean luma 49.7 vs 111.2); only within-condition comparisons across windows are clean",
+    "a k-frame median adds (k-1)/30 s latency and smooths real fast motion by the same amount -- reported per window, not hidden",
+    "edge frames are replicated, so the first and last (k-1)/2 frames of each capture are not fully filtered",
+    "this shows whether the instrument is usable. It says nothing about whether vision can distinguish 'talking to me'"
+  ],
+  "banding_removal": "SOLID. The empty room goes from 50.00% to 0.00% and stays at 0.00% for every window k>=3, on both the median and the mean, and reproduces at 300 and 700 frames. The banding is removable in software.",
+  "verdict": "PARTIAL, AND THE SECOND HALF IS A WARNING. The banding is completely removed -- empty room 50.00% -> 0.00%, every window, both operators, stable across frame counts. But the occupied rate is NON-MONOTONIC in the window size (k=1: 48.19%, k=3: 21.43%, k=5: 0.48%, k=7: 12.18%) and the k=5 collapse to 0.44% reproduces at both frame counts. A filter that can drive a REAL scene to 0.44% is cancelling periodic content, not preserving content while removing nuisance. So this is NOT a safe drop-in fix at any fixed window: k=3 is the best available, and 'real motion survives it' is NOT established by this data. The honest next step is a filter that can tell banding from content, or a camera and lighting combination with no banding in the first place."
+}

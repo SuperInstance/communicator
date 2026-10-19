@@ -155,3 +155,67 @@ banding reduced enough to measure against.
   resolved peak. It is a band, not a frequency.
 - Nothing here re-opens whether vision can distinguish "talking to me". It says
   the current instrument cannot answer that question yet.
+---
+
+## Addendum: the temporal median, tested
+
+`experiments/temporal_median_fix.py`. Median over k frames applied *before*
+thresholding, edge-replicated so no latency shift is hidden. Both operators are
+tested, because if a mean worked as well as a median the cheaper operator would
+be the right answer and I wanted to know that rather than assume it.
+
+| operator | k | empty | occupied | latency |
+|---|---:|---:|---:|---:|
+| — | 1 | 50.00% | 48.19% | — |
+| median | 3 | **0.00%** | 21.43% | +0.07s |
+| median | 5 | **0.00%** | **0.48%** | +0.13s |
+| median | 7 | **0.00%** | 12.18% | +0.20s |
+| mean | 3 | 0.00% | 25.77% | +0.07s |
+| mean | 5 | 0.00% | 0.78% | +0.13s |
+| mean | 7 | 0.00% | 12.81% | +0.20s |
+
+### The banding removal is solid
+
+The empty room goes to **0.00%** at every window k ≥ 3, on **both** operators,
+and reproduces at 300, 400 and 700 frames. That is the actionable result: the
+50.00% ceiling is removable in software, and the camera is now usable.
+
+### And my prediction about the mean was wrong
+
+I argued in the script that a mean would blur the shifting bands into a
+low-amplitude standing wave and fail, while only the non-linear median could
+reject them. It did not fail — at every window the mean lands within ~4 points
+of the median. The banding shifts enough that plain averaging removes it too.
+The median is marginally better at k=3 and costs more to compute, but with one
+capture per condition and no error bars that difference is not established.
+
+### The second half is a warning, and it is the important half
+
+The occupied rate is **non-monotonic** in the window: 21.43%, **0.48%**, 12.18%.
+It reproduces at every frame count I ran, so it is structure, not noise.
+
+A filter that can drive a *real* scene to 0.48% is not selectively preserving
+content — it is cancelling periodic content. At k=5 it is destroying exactly the
+signal we want. So:
+
+- **k=3 is the best available**, and it is not a safe drop-in fix at any fixed
+  window.
+- **"Real motion survives the filter" is not established by this data.** My
+  first version of this script's verdict claimed it, on the strength of the k=3
+  row alone, while the k=5 row in the same table refuted it. That is the fourth
+  verdict function in two days to contradict its own printed table.
+
+The honest next step is a filter that can *tell banding from content* — the
+banding is stationary in frequency and moving in phase, content is neither — or
+a camera and lighting combination with no banding to remove.
+
+## Practical status
+
+The camera instrument now has a usable null: an empty room reports 0.00% rather
+than 50.00%. **The morning capture is worth recording**, with a k=3 temporal
+median applied before thresholding, and the bar is that the facing and
+head-turned conditions must differ from **0.00%**, not from 50%.
+
+The lighting advice from the section above still stands on its own merits —
+reducing the banding at source is better than filtering it out — but it is no
+longer blocking.
