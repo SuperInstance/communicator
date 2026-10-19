@@ -112,6 +112,53 @@ MAP_W, MAP_H = 80, 48          # stored change-map resolution
 RATE = 16000
 FPS = 30
 
+# THE CONDITION PLAN.
+#
+# REPETITIONS, AND WHY THEY ARE THE POINT.
+#
+# `docs/research/TEACHER-PIPELINE.md` measured why one session per condition
+# cannot work: a conventional teacher scored 1.000 on a temporal split of a
+# single session and 0.000 on leave-one-session-out, for every feature set
+# tried. It had learned what the room looked like, not what speaking looks
+# like. The only split that can tell those apart needs several INDEPENDENT
+# sessions, so the plan records each condition REPEATS times, as separate
+# recordings, with a rest between them.
+#
+# The repetition count is the parameter that unlocks everything downstream.
+# Three is the minimum that makes leave-one-session-out meaningful; more is
+# better, and the free sessions can run for as long as Casey likes.
+#
+# `kind` drives the achievement check; `pose` and `speak` describe what the
+# performer should do.
+REPEATS = 3
+
+_CONDITIONS = [
+    {"name": "A", "kind": "condition", "speak": True,  "pose": "facing",
+     "note": "facing the camera, speaking the standard paragraph"},
+    {"name": "B", "kind": "condition", "speak": True,  "pose": "turned",
+     "note": "head turned fully away (90 deg, at the wall), same paragraph"},
+    {"name": "C", "kind": "condition", "speak": False, "pose": "facing",
+     "note": "facing the camera, completely silent"},
+    {"name": "D", "kind": "condition", "speak": False, "pose": "turned",
+     "note": "head turned fully away, completely silent"},
+    {"name": "F", "kind": "free", "speak": None, "pose": "any",
+     "note": "free session: just be in the room, talk, read, move"},
+]
+
+PLAN = []
+for _rep in range(REPEATS):
+    for _c in _CONDITIONS:
+        _c = dict(_c)
+        _c["rep"] = _rep + 1
+        _c["name"] = f"{_c['name']}{_rep + 1}"
+        PLAN.append(_c)
+# One long free session at the end: the corpus the teacher will label.
+_free = dict(_CONDITIONS[-1])
+_free["name"] = "FREE"
+_free["rep"] = 1
+_free["long"] = True
+PLAN.append(_free)
+
 
 def row_band_remove(ys: np.ndarray) -> np.ndarray:
     """Remove the row-constant component: the LED flicker banding.
@@ -147,6 +194,8 @@ def main():
     ap.add_argument("--condition", default=None,
                     help="single condition name, e.g. A or F1")
     ap.add_argument("--seconds", type=float, default=30.0)
+    ap.add_argument("--long-seconds", type=float, default=300.0,
+                    help="length of the trailing free session")
     ap.add_argument("--plan", action="store_true",
                     help="run the whole condition sequence")
     ap.add_argument("--countdown", type=int, default=5)
@@ -185,6 +234,9 @@ def main():
 
     for spec in plan:
         name = spec["name"]
+        secs = args.seconds
+        if spec.get("long"):
+            secs = args.long_seconds
         print("\n" + "=" * 62)
         print(f"CONDITION {name}: {spec['note']}")
         print("=" * 62)
@@ -193,7 +245,7 @@ def main():
             time.sleep(1)
 
         ys, af = [], []
-        n_target = int(args.seconds * FPS)
+        n_target = int(secs * FPS)
         with sd.InputStream(device=args.mic, channels=1, samplerate=RATE,
                             dtype="int16", blocksize=0) as mic:
             for i in range(n_target):
@@ -278,6 +330,8 @@ def main():
             "drift_raw": raw_mad,
             "drift_after_row_removal": row_mad,
             "timestamp": stamp,
+            "rep": spec.get("rep"),
+            "filter": "row+median3",
         }
         (out / f"{name}_{stamp}.json").write_text(json.dumps(meta, indent=2))
         print(f"  wrote {npz.name}  ({npz.stat().st_size / 1024:.0f} kB)")

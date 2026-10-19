@@ -1,0 +1,145 @@
+{
+  "question": "does composing row-band removal with a temporal median de-saturate the motion field and make the speech signal stand out more?",
+  "variants": {
+    "raw": {
+      "empty_flip": null,
+      "empty_saturation": 0.4172540726817043,
+      "A_flip": 0.06634409024288107,
+      "A_saturation": 0.9972927109440267,
+      "A_gap": {
+        "mean_abs_diff": 6.113118489583332,
+        "max_diff": 42.291666666666664,
+        "top5pct_excess_share": 0.326825526229356
+      },
+      "B_flip": 0.10066739949748743,
+      "B_saturation": 0.9989067721386801,
+      "C_flip": 0.08439528371021776,
+      "C_saturation": 0.9975524749373433,
+      "C_gap": {
+        "mean_abs_diff": 4.637109375,
+        "max_diff": 48.41666666666666,
+        "top5pct_excess_share": 0.38784024379806264
+      },
+      "A_vs_C": {
+        "mean_abs_diff": 3.941455078125,
+        "max_diff": 28.387499999999996,
+        "within_condition_split": 1.9757606336805555,
+        "snr": 1.9949051575051584,
+        "top5pct_excess_share": 0.2491961541906909
+      }
+    },
+    "row": {
+      "empty_flip": null,
+      "empty_saturation": 0.488390246449457,
+      "A_flip": 0.029909312185929647,
+      "A_saturation": 0.9987005273600669,
+      "A_gap": {
+        "mean_abs_diff": 6.4902154993127885,
+        "max_diff": 49.55381944444446,
+        "top5pct_excess_share": 0.34383667370540183
+      },
+      "B_flip": 0.05949408500837521,
+      "B_saturation": 0.9993871397243108,
+      "C_flip": 0.0364936662479062,
+      "C_saturation": 0.9990523182957394,
+      "C_gap": {
+        "mean_abs_diff": 4.203007789894386,
+        "max_diff": 54.33072916666666,
+        "top5pct_excess_share": 0.4201214920418101
+      },
+      "A_vs_C": {
+        "mean_abs_diff": 4.480712147465457,
+        "max_diff": 38.0480251736111,
+        "within_condition_split": 2.440874803331164,
+        "snr": 1.8356992916434887,
+        "top5pct_excess_share": 0.2810078226642143
+      }
+    },
+    "median3": {
+      "empty_flip": null,
+      "empty_saturation": 0.03907881683375104,
+      "A_flip": 0.040910280569514235,
+      "A_saturation": 0.788421574770259,
+      "A_gap": {
+        "mean_abs_diff": 6.845453559027777,
+        "max_diff": 63.208333333333336,
+        "top5pct_excess_share": 0.35664113089095284
+      },
+      "B_flip": 0.07213868823283082,
+      "B_saturation": 0.7878171992481203,
+      "C_flip": 0.02391842022613065,
+      "C_saturation": 0.7897556390977444,
+      "C_gap": {
+        "mean_abs_diff": 4.502918836805557,
+        "max_diff": 46.58333333333333,
+        "top5pct_excess_share": 0.4323865694441848
+      },
+      "A_vs_C": {
+        "mean_abs_diff": 2.415796169704861,
+        "max_diff": 16.759375,
+        "within_condition_split": 1.2631770833333333,
+        "snr": 1.9124762486427795,
+        "top5pct_excess_share": 0.23431477443946322
+      }
+    },
+    "row+median3": {
+      "empty_flip": null,
+      "empty_saturation": 0.0347874895572264,
+      "A_flip": 0.0014447236180904523,
+      "A_saturation": 0.8324815946115288,
+      "A_gap": {
+        "mean_abs_diff": 4.371495734320747,
+        "max_diff": 38.863932291666686,
+        "top5pct_excess_share": 0.35922371253683083
+      },
+      "B_flip": 0.04754174518425461,
+      "B_saturation": 0.8022686925647452,
+      "C_flip": 0.009323309254606366,
+      "C_saturation": 0.8233696219715957,
+      "C_gap": {
+        "mean_abs_diff": 2.9114390620478874,
+        "max_diff": 71.97699652777779,
+        "top5pct_excess_share": 0.4488674513422159
+      },
+      "A_vs_C": {
+        "mean_abs_diff": 1.806422117727774,
+        "max_diff": 38.17597656250001,
+        "within_condition_split": 0.9890424968578198,
+        "snr": 1.8264352881365187,
+        "top5pct_excess_share": 0.35745491937550006
+      }
+    },
+    "row+median5": {
+      "empty_flip": null,
+      "empty_saturation": 0.0,
+      "A_flip": 0.00013086264656616414,
+      "A_saturation": 0.41675804093567254,
+      "A_gap": {
+        "mean_abs_diff": 0.4977777551721643,
+        "max_diff": 5.780815972222226,
+        "top5pct_excess_share": 0.4165223758205294
+      },
+      "B_flip": 0.0002558364740368509,
+      "B_saturation": 0.4131285244360902,
+      "C_flip": 0.00022770100502512563,
+      "C_saturation": 0.4010410139933166,
+      "C_gap": {
+        "mean_abs_diff": 0.4846679687499984,
+        "max_diff": 5.0546875,
+        "top5pct_excess_share": 0.2981017192593941
+      },
+      "A_vs_C": {
+        "mean_abs_diff": 0.1875217748571325,
+        "max_diff": 1.131070963541666,
+        "within_condition_split": 0.10273797211823638,
+        "snr": 1.825243101365894,
+        "top5pct_excess_share": 0.23937845958521506
+      }
+    }
+  },
+  "limits": [
+    "two labelled sessions per class; the composition can make a teacher MORE LIKELY to pass its gate but cannot make one pass",
+    "the empty capture is later and darker than the occupied ones",
+    "the flip rates here are computed on the motion maps, not on the Braille field, so they are not directly comparable to the 50.00% / 0.01% figures in the other documents"
+  ]
+}

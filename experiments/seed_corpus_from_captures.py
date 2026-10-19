@@ -55,6 +55,10 @@ def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--out", default="/mnt/c/proart_capture/corpus")
     ap.add_argument("--max-frames", type=int, default=600)
+    ap.add_argument("--filter", default="row",
+                    choices=("none", "row", "row+median3", "row+median5"),
+                    help="which filter to apply before computing motion maps")
+    ap.add_argument("--tag", default="")
     a = ap.parse_args()
 
     out = Path(a.out)
@@ -69,9 +73,16 @@ def main():
         n = min(a.max_frames, len(raw) // FB)
         Y = raw[:n * FB].reshape(n, FB)[:, :YS].reshape(n, H, W).astype(np.float64)
 
-        prof = np.median(Y, axis=2)
-        g = prof.mean(axis=1, keepdims=True)
-        Yr = Y - (prof - g)[:, :, None]
+        Yr = Y
+        if "row" in a.filter:
+            prof = np.median(Y, axis=2)
+            g = prof.mean(axis=1, keepdims=True)
+            Yr = Y - (prof - g)[:, :, None]
+        k = 3 if "median3" in a.filter else (5 if "median5" in a.filter else 1)
+        if k > 1:
+            pad = k // 2
+            P = np.pad(Yr, ((pad, pad), (0, 0), (0, 0)), mode="edge")
+            Yr = np.median(np.stack([P[i:i + len(Yr)] for i in range(k)]), axis=0)
         d = np.abs(np.diff(Yr, axis=0))
         maps = d.reshape(d.shape[0], H // 2, 2, W // 2, 2).mean(axis=(2, 4))
 
@@ -79,7 +90,8 @@ def main():
         hi = max(hi, 1e-6)
         q = np.clip(maps / hi * 255.0, 0, 255).astype(np.uint8)
 
-        npz = out / f"{name}_seed.npz"
+        sfx = f"_{a.tag}" if a.tag else ""
+        npz = out / f"{name}{sfx}.npz"
         np.savez_compressed(npz, maps=q, scale=np.float32(hi))
         meta = {
             "condition": name, "kind": "condition", "pose": pose,
@@ -91,7 +103,8 @@ def main():
             "drift_after_row_removal": float(np.abs(np.diff(Yr, axis=0)).mean()),
             "source": path, "seeded": True,
         }
-        (out / f"{name}_seed.json").write_text(json.dumps(meta, indent=2))
+        meta["filter"] = a.filter
+        (out / f"{name}{sfx}.json").write_text(json.dumps(meta, indent=2))
         print(f"{name}: {len(Y)} frames -> {npz.name} "
               f"({npz.stat().st_size / 1024:.0f} kB)  "
               f"drift raw {meta['drift_raw']:.1f} -> row {meta['drift_after_row_removal']:.1f}")
