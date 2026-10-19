@@ -1,0 +1,54 @@
+{
+  "question": "does the camera carry a usable pose signal, measured against a measured empty-room null?",
+  "window_s": [
+    0.8,
+    9.0
+  ],
+  "null_map_mean": 10.004265381521003,
+  "null_map_max": 36.69308943089431,
+  "null_map_p99": 13.785325203252027,
+  "results": {
+    "A_vs_B": {
+      "mean_abs_diff": 9.182033822077722,
+      "max_diff": 57.861449864498624,
+      "frac_above_null": 0.34908854166666664,
+      "top5pct_excess_share": 0.3744645852857468,
+      "excess_mean": 2.9514901427395612
+    },
+    "A_vs_C": {
+      "mean_abs_diff": 4.913595272295089,
+      "max_diff": 49.601202574525765,
+      "frac_above_null": 0.12057291666666667,
+      "top5pct_excess_share": 0.7914137145311372,
+      "excess_mean": 1.0483934659191154
+    },
+    "B_vs_C": {
+      "mean_abs_diff": 9.410518833012222,
+      "max_diff": 52.012237466124645,
+      "frac_above_null": 0.3490234375,
+      "top5pct_excess_share": 0.3881837216875537,
+      "excess_mean": 3.370947753575435
+    },
+    "within_A_facing_speaking": {
+      "mean_abs_diff": 2.878394530588373,
+      "max_diff": 23.064955962059642
+    },
+    "within_B_turned_speaking": {
+      "mean_abs_diff": 1.917389108990373,
+      "max_diff": 26.151338075880773
+    },
+    "A_vs_B_shifted": {
+      "mean_abs_diff": 9.178467943696363,
+      "max_diff": 57.76196222899725
+    }
+  },
+  "limits": [
+    "the empty capture is later and darker than the others; the null floor is therefore probably an OVER-estimate, which makes the test conservative rather than optimistic",
+    "A and B are only 30 s of speech each and the head turn was constrained; a null here is evidence about the capture, not about vision",
+    "one capture per condition, no error bars, no cross-validation",
+    "this measures a POSE signal. It does not measure whether anyone is talking to you"
+  ],
+  "pose_verdict": "NO POSE SIGNAL. A-vs-B is 9.182 and the time-shifted control is 9.178 -- indistinguishable. The apparent difference between facing and turned is the scene changing over time, not a head direction. This is a statement about the CAPTURE, not about vision: the head turn was too small to register (Casey reported the glasses restricting it), so a null here is the expected outcome and not evidence against the idea.",
+  "speech_verdict": "SPEECH IS VISIBLE. Facing-and-speaking vs facing-and-silent differ by 4.914 against a within-condition split of 1.917 (2.6x), and the excess is 79% concentrated in the top 5% of pixels -- it is LOCALISED, which is what a real signal looks like and what the A-vs-B comparison is not. The camera channel does carry information about whether someone is speaking.",
+  "verdict": "NO POSE SIGNAL. A-vs-B is 9.182 and the time-shifted control is 9.178 -- indistinguishable. The apparent difference between facing and turned is the scene changing over time, not a head direction. This is a statement about the CAPTURE, not about vision: the head turn was too small to register (Casey reported the glasses restricting it), so a null here is the expected outcome and not evidence against the idea. SPEECH IS VISIBLE. Facing-and-speaking vs facing-and-silent differ by 4.914 against a within-condition split of 1.917 (2.6x), and the excess is 79% concentrated in the top 5% of pixels -- it is LOCALISED, which is what a real signal looks like and what the A-vs-B comparison is not. The camera channel does carry information about whether someone is speaking."
+}

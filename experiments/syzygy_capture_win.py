@@ -181,16 +181,35 @@ def main():
     # resolutions and lighting.
     if len(vf) >= 2:
         fr_nv12 = np.frombuffer(b"".join(vf), np.uint8)
-        ys = fr_nv12[:len(vf) * W * H].reshape(len(vf), H, W).astype(np.int32)
+        ys = fr_nv12[:len(vf) * W * H].reshape(len(vf), H, W).astype(np.float64)
         means = ys.reshape(len(vf), -1).mean(axis=1)
         mad = np.abs(np.diff(ys, axis=0)).mean()
+
+        # UPDATED 2026-10-19: a second number, and it is the one that matters.
+        # CAMERA-FLICKER-BANDING.md identified the dominant nuisance as
+        # HORIZONTAL BANDS from mains-frequency LED flicker sampled by the
+        # rolling shutter -- row-constant, and removable with no latency by
+        # subtracting each row's median across the columns. So the raw figure
+        # is now followed by the residual AFTER that removal, which is the
+        # noise floor the pose test will be measured against.
+        prof = np.median(ys, axis=2)
+        g = prof.mean(axis=1, keepdims=True)
+        yr = ys - (prof - g)[:, :, None]
+        mad_row = np.abs(np.diff(yr, axis=0)).mean()
+
         print(f"luma    : mean {means.mean():.2f}  std {means.std():.3f}  "
               f"range {means.max() - means.min():.2f}")
-        print(f"drift   : adjacent-frame MAD {mad:.3f} counts"
-              f"   {'OK - below ~5' if mad < 5 else 'TOO HIGH - exposure is hunting'}")
+        print(f"drift   : adjacent-frame MAD {mad:.3f} counts  (raw)")
+        print(f"drift   : after row-band removal {mad_row:.3f} counts"
+              f"   {'OK - below ~5' if mad_row < 5 else 'TOO HIGH'}")
+        if mad_row >= 5:
+            print("warn   : the row-removed residual is still high. The banding "
+                  "is not the only problem -- try different lighting before "
+                  "recording.")
         if mad >= 5:
-            print("warn   : brightness drift exceeds the usable threshold. Re-run "
-                  "with --lock-exposure, or move out of the bright window.")
+            print("warn   : raw brightness drift is high. This script could not "
+                  "lock exposure on this driver, so a gain-invariant threshold "
+                  "is not available as a fallback.")
 
 
 if __name__ == "__main__":

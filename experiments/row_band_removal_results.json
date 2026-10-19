@@ -1,0 +1,69 @@
+{
+  "question": "can row-wise removal remove the banding without blurring time or erasing content?",
+  "method": "per-row MEDIAN across the 160 columns estimates band(y); the row-constant component is removed, then the frame is rescaled to the capture's median mean luma",
+  "results": {
+    "none": {
+      "occupied": {
+        "flip_pct": 48.190104166666664,
+        "min": 33.932291666666664,
+        "max": 56.822916666666664
+      },
+      "turned": {
+        "flip_pct": 40.345052083333336,
+        "min": 29.420572916666664,
+        "max": 48.69140625
+      },
+      "empty": {
+        "flip_pct": 50.0,
+        "min": 25.0,
+        "max": 50.0
+      }
+    },
+    "subtract": {
+      "occupied": {
+        "flip_pct": 48.56770833333333,
+        "min": 45.54036458333333,
+        "max": 50.501302083333336
+      },
+      "turned": {
+        "flip_pct": 44.921875,
+        "min": 39.752604166666664,
+        "max": 46.90755208333333
+      },
+      "empty": {
+        "flip_pct": 0.013020833333333334,
+        "min": 0.006510416666666667,
+        "max": 0.052083333333333336
+      }
+    },
+    "divide": {
+      "occupied": {
+        "flip_pct": 49.303385416666664,
+        "min": 44.40104166666667,
+        "max": 50.76171874999999
+      },
+      "turned": {
+        "flip_pct": 46.184895833333336,
+        "min": 43.450520833333336,
+        "max": 47.350260416666664
+      },
+      "empty": {
+        "flip_pct": 0.05859375,
+        "min": 0.03255208333333333,
+        "max": 0.09114583333333333
+      }
+    }
+  },
+  "best_mode": [
+    "divide",
+    49.303385416666664,
+    0.05859375
+  ],
+  "limits": [
+    "the row estimate is contaminated where a subject fills more than half a row's columns -- the filter can partly remove a close subject, which is why the occupied number matters",
+    "the empty capture is later and darker; only within-condition comparisons are clean",
+    "one capture per condition, no error bars",
+    "the reconstruction cannot restore the original absolute luma, only the row-structured part of the change, so the threshold is applied to a reconstructed image"
+  ],
+  "verdict": "ROW REMOVAL WORKS AND BEATS THE TEMPORAL MEDIAN. Mode 'divide': empty room 0.06%, occupied 49.30%. The occupied rate STAYS HIGH, which is the thing the temporal median could not do -- at k=5 it fell to 0.48%. No latency, no motion smearing, no frame averaging. Facing vs head-turned gap is 3.12 pp."
+}
