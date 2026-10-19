@@ -306,8 +306,10 @@ encforces.
 
 ## 7. Ranked next actions
 
-Status as of the execution pass. Three are done and pushed; two are falsified
-by measurement and struck rather than deleted.
+Status as of the execution pass. **Five are done and pushed; two were falsified
+by measurement and struck rather than deleted. The corpus that was blocking
+items 5–8 has since been built, and the ranking below has changed because of
+what it showed.**
 
 | # | action | cost | status |
 |---|---|---|---|
@@ -315,15 +317,42 @@ by measurement and struck rather than deleted.
 | 2 | **Correct `src/watcher.py`'s docstring** | 5 min | **DONE** `8eb05f6` |
 | 3 | ~~**Split 150 ms into a 200 ms trigger and a 3 s decision**~~ | 2 h | **PARTLY FALSIFIED** — the 200 ms trigger half costs 17.8% of real pauses. Keep 150 ms; add 3 s as a separate stage. See §3. |
 | 4 | **Locally adaptive threshold** (reimplement `peakpicker.c:110-117`) | 3 h | **DONE, and the plan was wrong about it** `77dd5c2` — a *median* threshold discards 94% of real speech; a 20th-percentile one beats the global bar on every axis. §3. |
-| 5 | **Test the 3 s decision against a waveform-only classifier** (smart-turn v3.2, BSD-2, bundled) | 2 days | next — the measured 63–79 ms and the silence finding |
-| 6 | Speculation gate (OPEN/HOLDING/DROPPING) | 3 days | what makes 5 defensible |
-| 7 | FunASR 2pass for the cold path | 1 week | only after the hot path is cheap |
-| 8 | Lock-free SPSC ring + fixed-capacity event heap | 1 week | reimplement; GPL/AGPL means reimplement |
+| 5 | **Test the 3 s decision against a waveform-only classifier** (smart-turn v3.2) | 2 days | **DONE** `4024cd9`, and **the silence premise underneath it is now measured false** — see §9 |
+| 6 | Speculation gate (OPEN/HOLDING/DROPPING) | 3 days | **DONE** `3172077` — best accuracy 0.536 at 0.40 s, 84 interruptions; no bar reaches 90% |
+| 7 | **Acquire a corpus with real speaker changes** | 2 days | **DONE** `3214f00` — AMI meetings, 4 speakers, CC-BY-4.0, no registration. Was the blocker on everything below |
+| 8 | FunASR 2pass for the cold path | 1 week | still queued; only after the hot path is cheap |
+| 9 | Lock-free SPSC ring + fixed-capacity event heap | 1 week | reimplement; GPL/AGPL means reimplement |
+| 10 | **Record real two-microphone dialogue** | ~30 min human time | **NEXT** — the one measurement AMI cannot supply. Protocol in `examples/realdialogue/README.md` |
+| 11 | **Held-out-device** (device generalisation) | 1 day | **NEXT** — §8. Being measured as a cache-pressure proxy; a real second architecture is not available on this box |
 
-Two of eight recommendations in this document did not survive contact with
-real audio. Both are marked in place. That is the expected rate for a plan
+Three of eight original recommendations did not survive contact with real
+audio. All three are marked in place. That is the expected rate for a plan
 written from other people's numbers, and it is why the corpus is the thing to
 build before the plan, not after.
+
+## 9. What the corpus changed, after it was built
+
+`3214f00` added the corpus this plan was waiting on, and the first honest answer
+it produced is negative. Full write-ups in
+[TWO-SPEAKER-TURNS.md](TWO-SPEAKER-TURNS.md) and
+[F0-SPEAKER-CHANGE.md](F0-SPEAKER-CHANGE.md); the short version:
+
+**The premise under items 5 and 6 does not hold.** Silence duration does not
+identify a hand-off. On 1396 watcher pauses from two four-party meetings, the
+AUC is **0.529** — and every threshold loses to the trivial baseline of always
+predicting a change (0.6225). The best bar reaches 0.5709. Raising it destroys
+it monotonically, because in a multi-party meeting the long silences are where
+*nobody* is speaking. pipecat's 200 ms / 3 s pair has nothing here to
+reproduce.
+
+**The cheap pitch rescue is dead too.** Zero of six corpus cells show the
+monotone jump a speaker change needs; four of six do not exceed pure intonation
+inside one speaker's own speech. Independently, on the AMI corpus F0 separates
+two voice *classes* but not the speakers within one (0.5σ and 0.3σ apart).
+
+So the decision in items 5–6 cannot be made from a duration threshold, and that
+is now a measured fact rather than an open question. What remains is to find a
+signal that carries the information — which is what items 10 and 11 are for.
 
 ## 8. What would most change our minds
 
