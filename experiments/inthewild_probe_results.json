@@ -1,0 +1,777 @@
+{
+  "note": "Does the gate's 150-200 Hz failure hurt correctness or only CPU? Part A: hum alone (cost+emitted pitch) and speech+hum (the case hum_sweep.py cannot see). Part B: a per-device noise profile applied as spectral subtraction to the frozen gate -- the wearable analogue of ManiWAV's robot-noise calibration. Part C: the same profile applied to a device 6x louder than calibration (the fan spinning up).",
+  "methods": {
+    "sr": 16000,
+    "dur_s": 6.0,
+    "fundamentals": [
+      50,
+      60,
+      100,
+      120,
+      150,
+      175,
+      200
+    ],
+    "amps": [
+      0.05,
+      0.3,
+      0.5
+    ],
+    "snrs_db": [
+      20.0,
+      10.0,
+      0.0
+    ],
+    "harmonics": 12,
+    "gate_speech_threshold": 0.5,
+    "stft": {
+      "frame": 512,
+      "hop": 256
+    },
+    "fresh_gate_per_signal": true,
+    "overlaps_hum_sweep": "hum-alone rows deliberately reproduce hum_sweep.py's generator so the two files are comparable; the speech+hum mixture rows and Parts B/C are new"
+  },
+  "part_a0_testvad_fixture": [
+    {
+      "signal": "testvad_stack_150Hz_amp0.3",
+      "gate_mean": 0.943,
+      "gate_frac": 1.0,
+      "gate_segmax": 0.985,
+      "gate_max": 0.985,
+      "cpu_gated_pct": 108.96,
+      "cpu_ungated_pct": 116.58,
+      "emitted_gated": {
+        "utterances": 3,
+        "hz_p05_values": [
+          150.0,
+          150.0,
+          150.0
+        ],
+        "voiced_ratio_max": 1.0
+      }
+    },
+    {
+      "signal": "testvad_stack_175Hz_amp0.3",
+      "gate_mean": 0.9401,
+      "gate_frac": 1.0,
+      "gate_segmax": 0.975,
+      "gate_max": 0.9825,
+      "cpu_gated_pct": 121.93
+    },
+    {
+      "signal": "testvad_stack_200Hz_amp0.3",
+      "gate_mean": 0.8939,
+      "gate_frac": 1.0,
+      "gate_segmax": 0.9729,
+      "gate_max": 0.9729,
+      "cpu_gated_pct": 116.85,
+      "cpu_ungated_pct": 117.94,
+      "emitted_gated": {
+        "utterances": 3,
+        "hz_p05_values": [
+          200.01,
+          200.01,
+          200.01
+        ],
+        "voiced_ratio_max": 1.0
+      }
+    },
+    {
+      "signal": "testvad_tone_150Hz_amp0.3",
+      "gate_mean": 0.3765,
+      "gate_frac": 0.3743,
+      "gate_segmax": 0.7821,
+      "gate_max": 0.7852,
+      "cpu_gated_pct": 70.4
+    },
+    {
+      "signal": "testvad_tone_175Hz_amp0.3",
+      "gate_mean": 0.6587,
+      "gate_frac": 0.8824,
+      "gate_segmax": 0.8183,
+      "gate_max": 0.8423,
+      "cpu_gated_pct": 109.1
+    },
+    {
+      "signal": "testvad_tone_200Hz_amp0.3",
+      "gate_mean": 0.1791,
+      "gate_frac": 0.0909,
+      "gate_segmax": 0.6597,
+      "gate_max": 0.6597,
+      "cpu_gated_pct": 51.62
+    }
+  ],
+  "part_a": [
+    {
+      "signal": "hum_stack_50Hz_amp0.05",
+      "gate_mean": 0.0253,
+      "gate_frac": 0.0,
+      "gate_segmax": 0.2059,
+      "gate_max": 0.2059,
+      "cpu_gated_pct": 6.82
+    },
+    {
+      "signal": "hum_stack_50Hz_amp0.3",
+      "gate_mean": 0.0119,
+      "gate_frac": 0.0,
+      "gate_segmax": 0.3399,
+      "gate_max": 0.3399,
+      "cpu_gated_pct": 6.85
+    },
+    {
+      "signal": "hum_stack_50Hz_amp0.5",
+      "gate_mean": 0.0055,
+      "gate_frac": 0.0,
+      "gate_segmax": 0.1383,
+      "gate_max": 0.1383,
+      "cpu_gated_pct": 6.69
+    },
+    {
+      "signal": "hum_stack_60Hz_amp0.05",
+      "gate_mean": 0.0856,
+      "gate_frac": 0.0374,
+      "gate_segmax": 0.9452,
+      "gate_max": 0.9452,
+      "cpu_gated_pct": 38.72
+    },
+    {
+      "signal": "hum_stack_60Hz_amp0.3",
+      "gate_mean": 0.018,
+      "gate_frac": 0.0107,
+      "gate_segmax": 0.6403,
+      "gate_max": 0.6403,
+      "cpu_gated_pct": 41.85
+    },
+    {
+      "signal": "hum_stack_60Hz_amp0.5",
+      "gate_mean": 0.0084,
+      "gate_frac": 0.0,
+      "gate_segmax": 0.3648,
+      "gate_max": 0.3648,
+      "cpu_gated_pct": 7.21
+    },
+    {
+      "signal": "hum_stack_100Hz_amp0.05",
+      "gate_mean": 0.0484,
+      "gate_frac": 0.0053,
+      "gate_segmax": 0.5431,
+      "gate_max": 0.5431,
+      "cpu_gated_pct": 38.97
+    },
+    {
+      "signal": "hum_stack_100Hz_amp0.3",
+      "gate_mean": 0.0484,
+      "gate_frac": 0.0053,
+      "gate_segmax": 0.5959,
+      "gate_max": 0.5959,
+      "cpu_gated_pct": 48.49
+    },
+    {
+      "signal": "hum_stack_100Hz_amp0.5",
+      "gate_mean": 0.0202,
+      "gate_frac": 0.0,
+      "gate_segmax": 0.4307,
+      "gate_max": 0.4307,
+      "cpu_gated_pct": 10.28
+    },
+    {
+      "signal": "hum_stack_120Hz_amp0.05",
+      "gate_mean": 0.0492,
+      "gate_frac": 0.0053,
+      "gate_segmax": 0.5039,
+      "gate_max": 0.5039,
+      "cpu_gated_pct": 43.01
+    },
+    {
+      "signal": "hum_stack_120Hz_amp0.3",
+      "gate_mean": 0.0981,
+      "gate_frac": 0.0267,
+      "gate_segmax": 0.614,
+      "gate_max": 0.614,
+      "cpu_gated_pct": 46.48
+    },
+    {
+      "signal": "hum_stack_120Hz_amp0.5",
+      "gate_mean": 0.0461,
+      "gate_frac": 0.0053,
+      "gate_segmax": 0.5055,
+      "gate_max": 0.5055,
+      "cpu_gated_pct": 42.65
+    },
+    {
+      "signal": "hum_stack_150Hz_amp0.05",
+      "gate_mean": 0.0213,
+      "gate_frac": 0.0,
+      "gate_segmax": 0.4013,
+      "gate_max": 0.4013,
+      "cpu_gated_pct": 6.92,
+      "cpu_ungated_pct": 116.89,
+      "emitted_gated": {
+        "utterances": 3,
+        "hz_p05_values": [],
+        "voiced_ratio_max": 0.0
+      }
+    },
+    {
+      "signal": "hum_stack_150Hz_amp0.3",
+      "gate_mean": 0.019,
+      "gate_frac": 0.0,
+      "gate_segmax": 0.392,
+      "gate_max": 0.392,
+      "cpu_gated_pct": 7.45
+    },
+    {
+      "signal": "hum_stack_150Hz_amp0.5",
+      "gate_mean": 0.0076,
+      "gate_frac": 0.0,
+      "gate_segmax": 0.3568,
+      "gate_max": 0.3568,
+      "cpu_gated_pct": 7.24,
+      "cpu_ungated_pct": 121.47,
+      "emitted_gated": {
+        "utterances": 3,
+        "hz_p05_values": [],
+        "voiced_ratio_max": 0.0
+      }
+    },
+    {
+      "signal": "hum_stack_175Hz_amp0.05",
+      "gate_mean": 0.0327,
+      "gate_frac": 0.0,
+      "gate_segmax": 0.3012,
+      "gate_max": 0.3012,
+      "cpu_gated_pct": 12.0
+    },
+    {
+      "signal": "hum_stack_175Hz_amp0.3",
+      "gate_mean": 0.0233,
+      "gate_frac": 0.0,
+      "gate_segmax": 0.3559,
+      "gate_max": 0.3559,
+      "cpu_gated_pct": 10.49
+    },
+    {
+      "signal": "hum_stack_175Hz_amp0.5",
+      "gate_mean": 0.0114,
+      "gate_frac": 0.0,
+      "gate_segmax": 0.4218,
+      "gate_max": 0.4218,
+      "cpu_gated_pct": 7.02
+    },
+    {
+      "signal": "hum_stack_200Hz_amp0.05",
+      "gate_mean": 0.041,
+      "gate_frac": 0.0,
+      "gate_segmax": 0.3625,
+      "gate_max": 0.3625,
+      "cpu_gated_pct": 7.22
+    },
+    {
+      "signal": "hum_stack_200Hz_amp0.3",
+      "gate_mean": 0.0196,
+      "gate_frac": 0.0,
+      "gate_segmax": 0.3372,
+      "gate_max": 0.3372,
+      "cpu_gated_pct": 7.53
+    },
+    {
+      "signal": "hum_stack_200Hz_amp0.5",
+      "gate_mean": 0.0084,
+      "gate_frac": 0.0,
+      "gate_segmax": 0.4446,
+      "gate_max": 0.4446,
+      "cpu_gated_pct": 7.4
+    },
+    {
+      "signal": "speech+hum_50Hz_20dB",
+      "gate_mean": 0.6629,
+      "gate_frac": 0.6578,
+      "gate_segmax": 1.0,
+      "gate_max": 1.0,
+      "cpu_gated_pct": 65.92
+    },
+    {
+      "signal": "speech+hum_50Hz_10dB",
+      "gate_mean": 0.6711,
+      "gate_frac": 0.6631,
+      "gate_segmax": 1.0,
+      "gate_max": 1.0,
+      "cpu_gated_pct": 111.59
+    },
+    {
+      "signal": "speech+hum_50Hz_0dB",
+      "gate_mean": 0.6127,
+      "gate_frac": 0.615,
+      "gate_segmax": 0.9998,
+      "gate_max": 1.0,
+      "cpu_gated_pct": 106.46
+    },
+    {
+      "signal": "speech+hum_60Hz_20dB",
+      "gate_mean": 0.6487,
+      "gate_frac": 0.6417,
+      "gate_segmax": 1.0,
+      "gate_max": 1.0,
+      "cpu_gated_pct": 63.4
+    },
+    {
+      "signal": "speech+hum_60Hz_10dB",
+      "gate_mean": 0.6358,
+      "gate_frac": 0.631,
+      "gate_segmax": 1.0,
+      "gate_max": 1.0,
+      "cpu_gated_pct": 108.53
+    },
+    {
+      "signal": "speech+hum_60Hz_0dB",
+      "gate_mean": 0.5898,
+      "gate_frac": 0.5882,
+      "gate_segmax": 0.9986,
+      "gate_max": 1.0,
+      "cpu_gated_pct": 100.94
+    },
+    {
+      "signal": "speech+hum_100Hz_20dB",
+      "gate_mean": 0.6624,
+      "gate_frac": 0.6578,
+      "gate_segmax": 1.0,
+      "gate_max": 1.0,
+      "cpu_gated_pct": 59.93
+    },
+    {
+      "signal": "speech+hum_100Hz_10dB",
+      "gate_mean": 0.6865,
+      "gate_frac": 0.6898,
+      "gate_segmax": 1.0,
+      "gate_max": 1.0,
+      "cpu_gated_pct": 112.64
+    },
+    {
+      "signal": "speech+hum_100Hz_0dB",
+      "gate_mean": 0.7075,
+      "gate_frac": 0.7112,
+      "gate_segmax": 0.9991,
+      "gate_max": 1.0,
+      "cpu_gated_pct": 123.24
+    },
+    {
+      "signal": "speech+hum_120Hz_20dB",
+      "gate_mean": 0.6625,
+      "gate_frac": 0.6631,
+      "gate_segmax": 1.0,
+      "gate_max": 1.0,
+      "cpu_gated_pct": 55.02
+    },
+    {
+      "signal": "speech+hum_120Hz_10dB",
+      "gate_mean": 0.7105,
+      "gate_frac": 0.7005,
+      "gate_segmax": 1.0,
+      "gate_max": 1.0,
+      "cpu_gated_pct": 105.74
+    },
+    {
+      "signal": "speech+hum_120Hz_0dB",
+      "gate_mean": 0.7808,
+      "gate_frac": 0.7701,
+      "gate_segmax": 0.9976,
+      "gate_max": 1.0,
+      "cpu_gated_pct": 98.41
+    },
+    {
+      "signal": "speech+hum_150Hz_20dB",
+      "gate_mean": 0.6672,
+      "gate_frac": 0.6631,
+      "gate_segmax": 1.0,
+      "gate_max": 1.0,
+      "cpu_gated_pct": 53.06
+    },
+    {
+      "signal": "speech+hum_150Hz_10dB",
+      "gate_mean": 0.6818,
+      "gate_frac": 0.6952,
+      "gate_segmax": 1.0,
+      "gate_max": 1.0,
+      "cpu_gated_pct": 101.03,
+      "cpu_ungated_pct": 111.93,
+      "emitted_gated": {
+        "utterances": 3,
+        "hz_p05_values": [
+          74.97,
+          74.99,
+          79.86
+        ],
+        "voiced_ratio_max": 0.9826
+      }
+    },
+    {
+      "signal": "speech+hum_150Hz_0dB",
+      "gate_mean": 0.6597,
+      "gate_frac": 0.6738,
+      "gate_segmax": 0.9908,
+      "gate_max": 1.0,
+      "cpu_gated_pct": 105.95,
+      "cpu_ungated_pct": 105.18,
+      "emitted_gated": {
+        "utterances": 3,
+        "hz_p05_values": [
+          72.7,
+          72.89,
+          148.81
+        ],
+        "voiced_ratio_max": 1.0
+      }
+    },
+    {
+      "signal": "speech+hum_175Hz_20dB",
+      "gate_mean": 0.6687,
+      "gate_frac": 0.6631,
+      "gate_segmax": 1.0,
+      "gate_max": 1.0,
+      "cpu_gated_pct": 61.72
+    },
+    {
+      "signal": "speech+hum_175Hz_10dB",
+      "gate_mean": 0.689,
+      "gate_frac": 0.6845,
+      "gate_segmax": 1.0,
+      "gate_max": 1.0,
+      "cpu_gated_pct": 99.2
+    },
+    {
+      "signal": "speech+hum_175Hz_0dB",
+      "gate_mean": 0.7286,
+      "gate_frac": 0.754,
+      "gate_segmax": 0.9839,
+      "gate_max": 1.0,
+      "cpu_gated_pct": 102.34
+    },
+    {
+      "signal": "speech+hum_200Hz_20dB",
+      "gate_mean": 0.6604,
+      "gate_frac": 0.6524,
+      "gate_segmax": 1.0,
+      "gate_max": 1.0,
+      "cpu_gated_pct": 67.63
+    },
+    {
+      "signal": "speech+hum_200Hz_10dB",
+      "gate_mean": 0.6875,
+      "gate_frac": 0.6845,
+      "gate_segmax": 1.0,
+      "gate_max": 1.0,
+      "cpu_gated_pct": 109.91
+    },
+    {
+      "signal": "speech+hum_200Hz_0dB",
+      "gate_mean": 0.6924,
+      "gate_frac": 0.7112,
+      "gate_segmax": 0.992,
+      "gate_max": 1.0,
+      "cpu_gated_pct": 134.93
+    }
+  ],
+  "part_b_device_conditioning": [
+    {
+      "signal": "hum_150Hz_conditioned_a1.0",
+      "gate_mean": 0.0145,
+      "gate_frac": 0.0,
+      "gate_segmax": 0.1639,
+      "gate_max": 0.1639
+    },
+    {
+      "signal": "hum_150Hz_conditioned_a2.0",
+      "gate_mean": 0.0256,
+      "gate_frac": 0.0,
+      "gate_segmax": 0.1189,
+      "gate_max": 0.1189
+    },
+    {
+      "signal": "speech+hum_150Hz_20dB_a1.0",
+      "gate_mean": 0.6357,
+      "gate_frac": 0.6257,
+      "gate_segmax": 0.9999,
+      "gate_max": 1.0
+    },
+    {
+      "signal": "speech+hum_150Hz_20dB_a2.0",
+      "gate_mean": 0.6319,
+      "gate_frac": 0.6257,
+      "gate_segmax": 0.9999,
+      "gate_max": 1.0
+    },
+    {
+      "signal": "speech+hum_150Hz_10dB_a1.0",
+      "gate_mean": 0.6733,
+      "gate_frac": 0.6898,
+      "gate_segmax": 0.9998,
+      "gate_max": 1.0
+    },
+    {
+      "signal": "speech+hum_150Hz_10dB_a2.0",
+      "gate_mean": 0.6663,
+      "gate_frac": 0.6791,
+      "gate_segmax": 0.9999,
+      "gate_max": 1.0
+    },
+    {
+      "signal": "hum_175Hz_conditioned_a1.0",
+      "gate_mean": 0.0197,
+      "gate_frac": 0.0,
+      "gate_segmax": 0.094,
+      "gate_max": 0.094
+    },
+    {
+      "signal": "hum_175Hz_conditioned_a2.0",
+      "gate_mean": 0.0168,
+      "gate_frac": 0.0,
+      "gate_segmax": 0.0437,
+      "gate_max": 0.0437
+    },
+    {
+      "signal": "speech+hum_175Hz_20dB_a1.0",
+      "gate_mean": 0.6415,
+      "gate_frac": 0.631,
+      "gate_segmax": 0.9999,
+      "gate_max": 1.0
+    },
+    {
+      "signal": "speech+hum_175Hz_20dB_a2.0",
+      "gate_mean": 0.6325,
+      "gate_frac": 0.6257,
+      "gate_segmax": 0.9999,
+      "gate_max": 1.0
+    },
+    {
+      "signal": "speech+hum_175Hz_10dB_a1.0",
+      "gate_mean": 0.6711,
+      "gate_frac": 0.6791,
+      "gate_segmax": 0.9999,
+      "gate_max": 1.0
+    },
+    {
+      "signal": "speech+hum_175Hz_10dB_a2.0",
+      "gate_mean": 0.6687,
+      "gate_frac": 0.6791,
+      "gate_segmax": 0.9999,
+      "gate_max": 1.0
+    },
+    {
+      "signal": "hum_200Hz_conditioned_a1.0",
+      "gate_mean": 0.024,
+      "gate_frac": 0.0,
+      "gate_segmax": 0.074,
+      "gate_max": 0.074
+    },
+    {
+      "signal": "hum_200Hz_conditioned_a2.0",
+      "gate_mean": 0.0158,
+      "gate_frac": 0.0,
+      "gate_segmax": 0.0461,
+      "gate_max": 0.0461
+    },
+    {
+      "signal": "speech+hum_200Hz_20dB_a1.0",
+      "gate_mean": 0.6435,
+      "gate_frac": 0.631,
+      "gate_segmax": 0.9999,
+      "gate_max": 1.0
+    },
+    {
+      "signal": "speech+hum_200Hz_20dB_a2.0",
+      "gate_mean": 0.6398,
+      "gate_frac": 0.6364,
+      "gate_segmax": 0.9999,
+      "gate_max": 1.0
+    },
+    {
+      "signal": "speech+hum_200Hz_10dB_a1.0",
+      "gate_mean": 0.674,
+      "gate_frac": 0.6791,
+      "gate_segmax": 0.9999,
+      "gate_max": 1.0
+    },
+    {
+      "signal": "speech+hum_200Hz_10dB_a2.0",
+      "gate_mean": 0.6652,
+      "gate_frac": 0.6684,
+      "gate_segmax": 0.9999,
+      "gate_max": 1.0
+    },
+    {
+      "signal": "real_speech_conditioned_a1.0",
+      "gate_mean": 0.6253,
+      "gate_frac": 0.6257,
+      "gate_segmax": 0.9998,
+      "gate_max": 1.0
+    },
+    {
+      "signal": "real_speech_conditioned_a2.0",
+      "gate_mean": 0.625,
+      "gate_frac": 0.6257,
+      "gate_segmax": 0.9998,
+      "gate_max": 1.0
+    }
+  ],
+  "part_c_louder_device": [
+    {
+      "signal": "hum_150Hz_amp0.1_profile_a1.0",
+      "gate_mean": 0.0493,
+      "gate_frac": 0.0053,
+      "gate_segmax": 0.5525,
+      "gate_max": 0.5525
+    },
+    {
+      "signal": "hum_150Hz_amp0.1_profile_a2.0",
+      "gate_mean": 0.0338,
+      "gate_frac": 0.0,
+      "gate_segmax": 0.4687,
+      "gate_max": 0.4687
+    },
+    {
+      "signal": "hum_150Hz_amp0.3_profile_a1.0",
+      "gate_mean": 0.0404,
+      "gate_frac": 0.0107,
+      "gate_segmax": 0.5673,
+      "gate_max": 0.5673
+    },
+    {
+      "signal": "hum_150Hz_amp0.3_profile_a2.0",
+      "gate_mean": 0.0354,
+      "gate_frac": 0.0053,
+      "gate_segmax": 0.5102,
+      "gate_max": 0.5102
+    }
+  ],
+  "summary": {
+    "real_speech": {
+      "gate": 0.6428,
+      "frac": 0.6364,
+      "hz_p05": [
+        163.61,
+        179.04,
+        189.28,
+        194.49
+      ]
+    },
+    "hum_alone_hz_p05": {
+      "n": 0,
+      "min": null,
+      "max": null
+    },
+    "testvad_fixture_rows": [
+      {
+        "signal": "testvad_stack_150Hz_amp0.3",
+        "gate_mean": 0.943,
+        "gate_frac": 1.0,
+        "gate_segmax": 0.985,
+        "gate_max": 0.985,
+        "cpu_gated_pct": 108.96,
+        "cpu_ungated_pct": 116.58,
+        "emitted_gated": {
+          "utterances": 3,
+          "hz_p05_values": [
+            150.0,
+            150.0,
+            150.0
+          ],
+          "voiced_ratio_max": 1.0
+        }
+      },
+      {
+        "signal": "testvad_stack_175Hz_amp0.3",
+        "gate_mean": 0.9401,
+        "gate_frac": 1.0,
+        "gate_segmax": 0.975,
+        "gate_max": 0.9825,
+        "cpu_gated_pct": 121.93
+      },
+      {
+        "signal": "testvad_stack_200Hz_amp0.3",
+        "gate_mean": 0.8939,
+        "gate_frac": 1.0,
+        "gate_segmax": 0.9729,
+        "gate_max": 0.9729,
+        "cpu_gated_pct": 116.85,
+        "cpu_ungated_pct": 117.94,
+        "emitted_gated": {
+          "utterances": 3,
+          "hz_p05_values": [
+            200.01,
+            200.01,
+            200.01
+          ],
+          "voiced_ratio_max": 1.0
+        }
+      },
+      {
+        "signal": "testvad_tone_150Hz_amp0.3",
+        "gate_mean": 0.3765,
+        "gate_frac": 0.3743,
+        "gate_segmax": 0.7821,
+        "gate_max": 0.7852,
+        "cpu_gated_pct": 70.4
+      },
+      {
+        "signal": "testvad_tone_175Hz_amp0.3",
+        "gate_mean": 0.6587,
+        "gate_frac": 0.8824,
+        "gate_segmax": 0.8183,
+        "gate_max": 0.8423,
+        "cpu_gated_pct": 109.1
+      },
+      {
+        "signal": "testvad_tone_200Hz_amp0.3",
+        "gate_mean": 0.1791,
+        "gate_frac": 0.0909,
+        "gate_segmax": 0.6597,
+        "gate_max": 0.6597,
+        "cpu_gated_pct": 51.62
+      }
+    ],
+    "hum_that_beats_threshold": [
+      "hum_stack_100Hz",
+      "hum_stack_120Hz",
+      "hum_stack_60Hz",
+      "speech+hum_100Hz_0dB",
+      "speech+hum_100Hz_10dB",
+      "speech+hum_100Hz_20dB",
+      "speech+hum_120Hz_0dB",
+      "speech+hum_120Hz_10dB",
+      "speech+hum_120Hz_20dB",
+      "speech+hum_150Hz_0dB",
+      "speech+hum_150Hz_10dB",
+      "speech+hum_150Hz_20dB",
+      "speech+hum_175Hz_0dB",
+      "speech+hum_175Hz_10dB",
+      "speech+hum_175Hz_20dB",
+      "speech+hum_200Hz_0dB",
+      "speech+hum_200Hz_10dB",
+      "speech+hum_200Hz_20dB",
+      "speech+hum_50Hz_0dB",
+      "speech+hum_50Hz_10dB",
+      "speech+hum_50Hz_20dB",
+      "speech+hum_60Hz_0dB",
+      "speech+hum_60Hz_10dB",
+      "speech+hum_60Hz_20dB"
+    ],
+    "mixture_that_beats_threshold": [
+      "speech+hum_100Hz",
+      "speech+hum_120Hz",
+      "speech+hum_150Hz",
+      "speech+hum_175Hz",
+      "speech+hum_200Hz",
+      "speech+hum_50Hz",
+      "speech+hum_60Hz"
+    ],
+    "conditioning_recovered_rejection": [
+      "hum_150Hz_conditioned_a1.0",
+      "hum_150Hz_conditioned_a2.0",
+      "hum_175Hz_conditioned_a1.0",
+      "hum_175Hz_conditioned_a2.0",
+      "hum_200Hz_conditioned_a1.0",
+      "hum_200Hz_conditioned_a2.0"
+    ],
+    "conditioning_speech_damage": []
+  }
+}
