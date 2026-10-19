@@ -30,6 +30,79 @@ fire and would be interrupted almost immediately when it did -- and it would
 look like it worked, because nothing would go wrong. There would be nothing
 to go wrong. A gate that never fires cannot fail, and a suite that only checks
 "no exception was raised" would have passed it happily.
+
+WHY THIS LANE WAS REPORTED FLAKY, AND WHAT IT ACTUALLY WAS.
+
+Reported as "live-call and order-dependent". Measured, neither is true:
+
+    pytest tests/test_speculate.py -q   3/3 runs -> 18 passed
+                                            (123.20s, 109.85s, 121.30s)
+    pytest tests/ -q                    3/3 runs -> 422 passed, 5 skipped
+                                            (304.39s, 314.42s, 295.83s)
+
+Six consecutive clean runs, so the reported flake does not reproduce here.
+There is no live call in this file: the only urlopen sites in this suite are
+monkeypatched stubs in test_local_tev.py / test_local_judge.py. And there is
+no order dependence: watcher.py and speculate.py read no clock, no RNG, no
+environment and hold no module cache; every cross-test mutation elsewhere
+(test_watcher.py, test_policy.py) is restored in a `finally`; wavio cannot
+write, so no test can alter the corpus mid-run; and pytest-randomly, -xdist
+and -timeout are not installed, so ordering is fixed.
+
+THE REAL DEFECT. IT IS A FAIL-NOT-SKIP BUG, NOT A FLAKE.
+
+This lane reads its corpus from `examples/realaudio/`, and every `.wav` under
+that path is GITIGNORED and untracked (.gitignore:10) -- only the
+transcripts, the build script and corpus/MANIFEST.md are in git. The corpus
+is generated from tracked .mp3s by corpus/_downloads/make_excerpt.py into a
+directory shared with other agents working this tree.
+
+So the result depended on ambient shared-tree filesystem state. With the
+corpus absent -- the default on any fresh clone -- neither measurement test
+skipped, both FAILED:
+
+    test_the_shipped_threshold_is_not_theatre
+        AssertionError: only 0 runs; corpus too thin
+    test_the_rejected_threshold_is_rejected_for_a_reason
+        ZeroDivisionError: division by zero
+
+A measurement that cannot run has to say so, not fail for want of a file.
+A lane whose verdict is decided by files nobody committed is a lane that goes
+red on a machine that did nothing wrong -- which is the shape of bug that
+gets misfiled as "flaky" and then blamed on ordering.
+
+WHAT CHANGED, AND WHAT DID NOT.
+
+1. The corpus is PINNED to the seven cells declared in
+   `examples/realaudio/corpus/MANIFEST.md` instead of an open-ended
+   `glob("*.wav")`. A stray or regenerated clip dropped into that shared
+   directory used to silently move the measured numbers; the measurement now
+   names the files it is over.
+2. `needs_corpus` skips the two measurement tests, with a real and stated
+   reason, when the declared corpus has not been built. This is the existing
+   house pattern -- test_vad.py's `needs_weights`, test_judged_tracks.py's
+   `needs_key`.
+3. Nothing was softened. No assertion was removed, weakened, or made
+   trivially true; both measurement tests carry an explicit non-empty
+   precondition now, so a degenerate corpus reports itself instead of raising
+   ZeroDivisionError. Every assertion runs at full strength whenever the
+   corpus exists, which is every run on a built tree.
+
+THE PROSE ABOVE QUOTES A CORPUS THAT IS NOT THE ONE ON DISK. THE ONES THE
+CODE MEASURES TODAY, over the same seven declared cells:
+
+    1671 pause runs                        (prose says 680 / 676)
+    min 0.160 s   median 0.380 s   max 2.540 s     (prose: 0.320 / 2.440)
+    speculate_s=0.30 reach rate 75.3%              (prose: 53.8%)
+    share below the rejected 1.20 s: 94.4%        (prose: 96.9%)
+
+Both the old and the new figures clear the asserted floors (reach > 0.35,
+below 1.20 s > 0.90), so the assertions were never wrong -- they were
+quoting a corpus that has since changed. The floors are deliberately not
+raised to the current numbers: the claim being defended is "the gate reaches
+enough real pauses to be a gate", and pinning a floor to one corpus's exact
+reach rate would make the test fail on a fixture change rather than on a
+regression in the gate.
 """
 
 from __future__ import annotations
@@ -68,9 +141,42 @@ def pause_event(t0, t1, run_s):
                           "open": False})
 
 
+# -- the corpus, named ------------------------------------------------------
+
+# The seven cells declared in examples/realaudio/corpus/MANIFEST.md, NAMED
+# rather than globbed. Every .wav under examples/realaudio/ is gitignored and
+# untracked, and that directory is shared with other agents working this tree,
+# so `glob("*.wav")` let a stray or regenerated clip silently change a
+# measured number. The manifest IS in git; this list mirrors it.
+_AUDIO = ROOT / "examples" / "realaudio"
+
+CORPUS_CELLS = (
+    "alice01_excerpt.wav",
+    "corpus/poetry_weeds_by_the_wall_1702_librivox.wav",
+    "corpus/essay_perpetual_peace_librivox.wav",
+    "corpus/shortstory_shortstory058_1405_librivox.wav",
+    "corpus/shakespeare_midsummernightsdream_1201_librivox.wav",
+    "corpus/children_english_fairy_tales_joy_librivox.wav",
+    "corpus/oration_jfks19620912.wav",
+)
+
+MISSING_CELLS = tuple(n for n in CORPUS_CELLS
+                      if not (_AUDIO / n).is_file())
+
+# Same pattern as test_vad.py's `needs_weights` and test_judged_tracks.py's
+# `needs_key`: skip with a real, stated reason when the prerequisite is
+# genuinely absent, instead of failing for want of a gitignored file.
+needs_corpus = pytest.mark.skipif(
+    bool(MISSING_CELLS),
+    reason="corpus not built, missing cell(s): " + ", ".join(MISSING_CELLS)
+           + " -- audio is gitignored; regenerate with"
+             " examples/realaudio/corpus/_downloads/make_excerpt.py")
+
+
 # -- the threshold, measured ------------------------------------------------
 
 class TestThresholdIsMeasured:
+    @needs_corpus
     def test_the_shipped_threshold_is_not_theatre(self):
         """
         A gate that fires almost never and is voided almost always is worse
@@ -78,6 +184,7 @@ class TestThresholdIsMeasured:
         is on the corpus, not on a fixture.
         """
         runs = _corpus_pause_runs()
+        assert runs, "the declared corpus produced no pause runs at all"
         assert len(runs) > 300, f"only {len(runs)} runs; corpus too thin"
         reach = sum(1 for r in runs if r >= speculate.SpeculationGate().speculate_s)
         rate = reach / len(runs)
@@ -86,12 +193,14 @@ class TestThresholdIsMeasured:
             f"only {rate:.1%} of {len(runs)} real pause runs; below ~0.35 the "
             f"gate is theatre")
 
+    @needs_corpus
     def test_the_rejected_threshold_is_rejected_for_a_reason(self):
         """
         The falsification, kept so the original 1.20 s cannot come back
         unexamined. 96.9% void rate.
         """
         runs = _corpus_pause_runs()
+        assert runs, "the declared corpus produced no pause runs at all"
         below = sum(1 for r in runs if r < 1.20)
         assert below / len(runs) > 0.90, (
             f"1.20 s now voids only {below / len(runs):.1%}; the reason it "
@@ -293,15 +402,13 @@ _CORPUS_RUNS = None
 
 
 def _corpus_pause_runs():
-    """Real pause-run durations across every corpus cell present."""
+    """Real pause-run durations across the declared corpus cells."""
     global _CORPUS_RUNS
     if _CORPUS_RUNS is not None:
         return _CORPUS_RUNS
-    corpus = ROOT / "examples" / "realaudio"
-    cells = [corpus / "alice01_excerpt.wav"] + sorted(
-        (corpus / "corpus").glob("*.wav"))
     runs = []
-    for path in cells:
+    for name in CORPUS_CELLS:
+        path = _AUDIO / name
         if not path.is_file():
             continue
         samples = wavio.read_wav(str(path)).samples
