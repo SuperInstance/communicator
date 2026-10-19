@@ -1,0 +1,74 @@
+{
+  "question": "is the per-frame drift global gain, pixel noise, or a spatial change in the scene?",
+  "correction": "An earlier report said per-frame gain normalisation cut drift from 43.3 to 0.81 counts. It did not: it compared raw counts against relative units. 43.686/111.18 = 0.393 and 43.226/109.71 = 0.394, so the reduction was 1.00x, not ~50x. That error is why gain_invariance.py could not work.",
+  "captures": [
+    {
+      "label": "OCCUPIED (facing, speaking)",
+      "path": "/mnt/c/proart_capture/A.nv12",
+      "n_frames": 400,
+      "mean_luma": 111.17517106119791,
+      "adjacent_mad_raw": 43.68600162515664,
+      "adjacent_mad_after_gain": 42.46152358314948,
+      "relative_raw_pct": 39.29474648715321,
+      "relative_after_gain_pct": 38.1933512472636,
+      "gain_explains_pct": 2.8029071017157348,
+      "fitted_k_median": 0.8856671028295736,
+      "fitted_k_min": 0.8274576985362577,
+      "fitted_k_max": 0.9880347818329536,
+      "residual_rms": 52.32412683117896,
+      "residual_rms_2x2": 50.70367387362781,
+      "residual_noise_ratio": 0.9690304825768148,
+      "residual_peak_col": 17,
+      "residual_peak_row": 92,
+      "row_profile_std": 31.312025810208343,
+      "col_profile_std": 7.08056686943787,
+      "column_energy_share": 0.04864693112727292,
+      "row_fft_top_bins": [
+        1,
+        2,
+        3
+      ],
+      "implied_band_hz_range": [
+        30.0,
+        90.0
+      ],
+      "row_fft_top3_energy_share": 0.4428339019148429,
+      "classification": "SPATIAL STRUCTURE, not noise: the residual survives 2x2 averaging (ratio 0.97, pure noise would be 0.50) and gain explains only 2.8%"
+    },
+    {
+      "label": "EMPTY (nobody, dark room)",
+      "path": "/home/proart/projects/glasses/.capture_keep/empty1.nv12",
+      "n_frames": 400,
+      "mean_luma": 49.69857259114583,
+      "adjacent_mad_raw": 39.34364181939223,
+      "adjacent_mad_after_gain": 37.63364664052054,
+      "relative_raw_pct": 79.16453082678997,
+      "relative_after_gain_pct": 75.72379784449835,
+      "gain_explains_pct": 4.346306289390956,
+      "fitted_k_median": 0.4975903034112806,
+      "fitted_k_min": 0.34263900946582504,
+      "fitted_k_max": 1.8174001358574519,
+      "residual_rms": 50.878145767996,
+      "residual_rms_2x2": 50.869402768786934,
+      "residual_noise_ratio": 0.9998281580612443,
+      "residual_peak_col": 150,
+      "residual_peak_row": 54,
+      "row_profile_std": 45.9758537715454,
+      "col_profile_std": 0.1648122284073493,
+      "column_energy_share": 1.285031212242642e-05,
+      "row_fft_top_bins": [
+        1,
+        2,
+        3
+      ],
+      "implied_band_hz_range": [
+        30.0,
+        90.0
+      ],
+      "row_fft_top3_energy_share": 0.46455772339548435,
+      "classification": "SPATIAL STRUCTURE, not noise: the residual survives 2x2 averaging (ratio 1.00, pure noise would be 0.50) and gain explains only 4.3%"
+    }
+  ],
+  "method": "least-squares fit of one scalar k per adjacent frame pair through the origin; residual is what a global gain cannot explain. Noise test: RMS of the residual after 2x2 block averaging, relative to before -- pure independent noise gives ~0.50, structure survives.",
+  "verdict": "Gain explains 4.3% of the drift in EMPTY (nobody, dark room), and the residual noise ratio is 1.00. SPATIAL STRUCTURE, not noise: the residual survives 2x2 averaging (ratio 1.00, pure noise would be 0.50) and gain explains only 4.3%"
+}

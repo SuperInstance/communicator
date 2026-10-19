@@ -95,6 +95,27 @@ table, because it looked entirely plausible.
 
 ## What has to change before any motion claim
 
+> ### ⚠ THIS SECTION WAS WRONG — see `CAMERA-FLICKER-BANDING.md`
+>
+> The gain-invariance fix proposed below has been implemented and tested. **It
+> does not work**: per-frame gain normalisation leaves the empty-room flip rate
+> at exactly 50.00%. Measured afterward, a single scalar per frame explains only
+> 2.80% (occupied) / 4.35% (empty) of the frame-to-frame variation. The
+> dominant term is **horizontal banding from mains-frequency LED flicker
+> sampled by the rolling shutter** — in the empty room the residual's column
+> energy share is 0.00%, meaning it is identical in every column, which is what
+> a light band looks like and what no room feature looks like.
+>
+> **A number in the text below is also an arithmetic artefact.** "Per-frame mean
+> removal cuts adjacent drift from 39.3 to 0.81 counts" is wrong: it compares raw
+> counts against relative units. 43.686/111.18 = 0.393 and 43.226/109.71 = 0.394,
+> so the real reduction is **1.00×**. Normalisation is still needed to put two
+> captures into the same units for comparison, but this document overstated what
+> it achieves.
+>
+> The original text is kept below rather than deleted, because it is a fair
+> record of the reasoning and of where it went wrong.
+
 The fix is now specific and it is not a tuning knob.
 
 **The threshold must be gain-invariant.** Syzygy compares raw luma to a fixed

@@ -1,0 +1,65 @@
+{
+  "question": "does per-frame gain normalisation make the character delta measure the subject instead of the camera?",
+  "prediction": "empty-room flip rate collapses toward zero while the occupied rate stays above it",
+  "captures": [
+    {
+      "label": "OCCUPIED (facing, speaking)",
+      "path": "/mnt/c/proart_capture/A.nv12",
+      "n_frames": 400,
+      "mean_luma": 111.17517106119791,
+      "clipped_fraction_after_norm": 1.6276041666666666e-07,
+      "adjacent_mad_raw": 43.68600162515664,
+      "adjacent_mad_normalised": 43.2263463019528,
+      "mad_reduction_x": 1.0106336843737143,
+      "flip_raw_pct": 48.190104166666664,
+      "flip_raw_min": 33.932291666666664,
+      "flip_raw_max": 56.822916666666664,
+      "flip_normalised_pct": 51.42578125,
+      "flip_normalised_min": 38.88671875,
+      "flip_normalised_max": 55.67057291666667
+    },
+    {
+      "label": "TURNED (head away, same words)",
+      "path": "/mnt/c/proart_capture/B.nv12",
+      "n_frames": 400,
+      "mean_luma": 115.36425211588542,
+      "clipped_fraction_after_norm": 0.0,
+      "adjacent_mad_raw": 37.93195521355472,
+      "adjacent_mad_normalised": 37.93207187891604,
+      "mad_reduction_x": 0.9999969243609552,
+      "flip_raw_pct": 40.345052083333336,
+      "flip_raw_min": 29.420572916666664,
+      "flip_raw_max": 48.69140625,
+      "flip_normalised_pct": 41.217447916666664,
+      "flip_normalised_min": 30.7421875,
+      "flip_normalised_max": 46.458333333333336
+    },
+    {
+      "label": "EMPTY (nobody)",
+      "path": "/home/proart/projects/glasses/.capture_keep/empty1.nv12",
+      "n_frames": 400,
+      "mean_luma": 49.69857259114583,
+      "clipped_fraction_after_norm": 0.0,
+      "adjacent_mad_raw": 39.34364181939223,
+      "adjacent_mad_normalised": 44.29305767674394,
+      "mad_reduction_x": 0.8882575257397414,
+      "flip_raw_pct": 50.0,
+      "flip_raw_min": 25.0,
+      "flip_raw_max": 50.0,
+      "flip_normalised_pct": 50.0,
+      "flip_normalised_min": 24.973958333333332,
+      "flip_normalised_max": 50.0
+    }
+  ],
+  "limits": [
+    "normalisation changes what the fixed braille_thresh means, so normalised numbers are comparable WITHIN this script only, not to any earlier report",
+    "the empty room was captured dark (mean luma ~50 vs ~111 occupied) and the two captures are hours apart; gain normalisation removes frame-to-frame drift, not a global difference between two recordings",
+    "one capture per condition, no error bars",
+    "per-frame normalisation also removes genuine global lighting changes, which is an accepted trade, not a free win"
+  ],
+  "empty_over_occupied_normalised": 0.9722749715153817,
+  "empty_over_occupied_raw": 1.0375574169143476,
+  "verdict": "THE FIX DOES NOT WORK. The empty room still reports a large flip rate after gain normalisation, so the auto-exposure hunt is not the whole mechanism. Do NOT spend the morning on a capture that will still be uninterpretable -- the next thing to try is hysteresis (a dot keeps its bit until its luma crosses the threshold by a margin), which attacks the remaining per-dot instability directly.",
+  "facing_vs_turned_normalised_gap_pp": 10.208333333333336,
+  "original_capture_recovered": true
+}
