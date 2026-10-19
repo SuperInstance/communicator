@@ -1,0 +1,77 @@
+{
+  "question": "does GATE_FIELD report the segment, and is the 14.5x understatement a code bug or an experiment bug?",
+  "fixture": "150 Hz 3-harmonic stack, 16 s, amplitude 0.3",
+  "whole_signal_max": 0.7293078303337097,
+  "whole_signal_peak_time_s": 0.064,
+  "whole_signal_peak_frame_index": 2,
+  "records": [
+    {
+      "t0": 0.025,
+      "t1": 1.8,
+      "gate_field": 0.7293078303337097,
+      "max_over_same_interval": 0.7293078303337097,
+      "ratio_field_over_interval": 1.0,
+      "whole_signal_peak_inside_this_record": true
+    },
+    {
+      "t0": 1.825,
+      "t1": 3.6,
+      "gate_field": 0.05028313398361206,
+      "max_over_same_interval": 0.05028313398361206,
+      "ratio_field_over_interval": 1.0,
+      "whole_signal_peak_inside_this_record": false
+    },
+    {
+      "t0": 3.625,
+      "t1": 5.4,
+      "gate_field": 0.0497187077999115,
+      "max_over_same_interval": 0.049213528633117676,
+      "ratio_field_over_interval": 1.0102650466411358,
+      "whole_signal_peak_inside_this_record": false
+    },
+    {
+      "t0": 5.425,
+      "t1": 7.2,
+      "gate_field": 0.05394715070724487,
+      "max_over_same_interval": 0.05394715070724487,
+      "ratio_field_over_interval": 1.0,
+      "whole_signal_peak_inside_this_record": false
+    },
+    {
+      "t0": 7.225,
+      "t1": 9.0,
+      "gate_field": 0.055645644664764404,
+      "max_over_same_interval": 0.055645644664764404,
+      "ratio_field_over_interval": 1.0,
+      "whole_signal_peak_inside_this_record": false
+    },
+    {
+      "t0": 9.025,
+      "t1": 10.7999375,
+      "gate_field": 0.055710673332214355,
+      "max_over_same_interval": 0.055710673332214355,
+      "ratio_field_over_interval": 1.0,
+      "whole_signal_peak_inside_this_record": false
+    },
+    {
+      "t0": 10.815,
+      "t1": 12.6,
+      "gate_field": 0.054377973079681396,
+      "max_over_same_interval": 0.054377973079681396,
+      "ratio_field_over_interval": 1.0,
+      "whole_signal_peak_inside_this_record": false
+    },
+    {
+      "t0": 12.625,
+      "t1": 14.3999375,
+      "gate_field": 0.05234646797180176,
+      "max_over_same_interval": 0.05234646797180176,
+      "ratio_field_over_interval": 1.0,
+      "whole_signal_peak_inside_this_record": false
+    }
+  ],
+  "median_ratio": 1.0,
+  "worst_ratio": 1.0,
+  "field_matches_own_interval": true,
+  "verdict": "zcode is right and f0a566f is withdrawn. GATE_FIELD equals the standalone gate's max over the record's OWN interval, so the code matches its docstring. The 14.5x divided the whole-signal max -- a start-up transient at t=0.064s -- by a record's value at t=4s and later. Two different intervals. The original docstring's control ('max over the first 0.5s gives the same 0.7293') could not distinguish a warm-up transient from real signal, because both give the same answer; the control was badly designed rather than the code being wrong."
+}
