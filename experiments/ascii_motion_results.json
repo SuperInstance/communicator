@@ -1,0 +1,161 @@
+{
+  "note": "Motion made first-class in a character array. full_changed is how many of the 80x24 cells differ from the previous frame; ladder_step is which rung of the resolution ladder that frame was coded at under a fixed changed-cell budget. Measures the representation only -- no claim is made here that it separates any particular class.",
+  "cells": [
+    80,
+    24
+  ],
+  "n_frames": 25,
+  "budget_changed_cells": 40,
+  "stats": {
+    "full_changed_min": 890,
+    "full_changed_median": 1074.0,
+    "full_changed_max": 1323,
+    "frames_needing_downscale": 24
+  },
+  "per_frame": [
+    {
+      "frame": 1,
+      "full_changed": 1323,
+      "ladder_step": 4,
+      "coarse_changed": 116
+    },
+    {
+      "frame": 2,
+      "full_changed": 1149,
+      "ladder_step": 4,
+      "coarse_changed": 109
+    },
+    {
+      "frame": 3,
+      "full_changed": 917,
+      "ladder_step": 4,
+      "coarse_changed": 104
+    },
+    {
+      "frame": 4,
+      "full_changed": 890,
+      "ladder_step": 4,
+      "coarse_changed": 105
+    },
+    {
+      "frame": 5,
+      "full_changed": 1015,
+      "ladder_step": 4,
+      "coarse_changed": 107
+    },
+    {
+      "frame": 6,
+      "full_changed": 1125,
+      "ladder_step": 4,
+      "coarse_changed": 116
+    },
+    {
+      "frame": 7,
+      "full_changed": 1075,
+      "ladder_step": 4,
+      "coarse_changed": 107
+    },
+    {
+      "frame": 8,
+      "full_changed": 974,
+      "ladder_step": 4,
+      "coarse_changed": 105
+    },
+    {
+      "frame": 9,
+      "full_changed": 963,
+      "ladder_step": 4,
+      "coarse_changed": 106
+    },
+    {
+      "frame": 10,
+      "full_changed": 1091,
+      "ladder_step": 4,
+      "coarse_changed": 108
+    },
+    {
+      "frame": 11,
+      "full_changed": 1190,
+      "ladder_step": 4,
+      "coarse_changed": 114
+    },
+    {
+      "frame": 12,
+      "full_changed": 1124,
+      "ladder_step": 4,
+      "coarse_changed": 108
+    },
+    {
+      "frame": 13,
+      "full_changed": 1002,
+      "ladder_step": 4,
+      "coarse_changed": 106
+    },
+    {
+      "frame": 14,
+      "full_changed": 977,
+      "ladder_step": 4,
+      "coarse_changed": 105
+    },
+    {
+      "frame": 15,
+      "full_changed": 1091,
+      "ladder_step": 4,
+      "coarse_changed": 108
+    },
+    {
+      "frame": 16,
+      "full_changed": 1181,
+      "ladder_step": 4,
+      "coarse_changed": 114
+    },
+    {
+      "frame": 17,
+      "full_changed": 1127,
+      "ladder_step": 4,
+      "coarse_changed": 107
+    },
+    {
+      "frame": 18,
+      "full_changed": 989,
+      "ladder_step": 4,
+      "coarse_changed": 105
+    },
+    {
+      "frame": 19,
+      "full_changed": 968,
+      "ladder_step": 4,
+      "coarse_changed": 107
+    },
+    {
+      "frame": 20,
+      "full_changed": 1073,
+      "ladder_step": 4,
+      "coarse_changed": 106
+    },
+    {
+      "frame": 21,
+      "full_changed": 1167,
+      "ladder_step": 4,
+      "coarse_changed": 115
+    },
+    {
+      "frame": 22,
+      "full_changed": 1118,
+      "ladder_step": 4,
+      "coarse_changed": 108
+    },
+    {
+      "frame": 23,
+      "full_changed": 986,
+      "ladder_step": 4,
+      "coarse_changed": 106
+    },
+    {
+      "frame": 24,
+      "full_changed": 966,
+      "ladder_step": 4,
+      "coarse_changed": 107
+    }
+  ]
+}

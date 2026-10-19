@@ -1,0 +1,64 @@
+{
+  "question": "does the mask flip because cells sit on the threshold (dither) or because the subject moved?",
+  "capture": "/mnt/c/proart_capture/small.nv12",
+  "n_frames": 25,
+  "braille_thresh": 100,
+  "granularity": "dot (2x4 pixel block per cell, one byte per cell)",
+  "dot_density_p": 0.7773177083333334,
+  "independence_baseline_2p_1mp": 0.3461897772894965,
+  "flip_rate_by_distance_from_threshold": [
+    {
+      "abs_dluma": "0-0",
+      "dots": 3487,
+      "flipped": 2345,
+      "flip_rate_pct": 67.24978491540006
+    },
+    {
+      "abs_dluma": "1-2",
+      "dots": 14016,
+      "flipped": 6905,
+      "flip_rate_pct": 49.265125570776256
+    },
+    {
+      "abs_dluma": "3-5",
+      "dots": 22583,
+      "flipped": 10927,
+      "flip_rate_pct": 48.38595403622193
+    },
+    {
+      "abs_dluma": "6-10",
+      "dots": 38208,
+      "flipped": 15649,
+      "flip_rate_pct": 40.95739112227806
+    },
+    {
+      "abs_dluma": "11-20",
+      "dots": 64950,
+      "flipped": 24491,
+      "flip_rate_pct": 37.70746728252502
+    },
+    {
+      "abs_dluma": "21-40",
+      "dots": 127306,
+      "flipped": 43893,
+      "flip_rate_pct": 34.47834351876581
+    },
+    {
+      "abs_dluma": "41-200",
+      "dots": 113450,
+      "flipped": 24518,
+      "flip_rate_pct": 21.61128250330542
+    }
+  ],
+  "on_threshold_flip_pct": 67.24978491540006,
+  "near_threshold_flip_pct": 67.24978491540006,
+  "far_threshold_flip_pct": 21.61128250330542,
+  "gradient_ratio_on_to_far": 3.1117905614863104,
+  "gradient_is_monotone": true,
+  "signal_floor_pct": 21.61128250330542,
+  "random_floor_pct": 34.61897772894965,
+  "tone_channel_flip_pct": 70.91458333333334,
+  "threshold_dither_confirmed": true,
+  "verdict": "BOTH, and that is the actual finding. Flip rate falls monotonically from 67.25% on the threshold to 21.61% far from it (3.1x), so roughly half the raw delta is threshold dither. But the far-from-threshold floor of 21.61% is BELOW the 34.62% independence baseline, so that residual is structured, not noise -- there is genuine change to build on. The tone control came back at 70.91%, WORSE than the mask, so the argmax ramp is not a more stable channel and the fallback is refuted by its own control.",
+  "consequence": "Two things follow, and the second is the one that matters. First, the fix for the noisy half is hysteresis: keep a dot's bit until its luma crosses the threshold by a margin, not a single bare comparison. The measured gradient sizes it -- a dot more than ~20 counts from the threshold is already 1.6x more stable than one on it, so a margin of that order separates the two populations. Second, the tone channel must NOT be the fallback: at 70.91% it flips more than the mask and carries less stable content. Any P-frame built on tone would be worse, not better."
+}

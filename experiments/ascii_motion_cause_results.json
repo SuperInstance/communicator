@@ -1,0 +1,112 @@
+{
+  "question": "is the frame-to-frame character delta dominated by the camera's auto-exposure loop rather than by subject motion?",
+  "capture": "/mnt/c/proart_capture/small.nv12",
+  "n_frames": 25,
+  "live_mean_luma": [
+    111.15709635416667,
+    114.26796875,
+    122.75227864583333,
+    125.1623046875,
+    124.64296875,
+    121.61171875,
+    121.296484375,
+    121.84889322916666,
+    123.19485677083334,
+    123.5009765625,
+    119.333203125,
+    119.82161458333333,
+    120.90657552083333,
+    122.66575520833334,
+    123.05638020833334,
+    119.12682291666667,
+    119.71516927083333,
+    120.87135416666666,
+    122.69505208333334,
+    122.896875,
+    119.06888020833334,
+    119.6767578125,
+    120.87623697916666,
+    122.71868489583333,
+    122.86380208333334
+  ],
+  "static_control_mean_luma": [
+    111.15709635416667,
+    111.15709635416667,
+    111.15709635416667,
+    111.15709635416667,
+    111.15709635416667,
+    111.15709635416667,
+    111.15709635416667,
+    111.15709635416667,
+    111.15709635416667,
+    111.15709635416667,
+    111.15709635416667,
+    111.15709635416667,
+    111.15709635416667,
+    111.15709635416667,
+    111.15709635416667,
+    111.15709635416667,
+    111.15709635416667,
+    111.15709635416667,
+    111.15709635416667,
+    111.15709635416667,
+    111.15709635416667,
+    111.15709635416667,
+    111.15709635416667,
+    111.15709635416667,
+    111.15709635416667
+  ],
+  "mean_luma_span_live": 14.005208333333329,
+  "mean_luma_span_static_control": 0.0,
+  "p90_luma_span_live": 15,
+  "autocorr_live": {
+    "1": 0.566242514238466,
+    "2": -0.4500510660624538,
+    "3": -0.67826060303455,
+    "4": -0.20833551882903464,
+    "5": 0.4361381191587739,
+    "6": 0.07815759537394676
+  },
+  "autocorr_static_control": {
+    "1": 1.0000000000000002,
+    "2": 1.0000000000000002,
+    "3": 1.0,
+    "4": null,
+    "5": null,
+    "6": null
+  },
+  "corr_mean_vs_p90_per_frame": 0.6781609605645532,
+  "oscillating": true,
+  "cross_test_exposure_vs_delta_by_lag": {
+    "1": {
+      "mean_abs_dY": 1.8037082248263878,
+      "cell_change_pct": 55.29730902777777
+    },
+    "2": {
+      "mean_abs_dY": 3.325498188405798,
+      "cell_change_pct": 58.47826086956521
+    },
+    "3": {
+      "mean_abs_dY": 3.561931818181819,
+      "cell_change_pct": 58.546401515151516
+    },
+    "4": {
+      "mean_abs_dY": 2.629439484126983,
+      "cell_change_pct": 55.74652777777778
+    },
+    "5": {
+      "mean_abs_dY": 1.3930078124999987,
+      "cell_change_pct": 14.518229166666668
+    },
+    "6": {
+      "mean_abs_dY": 2.30575657894737,
+      "cell_change_pct": 55.57291666666666
+    }
+  },
+  "cross_test_correlation": 0.7021488392201023,
+  "lag1_autocorr": 0.566242514238466,
+  "autocorr_trough": -0.67826060303455,
+  "hunt_period_frames": 3,
+  "verdict": "EXPOSURE OSCILLATION. Consecutive frames sit at opposite phases of a hunting gain loop. The character delta is dominated by the camera's AGC, not the subject.",
+  "consequence": "Any I/P representation built on raw frame subtraction of this capture would be spending its budget on the exposure cycle. Either the capture is normalised (lock exposure) or the P-frame must be taken against a per-frame gain-compensated reference. Until that is settled, no motion claim from a live webcam capture is admissible."
+}

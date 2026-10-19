@@ -118,7 +118,7 @@
     }
   ],
   "elapsed_s": 5.08,
-  "note": "CLEF ROUTE UNAVAILABLE. Every call returned HTTP 400. The documented body worked earlier in the same session, so this is a Cloudflare-side schema regression: the validator rejects the exact key names it names as required. Verified against clef, clef-omni and clef-flash, including a text-only call with no audio at all. The account token and the /ai/models/search listing both succeed. Not worked around.",
+  "note": "CLEF ROUTE UNAVAILABLE. Re-checked 2026-10-18 17:10 local. Every call still returns HTTP 400, but THE ERROR HAS CHANGED CHARACTER, and that matters for diagnosis. Earlier it was a schema rejection: the validator named required key names and then rejected those exact names, on every body shape including a text-only call with no audio. It is now code 7000 'No route for that URI' on clef, clef-omni and clef-flash, for audio and text bodies alike. That is a ROUTING-level failure, not a body-validation one -- the endpoint does not resolve at all for this account, so the original schema reading was probably a symptom rather than the fault. The account token is valid and @cf/pipecat-ai/smart-turn-v2 on the same account and the same request path returned 200 with is_complete=false, probability=0.3498 on a 1 s 200 Hz tone, so the path prefix and credentials are fine and the failure is specific to the clef routes. Still not worked around.",
   "schema_attempts": [
     {
       "audio_shape": "[{'content_type','base64'}] (documented)",

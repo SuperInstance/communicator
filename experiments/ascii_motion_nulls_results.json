@@ -1,0 +1,35 @@
+{
+  "question": "does the I/P character representation measure motion, or threshold dither on a noisy continuous signal?",
+  "capture": "/mnt/c/proart_capture/small.nv12",
+  "cells": [
+    80,
+    24
+  ],
+  "braille_thresh": 100,
+  "N1_determinism_same_frame_changed_pct": 0.0,
+  "N1_pass": true,
+  "N2_lag_change_rate_pct": {
+    "1": 55.93749999999999,
+    "2": 57.552083333333336,
+    "3": 57.447916666666664,
+    "5": 11.458333333333332,
+    "10": 15.156249999999998,
+    "20": 18.958333333333332
+  },
+  "N2_monotone_increasing": false,
+  "N2_headroom_lag1_to_lag20_pp": -36.979166666666664,
+  "N3_null_rung_agreement_pct": 100.0,
+  "luma_histogram": {
+    "n_pixels": 384000,
+    "min": 32,
+    "max": 212,
+    "p01": 50,
+    "p10": 83,
+    "p50": 123,
+    "p90": 157,
+    "p99": 173,
+    "frac_within_2_of_threshold": 0.04558072916666667
+  },
+  "verdict": "SATURATED: the delta is dominated by threshold dither, not motion.",
+  "consequence": "A hard threshold on a noisy continuous signal makes the P-frame a dither map. The representation needs the MAGNITUDE of the change between keyframes, not the per-frame sign of a threshold test. That also un-saturates the ladder: cost then tracks real motion instead of a constant flip rate."
+}

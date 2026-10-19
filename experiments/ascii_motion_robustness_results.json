@@ -1,0 +1,62 @@
+{
+  "question": "is the +0.702 exposure/delta correlation a real mechanism or one leverage point?",
+  "capture": "/mnt/c/proart_capture/small.nv12",
+  "n_frames": 25,
+  "lag_profile": {
+    "1": {
+      "mean_abs_dY": 180.37082248263877,
+      "cell_change_pct": 55.29730902777777
+    },
+    "2": {
+      "mean_abs_dY": 332.5498188405798,
+      "cell_change_pct": 58.47826086956521
+    },
+    "3": {
+      "mean_abs_dY": 356.1931818181819,
+      "cell_change_pct": 58.546401515151516
+    },
+    "4": {
+      "mean_abs_dY": 262.9439484126983,
+      "cell_change_pct": 55.74652777777778
+    },
+    "5": {
+      "mean_abs_dY": 139.3007812499999,
+      "cell_change_pct": 14.518229166666668
+    },
+    "6": {
+      "mean_abs_dY": 230.57565789473702,
+      "cell_change_pct": 55.57291666666666
+    }
+  },
+  "R1_lowest_lag5_pair": {
+    "frames": [
+      18,
+      23
+    ],
+    "change_pct": 7.708333333333334,
+    "mean_luma_delta": 0.023632812499997158,
+    "median_lag5_change_pct": 11.458333333333332
+  },
+  "R3_global_min_pair": {
+    "frames": [
+      18,
+      23
+    ],
+    "change_pct": 7.708333333333334
+  },
+  "R2_correlation_all_lags": 0.7021488392201023,
+  "R2_leave_one_out": {
+    "drop_lag_1": 0.8492338524851584,
+    "drop_lag_2": 0.6853268635506512,
+    "drop_lag_3": 0.7172224906763196,
+    "drop_lag_4": 0.7018548426153475,
+    "drop_lag_5": 0.9433373626223542,
+    "drop_lag_6": 0.7362587261905725
+  },
+  "R2_spread": 0.25801049907170304,
+  "duplicate_frame_suspected": false,
+  "correlation_is_fragile": false,
+  "verdict": "The correlation survives leave-one-out and is not a leverage point.",
+  "duplicate_note": "No near-duplicate frame pair found; the lag-5 dip is not a repeat.",
+  "consequence": "Neither auto-exposure nor threshold dither is established as the cause. The honest state is that the 55-58% baseline cell-change rate on a stationary subject is UNEXPLAINED, and the resolution ladder is saturated because of it. Before any motion claim, the capture must record a per-frame checksum so repeats are caught, and the ladder budget must be set from measured, not assumed, change rates."
+}
