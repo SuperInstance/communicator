@@ -1,7 +1,42 @@
 # Finding: `GATE_FIELD` does not report what it says it reports
 
-**Status:** a real defect, reproduced and quantified. Not fixed here — the fix is
-a design decision and `src/` belongs to the other agent.
+> ## ⚠ RETRACTED — there is no bug here, and the "14.5×" is withdrawn
+>
+> **This document's finding is wrong.** `GATE_FIELD` does report the gate's max
+> over the record's own interval, exactly as documented. The code was never
+> broken.
+>
+> Commit `f0a566f` claimed a 14.5× understatement caused by `_trim`. It
+> measured that by comparing **the gate's max over the entire signal (0.7293)
+> against one record's value at t≥4s (0.0503)** — two different intervals. The
+> 0.7293 peak sits at **t = 0.064 s, frame 2 of 500**: an LSTM start-up
+> transient that falls inside the *first* record only. Every later record
+> genuinely has ~0.05, and `GATE_FIELD` reports it faithfully.
+>
+> Measured properly — one gate over the whole stream, then each record's
+> absolute index range looked up in that single series — every record's ratio
+> is **1.000** (worst 1.000). Reproduce with
+> `experiments/gate_peak_verdict.py`.
+>
+> **The control was badly designed, and so was mine.** The original docstring
+> dismissed the warm-up hypothesis with "max over the first 0.5 s gives the same
+> 0.7293" — but a warm-up transient and real signal at the start answer that
+> question identically, so the control could not distinguish them. Worse, a
+> re-check that appeared to *confirm* the bug (a flat ratio of 0.07 across all
+> records) was itself an artefact: it ran a **fresh `SileroGate()` over each
+> record's slice**, and the gate is an LSTM, so every slice re-ran the same
+> start-up transient and reported its own 0.7293 regardless of position.
+> Slicing is not a control, it is a confound.
+>
+> This is the third time this project has produced a confident conclusion from
+> a statistic summarised over the wrong interval — including the one the
+> retracted claim was about. That pattern is the finding worth keeping.
+>
+> The genuine defect this document accidentally pointed at is real and is fixed
+> elsewhere: `_gate_peak` took a max over too long a window, letting one
+> start-up transient clear a 2 s window. See `c2319a0` and `GATE_MIN_FRAMES`.
+
+**Status:** retracted. Nothing here is a defect in `GATE_FIELD`.
 
 ---
 
