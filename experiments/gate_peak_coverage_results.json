@@ -1,0 +1,63 @@
+{
+  "note": "Does GATE_FIELD report the segment's peak, as documented? 200Hz 3-harmonic stack at -26 dBFS through Watcher with one continuous gate. true_max is the maximum over the whole signal from a standalone gate on identical samples.",
+  "rows": [
+    {
+      "duration_s": 0.5,
+      "true_max": 0.7293,
+      "true_mean": 0.4245,
+      "reported": null,
+      "pitch_skipped": null,
+      "gate_probs_retained": null,
+      "understatement_x": null
+    },
+    {
+      "duration_s": 1.0,
+      "true_max": 0.7293,
+      "true_mean": 0.2448,
+      "reported": null,
+      "pitch_skipped": null,
+      "gate_probs_retained": null,
+      "understatement_x": null
+    },
+    {
+      "duration_s": 2.0,
+      "true_max": 0.7293,
+      "true_mean": 0.1397,
+      "reported": null,
+      "pitch_skipped": null,
+      "gate_probs_retained": null,
+      "understatement_x": null
+    },
+    {
+      "duration_s": 4.0,
+      "true_max": 0.7293,
+      "true_mean": 0.0844,
+      "reported": 0.0503,
+      "pitch_skipped": true,
+      "gate_probs_retained": 13,
+      "understatement_x": 14.5
+    },
+    {
+      "duration_s": 8.0,
+      "true_max": 0.7293,
+      "true_mean": 0.0569,
+      "reported": 0.0539,
+      "pitch_skipped": true,
+      "gate_probs_retained": 25,
+      "understatement_x": 13.52
+    },
+    {
+      "duration_s": 16.0,
+      "true_max": 0.7293,
+      "true_mean": 0.0425,
+      "reported": 0.0523,
+      "pitch_skipped": true,
+      "gate_probs_retained": 51,
+      "understatement_x": 13.93
+    }
+  ],
+  "summary": {
+    "max_understatement_x": 14.5,
+    "all_rows_understated": true
+  }
+}

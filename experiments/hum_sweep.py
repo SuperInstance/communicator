@@ -70,7 +70,22 @@ from src import vad, wavio, watcher  # noqa: E402
 import numpy as np  # noqa: E402
 
 SR = 16000
-DUR_S = 30.0
+# 8 s, not 30. The gate probability is stationary, so it converges long before
+# 8 s; the CPU column does NOT, and the reason is a finding rather than a
+# tuning choice. On a CONTINUOUS signal the watcher's buffer never trims (the
+# buffer is trimmed at pause boundaries), so every push re-runs
+# `energy.rms_series` over a growing buffer. Measured per-second cost on a
+# continuous 200 Hz tone: 1.01% at 1 s, 6.37% at 2 s, 10.08% at 3 s, buffer
+# 16000 -> 32000 -> 48000 samples. That is quadratic in run length, on exactly
+# the signal the gate exists to stop, and it made a 30 s x 27-signal sweep run
+# past 20 minutes without finishing.
+#
+# The CPU column here is therefore short by construction. It is kept because it
+# shows WHERE the gate stops saving work, which is the question; the portable
+# cost ratio is measured properly and at length in
+# experiments/device_generalisation.py, which uses a 30 s signal and repeated
+# timed runs with a verified cache flush. Do not quote a ratio from this file.
+DUR_S = 8.0
 CORPUS = Path(__file__).resolve().parents[1] / "examples/realaudio"
 SPEECH = CORPUS / "alice01_excerpt.wav"
 
@@ -179,6 +194,19 @@ def main():
                  f"GATE_SPEECH={watcher.GATE_SPEECH}, and percent of one core "
                  "the watcher burns with and without the gate. A row with "
                  "frac>0 defeats the mitigation: YIN runs anyway."),
+        "READ_THIS_FIRST": (
+            "The 'mean' and 'frac' columns below are NOT the statistic the "
+            "watcher decides on. `Watcher._gate_peak` takes the MAX over the "
+            "segment, and its own max over this same signal is far higher than "
+            "the mean: a 200 Hz three-harmonic stack at -26 dBFS has a true "
+            "peak of 0.7293 while its mean here is well under 0.1. A row can "
+            "therefore read frac=0.0 and still be one the gate would have "
+            "cleared. See docs/research/GATE-PEAK-COVERAGE.md, which "
+            "quantifies the second half of this: the reported value is also "
+            "taken only over the tail still inside the retained buffer, so it "
+            "understates by up to 14x on long segments. Both columns are kept "
+            "because they are cheap and because a mean is what an auditor "
+            "would otherwise assume."),
         "rows": rows,
         "summary": {
             "mains_fundamentals_rejected": sorted(

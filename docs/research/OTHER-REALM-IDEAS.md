@@ -42,30 +42,58 @@ the signal the test injected.
 
 ---
 
-## 2. The one idea that genuinely transfers
+## 2. Scope correction, and a retraction
+
+**Scope.** The source material is framed around boat and workshop systems. This
+project is a **general-purpose voice peripheral**; a boat is one deployment
+domain, not the target. So the room-fingerprinting, the hull-resonance features
+and the `confined_metal_hull` environmental label are all *domain plugins*. The
+architecture underneath them is the part worth stealing, and this file is scored
+on that basis. An earlier version of this file read the boat framing as if it
+were our problem and over-weighted it.
+
+### 2a. RETRACTED: the OpenVLA-Micro citation was fabricated
+
+**An earlier version ranked "hidden-state distillation with a frozen head" as the
+single most transferable idea and cited `theguy21/openvla-micro`. That model
+does not exist.**
+
+Verified four ways: the model page 404s, `resolve` returns 401, the author
+`theguy21` owns exactly one unrelated Octo checkpoint, and a GitHub repository
+search returns zero results. The account is real (profile 200), so this is not a
+typo for a similarly-named project.
+
+The figures quoted with it — action cosine 0.997, ~14× faster, a
+896→2048→4096 shim — came from a search snippet and were never checked against
+a primary source. That is precisely the failure this project keeps recording: a
+confident number from an unverified artifact, wearing the costume of a citation.
+
+Hidden-state distillation remains a real technique, and it remains a reasonable
+thing to try. But **the specific claim and the specific source are withdrawn**,
+and it is demoted to "inference from general literature, not something we read
+in a paper".
+
+### 2b. What survives, on the general-purpose framing
 
 **Cross-modal teacher–student with a contrastive alignment loss.** Vision is
-the teacher when it can see; audio is the student; the loss pulls the audio
-embedding toward the visual one (InfoNCE or similar). The audio model then
-carries information about the world that the camera would have supplied.
+the teacher when it can see; audio is the student. This is the same mechanism as
+teacher–student self-training, which this project already uses in a smaller
+form: local models score candidates and a stronger model is consulted only
+occasionally.
 
-This is the same mechanism as teacher–student **self-training**, which this
-project already uses in a much smaller form: `src/judge.py` / `experiments/`
-score local candidates and a stronger model is consulted only occasionally.
+For a *general* voice peripheral the honest version is narrower than the boat
+framing suggests. The transferable claim is not "audio predicts vision" — it is
+that **a perceptual front-end can be trained against a privileged signal that
+is available at training time and absent at run time.** For us the privileged
+signal is not a camera; it is the *two-microphone separation* we can record once
+and cannot have in production. That is a cleaner and more available teacher than
+vision, and it is already sitting in
+`examples/realtwospeaker/ihm_EN2002a_channels_90s/` as paired clean channels
+alongside the far-field mix.
 
-What the adjacent literature adds is the specific recipe in
-**OpenVLA-Micro**: replace a 7B stack with a 0.6B one, insert a *learned hidden
-state shim* (896→2048→4096), keep the teacher's pretrained head **unchanged**,
-and recover **action cosine 0.997 at ~14× the speed**. The claim worth stealing
-is not the architecture — it is that **you do not need to re-learn the head.**
-
-That maps onto an open problem here: we may want the semantics of a large model
-we can only query intermittently, inside a loop that must run always-on. If the
-head is frozen and only a projection is learned, the expensive part is paid once.
-
-**Open question, not yet answered:** the published result is action regression.
-Whether hidden-state transfer survives into **classification** — which is what a
-turn decision is — is not established by that result. Do not assume it does.
+**Open question, not answered:** whether any of this transfers to
+**classification** — which is what a turn decision is — rather than to action
+regression. Do not assume it does.
 
 ---
 
@@ -145,15 +173,29 @@ keeping. The claim that it replaces a model is not supported.
 
 ## 6. Ranked, and what to do about each
 
+Re-ranked after the retraction in §2a and the scope correction in §2.
+
 | # | idea | verdict | next step |
 |---|---|---|---|
-| 1 | hidden-state distillation, frozen head | **strongest** | evaluate on a classification task, not action |
-| 2 | probabilities held open over time | already ours | keep; `src/turn.py` does this |
-| 3 | per-device noise baseline + drift | **new and cheap** | record the device's own noise floor as a calibration artifact |
-| 4 | sensor-native image unification | plausible, **known-bad for overlap** | lane running now; may fail on phase |
-| 5 | modality dropout | right answer, no training set | blocked on the recording protocol |
-| 6 | room RIR fingerprinting | real technique, wrong target | measures the laptop, not a wearable |
-| 7 | "lattice" as a model substitute | not supported | keep the discipline, drop the claim |
+| 1 | probabilities held open over time | **already ours, and now justified** | `src/turn.py` returns COMPLETE / OPEN / UNRESOLVED; silence AUC 0.529 says it *must* |
+| 2 | trajectory, not snapshot | **explains our dead end** | at the decision instant END and RESUME are byte-identical, so only history can separate them |
+| 3 | per-device noise baseline + drift | new and cheap | record the device's own noise floor as a calibration artifact |
+| 4 | teacher = two-microphone separation | reframed and more available | clean channels already exist alongside the far-field mix in our corpus |
+| 5 | modality dropout | right answer, no training set | blocked on the recording protocol, not on the idea |
+| 6 | hidden-state distillation | **source withdrawn**, inference only | do not cite; try only after a teacher exists |
+| 7 | room RIR fingerprinting | real technique, **domain plugin** | boat/workshop feature, not the general core |
+| 8 | "lattice" as a model substitute | not supported | keep the discipline, drop the claim |
+
+**On #2**, which is the most important line in this table: we measured that at
+the moment of decision, END and RESUME are byte-identical audio. The
+information is not in the frame. Every route we have tried — duration, pitch,
+route voting — reads a single instant, which is why all of them failed for the
+same reason. A trajectory representation is not a stylistic upgrade here; it is
+the only place the information can physically be.
+
+**On #7**, the scope correction matters practically: a room-impulse-response
+feature is a plugin for one domain. Building it before the general path would be
+optimising a case study.
 
 ---
 
@@ -163,9 +205,15 @@ keeping. The claim that it replaces a model is not supported.
 - UMI — <https://github.com/real-stanford/universal_manipulation_interface>
 - See, Hear, and Feel (CoRL 2022) — <https://github.com/JunzheJosephZhu/see_hear_feel>
 - OmniVLA, navigation — arXiv 2509.19480, <https://github.com/NHirose/OmniVLA>
-- OmniVLA, multisensory — "Physically-Grounded Multimodal VLA with Unified
-  Sensor Integration" (infovaya PDF)
-- OpenVLA-Micro — <https://huggingface.co/theguy21/openvla-micro>
+- OmniVLA, multisensory — arXiv 2511.01210 (ICRA'26), "Physically-Grounded
+  Multimodal VLA with Unified Sensor Integration"
+- Speaker-change detection, for calibration of our own dead end —
+  wav2vec 2.0 SCD <https://arxiv.org/abs/2210.14755>; USM-SCD
+  <https://arxiv.org/abs/2309.08023>
+
+**WITHDRAWN:** `theguy21/openvla-micro` — cited in an earlier revision of this
+file, **does not exist** (404 / 401, author owns one unrelated checkpoint, zero
+repository results). See §2a. Do not cite it.
 
 Related, in this repo: [TWO-SPEAKER-TURNS.md](TWO-SPEAKER-TURNS.md),
 [F0-SPEAKER-CHANGE.md](F0-SPEAKER-CHANGE.md),

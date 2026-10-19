@@ -1,0 +1,322 @@
+{
+  "note": "Does the silero gate hold against mains-frequency hum? Each row is mean gate probability, fraction of frames clearing GATE_SPEECH=0.5, and percent of one core the watcher burns with and without the gate. A row with frac>0 defeats the mitigation: YIN runs anyway.",
+  "rows": [
+    {
+      "signal": "harmonic_stack_50Hz",
+      "f0": 50,
+      "amp": 0.02,
+      "mean": 0.0095,
+      "frac": 0.0,
+      "cpu_gated_pct": 10.64,
+      "cpu_ungated_pct": 129.93
+    },
+    {
+      "signal": "harmonic_stack_50Hz",
+      "f0": 50,
+      "amp": 0.05,
+      "mean": 0.0042,
+      "frac": 0.0,
+      "cpu_gated_pct": 13.65,
+      "cpu_ungated_pct": 122.18
+    },
+    {
+      "signal": "harmonic_stack_50Hz",
+      "f0": 50,
+      "amp": 0.1,
+      "mean": 0.0023,
+      "frac": 0.0,
+      "cpu_gated_pct": 9.2,
+      "cpu_ungated_pct": 122.41
+    },
+    {
+      "signal": "harmonic_stack_60Hz",
+      "f0": 60,
+      "amp": 0.02,
+      "mean": 0.0007,
+      "frac": 0.0,
+      "cpu_gated_pct": 11.22,
+      "cpu_ungated_pct": 126.25
+    },
+    {
+      "signal": "harmonic_stack_60Hz",
+      "f0": 60,
+      "amp": 0.05,
+      "mean": 0.0091,
+      "frac": 0.0,
+      "cpu_gated_pct": 13.29,
+      "cpu_ungated_pct": 114.74
+    },
+    {
+      "signal": "harmonic_stack_60Hz",
+      "f0": 60,
+      "amp": 0.1,
+      "mean": 0.0027,
+      "frac": 0.0,
+      "cpu_gated_pct": 8.9,
+      "cpu_ungated_pct": 124.89
+    },
+    {
+      "signal": "harmonic_stack_100Hz",
+      "f0": 100,
+      "amp": 0.02,
+      "mean": 0.001,
+      "frac": 0.0,
+      "cpu_gated_pct": 8.56,
+      "cpu_ungated_pct": 113.51
+    },
+    {
+      "signal": "harmonic_stack_100Hz",
+      "f0": 100,
+      "amp": 0.05,
+      "mean": 0.011,
+      "frac": 0.0,
+      "cpu_gated_pct": 8.58,
+      "cpu_ungated_pct": 111.37
+    },
+    {
+      "signal": "harmonic_stack_100Hz",
+      "f0": 100,
+      "amp": 0.1,
+      "mean": 0.0146,
+      "frac": 0.0,
+      "cpu_gated_pct": 8.91,
+      "cpu_ungated_pct": 125.35
+    },
+    {
+      "signal": "harmonic_stack_120Hz",
+      "f0": 120,
+      "amp": 0.02,
+      "mean": 0.0002,
+      "frac": 0.0,
+      "cpu_gated_pct": 9.23,
+      "cpu_ungated_pct": 123.87
+    },
+    {
+      "signal": "harmonic_stack_120Hz",
+      "f0": 120,
+      "amp": 0.05,
+      "mean": 0.0063,
+      "frac": 0.0,
+      "cpu_gated_pct": 8.82,
+      "cpu_ungated_pct": 105.6
+    },
+    {
+      "signal": "harmonic_stack_120Hz",
+      "f0": 120,
+      "amp": 0.1,
+      "mean": 0.0137,
+      "frac": 0.0,
+      "cpu_gated_pct": 8.53,
+      "cpu_ungated_pct": 103.58
+    },
+    {
+      "signal": "harmonic_stack_150Hz",
+      "f0": 150,
+      "amp": 0.02,
+      "mean": 0.0001,
+      "frac": 0.0,
+      "cpu_gated_pct": 8.76,
+      "cpu_ungated_pct": 103.69
+    },
+    {
+      "signal": "harmonic_stack_150Hz",
+      "f0": 150,
+      "amp": 0.05,
+      "mean": 0.0002,
+      "frac": 0.0,
+      "cpu_gated_pct": 8.86,
+      "cpu_ungated_pct": 107.54
+    },
+    {
+      "signal": "harmonic_stack_150Hz",
+      "f0": 150,
+      "amp": 0.1,
+      "mean": 0.0015,
+      "frac": 0.0,
+      "cpu_gated_pct": 8.77,
+      "cpu_ungated_pct": 112.93
+    },
+    {
+      "signal": "harmonic_stack_175Hz",
+      "f0": 175,
+      "amp": 0.02,
+      "mean": 0.0001,
+      "frac": 0.0,
+      "cpu_gated_pct": 9.21,
+      "cpu_ungated_pct": 118.96
+    },
+    {
+      "signal": "harmonic_stack_175Hz",
+      "f0": 175,
+      "amp": 0.05,
+      "mean": 0.0011,
+      "frac": 0.0,
+      "cpu_gated_pct": 8.55,
+      "cpu_ungated_pct": 111.44
+    },
+    {
+      "signal": "harmonic_stack_175Hz",
+      "f0": 175,
+      "amp": 0.1,
+      "mean": 0.0151,
+      "frac": 0.0,
+      "cpu_gated_pct": 9.88,
+      "cpu_ungated_pct": 113.35
+    },
+    {
+      "signal": "harmonic_stack_200Hz",
+      "f0": 200,
+      "amp": 0.02,
+      "mean": 0.0001,
+      "frac": 0.0,
+      "cpu_gated_pct": 9.1,
+      "cpu_ungated_pct": 117.59
+    },
+    {
+      "signal": "harmonic_stack_200Hz",
+      "f0": 200,
+      "amp": 0.05,
+      "mean": 0.0005,
+      "frac": 0.0,
+      "cpu_gated_pct": 11.19,
+      "cpu_ungated_pct": 124.48
+    },
+    {
+      "signal": "harmonic_stack_200Hz",
+      "f0": 200,
+      "amp": 0.1,
+      "mean": 0.0095,
+      "frac": 0.0,
+      "cpu_gated_pct": 8.68,
+      "cpu_ungated_pct": 115.27
+    },
+    {
+      "signal": "harmonic_stack_250Hz",
+      "f0": 250,
+      "amp": 0.02,
+      "mean": 0.0001,
+      "frac": 0.0,
+      "cpu_gated_pct": 9.39,
+      "cpu_ungated_pct": 115.0
+    },
+    {
+      "signal": "harmonic_stack_250Hz",
+      "f0": 250,
+      "amp": 0.05,
+      "mean": 0.0095,
+      "frac": 0.0,
+      "cpu_gated_pct": 10.85,
+      "cpu_ungated_pct": 122.49
+    },
+    {
+      "signal": "harmonic_stack_250Hz",
+      "f0": 250,
+      "amp": 0.1,
+      "mean": 0.0067,
+      "frac": 0.0,
+      "cpu_gated_pct": 9.1,
+      "cpu_ungated_pct": 111.96
+    },
+    {
+      "signal": "harmonic_stack_300Hz",
+      "f0": 300,
+      "amp": 0.02,
+      "mean": 0.0001,
+      "frac": 0.0,
+      "cpu_gated_pct": 8.63,
+      "cpu_ungated_pct": 110.21
+    },
+    {
+      "signal": "harmonic_stack_300Hz",
+      "f0": 300,
+      "amp": 0.05,
+      "mean": 0.0016,
+      "frac": 0.0,
+      "cpu_gated_pct": 9.04,
+      "cpu_ungated_pct": 121.92
+    },
+    {
+      "signal": "harmonic_stack_300Hz",
+      "f0": 300,
+      "amp": 0.1,
+      "mean": 0.0057,
+      "frac": 0.0,
+      "cpu_gated_pct": 11.01,
+      "cpu_ungated_pct": 134.08
+    },
+    {
+      "signal": "pure_tone_150Hz",
+      "f0": 150,
+      "amp": 0.05,
+      "mean": 0.0235,
+      "frac": 0.0,
+      "cpu_gated_pct": 8.69,
+      "cpu_ungated_pct": 110.2
+    },
+    {
+      "signal": "pure_tone_175Hz",
+      "f0": 175,
+      "amp": 0.05,
+      "mean": 0.1379,
+      "frac": 0.0,
+      "cpu_gated_pct": 9.25,
+      "cpu_ungated_pct": 114.87
+    },
+    {
+      "signal": "pure_tone_200Hz",
+      "f0": 200,
+      "amp": 0.05,
+      "mean": 0.1205,
+      "frac": 0.0,
+      "cpu_gated_pct": 10.03,
+      "cpu_ungated_pct": 119.87
+    },
+    {
+      "signal": "real_speech",
+      "dbfs": -10,
+      "mean": 0.6537,
+      "frac": 0.644,
+      "cpu_gated_pct": 68.49,
+      "cpu_ungated_pct": 64.53
+    },
+    {
+      "signal": "real_speech",
+      "dbfs": -20,
+      "mean": 0.6336,
+      "frac": 0.624,
+      "cpu_gated_pct": 68.12,
+      "cpu_ungated_pct": 63.87
+    },
+    {
+      "signal": "real_speech",
+      "dbfs": -30,
+      "mean": 0.5998,
+      "frac": 0.588,
+      "cpu_gated_pct": 55.56,
+      "cpu_ungated_pct": 55.38
+    },
+    {
+      "signal": "real_speech",
+      "dbfs": -40,
+      "mean": 0.5821,
+      "frac": 0.572,
+      "cpu_gated_pct": 43.27,
+      "cpu_ungated_pct": 39.23
+    }
+  ],
+  "summary": {
+    "mains_fundamentals_rejected": [
+      50,
+      60,
+      100,
+      120
+    ],
+    "fundamentals_that_clear_the_threshold": [],
+    "max_cpu_saved_pct": 123.07,
+    "min_cpu_saved_pct": -4.25
+  }
+}
+_cpu_saved_pct": 147.96,
+    "min_cpu_saved_pct": -8.44
+  }
+}
