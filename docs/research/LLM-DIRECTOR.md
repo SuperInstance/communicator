@@ -480,6 +480,42 @@ slice walks straight past them), and take the head and the tail of each note
 (the retraction notices live at both ends). After that: 28/28 notes, every
 key figure present, and the score moved from +0.500 to +0.833.
 
+> **CORRECTION (2026-10-20, overnight) — "28/28 notes, every key figure
+> present" WAS NOT TRUE, AND THE +0.833 IS NOT ATTRIBUTABLE TO THE POOL.**
+>
+> The keep-set was built exactly as described above, and then the assembled
+> text was cut **from the front** with `text[:per]`. Every note over its
+> share lost its **tail**, and the retraction notices live in the tails. On
+> the corpus as it stands, **2 of 50 notes kept their tail** — not 28 of 28
+> with every key figure present.
+>
+> The pool is now fixed: the budget is spent by dropping lines from the
+> MIDDLE of the keep-set, and if the head-and-tail slice is still too big
+> each end is cut to its own half, so both survive. **50 of 50 notes now
+> keep their tail and 50 of 50 keep their head**, and
+> `collect_materials_stats()` measures it. The fix and the A/B are in
+> `docs/research/DEBRIEF-MATERIAL-POOL.md`.
+>
+> **And the +0.833 does not survive as a result.** Against one corpus, with
+> both pools, 3 repeats per model per pool, the headline moved from a
+> median of −0.778 to −0.611 — **inside the old pool's own run-to-run
+> range**, because gpt-oss-120b's sensitivity on the old pool was 0.889,
+> 0.333 and 1.000 on three *identical* prompts. Three repeats cannot
+> separate a pool effect from a 0.667 spread, and the sample was never big
+> enough to attribute +0.833 to the pool in the first place.
+>
+> **The one robust result, and it is the opposite of a success story: the
+> director accuses the one TRUE claim in 15 of 15 successful runs**, in both
+> pools, at every budget. Its sensitivity moves around; its specificity
+> never leaves zero. A director that always accuses the true claim has a
+> floor of −1.000 on the headline no matter how much evidence it is given.
+>
+> **And the "+1.000 at 240,000 characters" arm of the materials sweep is not
+> reproducible**: re-run against the current corpus it gives −0.111 three
+> times out of three. The corpus changed in between, so that arm is a
+> property of a particular corpus, not a capability of the director. It
+> should not be quoted as one.
+
 ## 6. What the director actually said
 
 The one production debrief (gpt-oss-120b, full evidence base) flagged seven

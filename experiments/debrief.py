@@ -566,10 +566,51 @@ def collect_materials(limit: int = 140000) -> str:
     contributes its HEAD and its TAIL -- the retraction notices live at both
     ends of these notes, one at the top and one at the bottom, and a
     head-only slice loses half of them.
+
+    > CORRECTION (2026-10-20, overnight) -- THE HEAD-AND-TAIL SLICE WAS
+    > DEFEATED BY A FRONT-TRUNCATION, AND THE TAIL NEVER SURVIVED.
+    >
+    > The keep-set is built to hold each note's head, its tail, and every
+    > line containing a digit. But the assembled text was then cut with
+    > `text[:per]` -- from the FRONT. Every note whose assembled slice
+    > exceeded its share therefore lost its TAIL, and the retraction
+    > notices live in the tails. The design was right and the last line of
+    > code undid it.
+    >
+    > The budget is now spent by dropping lines from the MIDDLE of the
+    > keep-set, never from the end, and if even the head-and-tail slice is
+    > too big then each end is cut to its own half of the budget so that
+    > both survive. `collect_materials_stats()` MEASURES the result -- how
+    > many notes kept their tail, and how many lost it -- so the claim is a
+    > number in an artefact rather than a promise in a docstring.
+    """
+    text, _ = collect_materials_with_stats(limit)
+    return text
+
+
+def collect_materials_with_stats(limit: int = 140000) -> tuple[str, dict]:
+    """`collect_materials`, plus the measurements of what it actually kept.
+
+    The stats exist because the defect this file had was invisible from the
+    outside: the prompt looked reasonable and the verdicts were confidently
+    wrong, and the only way to know the evidence was complete was to COUNT
+    it. `notes_total`, `notes_kept_whole`, `notes_truncated`,
+    `notes_keeping_head`, `notes_keeping_tail` and
+    `notes_keeping_both_ends` are the numbers.
     """
     notes = sorted((ROOT / "docs" / "research").glob("*.md"))
     res = sorted((ROOT / "experiments").glob("*.json"))
     parts: list[str] = []
+    stats = {
+        "notes_total": 0,
+        "notes_kept_whole": 0,
+        "notes_truncated": 0,
+        "notes_keeping_head": 0,
+        "notes_keeping_tail": 0,
+        "notes_keeping_both_ends": 0,
+        "results_total": 0,
+        "results_truncated": 0,
+    }
 
     # -- the notes: an equal share each, and every NUMBER kept ------------
     #
@@ -585,9 +626,14 @@ def collect_materials(limit: int = 140000) -> str:
             body = p.read_text()
         except Exception:  # noqa: BLE001
             continue
+        stats["notes_total"] += 1
         lines = body.splitlines()
         if len(body) <= per:
             parts.append(f"--- NOTE: {p.name} ---\n{body}")
+            stats["notes_kept_whole"] += 1
+            stats["notes_keeping_head"] += 1
+            stats["notes_keeping_tail"] += 1
+            stats["notes_keeping_both_ends"] += 1
             continue
         head_lines = max(3, int(len(lines) * 0.18))
         keep = set(range(head_lines))
@@ -596,15 +642,49 @@ def collect_materials(limit: int = 140000) -> str:
             if any(ch.isdigit() for ch in ln):
                 keep.add(i)
         keep = sorted(keep)
-        out, prev = [], -2
-        for i in keep:
-            if i != prev + 1:
-                out.append(f"[... {i - prev - 1} lines elided ...]")
-            out.append(lines[i])
-            prev = i
-        text = "\n".join(out)
+
+        def assemble(ks: list[int]) -> str:
+            out, prev = [], -2
+            for i in ks:
+                if i != prev + 1:
+                    out.append(f"[... {i - prev - 1} lines elided ...]")
+                out.append(lines[i])
+                prev = i
+            return "\n".join(out)
+
+        n_head = max(3, len(keep) // 4)
+        n_tail = max(3, len(keep) // 4)
+        text = assemble(keep)
         if len(text) > per:
-            text = text[:per] + "\n[... truncated ...]"
+            # Spend the budget by dropping lines from the MIDDLE. The head
+            # and the tail are what carry the retraction notices.
+            ks = list(keep)
+            while len(ks) > n_head + n_tail and len(assemble(ks)) > per:
+                del ks[len(ks) // 2]
+            keep = ks
+            text = assemble(keep)
+        if len(text) > per:
+            # Even the head-and-tail slice is too big. Cut each end to its
+            # own half of the budget so that BOTH survive -- a head-only
+            # slice loses half the retraction notices, which is the bug.
+            head_text = "\n".join(lines[i] for i in keep[:n_head])
+            tail_text = "\n".join(lines[i] for i in keep[-n_tail:])
+            half = per // 2
+            text = (head_text[:half] + "\n[... truncated ...]\n"
+                    + "[... middle elided ...]\n" + tail_text[-half:])
+        stats["notes_truncated"] += 1
+        # A note's first kept line can be BLANK, and the assembler puts an
+        # elision marker before the next one, so "does the text start with
+        # lines[keep[0]]" is the wrong test -- it fails on a note whose
+        # title is present and perfectly readable. The head is kept if the
+        # first NON-EMPTY kept line is in the text; the tail is kept if the
+        # text ends with the last kept line.
+        first_kept = next((lines[i] for i in keep if lines[i].strip()), "")
+        if first_kept and first_kept in text:
+            stats["notes_keeping_head"] += 1
+        if text.rstrip().endswith(lines[keep[-1]]):
+            stats["notes_keeping_tail"] += 1
+            stats["notes_keeping_both_ends"] += 1
         parts.append(f"--- NOTE: {p.name} ---\n{text}")
 
     # -- the machine-readable results, whole where they fit --------------
@@ -615,6 +695,9 @@ def collect_materials(limit: int = 140000) -> str:
             body = p.read_text()
         except Exception:  # noqa: BLE001
             continue
+        stats["results_total"] += 1
+        if len(body) > per_res:
+            stats["results_truncated"] += 1
         parts.append(f"--- RESULT: {p.name} ---\n{body[:per_res]}")
 
     try:
@@ -622,7 +705,15 @@ def collect_materials(limit: int = 140000) -> str:
         parts.append(f"--- GIT HISTORY ---\n{log}")
     except Exception:  # noqa: BLE001
         pass
-    return "\n\n".join(parts)
+    return "\n\n".join(parts), stats
+
+
+def collect_materials_stats(limit: int = 140000) -> dict:
+    """Just the measurements -- how much of each note actually reached the
+    prompt. A verdict from a starved evidence base is still a verdict, but
+    it has to be read as one."""
+    _, stats = collect_materials_with_stats(limit)
+    return stats
 
 
 # ---------------------------------------------------------------------- audit

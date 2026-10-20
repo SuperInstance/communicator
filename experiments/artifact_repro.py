@@ -330,6 +330,13 @@ RECIPES: dict[str, Recipe] = {
                   expect="ascii_motion_threshold_results.json")],
         inputs=["/mnt/c/proart_capture/small.nv12"],
     ),
+    "ascii_dither_characterisation.py": Recipe(
+        script="ascii_dither_characterisation.py",
+        runs=[Run(argv=[], expect="ascii_dither_characterisation_results.json")],
+        inputs=["/mnt/c/proart_capture/small.nv12",
+                "/mnt/c/proart_capture/A.nv12",
+                "/mnt/c/proart_capture/empty1.nv12"],
+    ),
     "av_sync.py": Recipe(
         script="av_sync.py",
         runs=[Run(argv=[], expect="av_sync_results.json")],
@@ -439,11 +446,43 @@ RECIPES: dict[str, Recipe] = {
                   out_kind=OUT_SIBLING)],
         inputs=["examples/realaudio/alice01_excerpt.wav"],
     ),
+    "mouth_aperture_alignment.py": Recipe(
+        script="mouth_aperture_alignment.py",
+        skip="needs MediaPipe, which lives in the GPU venv "
+             "(/home/proart/projects/gpu-venv), not in the venv this gate "
+             "runs the scripts with",
+    ),
+    "mouth_detector.py": Recipe(
+        script="mouth_detector.py",
+        runs=[Run(argv=["--capture-dir", "/mnt/c/proart_capture"],
+                  expect="mouth_detector_results.json",
+                  out_kind=OUT_SIBLING)],
+        inputs=["/mnt/c/proart_capture/A.nv12",
+                "/mnt/c/proart_capture/B.nv12",
+                "/mnt/c/proart_capture/C.nv12",
+                "/mnt/c/proart_capture/empty1.nv12"],
+    ),
+    "nv12_stride_audit.py": Recipe(
+        script="nv12_stride_audit.py",
+        runs=[Run(argv=[], expect="nv12_stride_audit_results.json",
+                  out_kind=OUT_SIBLING)],
+        inputs=["/mnt/c/proart_capture"],
+    ),
     "pause_threshold.py": Recipe(
         script="pause_threshold.py",
         runs=[Run(argv=[], expect="pause_threshold_results.json",
                   out_kind=OUT_FILE)],
         inputs=["examples/realtwospeaker"],
+    ),
+    "pose_feature_search.py": Recipe(
+        script="pose_feature_search.py",
+        runs=[Run(argv=["--json", "experiments/pose_feature_search_results.json"],
+                  expect="pose_feature_search_results.json",
+                  out_kind=OUT_SIBLING)],
+        inputs=["/mnt/c/proart_capture/A.nv12",
+                "/mnt/c/proart_capture/B.nv12",
+                "/mnt/c/proart_capture/C.nv12",
+                "/mnt/c/proart_capture/empty1.nv12"],
     ),
     "pose_test.py": Recipe(
         script="pose_test.py",
@@ -465,6 +504,12 @@ RECIPES: dict[str, Recipe] = {
         script="room_map.py",
         runs=[Run(argv=[], expect="room_map_results.json")],
         inputs=["/mnt/c/proart_capture/empty1.wav"],
+    ),
+    "speaker_embedding_f0.py": Recipe(
+        script="speaker_embedding_f0.py",
+        skip="needs torch and the WavLM checkpoint, which live in the GPU "
+             "venv (/home/proart/projects/gpu-venv), not in the venv this "
+             "gate runs the scripts with",
     ),
     "row_band_removal.py": Recipe(
         script="row_band_removal.py",
@@ -503,6 +548,22 @@ RECIPES: dict[str, Recipe] = {
         script="teacher_data_requirement.py",
         runs=[Run(argv=[], expect="teacher_data_requirement_results.json")],
         inputs=["/mnt/c/proart_capture/corpus"],
+    ),
+    "teacher_raw_representation.py": Recipe(
+        script="teacher_raw_representation.py",
+        runs=[Run(argv=[], expect="teacher_raw_representation_results.json",
+                  out_kind=OUT_SIBLING)],
+        inputs=["/mnt/c/proart_capture/A.nv12",
+                "/mnt/c/proart_capture/B.nv12",
+                "/mnt/c/proart_capture/C.nv12"],
+    ),
+    "debrief_set_reaudit.py": Recipe(
+        script="debrief_set_reaudit.py",
+        skip="calls the live Cloudflare models over the network",
+    ),
+    "vision_motion_teacher.py": Recipe(
+        script="vision_motion_teacher.py",
+        skip="calls the live Cloudflare models over the network",
     ),
     "temporal_median_fix.py": Recipe(
         script="temporal_median_fix.py",

@@ -1,0 +1,239 @@
+{
+  "date": "2026-10-20",
+  "question": "The material pool's head-and-tail design was defeated by a front-truncation, so the dated correction blocks -- the ones that say which of this repository's numbers were withdrawn -- never reached the prompt. Does fixing it make the director better?",
+  "the_defect": {
+    "what": "collect_materials built a keep-set holding each note's head, its tail and every digit-line, then cut the assembled text from the FRONT with text[:per]. Every note over its share lost its tail, and the retraction notices live in the tails.",
+    "measured_before": {
+      "notes_total": 50,
+      "notes_truncated": 49,
+      "notes_keeping_head": 50,
+      "notes_keeping_tail": 2
+    },
+    "measured_after": {
+      "notes_total": 50,
+      "notes_kept_whole": 1,
+      "notes_truncated": 49,
+      "notes_keeping_head": 50,
+      "notes_keeping_tail": 50,
+      "notes_keeping_both_ends": 50,
+      "results_total": 86,
+      "results_truncated": 86
+    },
+    "the_change": {
+      "notes_keeping_tail_before": 2,
+      "notes_keeping_tail_after": 50,
+      "notes_total": 50
+    }
+  },
+  "the_ab": {
+    "source": "/home/proart/projects/communicator/.scratch/debrief_reaudit/ab_pools_samecorpus.json",
+    "pools": {
+      "old_pool": {
+        "runs_ok": 7,
+        "runs_unparseable": 2,
+        "sensitivity_values": [
+          0.888889,
+          0.333333,
+          1.0,
+          0.222222,
+          0.222222,
+          0.222222,
+          0.0
+        ],
+        "sensitivity_spread": 1.0,
+        "specificity_values": [
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0
+        ],
+        "specificity_is_zero_in_every_run": true,
+        "headlines": [
+          -0.111111,
+          -0.666667,
+          0.0,
+          -0.777778,
+          -0.777778,
+          -0.777778,
+          -1.0
+        ],
+        "headline_median": -0.777778,
+        "headline_spread": 1.0,
+        "by_model": {
+          "@cf/openai/gpt-oss-120b": {
+            "materials_chars": [
+              null
+            ],
+            "headlines": [
+              -0.111111,
+              -0.666667,
+              0.0
+            ]
+          },
+          "@cf/meta/llama-3.3-70b-instruct-fp8-fast": {
+            "materials_chars": [
+              null
+            ],
+            "headlines": [
+              -0.777778,
+              -0.777778,
+              -0.777778
+            ]
+          },
+          "@cf/qwen/qwen3-30b-a3b-fp8": {
+            "materials_chars": [
+              null
+            ],
+            "headlines": [
+              -1.0
+            ]
+          }
+        }
+      },
+      "new_pool": {
+        "runs_ok": 8,
+        "runs_unparseable": 1,
+        "sensitivity_values": [
+          0.888889,
+          0.888889,
+          0.333333,
+          0.333333,
+          0.333333,
+          0.333333,
+          0.444444,
+          0.444444
+        ],
+        "sensitivity_spread": 0.555556,
+        "specificity_values": [
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0
+        ],
+        "specificity_is_zero_in_every_run": true,
+        "headlines": [
+          -0.111111,
+          -0.111111,
+          -0.666667,
+          -0.666667,
+          -0.666667,
+          -0.666667,
+          -0.555556,
+          -0.555556
+        ],
+        "headline_median": -0.611111,
+        "headline_spread": 0.555556,
+        "by_model": {
+          "@cf/openai/gpt-oss-120b": {
+            "materials_chars": [
+              null
+            ],
+            "headlines": [
+              -0.111111,
+              -0.111111
+            ]
+          },
+          "@cf/meta/llama-3.3-70b-instruct-fp8-fast": {
+            "materials_chars": [
+              null
+            ],
+            "headlines": [
+              -0.666667,
+              -0.666667,
+              -0.666667
+            ]
+          },
+          "@cf/qwen/qwen3-30b-a3b-fp8": {
+            "materials_chars": [
+              null
+            ],
+            "headlines": [
+              -0.666667,
+              -0.555556,
+              -0.555556
+            ]
+          }
+        }
+      }
+    }
+  },
+  "the_finding": {
+    "specificity_is_zero_in_every_successful_run": true,
+    "successful_runs_in_the_ab": 15,
+    "the_robust_result": "The director accuses the one TRUE claim in every successful run, in both pools, at every budget. That is the failure and it is not a starvation problem.",
+    "the_pool_effect_is_not_separable": "gpt-oss-120b's sensitivity on the old pool was 0.889, 0.333 and 1.000 on three IDENTICAL prompts, a spread of 0.667 in one cell, so three repeats cannot separate a pool effect from the endpoint's variance.",
+    "the_fix_changes_how_much_evidence_a_model_gets": "The tails are dense tables of numbers and tokenise more densely than the head slices, so the same character budget costs more tokens and the fit ladder shrinks further: llama-3.3-70b went from 140,000 characters to 40,000 and qwen3-30b from 140,000 to 60,000. A comparison of 'the same evidence' has to be made on TOKENS."
+  },
+  "supersedes": {
+    "what": "The implicit claim, carried by the 2026-10-19 note in LLM-DIRECTOR.md, that the director's quality is a function of the evidence you hand it and that delivering the retraction notices would therefore help.",
+    "status": "PARTLY WITHDRAWN. The budget sweep still shows a strong effect of the MATERIALS BUDGET. The pool's internal COMPLETENESS is a different axis, and on this evidence fixing it does not help. The note's mechanism -- 'a starved evidence base produces a confident, specific, WRONG verdict' -- survives, and is now the best-supported thing in the instrument: the director accuses the true claim in 15 of 15 successful runs."
+  },
+  "provenance": {
+    "generated_by": "experiments/debrief_material_pool.py",
+    "script_sha256": "8380e0d377227a2f0b638cdf12e656f6734e27f4bdd4b3298a0a033c59bc6264",
+    "debrief_py_sha256": "d29b6239e099f7662781f0e99e810fb96e700ef94c9a0e31e7e0e0d5ab19d6f2",
+    "command_line": "experiments/debrief_material_pool.py",
+    "cli_args": [],
+    "python": "3.14.4",
+    "platform": "linux",
+    "notes_read": [
+      "ADOPTION-PLAN.md",
+      "ARTIFACT-REPRODUCIBILITY.md",
+      "ASCII-DITHER-CHARACTERISATION.md",
+      "ASCII-MOTION.md",
+      "AV-SYNC.md",
+      "BORROWING.md",
+      "CAMERA-FLICKER-BANDING.md",
+      "CLOUD-TEACHER.md",
+      "COMBINED-FILTER.md",
+      "CROSS-MODAL-FUSION.md",
+      "DEBRIEF-REAUDIT.md",
+      "DEVICE-GENERALISATION.md",
+      "DIALOGUE-INTAKE.md",
+      "EMPTY-ROOM-CONTROL.md",
+      "EXPERIMENTS-AUDIO.md",
+      "F0-SPEAKER-CHANGE.md",
+      "FLEET-MUSIC.md",
+      "GATE-PEAK-COVERAGE.md",
+      "GOLD.md",
+      "HOW-WE-KEEP-FOOLING-OURSELVES.md",
+      "IN-THE-WILD-AUDIO.md",
+      "LLM-DIRECTOR.md",
+      "LOCAL-VLM-DETERMINISM.md",
+      "MIC-HARDWARE.md",
+      "MOUTH-APERTURE-ALIGNMENT.md",
+      "MOUTH-DETECTOR.md",
+      "NOTCH-AB.md",
+      "NOTES-AUDIT-2.md",
+      "NOTES-AUDIT-3.md",
+      "NOTES-AUDIT.md",
+      "NV12-STRIDE.md",
+      "OTHER-REALM-IDEAS.md",
+      "PAPERS.md",
+      "PAUSE-THRESHOLD.md",
+      "POSE-FEATURE.md",
+      "ROW-BAND-REMOVAL.md",
+      "SILENCE-LEADING-ARTEFACT.md",
+      "SPEAKER-EMBEDDING-F0.md",
+      "SPECTROGRAM-TURN.md",
+      "STIMULUS.md",
+      "TEACHER-LOO-FOLDS.md",
+      "TEACHER-PIPELINE.md",
+      "TEACHER-RAW-REPRESENTATION.md",
+      "TIMING.md",
+      "TURN-ROUTES.md",
+      "TWO-SPEAKER-TURNS.md",
+      "VISION-MOTION-TEACHER.md",
+      "WATCHER-COST.md",
+      "jev-play-findings.md",
+      "prior-art-audit.md"
+    ]
+  }
+}
