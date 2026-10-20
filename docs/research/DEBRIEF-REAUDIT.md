@@ -1421,3 +1421,19 @@ paths. The pre-registered rules are in the same file under
 The driver re-derives every label from the results files, so the audit
 set's key cannot drift away from its evidence without the test suite
 noticing.
+
+**The three new measurements added later that night each carry their own
+provenance block:**
+
+| artefact | what it measures | provenance it records |
+|---|---|---|
+| `experiments/debrief_truncation_probe_results.json` | the truncation rate of the audit's answers, and whether 4× the output budget recovers them | the script's own SHA-256, `debrief.py`'s SHA-256, the model, the mode, the material limit, the token caps, the number of trials, the git HEAD |
+| `experiments/debrief_local_director_results.json` | the director on local models, and the run-to-run spread over identical prompts | as above, plus the hosted spreads it is compared against — and a `the_confound_and_what_it_does_to_the_verdict` block recording that the pre-registered verdict fired and was then contradicted |
+| `experiments/debrief_paired_analysis_results.json` | the budget comparison at the unit the metric can resolve | the script's SHA-256, `debrief.py`'s SHA-256, the model, the repeats, the budgets, the design arithmetic, and the p-value table for nine claims |
+
+**And the artefact that says what it is not.** The local director's results
+file carries a `the_confound_and_what_it_does_to_the_verdict` block
+because the pre-registered rule fired and produced a verdict that a later,
+better-controlled measurement contradicted. The measurements in that file
+are untouched; only the analysis is annotated, and the annotation says who
+added it and when.
