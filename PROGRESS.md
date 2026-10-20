@@ -1505,3 +1505,52 @@ refused as ambiguous. And the layout was renamed `y_u_v_planar` →
 **interleaved**, not planar (even bytes average 125.05, odd bytes 135.88,
 no step at the midpoint) — a name that asserts a falsehood is a landmine
 even when no measurement depends on it.
+
+**And the capture tool was baking the withdrawn filter into every take.**
+`corpus_capture_win.py` subtracted each row's median at capture time, on
+the stated grounds that "an empty room flips 50.00% of its dots per frame
+without it" — which was the tear. Because the tool discarded the raw
+frames and kept only the filtered change maps, the choice was permanent:
+**a capture cannot be re-filtered.** It now stores `maps` (row-removed, the
+same key and meaning as before), `maps_raw` (unfiltered) and `luma` (the
+raw frames), and records the filter per array. The luma is what makes the
+corpus usable by the mouth, pose, room-map and MediaPipe work — the
+night's best result is measured on luma, and a corpus of change maps
+alone could not carry it. The metadata also said
+`"filter": "row+median3"` when no temporal median of width 3 was ever
+applied; it now says `row`. The Windows copy at
+`C:\proart_capture\corpus_capture_win.py` is synced and parses.
+
+**Three more lanes ran on top of the fix, and they each moved a claim.**
+
+| lane | question | answer |
+|---|---|---|
+| **teacher on the raw representation** | the teacher was measured on `corpus_v2`, which is seeded with `--filter row` — a representation `combined_filter.py` had **rejected**. Does the raw one do better? | **No, and nothing works either way.** `row` beats raw on 3 of 5 feature sets, but **no representation beats the teacher's own controls** — all four are NOT USABLE. The size of the difference the pre-registered rule decided on is **+0.0833, which is 4 of 48 test windows**, reported beside the verdict rather than inside it. The representation was never the blocker. |
+| **mouth detector** | the mouth signal survives head motion — but is it a *mouth* detector? | **It survives, and it is not mouth-specific.** Conditional AUC 0.7086 vs null 0.4994 (z +9.60) with head motion held constant, and the residualised effect is positive in every fold — but the **cheek control scores 0.7443 and BEATS the mouth**, and the leave-one-session-out accuracy 0.6655 does **not** beat a constant predictor (0.6667) or a wrong-session pairing (0.6661). A detector that separates sessions is not a speaking detector. |
+| **dither characterisation** | how much of the braille representation's change is threshold dither? | **None of it. The dither fraction is 0.0%.** The empty room changes **0.0000%** of cells and a frozen null scene **0.0000%**, against the capture's **8.6315%**. 23.8% is the scene's global brightness wander; 76.2% is local scene change. And the published "build motion on the tone channel" is **withdrawn** — it compared raw flip rates, and a lower raw rate is a lower *sensitivity*. Measured as excess over the null scene, the **mask** is 76.2% against the tone's 63.6%. |
+
+**Two more defects, found by the lanes and both fixed.**
+
+* **The captures are not 30 distinct frames per second.** 304 of A's 899
+  consecutive pairs are byte-identical: the camera delivered ~19.9 Hz and
+  the driver repeated frames to fill the grid. Verified independently — A/B/C
+  carry 596/595/595 distinct images in 900 frames (19.83–19.87 Hz) while the
+  empty room carries 29.01 Hz. The time base is right; the effective signal
+  is 20 Hz. The published mouth effect survives and strengthens (ratio
+  1.534× against the published 1.54×; 1.788× on distinct frames only).
+* **The braille per-dot table was pairing the wrong pixel.** Syzygy packs
+  the LEFT column of the 2×4 block into bits 0,1,2,6 and the RIGHT into
+  3,4,5,7, so bit b belongs to raster dot `[0,2,4,1,3,5,6,7][b]`, not
+  dot b — half the bits in every cell were paired with the wrong pixel's
+  luma. Over all 460,800 dot-decisions: **0** mismatches under the correct
+  mapping, **24,894** under the identity, **42,680** under the wrong
+  column-major formula that the first version of the note asserted. The
+  check is now computed by the script, not asserted in the results file.
+
+**One more thing the night's own audit found, and it is about the auditor.**
+The LLM director (`experiments/debrief.py`) is audited against ten claims
+drawn from this project's own retracted history — and that audit set's
+answer key was written against the torn frames. Two of its three "still
+standing" claims are now false (both row-removal claims), so the set holds
+**9 false and 1 true** instead of 7 and 3. The re-audit is in
+`docs/research/DEBRIEF-REAUDIT.md`.

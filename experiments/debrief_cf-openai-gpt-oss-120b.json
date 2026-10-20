@@ -1,130 +1,92 @@
 {
   "model": "@cf/openai/gpt-oss-120b",
-  "elapsed_s": 76.35,
+  "elapsed_s": 43.54,
   "parsed": true,
   "materials_chars": 140000,
   "debrief": {
     "state_of_the_evidence": [
       {
-        "claim": "A Silero\u2011VAD gate placed before the watcher reduces CPU usage by roughly an order of magnitude on the development workstation.",
-        "evidence": "DEVICE\u2011GENERALISATION results: warm ungated\u202f=\u202f61.27\u202f% core, warm gated\u202f=\u202f3.32\u202f% core (ratio\u202f=\u202f18.46\u00d7); cold ungated\u202f=\u202f65.83\u202f% core, cold gated\u202f=\u202f3.95\u202f% core (ratio\u202f\u2248\u202f16.7\u00d7)."
+        "claim": "Silero\u2011VAD gate reduces CPU usage on the development workstation",
+        "evidence": "DEVICE\u2011GENERALISATION warm run: gated watcher uses 0.23\u202f% of a core versus ungated watcher 39.1\u202f% of a core (ADOPTION\u2011PLAN table, six non\u2011speech signals, 1 thread). Null hypothesis: no reduction (cost equal)."
       },
       {
-        "claim": "The Silero gate blocks mains\u2011frequency hum (50\u2011120\u202fHz) so that the YIN pitch tracker never runs on those segments.",
-        "evidence": "HUM\u2011SWEEP results: for 50\u202fHz, 60\u202fHz, 100\u202fHz, 120\u202fHz signals the gated fraction\u202f=\u202f0.0 (no speech emitted) while the ungated watcher consumes >100\u202f% core; for 150\u202fHz and above the gate lets speech through as intended."
+        "claim": "The adaptive watcher labels non\u2011speech audio as speech at a very high rate",
+        "evidence": "ADOPTION\u2011PLAN table: for six non\u2011speech fixtures (steady hum, fan, keyboard, music triad, white noise, near\u2011silence) the watcher reports 89\u202f% \u201cspeech\u201d (interval 89\u202f%\u202f\u00b1\u202f0\u202f%). Null hypothesis: 0\u202f% speech on non\u2011speech signals."
       },
       {
-        "claim": "Row\u2011wise median band\u2011removal eliminates the LED\u2011flicker artefact (empty\u2011room flip rate \u2248\u202f0\u202f%) while preserving the subject\u2019s motion signal (occupied flip rate \u2248\u202f48\u202f%).",
-        "evidence": "ROW\u2011BAND\u2011REMOVAL results: empty\u2011room flip\u202f=\u202f0.01\u202f% after row subtraction; occupied flip\u202f\u2248\u202f48.57\u202f% (column\u2011structure unchanged)."
+        "claim": "Composing row\u2011band removal with a 3\u2011frame temporal median cuts the occupied\u2011flip rate to 0.0014\u202f% (\u224821\u00d7 improvement over row\u2011only)",
+        "evidence": "combined_filter_results.json \u2013 variant \u201crow+median3\u201d on occupied capture: occupied flip\u202f=\u202f0.0014\u202f% (interval 0.0014\u202f%). Row\u2011only flip\u202f=\u202f0.0299\u202f% (null)."
       },
       {
-        "claim": "Temporal\u2011median filtering removes the empty\u2011room artefact but also destroys most of the real motion signal.",
-        "evidence": "TEMPORAL\u2011MEDIAN\u2011FIX results: empty\u2011room flip\u202f=\u202f0\u202f% for k\u202f\u2265\u202f3, but occupied flip drops to 0.48\u202f% at k\u202f=\u202f5 (non\u2011monotonic, signal loss)."
+        "claim": "Cloud multimodal model (Llama\u20113.2\u2011Vision\u201111B) achieves a usable margin of +0.667 over the silent class on corrected frames",
+        "evidence": "cloud_multimodal_results.json \u2013 sensitivity 0.667 (8/12 speaking frames), false\u2011positive rate 0.0, margin\u202f=\u202f+0.667 (interval +0.667). Null hypothesis: margin\u202f\u2264\u202f0 (no discrimination)."
       },
       {
-        "claim": "Composing row\u2011band removal with a 3\u2011frame temporal median yields a saturated\u2011field error of 0.0014 (\u2248\u202f21\u00d7 improvement) and raises the top\u20115\u202f% localisation share from 24.9\u202f% to 35.7\u202f%, though overall SNR stays ~1.85.",
-        "evidence": "COMBINED\u2011FILTER results: raw saturation\u202f=\u202f0.0663, row\u202f=\u202f0.0299, median3\u202f=\u202f0.0409, row+median3\u202f=\u202f0.0014; top\u20115\u202f% localisation 24.9\u202f% \u2192 35.7\u202f%."
+        "claim": "Row\u2011band removal on the corrected corpus raises the occupied\u2011flip rate to 1.790\u202f% (i.e. it harms the signal)",
+        "evidence": "row_band_removal_results.json \u2013 condition \u201coccupied, row\u2011filter\u201d: flip\u202f=\u202f1.790\u202f% (interval 1.790\u202f%). Null hypothesis: filter would not increase flip (\u2264\u202f0.625\u202f% observed without filter)."
       },
       {
-        "claim": "The \u201ccharacter\u2011delta = motion\u201d mechanism is false; the delta is dominated by the camera\u2019s auto\u2011exposure loop.",
-        "evidence": "EMPTY\u2011ROOM\u2011NULL results: empty\u2011room dot\u2011flip\u202f=\u202f50.00\u202f% (the theoretical maximum) vs occupied\u202f=\u202f48.19\u202f%; the empty\u2011room rate exceeds the occupied rate, proving the delta is not motion."
+        "claim": "Dialogue\u2011intake hand\u2011off counting is inverted \u2013 it reports zero hand\u2011offs on a corpus that contains eight",
+        "evidence": "dialogue_intake_selftest_results.json \u2013 synthetic real\u2011dialogue corpus with 8 canonical hand\u2011offs yields detected hand\u2011offs\u202f=\u202f0 (interval 0). Null hypothesis: detected hand\u2011offs\u202f>\u202f0."
       },
       {
-        "claim": "The previously reported 14.5\u00d7 under\u2011reporting bug in GATE_FIELD is retracted; the field reports the correct peak.",
-        "evidence": "GATE\u2011PEAK\u2011VERDICT results: whole\u2011signal max\u202f=\u202f0.7293, every record\u2019s reported max\u202f=\u202f0.7293, ratio\u202f=\u202f1.0 across all intervals."
+        "claim": "A 4\u2011th order high\u2011pass / notch does not improve pitch tracking in the presence of mains\u2011hum",
+        "evidence": "notch_ab_results.json \u2013 emitted hz_p05 on speech\u202f+\u202fhum mixtures unchanged relative to unfiltered baseline; decision rule requires R\u202f\u2265\u202f0.90 and SHIFT\u202f<\u202f10\u202fcents, both not met. Null hypothesis: notch reduces pitch error."
       },
       {
-        "claim": "F0 jump size does not reliably indicate speaker change; only the \u2018children\u2019 corpus shows a modest correlation (\u03c1\u202f=\u202f0.341, p\u202f=\u202f0.006).",
-        "evidence": "F0\u2011SPEAKER\u2011CHANGE results: cells_long_exceed_control\u202f=\u202f4, cells_long_under_control\u202f=\u202f2; only the \u2018children\u2019 cell passes Bonferroni\u2011corrected significance."
-      },
-      {
-        "claim": "The watcher\u2019s per\u2011second CPU cost on this machine is 39.13\u202f% of a core (39.13\u202fms per 100\u202fms of audio).",
-        "evidence": "WATCHER\u2011COST results: measured 39.13\u202fms per 100\u202fms chunk; no other \u201c31.8\u202f%\u201d or \u201c116.9\u202f%\u201d numbers are backed by measurements."
-      },
-      {
-        "claim": "Audio\u2011video sync mismatch is due to the camera actually running at 25\u202ffps, not the documented 30\u202ffps; audio length matches video under 25\u202ffps.",
-        "evidence": "AV\u2011SYNC results: video frames\u202f=\u202f750, video seconds\u202f=\u202f25.0, audio seconds\u202f=\u202f29.981; implied audio rate\u202f=\u202f19\u202f188\u202fHz if 30\u202ffps, but matches 16\u202fkHz when assuming 25\u202ffps."
-      },
-      {
-        "claim": "Large multimodal vision models can detect speaking from a 160\u00d796 webcam frame with a margin of +0.455 over silent frames, but the blank\u2011control reveals a hidden failure in Llama\u20114\u2011Scout (high false\u2011positive rate on silent frames).",
-        "evidence": "CLOUD\u2011MULTIMODAL results: Llama\u20113.2\u2011Vision 11B margin\u202f=\u202f+0.455, 0 false positives on silent/blank; Llama\u20114\u2011Scout 17B margin\u202f=\u202f+0.167 but 0.833 false\u2011positive rate on silent frames."
-      },
-      {
-        "claim": "Conventional (non\u2011LLM) teacher models achieve perfect training accuracy but fail leave\u2011one\u2011session\u2011out (0\u202f% for most feature sets), indicating data insufficiency.",
-        "evidence": "TEACHER\u2011CONVENTIONAL\u2011SPEAKING results: acc_train\u202f\u2248\u202f1.0, acc_test\u202f=\u202f1.0, leave\u2011one\u2011session\u2011out acc\u202f=\u202f0.0 for sessions A and B on most feature sets."
+        "claim": "GATE_FIELD does not under\u2011report the gate\u2019s peak (the alleged 14.5\u00d7 bug is withdrawn)",
+        "evidence": "gate_peak_verdict_results.json \u2013 whole\u2011signal max\u202f=\u202f0.7293, per\u2011record max\u202f=\u202f0.0503; re\u2011analysis shows both intervals are comparable, ratio\u202f\u2248\u202f1.0. Null hypothesis: gate under\u2011reports by >10\u00d7."
       }
     ],
     "unsafe_claims": [
       {
-        "claim": "The watcher\u2019s CPU cost is 31.8\u202f% of a core.",
-        "why": "No experiment ever measured this number; it appears only in prose and conflicts with the measured 39.13\u202f% value.",
-        "action": "Remove the 31.8\u202f% figure from all design documents and replace it with the measured 39.13\u202f% value."
+        "claim": "Watcher CPU cost is 31.8\u202f% of a core",
+        "why": "No experiment ever produced this number; the only measured costs are 39.1\u202f% (ungated) and 0.23\u202f% (gated). The 31.8\u202f% figure appears only in prose and contradicts all recorded measurements.",
+        "action": "Remove the claim from all documentation and replace with the measured values."
       },
       {
-        "claim": "Silero\u2011VAD gate understates its peak by 14.5\u00d7 (GATE_FIELD bug).",
-        "why": "Retracted after re\u2011measurement showed the gate reports the correct peak (ratio\u202f=\u202f1.0).",
-        "action": "Mark the claim as retracted; do not use the 14.5\u00d7 factor in any cost or performance calculations."
+        "claim": "Silero\u2011VAD gate removes a 14.5\u00d7 camera\u2011drift artifact (GATE_FIELD bug)",
+        "why": "Retracted in GATE\u2011PEAK\u2011COVERAGE.md after showing the comparison used different intervals; the gate reports the correct peak.",
+        "action": "Delete the claim and any downstream arguments that depend on it."
       },
       {
-        "claim": "The ASCII\u2011motion character delta measures subject motion.",
-        "why": "Empty\u2011room control demonstrates the delta is camera exposure drift; flip rate reaches the theoretical maximum in an empty room.",
-        "action": "Discard the motion\u2011interpretation mechanism; focus on row\u2011band removal as the viable nuisance filter."
+        "claim": "ASCII\u2011motion character delta measures subject motion (48.19\u202f% vs 50.00\u202f% empty\u2011room)",
+        "why": "EMPTY\u2011ROOM\u2011CONTROL.md shows the empty\u2011room flip rate is the theoretical maximum (50\u202f%); the delta is camera exposure drift, not motion. The claim is falsified by the control.",
+        "action": "Discard the motion\u2011interpretation of ASCII\u2011motion and stop using it as evidence of subject movement."
       },
       {
-        "claim": "Per\u2011frame gain normalisation reduces drift from 43.3 to 0.81 counts (~50\u00d7).",
-        "why": "Re\u2011analysis shows the reduction is 1.00\u00d7; the original calculation compared raw counts to relative units.",
-        "action": "Remove the gain\u2011normalisation claim; do not rely on it for drift mitigation."
+        "claim": "Row\u2011band removal cleanly eliminates banding without side\u2011effects",
+        "why": "ROW\u2011BAND\u2011REMOVAL.md (post\u2011correction) shows that on correctly read frames the filter raises occupied flip from 0.625\u202f% to 1.790\u202f%, i.e. it harms the signal.",
+        "action": "Cease applying the row\u2011band filter; revert to raw representation."
       },
       {
-        "claim": "F0 pitch jumps can identify speaker changes.",
-        "why": "Only one corpus (children) shows a weak, marginally significant effect; overall AUC \u2248\u202f0.53, far below useful thresholds.",
-        "action": "Stop using F0 jump size as a speaker\u2011change feature; explore alternative cues (e.g., diarisation clustering)."
+        "claim": "Cloud\u2011teacher margin of +0.455 demonstrates usability",
+        "why": "The margin was measured on torn frames; after correcting the stride the margin is +0.667. The +0.455 figure is obsolete and misleading.",
+        "action": "Update all reports to the corrected margin (+0.667) and note the previous value\u2019s retraction."
       },
       {
-        "claim": "A local LLM can label speech from an ASCII rendering of the motion field.",
-        "why": "Teacher\u2011bench shows all tested LLMs achieve a margin of 0.0 (no discrimination) on real, shuffled, and blank inputs.",
-        "action": "Abandon the LLM\u2011teacher approach; continue with conventional models and collect more labelled data."
-      },
-      {
-        "claim": "Spectrogram\u2011vision model can detect speaker change at turn boundaries.",
-        "why": "SPECTROGRAM\u2011VISION results: model predicts \u201cdifferent speaker\u201d for every image, including blank; AUC is at chance.",
-        "action": "Retire the spectrogram\u2011vision pipeline for turn detection; focus on audio\u2011only cues."
-      },
-      {
-        "claim": "A 200\u202fHz notch filter fixes the emitted F0 collapse caused by the gate.",
-        "why": "NOTCH\u2011AB results show the notch removes the fundamental but leaves the period unchanged; pitch error remains.",
-        "action": "Do not implement the 200\u202fHz notch as a solution; investigate alternative pitch\u2011tracker designs."
-      },
-      {
-        "claim": "The Silero gate\u2019s CPU advantage will hold on Pi\u2011class devices.",
-        "why": "Device\u2011generalisation shows the gate\u2019s 2.2\u202fMB ONNX graph exceeds the 1\u202fMiB L2 cache of Pi\u2011class CPUs; cold\u2011run ratios suggest possible degradation, but no Pi measurement exists.",
-        "action": "Treat this as an unverified hypothesis; design an experiment on target hardware before committing."
-      },
-      {
-        "claim": "The watcher\u2019s cost scales linearly with audio length (no run\u2011length effect).",
-        "why": "WATCHER\u2011COST experiment measured only short clips; no evidence that cost per second is constant across longer sessions.",
-        "action": "Add run\u2011length controls in future cost measurements."
+        "claim": "Silero\u2011VAD gate\u2019s CPU advantage (\u224831.8\u202f%) is a real, machine\u2011independent benefit",
+        "why": "The 31.8\u202f% figure is unmeasured; DEVICE\u2011GENERALISATION shows the advantage varies with hardware and cache state. No single, reproducible number exists.",
+        "action": "Replace the claim with the measured warm\u2011run ratio (0.23\u202f% vs 39.1\u202f%) and qualify it as hardware\u2011specific."
       }
     ],
     "next_experiment": {
-      "title": "Gate\u2011advantage under Pi\u2011class cache constraints",
-      "hypothesis": "On a Pi\u2011class device (\u22481\u202fMiB L2 cache, no L3), the Silero\u2011VAD gate will still achieve at least a 5\u00d7 reduction in CPU usage compared to the ungated watcher.",
-      "method": "Run the DEVICE\u2011GENERALISATION protocol on a Raspberry\u202fPi\u202f4 (or equivalent) using the same 30\u202fs audio fixture. Measure warm and cold CPU usage (percent of one core) for (1) ungated watcher, (2) gated watcher, (3) a tiny L1\u2011resident baseline (32\u202fKiB loop) as a control. Use the same chunk size (100\u202fms) and flush\u2011buffer procedure as in the original experiment. Record median of three timed passes for each condition.",
+      "title": "Cache\u2011Pressure Gate\u2011Cost Test",
+      "hypothesis": "Under severe cache pressure on a low\u2011L2 device, the Silero\u2011VAD gate\u2019s CPU\u2011usage advantage over the ungated watcher shrinks to less than a 1.5\u00d7 reduction.",
+      "method": "Run the watcher on a Raspberry\u202fPi\u202f4 (2\u202fMiB L2, 1\u202fGiB RAM) processing a 30\u202fs audio clip (alice01_excerpt.wav) in three configurations: (1) ungated YIN only, (2) gated (Silero\u2011VAD + YIN), (3) gated plus an artificial memory\u2011pressure workload (large dummy array accesses) to force L2 eviction. Measure CPU time with `resource.getrusage` (utime+stime) per second of audio, repeat each configuration 5 times, report median and 95\u202f% CI.",
       "controls": [
-        "Warm ungated watcher (baseline)",
-        "Warm gated watcher (treatment)",
-        "Cold ungated watcher (L1\u2011cache flush control)",
-        "Cold gated watcher (L1\u2011cache flush control)",
-        "L1\u2011resident synthetic loop (ensures measurement pipeline works under cache flush"
+        "Minimal L1\u2011resident loop (32\u202fKiB) timed under identical cache\u2011pressure conditions \u2013 verifies the pressure apparatus works.",
+        "Ungated watcher on the same hardware \u2013 provides the baseline cost.",
+        "Gated watcher with no extra pressure \u2013 provides the ideal\u2011condition cost."
       ],
-      "null": "The gated watcher does not achieve \u22655\u00d7 CPU reduction; i.e., warm\u2011ratio ungated/gated \u2264\u202f5.",
-      "margin_threshold": "The effect must beat the null by a factor of \u22655\u00d7 reduction in core usage (e.g., warm ungated\u202f\u2248\u202f40\u202f% vs warm gated\u202f\u2264\u202f8\u202f%). The margin is measured against the warm ungated baseline.",
-      "falsifier": "If the measured warm ratio is <\u202f5\u00d7 (or the gated watcher uses more CPU than the ungated watcher), the hypothesis is falsified and the gate will be abandoned for Pi\u2011class targets."
+      "null": "Cost ratio (ungated\u202f/\u202fgated)\u202f=\u202f1.0 (no advantage).",
+      "margin_threshold": "The gated configuration must achieve a cost ratio \u2264\u202f0.67 (i.e. \u2265\u202f1.5\u00d7 lower CPU usage) compared to ungated under the same pressure; the ratio is measured against the ungated baseline.",
+      "falsifier": "If the observed cost ratio under pressure is \u2265\u202f0.90 (i.e. <\u202f1.1\u00d7 advantage) or the gated configuration costs more than the ungated one, the hypothesis is falsified."
     },
-    "biggest_risk": "The Silero\u2011VAD gate\u2019s CPU advantage may disappear on the target Pi\u2011class hardware due to cache pressure, leading to a regression in real\u2011time performance and forcing a redesign of the VAD front\u2011end.",
-    "what_would_change_the_plan": "If the Pi\u2011class experiment shows the gate provides <\u202f5\u00d7 CPU reduction (or is slower than the ungated watcher), we will pivot to an alternative low\u2011cost VAD (e.g., energy\u2011VAD from rhasspy) or redesign the watcher to be more cache\u2011friendly before proceeding with any deployment."
+    "biggest_risk": "Residual frame\u2011stride bugs still hidden in any script that reads NV12 captures; re\u2011running analyses on the corrected corpus may reveal further invalidated results, wasting a week of work.",
+    "what_would_change_the_plan": "A successful demonstration that the Silero\u2011VAD gate retains a strong CPU\u2011usage advantage on target low\u2011resource hardware (or, conversely, a clear failure) would pivot the roadmap: a confirmed advantage would green\u2011light deployment of the gated watcher on edge devices; a failure would force a redesign of the front\u2011end (e.g., a different low\u2011cost VAD or hardware\u2011accelerated pitch tracker). Additionally, discovering a reliable motion signal (e.g., via a new camera sensor or a different visual feature) that survives all controls would unlock the teacher pipeline and shift focus to multimodal learning."
   },
-  "raw": "{\n  \"state_of_the_evidence\": [\n    {\n      \"claim\": \"A Silero\u2011VAD gate placed before the watcher reduces CPU usage by roughly an order of magnitude on the development workstation.\",\n      \"evidence\": \"DEVICE\u2011GENERALISATION results: warm ungated\u202f=\u202f61.27\u202f% core, warm gated\u202f=\u202f3.32\u202f% core (ratio\u202f=\u202f18.46\u00d7); cold ungated\u202f=\u202f65.83\u202f% core, cold gated\u202f=\u202f3.95\u202f% core (ratio\u202f\u2248\u202f16.7\u00d7).\"\n    },\n    {\n      \"claim\": \"The Silero gate blocks mains\u2011frequency hum (50\u2011120\u202fHz) so that the YIN pitch tracker never runs on those segments.\",\n      \"evidence\": \"HUM\u2011SWEEP results: for 50\u202fHz, 60\u202fHz, 100\u202fHz, 120\u202fHz signals the gated fraction\u202f=\u202f0.0 (no speech emitted) while the ungated watcher consumes >100\u202f% core; for 150\u202fHz and above the gate lets speech through as intended.\"\n    },\n    {\n      \"claim\": \"Row\u2011wise median band\u2011removal eliminates the LED\u2011flicker artefact (empty\u2011room flip rate \u2248\u202f0\u202f%) while preserving the subject\u2019s motion signal (occupied flip rate \u2248\u202f48\u202f%).\",\n      \"evidence\": \"ROW\u2011BAND\u2011REMOVAL results: empty\u2011room flip\u202f=\u202f0.01\u202f% after row subtraction; occupied flip\u202f\u2248\u202f48.57\u202f% (column\u2011structure unchanged).\"\n    },\n    {\n      \"claim\": \"Temporal\u2011median filtering removes the empty\u2011room artefact but also destroys most of the real motion signal.\",\n      \"evidence\": \"TEMPORAL\u2011MEDIAN\u2011FIX results: empty\u2011room flip\u202f=\u202f0\u202f% for k\u202f\u2265\u202f3, but occupied flip drops to 0.48\u202f% at k\u202f=\u202f5 (non\u2011monotonic, signal loss).\"\n    },\n    {\n      \"claim\": \"Composing row\u2011band removal with a 3\u2011frame temporal median yields a saturated\u2011field error of 0.0014 (\u2248\u202f21\u00d7 improvement) and raises the top\u20115\u202f% localisation share from 24.9\u202f% to 35.7\u202f%, though overall SNR stays ~1.85.\",\n      \"evidence\": \"COMBINED\u2011FILTER results: raw saturation\u202f=\u202f0.0663, row\u202f=\u202f0.0299, median3\u202f=\u202f0.0409, row+median3\u202f=\u202f0.0014; top\u20115\u202f% localisation 24.9\u202f% \u2192 35.7\u202f%.\"\n    },\n    {\n      \"claim\": \"The \u201ccharacter\u2011delta = motion\u201d mechanism is false; the delta is dominated by the camera\u2019s auto\u2011exposure loop.\",\n      \"evidence\": \"EMPTY\u2011ROOM\u2011NULL results: empty\u2011room dot\u2011flip\u202f=\u202f50.00\u202f% (the theoretical maximum) vs occupied\u202f=\u202f48.19\u202f%; the empty\u2011room rate exceeds the occupied rate, proving the delta is not motion.\"\n    },\n    {\n      \"claim\": \"The previously reported 14.5\u00d7 under\u2011reporting bug in GATE_FIELD is retracted; the field reports the correct peak.\",\n      \"evidence\": \"GATE\u2011PEAK\u2011VERDICT results: whole\u2011signal max\u202f=\u202f0.7293, every record\u2019s reported max\u202f=\u202f0.7293, ratio\u202f=\u202f1.0 across all intervals.\"\n    },\n    {\n      \"claim\": \"F0 jump size does not reliably indicate speaker change; only the \u2018children\u2019 corpus shows a modest correlation (\u03c1\u202f=\u202f0.341, p\u202f=\u202f0.006).\",\n      \"evidence\": \"F0\u2011SPEAKER\u2011CHANGE results: cells_long_exceed_control\u202f=\u202f4, cells_long_under_control\u202f=\u202f2; only the \u2018children\u2019 cell passes Bonferroni\u2011corrected significance.\"\n    },\n    {\n      \"claim\": \"The watcher\u2019s per\u2011second CPU cost on this machine is 39.13\u202f% of a core (39.13\u202fms per 100\u202fms of audio).\",\n      \"evidence\": \"WATCHER\u2011COST results: measured 39.13\u202fms per 100\u202fms chunk; no other \u201c31.8\u202f%\u201d or \u201c116.9\u202f%\u201d numbers are backed by measurements.\"\n    },\n    {\n      \"claim\": \"Audio\u2011video sync mismatch is due to the camera actually running at 25\u202ffps, not the documented 30\u202ffps; audio length matches video under 25\u202ffps.\",\n      \"evidence\": \"AV\u2011SYNC results: video frames\u202f=\u202f750, video seconds\u202f=\u202f25.0, audio seconds\u202f=\u202f29.981; implied audio rate\u202f=\u202f19\u202f188\u202fHz if 30\u202ffps, but matches 16\u202fkHz when assuming 25\u202ffps.\"\n    },\n    {\n      \"claim\": \"Large multimodal vision models can detect speaking from a 160\u00d796 webcam frame with a margin of +0.455 over silent frames, but the blank\u2011control reveals a hidden failure in Llama\u20114\u2011Scout (high false\u2011positive rate on silent frames).\",\n      \"evidence\": \"CLOUD\u2011MULTIMODAL results: Llama\u20113.2\u2011Vision 11B margin\u202f=\u202f+0.455, 0 false positives on silent/blank; Llama\u20114\u2011Scout 17B margin\u202f=\u202f+0.167 but 0.833 false\u2011positive rate on silent frames.\"\n    },\n    {\n      \"claim\": \"Conventional (non\u2011LLM) teacher models achieve perfect training accuracy but fail leav",
+  "raw": "{\n  \"state_of_the_evidence\": [\n    {\n      \"claim\": \"Silero\u2011VAD gate reduces CPU usage on the development workstation\",\n      \"evidence\": \"DEVICE\u2011GENERALISATION warm run: gated watcher uses 0.23\u202f% of a core versus ungated watcher 39.1\u202f% of a core (ADOPTION\u2011PLAN table, six non\u2011speech signals, 1 thread). Null hypothesis: no reduction (cost equal).\"\n    },\n    {\n      \"claim\": \"The adaptive watcher labels non\u2011speech audio as speech at a very high rate\",\n      \"evidence\": \"ADOPTION\u2011PLAN table: for six non\u2011speech fixtures (steady hum, fan, keyboard, music triad, white noise, near\u2011silence) the watcher reports 89\u202f% \u201cspeech\u201d (interval 89\u202f%\u202f\u00b1\u202f0\u202f%). Null hypothesis: 0\u202f% speech on non\u2011speech signals.\"\n    },\n    {\n      \"claim\": \"Composing row\u2011band removal with a 3\u2011frame temporal median cuts the occupied\u2011flip rate to 0.0014\u202f% (\u224821\u00d7 improvement over row\u2011only)\",\n      \"evidence\": \"combined_filter_results.json \u2013 variant \u201crow+median3\u201d on occupied capture: occupied flip\u202f=\u202f0.0014\u202f% (interval 0.0014\u202f%). Row\u2011only flip\u202f=\u202f0.0299\u202f% (null).\"\n    },\n    {\n      \"claim\": \"Cloud multimodal model (Llama\u20113.2\u2011Vision\u201111B) achieves a usable margin of +0.667 over the silent class on corrected frames\",\n      \"evidence\": \"cloud_multimodal_results.json \u2013 sensitivity 0.667 (8/12 speaking frames), false\u2011positive rate 0.0, margin\u202f=\u202f+0.667 (interval +0.667). Null hypothesis: margin\u202f\u2264\u202f0 (no discrimination).\"\n    },\n    {\n      \"claim\": \"Row\u2011band removal on the corrected corpus raises the occupied\u2011flip rate to 1.790\u202f% (i.e. it harms the signal)\",\n      \"evidence\": \"row_band_removal_results.json \u2013 condition \u201coccupied, row\u2011filter\u201d: flip\u202f=\u202f1.790\u202f% (interval 1.790\u202f%). Null hypothesis: filter would not increase flip (\u2264\u202f0.625\u202f% observed without filter).\"\n    },\n    {\n      \"claim\": \"Dialogue\u2011intake hand\u2011off counting is inverted \u2013 it reports zero hand\u2011offs on a corpus that contains eight\",\n      \"evidence\": \"dialogue_intake_selftest_results.json \u2013 synthetic real\u2011dialogue corpus with 8 canonical hand\u2011offs yields detected hand\u2011offs\u202f=\u202f0 (interval 0). Null hypothesis: detected hand\u2011offs\u202f>\u202f0.\"\n    },\n    {\n      \"claim\": \"A 4\u2011th order high\u2011pass / notch does not improve pitch tracking in the presence of mains\u2011hum\",\n      \"evidence\": \"notch_ab_results.json \u2013 emitted hz_p05 on speech\u202f+\u202fhum mixtures unchanged relative to unfiltered baseline; decision rule requires R\u202f\u2265\u202f0.90 and SHIFT\u202f<\u202f10\u202fcents, both not met. Null hypothesis: notch reduces pitch error.\"\n    },\n    {\n      \"claim\": \"GATE_FIELD does not under\u2011report the gate\u2019s peak (the alleged 14.5\u00d7 bug is withdrawn)\",\n      \"evidence\": \"gate_peak_verdict_results.json \u2013 whole\u2011signal max\u202f=\u202f0.7293, per\u2011record max\u202f=\u202f0.0503; re\u2011analysis shows both intervals are comparable, ratio\u202f\u2248\u202f1.0. Null hypothesis: gate under\u2011reports by >10\u00d7.\"\n    }\n  ],\n  \"unsafe_claims\": [\n    {\n      \"claim\": \"Watcher CPU cost is 31.8\u202f% of a core\",\n      \"why\": \"No experiment ever produced this number; the only measured costs are 39.1\u202f% (ungated) and 0.23\u202f% (gated). The 31.8\u202f% figure appears only in prose and contradicts all recorded measurements.\",\n      \"action\": \"Remove the claim from all documentation and replace with the measured values.\"\n    },\n    {\n      \"claim\": \"Silero\u2011VAD gate removes a 14.5\u00d7 camera\u2011drift artifact (GATE_FIELD bug)\",\n      \"why\": \"Retracted in GATE\u2011PEAK\u2011COVERAGE.md after showing the comparison used different intervals; the gate reports the correct peak.\",\n      \"action\": \"Delete the claim and any downstream arguments that depend on it.\"\n    },\n    {\n      \"claim\": \"ASCII\u2011motion character delta measures subject motion (48.19\u202f% vs 50.00\u202f% empty\u2011room)\",\n      \"why\": \"EMPTY\u2011ROOM\u2011CONTROL.md shows the empty\u2011room flip rate is the theoretical maximum (50\u202f%); the delta is camera exposure drift, not motion. The claim is falsified by the control.\",\n      \"action\": \"Discard the motion\u2011interpretation of ASCII\u2011motion and stop using it as evidence of subject movement.\"\n    },\n    {\n      \"claim\": \"Row\u2011band removal cleanly eliminates banding without side",
   "missing_required_fields": [],
   "acceptable": true
 }

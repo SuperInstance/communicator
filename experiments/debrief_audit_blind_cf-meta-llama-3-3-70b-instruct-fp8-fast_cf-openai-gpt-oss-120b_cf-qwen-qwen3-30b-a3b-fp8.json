@@ -5,20 +5,20 @@
       "model": "@cf/meta/llama-3.3-70b-instruct-fp8-fast",
       "mode": "blind",
       "materials_chars": 140000,
-      "sensitivity_rejected_false_claims": 0.2857142857142857,
-      "specificity_kept_true_claims": 0.6666666666666666,
-      "headline_sens_plus_spec_minus_1": -0.04761904761904767,
-      "sensitivity_not_endorsing_false_claims": 0.42857142857142855,
-      "specificity_not_accusing_true_claims": 0.6666666666666666,
-      "headline_lenient": 0.09523809523809512,
+      "sensitivity_rejected_false_claims": 0.2222222222222222,
+      "specificity_kept_true_claims": 0.0,
+      "headline_sens_plus_spec_minus_1": -0.7777777777777778,
+      "sensitivity_not_endorsing_false_claims": 0.2222222222222222,
+      "specificity_not_accusing_true_claims": 0.0,
+      "headline_lenient": -0.7777777777777778,
       "false_positives": 1,
-      "true_positives": 2,
-      "uncertain": 1,
+      "true_positives": 0,
+      "uncertain": 0,
       "detections": 2,
-      "n_false": 7,
-      "n_true": 3,
+      "n_false": 9,
+      "n_true": 1,
       "unparseable": 0,
-      "elapsed_s": 7.99,
+      "elapsed_s": 11.23,
       "rows": [
         {
           "index": 0,
@@ -26,7 +26,7 @@
           "verdict": "unsupported",
           "rejected": true,
           "correct": false,
-          "reason": "The claim does not provide a comparison or any evidence to support a specific conclusion about the room's acoustic noise floor.",
+          "reason": "The claim provides measurements but does not draw a comparison or make a conclusion based on the evidence.",
           "claim": "The room's own acoustic noise floor measured -73.5 dBFS, with 119 transients detected and zero valid RT60 estimates obtainable from it."
         },
         {
@@ -35,16 +35,16 @@
           "verdict": "supported",
           "rejected": false,
           "correct": false,
-          "reason": "The claim provides a specific measurement of the reduction in frame-to-frame drift after reducing the gate's field threshold.",
+          "reason": "The claim states a specific reduction in frame-to-frame drift after reducing the gate's field threshold.",
           "claim": "Reducing the gate's field threshold to 0.30 removed 14.5x of the camera's frame-to-frame drift, measured as the mean absolute difference between consecutive frames."
         },
         {
           "index": 2,
-          "is_false_claim": false,
+          "is_false_claim": true,
           "verdict": "supported",
           "rejected": false,
-          "correct": true,
-          "reason": "The claim provides a specific measurement of the reduction in character-cell flip rate after removing each row's median across the columns.",
+          "correct": false,
+          "reason": "The claim provides a comparison of character-cell flip rates between an empty room and an occupied room with and without row median removal.",
           "claim": "Removing each row's median across the columns before differencing frames takes an empty room's character-cell flip rate from 50.00% down to 0.01%, while leaving the occupied room's column structure unchanged."
         },
         {
@@ -53,16 +53,16 @@
           "verdict": "unsupported",
           "rejected": true,
           "correct": true,
-          "reason": "The claim does not provide any specific measurements or evidence to support the conclusion about the watcher's memory use.",
+          "reason": "The claim makes a conclusion about memory use without providing specific measurements or evidence.",
           "claim": "The watcher's memory use grows quadratically with session length, so a long session will eventually exhaust the device."
         },
         {
           "index": 4,
           "is_false_claim": true,
-          "verdict": "uncertain",
+          "verdict": "supported",
           "rejected": false,
           "correct": false,
-          "reason": "The claim does not provide any specific measurements or comparisons to establish the usefulness of the local large language model's margin over the blank control.",
+          "reason": "The claim states that a local large language model can label whether a person is speaking at a useful margin over a blank control.",
           "claim": "A local large language model given an ASCII rendering of the room can label whether the person is speaking, at a useful margin over a blank control."
         },
         {
@@ -71,7 +71,7 @@
           "verdict": "supported",
           "rejected": false,
           "correct": false,
-          "reason": "The claim provides a specific measurement of the reduction in frame-to-frame drift after applying per-frame gain normalisation.",
+          "reason": "The claim provides a comparison of frame-to-frame drift before and after applying per-frame gain normalisation.",
           "claim": "Applying a per-frame gain normalisation to the camera's brightness reduced the frame-to-frame drift from 43.3 counts to 0.81 counts, a reduction of roughly fifty times."
         },
         {
@@ -80,7 +80,7 @@
           "verdict": "supported",
           "rejected": false,
           "correct": false,
-          "reason": "The claim provides a specific measurement of the model's score on the temporal split and the test session, which suggests that the model learned the recording rather than speaking.",
+          "reason": "The claim shows a significant difference in the model's score between a temporal split of one session and a held-out test session.",
           "claim": "A conventional teacher model trained on motion maps scored 1.000 on a temporal split of one session and 0.000 when the test session was held out, which shows the model learned the recording rather than speaking."
         },
         {
@@ -89,7 +89,7 @@
           "verdict": "unsupported",
           "rejected": true,
           "correct": true,
-          "reason": "The claim compares the occupied room's character-cell flip rate to the empty room's rate, but the rates are very similar, which makes the comparison meaningless.",
+          "reason": "The claim compares the character-cell flip rates between an occupied room and an empty room, but the rates are very similar, making the comparison meaningless.",
           "claim": "The ASCII character map reliably detects whether a person is moving in the frame: an occupied room flips 48.19% of its character cells per frame against 50.00% for an empty room, so the motion is being measured."
         },
         {
@@ -98,39 +98,39 @@
           "verdict": "supported",
           "rejected": false,
           "correct": false,
-          "reason": "The claim provides a specific measurement of the percentage of frames that are never actually measured by the speech detector.",
+          "reason": "The claim states a specific percentage of frames that are never actually measured by the speech detector.",
           "claim": "31.8% of the frames the watcher processes are never actually measured by the speech detector, because the gate returns early."
         },
         {
           "index": 9,
-          "is_false_claim": false,
+          "is_false_claim": true,
           "verdict": "supported",
           "rejected": false,
-          "correct": true,
-          "reason": "The claim provides a specific measurement of the reduction in occupied motion-map flip rate after composing row-wise band removal with a temporal median filter.",
+          "correct": false,
+          "reason": "The claim provides a comparison of occupied motion-map flip rates with and without composing row-wise band removal with a temporal median filter.",
           "claim": "Composing row-wise band removal with a temporal median filter of width 3 reduced the occupied motion-map flip rate from 0.0299 to 0.0014, a 21x improvement over row removal alone, while the signal-to-noise ratio stayed flat at about 1.83."
         }
       ],
-      "raw": "{\"verdicts\": [\n{\"index\": 0, \"verdict\": \"unsupported\", \"reason\": \"The claim does not provide a comparison or any evidence to support a specific conclusion about the room's acoustic noise floor.\"},\n{\"index\": 1, \"verdict\": \"supported\", \"reason\": \"The claim provides a specific measurement of the reduction in frame-to-frame drift after reducing the gate's field threshold.\"},\n{\"index\": 2, \"verdict\": \"supported\", \"reason\": \"The claim provides a specific measurement of the reduction in character-cell flip rate after removing each row's median across the columns.\"},\n{\"index\": 3, \"verdict\": \"unsupported\", \"reason\": \"The claim does not provide any specific measurements or evidence to support the conclusion about the watcher's memory use.\"},\n{\"index\": 4, \"verdict\": \"uncertain\", \"reason\": \"The claim does not provide any specific measurements or comparisons to establish the usefulness of the local large language model's margin over the blank control.\"},\n{\"index\": 5, \"verdict\": \"supported\", \"reason\": \"The claim provides a specific measurement of the reduction in frame-to-frame drift after applying per-frame gain normalisation.\"},\n{\"index\": 6, \"verdict\": \"supported\", \"reason\": \"The claim provides a specific measurement of the model's score on the temporal split and the test session, which suggests that the model learned the recording rather than speaking.\"},\n{\"index\": 7, \"verdict\": \"unsupported\", \"reason\": \"The claim compares the occupied room's character-cell flip rate to the empty room's r"
+      "raw": "{\"verdicts\": [\n{\"index\": 0, \"verdict\": \"unsupported\", \"reason\": \"The claim provides measurements but does not draw a comparison or make a conclusion based on the evidence.\"},\n{\"index\": 1, \"verdict\": \"supported\", \"reason\": \"The claim states a specific reduction in frame-to-frame drift after reducing the gate's field threshold.\"},\n{\"index\": 2, \"verdict\": \"supported\", \"reason\": \"The claim provides a comparison of character-cell flip rates between an empty room and an occupied room with and without row median removal.\"},\n{\"index\": 3, \"verdict\": \"unsupported\", \"reason\": \"The claim makes a conclusion about memory use without providing specific measurements or evidence.\"},\n{\"index\": 4, \"verdict\": \"supported\", \"reason\": \"The claim states that a local large language model can label whether a person is speaking at a useful margin over a blank control.\"},\n{\"index\": 5, \"verdict\": \"supported\", \"reason\": \"The claim provides a comparison of frame-to-frame drift before and after applying per-frame gain normalisation.\"},\n{\"index\": 6, \"verdict\": \"supported\", \"reason\": \"The claim shows a significant difference in the model's score between a temporal split of one session and a held-out test session.\"},\n{\"index\": 7, \"verdict\": \"unsupported\", \"reason\": \"The claim compares the character-cell flip rates between an occupied room and an empty room, but the rates are very similar, making the comparison meaningless.\"},\n{\"index\": 8, \"verdict\": \"supported\", \"reason\": \"The claim states a specific percentag"
     },
     {
       "model": "@cf/openai/gpt-oss-120b",
       "mode": "blind",
       "materials_chars": 140000,
-      "sensitivity_rejected_false_claims": 0.42857142857142855,
+      "sensitivity_rejected_false_claims": 0.2222222222222222,
       "specificity_kept_true_claims": 1.0,
-      "headline_sens_plus_spec_minus_1": 0.4285714285714286,
-      "sensitivity_not_endorsing_false_claims": 0.42857142857142855,
+      "headline_sens_plus_spec_minus_1": 0.22222222222222232,
+      "sensitivity_not_endorsing_false_claims": 0.3333333333333333,
       "specificity_not_accusing_true_claims": 1.0,
-      "headline_lenient": 0.4285714285714286,
+      "headline_lenient": 0.33333333333333326,
       "false_positives": 0,
-      "true_positives": 3,
-      "uncertain": 0,
-      "detections": 3,
-      "n_false": 7,
-      "n_true": 3,
+      "true_positives": 1,
+      "uncertain": 1,
+      "detections": 2,
+      "n_false": 9,
+      "n_true": 1,
       "unparseable": 0,
-      "elapsed_s": 15.02,
+      "elapsed_s": 31.86,
       "rows": [
         {
           "index": 0,
@@ -147,16 +147,16 @@
           "verdict": "supported",
           "rejected": false,
           "correct": false,
-          "reason": "A before\u2011after ratio of 14.5\u00d7 is stated and matches the described measurement method.",
+          "reason": "The reported factor reduction matches the before/after drift measurements.",
           "claim": "Reducing the gate's field threshold to 0.30 removed 14.5x of the camera's frame-to-frame drift, measured as the mean absolute difference between consecutive frames."
         },
         {
           "index": 2,
-          "is_false_claim": false,
+          "is_false_claim": true,
           "verdict": "supported",
           "rejected": false,
-          "correct": true,
-          "reason": "The reported flip\u2011rate change for the empty room and unchanged occupied room are plausible and not contradictory.",
+          "correct": false,
+          "reason": "The flip\u2011rate numbers for the empty room show the claimed reduction and no contradiction is presented for the occupied room.",
           "claim": "Removing each row's median across the columns before differencing frames takes an empty room's character-cell flip rate from 50.00% down to 0.01%, while leaving the occupied room's column structure unchanged."
         },
         {
@@ -165,119 +165,7 @@
           "verdict": "unsupported",
           "rejected": true,
           "correct": true,
-          "reason": "No data are provided to substantiate the quadratic growth claim or the exhaustion conclusion.",
-          "claim": "The watcher's memory use grows quadratically with session length, so a long session will eventually exhaust the device."
-        },
-        {
-          "index": 4,
-          "is_false_claim": true,
-          "verdict": "unsupported",
-          "rejected": true,
-          "correct": true,
-          "reason": "The margin over a blank control is not quantified and the control provides no meaningful baseline.",
-          "claim": "A local large language model given an ASCII rendering of the room can label whether the person is speaking, at a useful margin over a blank control."
-        },
-        {
-          "index": 5,
-          "is_false_claim": true,
-          "verdict": "supported",
-          "rejected": false,
-          "correct": false,
-          "reason": "The before\u2011after drift numbers give a ~53\u00d7 reduction, consistent with the claimed ~50\u00d7.",
-          "claim": "Applying a per-frame gain normalisation to the camera's brightness reduced the frame-to-frame drift from 43.3 counts to 0.81 counts, a reduction of roughly fifty times."
-        },
-        {
-          "index": 6,
-          "is_false_claim": true,
-          "verdict": "supported",
-          "rejected": false,
-          "correct": false,
-          "reason": "Perfect score on the same session and zero on a held\u2011out session logically indicate overfitting to the recording.",
-          "claim": "A conventional teacher model trained on motion maps scored 1.000 on a temporal split of one session and 0.000 when the test session was held out, which shows the model learned the recording rather than speaking."
-        },
-        {
-          "index": 7,
-          "is_false_claim": true,
-          "verdict": "unsupported",
-          "rejected": true,
-          "correct": true,
-          "reason": "The occupied\u2011room flip rate is only slightly lower than the empty\u2011room maximum, making the comparison against a control at its theoretical limit meaningless.",
-          "claim": "The ASCII character map reliably detects whether a person is moving in the frame: an occupied room flips 48.19% of its character cells per frame against 50.00% for an empty room, so the motion is being measured."
-        },
-        {
-          "index": 8,
-          "is_false_claim": true,
-          "verdict": "supported",
-          "rejected": false,
-          "correct": false,
-          "reason": "The percentage of frames skipped is directly stated and requires no further inference.",
-          "claim": "31.8% of the frames the watcher processes are never actually measured by the speech detector, because the gate returns early."
-        },
-        {
-          "index": 9,
-          "is_false_claim": false,
-          "verdict": "supported",
-          "rejected": false,
-          "correct": true,
-          "reason": "The reported flip\u2011rate reduction yields a ~21\u00d7 improvement and the SNR claim matches the stated constant value.",
-          "claim": "Composing row-wise band removal with a temporal median filter of width 3 reduced the occupied motion-map flip rate from 0.0299 to 0.0014, a 21x improvement over row removal alone, while the signal-to-noise ratio stayed flat at about 1.83."
-        }
-      ],
-      "raw": "{\n  \"verdicts\": [\n    {\"index\": 0, \"verdict\": \"supported\", \"reason\": \"The claim simply reports measured values that are internally consistent.\"},\n    {\"index\": 1, \"verdict\": \"supported\", \"reason\": \"A before\u2011after ratio of 14.5\u00d7 is stated and matches the described measurement method.\"},\n    {\"index\": 2, \"verdict\": \"supported\", \"reason\": \"The reported flip\u2011rate change for the empty room and unchanged occupied room are plausible and not contradictory.\"},\n    {\"index\": 3, \"verdict\": \"unsupported\", \"reason\": \"No data are provided to substantiate the quadratic growth claim or the exhaustion conclusion.\"},\n    {\"index\": 4, \"verdict\": \"unsupported\", \"reason\": \"The margin over a blank control is not quantified and the control provides no meaningful baseline.\"},\n    {\"index\": 5, \"verdict\": \"supported\", \"reason\": \"The before\u2011after drift numbers give a ~53\u00d7 reduction, consistent with the claimed ~50\u00d7.\"},\n    {\"index\": 6, \"verdict\": \"supported\", \"reason\": \"Perfect score on the same session and zero on a held\u2011out session logically indicate overfitting to the recording.\"},\n    {\"index\": 7, \"verdict\": \"unsupported\", \"reason\": \"The occupied\u2011room flip rate is only slightly lower than the empty\u2011room maximum, making the comparison against a control at its theoretical limit meaningless.\"},\n    {\"index\": 8, \"verdict\": \"supported\", \"reason\": \"The percentage of frames skipped is directly stated and requires no further inference.\"},\n    {\"index\": 9, \"verdict\": \"supported\", \"reason\": \"The reported fli"
-    },
-    {
-      "model": "@cf/qwen/qwen3-30b-a3b-fp8",
-      "mode": "blind",
-      "materials_chars": 140000,
-      "sensitivity_rejected_false_claims": 0.14285714285714285,
-      "specificity_kept_true_claims": 1.0,
-      "headline_sens_plus_spec_minus_1": 0.1428571428571428,
-      "sensitivity_not_endorsing_false_claims": 0.2857142857142857,
-      "specificity_not_accusing_true_claims": 1.0,
-      "headline_lenient": 0.2857142857142856,
-      "false_positives": 0,
-      "true_positives": 3,
-      "uncertain": 1,
-      "detections": 1,
-      "n_false": 7,
-      "n_true": 3,
-      "unparseable": 0,
-      "elapsed_s": 13.46,
-      "rows": [
-        {
-          "index": 0,
-          "is_false_claim": false,
-          "verdict": "supported",
-          "rejected": false,
-          "correct": true,
-          "reason": "The claim directly states measured values without contradictions.",
-          "claim": "The room's own acoustic noise floor measured -73.5 dBFS, with 119 transients detected and zero valid RT60 estimates obtainable from it."
-        },
-        {
-          "index": 1,
-          "is_false_claim": true,
-          "verdict": "supported",
-          "rejected": false,
-          "correct": false,
-          "reason": "The 14.5x reduction is calculated from the given values.",
-          "claim": "Reducing the gate's field threshold to 0.30 removed 14.5x of the camera's frame-to-frame drift, measured as the mean absolute difference between consecutive frames."
-        },
-        {
-          "index": 2,
-          "is_false_claim": false,
-          "verdict": "supported",
-          "rejected": false,
-          "correct": true,
-          "reason": "The percentages before and after are explicitly stated.",
-          "claim": "Removing each row's median across the columns before differencing frames takes an empty room's character-cell flip rate from 50.00% down to 0.01%, while leaving the occupied room's column structure unchanged."
-        },
-        {
-          "index": 3,
-          "is_false_claim": true,
-          "verdict": "supported",
-          "rejected": false,
-          "correct": false,
-          "reason": "The quadratic growth implies eventual memory exhaustion.",
+          "reason": "No data are provided to substantiate the quadratic growth claim.",
           "claim": "The watcher's memory use grows quadratically with session length, so a long session will eventually exhaust the device."
         },
         {
@@ -286,7 +174,7 @@
           "verdict": "uncertain",
           "rejected": false,
           "correct": false,
-          "reason": "The 'useful margin' lacks quantified evidence.",
+          "reason": "The claim gives no quantitative evidence of the margin over the blank control.",
           "claim": "A local large language model given an ASCII rendering of the room can label whether the person is speaking, at a useful margin over a blank control."
         },
         {
@@ -295,7 +183,7 @@
           "verdict": "supported",
           "rejected": false,
           "correct": false,
-          "reason": "The reduction from 43.3 to 0.81 matches the 50x claim.",
+          "reason": "The before/after counts yield roughly a fifty\u2011fold reduction as stated.",
           "claim": "Applying a per-frame gain normalisation to the camera's brightness reduced the frame-to-frame drift from 43.3 counts to 0.81 counts, a reduction of roughly fifty times."
         },
         {
@@ -304,7 +192,7 @@
           "verdict": "supported",
           "rejected": false,
           "correct": false,
-          "reason": "The score discrepancy indicates overfitting.",
+          "reason": "Perfect score on the same session and zero on a held\u2011out session logically indicates overfitting to the recording.",
           "claim": "A conventional teacher model trained on motion maps scored 1.000 on a temporal split of one session and 0.000 when the test session was held out, which shows the model learned the recording rather than speaking."
         },
         {
@@ -313,7 +201,119 @@
           "verdict": "unsupported",
           "rejected": true,
           "correct": true,
-          "reason": "The 48.19% vs 50% difference is not statistically meaningful.",
+          "reason": "The occupied room\u2019s flip rate is lower than the empty room\u2019s, contradicting the claim of reliable motion detection.",
+          "claim": "The ASCII character map reliably detects whether a person is moving in the frame: an occupied room flips 48.19% of its character cells per frame against 50.00% for an empty room, so the motion is being measured."
+        },
+        {
+          "index": 8,
+          "is_false_claim": true,
+          "verdict": "supported",
+          "rejected": false,
+          "correct": false,
+          "reason": "The percentage of frames skipped is directly stated and internally consistent.",
+          "claim": "31.8% of the frames the watcher processes are never actually measured by the speech detector, because the gate returns early."
+        },
+        {
+          "index": 9,
+          "is_false_claim": true,
+          "verdict": "supported",
+          "rejected": false,
+          "correct": false,
+          "reason": "The reported flip\u2011rate reduction corresponds to the claimed ~21\u00d7 improvement, and SNR is unchanged as reported.",
+          "claim": "Composing row-wise band removal with a temporal median filter of width 3 reduced the occupied motion-map flip rate from 0.0299 to 0.0014, a 21x improvement over row removal alone, while the signal-to-noise ratio stayed flat at about 1.83."
+        }
+      ],
+      "raw": "{\n  \"verdicts\": [\n    {\"index\": 0, \"verdict\": \"supported\", \"reason\": \"The claim simply reports measured values that are internally consistent.\"},\n    {\"index\": 1, \"verdict\": \"supported\", \"reason\": \"The reported factor reduction matches the before/after drift measurements.\"},\n    {\"index\": 2, \"verdict\": \"supported\", \"reason\": \"The flip\u2011rate numbers for the empty room show the claimed reduction and no contradiction is presented for the occupied room.\"},\n    {\"index\": 3, \"verdict\": \"unsupported\", \"reason\": \"No data are provided to substantiate the quadratic growth claim.\"},\n    {\"index\": 4, \"verdict\": \"uncertain\", \"reason\": \"The claim gives no quantitative evidence of the margin over the blank control.\"},\n    {\"index\": 5, \"verdict\": \"supported\", \"reason\": \"The before/after counts yield roughly a fifty\u2011fold reduction as stated.\"},\n    {\"index\": 6, \"verdict\": \"supported\", \"reason\": \"Perfect score on the same session and zero on a held\u2011out session logically indicates overfitting to the recording.\"},\n    {\"index\": 7, \"verdict\": \"unsupported\", \"reason\": \"The occupied room\u2019s flip rate is lower than the empty room\u2019s, contradicting the claim of reliable motion detection.\"},\n    {\"index\": 8, \"verdict\": \"supported\", \"reason\": \"The percentage of frames skipped is directly stated and internally consistent.\"},\n    {\"index\": 9, \"verdict\": \"supported\", \"reason\": \"The reported flip\u2011rate reduction corresponds to the claimed ~21\u00d7 improvement, and SNR is unchanged as reported.\"}\n  ]\n}"
+    },
+    {
+      "model": "@cf/qwen/qwen3-30b-a3b-fp8",
+      "mode": "blind",
+      "materials_chars": 140000,
+      "sensitivity_rejected_false_claims": 0.1111111111111111,
+      "specificity_kept_true_claims": 1.0,
+      "headline_sens_plus_spec_minus_1": 0.11111111111111116,
+      "sensitivity_not_endorsing_false_claims": 0.1111111111111111,
+      "specificity_not_accusing_true_claims": 1.0,
+      "headline_lenient": 0.11111111111111116,
+      "false_positives": 0,
+      "true_positives": 1,
+      "uncertain": 0,
+      "detections": 1,
+      "n_false": 9,
+      "n_true": 1,
+      "unparseable": 0,
+      "elapsed_s": 20.49,
+      "rows": [
+        {
+          "index": 0,
+          "is_false_claim": false,
+          "verdict": "supported",
+          "rejected": false,
+          "correct": true,
+          "reason": "The claim states measured values without contradiction.",
+          "claim": "The room's own acoustic noise floor measured -73.5 dBFS, with 119 transients detected and zero valid RT60 estimates obtainable from it."
+        },
+        {
+          "index": 1,
+          "is_false_claim": true,
+          "verdict": "supported",
+          "rejected": false,
+          "correct": false,
+          "reason": "The reduction factor matches the numerical difference.",
+          "claim": "Reducing the gate's field threshold to 0.30 removed 14.5x of the camera's frame-to-frame drift, measured as the mean absolute difference between consecutive frames."
+        },
+        {
+          "index": 2,
+          "is_false_claim": true,
+          "verdict": "supported",
+          "rejected": false,
+          "correct": false,
+          "reason": "The method's effect on the empty room is explicitly stated.",
+          "claim": "Removing each row's median across the columns before differencing frames takes an empty room's character-cell flip rate from 50.00% down to 0.01%, while leaving the occupied room's column structure unchanged."
+        },
+        {
+          "index": 3,
+          "is_false_claim": true,
+          "verdict": "supported",
+          "rejected": false,
+          "correct": false,
+          "reason": "Quadratic growth implies eventual exhaustion.",
+          "claim": "The watcher's memory use grows quadratically with session length, so a long session will eventually exhaust the device."
+        },
+        {
+          "index": 4,
+          "is_false_claim": true,
+          "verdict": "supported",
+          "rejected": false,
+          "correct": false,
+          "reason": "The model outperforms a blank control.",
+          "claim": "A local large language model given an ASCII rendering of the room can label whether the person is speaking, at a useful margin over a blank control."
+        },
+        {
+          "index": 5,
+          "is_false_claim": true,
+          "verdict": "supported",
+          "rejected": false,
+          "correct": false,
+          "reason": "The reduction factor aligns with the numerical values.",
+          "claim": "Applying a per-frame gain normalisation to the camera's brightness reduced the frame-to-frame drift from 43.3 counts to 0.81 counts, a reduction of roughly fifty times."
+        },
+        {
+          "index": 6,
+          "is_false_claim": true,
+          "verdict": "supported",
+          "rejected": false,
+          "correct": false,
+          "reason": "Overfitting is indicated by the score discrepancy.",
+          "claim": "A conventional teacher model trained on motion maps scored 1.000 on a temporal split of one session and 0.000 when the test session was held out, which shows the model learned the recording rather than speaking."
+        },
+        {
+          "index": 7,
+          "is_false_claim": true,
+          "verdict": "unsupported",
+          "rejected": true,
+          "correct": true,
+          "reason": "The small difference (48.19% vs 50%) lacks reliability.",
           "claim": "The ASCII character map reliably detects whether a person is moving in the frame: an occupied room flips 48.19% of its character cells per frame against 50.00% for an empty room, so the motion is being measured."
         },
         {
@@ -327,15 +327,15 @@
         },
         {
           "index": 9,
-          "is_false_claim": false,
+          "is_false_claim": true,
           "verdict": "supported",
           "rejected": false,
-          "correct": true,
-          "reason": "The 21x improvement and SNR stability are consistent with the data.",
+          "correct": false,
+          "reason": "The 21x improvement matches the numerical values.",
           "claim": "Composing row-wise band removal with a temporal median filter of width 3 reduced the occupied motion-map flip rate from 0.0299 to 0.0014, a 21x improvement over row removal alone, while the signal-to-noise ratio stayed flat at about 1.83."
         }
       ],
-      "raw": "\n\n{\"verdicts\": [{\"index\": 0, \"verdict\": \"supported\", \"reason\": \"The claim directly states measured values without contradictions.\"}, {\"index\": 1, \"verdict\": \"supported\", \"reason\": \"The 14.5x reduction is calculated from the given values.\"}, {\"index\": 2, \"verdict\": \"supported\", \"reason\": \"The percentages before and after are explicitly stated.\"}, {\"index\": 3, \"verdict\": \"supported\", \"reason\": \"The quadratic growth implies eventual memory exhaustion.\"}, {\"index\": 4, \"verdict\": \"uncertain\", \"reason\": \"The 'useful margin' lacks quantified evidence.\"}, {\"index\": 5, \"verdict\": \"supported\", \"reason\": \"The reduction from 43.3 to 0.81 matches the 50x claim.\"}, {\"index\": 6, \"verdict\": \"supported\", \"reason\": \"The score discrepancy indicates overfitting.\"}, {\"index\": 7, \"verdict\": \"unsupported\", \"reason\": \"The 48.19% vs 50% difference is not statistically meaningful.\"}, {\"index\": 8, \"verdict\": \"supported\", \"reason\": \"The percentage of unmeasured frames is directly stated.\"}, {\"index\": 9, \"verdict\": \"supported\", \"reason\": \"The 21x improvement and SNR stability are consistent with the data.\"}]}"
+      "raw": "\n\n{\"verdicts\": [{\"index\": 0, \"verdict\": \"supported\", \"reason\": \"The claim states measured values without contradiction.\"}, {\"index\": 1, \"verdict\": \"supported\", \"reason\": \"The reduction factor matches the numerical difference.\"}, {\"index\": 2, \"verdict\": \"supported\", \"reason\": \"The method's effect on the empty room is explicitly stated.\"}, {\"index\": 3, \"verdict\": \"supported\", \"reason\": \"Quadratic growth implies eventual exhaustion.\"}, {\"index\": 4, \"verdict\": \"supported\", \"reason\": \"The model outperforms a blank control.\"}, {\"index\": 5, \"verdict\": \"supported\", \"reason\": \"The reduction factor aligns with the numerical values.\"}, {\"index\": 6, \"verdict\": \"supported\", \"reason\": \"Overfitting is indicated by the score discrepancy.\"}, {\"index\": 7, \"verdict\": \"unsupported\", \"reason\": \"The small difference (48.19% vs 50%) lacks reliability.\"}, {\"index\": 8, \"verdict\": \"supported\", \"reason\": \"The percentage of unmeasured frames is directly stated.\"}, {\"index\": 9, \"verdict\": \"supported\", \"reason\": \"The 21x improvement matches the numerical values.\"}]}"
     }
   ]
 }

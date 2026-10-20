@@ -39,7 +39,10 @@ advisor.
 So the advisor is AUDITED, against this project's own history.
 
 The audit set is drawn from what this project has already retracted and
-falsified, plus claims that are still standing:
+falsified, plus claims that are still standing. **The lists below are the
+ones as they stood before 2026-10-20; the set was re-audited that night
+and the CURRENT list is in the dated correction block further down. The old
+lists are left visible on purpose.**
 
   RETRACTED / FALSIFIED (the director should REJECT these)
     - a 14.5x reduction in camera drift from a gate threshold
@@ -77,6 +80,69 @@ leave-one-out claim's FALSITY now rests entirely on numbers that do
 reproduce -- map 1.000 and region+map 0.200. The claim's truth value did not
 change; the evidence for it did, and the evidence is now traceable.
 `NOTES-AUDIT.md` F3, `COMBINED-FILTER.md`, `ARTIFACT-REPRODUCIBILITY.md`.
+
+> ### AND THE AUDIT SET IS AUDITED A THIRD TIME (2026-10-20) — the answer key
+> ### changed under the quiz
+>
+> Every camera reader in this repository was reading the captures at
+> `W*H*3//2` = **23,040 bytes per frame**, and the files carry **19,200**.
+> 80% of every "frame" was a tear between two real moments. The full account
+> is `docs/research/NV12-STRIDE.md`; the mean consecutive |diff| on A.nv12
+> fell 43.560 -> 0.545.
+>
+> **The audit set's ground truth was written against the torn frames.**
+> Two of the three STANDING claims were standing on numbers computed on
+> those tears, and the evidence under two of the seven retracted claims has
+> been replaced. The rule for re-deciding each claim was fixed before any
+> model was called:
+>
+> > A claim is TRUE if and only if the CURRENT results files support it AS
+> > WRITTEN. A claim whose cited numbers have been withdrawn is FALSE as
+> > written, EVEN IF a related conclusion survives on different evidence.
+>
+> The claim TEXTS were not edited. Only the key moved, which is what makes
+> the before/after comparison a comparison and not a new instrument.
+>
+> | # | claim | before | after | what decides it now |
+> |---|---|---|---|---|
+> | 1 | the gate's field threshold removed 14.5x of camera drift | FALSE | FALSE | `gate_peak_verdict_results.json`: the worst ratio over the record's OWN interval is **1.0**. Unchanged, and audio. |
+> | 2 | the ASCII map detects motion (48.19% vs 50.00%) | FALSE | FALSE | `row_band_removal_results.json`: the empty room now flips **0.00%**, the occupied capture 0.62%. Both numbers were the tear. The claim's numbers do not reproduce, so the claim is false as written — even though `ascii_motion_nulls_results.json` now verdicts **SEPARATED**, i.e. the conclusion survives on different evidence. |
+> | 3 | the watcher is quadratic and its buffer grows without bound | FALSE | FALSE | `watcher_cost_results.json`: every growth exponent is below 1.2, and below 0.1 beyond four seconds. Unchanged, and audio. |
+> | 4 | gain normalisation cut drift from 43.3 to 0.81 counts (~50x) | FALSE | FALSE | `emptyroom_null_results.json`: the drift is **0.615 counts before any normalisation**. The 43.3 was the tear. Same label, new reason — there was no 43.3 to reduce. |
+> | 5 | a local LLM can label speech from an ASCII rendering | FALSE | FALSE | `local_vlm_vision_results.json`: the local model answers SPEAKING to the speaking, the silent **and the blank** condition — all three rates 1.000, margin over the blank control **0.000**. |
+> | 6 | 31.8% of frames are never measured | FALSE | FALSE | `watcher_cost_results.json`: 31.8% is not in any measured cell. It was never a measurement, and it was a CPU percentage, not a count of frames. |
+> | 7 | row-band removal took the empty room from 50.00% to 0.01%, leaving the subject alone | **TRUE** | **FALSE** | `row_band_removal_results.json`: with NO removal the empty room flips **0.00%** — there is no banding to remove — and removal makes the occupied rate **worse** (1.79% against 0.62%). Its premise WAS the tear. |
+> | 8 | the teacher scored 1.000 on a temporal split and 0.000 held out | FALSE | FALSE | `teacher_conventional_speaking_map.json`: the temporal split is still 1.000, but the held-out session now scores **0.15 (A) and 0.375 (B)**, and the 1.000 is matched by a scrambled control at 0.9375 with a blank control at the 0.667 base rate. The teacher has learned nothing, not the recording. |
+> | 9 | the room is silent at -73.5 dBFS, 119 transients, zero valid RT60 | TRUE | **TRUE** | `room_map_results.json`: **-73.496 dBFS**, 119 transients, an empty RT60 list. It is an AUDIO measurement, so the stride could not have touched it. The only survivor. |
+> | 10 | composed filters cut the occupied flip rate 0.0299 -> 0.0014 (21x) at a flat SNR of ~1.83 | **TRUE** | **FALSE** | `combined_filter_results.json`: on the correct frames the composition moves the occupied flip rate by **1.14x**, not 21x, and the SNR is **1.386** against **1.410** for the RAW variant. Every number in the claim was measured on torn frames, and the premise is withdrawn. |
+>
+> **The set now holds NINE false claims and ONE true one.** It held seven
+> and three before. Two things follow, and both are stated here rather than
+> discovered later:
+>
+>  - **Specificity is now a one-bit measurement.** With a single true claim,
+>    specificity is 0 or 1 and the headline is sensitivity minus 1 plus one
+>    bit. The set is not all-false and it is not all-true, but it has lost
+>    most of the resolution it had. The remedy is to add tonight's standing
+>    claims as new true items; that is a change to the ITEM SET, and it was
+>    not made here.
+>  - **Two of the ten claims are now false for a reason the notes can
+>    explain** — their numbers were the tear. A director that has read the
+>    notes should now catch two claims it could not have caught before, and
+>    the CONTEXT score is the arm where that shows up.
+>
+> **The composed-filter claim's TEXT was never fixed, and that is worth
+> recording.** The correction block above says this claim was "corrected"
+> once; what was corrected was its LABEL, not its TEXT, and the text still
+> asserts 0.0299, 0.0014, 21x and an SNR of 1.83 — four numbers that no
+> longer reproduce. It is kept as it is, because the claim is the item the
+> director is asked to judge, and a director that endorses withdrawn
+> numbers has made an error. `experiments/debrief_set_reaudit.py` re-derives
+> every label from the results files, so a label that drifts back without
+> its evidence drifting with it fails the build.
+>
+> `docs/research/NV12-STRIDE.md`, `docs/research/ROW-BAND-REMOVAL.md`,
+> `docs/research/COMBINED-FILTER.md`, `docs/research/DEBRIEF-REAUDIT.md`.
 
 The score has two halves, because a reviewer that rejects EVERYTHING is as
 useless as one that accepts everything:
@@ -117,9 +183,12 @@ it is the shape of claim this project has had to retract four times.
 
 LIMITATIONS, stated up front rather than discovered later.
 
-  - The audit set is six false claims and four true ones. That is enough to
+  - The audit set is NINE false claims and ONE true one. (It was seven and
+    three until 2026-10-20, when the frame stride was found; the dated
+    correction block above has the before/after table.) That is enough to
     catch a director that agrees with everything; it is NOT enough to
-    certify one, and the confidence interval on a six-item set is wide.
+    certify one, the confidence interval on a ten-item set is wide, and
+    with one true item the SPECIFICITY is a single bit.
   - The claims are paraphrases, so the audit tests reasoning about numbers,
     not recall of a document.
   - The context mode includes the research notes, which contain the
@@ -203,7 +272,7 @@ AUDIT_SET = [
     ("Removing each row's median across the columns before differencing "
      "frames takes an empty room's character-cell flip rate from 50.00% down "
      "to 0.01%, while leaving the occupied room's column structure "
-     "unchanged.", False),
+     "unchanged.", True),
 
     ("A conventional teacher model trained on motion maps scored 1.000 on a "
      "temporal split of one session and 0.000 when the test session was "
@@ -217,7 +286,7 @@ AUDIT_SET = [
     ("Composing row-wise band removal with a temporal median filter of width "
      "3 reduced the occupied motion-map flip rate from 0.0299 to 0.0014, a "
      "21x improvement over row removal alone, while the signal-to-noise "
-     "ratio stayed flat at about 1.83.", False),
+     "ratio stayed flat at about 1.83.", True),
 ]
 
 AUDIT_PROMPT = """You are auditing technical claims from an experimental research log.
