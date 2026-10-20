@@ -1239,3 +1239,98 @@ already item 11 of the written adoption plan, so the proposal is stable
 because the *material* says so. The director is faithfully echoing the
 plan, not independently choosing — which is what this project already
 believed, now measured.
+
+## 2026-10-19 (late) — the dialogue intake, fixed: it had been rejecting a correct recording
+
+`docs/research/DIALOGUE-INTAKE.md` audited the tool that will read Casey's
+two-microphone recording and found it would **reject a recording made exactly
+to its own protocol**. That is the worst kind of bug in a gate: it does not
+let bad data through, it stops good data. All seven of the audit's P0–P3
+items are now fixed, and every fix was measured against the behaviour it
+replaces (`experiments/dialogue_intake_fixes.py` →
+`experiments/dialogue_intake_fixes_results.json`).
+
+**The hand-off rule was counting the wrong thing.** It asked whether channel
+B was loud at the instant channel A's silence ENDED. A canonical hand-off —
+A stops, B takes the floor, A stays quiet — has B starting just after that
+instant and finishing before the next silence closes, so it scored **zero**.
+It scored the *barge-back* instead, which is the rare shape. Measured on the
+protocol-strict corpus: **8 canonical + 3 barge-in = 11 hand-offs are in it;
+the old rule counted 1, the new rule counts 11.** The rule now asks whether B
+is loud *during* A's silence, with a 0.150 s minimum (the old rule counted a
+20 ms dip) and the clap excluded (it is loud in both channels by construction,
+so it sits inside the lead-in silence — exactly one false hand-off per
+scene).
+
+**The clap was never read.** The protocol asks for one clap per scene
+precisely so the two files can be aligned without a shared clock, and nothing
+in the repo read it. Now they are: the offset is recovered exactly at
+0/40/120/300/600 ms (peak r 0.7586) and the correction is applied *before*
+any cross-channel number. The old rule's hand-off count flipped to zero at
+300 ms and 600 ms; the new one never flips.
+
+**The cross-talk statistic could not be gated on.** The old one separated a
+contaminated corpus from a clean one by **0.0067** — a margin far too small
+to threshold. The new one asks the question the gate wants ("of the time A is
+loud, how much of it is B loud too?") and separates by **0.6939** on the same
+signals: clean 0.000–0.306, contaminated 1.000. It is gated at 0.60.
+
+**The level floor was 23.5 dB below an ordinary room.** `energy.ABS_FLOOR` is
+1e-4 RMS (≈ −80 dBFS); a lived-in room measures 1.5e-3. So an empty room was
+reported as **100% signal and 100% overlap** — "a full minute of two people
+talking over each other" out of nothing. The floor is now *measured*, from the
+place the protocol says to measure it from: the room-tone scene, "the noise
+floor every other number is measured against". An empty room now reads
+`both_loud_frac` **0.0 in a quiet room and 0.0 in an ordinary one**, and the
+numbers are room-independent.
+
+Three obvious rules were measured and two of them fail, which is why the
+measure that survives is the one the protocol already specifies: a threshold
+at a fraction of the file's **peak** works on continuous speech and fails on
+room tone; a threshold at a multiple of the channel's **quietest frames**
+fails the other way round (0.2% detected in scene 4); and the watcher's
+**adaptive** threshold has the same failure on continuous speech (14% in
+scene 4), because a local noise-floor estimator in a room with no silence
+estimates the floor from the voice.
+
+**The exit code did not carry the verdict.** `main()` returned `None` and
+exited 0 while reporting "NOT YET USABLE", so a pipeline could not tell a
+rejected corpus from an accepted one. Now: **0 = usable, 1 = not yet usable,
+2 = nothing recorded**. The dead `ok` variable — the matched-pairs verdict
+that was computed and never used — is gone; the verdict it computed is what
+the gate uses. The four failures that were visible in the report and invisible
+in the verdict are gates now, with the two that needed it scoped: "channel B
+is silent" fires only in the scenes where the protocol has B speaking (scene 7
+is *specified* to have a silent B), and "the channel is low" is a statement
+about the balance between the two channels of a pair.
+
+**And the length gate wanted 600 s while the protocol's eight scenes are
+1230 s** — a corpus that satisfied the protocol tripped the gate.
+
+`src/wavio.py` gained the **writer** the protocol asked for and nothing in the
+repo could produce (every synthetic corpus in this project carried its own
+copy), and it now keeps the file's **real sample rate**: `read_wav` resamples,
+so before this the original rate was unrecoverable and every file reported
+16000.
+
+**What did not get fixed, because it cannot be.** The drift between two
+recorders **cannot be measured from one clap** — the two channels speak
+different words, so their envelopes are uncorrelated everywhere except at the
+clap. The tool reports a **bound** (2.0 ms at 100 ppm over 20 s; 250 ms at the
+audit's deliberately extreme 1.25%) and says in the report that it is a bound.
+The audit asked for a measurement; a bound plus a statement of why a
+measurement is impossible is what the data actually supports.
+
+Two new findings came out of fixing the old ones, and both are written down
+rather than quietly fixed: the protocol's scene names are **zero-padded**
+(`scene01_free`), and the first version of the scene-number pattern found
+**nothing** in a padded name, so the "is B supposed to speak here" gate
+silently did not fire for five of the eight scenes; and a noise reference
+taken from the wrong scene is worse than none — the first fallback picked the
+*quietest scene*, which is scene 7, whose channel A is the quietest channel
+in the corpus for the wrong reason (it is mostly **speech**).
+
+The intake **has still never seen a real file**. Everything above is
+synthetic with known truth, exercising the gates. What it means is that the
+recording is no longer at risk of being thrown away by a tool that could not
+see what it contained.

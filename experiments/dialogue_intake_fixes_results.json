@@ -1,0 +1,784 @@
+{
+  "what_changed": "experiments/dialogue_intake.py, 2026-10-19",
+  "hand_off_rule": {
+    "canonical": {
+      "old_rule_hand_offs": 0,
+      "new_rule_hand_offs": 1,
+      "silences": 2,
+      "alignment_applied": true
+    },
+    "canonical_then_return": {
+      "old_rule_hand_offs": 0,
+      "new_rule_hand_offs": 1,
+      "silences": 3,
+      "alignment_applied": true
+    },
+    "barge_back": {
+      "old_rule_hand_offs": 1,
+      "new_rule_hand_offs": 1,
+      "silences": 3,
+      "alignment_applied": true
+    },
+    "expected": {
+      "canonical": 1,
+      "canonical_then_return": 1,
+      "barge_back": 1,
+      "note": "the old rule scored the canonical shapes ZERO and the barge-back shape 2 -- it was counting the rare shape and missing the common one"
+    }
+  },
+  "protocol_strict": {
+    "hand_offs_in_the_corpus": {
+      "canonical": 8,
+      "barge_in": 3,
+      "total": 11,
+      "per_scene": {
+        "scene01_free": {
+          "canonical": 4,
+          "barge_in": 0
+        },
+        "scene02_qa": {
+          "canonical": 2,
+          "barge_in": 0
+        },
+        "scene03_think": {
+          "canonical": 2,
+          "barge_in": 0
+        },
+        "scene06_interrupt": {
+          "canonical": 0,
+          "barge_in": 3
+        }
+      }
+    },
+    "old_rule_hand_offs": 1,
+    "new_rule_hand_offs": 11,
+    "status": "NOT YET USABLE",
+    "exit_code": 1,
+    "unmet": [
+      "only 96s of audio; the protocol's eight scenes are 1230s"
+    ],
+    "per_scene": [
+      {
+        "scene": "scene01_free",
+        "hand_offs": 4,
+        "silences": 5
+      },
+      {
+        "scene": "scene02_qa",
+        "hand_offs": 2,
+        "silences": 4
+      },
+      {
+        "scene": "scene03_think",
+        "hand_offs": 2,
+        "silences": 3
+      },
+      {
+        "scene": "scene04_fillers",
+        "hand_offs": 0,
+        "silences": 2
+      },
+      {
+        "scene": "scene05_backchannel",
+        "hand_offs": 0,
+        "silences": 3
+      },
+      {
+        "scene": "scene06_interrupt",
+        "hand_offs": 3,
+        "silences": 5
+      },
+      {
+        "scene": "scene07_alone",
+        "hand_offs": 0,
+        "silences": 4
+      },
+      {
+        "scene": "scene08_roomtone",
+        "hand_offs": 0,
+        "silences": 1
+      }
+    ]
+  },
+  "cross_talk": {
+    "scenes": [
+      {
+        "scene": "scene01_free",
+        "clean": {
+          "new_b_loud_when_a_loud": 0.0,
+          "legacy_corr": null
+        },
+        "crosstalk": {
+          "new_b_loud_when_a_loud": 1.0,
+          "legacy_corr": 0.9932
+        }
+      },
+      {
+        "scene": "scene02_qa",
+        "clean": {
+          "new_b_loud_when_a_loud": 0.0,
+          "legacy_corr": null
+        },
+        "crosstalk": {
+          "new_b_loud_when_a_loud": 1.0,
+          "legacy_corr": 0.9897
+        }
+      },
+      {
+        "scene": "scene03_think",
+        "clean": {
+          "new_b_loud_when_a_loud": 0.0,
+          "legacy_corr": null
+        },
+        "crosstalk": {
+          "new_b_loud_when_a_loud": 1.0,
+          "legacy_corr": 0.9951
+        }
+      },
+      {
+        "scene": "scene04_fillers",
+        "clean": {
+          "new_b_loud_when_a_loud": 0.0,
+          "legacy_corr": null
+        },
+        "crosstalk": {
+          "new_b_loud_when_a_loud": 1.0,
+          "legacy_corr": 0.9984
+        }
+      },
+      {
+        "scene": "scene05_backchannel",
+        "clean": {
+          "new_b_loud_when_a_loud": 0.078,
+          "legacy_corr": 0.983
+        },
+        "crosstalk": {
+          "new_b_loud_when_a_loud": 1.0,
+          "legacy_corr": 0.9934
+        }
+      },
+      {
+        "scene": "scene06_interrupt",
+        "clean": {
+          "new_b_loud_when_a_loud": 0.3061,
+          "legacy_corr": 0.9738
+        },
+        "crosstalk": {
+          "new_b_loud_when_a_loud": 1.0,
+          "legacy_corr": 0.9908
+        }
+      },
+      {
+        "scene": "scene07_alone",
+        "clean": {
+          "new_b_loud_when_a_loud": 0.0,
+          "legacy_corr": null
+        },
+        "crosstalk": {
+          "new_b_loud_when_a_loud": 1.0,
+          "legacy_corr": 0.9933
+        }
+      },
+      {
+        "scene": "scene08_roomtone",
+        "clean": {
+          "new_b_loud_when_a_loud": null,
+          "legacy_corr": null
+        },
+        "crosstalk": {
+          "new_b_loud_when_a_loud": null,
+          "legacy_corr": null
+        }
+      }
+    ],
+    "new_statistic": {
+      "clean_min": 0.0,
+      "clean_max": 0.3061,
+      "crosstalk_min": 1.0,
+      "crosstalk_max": 1.0,
+      "separation": 0.6939,
+      "gate": 0.6
+    },
+    "legacy_statistic": {
+      "clean_min": 0.9738,
+      "clean_max": 0.983,
+      "crosstalk_min": 0.9897,
+      "crosstalk_max": 0.9984,
+      "separation": 0.0067
+    }
+  },
+  "level_floor": {
+    "rooms": {
+      "quiet_room_1e-5": {
+        "tone_rms": 1e-05,
+        "rows": [
+          {
+            "scene": "scene01_free",
+            "old": {
+              "signal_frame_frac_A": 0.3375,
+              "signal_frame_frac_B": 0.3042,
+              "both_loud_frac": 0.0042,
+              "either_loud_frac": 0.6388
+            },
+            "new": {
+              "signal_frame_frac_A": 0.3417,
+              "signal_frame_frac_B": 0.3083,
+              "both_loud_frac": 0.0
+            }
+          },
+          {
+            "scene": "scene02_qa",
+            "old": {
+              "signal_frame_frac_A": 0.3042,
+              "signal_frame_frac_B": 0.2708,
+              "both_loud_frac": 0.0042,
+              "either_loud_frac": 0.572
+            },
+            "new": {
+              "signal_frame_frac_A": 0.3063,
+              "signal_frame_frac_B": 0.2687,
+              "both_loud_frac": 0.0
+            }
+          },
+          {
+            "scene": "scene03_think",
+            "old": {
+              "signal_frame_frac_A": 0.1542,
+              "signal_frame_frac_B": 0.2042,
+              "both_loud_frac": 0.0042,
+              "either_loud_frac": 0.3549
+            },
+            "new": {
+              "signal_frame_frac_A": 0.1542,
+              "signal_frame_frac_B": 0.2104,
+              "both_loud_frac": 0.0
+            }
+          },
+          {
+            "scene": "scene04_fillers",
+            "old": {
+              "signal_frame_frac_A": 0.9042,
+              "signal_frame_frac_B": 0.0042,
+              "both_loud_frac": 0.0042,
+              "either_loud_frac": 0.9061
+            },
+            "new": {
+              "signal_frame_frac_A": 0.9021,
+              "signal_frame_frac_B": 0.0,
+              "both_loud_frac": 0.0
+            }
+          },
+          {
+            "scene": "scene05_backchannel",
+            "old": {
+              "signal_frame_frac_A": 0.8542,
+              "signal_frame_frac_B": 0.0646,
+              "both_loud_frac": 0.0647,
+              "either_loud_frac": 0.8559
+            },
+            "new": {
+              "signal_frame_frac_A": 0.8542,
+              "signal_frame_frac_B": 0.0667,
+              "both_loud_frac": 0.0667
+            }
+          },
+          {
+            "scene": "scene06_interrupt",
+            "old": {
+              "signal_frame_frac_A": 0.4042,
+              "signal_frame_frac_B": 0.3396,
+              "both_loud_frac": 0.1232,
+              "either_loud_frac": 0.6221
+            },
+            "new": {
+              "signal_frame_frac_A": 0.4083,
+              "signal_frame_frac_B": 0.3417,
+              "both_loud_frac": 0.125
+            }
+          },
+          {
+            "scene": "scene07_alone",
+            "old": {
+              "signal_frame_frac_A": 0.3708,
+              "signal_frame_frac_B": 0.0042,
+              "both_loud_frac": 0.0042,
+              "either_loud_frac": 0.3716
+            },
+            "new": {
+              "signal_frame_frac_A": 0.3729,
+              "signal_frame_frac_B": 0.0,
+              "both_loud_frac": 0.0
+            }
+          },
+          {
+            "scene": "scene08_roomtone",
+            "old": {
+              "signal_frame_frac_A": 0.0,
+              "signal_frame_frac_B": 0.0,
+              "both_loud_frac": 0.0,
+              "either_loud_frac": 0.0
+            },
+            "new": {
+              "signal_frame_frac_A": 0.0,
+              "signal_frame_frac_B": 0.0,
+              "both_loud_frac": 0.0
+            }
+          }
+        ],
+        "roomtone_scene_new": {
+          "signal_frame_frac_A": 0.0,
+          "signal_frame_frac_B": 0.0,
+          "both_loud_frac": 0.0
+        },
+        "roomtone_scene_old": {
+          "signal_frame_frac_A": 0.0,
+          "signal_frame_frac_B": 0.0,
+          "both_loud_frac": 0.0,
+          "either_loud_frac": 0.0
+        }
+      },
+      "ordinary_room_1.5e-3": {
+        "tone_rms": 0.0015,
+        "rows": [
+          {
+            "scene": "scene01_free",
+            "old": {
+              "signal_frame_frac_A": 1.0,
+              "signal_frame_frac_B": 1.0,
+              "both_loud_frac": 1.0,
+              "either_loud_frac": 1.0
+            },
+            "new": {
+              "signal_frame_frac_A": 0.3417,
+              "signal_frame_frac_B": 0.3083,
+              "both_loud_frac": 0.0
+            }
+          },
+          {
+            "scene": "scene02_qa",
+            "old": {
+              "signal_frame_frac_A": 1.0,
+              "signal_frame_frac_B": 1.0,
+              "both_loud_frac": 1.0,
+              "either_loud_frac": 1.0
+            },
+            "new": {
+              "signal_frame_frac_A": 0.3063,
+              "signal_frame_frac_B": 0.2687,
+              "both_loud_frac": 0.0
+            }
+          },
+          {
+            "scene": "scene03_think",
+            "old": {
+              "signal_frame_frac_A": 1.0,
+              "signal_frame_frac_B": 1.0,
+              "both_loud_frac": 1.0,
+              "either_loud_frac": 1.0
+            },
+            "new": {
+              "signal_frame_frac_A": 0.1542,
+              "signal_frame_frac_B": 0.2104,
+              "both_loud_frac": 0.0
+            }
+          },
+          {
+            "scene": "scene04_fillers",
+            "old": {
+              "signal_frame_frac_A": 1.0,
+              "signal_frame_frac_B": 1.0,
+              "both_loud_frac": 1.0,
+              "either_loud_frac": 1.0
+            },
+            "new": {
+              "signal_frame_frac_A": 0.9021,
+              "signal_frame_frac_B": 0.0,
+              "both_loud_frac": 0.0
+            }
+          },
+          {
+            "scene": "scene05_backchannel",
+            "old": {
+              "signal_frame_frac_A": 1.0,
+              "signal_frame_frac_B": 1.0,
+              "both_loud_frac": 1.0,
+              "either_loud_frac": 1.0
+            },
+            "new": {
+              "signal_frame_frac_A": 0.8542,
+              "signal_frame_frac_B": 0.0646,
+              "both_loud_frac": 0.0646
+            }
+          },
+          {
+            "scene": "scene06_interrupt",
+            "old": {
+              "signal_frame_frac_A": 1.0,
+              "signal_frame_frac_B": 1.0,
+              "both_loud_frac": 1.0,
+              "either_loud_frac": 1.0
+            },
+            "new": {
+              "signal_frame_frac_A": 0.4083,
+              "signal_frame_frac_B": 0.3396,
+              "both_loud_frac": 0.1229
+            }
+          },
+          {
+            "scene": "scene07_alone",
+            "old": {
+              "signal_frame_frac_A": 1.0,
+              "signal_frame_frac_B": 1.0,
+              "both_loud_frac": 1.0,
+              "either_loud_frac": 1.0
+            },
+            "new": {
+              "signal_frame_frac_A": 0.3729,
+              "signal_frame_frac_B": 0.0,
+              "both_loud_frac": 0.0
+            }
+          },
+          {
+            "scene": "scene08_roomtone",
+            "old": {
+              "signal_frame_frac_A": 1.0,
+              "signal_frame_frac_B": 1.0,
+              "both_loud_frac": 1.0,
+              "either_loud_frac": 1.0
+            },
+            "new": {
+              "signal_frame_frac_A": 0.0,
+              "signal_frame_frac_B": 0.0,
+              "both_loud_frac": 0.0
+            }
+          }
+        ],
+        "roomtone_scene_new": {
+          "signal_frame_frac_A": 0.0,
+          "signal_frame_frac_B": 0.0,
+          "both_loud_frac": 0.0
+        },
+        "roomtone_scene_old": {
+          "signal_frame_frac_A": 1.0,
+          "signal_frame_frac_B": 1.0,
+          "both_loud_frac": 1.0,
+          "either_loud_frac": 1.0
+        }
+      }
+    },
+    "finding": {
+      "old_floor_reads_an_empty_room_as_full": {
+        "quiet_room_both_loud_frac": 0.0,
+        "ordinary_room_both_loud_frac": 1.0
+      },
+      "new_floor_reads_an_empty_room_as_empty": {
+        "quiet_room_both_loud_frac": 0.0,
+        "ordinary_room_both_loud_frac": 0.0
+      },
+      "new_floor_is_room_independent": true
+    }
+  },
+  "alignment": {
+    "rows": [
+      {
+        "true_offset_ms": 0,
+        "detected_offset_ms": 0,
+        "peak_r": 0.7586,
+        "alignment_applied": true,
+        "old_rule_hand_offs": 1,
+        "new_rule_hand_offs": 1,
+        "true_hand_offs": 1
+      },
+      {
+        "true_offset_ms": 40,
+        "detected_offset_ms": -40,
+        "peak_r": 0.7586,
+        "alignment_applied": true,
+        "old_rule_hand_offs": 1,
+        "new_rule_hand_offs": 1,
+        "true_hand_offs": 1
+      },
+      {
+        "true_offset_ms": 120,
+        "detected_offset_ms": -120,
+        "peak_r": 0.7586,
+        "alignment_applied": true,
+        "old_rule_hand_offs": 1,
+        "new_rule_hand_offs": 1,
+        "true_hand_offs": 1
+      },
+      {
+        "true_offset_ms": 300,
+        "detected_offset_ms": -300,
+        "peak_r": 0.7586,
+        "alignment_applied": true,
+        "old_rule_hand_offs": 0,
+        "new_rule_hand_offs": 1,
+        "true_hand_offs": 1
+      },
+      {
+        "true_offset_ms": 600,
+        "detected_offset_ms": -600,
+        "peak_r": 0.7586,
+        "alignment_applied": true,
+        "old_rule_hand_offs": 0,
+        "new_rule_hand_offs": 1,
+        "true_hand_offs": 1
+      }
+    ],
+    "old_rule_flip": [
+      300,
+      600
+    ],
+    "new_rule_flip": []
+  },
+  "drift": {
+    "drift_eps": 0.0125,
+    "drift_ms_total": 250.0,
+    "drift_ms_at_the_gap": 187.5,
+    "reported_by_the_intake": {
+      "measurable_from_one_alignment_point": false,
+      "measured_ms": null,
+      "clap_offset_ms": 4,
+      "bound_ms_at_100ppm": 2.0,
+      "bound_ms_at_12500ppm": 250.0,
+      "method": "the clap is the only alignment point in the pair, so the drift cannot be measured; the bound above is what an assumed clock error of that size would produce by the end of the scene"
+    },
+    "measurable": false,
+    "finding": "a single alignment point cannot measure drift; the report carries a bound and says so"
+  },
+  "perturbations": [
+    {
+      "perturbation": "missing_channel_B",
+      "description": "one channel of a pair is missing",
+      "must_be_caught": true,
+      "caught_by_the_relevant_gate": true,
+      "correct": true,
+      "exit_code": 1,
+      "status": "NOT YET USABLE",
+      "unmet_excluding_the_length_gate": [
+        "scene02_qa: unmatched pair (missing B)"
+      ],
+      "unmet": [
+        "scene02_qa: unmatched pair (missing B)",
+        "only 84s of audio; the protocol's eight scenes are 1230s"
+      ]
+    },
+    {
+      "perturbation": "digital_silence_A",
+      "description": "channel A of one scene is digital silence",
+      "must_be_caught": true,
+      "caught_by_the_relevant_gate": true,
+      "correct": true,
+      "exit_code": 1,
+      "status": "NOT YET USABLE",
+      "unmet_excluding_the_length_gate": [
+        "scene04_fillers: channel A is digitally silent",
+        "scene04_fillers: the two channels differ by -120.0 dB, past the 20.0 dB limit"
+      ],
+      "unmet": [
+        "scene04_fillers: channel A is digitally silent",
+        "scene04_fillers: the two channels differ by -120.0 dB, past the 20.0 dB limit",
+        "only 90s of audio; the protocol's eight scenes are 1230s"
+      ]
+    },
+    {
+      "perturbation": "digital_silence_B",
+      "description": "channel B of one scene is digital silence",
+      "must_be_caught": true,
+      "caught_by_the_relevant_gate": true,
+      "correct": true,
+      "exit_code": 1,
+      "status": "NOT YET USABLE",
+      "unmet_excluding_the_length_gate": [
+        "scene04_fillers: channel B is digitally silent",
+        "scene04_fillers: the two channels differ by 207.9 dB, past the 20.0 dB limit"
+      ],
+      "unmet": [
+        "scene04_fillers: channel B is digitally silent",
+        "scene04_fillers: the two channels differ by 207.9 dB, past the 20.0 dB limit",
+        "only 90s of audio; the protocol's eight scenes are 1230s"
+      ]
+    },
+    {
+      "perturbation": "low_level_B",
+      "description": "channel B of one scene is very low but NOT zero",
+      "must_be_caught": true,
+      "caught_by_the_relevant_gate": true,
+      "correct": true,
+      "exit_code": 1,
+      "status": "NOT YET USABLE",
+      "unmet_excluding_the_length_gate": [
+        "scene04_fillers: the two channels differ by 41.9 dB, past the 20.0 dB limit"
+      ],
+      "unmet": [
+        "scene04_fillers: the two channels differ by 41.9 dB, past the 20.0 dB limit",
+        "only 96s of audio; the protocol's eight scenes are 1230s"
+      ]
+    },
+    {
+      "perturbation": "very_low_level_B",
+      "description": "channel B of one scene is below the floor",
+      "must_be_caught": true,
+      "caught_by_the_relevant_gate": true,
+      "correct": true,
+      "exit_code": 1,
+      "status": "NOT YET USABLE",
+      "unmet_excluding_the_length_gate": [
+        "scene04_fillers: the two channels differ by 53.9 dB, past the 20.0 dB limit"
+      ],
+      "unmet": [
+        "scene04_fillers: the two channels differ by 53.9 dB, past the 20.0 dB limit",
+        "only 96s of audio; the protocol's eight scenes are 1230s"
+      ]
+    },
+    {
+      "perturbation": "crosstalk",
+      "description": "channel B clearly hears channel A",
+      "must_be_caught": true,
+      "caught_by_the_relevant_gate": true,
+      "correct": true,
+      "exit_code": 1,
+      "status": "NOT YET USABLE",
+      "unmet_excluding_the_length_gate": [
+        "scene01_free: channel B hears channel A (b_loud_when_a_loud = 1.0 > 0.6)",
+        "scene02_qa: channel B hears channel A (b_loud_when_a_loud = 1.0 > 0.6)",
+        "scene03_think: channel B hears channel A (b_loud_when_a_loud = 1.0 > 0.6)",
+        "scene04_fillers: channel B carries signal but the protocol has B SILENT in this scene (frame fraction 0.9021)",
+        "scene04_fillers: channel B hears channel A (b_loud_when_a_loud = 1.0 > 0.6)",
+        "scene05_backchannel: channel B hears channel A (b_loud_when_a_loud = 1.0 > 0.6)",
+        "scene06_interrupt: channel B hears channel A (b_loud_when_a_loud = 1.0 > 0.6)",
+        "scene07_alone: channel B carries signal but the protocol has B SILENT in this scene (frame fraction 0.3729)",
+        "scene07_alone: channel B hears channel A (b_loud_when_a_loud = 1.0 > 0.6)",
+        "scene08_roomtone: the two channels differ by 120.0 dB, past the 20.0 dB limit"
+      ],
+      "unmet": [
+        "scene01_free: channel B hears channel A (b_loud_when_a_loud = 1.0 > 0.6)",
+        "scene02_qa: channel B hears channel A (b_loud_when_a_loud = 1.0 > 0.6)",
+        "scene03_think: channel B hears channel A (b_loud_when_a_loud = 1.0 > 0.6)",
+        "scene04_fillers: channel B carries signal but the protocol has B SILENT in this scene (frame fraction 0.9021)",
+        "scene04_fillers: channel B hears channel A (b_loud_when_a_loud = 1.0 > 0.6)",
+        "scene05_backchannel: channel B hears channel A (b_loud_when_a_loud = 1.0 > 0.6)",
+        "scene06_interrupt: channel B hears channel A (b_loud_when_a_loud = 1.0 > 0.6)",
+        "scene07_alone: channel B carries signal but the protocol has B SILENT in this scene (frame fraction 0.3729)",
+        "scene07_alone: channel B hears channel A (b_loud_when_a_loud = 1.0 > 0.6)",
+        "scene08_roomtone: the two channels differ by 120.0 dB, past the 20.0 dB limit",
+        "only 96s of audio; the protocol's eight scenes are 1230s"
+      ]
+    },
+    {
+      "perturbation": "no_overlap",
+      "description": "the two speakers never overlap at all",
+      "must_be_caught": false,
+      "caught_by_the_relevant_gate": false,
+      "correct": true,
+      "exit_code": 1,
+      "status": "NOT YET USABLE",
+      "unmet_excluding_the_length_gate": [],
+      "unmet": [
+        "only 96s of audio; the protocol's eight scenes are 1230s"
+      ]
+    },
+    {
+      "perturbation": "no_handoff",
+      "description": "only one speaker exists",
+      "must_be_caught": true,
+      "caught_by_the_relevant_gate": true,
+      "correct": true,
+      "exit_code": 1,
+      "status": "NOT YET USABLE",
+      "unmet_excluding_the_length_gate": [
+        "scene01_free: channel B is digitally silent",
+        "scene01_free: the two channels differ by 202.6 dB, past the 20.0 dB limit",
+        "scene02_qa: channel B is digitally silent",
+        "scene02_qa: the two channels differ by 202.4 dB, past the 20.0 dB limit",
+        "scene03_think: channel B is digitally silent",
+        "scene03_think: the two channels differ by 200.2 dB, past the 20.0 dB limit",
+        "scene04_fillers: channel B is digitally silent",
+        "scene04_fillers: the two channels differ by 207.9 dB, past the 20.0 dB limit",
+        "scene05_backchannel: channel B is digitally silent",
+        "scene05_backchannel: the two channels differ by 207.6 dB, past the 20.0 dB limit",
+        "scene06_interrupt: channel B is digitally silent",
+        "scene06_interrupt: the two channels differ by 203.5 dB, past the 20.0 dB limit",
+        "scene07_alone: channel B is digitally silent",
+        "scene07_alone: the two channels differ by 203.0 dB, past the 20.0 dB limit",
+        "zero hand-offs: no silence is followed by the other speaker, so the positive class is still absent"
+      ],
+      "unmet": [
+        "scene01_free: channel B is digitally silent",
+        "scene01_free: the two channels differ by 202.6 dB, past the 20.0 dB limit",
+        "scene02_qa: channel B is digitally silent",
+        "scene02_qa: the two channels differ by 202.4 dB, past the 20.0 dB limit",
+        "scene03_think: channel B is digitally silent",
+        "scene03_think: the two channels differ by 200.2 dB, past the 20.0 dB limit",
+        "scene04_fillers: channel B is digitally silent",
+        "scene04_fillers: the two channels differ by 207.9 dB, past the 20.0 dB limit",
+        "scene05_backchannel: channel B is digitally silent",
+        "scene05_backchannel: the two channels differ by 207.6 dB, past the 20.0 dB limit",
+        "scene06_interrupt: channel B is digitally silent",
+        "scene06_interrupt: the two channels differ by 203.5 dB, past the 20.0 dB limit",
+        "scene07_alone: channel B is digitally silent",
+        "scene07_alone: the two channels differ by 203.0 dB, past the 20.0 dB limit",
+        "only 96s of audio; the protocol's eight scenes are 1230s",
+        "zero hand-offs: no silence is followed by the other speaker, so the positive class is still absent"
+      ]
+    },
+    {
+      "perturbation": "sample_rate_mismatch",
+      "description": "the two channels have different rates",
+      "must_be_caught": false,
+      "caught_by_the_relevant_gate": false,
+      "correct": true,
+      "exit_code": 1,
+      "status": "NOT YET USABLE",
+      "unmet_excluding_the_length_gate": [],
+      "unmet": [
+        "only 93s of audio; the protocol's eight scenes are 1230s"
+      ],
+      "source_rates_hz": {
+        "A": 16000,
+        "B": 22050
+      }
+    },
+    {
+      "perturbation": "unreadable",
+      "description": "one channel is not a readable WAV",
+      "must_be_caught": true,
+      "caught_by_the_relevant_gate": true,
+      "correct": true,
+      "exit_code": 1,
+      "status": "NOT YET USABLE",
+      "unmet_excluding_the_length_gate": [
+        "scene06_interrupt: unreadable channel"
+      ],
+      "unmet": [
+        "scene06_interrupt: unreadable channel",
+        "only 84s of audio; the protocol's eight scenes are 1230s"
+      ]
+    }
+  ],
+  "exit_codes": {
+    "nothing_recorded": {
+      "exit_code": 2,
+      "expected": 2
+    },
+    "empty_directory": {
+      "exit_code": 1,
+      "expected": 1
+    },
+    "short_corpus": {
+      "exit_code": 1,
+      "expected": 1,
+      "note": "the synthetic corpus is 96 s and the protocol asks for 1230 s, so this one is rejected for length -- which is the gate working, not a failure of it"
+    }
+  },
+  "constants": {
+    "crosstalk_max": 0.6,
+    "noise_multiple": 3.0,
+    "protocol_seconds": 1230.0,
+    "min_silence_s": 0.15,
+    "align_min_r": 0.3,
+    "level_balance_db": 20.0,
+    "min_signal_frac": 0.02
+  }
+}

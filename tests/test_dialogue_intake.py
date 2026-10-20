@@ -29,20 +29,39 @@ WHAT IS PINNED HERE.
     overlap, no hand-off, a sample-rate mismatch, an unreadable file;
   - the alignment question, measured: an inter-channel offset of D moves
     the measured hand-off gap by D, and the clap the README calls the
-    alignment point recovers D exactly (and is used by NOBODY today);
+    alignment point recovers D exactly;
   - the hand-off semantics: a canonical hand-off -- A stops, B takes the
-    floor, A stays quiet -- is counted ZERO times by the intake;
-  - the exit code does not reflect the verdict;
+    floor, A stays quiet -- IS counted;
+  - the exit code carries the verdict;
   - the intake fails LOUDLY when its `src` import cannot resolve, instead
     of quietly reporting success.
 
-WHAT IS CHARACTERISATION, NOT ENFORCEMENT.
+WHAT CHANGED ON 2026-10-19, AND WHY THIS FILE WAS EDITED.
 
-Several of the tests below assert that a defect is STILL PRESENT. Those
-assertions are written so that they FAIL when the defect is fixed, with a
-message saying the report needs updating. That is deliberate: a test that
-asserts "the tool cannot do X" must be able to notice the day the tool
-starts doing X, and a suite that quietly passes forever is not evidence.
+`docs/research/DIALOGUE-INTAKE.md` audited the intake and found seven
+defects. The fixes landed, and this file's assertions were INVERTED, one by
+one, as each defect was fixed. The inversions were deliberate and are
+recorded here rather than quietly rewritten, because a reader of the old
+file deserves to know that the tests once asserted the opposite.
+
+  - the intake's code never mentioned the clap -> it now READS the clap and
+    aligns the two channels on it;
+  - an unmatched pair was reported but not gated -> it is gated;
+  - a silent channel B was reported but not gated -> it is gated, and
+    SCOPED to the scenes where the protocol has B speaking (scene 7 is
+    specified to have a silent B, so a blanket rule would be wrong);
+  - a low-level channel was reported but not gated -> it is gated, by the
+    balance between the two channels of a pair;
+  - cross-talk was measured by a statistic that separated clean from
+    contaminated by 0.0067 and was not gated -> the statistic was replaced
+    (it now separates by 0.6939) and it IS gated;
+  - a sample-rate mismatch was invisible -> the intake now reports the
+    file's REAL rate, which `src/wavio.read_wav` used to discard;
+  - an unreadable channel was reported but not gated -> it is gated;
+  - the exit code did not reflect the verdict -> it does now;
+  - a canonical hand-off was counted ZERO times -> it is counted once;
+  - a corpus of canonical hand-offs was REJECTED for having none -> it is
+    accepted.
 
 COST.
 
@@ -135,6 +154,19 @@ def header_rate(path: Path) -> int:
         return w.getframerate()
 
 
+def non_length_unmet(report: dict) -> list:
+    """The unmet requirements, minus the protocol-LENGTH one.
+
+    Every corpus in this file is three 8 s scenes and the protocol asks for
+    1230 s, so the length gate fires on all of them. It is the gate that is
+    under test everywhere else, so it is filtered out here -- but it is
+    never filtered out silently: `test_a_good_corpus_is_not_rejected_for_
+    anything_but_its_length` asserts that it is the ONLY thing that fires.
+    """
+    return [u for u in report["gates"]["unmet"]
+            if "the protocol's eight scenes are" not in u]
+
+
 # ------------------------------------------------------------ the baseline --
 
 def test_the_generator_makes_two_genuinely_different_channels(tmp_path):
@@ -170,18 +202,21 @@ def test_a_good_corpus_is_not_rejected_for_anything_but_its_length(tmp_path):
     """The gate must accept a corpus that satisfies the protocol.
 
     The corpus here is three scenes rather than eight, so the intake's
-    protocol-LENGTH gate ("only 24s of audio; the protocol asks for ~25
-    min") is expected to fire. Nothing else may.
+    protocol-LENGTH gate is expected to fire. Nothing else may.
     """
     code, report = run_intake(build(tmp_path, "good"))
     gates = report["gates"]
-    non_length = [u for u in gates["unmet"] if not u.startswith("only ")]
-    assert non_length == [], f"a good corpus was rejected for: {non_length}"
+    assert non_length_unmet(report) == [], \
+        f"a good corpus was rejected for: {non_length_unmet(report)}"
     assert gates["matched_pairs"] == len(TEST_SCENES)
     assert gates["total_audio_s"] > 0
     assert gates["hand_offs_seen"] >= 1, \
         "the good corpus contains a barge-back and must produce a hand-off"
-    assert code == 0
+    # The exit code carries the verdict: this corpus is rejected, for its
+    # length, and says so in the exit code.
+    assert code == 1, \
+        f"the intake exited {code} on a corpus it reports as NOT YET USABLE"
+    assert gates["status"] == "NOT YET USABLE"
 
 
 def test_an_empty_directory_cannot_satisfy_the_intake(tmp_path):
@@ -219,7 +254,7 @@ def test_the_gate_logic_is_actually_reached(tmp_path):
         assert p, f"no entry for {scene}"
         assert p["A"]["duration_s"] > 0
         assert p["B"]["duration_s"] > 0
-        assert p["A"]["raw_rate_hz"] == 16000
+        assert p["A"]["source_rate_hz"] == 16000
         assert p["crosstalk"] is not None
         assert p["levels"]["frames"] > 0
 
@@ -244,24 +279,24 @@ def test_the_intake_fails_loudly_when_its_import_cannot_resolve(tmp_path):
         "the intake reported a usable corpus while its import was broken"
 
 
-def test_the_intake_code_never_reads_the_clap(tmp_path):
-    """The README's alignment point is unused by the code that needs it.
+def test_the_intake_code_reads_the_clap(tmp_path):
+    """The README's alignment point is now USED by the code that needs it.
 
     `examples/realdialogue/README.md` says the clap "gives an unambiguous
     alignment point across the two files without needing a shared clock".
-    Nothing in the intake's CODE reads it -- the word appears only in the
-    docstring, which says the intake does not attempt to align. If someone
-    wires the clap in, this test fails and says so -- and
-    `docs/research/DIALOGUE-INTAKE.md` needs updating, because the whole
-    alignment section changes.
 
-    (The behavioural guard is `test_the_intake_does_not_align_the_channels`
-    below; this one pins the absence of the mechanism itself.)
+    This assertion was INVERTED on 2026-10-19. It used to read:
+
+        assert not any("clap" in s.lower() for s in strings)
+
+    -- pinning the ABSENCE of the mechanism. The audit found the absence was
+    the defect, so the test now pins the presence. If the clap is ever
+    removed from the code again, this fails.
     """
     strings = code_strings(INTAKE)
-    assert not any("clap" in s.lower() for s in strings), \
-        "the intake's code now mentions the clap: re-measure the alignment " \
-        "and update docs/research/DIALOGUE-INTAKE.md"
+    assert any("clap" in s.lower() for s in strings), \
+        "the intake's code no longer mentions the clap: the alignment step " \
+        "has gone; re-measure and update docs/research/DIALOGUE-INTAKE.md"
 
 
 def test_the_selftest_never_writes_into_the_raw_directory():
@@ -273,24 +308,23 @@ def test_the_selftest_never_writes_into_the_raw_directory():
 
 # ------------------------------------------------------------ perturbations --
 
-def test_a_missing_channel_is_reported_as_an_unmatched_pair(tmp_path):
-    """One channel of a pair missing: the intake must say so."""
+def test_a_missing_channel_is_reported_and_gated(tmp_path):
+    """One channel of a pair missing: the intake must say so AND reject it.
+
+    The GATE half of this assertion was INVERTED on 2026-10-19: the defect
+    was that the pair was reported and then ignored by the verdict.
+    """
     d = build(tmp_path, "missing")
     (d / "scene01_free_B.wav").unlink()
     code, report = run_intake(d)
     p = pair_of(report, "scene01_free")
     assert p.get("problem") == "unmatched pair", \
         f"expected 'unmatched pair', got {p.get('problem')!r}"
-    # CHARACTERISATION: this is reported but NOT gated -- the pair still
-    # counts towards `matched_pairs`, and nothing in `unmet` mentions it.
-    assert report["gates"]["matched_pairs"] == len(TEST_SCENES), \
+    assert report["gates"]["matched_pairs"] == len(TEST_SCENES) - 1, \
         "the intake counted an unmatched pair as a matched pair"
-    non_length = [u for u in report["gates"]["unmet"]
-                  if not u.startswith("only ")]
-    assert not any("unmatched" in u or "not matching" in u
-                   for u in non_length), \
-        "the intake now GATES an unmatched pair: update " \
-        "docs/research/DIALOGUE-INTAKE.md"
+    assert any("unmatched" in u for u in report["gates"]["unmet"]), \
+        "an unmatched pair was not gated"
+    assert code != 0
 
 
 def test_a_digitally_silent_channel_A_is_rejected(tmp_path):
@@ -306,14 +340,19 @@ def test_a_digitally_silent_channel_A_is_rejected(tmp_path):
     assert report["gates"]["status"] != "USABLE"
 
 
-def test_a_digitally_silent_channel_B_is_reported_but_not_gated(tmp_path):
-    """A dead channel on side B is reported and NOT gated.
+def test_a_digitally_silent_channel_B_is_gated_where_B_speaks(tmp_path):
+    """A dead channel on side B is gated -- in the scenes where B speaks.
 
-    The intake's silent check only ever looks at channel A. That is not
-    merely an oversight -- scene 7 of the protocol is SPECIFIED to have a
-    silent channel B -- so a blanket "B is silent = error" rule would be
-    wrong. The intake cannot tell a dead microphone from a deliberately
-    unused one, and this test pins that it does not claim to.
+    The old behaviour was to report it and never gate it, on the grounds
+    that scene 7 of the protocol is SPECIFIED to have a silent channel B,
+    so a blanket "B is silent = error" rule would be wrong.
+
+    The fix keeps that reasoning and scopes the rule: in scene 1 the
+    protocol has B speaking, so a silent B there IS a fault. The
+    companion test below covers the other half -- scene 7, where a silent B
+    is correct.
+
+    This assertion was INVERTED on 2026-10-19.
     """
     d = build(tmp_path, "silent_b")
     st.write_wav(d / "scene01_free_B.wav", np.zeros(int(SCENE_SECONDS * st.SR)))
@@ -321,16 +360,21 @@ def test_a_digitally_silent_channel_B_is_reported_but_not_gated(tmp_path):
     p = pair_of(report, "scene01_free")
     assert p["B"]["silent"] is True, "the intake did not report the silent B"
     assert p["A"]["silent"] is False
-    non_length = [u for u in report["gates"]["unmet"]
-                  if not u.startswith("only ")]
-    assert not any("digitally silent" in u for u in non_length), \
-        "the intake now GATES a silent channel B: update " \
-        "docs/research/DIALOGUE-INTAKE.md"
+    assert any("digitally silent" in u for u in report["gates"]["unmet"]), \
+        "a silent channel B was not gated in a scene where B speaks"
+    assert code != 0
 
 
-def test_a_very_low_but_non_zero_channel_is_not_silently_accepted(tmp_path):
+def test_a_low_level_channel_is_gated(tmp_path):
     """A channel that is quiet but alive must be distinguishable from a dead
-    one -- and the intake reports no number that distinguishes them."""
+    one -- and now it is.
+
+    The gate is the BALANCE between the two channels of a pair: a microphone
+    on the table instead of at the mouth is tens of dB down, and that is a
+    fault in the recording, not a stylistic choice.
+
+    This assertion was INVERTED on 2026-10-19.
+    """
     d = build(tmp_path, "low")
     b = read_channel(d / "scene01_free_B.wav")
     rms = float(np.sqrt(np.mean(b ** 2)))
@@ -340,18 +384,16 @@ def test_a_very_low_but_non_zero_channel_is_not_silently_accepted(tmp_path):
     assert p["B"]["silent"] is False, "a 2e-4 RMS channel was called silent"
     assert p["B"]["rms"] < 1e-3, "the reported RMS does not look low"
     assert p["B"]["peak"] > 0.0, "the channel is digitally silent, not low"
-    # The defect: the report says "not silent" and gives no level verdict.
-    non_length = [u for u in report["gates"]["unmet"]
-                  if not u.startswith("only ")]
-    assert not any("quiet" in u or "low" in u or "level" in u
-                   for u in non_length), \
-        "the intake now GATES a low-level channel: update " \
-        "docs/research/DIALOGUE-INTAKE.md"
+    assert any("differ by" in u for u in report["gates"]["unmet"]), \
+        "a low-level channel was not gated"
+    assert code != 0
 
 
-def test_a_very_low_channel_below_the_floor_is_not_gated_either(tmp_path):
-    """Below the floor the channel reports as signal-free but is still not
-    rejected, and it is indistinguishable from a dead mic in the report."""
+def test_a_very_low_channel_below_the_floor_is_gated_too(tmp_path):
+    """Below the floor the channel carries nothing, and the gate says so.
+
+    This assertion was INVERTED on 2026-10-19.
+    """
     d = build(tmp_path, "vlow")
     b = read_channel(d / "scene01_free_B.wav")
     rms = float(np.sqrt(np.mean(b ** 2)))
@@ -361,19 +403,20 @@ def test_a_very_low_channel_below_the_floor_is_not_gated_either(tmp_path):
     assert p["B"]["silent"] is False
     assert p["B"]["signal_frame_frac"] < 0.1, \
         "a channel below the floor should report almost no signal frames"
-    non_length = [u for u in report["gates"]["unmet"]
-                  if not u.startswith("only ")]
-    assert not any("digitally silent" in u or "quiet" in u
-                   for u in non_length), \
-        "the intake now GATES a sub-floor channel: update " \
-        "docs/research/DIALOGUE-INTAKE.md"
+    assert non_length_unmet(report), \
+        "a sub-floor channel was accepted"
+    assert code != 0
 
 
-def test_crosstalk_is_measured_but_not_gated(tmp_path):
-    """Channel B clearly hearing channel A.
+def test_crosstalk_is_measured_by_a_statistic_that_separates_and_is_gated(
+        tmp_path):
+    """Channel B clearly hearing channel A: separated widely, and gated.
 
-    The intake computes a cross-talk number per pair. This asserts the
-    number responds to the corruption and that nothing is gated on it.
+    THE STATISTIC WAS REPLACED on 2026-10-19. The old one correlated the
+    MEANS of the ten loudest windows and separated clean from contaminated
+    by 0.0067 -- a margin too small to gate on. The new one asks "of the
+    time A is loud, how much of it is B loud too?", which separates by
+    0.6939 on the same signals: clean 0.000-0.306, contaminated 1.000.
     """
     clean = build(tmp_path, "xt_clean")
     bad = build(tmp_path, "xt_bad")
@@ -384,32 +427,43 @@ def test_crosstalk_is_measured_but_not_gated(tmp_path):
         st.write_wav(bad / f"{name}_B.wav", 0.6 * a + b)
 
     _, clean_report = run_intake(clean)
-    _, bad_report = run_intake(bad)
-    clean_corrs = [p["crosstalk"]["corr"] for p in clean_report["pairs"]
-                   if p["crosstalk"]["corr"] is not None]
-    bad_corrs = [p["crosstalk"]["corr"] for p in bad_report["pairs"]
-                 if p["crosstalk"]["corr"] is not None]
-    assert bad_corrs, "no cross-talk number was produced at all"
-    assert min(bad_corrs) > max(clean_corrs), \
+    code, bad_report = run_intake(bad)
+
+    def stat(report):
+        return [p["crosstalk"]["b_loud_when_a_loud"] for p in report["pairs"]
+                if p["crosstalk"]["b_loud_when_a_loud"] is not None]
+
+    clean_vals, bad_vals = stat(clean_report), stat(bad_report)
+    assert bad_vals, "no cross-talk number was produced at all"
+    assert min(bad_vals) > max(clean_vals), \
         "the cross-talk number did not rise when B heard A"
-    # CHARACTERISATION: the separation is tiny, and nothing is gated on it.
-    separation = min(bad_corrs) - max(clean_corrs)
-    assert separation < 0.10, \
-        f"the cross-talk metric now separates cleanly ({separation:.3f}): " \
-        "re-measure and update docs/research/DIALOGUE-INTAKE.md"
-    non_length = [u for u in bad_report["gates"]["unmet"]
-                  if not u.startswith("only ")]
-    assert not any("cross" in u.lower() for u in non_length), \
-        "the intake now GATES cross-talk: update " \
-        "docs/research/DIALOGUE-INTAKE.md"
+    separation = min(bad_vals) - max(clean_vals)
+    assert separation > 0.30, \
+        (f"the cross-talk statistic separates by only {separation:.3f}: "
+         "re-measure and update docs/research/DIALOGUE-INTAKE.md")
+    assert any("hears channel A" in u for u in bad_report["gates"]["unmet"]), \
+        "the intake does not GATE cross-talk"
+    assert code != 0
+    # And a clean corpus is not gated on it.
+    assert not any("hears channel A" in u
+                   for u in non_length_unmet(clean_report)), \
+        "the intake gates cross-talk on a clean corpus"
 
 
 def test_a_corpus_with_no_overlap_is_not_rejected(tmp_path):
-    """The barge-in scenes did not happen -- and the intake cannot tell.
+    """The barge-in scenes did not happen -- and that is not a fault.
 
     The corpus is re-placed so that the two speakers strictly alternate,
     except for one barge-back in scene 6, which is kept so that the
     hand-off count (and therefore the hand-off gate) does not move with it.
+
+    NOTE WHERE THE OVERLAP IS. It is in scene 6, not scene 1: scene 1's
+    turns are strictly alternating even in the good corpus. The old
+    segmentation reported an overlap in scene 1 anyway, because it counted
+    the CLAP -- which is loud in both channels by construction and is
+    40 ms, shorter than `energy.MIN_SPEECH_S`, so the new segmentation
+    correctly leaves it out of the conversation and out of the overlap
+    budget.
     """
     good = build(tmp_path, "ov_good")
     specs = [s for s in st.alternate_specs(keep_overlap=("scene06_interrupt",))
@@ -426,21 +480,19 @@ def test_a_corpus_with_no_overlap_is_not_rejected(tmp_path):
 
     good_ov = overlapping(good_report)
     alt_ov = overlapping(alt_report)
-    assert good_ov["scene01_free"] > 0.0, "the good corpus has no overlap"
-    assert alt_ov["scene01_free"] < 0.02, \
-        "the alternating corpus still has overlap in scene 1"
+    assert good_ov["scene06_interrupt"] > 0.0, \
+        "the good corpus has no barge-in to overlap"
     assert alt_ov["scene06_interrupt"] > 0.0, \
         "the kept barge-back should still overlap"
+    assert alt_ov["scene01_free"] < 0.02, \
+        "the alternating corpus still has overlap in scene 1"
     # The hand-off count is preserved, so the corpus is NOT rejected --
     # the missing overlap changes nothing about the verdict.
     assert alt_report["gates"]["hand_offs_seen"] == \
         good_report["gates"]["hand_offs_seen"]
     assert alt_report["gates"]["status"] == good_report["gates"]["status"]
-    non_length = [u for u in alt_report["gates"]["unmet"]
-                  if not u.startswith("only ")]
-    assert not any("overlap" in u.lower() for u in non_length), \
-        "the intake now GATES a missing overlap: update " \
-        "docs/research/DIALOGUE-INTAKE.md"
+    assert not any("overlap" in u.lower() for u in non_length_unmet(alt_report)), \
+        "the intake GATES a missing overlap: that is a legitimate variation"
 
 
 def test_a_corpus_with_no_handoff_is_rejected(tmp_path):
@@ -454,15 +506,21 @@ def test_a_corpus_with_no_handoff_is_rejected(tmp_path):
     assert any("zero hand-offs" in u for u in report["gates"]["unmet"]), \
         "a corpus with no hand-off at all was not rejected"
     assert report["gates"]["status"] != "USABLE"
+    assert code != 0
 
 
-def test_a_sample_rate_mismatch_is_not_detected(tmp_path):
+def test_a_sample_rate_mismatch_is_reported(tmp_path):
     """Two channels of one pair recorded at different rates.
 
-    `src.wavio.read_wav` resamples to the analysis rate and returns an
-    Audio whose `sample_rate` is 16000, so the intake's `raw_rate_hz`
-    field is 16000 whatever the file says. The duration survives, because
-    it is computed after the resample; the rate does not.
+    `src/wavio.read_wav` resamples to the analysis rate, so the file's real
+    rate used to be unrecoverable -- `raw_rate_hz` was 16000 whatever the
+    file said. `src/wavio.py` now carries the source rate on the Audio
+    object, and the intake reports it.
+
+    A mismatch is REPORTED and not GATED, because the protocol explicitly
+    allows it: "Rate: anything 16 kHz and up."
+
+    This assertion was INVERTED on 2026-10-19.
     """
     d = build(tmp_path, "rate")
     b = read_channel(d / "scene01_free_B.wav")
@@ -471,48 +529,48 @@ def test_a_sample_rate_mismatch_is_not_detected(tmp_path):
 
     code, report = run_intake(d)
     p = pair_of(report, "scene01_free")
-    assert p["A"]["raw_rate_hz"] == 16000
-    # CHARACTERISATION: the real rate is invisible in the intake's report.
-    assert p["B"]["raw_rate_hz"] == 16000, \
-        "the intake now reports the file's real sample rate: re-measure " \
-        "and update docs/research/DIALOGUE-INTAKE.md"
-    non_length = [u for u in report["gates"]["unmet"]
-                  if not u.startswith("only ")]
-    assert not any("rate" in u.lower() for u in non_length), \
-        "the intake now GATES a sample-rate mismatch: update " \
-        "docs/research/DIALOGUE-INTAKE.md"
+    assert p["A"]["source_rate_hz"] == 16000
+    assert p["B"]["source_rate_hz"] == 22050, \
+        "the intake does not report the file's real sample rate"
+    assert p["source_rates_hz"]["B"] == 22050
+    assert not any("rate" in u.lower() for u in non_length_unmet(report)), \
+        "the intake GATES a sample-rate mismatch: the protocol allows it"
 
 
-def test_an_unreadable_channel_is_reported_but_not_gated(tmp_path):
-    """A file that is named .wav and is not one."""
+def test_an_unreadable_channel_is_reported_and_gated(tmp_path):
+    """A file that is named .wav and is not one.
+
+    The GATE half of this assertion was INVERTED on 2026-10-19.
+    """
     d = build(tmp_path, "unreadable")
     (d / "scene01_free_B.wav").write_bytes(b"NOT A WAV FILE" * 64)
     code, report = run_intake(d)
     p = pair_of(report, "scene01_free")
-    assert p.get("problem") == "unreadable"
-    non_length = [u for u in report["gates"]["unmet"]
-                  if not u.startswith("only ")]
-    assert not any("unreadable" in u.lower() for u in non_length), \
-        "the intake now GATES an unreadable channel: update " \
-        "docs/research/DIALOGUE-INTAKE.md"
+    assert p.get("problem", "").startswith("unreadable")
+    assert any("unreadable" in u.lower() for u in report["gates"]["unmet"]), \
+        "an unreadable channel was not gated"
+    assert code != 0
 
 
-def test_the_exit_code_does_not_reflect_the_verdict(tmp_path):
-    """The corpus capture's third defect again: the check cannot fail the
-    pipeline. `main()` returns None; nothing calls sys.exit(1)."""
+def test_the_exit_code_carries_the_verdict(tmp_path):
+    """The corpus capture's third defect again: the check must be able to
+    fail the pipeline.
+
+    This assertion was INVERTED on 2026-10-19: it used to assert that the
+    exit code was 0 on a rejected corpus.
+    """
     d = build(tmp_path, "exitcode")
     code, report = run_intake(d)
     assert report["gates"]["status"] == "NOT YET USABLE"
-    assert code == 0, \
-        "the intake now exits non-zero on a rejected corpus: update " \
-        "docs/research/DIALOGUE-INTAKE.md"
+    assert code != 0, \
+        "the intake exited 0 on a corpus it reports as NOT YET USABLE"
 
     missing = tmp_path / "no_such_dir"
     proc = subprocess.run([PY, str(INTAKE), "--raw", str(missing)],
                           capture_output=True, text=True, cwd=str(ROOT))
-    assert proc.returncode == 0, \
-        "the intake now exits non-zero when nothing is recorded: update " \
-        "docs/research/DIALOGUE-INTAKE.md"
+    assert proc.returncode != 0, \
+        "the intake exited 0 when nothing was recorded"
+    assert json.loads(proc.stdout)["gates"]["status"] == "NOTHING RECORDED YET"
 
 
 # --------------------------------------------------------------- alignment --
@@ -530,39 +588,13 @@ def _offset_pair(tmp_path, offset_ms: float, name: str) -> tuple:
     return d, a, b
 
 
-def test_an_inter_channel_offset_moves_the_measured_gap_by_the_whole_offset(
-        tmp_path):
-    """The headline measurement.
-
-    Two recorders started by hand are not synchronised. The intake does
-    not align the channels, so an offset of D between the files moves the
-    measured hand-off gap by D -- the whole offset, with no correction.
-    """
-    truth = 0.95                     # B's onset (2.95) - A's offset (2.00)
-    gaps = {}
-    for offset in (0, 40, 120, 300):
-        d, a, b = _offset_pair(tmp_path, offset, f"off{offset}")
-        aa = read_channel(d / "probe_A.wav")
-        bb = read_channel(d / "probe_B.wav")
-        measured = st.measured_gap_samples(aa, bb)
-        assert measured, f"no gap was measurable at offset {offset} ms"
-        gaps[offset] = measured[0]
-        assert abs(gaps[offset] - (truth + offset / 1000.0)) < 0.01, \
-            (f"at offset {offset} ms the measured gap was {gaps[offset]:.3f} s, "
-             f"expected about {truth + offset / 1000.0:.3f} s")
-    for offset in (40, 120, 300):
-        shift = gaps[offset] - gaps[0]
-        assert abs(shift - offset / 1000.0) < 0.01, \
-            (f"the offset of {offset} ms moved the measured gap by "
-             f"{shift * 1000:.0f} ms")
-
-
-def test_the_clap_can_recover_the_offset_that_nobody_uses(tmp_path):
-    """The README's alignment point works -- it is simply never read.
+def test_the_clap_recovers_the_offset_and_the_intake_applies_it(tmp_path):
+    """The README's alignment point is now read, and used.
 
     The clap is the loudest transient in the first seconds of both files.
     Cross-correlating the two 1 ms energy envelopes finds the offset
-    exactly, and correcting it removes the whole error.
+    exactly, and the intake now corrects with it BEFORE it computes any
+    cross-channel number.
     """
     truth = 0.95
     for offset in (40, 120, 300, 600):
@@ -582,13 +614,23 @@ def test_the_clap_can_recover_the_offset_that_nobody_uses(tmp_path):
             (f"after aligning by the clap the gap was {gaps[0]:.3f} s, "
              f"expected {truth:.3f} s")
 
+        # And the INTAKE does it: the report carries the offset it found.
+        _, report = run_intake(d)
+        p = pair_of(report, "probe")
+        assert p["alignment"]["clap_offset_ms"] == -offset, \
+            ("the intake did not detect the inter-channel offset: "
+             f"{p.get('alignment')}")
+        assert p["alignment"]["applied"] is True
 
-def test_the_intake_does_not_align_the_channels(tmp_path):
-    """Behavioural proof that no alignment is applied by the tool.
 
-    The same pair, offset by 300 ms, changes the intake's own hand-off
-    count from one to zero: the hand-off stops being counted because
-    channel B has moved away from the instant the intake samples.
+def test_the_hand_off_count_does_not_flip_with_a_300ms_offset(tmp_path):
+    """The alignment step is BEHAVIOURAL, not decorative.
+
+    Before the fix, a 300 ms offset moved the intake's hand-off count from
+    one to zero: the hand-off stopped being counted because channel B had
+    moved away from the instant the intake sampled.
+
+    This assertion was INVERTED on 2026-10-19.
     """
     spec = dict(name="probe", protocol_s=8, kind="dialogue", events=[
         ("A", 0.60, 2.00, 81), ("B", 2.95, 3.60, 82), ("A", 3.20, 4.20, 83),
@@ -597,25 +639,26 @@ def test_the_intake_does_not_align_the_channels(tmp_path):
     d = tmp_path / "align"
     d.mkdir(parents=True, exist_ok=True)
     counts = {}
-    for offset in (0, 300):
+    for offset in (0, 40, 120, 300, 600):
         st.write_wav(d / "probe_A.wav", a)
         st.write_wav(d / "probe_B.wav", st.shift(b, offset))
         _, report = run_intake(d)
         counts[offset] = report["gates"]["hand_offs_seen"]
     assert counts[0] >= 1, "the aligned pair should produce a hand-off"
-    assert counts[300] == 0, (
-        f"a 300 ms offset did not change the hand-off count ({counts}); "
-        "the intake may have gained an alignment step -- re-measure and "
-        "update docs/research/DIALOGUE-INTAKE.md")
+    for offset, count in counts.items():
+        assert count == counts[0], \
+            (f"a {offset} ms offset changed the hand-off count from "
+             f"{counts[0]} to {count}: the alignment is not being applied")
 
 
-def test_a_canonical_handoff_is_not_counted_by_the_intake(tmp_path):
-    """The measurement the corpus exists to make, and the one the intake
-    does not make.
+def test_a_canonical_handoff_is_counted(tmp_path):
+    """The measurement the corpus exists to make, now made.
 
     A canonical hand-off is: A stops speaking, B takes the floor, A stays
-    quiet. The intake counts a hand-off only when A's silence ENDS while B
-    is still talking -- so a canonical hand-off is counted ZERO times.
+    quiet.
+
+    This assertion was INVERTED on 2026-10-19: the intake used to count it
+    ZERO times.
     """
     spec = dict(name="probe", protocol_s=8, kind="dialogue", events=[
         ("A", 1.00, 2.00, 101), ("B", 2.50, 3.50, 102),
@@ -626,9 +669,9 @@ def test_a_canonical_handoff_is_not_counted_by_the_intake(tmp_path):
     st.write_wav(d / "probe_A.wav", a)
     st.write_wav(d / "probe_B.wav", b)
     _, report = run_intake(d)
-    assert report["gates"]["hand_offs_seen"] == 0, \
-        ("the intake now counts a canonical hand-off: re-measure and "
-         "update docs/research/DIALOGUE-INTAKE.md")
+    assert report["gates"]["hand_offs_seen"] == 1, \
+        (f"the intake counted {report['gates']['hand_offs_seen']} canonical "
+         "hand-offs, expected 1")
 
     # The barge-back shape, where A comes back while B is still talking.
     spec2 = dict(name="probe", protocol_s=8, kind="dialogue", events=[
@@ -642,47 +685,100 @@ def test_a_canonical_handoff_is_not_counted_by_the_intake(tmp_path):
         "the barge-back shape should produce a hand-off"
 
 
-def test_the_proposed_hand_off_rule_counts_what_the_intake_misses(tmp_path):
-    """The fix proposed in docs/research/DIALOGUE-INTAKE.md, measured.
+def test_a_corpus_of_canonical_handoffs_is_not_rejected(tmp_path):
+    """The corpus-level consequence of the fix.
 
-    A hand-off should be "channel B loud ANYWHERE during channel A's
-    silence", not "channel B loud at the instant that silence ends". The
-    proposed rule is implemented in the selftest (the intake itself is
-    untouched) and run over the same protocol-strict corpus.
-    """
-    specs = [s for s in st.strict_specs() if s["name"] in TEST_SCENES]
-    d = tmp_path / "strict_prop"
-    st.build_corpus(d, SCENE_SECONDS, TONE_RMS, specs=specs)
+    The protocol corpus, with every turn canonical, contains real
+    hand-offs. The intake used to count NONE of them and reject the corpus
+    for "zero hand-offs".
 
-    _, report = run_intake(d)
-    assert report["gates"]["hand_offs_seen"] == 0, \
-        "the intake now counts a canonical hand-off: re-measure and update " \
-        "docs/research/DIALOGUE-INTAKE.md"
-
-    proposed = 0
-    for spec in specs:
-        a = read_channel(d / f"{spec['name']}_A.wav")
-        b = read_channel(d / f"{spec['name']}_B.wav")
-        proposed += st.hand_offs_proposed_rule(a, b, skip_before_s=0.6)
-    assert proposed >= 2, \
-        (f"the proposed rule found only {proposed} hand-offs in a corpus "
-         "full of canonical ones; the fix no longer works as described")
-    assert proposed > report["gates"]["hand_offs_seen"], \
-        "the proposed rule is no better than the current one"
-
-
-def test_a_corpus_of_canonical_handoffs_is_rejected(tmp_path):
-    """The corpus-level consequence.
-
-    The protocol corpus, with every turn canonical, contains eight real
-    hand-offs and the intake counts none of them -- so it rejects the
-    corpus for "zero hand-offs".
+    This assertion was INVERTED on 2026-10-19.
     """
     specs = [s for s in st.strict_specs() if s["name"] in TEST_SCENES]
     d = tmp_path / "strict"
     st.build_corpus(d, SCENE_SECONDS, TONE_RMS, specs=specs)
     _, report = run_intake(d)
-    assert report["gates"]["hand_offs_seen"] == 0
-    assert any("zero hand-offs" in u for u in report["gates"]["unmet"]), \
-        ("the intake no longer rejects a canonical-only corpus: "
-         "re-measure and update docs/research/DIALOGUE-INTAKE.md")
+    assert report["gates"]["hand_offs_seen"] >= 2, \
+        (f"the intake counted {report['gates']['hand_offs_seen']} hand-offs "
+         "in a corpus full of canonical ones")
+    assert not any("zero hand-offs" in u for u in report["gates"]["unmet"]), \
+        ("the intake rejects a canonical-only corpus for having no "
+         "hand-offs")
+    assert not any("hand-off" in u for u in non_length_unmet(report)), \
+        "the intake rejects a canonical-only corpus for a hand-off reason"
+
+
+# ------------------------------------------------------------- the silence --
+
+def test_a_short_dip_is_not_a_hand_off(tmp_path):
+    """A 20 ms dip inside a word is not a rest, and is not a hand-off.
+
+    The old rule had no duration filter at all between "a pause" and "a
+    hand-off", so a 20 ms envelope dip counted. The fix applies the repo's
+    own `energy.MIN_SILENCE_S` (0.150 s).
+    """
+    spec = dict(name="probe", protocol_s=8, kind="dialogue", events=[
+        ("A", 0.60, 2.00, 101), ("B", 2.95, 3.60, 102),
+    ])
+    a, b, _ = st.build_scene(spec, 8.0, TONE_RMS)
+    # A 20 ms hole in the middle of A's speech.
+    hole = a.copy()
+    start = int(1.20 * st.SR)
+    hole[start:start + int(0.020 * st.SR)] = 0.0
+    d = tmp_path / "dip"
+    d.mkdir(parents=True, exist_ok=True)
+    st.write_wav(d / "probe_A.wav", hole)
+    st.write_wav(d / "probe_B.wav", b)
+    _, report = run_intake(d)
+    assert report["gates"]["hand_offs_seen"] == 1, \
+        ("the 20 ms dip changed the hand-off count: the minimum-duration "
+         "filter is not applied")
+
+
+def test_a_silent_channel_B_in_scene_7_is_not_an_error(tmp_path):
+    """Scene 7 is SPECIFIED to have a silent channel B.
+
+    So "B is silent" cannot be an error on its own, and the gate has to be
+    scoped to the scenes where the protocol has B speaking. This is the
+    constraint the audit named, and the fix has to keep it.
+    """
+    specs = [s for s in st.SCENES if s["name"] == "scene07_alone"]
+    d = tmp_path / "scene7"
+    st.build_corpus(d, SCENE_SECONDS, TONE_RMS, specs=specs)
+    code, report = run_intake(d)
+    p = pair_of(report, "scene07_alone")
+    assert p["B"]["signal_frame_frac"] < 0.02, \
+        "scene 7's channel B should carry almost nothing"
+    assert not any("silent" in u.lower() for u in non_length_unmet(report)), \
+        ("the intake rejects a scene 7 whose channel B is silent, which is "
+         "what the protocol asks for")
+    assert p["B_expected_to_speak"] is False
+
+
+def test_the_room_tone_scene_is_not_reported_as_two_people_talking(tmp_path):
+    """The §7 failure: an ordinary room, reported as 100% overlap.
+
+    The old floor was `energy.ABS_FLOOR` (1e-4 RMS, about -80 dBFS). An
+    ordinary lived-in room is 23.5 dB above that, so the old intake
+    reported the empty room-tone scene as 100% signal and 100% overlap --
+    "a full minute of two people talking over each other" out of an empty
+    room.
+    """
+    quiet = tmp_path / "quiet"
+    ordinary = tmp_path / "ordinary"
+    st.build_corpus(quiet, SCENE_SECONDS, TONE_RMS,
+                    specs=scene_specs(("scene08_roomtone",)))
+    st.build_corpus(ordinary, SCENE_SECONDS, 1.5e-3,
+                    specs=scene_specs(("scene08_roomtone",)))
+
+    _, q_report = run_intake(quiet)
+    _, o_report = run_intake(ordinary)
+    q = pair_of(q_report, "scene08_roomtone")
+    o = pair_of(o_report, "scene08_roomtone")
+    assert q["levels"]["both_loud_frac"] < 0.02, \
+        f"the quiet room tone reads {q['levels']['both_loud_frac']} overlap"
+    assert o["levels"]["both_loud_frac"] < 0.02, \
+        (f"the ordinary room tone reads {o['levels']['both_loud_frac']} "
+         "overlap: the level floor is still absolute")
+    assert o["A"]["signal_frame_frac"] < 0.02
+    assert o["B"]["signal_frame_frac"] < 0.02

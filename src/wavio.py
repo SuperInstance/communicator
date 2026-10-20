@@ -40,6 +40,13 @@ class Audio:
     samples: list[float]
     sample_rate: int
     poisoned_samples: int = 0  # non-finite values replaced with 0.0 on read-in
+    # The rate the FILE was in, before resampling. `sample_rate` above is the
+    # rate the samples are in NOW, which after read_wav() is always the
+    # analysis rate. Without this field the original rate is unrecoverable,
+    # and a caller that needs to know it -- the dialogue intake, checking that
+    # two channels of one take came off devices with the same clock -- has
+    # nothing to read. It was always 16000 before this field existed.
+    source_sample_rate: int | None = None
 
     def duration(self) -> float:
         return len(self.samples) / self.sample_rate
@@ -108,8 +115,39 @@ def read_wav(path: str | Path) -> Audio:
         ]
 
     clean, poisoned = sanitize(mono)
-    audio = Audio(samples=clean, sample_rate=sr, poisoned_samples=poisoned)
+    audio = Audio(samples=clean, sample_rate=sr, poisoned_samples=poisoned,
+                  source_sample_rate=sr)
     return resample(audio, ANALYSIS_SR)
+
+
+def write_wav(path: str | Path, samples, sample_rate: int = ANALYSIS_SR) -> Path:
+    """Write mono float samples as a 16-bit PCM WAV.
+
+    THE REPO HAD NO WRITER. `read_wav` could read every file the protocol
+    asks for and nothing in the repo could produce one, so every synthetic
+    corpus in the test suite carried its own copy of this function, and the
+    protocol -- "Format: WAV, PCM 16-bit" -- described a file nothing here
+    could write. This is that writer.
+
+    The pair is verified on the round trip: what goes in is what comes back,
+    to within the 16-bit quantisation the format imposes (1 LSB = 3.05e-5
+    full scale). Samples outside [-1, 1] are CLIPPED, not wrapped, because a
+    wrapped sample is a sign flip and a clipped one is at least audible as
+    loud.
+    """
+    out_path = Path(path)
+    if out_path.parent and not out_path.parent.exists():
+        out_path.parent.mkdir(parents=True, exist_ok=True)
+    vals = array.array("h")
+    for s in samples:
+        v = int(round(max(-1.0, min(1.0, float(s))) * 32767.0))
+        vals.append(max(-32768, min(32767, v)))
+    with wave.open(str(out_path), "wb") as w:
+        w.setnchannels(1)
+        w.setsampwidth(2)
+        w.setframerate(int(sample_rate))
+        w.writeframes(vals.tobytes())
+    return out_path
 
 
 def resample(audio: Audio, target_sr: int) -> Audio:
@@ -124,7 +162,8 @@ def resample(audio: Audio, target_sr: int) -> Audio:
     n = len(audio.samples)
     if n == 0:
         return Audio(samples=[], sample_rate=target_sr,
-                     poisoned_samples=audio.poisoned_samples)
+                     poisoned_samples=audio.poisoned_samples,
+                     source_sample_rate=audio.source_sample_rate)
     step = audio.sample_rate / target_sr
     out: list[float] = []
     pos = 0.0
@@ -134,4 +173,5 @@ def resample(audio: Audio, target_sr: int) -> Audio:
         out.append(audio.samples[i] * (1.0 - frac) + audio.samples[i + 1] * frac)
         pos += step
     return Audio(samples=out, sample_rate=target_sr,
-                 poisoned_samples=audio.poisoned_samples)
+                 poisoned_samples=audio.poisoned_samples,
+                 source_sample_rate=audio.source_sample_rate)

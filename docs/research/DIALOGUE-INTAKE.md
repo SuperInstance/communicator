@@ -370,6 +370,23 @@ Two more latent defects found while looking:
 
 ## 9. What must be fixed before Casey records
 
+> **CORRECTION (2026-10-19, the fixes lane).** The paragraph below is no
+> longer true. **All seven of the P0–P3 items in this section have been
+> fixed**, in `experiments/dialogue_intake.py` and `src/wavio.py`, and the
+> measurements that motivated each one were re-taken against the fixed tool:
+> see **§12** and `experiments/dialogue_intake_fixes_results.json`. The
+> section is kept as it was written because it is the reason §12 exists — a
+> fix with no recorded audit behind it is a claim.
+>
+> One item is only PARTIALLY fixed, and the audit was right to call it out
+> separately: **the drift**. The clap gives one alignment point, and with
+> one alignment point the drift between two recorders **cannot be
+> measured** — the two channels speak different words, so their envelopes
+> are uncorrelated everywhere except at the clap. What the tool now does is
+> report a **bound** derived from an assumed maximum clock error, and say
+> that it is a bound. A bound is not a measurement and the report does not
+> pretend otherwise.
+
 Prioritised. **No change to `experiments/dialogue_intake.py` was made by
 this lane** — it is the tool Casey will rely on and it was not this lane's
 to change. Each item below is a precise fix, with the measurement that
@@ -479,6 +496,16 @@ The protocol specifies "WAV, PCM 16-bit" and the repo has no writer for it.
 
 ## 10. Is the path ready for the eight-scene recording?
 
+> **CORRECTION (2026-10-19, the fixes lane).** The four numbered defects
+> below **have been fixed**, and the tool now reads a protocol-shaped
+> recording the way it is supposed to. The recording instruction did not
+> change: clap **once per scene, loudly, before either person speaks** —
+> which was already the protocol, and is what the alignment step consumes.
+>
+> What is still true, and is not a defect in the tool: **the drift between
+> two recorders cannot be measured from one clap**, so the tool reports a
+> bound rather than a number (§12.7).
+
 **The recording: yes. The intake's verdict on it: no, not yet.**
 
 Casey's 25 minutes of human time is the bottleneck and the protocol does
@@ -536,14 +563,240 @@ alignment point per pair, at the start.
 
 ---
 
+## 12. What changed — the fixes, and what they were worth
+
+**2026-10-19.** Every P0–P3 item in §9 was fixed in
+`experiments/dialogue_intake.py`, with `src/wavio.py` changed for P3 and for
+the sample-rate field. The measurements below were re-taken against the
+fixed tool by `experiments/dialogue_intake_fixes.py`, which writes
+`experiments/dialogue_intake_fixes_results.json`. The tests are
+`tests/test_dialogue_intake.py` (behaviour) and
+`tests/test_dialogue_intake_fixes.py` (the margins).
+
+The audit's own numbers are in §4–§8 and are unchanged; what follows is the
+same quantities measured on the fixed tool, so the two can be compared
+directly.
+
+### 12.1 The hand-off rule
+
+| | old rule | new rule |
+|---|---:|---:|
+| canonical hand-off (A stops, B takes the floor, A stays quiet) | **0** | **1** |
+| canonical, A resumes much later | **0** | **1** |
+| barge-back (A comes back while B is still talking) | 1 | **1** |
+| protocol-strict corpus, hand-offs actually in it | — | **8 canonical + 3 barge-in = 11** |
+| protocol-strict corpus, counted | **1** | **11** |
+
+The old rule scored the common shape zero and the rare shape one. The new
+rule counts "channel B loud **during** channel A's silence", which is what
+"the other person took the floor" means. Three conditions, each measured:
+
+- the silence must be at least `energy.MIN_SILENCE_S` (0.150 s) — the old
+  rule counted a **20 ms** envelope dip as a hand-off;
+- the clap must be excluded — it is loud in **both** channels by
+  construction and sits inside the lead-in silence, which is exactly one
+  false hand-off per scene;
+- a leading sliver of silence is not a rest. `src/energy.py:290` keeps its
+  first segment whatever it is, so a file that opens with a sliver of
+  silence reports a sliver of silence. That defect is **measured but not
+  patched** in `src/energy.py` (`SILENCE-LEADING-ARTEFACT.md`); the
+  intake's own segmentation applies the rule to the first segment as well,
+  because a hand-off count that saw a leading sliver would be wrong.
+
+### 12.2 The clap
+
+The protocol's alignment point is now read, and the correction is applied
+**before** any cross-channel number is computed.
+
+| true offset | detected | peak r | old rule's hand-offs | new rule's hand-offs |
+|---:|---:|---:|---:|---:|
+| 0 ms | 0 ms | 0.7586 | 1 | 1 |
+| 40 ms | −40 ms | 0.7586 | 1 | 1 |
+| 120 ms | −120 ms | 0.7586 | 1 | 1 |
+| 300 ms | −300 ms | 0.7586 | **0** | **1** |
+| 600 ms | −600 ms | 0.7586 | **0** | **1** |
+
+The old rule flipped at 300 ms and 600 ms. The new rule never flips.
+
+One thing the fix exposed, and it is a measurement worth keeping: **the clap
+is shorter than `energy.MIN_SPEECH_S` (0.150 s)** — it is about 40 ms — so
+the new segmentation does not count it as speech at all. That is why the
+overlap budget no longer contains the clap, and it is why the clap has to
+be excluded from the hand-off rule explicitly rather than by falling out of
+the segmentation.
+
+A clap is also a **transient**, not merely the loudest thing in the window.
+In the room-tone scene there is no clap, and the loudest thing in the first
+two seconds is a noise peak; reading it as a clap produces a confident
+alignment between two files that were never aligned. The tool therefore
+requires the peak to stand at least 4× above the 90th percentile of the
+same window (measured: a real clap scores ≈ 15, a Gaussian noise peak
+≈ 3.1) and to be 3× above the measured noise floor.
+
+### 12.3 The exit code
+
+| situation | exit code |
+|---|---:|
+| the corpus is usable | **0** |
+| the corpus is rejected (any unmet requirement) | **1** |
+| nothing has been recorded | **2** |
+
+Before the fix, all three exited **0**.
+
+### 12.4 The reported-only failures
+
+All four are gates now: an unmatched pair, an unreadable channel, a silent
+channel, and a low-level channel. The dead `ok` variable — the matched-pairs
+verdict that was computed and never used — is gone; the verdict it computed
+is what the gate uses.
+
+Two of them needed scoping, and the audit was right to insist on it:
+
+- **"channel B is silent"** cannot be an error on its own, because scene 7
+  is *specified* to have a silent B. The gate fires only in the scenes
+  where the protocol has B speaking, and the tool says which scenes those
+  are (`B_expected_to_speak` in the report). Scene 7 with a silent B is
+  accepted; scene 1 with a silent B is rejected.
+- **"the channel is low"** is now a statement about the **balance between
+  the two channels of a pair**, not about one channel in isolation: a
+  microphone on the table instead of at the mouth is tens of dB down. The
+  limit is 20 dB.
+
+The perturbation battery, all ten cases from the audit, now behaves
+correctly: the eight defects are caught, and the two legitimate variations
+(a corpus with no barge-in, and two channels at different sample rates) are
+**not** rejected. The battery distinguishes "caught by the relevant gate"
+from "caught by the length gate", which every one of these short synthetic
+corpora trips.
+
+### 12.5 The cross-talk statistic
+
+| statistic | clean | contaminated | separation |
+|---|---|---|---:|
+| old (correlation of window means) | 0.974 – 0.983 | 0.990 – 0.998 | **0.0067** |
+| new (of the time A is loud, how much is B loud too) | 0.000 – 0.306 | **1.000** | **0.6939** |
+
+A margin of 0.0067 cannot be gated on. A margin of 0.6939 can, and is:
+the gate fires above 0.60, which sits between the two measured ranges.
+
+### 12.6 The level floor
+
+The old floor was `energy.ABS_FLOOR` — 1e-4 RMS, about −80 dBFS — which is
+**23.5 dB below an ordinary lived-in room**. The new floor is **measured**,
+from the place the protocol says to measure it from: *"Also record 30 s of
+nobody talking … This is the noise floor every other number is measured
+against."* The room-tone scene is read first and every other number is
+measured against it.
+
+| the empty room-tone scene | quiet room (1e-5 RMS) | ordinary room (1.5e-3 RMS) |
+|---|---:|---:|
+| old floor, `both_loud_frac` | 0.0 | **1.0** |
+| new floor, `both_loud_frac` | **0.0** | **0.0** |
+| new floor, `signal_frame_frac` (A and B) | **0.0** | **0.0** |
+
+The new floor is **room-independent**: the same corpus in a quiet room and
+in an ordinary one produces the same numbers, and an empty room reads as
+empty in both.
+
+Three things were measured on the way, because the obvious rule fails:
+
+- a threshold at a fixed fraction of the file's **peak** works on continuous
+  speech (scene 4, 90% detected) and fails on room tone (100% detected in
+  an empty room);
+- a threshold at a fixed multiple of the channel's **quietest frames**
+  works on room tone and fails on continuous speech (0.2% detected);
+- the **watcher's adaptive threshold** has the same failure on continuous
+  speech (14% detected in scene 4), because a local noise-floor estimator
+  in a room with no silence estimates the floor from the voice.
+
+The measure that survives both is the one the protocol already specifies: a
+**reference scene** with a known noise level, and a bar 3× above it.
+
+### 12.7 The drift — a bound, and labelled as one
+
+The audit was right that drift has to be dealt with, and wrong about how it
+can be dealt with. The clap gives **one** alignment point; with one
+alignment point the drift **cannot be measured**, because the two channels
+speak different words and their envelopes are uncorrelated everywhere except
+at the clap.
+
+What the tool does:
+
+- reports the offset it measured at the clap;
+- reports a **bound**: the error an assumed clock error of 100 ppm would
+  produce by the end of the scene (**2.0 ms** over a 20 s scene), and the
+  same at the audit's deliberately extreme 1.25% (**250 ms**);
+- says in the report that the drift is **not measurable** from one
+  alignment point, and says why.
+
+Measured with the audit's 1.25% time-base error: the tool detects the clap
+offset as **4 ms** (there is no drift yet, at the clap) and the bound at
+the scene's end is **250 ms**. The gap error that drift alone would cause
+(−0.19 s, §5) is still a real consequence — it is simply not something the
+tool can see from one clap, and it does not claim to.
+
+### 12.8 The length gate, and the writer
+
+- The gate wants the protocol's own number: **1230 s** (300 + 180 + 180 +
+  120 + 180 + 120 + 120 + 30). The old gate wanted 600 s, so a corpus that
+  satisfied the protocol tripped it.
+- `src/wavio.py` has a **writer** now (`write_wav`), so the repo can
+  produce the files the protocol asks for instead of every test carrying
+  its own copy. It clips rather than wraps — a wrapped sample is a sign
+  flip — and it round-trips through the repo's own reader to within the
+  16-bit quantisation (1 LSB = 3.05e-5 full scale).
+- `src/wavio.py` now keeps the file's **real** sample rate on the `Audio`
+  object (`source_sample_rate`). `read_wav` resamples to the analysis rate,
+  so before this the original rate was unrecoverable and every file
+  reported 16000 — the intake's `raw_rate_hz` field was 16000 whatever the
+  file said.
+
+### 12.9 What the fixes exposed, and what is still open
+
+Two new findings came out of fixing the old ones, and both are recorded
+here rather than quietly fixed:
+
+1. **The scene names are zero-padded** (`scene01_free`, not `scene1_free`),
+   and the first version of the scene-number pattern found **nothing** in a
+   padded name — a single digit that is not followed by another digit does
+   not exist in `scene01`. Every scene then fell through to the keyword
+   rules, which know only three of the eight, and the "is B supposed to
+   speak here" gate silently did not fire for five of them. Fixed, and
+   pinned by `test_the_scene_expectations_match_the_protocol`.
+2. **A noise reference taken from the wrong scene is worse than no
+   reference.** The first fallback picked the *quietest scene*, which in a
+   corpus without a room-tone scene is scene 7 — one speaker alone — whose
+   channel A is the quietest channel in the corpus for the wrong reason: it
+   is the median of a scene that is mostly **speech**, and a bar derived
+   from it is three times a voice. The fallback is now the 10th percentile
+   of the frame levels pooled over every scene, and the reference is the
+   **larger** of the room-tone estimate and that pooled estimate, so a
+   room-tone scene recorded at a lower gain cannot lower the bar for the
+   rest of the corpus.
+
+Still open, and not fixable by this tool:
+
+- **The drift.** A bound, not a measurement, and it stays a bound until the
+  protocol grows a second alignment point.
+- **The intake has still never seen a real file.** Everything in this
+  section is synthetic with known truth, exercising the gates. It says
+  nothing about what a real recording will look like.
+
+---
+
 ## Reproducing this
 
 ```bash
 /home/proart/projects/glasses/.venv/bin/python \
     experiments/dialogue_intake_selftest.py --matrix-seconds 12 --long
-/home/proart/projects/glasses/.venv/bin/python -m pytest tests/test_dialogue_intake.py -q
+/home/proart/projects/glasses/.venv/bin/python \
+    experiments/dialogue_intake_fixes.py
+/home/proart/projects/glasses/.venv/bin/python \
+    -m pytest tests/test_dialogue_intake.py tests/test_dialogue_intake_fixes.py -q
 ```
 
 The self-test takes ≈ 4 minutes and writes
-`experiments/dialogue_intake_selftest_results.json`. The test suite takes
-≈ 59 s. Both use only numpy and the repo's own `src/`.
+`experiments/dialogue_intake_selftest_results.json`. The fixes battery takes
+≈ 4 minutes and writes `experiments/dialogue_intake_fixes_results.json`.
+The two test files take ≈ 30 s. All of them use only numpy and the repo's
+own `src/`.

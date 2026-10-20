@@ -162,3 +162,23 @@ It checks the files actually exist as matched pairs, reports rate / duration /
 level per channel, and measures how many silences, hand-offs and overlaps the
 corpus now contains. It reports what is **still missing** — a suite that cannot
 say "this is not yet enough" is not a useful intake check.
+
+It also does three things this protocol needs it to do, each of which depends
+on something above:
+
+- **it aligns the two channels on the clap.** Two recorders started by hand
+  are not synchronised, and without the correction every gap in the corpus
+  carries the offset between them. That is why the clap is asked for *once
+  per scene, loudly, before either person speaks* — it is the alignment
+  point, not decoration.
+- **it measures the noise floor from the room-tone scene** and measures every
+  other level against it. That is why scene 8 is asked for: "the noise floor
+  every other number is measured against".
+- **it exits non-zero when the corpus is not ready** (0 = usable,
+  1 = not yet usable, 2 = nothing recorded), so a script can act on the
+  verdict.
+
+If it reports a channel B that is silent where B is supposed to speak, a
+cross-talk number above 0.60 (channel B hearing channel A), or a pair whose
+two claps do not match — those are faults in the recording, and the tool
+names the scene and the check.
