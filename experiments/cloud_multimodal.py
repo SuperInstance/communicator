@@ -321,12 +321,59 @@ def audio_call(model: str, wav_b64: str, question: str, kind: str = "speaking"):
     return r
 
 
+def clef_choice(answers_raw):
+    """clef's nested answer shape -> (choice, probabilities).
+
+    The real shape is
+        {'q1': {'type': 'choice', 'choice': 'yes',
+                'probabilities': {'yes': 0.8003, 'no': 0.1997},
+                'confidence': 0.3608}}
+    so the answer is at answers['q1']['choice'] and the PROBABILITY is
+    alongside it. An earlier parser looked for a flat {'yes': ...} mapping and
+    returned None for every call, which is the "empty response" shape that
+    hides a real bug.
+
+    The probability is worth more than the choice: it is continuous, so the
+    margin between two conditions is a real number rather than a coin flip.
+    """
+    if not isinstance(answers_raw, dict):
+        return None, {}
+    node = answers_raw.get("q1")
+    if node is None:
+        vals = list(answers_raw.values())
+        node = vals[0] if vals else None
+    if isinstance(node, dict):
+        probs = node.get("probabilities")
+        if not isinstance(probs, dict):
+            probs = {}
+        return node.get("choice"), probs
+    return None, {}
+
+
+def clef_prob(answers_raw, key: str) -> float | None:
+    """P(the model gave this answer), or None if the model gave no
+    probability."""
+    _choice, probs = clef_choice(answers_raw)
+    if not probs:
+        return None
+    try:
+        return float(probs.get(key))
+    except (TypeError, ValueError):
+        return None
+
+
 def clef_answer(text: str, answers_raw) -> bool | None:
     """True/False from clef's answer, which may be a string or a dict."""
+    choice, _probs = clef_choice(answers_raw)
+    if isinstance(choice, str):
+        t = choice.strip().lower()
+        if t in ("yes", "true"):
+            return True
+        if t in ("no", "false"):
+            return False
     if answers_raw is not None:
         a = answers_raw
         if isinstance(a, dict):
-            # clef's answers are keyed by question name ("q1"): {"q1": "yes"}
             vals = list(a.values())
             if vals:
                 a = vals[0]
@@ -351,13 +398,14 @@ def clef_answer(text: str, answers_raw) -> bool | None:
 
 
 def clef_facing(text: str, answers_raw) -> bool | None:
-    """True = FACING, False = AWAY, from clef's answer or its prose.
-
-    clef's `criteria` are the answer SPACE, so the facing question is asked
-    with criteria {facing: ..., away: ...} rather than {yes, no}: the model
-    then picks a side instead of producing a paragraph, and the answer comes
-    back keyed by the criterion it chose.
-    """
+    """True = FACING, False = AWAY, from clef's answer or its prose."""
+    choice, _probs = clef_choice(answers_raw)
+    if isinstance(choice, str):
+        t = choice.strip().lower()
+        if t in ("facing", "towards", "toward", "yes", "true"):
+            return True
+        if t in ("away", "turned", "no", "false"):
+            return False
     if answers_raw is not None:
         a = answers_raw
         if isinstance(a, dict):
@@ -723,14 +771,23 @@ def main():
             r = audio_call("@cf/cloudflare/clef-omni", b64, Q_AUDIO)
             txt = r.get("text") or ""
             p = clef_answer(txt, r.get("answers_raw"))
-            ar[variant] = {"parsed": p, "text": txt[:600],
+            p_yes = clef_prob(r.get("answers_raw"), "yes")
+            ar[variant] = {"parsed": p, "p_yes": p_yes,
+                           "text": txt[:600],
                            "answers_raw": str(r.get("answers_raw"))[:400],
                            "error": r.get("error"),
                            "detail": (r.get("detail") or "")[:300],
                            "elapsed_s": r.get("elapsed_s")}
-            print(f"  {variant:7s} parsed={p!s:5s} {txt[:180]!r}")
+            print(f"  {variant:7s} parsed={p!s:5s} P(yes)={p_yes}  {txt[:120]!r}")
             if r.get("error"):
                 print(f"          ERROR {r.get('error')}: {(r.get('detail') or '')[:200]}")
+        # THE AUDIO MARGIN, on the probability rather than the coin flip.
+        ps, pn = ar["speak"].get("p_yes"), ar["silent"].get("p_yes")
+        if ps is not None and pn is not None:
+            ar["audio_margin_p_yes_speak_minus_silent"] = ps - pn
+            print(f"  AUDIO margin P(yes|speech) - P(yes|silence) = {ps - pn:.4f}")
+        else:
+            print("  AUDIO margin unavailable (no probabilities returned)")
         # THE JOIN, on audio alone: A (facing, speaking) vs B (turned,
         # speaking). These are acoustically near-identical, so this is the
         # hardest possible version of the question, and it is the one the
@@ -744,13 +801,25 @@ def main():
                             kind="facing")
             pA = clef_facing(rA.get("text") or "", rA.get("answers_raw"))
             pB = clef_facing(rB.get("text") or "", rB.get("answers_raw"))
-            ar["facing_A"] = {"parsed": pA, "text": (rA.get("text") or "")[:400],
+            qA = clef_prob(rA.get("answers_raw"), "facing")
+            qB = clef_prob(rB.get("answers_raw"), "facing")
+            ar["facing_A"] = {"parsed": pA, "p_facing": qA,
+                              "text": (rA.get("text") or "")[:400],
                               "answers_raw": str(rA.get("answers_raw"))[:300]}
-            ar["facing_B"] = {"parsed": pB, "text": (rB.get("text") or "")[:400],
+            ar["facing_B"] = {"parsed": pB, "p_facing": qB,
+                              "text": (rB.get("text") or "")[:400],
                               "answers_raw": str(rB.get("answers_raw"))[:300]}
             sep = (None if (pA is None or pB is None) else
                    (1.0 if pA and not pB else 0.0 if pA == pB else -1.0))
             ar["facing_separation"] = sep
+            # THE PROBABILITY MARGIN is the real number: A is facing and
+            # speaking, B is turned and speaking, and the two are the SAME
+            # POEM, so any separation here is the acoustic signature of
+            # turning your head. There should not be one.
+            if qA is not None and qB is not None:
+                ar["facing_probability_margin"] = qA - qB
+                print(f"  JOIN P(facing|A) - P(facing|B) = {qA:.4f} - {qB:.4f} "
+                      f"= {qA - qB:+.4f}")
             print(f"  JOIN facing A(parsed={pA}) vs turned B(parsed={pB})  "
                   f"-> {'SEPARATES' if sep == 1.0 else 'does NOT separate'}")
             print(f"        A: {(rA.get('text') or '')[:150]!r}")

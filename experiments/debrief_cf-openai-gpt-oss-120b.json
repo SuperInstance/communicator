@@ -1,0 +1,112 @@
+{
+  "model": "@cf/openai/gpt-oss-120b",
+  "elapsed_s": 73.23,
+  "parsed": true,
+  "materials_chars": 139125,
+  "debrief": {
+    "state_of_the_evidence": [
+      {
+        "claim": "A Silero\u2011VAD gate in front of the watcher cuts CPU usage by roughly an order of magnitude while eliminating the watcher\u2019s \u201cspeech\u2011on\u2011hum\u201d saturation failure.",
+        "evidence": "DEVICE\u2011GENERALISATION\u202fresults: warm ungated\u202f=\u202f61.27\u202f% core, warm gated\u202f=\u202f3.32\u202f% core (ratio\u202f=\u202f18.46\u00d7); cold ungated\u202f=\u202f65.83\u202f% core, cold gated\u202f=\u202f3.95\u202f% core (ratio\u202f=\u202f16.68\u00d7). Hum\u2011sweep\u202fresults: for 50\u2011120\u202fHz hum the gate\u2019s mean probability is \u22480.0\u202f% (no speech emitted) versus \u224860\u201170\u202f% for the ungated watcher, confirming the failure mode is removed."
+      },
+      {
+        "claim": "The watcher\u2019s documented \u201cmicro\u2011second\u201d latency is false; on a desktop it costs ~39\u202fms per 100\u202fms of audio (\u224839\u202f% of a CPU core).",
+        "evidence": "WATCHER\u2011COST\u202fresults (device_generalisation) report 39.3\u202f% core for a 30\u202fs speech clip (median of timed passes, OMP/BLAS threads forced to\u202f1). The 31.8\u202f% figure cited in the commit message has no measurement backing and is therefore discarded."
+      },
+      {
+        "claim": "The character\u2011delta metric does **not** measure subject motion; it is dominated by camera auto\u2011exposure drift.",
+        "evidence": "EMPTY\u2011ROOM\u2011NULL\u202fresults: empty\u2011room dot\u2011flip rate\u202f=\u202f50.00\u202f% (the theoretical maximum) vs occupied\u202f=\u202f48.19\u202f%; the empty\u2011room rate is higher, proving the delta tracks the camera, not motion. This overturns the original ASCII\u2011MOTION claim (retracted in HOW\u2011WE\u2011KEEP\u2011FOOLING\u2011OURSELVES)."
+      },
+      {
+        "claim": "Row\u2011wise band removal eliminates the LED\u2011flicker nuisance without destroying speech\u2011related signal.",
+        "evidence": "ROW\u2011BAND\u2011REMOVAL\u202fresults: empty\u2011room flip\u202f=\u202f0.01\u202f% (vs 50\u202f% raw), occupied flip\u202f\u2248\u202f48.57\u202f% (\u2248 unchanged). The row\u2011subtract operator reduces the row\u2011constant nuisance by 159\u00d7 while preserving column\u2011wise motion (occupied column energy rises from 4.86\u202f% to 26.20\u202f%)."
+      },
+      {
+        "claim": "Temporal\u2011median filtering removes the banding but also erases most speech\u2011related motion.",
+        "evidence": "TEMPORAL\u2011MEDIAN\u2011FIX\u202fresults: empty\u2011room flip\u202f=\u202f0\u202f% (good) but occupied flip drops to 0.48\u202f% (k=5) and 21.43\u202f% (k=3), showing the filter cancels genuine signal."
+      },
+      {
+        "claim": "The GATE_FIELD under\u2011reporting bug (14.5\u00d7) is retracted; the field reports the correct peak.",
+        "evidence": "GATE\u2011PEAK\u2011VERDICT\u202fresults: for every record the reported gate field equals the true max (ratio\u202f=\u202f1.0). The earlier 14.5\u00d7 claim compared mismatched intervals and is documented as retracted (GATE\u2011PEAK\u2011COVERAGE)."
+      },
+      {
+        "claim": "High\u2011pass filtering cannot solve the 150\u2011200\u202fHz hum problem; a narrow notch can attenuate 200\u202fHz but does not improve pitch tracking.",
+        "evidence": "NOTCH\u2011AB\u202fresults: high\u2011pass\u202f60\u202fHz reduces 200\u202fHz by only\u202f\u20110.08\u202fdB (ineffective); a 200\u202fHz notch gives\u202f\u201121\u202fdB attenuation but the emitted pitch error (median\u202f0.14\u202fcents, p90\u202f1.43\u202fcents) is unchanged, confirming the filter does not fix the pitch collapse."
+      },
+      {
+        "claim": "Fundamental\u2011frequency jumps are not a reliable indicator of speaker change.",
+        "evidence": "F0\u2011SPEAKER\u2011CHANGE\u202fresults: only the \u2018children\u2019 cell shows a significant positive correlation (\u03c1\u202f=\u202f0.341, p\u202f=\u202f0.006); all other cells are non\u2011significant or negative. Overall AUC\u202f\u2248\u202f0.53, barely above chance."
+      },
+      {
+        "claim": "A vision model (jev\u20111.14.0) cannot detect speaker change from spectrogram images; accuracy equals the trivial baseline.",
+        "evidence": "SPECTROGRAM\u2011VISION\u202fresults: model accuracy\u202f=\u202f0.333 (margin\u202f=\u202f0.0) on a balanced 60/60 SAME vs CHANGE test, matching the always\u2011predict\u2011change baseline (AUC\u202f=\u202f0.529)."
+      },
+      {
+        "claim": "The \u201cteacher\u201d model is not validated; it scores 1.0 on real data but also 1.0 on spatially\u2011scrambled controls, indicating over\u2011fitting to session\u2011specific artefacts.",
+        "evidence": "TEACHER\u2011BENCH\u202fresults: real\u202f=\u202f1.000, shuffled\u202f=\u202f1.000, blank\u202f=\u202f0.333, margin\u202f=\u202f0.0. Leave\u2011one\u2011session\u2011out accuracy\u202f=\u202f0.0, confirming no generalizable signal."
+      },
+      {
+        "claim": "Silence\u2011duration alone is a poor predictor of turn\u2011ends; most pauses are resumed by the same speaker.",
+        "evidence": "REAL\u2011INTERRUPT\u2011RATE\u202fresults: for pauses \u22650.6\u202fs, 98.1\u202f% resume (interrupt\u202f=\u202f0.981); for longer thresholds the resume rate is 100\u202f%."
+      },
+      {
+        "claim": "The Silero gate\u2019s CPU advantage persists under cache pressure but degrades modestly.",
+        "evidence": "DEVICE\u2011GENERALISATION\u202fresults: relative cache penalty\u202f=\u202f1.107 (cold/warm inflation), yet warm\u2011gated\u202f=\u202f3.32\u202f% vs warm\u2011ungated\u202f=\u202f61.27\u202f% (\u224818\u00d7 reduction) still holds."
+      }
+    ],
+    "unsafe_claims": [
+      {
+        "claim": "The watcher runs in \u201cmicroseconds\u201d as claimed in its docstring.",
+        "why": "Measured cost is 39\u202fms per 100\u202fms (\u224839\u202f% of a core), three orders of magnitude slower than the docstring states.",
+        "action": "Update documentation; do not rely on the watcher for real\u2011time operation on low\u2011power hardware without optimisation."
+      },
+      {
+        "claim": "The Silero\u2011VAD gate will reduce CPU usage to <1\u202f% on all target devices (including Pi\u2011class).",
+        "why": "Evidence only from a desktop with 16\u202fMiB L3 cache; on a Pi\u2011class device the 2.2\u202fMiB ONNX model may exceed cache, and cache\u2011pressure tests show a 1.1\u00d7 penalty that could erase the advantage.",
+        "action": "Benchmark the gated watcher on a Pi\u2011class board before committing to the gate as the sole optimisation."
+      },
+      {
+        "claim": "Character\u2011delta (ASCII\u2011motion) measures subject motion.",
+        "why": "Empty\u2011room control shows flip rate at the theoretical maximum, proving the metric tracks camera exposure drift, not motion. The claim is retracted in HOW\u2011WE\u2011KEEP\u2011FOOLING\u2011OURSELVES.",
+        "action": "Discard the delta as a motion feature; replace with row\u2011band removal plus other robust visual cues if needed."
+      },
+      {
+        "claim": "A high\u2011pass filter can eliminate the 150\u2011200\u202fHz hum that corrupts pitch tracking.",
+        "why": "Measured attenuation at 200\u202fHz is \u2264\u202f\u20110.08\u202fdB for a 60\u202fHz HPF and \u2264\u202f\u20116\u202fdB for a 200\u202fHz HPF, insufficient to suppress the hum; notch filters attenuate the fundamental but do not improve pitch error.",
+        "action": "Do not pursue HPF\u2011only solutions; consider alternative pitch\u2011tracking algorithms or hardware\u2011level noise mitigation."
+      },
+      {
+        "claim": "GATE_FIELD under\u2011reports gate peaks by 14.5\u00d7.",
+        "why": "Retracted; verification shows the reported value matches the true peak (ratio\u202f=\u202f1.0) when measured over the same interval.",
+        "action": "Remove the 14.5\u00d7 factor from any cost or confidence calculations; rely on the verified gate output."
+      },
+      {
+        "claim": "Spectrogram images enable reliable speaker\u2011change detection.",
+        "why": "Vision model accuracy equals the trivial baseline (0.333) and does not exceed the always\u2011predict\u2011change AUC\u202f=\u202f0.529.",
+        "action": "Abandon the spectrogram\u2011vision route for turn\u2011taking; focus on audio\u2011only cues."
+      },
+      {
+        "claim": "Silence duration alone can reliably trigger turn\u2011end decisions.",
+        "why": "Real\u2011interrupt\u2011rate data shows >98\u202f% of pauses are resumed, making silence a poor predictor; smart\u2011turn route shows only modest improvement (p\u2011end\u202f\u2248\u202f0.96 for END vs 0.48 for RESUME).",
+        "action": "Do not use silence\u2011duration as the primary turn\u2011end signal; explore richer acoustic or multimodal cues."
+      }
+    ],
+    "next_experiment": {
+      "title": "Pi\u2011class Silero\u2011gate cost and accuracy test",
+      "hypothesis": "On a Pi\u2011class device the Silero\u2011VAD gate will still reduce CPU usage by at least 5\u00d7 compared to the ungated watcher while maintaining \u226580\u202f% speech\u2011segment detection accuracy.",
+      "method": "Run the same six test signals (steady hum, fan, keyboard, music, white noise, near\u2011silence, real speech) on a Raspberry\u202fPi\u202f4 (2\u202fGiB, 1\u202fMiB L2 cache). Measure percent\u2011core usage (resource.getrusage) for the watcher with and without the gate, using warm\u2011up + 5 timed passes per signal. Also compute detection accuracy (speech\u2011vs\u2011non\u2011speech classification) against the ground\u2011truth labels used in ADOPTION\u2011PLAN.",
+      "controls": [
+        "Ungated watcher on the same Pi (control that could fail if the gate adds overhead).",
+        "A synthetic \u201ccold\u2011cache\u201d run where L1/L2 are flushed before each 100\u202fms chunk (to expose worst\u2011case cache behaviour)."
+      ],
+      "null": "Gate provides no CPU benefit (ratio\u202f\u2264\u202f1) or degrades detection accuracy below 80\u202f%.",
+      "margin_threshold": "The gated watcher must achieve \u2264\u202f8\u202f% core usage (\u22655\u00d7 reduction from the ungated baseline) and \u2265\u202f80\u202f% detection accuracy; the effect is measured against the ungated baseline on the same hardware.",
+      "falsifier": "If the gated watcher uses \u2265\u202f30\u202f% of a core or its accuracy falls below 80\u202f%, the hypothesis is falsified and the gate cannot be adopted for Pi\u2011class targets."
+    },
+    "biggest_risk": "Relying on the Silero\u2011VAD gate as the sole performance optimisation; on low\u2011memory, cache\u2011limited devices the gate\u2019s working set may cause CPU usage to rise dramatically, re\u2011introducing the watcher\u2019s saturation failure and breaking real\u2011time operation.",
+    "what_would_change_the_plan": "A successful validation that the Silero gate provides \u22655\u00d7 CPU savings and \u226580\u202f% speech\u2011segment accuracy on a Pi\u2011class device would cement the gate as the primary front\u2011end. Conversely, a failure would force a redesign: either adopt a zero\u2011dependency VAD (e.g., rhasspy/energy\u2011vad) or redesign the watcher to avoid YIN\u2011based pitch tracking on non\u2011speech segments."
+  },
+  "raw": "{\n  \"state_of_the_evidence\": [\n    {\n      \"claim\": \"A Silero\u2011VAD gate in front of the watcher cuts CPU usage by roughly an order of magnitude while eliminating the watcher\u2019s \u201cspeech\u2011on\u2011hum\u201d saturation failure.\",\n      \"evidence\": \"DEVICE\u2011GENERALISATION\u202fresults: warm ungated\u202f=\u202f61.27\u202f% core, warm gated\u202f=\u202f3.32\u202f% core (ratio\u202f=\u202f18.46\u00d7); cold ungated\u202f=\u202f65.83\u202f% core, cold gated\u202f=\u202f3.95\u202f% core (ratio\u202f=\u202f16.68\u00d7). Hum\u2011sweep\u202fresults: for 50\u2011120\u202fHz hum the gate\u2019s mean probability is \u22480.0\u202f% (no speech emitted) versus \u224860\u201170\u202f% for the ungated watcher, confirming the failure mode is removed.\"\n    },\n    {\n      \"claim\": \"The watcher\u2019s documented \u201cmicro\u2011second\u201d latency is false; on a desktop it costs ~39\u202fms per 100\u202fms of audio (\u224839\u202f% of a CPU core).\",\n      \"evidence\": \"WATCHER\u2011COST\u202fresults (device_generalisation) report 39.3\u202f% core for a 30\u202fs speech clip (median of timed passes, OMP/BLAS threads forced to\u202f1). The 31.8\u202f% figure cited in the commit message has no measurement backing and is therefore discarded.\"\n    },\n    {\n      \"claim\": \"The character\u2011delta metric does **not** measure subject motion; it is dominated by camera auto\u2011exposure drift.\",\n      \"evidence\": \"EMPTY\u2011ROOM\u2011NULL\u202fresults: empty\u2011room dot\u2011flip rate\u202f=\u202f50.00\u202f% (the theoretical maximum) vs occupied\u202f=\u202f48.19\u202f%; the empty\u2011room rate is higher, proving the delta tracks the camera, not motion. This overturns the original ASCII\u2011MOTION claim (retracted in HOW\u2011WE\u2011KEEP\u2011FOOLING\u2011OURSELVES).\"\n    },\n    {\n      \"claim\": \"Row\u2011wise band removal eliminates the LED\u2011flicker nuisance without destroying speech\u2011related signal.\",\n      \"evidence\": \"ROW\u2011BAND\u2011REMOVAL\u202fresults: empty\u2011room flip\u202f=\u202f0.01\u202f% (vs 50\u202f% raw), occupied flip\u202f\u2248\u202f48.57\u202f% (\u2248 unchanged). The row\u2011subtract operator reduces the row\u2011constant nuisance by 159\u00d7 while preserving column\u2011wise motion (occupied column energy rises from 4.86\u202f% to 26.20\u202f%).\"\n    },\n    {\n      \"claim\": \"Temporal\u2011median filtering removes the banding but also erases most speech\u2011related motion.\",\n      \"evidence\": \"TEMPORAL\u2011MEDIAN\u2011FIX\u202fresults: empty\u2011room flip\u202f=\u202f0\u202f% (good) but occupied flip drops to 0.48\u202f% (k=5) and 21.43\u202f% (k=3), showing the filter cancels genuine signal.\"\n    },\n    {\n      \"claim\": \"The GATE_FIELD under\u2011reporting bug (14.5\u00d7) is retracted; the field reports the correct peak.\",\n      \"evidence\": \"GATE\u2011PEAK\u2011VERDICT\u202fresults: for every record the reported gate field equals the true max (ratio\u202f=\u202f1.0). The earlier 14.5\u00d7 claim compared mismatched intervals and is documented as retracted (GATE\u2011PEAK\u2011COVERAGE).\"\n    },\n    {\n      \"claim\": \"High\u2011pass filtering cannot solve the 150\u2011200\u202fHz hum problem; a narrow notch can attenuate 200\u202fHz but does not improve pitch tracking.\",\n      \"evidence\": \"NOTCH\u2011AB\u202fresults: high\u2011pass\u202f60\u202fHz reduces 200\u202fHz by only\u202f\u20110.08\u202fdB (ineffective); a 200\u202fHz notch gives\u202f\u201121\u202fdB attenuation but the emitted pitch error (median\u202f0.14\u202fcents, p90\u202f1.43\u202fcents) is unchanged, confirming the filter does not fix the pitch collapse.\"\n    },\n    {\n      \"claim\": \"Fundamental\u2011frequency jumps are not a reliable indicator of speaker change.\",\n      \"evidence\": \"F0\u2011SPEAKER\u2011CHANGE\u202fresults: only the \u2018children\u2019 cell shows a significant positive correlation (\u03c1\u202f=\u202f0.341, p\u202f=\u202f0.006); all other cells are non\u2011significant or negative. Overall AUC\u202f\u2248\u202f0.53, barely above chance.\"\n    },\n    {\n      \"claim\": \"A vision model (jev\u20111.14.0) cannot detect speaker change from spectrogram images; accuracy equals the trivial baseline.\",\n      \"evidence\": \"SPECTROGRAM\u2011VISION\u202fresults: model accuracy\u202f=\u202f0.333 (margin\u202f=\u202f0.0) on a balanced 60/60 SAME vs CHANGE test, matching the always\u2011predict\u2011change baseline (AUC\u202f=\u202f0.529).\"\n    },\n    {\n      \"claim\": \"The \u201cteacher\u201d model is not validated; it scores 1.0 on real data but also 1.0 on spatially\u2011scrambled controls, indicating over\u2011fitting to session\u2011specific artefacts.\",\n      \"evidence\": \"TEACHER\u2011BENCH\u202fresults: real\u202f=\u202f1.000, shuffled\u202f=\u202f1.000, blank\u202f=\u202f0.333, margin\u202f=\u202f0.0. Leave\u2011one\u2011session\u2011out accuracy\u202f=\u202f0.0, confirming no generalizable s",
+  "missing_required_fields": [],
+  "acceptable": true
+}
