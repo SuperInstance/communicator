@@ -99,10 +99,16 @@ free.
 ### The blunt caveat (measured, not assumed)
 
 I asked Jev whether these three knobs are separable and real-time safe. **It
-could not answer the question** — it scored all three *identically* on the
-substantive axes (spread across knobs: `timing` **0.000**, `prosody` **0.000**;
+could not answer the question** — it scored all three *nearly identically* on the
+substantive axes (spread across knobs: `timing` **0.000**, `prosody` **0.020**;
 see [JEV-AS-INSTRUMENT.md](JEV-AS-INSTRUMENT.md) §E6). What it did say, and
 what I accept, is that **`realtime_safe` ≈ 0.38 for all three**.
+
+> **CORRECTION (2026-10-19).** This said the three knobs scored *identically*,
+> with "spread across knobs: `timing` **0.000**, `prosody` **0.000**".
+> `docs/research/voiceloop/jev_voiceloop_results.json` gives a `prosody` spread
+> of **0.020** (and 0.010 on `orthogonal` and `realtime_safe`) — near-identical
+> rather than identical. `NOTES-AUDIT-2.md` F5.
 
 That is consistent with the source: each knob is a per-utterance draw through a
 flow with internal state, set once at `infer()` entry. You could re-draw them

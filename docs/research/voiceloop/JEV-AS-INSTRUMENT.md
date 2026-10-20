@@ -148,11 +148,16 @@ E/F   forward   E E E   all_first=True
 E/F   reversed  E F E   all_first=False   <- unstable
 ```
 
+`picked_first_option_rate = 0.5` is **not a per-call rate**: the script computes
+`sum(r["all_first"] for r in rows) / n` over the six *order-blocks*
+(`jev_voiceloop.py:659`), so 0.5 means "3 of the 6 order-blocks were all-first".
+
 Read carefully:
 
 - **Forward order: 9/9 first option.** That is *exactly* the reported "picks the
   first 9/9" bias, reproduced precisely.
-- **Reversed order: 6/9 first option.** The bias **breaks** under reversal.
+- **Reversed order: 3/9 first option** — the bias **breaks** under reversal (6 of
+  the 9 reversed calls stayed with the pair's *content* label instead).
 - Per-pair content stability **contradicts itself**: A/B held the content (A won
   with B listed first), C/D flipped to the new first option, E/F flip-flopped.
 
@@ -163,6 +168,19 @@ first" is a real forward-order artifact and nothing more; treating it as a
 general position bias would over-claim. The practical rule stands regardless:
 **a Choice over options you cannot tell apart carries no information**, and the
 symptom is instability across repeats, not a clean first-option pull.
+
+> **CORRECTION (2026-10-19) — the reversed-order count was quoted under the wrong
+> label.** This said *"Reversed order: 6/9 first option."* Under the file's own
+> `first_option` field — the option listed first *in that order* — the reversed
+> blocks give A/B 0/3 (`first_option` `variant_B`, picks A A A), C/D 2/3
+> (`variant_D`, picks D D C) and E/F 1/3 (`variant_F`, picks E F E): **3/9**, not
+> 6/9. Forward is 9/9 and that part was right.
+>
+> The number 6 does exist in the data, but it counts something else: 6 of the 9
+> reversed calls landed on the pair's *forward-declared* label — the
+> **content**-anchored count, the opposite quantity from "first option". Quoting
+> it under the "first option" label mixed two denominators inside one bullet.
+> Found by the notes audit — `NOTES-AUDIT-2.md` F7.
 
 ---
 
@@ -235,14 +253,15 @@ Three VITS/MeloTTS inference knobs, four axes:
 | `noise_scale_w` | 0.91 | 0.84 | 0.38 | 0.78 |
 | `sdp_ratio` | 0.91 | 0.86 | 0.39 | 0.78 |
 
-Spread across the three knobs: `timing` **0.000**, `prosody` **0.000**,
-`orthogonal` 0.020, `realtime_safe` 0.030.
+Spread across the three knobs: `timing` **0.000**, `prosody` **0.020**,
+`orthogonal` 0.010, `realtime_safe` 0.010.
 
-My script's `knobs_are_separate` flag fired `True` on the 0.02–0.03
+My script's `knobs_are_separate` flag fired `True` on the 0.01–0.02
 differences — and **that flag is a false positive I should not trust.** The
-substantive axes are *bit-identical*. Jev rated three semantically different
-knobs identically because their descriptions are structurally similar prose. It
-has no access to the mechanism; it only reads the text.
+substantive axes differ by at most 0.02 — near-identical, not *bit-identical*.
+Jev rated three semantically different knobs nearly identically because their
+descriptions are structurally similar prose. It has no access to the mechanism;
+it only reads the text.
 
 The one genuinely useful signal: **`realtime_safe` ≈ 0.38 for all three**. Even
 taken at face value that says the VITS knobs are poor real-time CC shapers,
@@ -254,6 +273,28 @@ rather than about differences between them.
 at audio-frame rate is a question about implementation, and Jev answered a
 question about vocabulary. This is the cleanest negative in the lane: the model
 was confident, structured, and worthless on this question.
+
+> **CORRECTION (2026-10-19) — the spread line above was in no result file, and
+> three of its four entries contradicted the file.** It read *"Spread across the
+> three knobs: `timing` 0.000, `prosody` 0.000, `orthogonal` 0.020, `realtime_safe`
+> 0.030"* and concluded *"The substantive axes are bit-identical."* There is no
+> `spread` field in `jev_voiceloop_results.json` at all — the script computes
+> `distinct_control_vectors` and `knobs_are_separate` and nothing else
+> (`jev_voiceloop.py:528-534`) — so the line was a hand recomputation that
+> disagreed with the file. Recomputed from the E6 `rows`
+> (`timing` 0.91/0.91/0.91, `prosody` 0.85/0.84/0.86, `realtime_safe`
+> 0.38/0.38/0.39, `orthogonal` 0.77/0.78/0.78), max − min per axis gives
+> **`timing` 0.000, `prosody` 0.020, `orthogonal` 0.010, `realtime_safe` 0.010**
+> — the document's own table three lines above the spread line already showed
+> `prosody` as 0.85 / 0.84 / 0.86.
+>
+> The load-bearing sentence was false: only `timing` is identical. The three
+> knobs were rated *distinguishable* on `prosody`, `orthogonal` and
+> `realtime_safe`, by at most 0.02 on a 0–1 scale — "nearly identically", not
+> "identically". The section's conclusion survives in that weaker form. Found by
+> the notes audit — `NOTES-AUDIT-2.md` F5. (Whether the `knobs_are_separate` flag
+> is described correctly is a separate, still-open candidate — `NOTES-AUDIT-2.md`
+> C3 — and is not settled here.)
 
 ---
 

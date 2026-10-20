@@ -164,11 +164,22 @@ repo*: `TTS/.models.json`. I parsed all 95 entries:
 | CC-BY-4.0 | 3 |
 | **CPML (non-commercial)** | **2** |
 | **CC BY-NC-ND 4.0** | **2** |
+| Apache 2.0 | 2 |
 | openrail / custom | 2 |
 
 **Only 2 of 95 are the non-commercial CPML everyone remembers** — and they are
 the flagship XTTS v1.1/v2. The classic English models are Apache-2.0/BSD-3/MIT.
 `tos_required` is `True` for exactly those 2 and `False` for the other 93.
+
+> **CORRECTION (2026-10-19) — this table lost a row on the way from the detail
+> file to this summary, and said 95 while summing to 93.** The rows above used to
+> read 34 + 24 + 11 + 8 + 7 + 3 + 2 + 2 + 2 = **93**, two sentences below the
+> "95 entries" they claimed to parse. The manifest has **two spellings** of the
+> same licence — "apache 2.0" (34) and "Apache 2.0" (2) — and the second row was
+> dropped. It is back, so the table sums to **95** again; together the two rows
+> are the Apache-2.0 ×36 that `coqui-tts.md:24-36` and `SYNTHESIS.md:281` both
+> quote. The `openrail / custom` row is still merged (1 + 1 in the manifest).
+> Found by the notes audit — `NOTES-AUDIT-2.md` F9.
 
 The clause I would have missed without reading the actual licence rather than
 the badge: CPML restricts "non-commercial use of a machine learning model **and
@@ -252,9 +263,19 @@ holistic question, which the brief says is the *unsafe* one, got it right.
 was **no** position bias at all — the pick travelled with the content in both
 orders. With genuinely indistinguishable options, forward order picked the
 first option **9/9** (reproducing the reported bias exactly) but reversed order
-only 6/9, and the per-pair readings contradicted each other: one pair held the
+only **3/9** (6 of the 9 reversed calls stayed with the pair's *content* label
+instead), and the per-pair readings contradicted each other: one pair held the
 content, one flipped to position, one flip-flopped. The honest finding is
 **instability**, not a clean positional bias.
+
+> **CORRECTION (2026-10-19).** This said reversed order picked the first option
+> *"only 6/9"*. Under the result file's own `first_option` field — the option
+> listed first *in that order* — the reversed blocks give A/B 0/3 (`variant_B`,
+> picks A A A), C/D 2/3 (`variant_D`, picks D D C) and E/F 1/3 (`variant_F`, picks
+> E F E): **3/9**. The 6 is real but counts something else: 6 of the 9 reversed
+> calls stayed with the pair's *forward-declared* label, i.e. the **content**
+> count. Forward 9/9 was right. This also now agrees with item 6 of "Where I was
+> wrong, collected" below. Found by the notes audit — `NOTES-AUDIT-2.md` F8.
 
 **The methodological lesson, which is the real result:** *every time I built an
 aggregator on top of Jev's outputs, the aggregator was worse than the rows
@@ -263,12 +284,21 @@ judgements in one call — E5's per-criterion table took one call and was
 genuinely informative. It is a bad instrument for producing a verdict.
 
 **And Jev was simply the wrong tool for one question.** Asked whether the VITS
-prosody knobs are separable and real-time safe, it scored all three
-*identically* — spread across knobs of exactly **0.000** on both substantive
-axes — because their descriptions are structurally similar prose. It has no
-access to the mechanism, only the vocabulary. Confident, well-structured, and
-worthless. My script's own `knobs_are_separate` flag fired `True` on a 0.02
-difference; I did not trust my own metric.
+prosody knobs are separable and real-time safe, it scored all three *nearly
+identically* — spread across knobs of **0.000** on `timing` and **0.020** on
+`prosody`, at most **0.020** on any axis — because their descriptions are
+structurally similar prose. It has no access to the mechanism, only the
+vocabulary. Confident, well-structured, and worthless. My script's own
+`knobs_are_separate` flag fired `True` on a 0.02 difference; I did not trust my
+own metric.
+
+> **CORRECTION (2026-10-19).** This said the knobs were scored *"identically —
+> spread across knobs of exactly 0.000 on both substantive axes"*. Only `timing`
+> is 0.000; `prosody` is **0.020** (0.85 / 0.84 / 0.86 in
+> `jev_voiceloop_results.json` E6), and the other two axes are 0.010 each. The
+> honest statement is "at most 0.020 apart on every axis" — near-identical, not
+> identical. The conclusion of the section is unchanged; the number was.
+> Found by the notes audit — `NOTES-AUDIT-2.md` F6.
 
 ---
 
@@ -279,8 +309,9 @@ difference; I did not trust my own metric.
    architecture.
 2. **There is no streaming synthesis to steal** from either TTS repo. Zero
    `yield`/`stream` in MeloTTS.
-3. **Coqui is not "non-commercial."** MPL-2.0 code; 93 of 95 models permissive;
-   the non-commercial ones are XTTS and two CC BY-NC-ND models. Checked the
+3. **Coqui is not "non-commercial."** MPL-2.0 code; **89 of 95** models
+   commercially permissive (4 non-commercial, 2 restricted/unverified); the
+   non-commercial ones are XTTS v1.1/v2 and two CC BY-NC-ND models. Checked the
    manifest instead of the badge.
 4. **`max` is not the fix for holistic inversion** — it is worse than the
    holistic question on the actual end-of-turn data.
@@ -291,6 +322,17 @@ difference; I did not trust my own metric.
    each number, making it retrieval, not derivation) and does not refute it.
 8. **My own `knobs_are_separate` metric was a false positive**, fooled by a
    0.02 difference on a flat field.
+
+> **CORRECTION (2026-10-19) — item 3 above.** It read *"93 of 95 models
+> permissive"*. **93 is the number of models that are *not CPML*** (95 − 2) — a
+> different quantity. The permissive count from the manifest is **89**:
+> 34 Apache-2.0 + 2 Apache-2.0 + 24 BSD-3 + 11 MIT + 7 MPL + 8 CC-BY-SA +
+> 3 CC-BY = **89**. The remaining six are the 4 non-commercial ones (XTTS v2 and
+> XTTS v1.1 under CPML, plus two CC BY-NC-ND models) and the 2 restricted or
+> unverified ones (`openrail`, `custom (jenny)`). The sentence also contradicted
+> its own clause: XTTS is *two* models, not one. The lane's own detail file has
+> the correct set — `coqui-tts.md:208-210`. Found by the notes audit —
+> `NOTES-AUDIT-2.md` F10.
 
 ---
 

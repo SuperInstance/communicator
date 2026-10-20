@@ -286,6 +286,13 @@ Only 2 of 95 Coqui models are CPML. The brief's "Coqui is non-commercial"
 premise applies to the flagship XTTS models, not the repo (MPL-2.0) and not the
 other 93 models.
 
+> **CORRECTION (2026-10-19).** "the other 93 models" was a *not-CPML* count and
+> read as though all 93 were fine to use. The manifest gives **89 of 95**
+> commercially permissive (4 non-commercial: XTTS v1.1, XTTS v2, and two
+> CC BY-NC-ND models; 2 restricted or unverified) — see
+> [README.md](README.md) §licences and `TTS/.models.json`. The not-CPML count
+> is still 93; the permissive count is 89. `NOTES-AUDIT-2.md` F9, F10.
+
 **Maintenance note:** use `idiap/coqui-ai-TTS` (pushed today, 2026-10-18), not
 `coqui-ai/TTS` (last push 2024-08-16). Idiap is the live continuation.
 

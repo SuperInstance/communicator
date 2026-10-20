@@ -185,8 +185,26 @@ Whole tree at the pinned commit:
 | `.ipynb` | 18 | 5,264,103 |
 
 **16.9× more code than prose** — a serious research codebase. It is the largest of the
-three by a wide margin (2.6× openWakeWord's Python, 6.6× silero's) and it is the only one
-whose *notebooks* exceed its source by 6.6×, which is what a research group looks like.
+three by a wide margin: **3.7× openWakeWord's Python** (798,995 ÷ 217,800 = 3.67) and
+6.6× silero's — though silero's 120,777 counts **package + tests only**, so that ratio
+is against a different population and is not comparable as stated. Its *notebooks*
+exceed its source by 6.6×, the largest of the three (openWakeWord's notebooks are
+3.96× its source), which is what a research group looks like.
+
+> **CORRECTION (2026-10-19) — this paragraph carried a mistyped ratio, a comparison
+> across two different populations, and a false exclusivity.** It read *"the largest
+> of the three by a wide margin (2.6× openWakeWord's Python, 6.6× silero's) and it is
+> the only one whose notebooks exceed its source by 6.6×"*.
+>
+> The openWakeWord ratio is **3.7×** (798,995 ÷ 217,800 = 3.67); no arithmetic on the
+> three byte counts produces 2.6. The "6.6× silero's" arithmetic is right as far as it
+> goes (798,995 ÷ 120,777 = 6.62) but silero's 120,777 counts **package + tests only**
+> (`SILERO-VAD.md:245-246`), while pyannote's and openWakeWord's are whole-tree counts
+> — so the two ratios do not share a denominator and are not comparable as stated.
+> And openWakeWord's notebooks also exceed its source (862,476 ÷ 217,800 = **3.96×**),
+> so pyannote's 6.6× is the largest of the three, not the only one; silero lists no
+> `.ipynb` row at all and is the only one of the three whose notebooks do not exceed
+> its source. Found by the notes audit — `NOTES-AUDIT-2.md` F1–F3.
 
 ## 9. Verdict for the hot path
 

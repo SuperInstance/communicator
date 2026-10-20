@@ -181,9 +181,25 @@ From the git tree at the pinned commit (all extensions, so `.ipynb` counts as ne
 and the thin docs are exactly where its unverified claims live (the Pi-3 number is in the
 README and has no script behind it, while `benchmark/benchmark.py` cannot run).
 
-Worth noting: the 4 notebooks total 862 KB, more than 4× the entire Python source. openWakeWord
-is the most notebook-heavy of the three, which fits a project whose training story is
+Worth noting: the 4 notebooks total 862 KB, **3.96×** the entire Python source — which
+is a lot of notebook for a project whose training story is
 "here is a Colab, run it for an hour".
+
+> **CORRECTION (2026-10-19).** This said "openWakeWord **is the most notebook-heavy
+> of the three**". It is not: pyannote's notebooks exceed its source by **6.6×**
+> (5,264,103 ÷ 798,995) against openWakeWord's **3.96×** (862,476 ÷ 217,800). The
+> claim was not in `NOTES-AUDIT-2.md` — it surfaced while applying that audit's
+> corrections, when the two files stopped agreeing — so it is recorded here rather
+> than left to be discovered twice. Note that the three repos are not compared on
+> the same population (silero lists no `.ipynb` row at all, and pyannote's "6.6×"
+> counts package + tests only), so "most notebook-heavy of the three" is not a
+> well-posed comparison in the first place.
+
+> **CORRECTION (2026-10-19).** This said the 4 notebooks total 862 KB, *"more than 4×
+> the entire Python source"*. 862,476 ÷ 217,800 = **3.960** — just under 4×, not over
+> it, so the claim landed on the wrong side of its own threshold. The neighbouring
+> "3.3× more code than prose" is unchanged and correct (217,800 ÷ 67,006 = 3.25).
+> Found by the notes audit — `NOTES-AUDIT-2.md` F4.
 
 ## 9. Verdict for the hot path
 

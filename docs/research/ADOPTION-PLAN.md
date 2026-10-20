@@ -351,16 +351,24 @@ reported failures. Consolidated:
   Good for one decomposed table in a single call; bad for verdicts. This is the
   single most consistent finding across both lanes.
 - **It has no access to mechanism.** Asked whether three prosody knobs were
-  separable and realtime-safe, it scored all three *identically* — spread
-  exactly **0.000** on both substantive axes — because the descriptions read
-  alike.
+  separable and realtime-safe, it scored all three *nearly identically* —
+  spread exactly **0.000** on `timing` and **0.020** on `prosody`, at most
+  0.020 on any axis — because the descriptions read alike.
 - **`Noul` has no `confidence` and no `probabilities` field at all.** The
   arithmetic finding covers `Choice` only, and the `Noul` gate is the one we use
   most.
 - **The position control did not reproduce** with distinguishable options
   (7/7 picks travelled), and reproduced only partially with indistinguishable
-  ones (forward 9/9 first, reversed 6/9). The honest reading is **instability**,
-  not a clean positional bias.
+  ones (forward 9/9 first, reversed **3/9** — 6 of the 9 reversed calls stayed
+  with the pair's *content* label instead). The honest reading is
+  **instability**, not a clean positional bias.
+
+> **CORRECTION (2026-10-19).** This said the three knobs scored *identically*
+> with "spread exactly **0.000** on both substantive axes", and the reversed
+> order was "**6/9** first option". `docs/research/voiceloop/jev_voiceloop_results.json`
+> gives spreads of 0.000 / 0.020 / 0.010 / 0.010 across `timing`, `prosody`,
+> `orthogonal` and `realtime_safe`, and its own `first_option` field gives
+> **3/9** for the reversed order. `NOTES-AUDIT-2.md` F5, F6, F7, F8.
 
 **Verdict:** useful as a fast screen over a small set of options with measured
 numbers in the state; not usable as an oracle, not usable for aggregation, and
