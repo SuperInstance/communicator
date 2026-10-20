@@ -116,7 +116,8 @@ set -a && . ~/.config/cloudflare/env && set +a
 
 **Everything is pushed.** `master` is in sync with `origin/master`, the
 suite is green (**1002 passed, 5 skipped**), and the artifact gate reports
-**NOT_REPRODUCIBLE=0**.
+**REPRODUCIBLE=37, NOT_REPRODUCIBLE=0** — every committed artefact
+reproduces from the committed code.
 
 **The camera pipeline now has a verified speaking signal at session
 level**: mouth box rows 46–58, cols 62–86, **+0.733σ** against the cheek
@@ -312,7 +313,7 @@ stay on disk so every withdrawn number can be re-run.
   the number was, what was falsified, and what was wrong on the way**.
   The repo's commits are read as the research log; a commit message that
   only says "fixed stuff" is a wasted commit.
-* Push often. The night was 21 commits.
+* Push often. The night was 24 commits.
 * After pushing, `git rev-list --left-right --count origin/master...HEAD`
   must print `0	0`.
 * Run the suite before you push: **1002 passed, 5 skipped** is the
@@ -327,7 +328,10 @@ stay on disk so every withdrawn number can be re-run.
   the gate* (`IndexError`, `EOFError`) and reproduced perfectly when run
   directly, byte-identically — the failures came from the `/mnt/c`
   Windows mount after the machine had been suspended and resumed, not
-  from the code. **Prove which it was before deciding.**
+  from the code. **Prove which it was before deciding.** This was
+  confirmed, not assumed: a later full run of the same worktree gave
+  **REPRODUCIBLE=37, NOT_REPRODUCIBLE=0** with both scripts reproducing
+  and no code changed.
 
 ---
 

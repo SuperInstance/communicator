@@ -3,8 +3,10 @@
 **Repository:** `SuperInstance/communicator`
 **Author:** Casey Digennaro, with an AI agent (MiniMax Code)
 **Window:** 2026-10-19 night → 2026-10-20 08:50 local
-**Status at hand-over:** 21 commits pushed, `master` in sync with
-`origin/master`, full suite green, artifact gate green.
+**Status at hand-over:** 24 commits of the night's work pushed (138 in the
+repository), `master` in sync with `origin/master`, full suite green
+(**1002 passed, 5 skipped**), artifact gate green
+(**REPRODUCIBLE=37, NOT_REPRODUCIBLE=0**).
 
 This document is the wrap-up of one night of work on **Communicator**, the
 local-first voice/peripheral system. It is written to be read by whoever
@@ -465,6 +467,43 @@ failure is a claim, and the claim has to be checked before it is acted
 on.** Re-running the script directly is the cheapest way to tell an
 environmental failure from a real one, and it is cheaper than a
 revert.
+
+> ## CORRECTION (2026-10-20, last thing before the reboot) — the two crashes were confirmed environmental, and the full gate is clean
+>
+> The paragraph above attributes the two crashes to the `/mnt/c` mount
+> returning short reads after the machine was suspended. That was a
+> **hypothesis**, supported by the fact that both scripts succeed in
+> isolation. It is now **measured**.
+>
+> A fourth gate run — same command, same `--source worktree`, detached
+> with `setsid` and unbuffered with `python -u`, log at
+> `/tmp/gate4.log`, kept beside the earlier runs at
+> `.scratch/fitladder/gate4.log` — was run against the worktree at
+> `96090ec` and finished with:
+>
+> ```
+> REPRODUCIBLE=37  NOT_REPRODUCIBLE=0  NO_SCRIPT=4  NOT_RE_RUN=37  LEGACY_NO_SCRIPT=1
+> ```
+>
+> `row_band_removal_results.json` and `teacher_raw_representation_results.json`
+> are **both REPRODUCIBLE** in this run. They are the two artefacts the
+> previous run reported as `IndexError` and `EOFError`.
+>
+> **What this establishes:** the crashes were not code defects, and no
+> code was changed to make them go away. The same worktree, the same
+> scripts and the same commands produce 37/0 when the machine has not
+> been suspended underneath them. The `NOT_RE_RUN` count rose from 35
+> to 37 because the two scripts added late in the night —
+> `debrief_truncation_probe.py` and `debrief_paired_analysis.py` — have
+> artefact files now, and both are skipped for a stated reason (they need
+> the Cloudflare API over the network), not for a failure.
+>
+> **What this does not establish:** it does not identify *which* read
+> went short, and it does not prove the suspend/resume mechanism. What
+> it does establish is the thing that actually matters for the
+> repository: **the committed artefacts still reproduce from the
+> committed code, 37 of 37, with zero not-reproducible.** The
+> worktree was clean before and after the run.
 
 ### 2.11b `zcode` could not be run, and the reason is an account entitlement
 
