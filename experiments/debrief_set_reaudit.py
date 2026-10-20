@@ -1241,6 +1241,17 @@ def collect_materials_with(limit: int, notes: list, res: list) -> str:
     which is what makes the excluded version worth anything: if the copy
     were not faithful, the "this note was in the pool" claims would be
     worthless.
+
+    > CORRECTION (2026-10-20, overnight). This copy carried the same
+    > front-truncation the harness had -- `text[:per]` -- and the
+    > faithfulness test caught the divergence the moment the harness was
+    > fixed. That is the test doing its job. The copy now mirrors the
+    > harness: the budget is spent by dropping lines from the MIDDLE of the
+    > keep-set, and if even the head-and-tail slice is too big then each
+    > end is cut to its own half so that BOTH survive. The numbers this
+    > lane recorded were measured against the pre-fix pool and stay in
+    > `debrief_set_reaudit_results.json` as the record of that run; what
+    > the fix is worth is in `docs/research/DEBRIEF-MATERIAL-POOL.md`.
     """
     parts: list[str] = []
     note_pool = int(limit * 0.72)
@@ -1261,15 +1272,36 @@ def collect_materials_with(limit: int, notes: list, res: list) -> str:
             if any(ch.isdigit() for ch in ln):
                 keep.add(i)
         keep = sorted(keep)
-        out, prev = [], -2
-        for i in keep:
-            if i != prev + 1:
-                out.append(f"[... {i - prev - 1} lines elided ...]")
-            out.append(lines[i])
-            prev = i
-        text = "\n".join(out)
+
+        def assemble(ks: list[int]) -> str:
+            out, prev = [], -2
+            for i in ks:
+                if i != prev + 1:
+                    out.append(f"[... {i - prev - 1} lines elided ...]")
+                out.append(lines[i])
+                prev = i
+            return "\n".join(out)
+
+        n_head = max(3, len(keep) // 4)
+        n_tail = max(3, len(keep) // 4)
+        text = assemble(keep)
         if len(text) > per:
-            text = text[:per] + "\n[... truncated ...]"
+            # The budget is spent by dropping lines from the MIDDLE of the
+            # keep-set. The head and the tail are what carry the retraction
+            # notices, and the old front-truncation threw the tail away.
+            ks = list(keep)
+            while len(ks) > n_head + n_tail and len(assemble(ks)) > per:
+                del ks[len(ks) // 2]
+            keep = ks
+            text = assemble(keep)
+        if len(text) > per:
+            # Even the head-and-tail slice is too big. Cut each end to its
+            # own half of the budget so that BOTH survive.
+            head_text = "\n".join(lines[i] for i in keep[:n_head])
+            tail_text = "\n".join(lines[i] for i in keep[-n_tail:])
+            half = per // 2
+            text = (head_text[:half] + "\n[... truncated ...]\n"
+                    + "[... middle elided ...]\n" + tail_text[-half:])
         parts.append(f"--- NOTE: {p.name} ---\n{text}")
     res_pool = int(limit * 0.24)
     per_res = max(300, res_pool // max(1, len(res)))
@@ -1287,10 +1319,18 @@ def evidence_reachability(mode: str = "context", limit: int = 140000,
     """Does the CONTEXT prompt actually carry each claim's evidence?
 
     `collect_materials` keeps each note's head, its tail and every line
-    containing a digit -- and then CAPS the result at a per-note budget.
-    The cap is applied AFTER the keep-set is built, so a note whose kept
-    text is longer than the cap loses its tail, and the tail is where the
-    retraction notices live. This measures what survives.
+    containing a digit. This measures what survives.
+
+    > CORRECTION (2026-10-20, overnight). This docstring used to say: "The
+    > cap is applied AFTER the keep-set is built, so a note whose kept text
+    > is longer than the cap loses its tail, and the tail is where the
+    > retraction notices live." That was a correct description of a DEFECT,
+    > and the defect is now fixed: the cap is spent on the middle of the
+    > keep-set, and both ends survive. So this function now measures the
+    > FIXED pool, and the numbers it reports are higher than the ones
+    > recorded in `debrief_set_reaudit_results.json` -- which were
+    > measured against the pre-fix pool and stay there as the record of
+    > that run. See `docs/research/DEBRIEF-MATERIAL-POOL.md`.
 
     The search is over the MATERIALS ONLY. The claims themselves are
     prepended to the prompt, and they carry the numbers -- so a naive
@@ -1363,10 +1403,19 @@ def evidence_reachability(mode: str = "context", limit: int = 140000,
     out["per_note_cap"] = per
     out["n_notes_truncated"] = sum(1 for r in rows if r["truncated"])
     out["n_notes_whose_tail_survives"] = sum(1 for r in rows if r["tail_survives"])
-    out["note"] = ("The per-note cap is applied AFTER the head/tail/digit-line "
-                   "keep-set is built, so a note longer than the cap loses "
-                   "its tail -- which is where this repository puts its "
-                   "retraction notices.")
+    out["note"] = ("CORRECTION (2026-10-20, overnight). This note used to "
+                   "say: 'The per-note cap is applied AFTER the head/tail/"
+                   "digit-line keep-set is built, so a note longer than the "
+                   "cap loses its tail -- which is where this repository "
+                   "puts its retraction notices.' That described a DEFECT, "
+                   "and the defect is fixed: the cap is now spent on the "
+                   "MIDDLE of the keep-set and both ends survive. So the "
+                   "numbers below are measured against the FIXED pool, and "
+                   "the ones recorded in the previous version of this file "
+                   "were measured against the pre-fix pool. What the fix is "
+                   "worth is in docs/research/DEBRIEF-MATERIAL-POOL.md: the "
+                   "acoustics figure now reaches the prompt, and the "
+                   "director accuses the one TRUE claim anyway.")
     return out
 
 

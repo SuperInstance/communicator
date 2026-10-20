@@ -9,6 +9,55 @@
 they stood on 2026-10-19. The old scores are kept, not overwritten, in
 `the_key_change.the_before_snapshot` of the results file.
 
+> ## CORRECTION (2026-10-20, later that night) — the evidence pool was broken, and the numbers below were measured against the broken one
+>
+> This lane measured the director's score against an evidence pool that was
+> **silently dropping the retractions**. `debrief.py` builds a keep-set
+> holding each note's head, its tail and every digit-line, and then cut the
+> assembled text **from the front** — so every over-long note lost its
+> tail, and the dated correction blocks live in the tails. **2 of 50 notes
+> kept their tail.** The pool is now fixed (50 of 50 keep both ends), and
+> this lane was **re-run against the fixed pool**; the numbers in this
+> document have been updated. The full account, including an A/B of the two
+> pools against one corpus, is `docs/research/DEBRIEF-MATERIAL-POOL.md`.
+>
+> **WHAT THE RE-RUN CHANGED:**
+>
+> | | this document's first version | re-run, fixed pool |
+> |---|---|---|
+> | context repeats, gpt-oss-120b | 0.000 | **−0.333** |
+> | context repeats, llama-3.3-70b | −0.667 | −0.667 |
+> | context repeats, qwen3-30b | −0.556 | **−0.778** |
+> | blind repeats | +0.333 / −0.778 / +0.111 | **unchanged** |
+> | sweep, 20,000 chars | −0.444 | **−0.222** |
+> | sweep, 240,000 chars | **+1.000** | **−0.111** |
+> | sweep, effect size | +1.444 | **+0.111** |
+> | echo: Jaccard vs the previous committed proposal | 0.312 | **1.000** |
+> | echo: max overlap with a repo next step | 0.312 | **0.0598** |
+>
+> **AND THE ONE RESULT THAT IS NOW THE HEADLINE, BECAUSE IT IS THE ONE THAT
+> IS ROBUST:**
+>
+> **Specificity is 0.000 in all 9 context runs, and 1.000 in the blind runs
+> for two of the three models.** The director keeps the one TRUE claim when
+> it is given the claim alone, and **accuses it once the evidence is added**.
+> That is the failure, and it is not a starvation problem: the acoustics
+> figure (**"73.5"**) **now reaches the prompt** — it did not before the
+> fix — and the director accuses the claim anyway.
+>
+> **AND THE "+1.000 AT 240,000 CHARACTERS" IS WITHDRAWN.** It does not
+> reproduce: three independent fixed-pool runs at 240,000 give −0.111, and
+> a paired old-pool/new-pool run at 240,000 gave **identical per-claim
+> verdicts**. The budget ladder's measured effect with the fixed pool is
+> **+0.111**, not +1.444. Note the confound honestly: the two sweeps ran
+> against **different corpora** (four research notes and six corrections
+> landed in between), so the difference between them cannot be attributed
+> to the pool alone. What the pool's effect IS, was measured with the
+> corpus held constant, and it is in `DEBRIEF-MATERIAL-POOL.md`.
+>
+> The old text below is kept visible, per the house rule that a falsified
+> claim stays in the record.
+
 ---
 
 ## 1. What happened
@@ -342,6 +391,19 @@ fail is the shape of claim this repository has had to retract four times.
 | **Does it propose the repository's own top next step?** | **No.** It does not mention **Condition D — turned AND silent**, which `PROGRESS.md`, `docs/research/POSE-FEATURE.md` and `docs/research/NV12-STRIDE.md` §8 all name as *the single most valuable missing take*. |
 | **Does it propose anything the repository has already falsified?** | **Not the experiment** (max Jaccard against the repository's own retraction list: 0.018). **But its REVIEW of the evidence does.** The debrief's list of what the evidence SUPPORTS includes: *"Composing row-band removal with a 3-frame temporal median cuts the occupied-flip rate to 0.0014 % (≈21× improvement over row-only)"* — the claim this document retracted, endorsed as supported, at a Jaccard of **0.667** against the repository's own retraction. It did correctly flag the row-band removal claim as unsafe, and it correctly caught tonight's new retraction. So it caught one of the two and endorsed the other. §4.3 says why. |
 
+> **CORRECTION (2026-10-20, later that night) — the echo numbers are now
+> measured against the fixed pool, and they are STRONGER, not weaker.**
+> The re-run gives a Jaccard of **1.000** against the previous committed
+> proposal — the proposal is now *literally the same experiment*, not a
+> rewording of it — and a maximum overlap with a repository next step of
+> **0.0598**, well under the repository's own ≈0.29 "same experiment"
+> threshold. So the answer is sharper in both directions: **it is the
+> previous experiment verbatim, and it is not any of the repository's own
+> next steps** (Condition D scores **0.000** against it).
+>
+> The **0.312** above is the number from the run against the broken pool
+> and is left visible, per the house rule.
+
 ---
 
 ## 6. The echo question
@@ -395,6 +457,24 @@ rather than silently dropped.
 | 60,000 chars | -0.222, -0.222 (+1 unparseable) | 2 | **-0.222** | 0.000 | -0.286 |
 | 140,000 chars | 0.000, 0.000, -0.111 | 3 | **0.000** | 0.111 | 0.000 |
 | 240,000 chars | +0.889, +1.000, +1.000 | 3 | **+1.000** | 0.111 | +0.333 |
+
+> **CORRECTION (2026-10-20, later that night) — the table above was measured
+> against the BROKEN evidence pool, and its 240,000-character arm does not
+> reproduce.** The re-run against the fixed pool:
+>
+> | material budget | headlines | n | median | spread |
+> |---|---|---|---|---|
+> | 20,000 chars | -0.222, -0.222, -0.222 | 3 | **-0.222** | 0.000 |
+> | 60,000 chars | 0.000, +0.778, -0.222 | 3 | **0.000** | 1.000 |
+> | 140,000 chars | 0.000, -0.222, -0.111 | 3 | **-0.111** | 0.222 |
+> | 240,000 chars | -0.111, -0.111, -0.111 | 3 | **-0.111** | 0.000 |
+>
+> The rule's verdict is unchanged — **EFFECT RESOLVED** — but the effect is
+> **+0.1111**, not +1.444, and the "+1.000 at 240,000 characters" is
+> **withdrawn**: three independent fixed-pool runs at 240,000 give −0.111,
+> and a paired old-pool/new-pool run at 240,000 gave identical per-claim
+> verdicts. See the correction block at the top of this document, and
+> `docs/research/DEBRIEF-MATERIAL-POOL.md`.
 
 **The null was** "more evidence does not make the director better", and the
 rule was fixed before the runs: the effect is called only if the median at
