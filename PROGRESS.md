@@ -926,3 +926,104 @@ GOLD.md's H1–H10 + use-case corpus, the CF/Workers-AI lane, and the
 public-domain 8-cell corpus in examples/realaudio/). Workers/ and
 experiments/ carry the newer lanes. This section exists so a reader of
 PROGRESS alone cannot conclude the repo never touched real audio.
+
+---
+
+## Cloud-teacher arc (2026-10-19): the footage read by a big model, and a join that was never there
+
+Casey's directive was to use cloud multimodal models to understand the video
+*before* trying to make the system work, to let LLMs act as the debrief and
+R&D director between experiments, and to make the recording stimulus something
+he can say without reading. Four notes carry it:
+`docs/research/CLOUD-TEACHER.md`, `AV-SYNC.md`, `LLM-DIRECTOR.md`,
+`STIMULUS.md`.
+
+**The cloud teacher works, and the first metric hid a failure.** Llama 3.2
+Vision 11B reads SPEAKING/NOT SPEAKING off a 160×96 frame: sensitivity 0.455,
+false-positive rate **0.000** on 12 silent frames and 0.000 on 11 blank ones,
+margin **+0.455**. clef-omni reads it off the raw audio at P(yes) 0.8003 vs
+0.0345, margin **+0.766**. The first version measured the margin against the
+BLANK and reported llama-4-scout-17b at 1.000, "USABLE" — while the scout
+says SPEAKING on **10 of 12 silent frames** (a person present, mouth closed)
+and NOT SPEAKING on a blank because nobody is in it. The blank is a prompt
+floor, not a task control. Under the real metric the scout is **+0.167, NOT
+USABLE**.
+
+**Frame labels are per-frame now.** The gate puts A at 70.6 % speech in 22
+segments, first segment starting at frame 58; the original uniform sampling
+called frame 30 (before any speech) and frame 120 (a gap between segments)
+"speaking" frames. The model answered "NOT SPEAKING" on both, which was
+correct. Same failure as the wrong-interval comparisons: the *label* was the
+statistic.
+
+**The pose question stays open, and the first result is retracted.** The
+6-frame separation of 0.333 does not survive: at 10–11 frames it is **0.018**,
+and the control fires — P(facing | facing AND SILENT) = **1.000**, so the model
+is reading "a person", not pose. clef on the audio gives P(facing|A) 0.9147 vs
+P(facing|B) 0.9059, margin **0.0088**: turning your head changes your voice
+by 0.9 %, so the pose task is visual-only and **A and B are acoustically
+identical by construction**.
+
+**The captures' audio and video do not correspond.** `experiments/av_sync.py`:
+no peak beats the shuffled null at any lag, any candidate sample rate, or with
+any of three motion features, and the *silent* session peaks too. The likely
+mechanism is a **frame-rate** error rather than a sample-rate one: 750 frames
+at 25 fps = 30 s, matching the 29.98 s of audio, and 3 750 frames at 25 fps =
+150 s, matching empty1's 149.91 s — both match exactly under 25 fps and
+neither under 30 fps. The script asked for 30 fps; the camera delivered 25.
+Nothing recorded a timestamp, so the video's time base was never known. The
+video-only results (A-vs-C 4.914 vs within-split 1.917; row-band removal
+50.00 % → 0.01 %; the drift and flicker work; the teacher's region features)
+are unaffected — they never needed the audio. What is affected is any claim
+tying a sound to a moment in a frame.
+
+**The capture script now makes the correspondence checkable.** One video frame
+and one audio block in the same loop iteration with one clock reading; the
+**achieved** camera rate recorded rather than the assumed one; the WAV header
+written with the mic's **actual** rate; and a `timing.json` beside every take.
+The old script's achievement check **never ran on Windows** — the `src` import
+path resolved to `C:\`, the exception was swallowed, and every take was saved
+unverified. `src/` now ships beside the script and the check is verified.
+
+**The LLM director is real, and it is an instrument that had to be calibrated
+against our own retractions.** Six claims this project falsified, four that
+stand, paraphrased and shuffled, with the key applied afterwards:
+
+| mode | model | sensitivity | specificity | headline |
+|---|---|---:|---:|---:|
+| blind | llama-3.3-70b | 0.333 | 0.750 | +0.083 |
+| blind | gpt-oss-120b | 0.167 | 0.500 | −0.333 |
+| blind | qwen3-30b-a3b-fp8 | 0.167 | 0.750 | −0.083 |
+| context | gpt-oss-120b | 0.833 | 1.000 | **+0.833** |
+| context | llama-3.3-70b | 0.500 | 0.750 | +0.250 |
+
+**Blind it is worse than useless** — the failure mode is legible in its own
+words, "the claim provides a specific measurement", i.e. a *specific*
+measurement read as a *valid* one. With the evidence base it is good:
+gpt-oss-120b catches 5 of 6 false claims and accuses none of the 4 true ones,
+and its production debrief flagged seven unsafe claims, **all seven real
+retractions** — including the "microseconds" docstring in `src/watcher.py`,
+which had separately been flagged for Casey's call. The metric was itself
+broken first (`sens − spec` scores an always-reject director at **+1.0**), and
+so was the harness: it filled a 24 kB budget with notes alphabetically, so six
+of thirty notes got in and every retraction notice was cut — and the director
+then accused two TRUE claims with entirely reasonable reasons, because the
+evidence was not there. Every note now gets an equal share and every
+digit-bearing line is kept; the score moved +0.500 → **+0.833** on that change
+alone. **Scores are per-run, not per-model**: llama scored +0.583 and +0.250
+on two runs with different material sizes.
+
+**The stimulus is now one fixed poem.** `src/stimulus.py`: *Invictus* (Henley,
+1875, public domain) — sixteen lines, four stanzas, ~40 s, sayable from
+memory. "The standard paragraph" is a *different* stimulus every take, so a
+teacher trained on it separates speech from not-speech using variation that
+is not the thing being detected. Three alternatives ship with it and
+`--stimulus-file` takes any text, with the stimulus name recorded per take.
+The same poem is recited facing (A) and turned (B), which makes A-vs-B a
+clean **visual** test. Condition **D** (turned and silent) has still never been
+recorded and is required to de-confound pose from speech.
+
+**What is blocked on what.** The binding constraint is unchanged and now
+sharper: the teacher needs **≥ 63 independent sessions per class**, the corpus
+needs a real 90° turn plus condition D, and the pose signal is not visible at
+160×96 to the models available. The capture is ready; the data is the gate.
