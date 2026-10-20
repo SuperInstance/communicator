@@ -1,77 +1,291 @@
 {
-  "method": "cross-correlation of the row-band-removed video motion envelope against the per-frame audio RMS envelope; the null is the peak of the same statistic on block-shuffled audio",
+  "method": "cross-correlation of the row-band-removed video motion envelope against the per-frame audio RMS envelope; the null is the peak of the same statistic on block-shuffled audio. A raw-motion control (no row-band removal) is reported alongside it.",
   "fps": 30,
   "results": {
     "A": {
-      "video_frames": 750,
-      "video_seconds": 25.0,
+      "video_frames": 900,
+      "video_seconds": 30.0,
       "audio_seconds": 29.981,
-      "duration_mismatch_s": 4.981,
-      "peak_lag_frames": 215,
-      "peak_lag_ms": 7166.7,
-      "peak_r": 0.0513,
-      "peak_r_top40rows": 0.0582,
-      "peak_lag_frames_top40rows": 222,
-      "null_shuffled_max_abs_r": 0.1452,
-      "null_shuffled_mean_abs_r": 0.0707,
-      "ratio_peak_over_null_max": 0.35,
+      "duration_mismatch_s": -0.019,
+      "peak_lag_frames": -179,
+      "peak_lag_ms": -5966.7,
+      "peak_r": 0.1038,
+      "peak_r_top40rows": 0.1048,
+      "peak_lag_frames_top40rows": -140,
+      "null_shuffled_max_abs_r": 0.3354,
+      "null_shuffled_mean_abs_r": 0.1652,
+      "ratio_peak_over_null_max": 0.31,
       "other_session_control": {
         "audio_from": "B",
-        "peak_r": 0.07394518016877037,
-        "abs_r": 0.07394518016877037
+        "peak_r": 0.12682117870342055,
+        "abs_r": 0.12682117870342055
       },
-      "motion_mean": 32.0347239678947,
-      "motion_std": 2.3671607035062903,
-      "audio_env_mean": 0.0019325569076717336
+      "motion_mean": 0.6932547371609369,
+      "motion_std": 0.7496022098307924,
+      "audio_env_mean": 0.0019792616446298646,
+      "raw_motion_control": {
+        "note": "the same statistic with NO row-band removal: the row-band filter was introduced to fight an artefact that was largely the torn frame, so this control says whether the filter is doing any work",
+        "peak_lag_frames": -179,
+        "peak_lag_ms": -5966.7,
+        "peak_r": 0.1066,
+        "null_shuffled_max_abs_r": 0.3671,
+        "ratio_peak_over_null_max": 0.29,
+        "motion_mean": 0.5448910971681498,
+        "motion_std": 0.6818850014395321
+      }
     },
     "B": {
-      "video_frames": 750,
-      "video_seconds": 25.0,
+      "video_frames": 900,
+      "video_seconds": 30.0,
       "audio_seconds": 29.981,
-      "duration_mismatch_s": 4.981,
-      "peak_lag_frames": -110,
-      "peak_lag_ms": -3666.7,
-      "peak_r": 0.1181,
-      "peak_r_top40rows": 0.0574,
-      "peak_lag_frames_top40rows": -54,
-      "null_shuffled_max_abs_r": 0.1637,
-      "null_shuffled_mean_abs_r": 0.0811,
-      "ratio_peak_over_null_max": 0.72,
+      "duration_mismatch_s": -0.019,
+      "peak_lag_frames": -141,
+      "peak_lag_ms": -4700.0,
+      "peak_r": 0.0651,
+      "peak_r_top40rows": 0.0662,
+      "peak_lag_frames_top40rows": -141,
+      "null_shuffled_max_abs_r": 0.1027,
+      "null_shuffled_mean_abs_r": 0.0604,
+      "ratio_peak_over_null_max": 0.63,
       "other_session_control": {
         "audio_from": "A",
-        "peak_r": 0.0677791851306449,
-        "abs_r": 0.0677791851306449
+        "peak_r": 0.05077913635992348,
+        "abs_r": 0.05077913635992348
       },
-      "motion_mean": 32.63491468985557,
-      "motion_std": 1.6157476373794213,
-      "audio_env_mean": 0.0017740670491771472
+      "motion_mean": 0.5698991635249139,
+      "motion_std": 0.419239267910579,
+      "audio_env_mean": 0.0017575016676815883,
+      "raw_motion_control": {
+        "note": "the same statistic with NO row-band removal: the row-band filter was introduced to fight an artefact that was largely the torn frame, so this control says whether the filter is doing any work",
+        "peak_lag_frames": -141,
+        "peak_lag_ms": -4700.0,
+        "peak_r": 0.081,
+        "null_shuffled_max_abs_r": 0.1206,
+        "ratio_peak_over_null_max": 0.67,
+        "motion_mean": 0.4332071804319615,
+        "motion_std": 0.3242360050818168
+      }
     },
     "C": {
-      "video_frames": 750,
-      "video_seconds": 25.0,
+      "video_frames": 900,
+      "video_seconds": 30.0,
       "audio_seconds": 29.981,
-      "duration_mismatch_s": 4.981,
-      "peak_lag_frames": 227,
-      "peak_lag_ms": 7566.7,
-      "peak_r": 0.0724,
-      "peak_r_top40rows": 0.0547,
-      "peak_lag_frames_top40rows": 239,
-      "null_shuffled_max_abs_r": 0.1335,
-      "null_shuffled_mean_abs_r": 0.066,
-      "ratio_peak_over_null_max": 0.54,
+      "duration_mismatch_s": -0.019,
+      "peak_lag_frames": -13,
+      "peak_lag_ms": -433.3,
+      "peak_r": 0.086,
+      "peak_r_top40rows": 0.0761,
+      "peak_lag_frames_top40rows": -13,
+      "null_shuffled_max_abs_r": 0.1656,
+      "null_shuffled_mean_abs_r": 0.0684,
+      "ratio_peak_over_null_max": 0.52,
       "other_session_control": {
         "audio_from": "A",
-        "peak_r": 0.051667944197120286,
-        "abs_r": 0.051667944197120286
+        "peak_r": 0.058010827142718636,
+        "abs_r": 0.058010827142718636
       },
-      "motion_mean": 33.441730783912696,
-      "motion_std": 2.196553078485423,
-      "audio_env_mean": 0.00031837303993601077
+      "motion_mean": 0.49478724084462083,
+      "motion_std": 0.3741140212986468,
+      "audio_env_mean": 0.0003189417640506305,
+      "raw_motion_control": {
+        "note": "the same statistic with NO row-band removal: the row-band filter was introduced to fight an artefact that was largely the torn frame, so this control says whether the filter is doing any work",
+        "peak_lag_frames": -13,
+        "peak_lag_ms": -433.3,
+        "peak_r": 0.1098,
+        "null_shuffled_max_abs_r": 0.2139,
+        "ratio_peak_over_null_max": 0.51,
+        "motion_mean": 0.3666883921950315,
+        "motion_std": 0.28939234522295665
+      }
+    }
+  },
+  "conclusion": {
+    "A": {
+      "peak_beats_shuffled_null": false,
+      "other_session_control_at_least_as_strong": true,
+      "raw_motion_control_agrees": true,
+      "verdict": "NO EVIDENCE OF A/V CORRESPONDENCE: the peak correlation does not beat the block-shuffled null, and the OTHER-SESSION control is at least as strong as the real one, so the statistic is picking up the room rather than the person. The raw-motion control (no row-band removal) lands on the same lag and nearly the same r, so the row-band filter is not what is producing the result"
+    },
+    "B": {
+      "peak_beats_shuffled_null": false,
+      "other_session_control_at_least_as_strong": false,
+      "raw_motion_control_agrees": true,
+      "verdict": "NO EVIDENCE OF A/V CORRESPONDENCE: the peak correlation does not beat the block-shuffled null. The raw-motion control (no row-band removal) lands on the same lag and nearly the same r, so the row-band filter is not what is producing the result"
+    },
+    "C": {
+      "peak_beats_shuffled_null": false,
+      "other_session_control_at_least_as_strong": false,
+      "raw_motion_control_agrees": false,
+      "verdict": "NO EVIDENCE OF A/V CORRESPONDENCE: the peak correlation does not beat the block-shuffled null"
     }
   },
   "limits": [
     "one session per condition, one room, one person",
     "a correlation peak is evidence that the streams correspond; it is not an accuracy for any task",
     "the null distribution uses 200 block shuffles of ONE session, so it describes that session's variability, not the population's"
-  ]
+  ],
+  "provenance": {
+    "generated_by": "experiments/av_sync.py",
+    "script_path": "/home/proart/projects/communicator/experiments/av_sync.py",
+    "script_sha256": "9c19aa5d8ada7f263723144bd146382377ef2e79ab917c1540aa37efc34af181",
+    "python": "/home/proart/projects/glasses/.venv/bin/python",
+    "command_line": "experiments/av_sync.py",
+    "cli_args": [],
+    "captures": {
+      "A": {
+        "capture": {
+          "path": "/mnt/c/proart_capture/A.nv12",
+          "sha256": "b65cf944aa4e8a65932d4c140335a495fa6a1707f28025d40fb08d31fa33bc73",
+          "bytes": 17280000,
+          "layout": "y_uv_halfres",
+          "stride_bytes": 19200,
+          "n_frames": 900,
+          "frames_used": 900,
+          "layout_evidence": {
+            "layout": "y_uv_halfres",
+            "stride_bytes": 19200,
+            "n_frames": 900,
+            "luma_bytes": 15360,
+            "mean_consecutive_frame_diff": 0.544891,
+            "runner_up_layout": "luma_only",
+            "runner_up_mean_consecutive_frame_diff": 43.554164,
+            "margin_over_runner_up": 79.932,
+            "chroma": "interleaved U,V, 80x24 samples"
+          }
+        },
+        "audio": {
+          "path": "/mnt/c/proart_capture/A.wav",
+          "sha256": "708d35bec71e74f84a06eb397fa313a721ca583183ecf609a56a802b4eed1c2f",
+          "bytes": 959444,
+          "seconds": 29.9812,
+          "samples": 479700,
+          "sample_rate": 16000
+        }
+      },
+      "B": {
+        "capture": {
+          "path": "/mnt/c/proart_capture/B.nv12",
+          "sha256": "c87269568fabea99d39bc40b46e9a8d3026c72c241d8194f7d9c27181e893e04",
+          "bytes": 17280000,
+          "layout": "y_uv_halfres",
+          "stride_bytes": 19200,
+          "n_frames": 900,
+          "frames_used": 900,
+          "layout_evidence": {
+            "layout": "y_uv_halfres",
+            "stride_bytes": 19200,
+            "n_frames": 900,
+            "luma_bytes": 15360,
+            "mean_consecutive_frame_diff": 0.433207,
+            "runner_up_layout": "luma_only",
+            "runner_up_mean_consecutive_frame_diff": 37.730449,
+            "margin_over_runner_up": 87.096,
+            "chroma": "interleaved U,V, 80x24 samples"
+          }
+        },
+        "audio": {
+          "path": "/mnt/c/proart_capture/B.wav",
+          "sha256": "c013fd540751f844a335cf462a92a51f79fc9f06c4fb5114c966c379fff5503d",
+          "bytes": 959444,
+          "seconds": 29.9812,
+          "samples": 479700,
+          "sample_rate": 16000
+        }
+      },
+      "C": {
+        "capture": {
+          "path": "/mnt/c/proart_capture/C.nv12",
+          "sha256": "937ac321bc436ea41b50508b5431f7c6862f32641c127c7800191b9ce080e5cf",
+          "bytes": 17280000,
+          "layout": "y_uv_halfres",
+          "stride_bytes": 19200,
+          "n_frames": 900,
+          "frames_used": 900,
+          "layout_evidence": {
+            "layout": "y_uv_halfres",
+            "stride_bytes": 19200,
+            "n_frames": 900,
+            "luma_bytes": 15360,
+            "mean_consecutive_frame_diff": 0.366688,
+            "runner_up_layout": "luma_only",
+            "runner_up_mean_consecutive_frame_diff": 42.921703,
+            "margin_over_runner_up": 117.052,
+            "chroma": "interleaved U,V, 80x24 samples"
+          }
+        },
+        "audio": {
+          "path": "/mnt/c/proart_capture/C.wav",
+          "sha256": "c30058a41b0b59ea17cc46f746d26f870c8bcdfcabd00a21ed46b6f5c8a90280",
+          "bytes": 959444,
+          "seconds": 29.9812,
+          "samples": 479700,
+          "sample_rate": 16000
+        }
+      }
+    }
+  },
+  "supersedes": {
+    "why": "Re-measured on 2026-10-20. The previous run read the captures at W*H*3//2 = 23,040 bytes per frame; the captures on disk carry 19,200 bytes per frame, so all but every sixth frame was torn (rows 0..71 from frame k, rows 72..95 from frame k+1), and the frame COUNT was wrong too (750 instead of 900). The previous numbers are recorded here rather than silently overwritten.",
+    "previous_stride_bytes": 23040,
+    "previous_video_frames": 750,
+    "previous_video_seconds": 25.0,
+    "previous_duration_mismatch_s": 4.981,
+    "previous_results": {
+      "A": {
+        "peak_lag_frames": 215,
+        "peak_lag_ms": 7166.7,
+        "peak_r": 0.0513,
+        "peak_r_top40rows": 0.0582,
+        "peak_lag_frames_top40rows": 222,
+        "null_shuffled_max_abs_r": 0.1452,
+        "null_shuffled_mean_abs_r": 0.0707,
+        "ratio_peak_over_null_max": 0.35,
+        "other_session_control": {
+          "audio_from": "B",
+          "peak_r": 0.07394518016877037,
+          "abs_r": 0.07394518016877037
+        },
+        "motion_mean": 32.0347239678947,
+        "motion_std": 2.3671607035062903,
+        "audio_env_mean": 0.0019325569076717336
+      },
+      "B": {
+        "peak_lag_frames": -110,
+        "peak_lag_ms": -3666.7,
+        "peak_r": 0.1181,
+        "peak_r_top40rows": 0.0574,
+        "peak_lag_frames_top40rows": -54,
+        "null_shuffled_max_abs_r": 0.1637,
+        "null_shuffled_mean_abs_r": 0.0811,
+        "ratio_peak_over_null_max": 0.72,
+        "other_session_control": {
+          "audio_from": "A",
+          "peak_r": 0.0677791851306449,
+          "abs_r": 0.0677791851306449
+        },
+        "motion_mean": 32.63491468985557,
+        "motion_std": 1.6157476373794213,
+        "audio_env_mean": 0.0017740670491771472
+      },
+      "C": {
+        "peak_lag_frames": 227,
+        "peak_lag_ms": 7566.7,
+        "peak_r": 0.0724,
+        "peak_r_top40rows": 0.0547,
+        "peak_lag_frames_top40rows": 239,
+        "null_shuffled_max_abs_r": 0.1335,
+        "null_shuffled_mean_abs_r": 0.066,
+        "ratio_peak_over_null_max": 0.54,
+        "other_session_control": {
+          "audio_from": "A",
+          "peak_r": 0.051667944197120286,
+          "abs_r": 0.051667944197120286
+        },
+        "motion_mean": 33.441730783912696,
+        "motion_std": 2.196553078485423,
+        "audio_env_mean": 0.00031837303993601077
+      }
+    },
+    "verdict_changed": "The headline changes and it is the point of this file. The previous run reported video_seconds 25.0 against audio 29.981, a 4.981 s mismatch, and treated the two streams as possibly unrelated. The 4.981 s was the stride: 17,280,000 bytes divided by 23,040 gives 750 frames, and divided by the true 19,200 gives 900. At the correct stride the mismatch is 0.019 s, less than half a video frame, and the video and the audio are the same length."
+  }
 }

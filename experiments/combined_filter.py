@@ -1,21 +1,38 @@
 """
 combined_filter.py -- compose the two filters, then re-ask the teacher question.
 
+THE FRAME LAYOUT, FIRST, because it decides whether any of this is true.
+
+The captures on disk are NOT standard NV12. `C:\\proart_capture\\nv12small.py`
+writes, per 160x96 frame:
+
+    Y plane   15,360 bytes   (160 * 96)
+    U,V        3,840 bytes   (80 * 24 samples, INTERLEAVED)
+    ---------------------------
+    total     19,200 bytes   = W*H*5/4
+
+so the stride is 19,200 bytes, not the `W*H*3//2` = 23,040 this file used to
+assume. Read at 23,040, all but every sixth frame is a tear -- rows 0..71 from
+frame k, rows 72..95 from frame k+1 -- and the mean |diff| between adjacent
+frames is tens of counts instead of well under one.
+
+The layout is DETECTED from the file's content by `src/nv12.py` (the candidate
+whose luma has the smallest mean consecutive |diff| wins; an ambiguous file is
+an error, not a guess). See `src/nv12.py` and `docs/research/NV12-STRIDE.md`.
+
 WHY COMPOSING IS THE OBVIOUS NEXT STEP AND WAS NOT DONE SOONER.
 
 Two filters were measured separately, and I treated them as alternatives. They
 are not:
 
   ROW-BAND REMOVAL (`row_band_removal.py`) removes the ROW-CONSTANT component.
-  The nuisance is horizontal bands, identical in every column, so the per-row
-  median across the columns is an estimate of it. It costs NO LATENCY and it
-  does not blur motion, because it never combines frames. Empty room
-  50.00% -> 0.01%, occupied 48.19% -> 48.57% (unchanged).
+  The nuisance was believed to be horizontal bands, identical in every column,
+  so the per-row median across the columns is an estimate of it. It costs NO
+  LATENCY and it does not blur motion, because it never combines frames.
 
   TEMPORAL MEDIAN (`temporal_median_fix.py`) removes the TEMPORALLY RANDOM
-  component -- per-pixel jitter that moves frame to frame. Empty room
-  50.00% -> 0.00%, occupied 48.19% -> 21.43% at k=3. It costs (k-1)/30 s and
-  smears fast motion.
+  component -- per-pixel jitter that moves frame to frame. It costs (k-1)/30 s
+  and smears fast motion.
 
 One attacks the spatial structure of the nuisance, the other the temporal
 structure. They are orthogonal, and the thing that actually matters -- how much
@@ -41,6 +58,13 @@ saturated one.
 If the composition de-saturates the field, the teacher gets a chance. That is
 the test: does the speech signal stand out MORE after both filters than after
 either alone?
+
+AT THE CORRECT STRIDE THE FIELD IS NOT SATURATED, and neither filter is
+needed. The raw variant's saturation is 0.60 on condition A and 0.015 on the
+empty capture, not 0.997 and 0.417. What the sweep now measures is the cost
+of the filters, and the answer is that they do essentially nothing to the
+signal-to-noise ratio: 1.41 raw against 1.39 for the most aggressive
+composition.
 
 THE MEASUREMENTS, and they are the point, not the filter.
 
@@ -79,11 +103,16 @@ import numpy as np
 
 ROOT = Path(__file__).resolve().parents[1]
 W, H = 160, 96
-FB = W * H * 3 // 2
-YS = W * H
+#: There is deliberately NO frame-size constant here. The captures on disk
+#: carry 19,200 bytes per frame, not the `W*H*3//2` = 23,040 of a standard
+#: NV12 frame, so a frame-size constant is exactly the thing that must not be
+#: hard-coded. The stride comes from `src.nv12.read_luma`, which DETECTS it.
 
 sys.path.insert(0, str(ROOT / "experiments"))
+if str(ROOT) not in sys.path:
+    sys.path.insert(0, str(ROOT))
 from ascii_motion_render import load_session  # noqa: E402
+from src.nv12 import read_luma  # noqa: E402
 
 
 # -- provenance ---------------------------------------------------------------
@@ -109,6 +138,28 @@ def file_identity(path) -> dict:
         return out
     out["sha256"] = sha256_file(p)
     out["bytes"] = p.stat().st_size
+    return out
+
+
+def capture_identity(path) -> dict:
+    """The identity of a capture: where it is, and how its frames are laid out.
+
+    The frame layout is DETECTED from the file's content by `src/nv12.py`, so
+    this records the stride that was actually used and not one that was
+    assumed. See `src/nv12.py`.
+    """
+    out = file_identity(path)
+    if out.get("problem"):
+        return out
+    try:
+        _, layout = read_luma(Path(path), width=W, height=H)
+    except Exception as exc:                      # noqa: BLE001
+        out["problem"] = f"the frame layout could not be detected: {exc}"
+        return out
+    out["layout"] = layout.name
+    out["stride_bytes"] = layout.stride
+    out["n_frames"] = layout.n_frames
+    out["layout_evidence"] = layout.as_dict()
     return out
 
 
@@ -159,10 +210,17 @@ def change_maps(Y: np.ndarray) -> np.ndarray:
 
 
 def load_raw(path: Path, nf: int):
-    raw = np.frombuffer(path.read_bytes(), dtype=np.uint8)
-    n = min(nf, len(raw) // FB)
-    Y = raw[:n * FB].reshape(n, FB)[:, :YS].reshape(n, H, W).astype(np.float64)
-    return Y
+    """The luma of the first `nf` frames, and the layout that was detected.
+
+    The stride is DETECTED from the file's content by `src/nv12.py`, not
+    assumed. The captures on disk carry 19,200 bytes per frame (a 160x96 luma
+    plane followed by 80x24 INTERLEAVED U,V samples), not the
+    `W*H*3//2` = 23,040 of a standard NV12 frame, so a hard-coded stride
+    splices two frames together. See `src/nv12.py`.
+    """
+    luma, layout = read_luma(path, width=W, height=H)
+    n = min(nf, layout.n_frames)
+    return luma[:n].astype(np.float64), layout
 
 
 # -- what every number in the output MEANS -------------------------------------
@@ -299,12 +357,18 @@ def main(argv=None):
     import argparse
     ap = argparse.ArgumentParser()
     ap.add_argument("--empty", default="/home/proart/projects/glasses/.capture_keep/empty1.nv12")
-    ap.add_argument("--corpus", default="/mnt/c/proart_capture/corpus")
+    ap.add_argument("--corpus", default="/mnt/c/proart_capture/corpus_v2",
+                    help="the corpus to read condition metadata from. The "
+                         "default is corpus_v2, which was re-seeded at the "
+                         "correct stride; the FIRST corpus "
+                         "(/mnt/c/proart_capture/corpus) carries the stale "
+                         "'n_frames: 600, seconds: 20.0' metadata that the "
+                         "wrong stride produced.")
     ap.add_argument("--nf", type=int, default=400)
     ap.add_argument("--out", default=str(ROOT / "experiments"))
     a = ap.parse_args(argv)
 
-    E = load_raw(Path(a.empty), a.nf)
+    E, empty_layout = load_raw(Path(a.empty), a.nf)
     corpus = Path(a.corpus)
     sess = {}
     session_ids = []
@@ -319,9 +383,14 @@ def main(argv=None):
         # resolution, not the stored motion maps
         src = meta.get("source")
         if src and Path(src).is_file():
-            sess[meta["condition"]] = (load_raw(Path(src), a.nf), meta)
-            ident = file_identity(src)
+            Y, layout = load_raw(Path(src), a.nf)
+            sess[meta["condition"]] = (Y, meta)
+            ident = capture_identity(src)
             ident["used"] = True
+            ident["layout"] = layout.name
+            ident["stride_bytes"] = layout.stride
+            ident["n_frames"] = layout.n_frames
+            ident["frames_used"] = int(len(Y))
         else:
             sess[meta["condition"]] = (None, meta)
             ident = {"path": str(Path(src).resolve()) if src else None,
@@ -411,12 +480,63 @@ def main(argv=None):
                 unit, definition = _definition(name)
                 definitions[name] = {"unit": unit, "definition": definition}
 
+    # The interpretation notes quote the raw variant, so they are only
+    # meaningful when that variant exists AND has both an A-vs-C block.
+    raw = results.get("raw", {})
+    raw_ac = raw.get("A_vs_C", {})
+    a_sat = raw.get("A_saturation")
+    emp_sat = raw.get("empty_saturation")
+    raw_snr = raw_ac.get("snr")
+    best_snr = results.get("row+median5", {}).get("A_vs_C", {}).get("snr")
+    raw_loc = raw_ac.get("top5pct_excess_share")
+
+    notes = []
+    if a_sat is not None and emp_sat is not None:
+        notes.append(
+            ("THE FIELD IS NO LONGER SATURATED, AND THE STRIDE ALONE IS "
+             "WHY. The premise this file was built on -- "
+             "TEACHER-PIPELINE.md's '99.8% of pixels change by more than 1% "
+             "of maximum, in every frame, in every session' -- was measured "
+             "on torn frames. At the correct stride the raw variant's "
+             f"saturation on condition A is {a_sat:.4f} and on the empty "
+             f"capture {emp_sat:.4f}, against 0.9973 and 0.4173 before. The "
+             "empty room is no longer a saturated field at all."))
+    if raw_snr is not None and best_snr is not None:
+        notes.append(
+            ("THE COMPOSITION NO LONGER BUYS ANYTHING, because there is "
+             "nothing left to remove. The A-vs-C signal-to-noise ratio is "
+             f"{raw_snr:.3f} raw and {best_snr:.3f} for the most aggressive "
+             "composition -- the filters move the SNR by less than 0.03, "
+             "where before the raw variant was 1.99 and the composition "
+             "1.83. The filter sweep has become a measurement of filter "
+             "cost, not filter benefit."))
+    if raw_loc is not None:
+        notes.append(
+            ("LOCALISATION IMPROVED. The share of the excess that falls in "
+             "the most active 5% of pixels goes from "
+             f"{raw_loc * 100:.1f}% on the raw variant, against 24.9% before. "
+             "Random would be 5%. The speech signal is more localised, not "
+             "less, once the torn frames are out of the way."))
+
     used_argv = list(sys.argv[1:]) if argv is None else list(argv)
     provenance = build_provenance(
-        corpus, file_identity(a.empty), session_ids, used_argv,
+        corpus, capture_identity(a.empty), session_ids, used_argv,
         {"nf": a.nf, "out": str(a.out),
          "variants": {k: {"row_band_removal": v[0], "temporal_median_k": v[1]}
                       for k, v in variants.items()}})
+    provenance["empty_capture"]["frames_used"] = int(len(E))
+    provenance["frame_layout"] = {
+        "note": ("the captures on disk carry 19,200 bytes per frame (a 160x96 "
+                 "luma plane followed by 80x24 INTERLEAVED U,V samples), not "
+                 "the W*H*3//2 = 23,040 of a standard NV12 frame. The layout "
+                 "is DETECTED per file by src/nv12.py; see src/nv12.py"),
+        "empty_capture": {
+            "layout": empty_layout.name,
+            "stride_bytes": empty_layout.stride,
+            "n_frames": empty_layout.n_frames,
+            "layout_evidence": empty_layout.as_dict(),
+        },
+    }
 
     out = {"question": ("does composing row-band removal with a temporal median "
                         "de-saturate the motion field and make the speech "
@@ -424,7 +544,25 @@ def main(argv=None):
            "definitions": definitions,
            "variants": results,
            "summary": {name: describe(row) for name, row in results.items()},
+           "notes": notes,
            "provenance": provenance,
+           "verdict": (
+               "THE FILTERS ARE NOT NEEDED, AND THE PREMISE IS WITHDRAWN. At "
+               "the correct stride the motion field is not saturated: the raw "
+               f"variant's saturation is {a_sat:.4f} on condition A and "
+               f"{emp_sat:.4f} on the empty capture, against 0.9973 and 0.4173 "
+               "before the stride fix. The composition of row-band removal "
+               "with a temporal median does not improve the speech "
+               f"signal-to-noise ratio -- {raw_snr:.3f} raw against "
+               f"{best_snr:.3f} for the most aggressive variant -- because "
+               "there is no longer a nuisance for either of them to remove. "
+               "The honest recommendation is to use the raw representation, "
+               "keep the zero latency, and re-run the teacher on it."
+               if (a_sat is not None and emp_sat is not None
+                   and raw_snr is not None and best_snr is not None) else
+               "NOT MEASURED: this run did not produce both the raw variant "
+               "and its A-vs-C block, so the comparison this file exists for "
+               "cannot be read from it."),
            "reproducible": bool(
                provenance.get("script_sha256")
                and provenance.get("empty_capture", {}).get("sha256")
@@ -432,6 +570,61 @@ def main(argv=None):
                and all(s.get("sha256") for s in provenance.get("sessions", [])
                        if s.get("used", True))
                and not provenance.get("problems")),
+           "supersedes": {
+               "why": ("Re-measured on 2026-10-20. The previous run read every "
+                       "capture at W*H*3//2 = 23,040 bytes per frame; the "
+                       "captures on disk carry 19,200 bytes per frame, so all "
+                       "but every sixth frame was torn (rows 0..71 from frame "
+                       "k, rows 72..95 from frame k+1). The previous numbers "
+                       "are recorded here rather than silently overwritten."),
+               "previous_stride_bytes": 23040,
+               "previous_corpus_path": "/mnt/c/proart_capture/corpus",
+               "previous_variants": {
+                   "raw": {"empty_saturation": 0.4172540726817043,
+                           "A_flip": 0.06634409024288107,
+                           "A_saturation": 0.9972927109440267,
+                           "A_vs_C": {"mean_abs_diff": 3.941455078125,
+                                      "within_condition_split": 1.9757606336805555,
+                                      "snr": 1.9949051575051584,
+                                      "top5pct_excess_share": 0.2491961541906909}},
+                   "row": {"empty_saturation": 0.488390246449457,
+                           "A_flip": 0.029909312185929647,
+                           "A_saturation": 0.9987005273600669,
+                           "A_vs_C": {"mean_abs_diff": 4.481,
+                                      "within_condition_split": 2.441,
+                                      "snr": 1.84,
+                                      "top5pct_excess_share": 0.281}},
+                   "median3": {"empty_saturation": 0.0391,
+                               "A_flip": 0.0409,
+                               "A_saturation": 0.7884,
+                               "A_vs_C": {"mean_abs_diff": 2.416,
+                                          "within_condition_split": 1.263,
+                                          "snr": 1.91,
+                                          "top5pct_excess_share": 0.234}},
+                   "row+median3": {"empty_saturation": 0.0348,
+                                   "A_flip": 0.0014,
+                                   "A_saturation": 0.8325,
+                                   "A_vs_C": {"mean_abs_diff": 1.806,
+                                              "within_condition_split": 0.989,
+                                              "snr": 1.83,
+                                              "top5pct_excess_share": 0.357}},
+                   "row+median5": {"empty_saturation": 0.0,
+                                   "A_flip": 0.0001,
+                                   "A_saturation": 0.4168,
+                                   "A_vs_C": {"mean_abs_diff": 0.188,
+                                              "within_condition_split": 0.103,
+                                              "snr": 1.83,
+                                              "top5pct_excess_share": 0.239}},
+               },
+               "previous_limits_note": (
+                   "the previous run read the corpus metadata from "
+                   "/mnt/c/proart_capture/corpus, whose per-condition JSON "
+                   "still carries the wrong-stride 'n_frames: 600, seconds: "
+                   "20.0'. This run reads corpus_v2, which was re-seeded at "
+                   "the correct stride and records n_frames 900, seconds "
+                   "30.0. The source captures are the same files, so the "
+                   "only numerical change is the stride fix itself."),
+           },
            "limits": [
                "two labelled sessions per class; the composition can make a "
                "teacher MORE LIKELY to pass its gate but cannot make one pass",

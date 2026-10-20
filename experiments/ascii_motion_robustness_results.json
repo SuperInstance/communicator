@@ -1,62 +1,159 @@
 {
-  "question": "is the +0.702 exposure/delta correlation a real mechanism or one leverage point?",
+  "question": "is the exposure/delta correlation a real mechanism or one leverage point?",
   "capture": "/mnt/c/proart_capture/small.nv12",
-  "n_frames": 25,
+  "n_frames": 30,
+  "layout": "y_uv_halfres",
+  "stride_bytes": 19200,
+  "layout_evidence": {
+    "layout": "y_uv_halfres",
+    "stride_bytes": 19200,
+    "n_frames": 30,
+    "luma_bytes": 15360,
+    "mean_consecutive_frame_diff": 1.374715,
+    "runner_up_layout": "standard_nv12",
+    "runner_up_mean_consecutive_frame_diff": 30.666062,
+    "margin_over_runner_up": 22.307,
+    "chroma": "interleaved U,V, 80x24 samples"
+  },
   "lag_profile": {
     "1": {
-      "mean_abs_dY": 180.37082248263877,
-      "cell_change_pct": 55.29730902777777
+      "mean_abs_dY": 47.5199802442529,
+      "cell_change_pct": 8.631465517241379
     },
     "2": {
-      "mean_abs_dY": 332.5498188405798,
-      "cell_change_pct": 58.47826086956521
+      "mean_abs_dY": 97.05426897321432,
+      "cell_change_pct": 11.986607142857144
     },
     "3": {
-      "mean_abs_dY": 356.1931818181819,
-      "cell_change_pct": 58.546401515151516
+      "mean_abs_dY": 111.22805748456783,
+      "cell_change_pct": 13.705632716049385
     },
     "4": {
-      "mean_abs_dY": 262.9439484126983,
-      "cell_change_pct": 55.74652777777778
+      "mean_abs_dY": 124.7829026442307,
+      "cell_change_pct": 15.160256410256409
     },
     "5": {
-      "mean_abs_dY": 139.3007812499999,
-      "cell_change_pct": 14.518229166666668
+      "mean_abs_dY": 135.6434895833333,
+      "cell_change_pct": 16.372916666666665
     },
     "6": {
-      "mean_abs_dY": 230.57565789473702,
-      "cell_change_pct": 55.57291666666666
+      "mean_abs_dY": 146.19140624999994,
+      "cell_change_pct": 17.369791666666668
     }
   },
   "R1_lowest_lag5_pair": {
     "frames": [
-      18,
-      23
+      21,
+      26
     ],
-    "change_pct": 7.708333333333334,
-    "mean_luma_delta": 0.023632812499997158,
-    "median_lag5_change_pct": 11.458333333333332
+    "change_pct": 11.09375,
+    "mean_luma_delta": 0.007031249999997158,
+    "median_lag5_change_pct": 12.760416666666666
   },
   "R3_global_min_pair": {
     "frames": [
-      18,
-      23
+      23,
+      24
     ],
-    "change_pct": 7.708333333333334
+    "change_pct": 5.3125
   },
-  "R2_correlation_all_lags": 0.7021488392201023,
+  "R2_correlation_all_lags": 0.9918606273601989,
   "R2_leave_one_out": {
-    "drop_lag_1": 0.8492338524851584,
-    "drop_lag_2": 0.6853268635506512,
-    "drop_lag_3": 0.7172224906763196,
-    "drop_lag_4": 0.7018548426153475,
-    "drop_lag_5": 0.9433373626223542,
-    "drop_lag_6": 0.7362587261905725
+    "drop_lag_1": 0.9992120251828672,
+    "drop_lag_2": 0.9974003365552762,
+    "drop_lag_3": 0.9925332572621508,
+    "drop_lag_4": 0.9915293070088887,
+    "drop_lag_5": 0.9913448268059906,
+    "drop_lag_6": 0.9903937574956087
   },
-  "R2_spread": 0.25801049907170304,
+  "R2_spread": 0.008818267687258574,
   "duplicate_frame_suspected": false,
   "correlation_is_fragile": false,
+  "units": "mean_abs_dY is the mean absolute difference of the per-frame MEAN LUMA in COUNTS, multiplied by 100 by this script. The old and new numbers carry the same scaling, so they are comparable with each other, but the field is not a percentage of anything.",
   "verdict": "The correlation survives leave-one-out and is not a leverage point.",
-  "duplicate_note": "No near-duplicate frame pair found; the lag-5 dip is not a repeat.",
-  "consequence": "Neither auto-exposure nor threshold dither is established as the cause. The honest state is that the 55-58% baseline cell-change rate on a stationary subject is UNEXPLAINED, and the resolution ladder is saturated because of it. Before any motion claim, the capture must record a per-frame checksum so repeats are caught, and the ladder budget must be set from measured, not assumed, change rates."
+  "duplicate_note": "No near-duplicate frame pair found: the most similar pair anywhere in the capture is frames 23 and 24 at 5.31% change, and they are ADJACENT frames, which is what a slow exposure ramp looks like.",
+  "consequence": "The previous run's picture -- a flat ~55-58% baseline cell-change rate on a stationary subject, saturated by a single lag-5 dip -- was the torn-frame artefact and is gone. At the correct stride the cell-change rate is 8.63% at lag 1 and rises to 17.37% at lag 6, which is the signature of change that ACCUMULATES rather than a field that flips on its own. There is no duplicate frame, the correlation is not a leverage point, and the exposure/delta correlation is strong and stable across lags (+0.992, leave-one-out spread 0.009). The camera's gain and the character delta move together because both follow the same slow exposure ramp, not because the delta is a picture of the camera. A per-frame checksum is still worth recording in future captures, but as a cheap guard rather than as a rescue for this one.",
+  "supersedes": {
+    "why": "Re-measured on 2026-10-20 at the CORRECT frame stride. The previous run read the capture at W*H*3//2 = 23,040 bytes per frame; the capture on disk carries 19,200 bytes per frame, so all but every sixth frame was torn, and the flat ~55% cell-change baseline with a single dip at lag 5 was the tear's signature. The previous numbers are recorded here rather than silently overwritten.",
+    "previous_stride_bytes": 23040,
+    "previous_n_frames": 25,
+    "previous_lag_profile": {
+      "1": {
+        "mean_abs_dY": 180.37082248263877,
+        "cell_change_pct": 55.29730902777777
+      },
+      "2": {
+        "mean_abs_dY": 332.5498188405798,
+        "cell_change_pct": 58.47826086956521
+      },
+      "3": {
+        "mean_abs_dY": 356.1931818181819,
+        "cell_change_pct": 58.546401515151516
+      },
+      "4": {
+        "mean_abs_dY": 262.9439484126983,
+        "cell_change_pct": 55.74652777777778
+      },
+      "5": {
+        "mean_abs_dY": 139.3007812499999,
+        "cell_change_pct": 14.518229166666668
+      },
+      "6": {
+        "mean_abs_dY": 230.57565789473702,
+        "cell_change_pct": 55.57291666666666
+      }
+    },
+    "previous_R1_lowest_lag5_pair": {
+      "frames": [
+        18,
+        23
+      ],
+      "change_pct": 7.708333333333334,
+      "mean_luma_delta": 0.023632812499997158,
+      "median_lag5_change_pct": 11.458333333333332
+    },
+    "previous_R3_global_min_pair": {
+      "frames": [
+        18,
+        23
+      ],
+      "change_pct": 7.708333333333334
+    },
+    "previous_R2_correlation_all_lags": 0.7021488392201023,
+    "previous_R2_spread": 0.25801049907170304,
+    "previous_duplicate_frame_suspected": false,
+    "previous_correlation_is_fragile": false,
+    "previous_verdict": "The correlation survives leave-one-out and is not a leverage point.",
+    "previous_duplicate_note": "No near-duplicate frame pair found; the lag-5 dip is not a repeat."
+  },
+  "provenance": {
+    "generated_by": "experiments/ascii_motion_robustness.py",
+    "script_path": "/home/proart/projects/communicator/experiments/ascii_motion_robustness.py",
+    "script_sha256": "59093e23e256a48dc142728afb94ad413c180d6852bc7b84dbd27c7123aa6055",
+    "python": "/home/proart/projects/glasses/.venv/bin/python",
+    "command_line": "experiments/ascii_motion_robustness.py --capture /mnt/c/proart_capture/small.nv12",
+    "cli_args": [
+      "--capture",
+      "/mnt/c/proart_capture/small.nv12"
+    ],
+    "capture": {
+      "path": "/mnt/c/proart_capture/small.nv12",
+      "sha256": "e0c980ca8f1f177b7538e61d938e2c13fb0f2bfed948a9e54c6e7274c93ed591",
+      "bytes": 576000,
+      "layout": "y_uv_halfres",
+      "stride_bytes": 19200,
+      "n_frames": 30,
+      "layout_evidence": {
+        "layout": "y_uv_halfres",
+        "stride_bytes": 19200,
+        "n_frames": 30,
+        "luma_bytes": 15360,
+        "mean_consecutive_frame_diff": 1.374715,
+        "runner_up_layout": "standard_nv12",
+        "runner_up_mean_consecutive_frame_diff": 30.666062,
+        "margin_over_runner_up": 22.307,
+        "chroma": "interleaved U,V, 80x24 samples"
+      }
+    }
+  }
 }

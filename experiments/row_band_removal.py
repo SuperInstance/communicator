@@ -1,6 +1,48 @@
 """
 row_band_removal.py -- remove the banding without blurring time.
 
+THE FRAME LAYOUT, BEFORE ANYTHING ELSE.
+
+The captures this reads are NOT standard NV12. `C:\\proart_capture\\nv12small.py`
+writes, per 160x96 frame:
+
+    Y plane    15,360 bytes   (160 * 96)
+    U plane     1,920 bytes
+    V plane     1,920 bytes
+    -------------------------
+    total      19,200 bytes   = W*H*5/4
+
+so the stride is 19,200 bytes, not the `W*H*3//2` = 23,040 this file used to
+assume. Read at 23,040, a 19,200-byte file yields 750 frames of which only
+every sixth is intact -- rows 0..71 from frame k and rows 72..95 from frame
+k+1 -- and the "banding" that measured was that tear.
+
+The layout is therefore DETECTED from the file's content by `src/nv12.py` (the
+candidate whose luma has the smallest mean consecutive |diff| wins; an
+ambiguous file is an error, not a guess) and not computed here. See
+`src/nv12.py` and `docs/research/NV12-STRIDE.md`.
+
+The character renderer is a separate program whose frame stride IS the
+standard-NV12 23,040, so the frames handed to it are re-wrapped into standard
+NV12 first. That re-wrap changes no luma byte.
+
+WHAT CHANGED, AND WHAT THE EXPERIMENT NOW SAYS.
+
+The premise of this experiment was a saturated flip rate: 50.00% of dots
+changing per frame in an EMPTY room, which no real scene produces. Re-measured
+at the correct stride, the empty room flips 0.00% of dots per frame with NO
+removal at all, and the occupied capture flips 0.62%. The saturation was the
+torn-frame artefact, not the camera. So the conclusion of the previous run --
+"row removal works and beats the temporal median" -- does NOT survive: there
+is no longer a nuisance term for row removal to beat, and applying it makes
+the occupied rate worse rather than better.
+
+The predictions further down were stated against the old numbers and are kept
+as written, because they are the record of what was believed and why the
+belief was wrong. The numbers this file prints are the ones in
+`experiments/row_band_removal_results.json`, and that file records the
+superseded values alongside them.
+
 WHY THIS IS THE RIGHT SHAPE OF FIX.
 
 `CAMERA-FLICKER-BANDING.md` measured the nuisance term precisely: in the empty
@@ -73,6 +115,7 @@ HONEST LIMITS, STATED BEFORE THE NUMBERS.
 
 from __future__ import annotations
 
+import hashlib
 import json
 import subprocess
 import sys
@@ -82,18 +125,56 @@ import numpy as np
 
 ROOT = Path(__file__).resolve().parents[1]
 FRAME_W, FRAME_H = 160, 96
+#: The STANDARD NV12 frame stride -- the layout the character renderer assumes.
+#: It is NOT the stride of the captures on disk; see the module docstring.
 FB = FRAME_W * FRAME_H * 3 // 2
 Y_SIZE = FRAME_W * FRAME_H
 THRESH = 100
 sys.path.insert(0, str(ROOT / "experiments"))
+if str(ROOT) not in sys.path:
+    sys.path.insert(0, str(ROOT))
 from ascii_motion_threshold import build  # noqa: E402
+from src.nv12 import read_luma  # noqa: E402
+
+
+def sha256_file(path) -> str:
+    """SHA-256 of a file, read in chunks."""
+    h = hashlib.sha256()
+    with open(path, "rb") as f:
+        for chunk in iter(lambda: f.read(1 << 20), b""):
+            h.update(chunk)
+    return h.hexdigest()
+
+
+def nv12_chroma(raw: np.ndarray, layout, n: int) -> np.ndarray:
+    """The chroma of the first `n` frames, in STANDARD NV12 siting.
+
+    The captures carry a quarter-height interleaved UV block; NV12 wants
+    80x48 UV pairs. Each chroma row serves two luma rows, so the source rows
+    are duplicated. Returns (n, 7680) uint8, ready to be appended to a luma
+    plane to make a standard-NV12 frame.
+    """
+    stride = layout.stride
+    chroma = raw[:n * stride].reshape(n, stride)[:, Y_SIZE:]
+    if layout.name == "y_uv_halfres":
+        uv = chroma.reshape(n, FRAME_H // 4, FRAME_W // 2, 2)
+        uv = np.repeat(uv, 2, axis=1)            # 24 chroma rows -> 48
+    elif layout.name == "standard_nv12":
+        uv = chroma.reshape(n, FRAME_H // 2, FRAME_W // 2, 2)
+    else:                                       # luma_only: there is no chroma
+        uv = np.zeros((n, FRAME_H // 2, FRAME_W // 2, 2), dtype=np.uint8)
+    return uv.reshape(n, -1)
 
 
 def load(path: Path, nf: int):
+    """(luma, chroma, layout) for the first `nf` frames of a capture.
+
+    The layout is detected, not assumed -- see `src/nv12.py`.
+    """
+    luma, layout = read_luma(path, width=FRAME_W, height=FRAME_H)
     raw = np.frombuffer(path.read_bytes(), dtype=np.uint8)
-    n = min(nf, len(raw) // FB)
-    a = raw[:n * FB].reshape(n, FB)
-    return a[:, :Y_SIZE].reshape(n, FRAME_H, FRAME_W), a[:, Y_SIZE:]
+    n = min(nf, layout.n_frames)
+    return luma[:n], nv12_chroma(raw, layout, n), layout
 
 
 def row_profile(F):
@@ -170,10 +251,22 @@ def main():
 
     binp = build()
     caps = {}
+    inputs = {}
     for p, lab in ((a.occupied, "occupied"), (a.turned, "turned"),
                    (a.empty, "empty")):
         if Path(p).is_file():
-            caps[lab] = load(Path(p), a.nf)
+            F, UV, layout = load(Path(p), a.nf)
+            caps[lab] = (F, UV)
+            inputs[lab] = {
+                "path": str(Path(p).resolve()),
+                "sha256": sha256_file(p),
+                "bytes": Path(p).stat().st_size,
+                "layout": layout.name,
+                "stride_bytes": layout.stride,
+                "n_frames": layout.n_frames,
+                "frames_used": int(len(F)),
+                "layout_evidence": layout.as_dict(),
+            }
 
     res = {}
     for mode in ("none", "subtract", "divide"):
@@ -219,7 +312,61 @@ def main():
                "the reconstruction cannot restore the original absolute luma, "
                "only the row-structured part of the change, so the threshold "
                "is applied to a reconstructed image",
-           ]}
+               "the temporal-median comparison numbers quoted in the verdict "
+               "(0.48% at k=5) come from experiments/temporal_median_fix.py, "
+               "which reads its capture at the OLD 23,040 stride and has not "
+               "been re-run. They are quoted as they stand, not re-measured "
+               "here.",
+           ],
+           "supersedes": {
+               "why": ("These numbers were RE-MEASURED on 2026-10-20. The "
+                       "previous run read the captures at W*H*3//2 = 23,040 "
+                       "bytes per frame, but the captures on disk carry 19,200 "
+                       "bytes per frame, so all but every sixth frame was torn "
+                       "(rows 0..71 from frame k, rows 72..95 from frame k+1). "
+                       "The previous numbers are recorded here rather than "
+                       "silently overwritten."),
+               "previous_stride_bytes": 23040,
+               "previous_results": {
+                   "none": {"occupied": 48.190104166666664,
+                            "turned": 40.345052083333336,
+                            "empty": 50.0},
+                   "subtract": {"occupied": 48.56770833333333,
+                                "turned": 44.921875,
+                                "empty": 0.013020833333333334},
+                   "divide": {"occupied": 49.303385416666664,
+                              "turned": 46.184895833333336,
+                              "empty": 0.05859375},
+               },
+               "previous_best_mode": ["divide", 49.303385416666664, 0.05859375],
+               "previous_verdict": (
+                   "ROW REMOVAL WORKS AND BEATS THE TEMPORAL MEDIAN. Mode "
+                   "'divide': empty room 0.06%, occupied 49.30%. The occupied "
+                   "rate STAYS HIGH, which is the thing the temporal median "
+                   "could not do -- at k=5 it fell to 0.48%. No latency, no "
+                   "motion smearing, no frame averaging. Facing vs head-turned "
+                   "gap is 3.12 pp."),
+           },
+           "provenance": {
+               "generated_by": "experiments/row_band_removal.py",
+               "script_path": str(Path(__file__).resolve()),
+               "script_sha256": sha256_file(Path(__file__).resolve()),
+               "python": sys.executable,
+               "command_line": " ".join(sys.argv),
+               "cli_args": list(sys.argv[1:]),
+               "captures": inputs,
+               "renderer": {
+                   "program": "experiments/ascii_motion_threshold.py CHANNELS_C",
+                   "note": ("the character renderer assumes the STANDARD NV12 "
+                            "stride of 23,040 bytes per frame, so the frames it "
+                            "is given are re-wrapped into standard NV12 first; "
+                            "no luma byte is changed by that re-wrap"),
+                   "frame_bytes": FB,
+                   "luma_bytes": Y_SIZE,
+                   "braille_thresh": THRESH,
+               },
+               "frames_requested": a.nf,
+           }}
 
     if best:
         mode, o, e = best
@@ -236,10 +383,48 @@ def main():
             + (f" Facing vs head-turned gap is {gap:.2f} pp."
                if gap is not None else ""))
     else:
-        out["verdict"] = (
-            "Row removal did not produce a clean split (empty near zero AND "
-            "occupied high). The banding may be column-varying as well as "
-            "row-constant, in which case a row-only model is insufficient.")
+        # THE PREMISE CHECK, and it is the whole result.
+        #
+        # This experiment was written to remove a saturated flip rate: 50.00%
+        # of dots per frame in an EMPTY room, which no real scene produces.
+        # Re-measured at the correct frame stride, the empty room flips
+        # 0.00% of dots per frame with NO removal at all. There is no banding
+        # to remove: the saturation was the torn-frame artefact of reading a
+        # 19,200-byte frame at a 23,040-byte stride. The conclusion of the
+        # previous run -- "row removal works and beats the temporal median" --
+        # does not survive; there is no longer a nuisance term for it to beat.
+        none_res = res.get("none", {})
+        e0 = none_res.get("empty", {}).get("flip_pct")
+        o0 = none_res.get("occupied", {}).get("flip_pct")
+        t0 = none_res.get("turned", {}).get("flip_pct")
+        if e0 is not None and e0 < 1.0:
+            sub = res.get("subtract", {}).get("occupied", {}).get("flip_pct")
+            div = res.get("divide", {}).get("occupied", {}).get("flip_pct")
+            out["verdict"] = (
+                f"THE PREMISE WAS A STRIDE ARTEFACT, AND THE CONCLUSION OF THE "
+                f"PREVIOUS RUN DOES NOT SURVIVE. With NO removal at all the "
+                f"empty room flips {e0:.2f}% of dots per frame, the occupied "
+                f"capture {o0:.2f}%"
+                + (f", the turned capture {t0:.2f}%" if t0 is not None else "")
+                + ". There is no saturated flip rate and therefore no "
+                "row-constant banding for this filter to remove: the 50.00% "
+                "empty-room figure that motivated the experiment was a "
+                "torn-frame artefact of reading a 19,200-byte frame at a "
+                "23,040-byte stride. Row removal now makes the occupied rate "
+                "WORSE rather than better"
+                + (f" ({sub:.2f}% subtract, {div:.2f}% divide, against "
+                   f"{o0:.2f}% with none)" if (sub is not None and div is not None)
+                   else "")
+                + ", because there is no banding to subtract and the filter "
+                "only adds its own noise. The character delta is not "
+                "saturated in this capture, so the whole 'the character field "
+                "flips 50% with nobody in the room' line of reasoning is "
+                "withdrawn.")
+        else:
+            out["verdict"] = (
+                "Row removal did not produce a clean split (empty near zero AND "
+                "occupied high). The banding may be column-varying as well as "
+                "row-constant, in which case a row-only model is insufficient.")
     p = Path(a.out) / "row_band_removal_results.json"
     p.write_text(json.dumps(out, indent=2))
     print(f"\nVERDICT: {out['verdict']}")

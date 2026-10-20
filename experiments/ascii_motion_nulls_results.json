@@ -9,27 +9,98 @@
   "N1_determinism_same_frame_changed_pct": 0.0,
   "N1_pass": true,
   "N2_lag_change_rate_pct": {
-    "1": 55.93749999999999,
-    "2": 57.552083333333336,
-    "3": 57.447916666666664,
-    "5": 11.458333333333332,
-    "10": 15.156249999999998,
-    "20": 18.958333333333332
+    "1": 6.979166666666667,
+    "2": 9.505208333333334,
+    "3": 10.989583333333334,
+    "5": 12.760416666666666,
+    "10": 16.588541666666668,
+    "20": 22.552083333333332
   },
-  "N2_monotone_increasing": false,
-  "N2_headroom_lag1_to_lag20_pp": -36.979166666666664,
+  "N2_monotone_increasing": true,
+  "N2_headroom_lag1_to_lag20_pp": 15.572916666666666,
   "N3_null_rung_agreement_pct": 100.0,
   "luma_histogram": {
-    "n_pixels": 384000,
+    "n_pixels": 460800,
     "min": 32,
     "max": 212,
-    "p01": 50,
-    "p10": 83,
-    "p50": 123,
-    "p90": 157,
-    "p99": 173,
-    "frac_within_2_of_threshold": 0.04558072916666667
+    "p01": 49,
+    "p10": 77,
+    "p50": 119,
+    "p90": 159,
+    "p99": 174,
+    "frac_within_2_of_threshold": 0.05618489583333333
   },
-  "verdict": "SATURATED: the delta is dominated by threshold dither, not motion.",
-  "consequence": "A hard threshold on a noisy continuous signal makes the P-frame a dither map. The representation needs the MAGNITUDE of the change between keyframes, not the per-frame sign of a threshold test. That also un-saturates the ladder: cost then tracks real motion instead of a constant flip rate."
+  "verdict": "SEPARATED: change grows with lag; the delta carries motion.",
+  "notes": [
+    "The SATURATED/SEPARATED predicate is the pre-registered falsifier this file was written to apply: lag-1 change above 30%, or not monotone in lag, means the delta is a dither map. It now comes out SEPARATED, so the conclusion the previous run recorded -- that the delta is dominated by threshold dither -- does NOT survive the stride fix.",
+    "That is not the same as saying the dither mechanism is gone. experiments/ascii_motion_threshold.py measures it directly on the same capture: the flip rate still falls monotonically with distance from the threshold, and 5.62% of pixels sit within +/-2 of it. What the stride fix removed was the TORN-FRAME artefact -- a large, lag-invariant change signal that was not motion at all. The residual dither is a small, structured, threshold-proximity effect sitting on top of a real motion signal, and the two are not in conflict."
+  ],
+  "consequence": "None. Proceed to the labelled capture.",
+  "provenance": {
+    "generated_by": "experiments/ascii_motion_nulls.py",
+    "script_path": "/home/proart/projects/communicator/experiments/ascii_motion_nulls.py",
+    "script_sha256": "711e43fbbbb71aeb6405185d8263823a618913b577454515416c3e52f4b1f87e",
+    "python": "/home/proart/projects/glasses/.venv/bin/python",
+    "command_line": "experiments/ascii_motion_nulls.py --capture /mnt/c/proart_capture/small.nv12",
+    "cli_args": [
+      "--capture",
+      "/mnt/c/proart_capture/small.nv12"
+    ],
+    "capture": {
+      "path": "/mnt/c/proart_capture/small.nv12",
+      "sha256": "e0c980ca8f1f177b7538e61d938e2c13fb0f2bfed948a9e54c6e7274c93ed591",
+      "bytes": 576000,
+      "layout": "y_uv_halfres",
+      "stride_bytes": 19200,
+      "n_frames": 30,
+      "frames_used": 30,
+      "layout_evidence": {
+        "layout": "y_uv_halfres",
+        "stride_bytes": 19200,
+        "n_frames": 30,
+        "luma_bytes": 15360,
+        "mean_consecutive_frame_diff": 1.374715,
+        "runner_up_layout": "standard_nv12",
+        "runner_up_mean_consecutive_frame_diff": 30.666062,
+        "margin_over_runner_up": 22.307,
+        "chroma": "interleaved U,V, 80x24 samples"
+      }
+    },
+    "renderer": {
+      "program": "experiments/ascii_motion.py RENDER_C",
+      "note": "the character renderer assumes the STANDARD NV12 stride of 23,040 bytes per frame, so the capture is re-wrapped into standard NV12 first; no luma byte is changed by that re-wrap",
+      "frame_bytes": 23040
+    }
+  },
+  "supersedes": {
+    "why": "Re-measured on 2026-10-20. The previous run read the capture at W*H*3//2 = 23,040 bytes per frame; the capture on disk carries 19,200 bytes per frame, so all but every sixth frame was torn (rows 0..71 from frame k, rows 72..95 from frame k+1). The previous numbers are recorded here rather than silently overwritten.",
+    "previous_stride_bytes": 23040,
+    "previous_n_frames": 25,
+    "previous_N1_determinism_same_frame_changed_pct": 0.0,
+    "previous_N1_pass": true,
+    "previous_N2_lag_change_rate_pct": {
+      "1": 55.93749999999999,
+      "2": 57.552083333333336,
+      "3": 57.447916666666664,
+      "5": 11.458333333333332,
+      "10": 15.156249999999998,
+      "20": 18.958333333333332
+    },
+    "previous_N2_monotone_increasing": false,
+    "previous_N2_headroom_lag1_to_lag20_pp": -36.979166666666664,
+    "previous_N3_null_rung_agreement_pct": 100.0,
+    "previous_luma_histogram": {
+      "n_pixels": 384000,
+      "min": 32,
+      "max": 212,
+      "p01": 50,
+      "p10": 83,
+      "p50": 123,
+      "p90": 157,
+      "p99": 173,
+      "frac_within_2_of_threshold": 0.04558072916666667
+    },
+    "previous_verdict": "SATURATED: the delta is dominated by threshold dither, not motion.",
+    "verdict_changed": "YES, AND IT FLIPS. The previous run read the capture at 23,040 bytes per frame, so 25 of the 30 frames were torn, and the lag curve was not even monotone: lag 1/2/3 sat at ~56-58% and lag 5 fell to 11.46%. That step is the tear signature -- every sixth frame was intact. At the correct stride the lag curve is monotone from 6.98% at lag 1 to 22.55% at lag 20, which is a motion signal, not saturation, so the conclusion this file was written to support does NOT survive."
+  }
 }

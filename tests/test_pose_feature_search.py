@@ -509,8 +509,14 @@ class TestScriptEndToEnd:
 
     def test_the_capture_loader_reads_the_luma_plane(self, tmp_path):
         """
-        NV12: W*H luma bytes first, then the interleaved chroma. The loader
-        must take the luma plane and reshape it to (n, H, W).
+        The loader must take the luma plane and reshape it to (n, H, W).
+
+        The frame layout is DETECTED from the file's content, not assumed --
+        see `src/nv12.py`. This fixture is a STANDARD NV12 file (15,360 luma
+        bytes then 7,680 bytes of interleaved chroma per 160x96 frame,
+        23,040 bytes per frame) and it is the only candidate stride that
+        divides its own length, so the loader has exactly one layout to
+        choose and takes it.
         """
         fb = W * H * 3 // 2
         frames = np.arange(3 * fb, dtype=np.uint8).reshape(3, fb)
@@ -520,3 +526,85 @@ class TestScriptEndToEnd:
         assert Y.shape == (3, H, W)
         assert Y.dtype == np.float32
         assert np.allclose(Y[0], frames[0, :W * H].reshape(H, W))
+
+    def test_a_mis_strided_read_tears_the_frames(self, tmp_path):
+        """
+        CHARACTERISATION: reading a 19,200-byte-per-frame capture at the
+        standard-NV12 stride of 23,040 produces TORN frames, not merely wrong
+        ones -- and the tearing is SILENT, because the array still has the
+        right shape.
+
+        WHY THIS TEST EXISTS. Every experiment in this repo used to assume the
+        frame stride was W*H*3//2 = 23,040. The captures on disk carry
+        19,200 bytes per 160x96 frame (15,360 luma + 1,920 U + 1,920 V), so
+        a reader at 23,040 tears every frame but every sixth. The damage is
+        invisible to any check that looks at shapes, which is why it survived
+        review and turned the "drift", the "row banding" and the "motion" this
+        project measured into a stride artefact.
+
+        The assertions below pin the exact tearing pattern, so the behaviour is
+        documented rather than remembered, and so that a regression to a
+        hard-coded stride is caught here rather than in a result file.
+
+        The measured effect on the real captures was an 80-fold difference in
+        mean consecutive |diff| (43.560 at the wrong stride against 0.545 at
+        the right one, on A.nv12). The synthetic fixture here shows a smaller
+        factor because its square genuinely moves on every frame, which puts a
+        floor under the correct stride's |diff| that the real captures do not
+        have.
+        """
+        from src.nv12 import luma_view, mean_consecutive_diff
+
+        stride_true = W * H * 5 // 4          # 19,200: Y + U + V
+        stride_wrong = W * H * 3 // 2        # 23,040: standard NV12
+        n = 4
+        rng = np.random.default_rng(7)
+
+        planes = []
+        for i in range(n):
+            y = np.full((H, W), 40, dtype=np.uint8)
+            x0 = 10 + (i * 2) % 100           # a square that really moves
+            y[40:56, x0:x0 + 16] = 220
+            # A light sensor dither, so no two frames are byte-identical --
+            # but small enough that the CORRECT stride still has a tiny mean
+            # consecutive |diff|, the way the real captures do.
+            y = np.clip(y.astype(np.int16)
+                        + rng.integers(0, 2, size=(H, W)), 0, 255).astype(np.uint8)
+            planes.append(y)
+        buf = bytearray()
+        for y in planes:
+            buf += y.tobytes()
+            buf += bytes(W * H // 8)          # U
+            buf += bytes(W * H // 8)          # V
+        assert len(buf) == n * stride_true
+        p = tmp_path / "capture.nv12"
+        p.write_bytes(bytes(buf))
+
+        # -- the CORRECT read ------------------------------------------------
+        Y = pfs.load_y(p, None)
+        assert Y.shape == (n, H, W)
+        for i, y in enumerate(planes):
+            assert np.array_equal(Y[i], y), f"frame {i} is not the luma plane"
+
+        # -- the WRONG read, at the stride this repo used to assume ---------
+        data = np.frombuffer(bytes(buf), dtype=np.uint8)
+        wrong = luma_view(data, "standard_nv12", W, H)
+        assert wrong.shape[0] == len(buf) // stride_wrong == 3
+        # frame 2 of the wrong read starts 48 rows into true frame 2, runs
+        # through true frame 2's chroma, and ends with true frame 3's FIRST
+        # 24 ROWS. That is the tear: one "frame" assembled from two of them.
+        assert np.array_equal(wrong[2][-24:], planes[3][:24])
+        # Frame 0 is the one frame a wrong stride cannot spoil: it starts at
+        # byte 0, which is the first luma plane either way. Every LATER frame
+        # is a collage of two true frames.
+        assert np.array_equal(wrong[0], planes[0])
+        for i in range(1, wrong.shape[0]):
+            assert not np.array_equal(wrong[i], planes[i]), (
+                f"mis-strided frame {i} is still intact -- the tear moved")
+
+        # -- and the consequence, which is the number that broke the project
+        good = mean_consecutive_diff(Y.astype(np.int32))
+        bad = mean_consecutive_diff(wrong.astype(np.int32))
+        assert bad > 5 * good, (
+            f"a mis-strided read should tear the frames hard: "
+            f"{bad:.3f} vs {good:.3f} mean consecutive |diff|")

@@ -16,11 +16,11 @@
         {
           "variant": "silent",
           "truth": false,
-          "parsed": null,
+          "parsed": true,
           "text": "SPEAKING.",
           "error": null,
           "detail": null,
-          "elapsed_s": 0.84
+          "elapsed_s": 1.55
         },
         {
           "variant": "blank",
@@ -29,20 +29,20 @@
           "text": "NOT SPEAKING.",
           "error": null,
           "detail": null,
-          "elapsed_s": 1.14
+          "elapsed_s": 0.91
         }
       ],
       "swap": [
         {
           "asked_as": "silent",
           "shown": "speak",
-          "parsed": null,
+          "parsed": true,
           "text": "SPEAKING."
         },
         {
           "asked_as": "speak",
           "shown": "silent",
-          "parsed": null,
+          "parsed": true,
           "text": "SPEAKING."
         }
       ]
@@ -52,11 +52,11 @@
         {
           "variant": "speak",
           "truth": true,
-          "parsed": null,
+          "parsed": true,
           "text": "SPEAKING.",
           "error": null,
           "detail": null,
-          "elapsed_s": 0.88
+          "elapsed_s": 0.75
         },
         {
           "variant": "silent",
@@ -65,7 +65,7 @@
           "text": "NOT SPEAKING.",
           "error": null,
           "detail": null,
-          "elapsed_s": 0.79
+          "elapsed_s": 0.72
         },
         {
           "variant": "blank",
@@ -74,14 +74,14 @@
           "text": "NOT SPEAKING.",
           "error": null,
           "detail": null,
-          "elapsed_s": 0.77
+          "elapsed_s": 0.59
         }
       ],
       "swap": [
         {
           "asked_as": "silent",
           "shown": "speak",
-          "parsed": null,
+          "parsed": true,
           "text": "SPEAKING."
         },
         {
@@ -109,8 +109,8 @@
           "parsed": null,
           "text": "",
           "error": "http400",
-          "detail": "{\"errors\":[{\"message\":\"AiError: Bad input: Error: oneOf at '/' not met, 0 matches: Type mismatch of '/', 'string' not in 'object', required properties at '/' are 'image' (6ab1d47c-d23e-487b-b7fd-cd989d4c4786)\",\"code\":5006}],\"success\":false,\"result\":{},\"messages\":[]}",
-          "elapsed_s": 0.32
+          "detail": "{\"errors\":[{\"message\":\"AiError: Bad input: Error: oneOf at '/' not met, 0 matches: Type mismatch of '/', 'string' not in 'object', required properties at '/' are 'image' (78fa44af-112f-4ede-87b8-97d3f643871b)\",\"code\":5006}],\"success\":false,\"result\":{},\"messages\":[]}",
+          "elapsed_s": 0.25
         },
         {
           "variant": "blank",
@@ -118,8 +118,8 @@
           "parsed": null,
           "text": "",
           "error": "http400",
-          "detail": "{\"errors\":[{\"message\":\"AiError: Bad input: Error: oneOf at '/' not met, 0 matches: Type mismatch of '/', 'string' not in 'object', required properties at '/' are 'image' (7f70e619-d503-4371-af55-b9f4b891f44f)\",\"code\":5006}],\"success\":false,\"result\":{},\"messages\":[]}",
-          "elapsed_s": 0.29
+          "detail": "{\"errors\":[{\"message\":\"AiError: Bad input: Error: oneOf at '/' not met, 0 matches: Type mismatch of '/', 'string' not in 'object', required properties at '/' are 'image' (317037b5-1367-450d-b2ce-edead6c8c996)\",\"code\":5006}],\"success\":false,\"result\":{},\"messages\":[]}",
+          "elapsed_s": 0.24
         }
       ],
       "swap": [
@@ -137,6 +137,60 @@
         }
       ]
     }
+  },
+  "provenance": {
+    "generated_by": "experiments/cloud_vision_probe.py",
+    "script_path": "/home/proart/projects/communicator/experiments/cloud_vision_probe.py",
+    "script_sha256": "7055f33b5b8a479b6ece602f7488e5150552c30dcc7259f76ee60b95615f19c9",
+    "python": "/home/proart/projects/glasses/.venv/bin/python",
+    "command_line": "experiments/cloud_vision_probe.py",
+    "cli_args": [],
+    "captures": {
+      "speaking": {
+        "path": "/mnt/c/proart_capture/A.nv12",
+        "sha256": "b65cf944aa4e8a65932d4c140335a495fa6a1707f28025d40fb08d31fa33bc73",
+        "bytes": 17280000,
+        "layout": "y_uv_halfres",
+        "stride_bytes": 19200,
+        "n_frames": 900,
+        "layout_evidence": {
+          "layout": "y_uv_halfres",
+          "stride_bytes": 19200,
+          "n_frames": 900,
+          "luma_bytes": 15360,
+          "mean_consecutive_frame_diff": 0.544891,
+          "runner_up_layout": "luma_only",
+          "runner_up_mean_consecutive_frame_diff": 43.554164,
+          "margin_over_runner_up": 79.932,
+          "chroma": "interleaved U,V, 80x24 samples"
+        }
+      },
+      "silent": {
+        "path": "/mnt/c/proart_capture/C.nv12",
+        "sha256": "937ac321bc436ea41b50508b5431f7c6862f32641c127c7800191b9ce080e5cf",
+        "bytes": 17280000,
+        "layout": "y_uv_halfres",
+        "stride_bytes": 19200,
+        "n_frames": 900,
+        "layout_evidence": {
+          "layout": "y_uv_halfres",
+          "stride_bytes": 19200,
+          "n_frames": 900,
+          "luma_bytes": 15360,
+          "mean_consecutive_frame_diff": 0.366688,
+          "runner_up_layout": "luma_only",
+          "runner_up_mean_consecutive_frame_diff": 42.921703,
+          "margin_over_runner_up": 117.052,
+          "chroma": "interleaved U,V, 80x24 samples"
+        }
+      }
+    }
+  },
+  "supersedes": {
+    "why": "Re-run on 2026-10-20. The previous run read the captures at W*H*3//2 = 23,040 bytes per frame; the captures on disk carry 19,200 bytes per frame, so the frame that was sent to the model was a TORN frame: rows 0..71 of one frame and rows 72..95 of the next. The previous answers are recorded here rather than silently overwritten.",
+    "previous_stride_bytes": 23040,
+    "previous_frame_index": 120,
+    "previous_note": "A model is credited only if it beats the blank and the template-only floors. Accuracy alone is not the headline; the margin over the controls is."
   },
   "note": "A model is credited only if it beats the blank and the template-only floors. Accuracy alone is not the headline; the margin over the controls is."
 }

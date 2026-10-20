@@ -5,98 +5,293 @@
       "label": "OCCUPIED (subject present, mostly still)",
       "path": "/mnt/c/proart_capture/A.nv12",
       "n_frames_used": 400,
-      "n_frames_available": 750,
-      "mean_luma": 111.17517106119791,
-      "adjacent_mad_raw": 43.68600162515664,
-      "adjacent_mad_gain_normalised": 0.39397797487733327,
-      "dot_flip_rate_median_pct": 48.190104166666664,
-      "dot_flip_rate_min_pct": 33.932291666666664,
-      "dot_flip_rate_max_pct": 56.822916666666664,
+      "n_frames_available": 900,
+      "layout": "y_uv_halfres",
+      "stride_bytes": 19200,
+      "layout_evidence": {
+        "layout": "y_uv_halfres",
+        "stride_bytes": 19200,
+        "n_frames": 900,
+        "luma_bytes": 15360,
+        "mean_consecutive_frame_diff": 0.544891,
+        "runner_up_layout": "luma_only",
+        "runner_up_mean_consecutive_frame_diff": 43.554164,
+        "margin_over_runner_up": 79.932,
+        "chroma": "interleaved U,V, 80x24 samples"
+      },
+      "mean_luma": 106.51885872395833,
+      "adjacent_mad_raw": 0.6154657477025898,
+      "adjacent_mad_gain_normalised": 0.005620853012734359,
+      "dot_flip_rate_median_pct": 0.625,
+      "dot_flip_rate_min_pct": 0.0,
+      "dot_flip_rate_max_pct": 17.643229166666664,
       "dither_gradient": [
         {
           "abs_dluma": "0-0",
-          "flip_rate_pct": 45.71394952050362,
-          "dots": 33994
+          "flip_rate_pct": 0.5980804690085575,
+          "dots": 42302
         },
         {
           "abs_dluma": "1-2",
-          "flip_rate_pct": 45.56061509812764,
-          "dots": 137474
+          "flip_rate_pct": 0.6338015839203488,
+          "dots": 171347
         },
         {
           "abs_dluma": "3-5",
-          "flip_rate_pct": 46.24189120350544,
-          "dots": 221827
+          "flip_rate_pct": 0.5926110413179553,
+          "dots": 273029
         },
         {
           "abs_dluma": "6-10",
-          "flip_rate_pct": 46.44532095528993,
-          "dots": 415790
+          "flip_rate_pct": 0.5347130785255518,
+          "dots": 485307
         },
         {
           "abs_dluma": "11-20",
-          "flip_rate_pct": 47.414897621268224,
-          "dots": 1078642
+          "flip_rate_pct": 0.5273715228028439,
+          "dots": 924775
         },
         {
           "abs_dluma": "21-40",
-          "flip_rate_pct": 48.21463921086326,
-          "dots": 1899392
+          "flip_rate_pct": 0.5809291613426373,
+          "dots": 1659927
         },
         {
           "abs_dluma": "41-200",
-          "flip_rate_pct": 48.38047576767409,
-          "dots": 2341521
+          "flip_rate_pct": 0.6058819892898509,
+          "dots": 2571953
         }
       ],
-      "gradient_on_to_far": 0.9448842491757359
+      "gradient_on_to_far": 0.9871236966617253,
+      "sha256": "b65cf944aa4e8a65932d4c140335a495fa6a1707f28025d40fb08d31fa33bc73",
+      "bytes": 17280000
     },
     {
       "label": "EMPTY (no subject)",
-      "path": "/home/proart/projects/glasses/.capture_keep/empty1.nv12",
+      "path": "/mnt/c/proart_capture/empty1.nv12",
       "n_frames_used": 400,
-      "n_frames_available": 3750,
-      "mean_luma": 49.69857259114583,
-      "adjacent_mad_raw": 39.34364181939223,
-      "adjacent_mad_gain_normalised": 0.8092197017047326,
-      "dot_flip_rate_median_pct": 50.0,
-      "dot_flip_rate_min_pct": 25.0,
-      "dot_flip_rate_max_pct": 50.0,
+      "n_frames_available": 4500,
+      "layout": "y_uv_halfres",
+      "stride_bytes": 19200,
+      "layout_evidence": {
+        "layout": "y_uv_halfres",
+        "stride_bytes": 19200,
+        "n_frames": 4500,
+        "luma_bytes": 15360,
+        "mean_consecutive_frame_diff": 0.005277,
+        "runner_up_layout": "luma_only",
+        "runner_up_mean_consecutive_frame_diff": 39.293797,
+        "margin_over_runner_up": 7446.099,
+        "chroma": "interleaved U,V, 80x24 samples"
+      },
+      "mean_luma": 30.083698079427084,
+      "adjacent_mad_raw": 0.005648887844611529,
+      "adjacent_mad_gain_normalised": 0.00020820368696232704,
+      "dot_flip_rate_median_pct": 0.0,
+      "dot_flip_rate_min_pct": 0.0,
+      "dot_flip_rate_max_pct": 0.0,
       "dither_gradient": [
         {
           "abs_dluma": "1-2",
-          "flip_rate_pct": 47.72727272727273,
-          "dots": 44
+          "flip_rate_pct": 0.0,
+          "dots": 62
         },
         {
           "abs_dluma": "3-5",
-          "flip_rate_pct": 50.204081632653065,
-          "dots": 245
+          "flip_rate_pct": 0.0,
+          "dots": 327
         },
         {
           "abs_dluma": "6-10",
-          "flip_rate_pct": 53.333333333333336,
-          "dots": 30
+          "flip_rate_pct": 0.0,
+          "dots": 10
         },
         {
           "abs_dluma": "21-40",
-          "flip_rate_pct": 43.74086607314949,
-          "dots": 1229619
+          "flip_rate_pct": 0.0,
+          "dots": 1010
         },
         {
           "abs_dluma": "41-200",
-          "flip_rate_pct": 39.10737987328072,
-          "dots": 4898702
+          "flip_rate_pct": 0.0,
+          "dots": 6127231
         }
       ],
-      "gradient_on_to_far": 1.2204160156452046
+      "gradient_on_to_far": null,
+      "sha256": "da348ccaf08c030dedea4b2e070ceb1149a4f11d3e9287e8212a480a58c05303",
+      "bytes": 86400000
     }
   ],
-  "empty_over_occupied_flip_rate": 1.0375574169143476,
-  "verdict": "The delta SURVIVES an empty room. Most of what the character field reports as change is produced by the camera and the threshold, not by a person in the room.",
+  "empty_over_occupied_flip_rate": 0.0,
+  "verdict": "The delta COLLAPSES with no subject. The structured residual in the occupied capture was the subject, so the representation does carry real motion.",
+  "notes": [
+    "THE AUTO-EXPOSURE HUNT WAS THE TORN FRAME. This file's docstring used to say the gain normalisation was needed because the auto-exposure hunt ran at 43.6 counts/frame. That 43.6 is the stride artefact: the occupied capture's adjacent MAD at the correct stride is 0.615 counts, and the empty room's is 0.006. Gain normalisation is still applied, but it is now correcting a sub-count residual, not a 43-count one.",
+    "THE DITHER-GRADIENT SUB-CLAIM IS NO LONGER TESTABLE IN THE EMPTY CAPTURE, and this is a limitation of the control, not a result. At the correct stride the empty room's luma sits at 30.1, far below the braille threshold of 100, so it has almost no pixels within +/-2 of the threshold and the near-threshold bins are empty. The empty room can therefore show that the OCCUPIED delta is not camera noise; it cannot show what the camera does to a signal that sits on the threshold. That question belongs to experiments/ascii_motion_threshold.py, which measures it directly.",
+    "The --limit flag was ignored by the previous run (it was declared with a default of 300 and never passed to analyse(), so 400 frames were actually used). It is now honoured, and its default was set to 400 -- the frame count the previous run actually used -- so the comparison is not confounded by the flag itself."
+  ],
   "confounds_not_removable": [
     "the two recordings differ in overall lighting as well as occupancy; per-frame gain normalisation removes frame-to-frame drift but cannot undo a global difference between recordings",
     "one capture per condition, no error bars -- suggestive, not a significance test",
     "the occupied capture's A-vs-B vision condition failed separately (0 of 96 windows); it is valid for 'subject present and mostly still', not for 'subject moving'"
-  ]
+  ],
+  "provenance": {
+    "generated_by": "experiments/emptyroom_null.py",
+    "script_path": "/home/proart/projects/communicator/experiments/emptyroom_null.py",
+    "script_sha256": "5572b93a4b5f6d923a5c8bd6012eede6d7402d179c5046087e3293583d77c6ce",
+    "python": "/home/proart/projects/glasses/.venv/bin/python",
+    "command_line": "experiments/emptyroom_null.py",
+    "cli_args": [],
+    "limit_frames": 400,
+    "captures": {
+      "OCCUPIED (subject present, mostly still)": {
+        "path": "/mnt/c/proart_capture/A.nv12",
+        "sha256": "b65cf944aa4e8a65932d4c140335a495fa6a1707f28025d40fb08d31fa33bc73",
+        "bytes": 17280000,
+        "layout": "y_uv_halfres",
+        "stride_bytes": 19200,
+        "n_frames": 900,
+        "frames_used": 400,
+        "layout_evidence": {
+          "layout": "y_uv_halfres",
+          "stride_bytes": 19200,
+          "n_frames": 900,
+          "luma_bytes": 15360,
+          "mean_consecutive_frame_diff": 0.544891,
+          "runner_up_layout": "luma_only",
+          "runner_up_mean_consecutive_frame_diff": 43.554164,
+          "margin_over_runner_up": 79.932,
+          "chroma": "interleaved U,V, 80x24 samples"
+        }
+      },
+      "EMPTY (no subject)": {
+        "path": "/mnt/c/proart_capture/empty1.nv12",
+        "sha256": "da348ccaf08c030dedea4b2e070ceb1149a4f11d3e9287e8212a480a58c05303",
+        "bytes": 86400000,
+        "layout": "y_uv_halfres",
+        "stride_bytes": 19200,
+        "n_frames": 4500,
+        "frames_used": 400,
+        "layout_evidence": {
+          "layout": "y_uv_halfres",
+          "stride_bytes": 19200,
+          "n_frames": 4500,
+          "luma_bytes": 15360,
+          "mean_consecutive_frame_diff": 0.005277,
+          "runner_up_layout": "luma_only",
+          "runner_up_mean_consecutive_frame_diff": 39.293797,
+          "margin_over_runner_up": 7446.099,
+          "chroma": "interleaved U,V, 80x24 samples"
+        }
+      }
+    },
+    "renderer": {
+      "program": "experiments/ascii_motion_threshold.py CHANNELS_C",
+      "note": "the character renderer assumes the STANDARD NV12 stride of 23,040 bytes per frame, so each capture is re-wrapped into standard NV12 first; no luma byte is changed by that re-wrap",
+      "frame_bytes": 23040,
+      "braille_thresh": 100
+    }
+  },
+  "supersedes": {
+    "why": "Re-measured on 2026-10-20. The previous run read both captures at W*H*3//2 = 23,040 bytes per frame; the captures on disk carry 19,200 bytes per frame, so all but every sixth frame was torn (rows 0..71 from frame k, rows 72..95 from frame k+1). The previous numbers are recorded here rather than silently overwritten.",
+    "previous_stride_bytes": 23040,
+    "previous_n_frames_available": {
+      "OCCUPIED": 750,
+      "EMPTY": 3750
+    },
+    "previous_captures": [
+      {
+        "label": "OCCUPIED (subject present, mostly still)",
+        "path": "/mnt/c/proart_capture/A.nv12",
+        "n_frames_used": 400,
+        "n_frames_available": 750,
+        "mean_luma": 111.17517106119791,
+        "adjacent_mad_raw": 43.68600162515664,
+        "adjacent_mad_gain_normalised": 0.39397797487733327,
+        "dot_flip_rate_median_pct": 48.190104166666664,
+        "dot_flip_rate_min_pct": 33.932291666666664,
+        "dot_flip_rate_max_pct": 56.822916666666664,
+        "gradient_on_to_far": 0.9448842491757359,
+        "dither_gradient": [
+          {
+            "abs_dluma": "0-0",
+            "flip_rate_pct": 45.71394952050362,
+            "dots": 33994
+          },
+          {
+            "abs_dluma": "1-2",
+            "flip_rate_pct": 45.56061509812764,
+            "dots": 137474
+          },
+          {
+            "abs_dluma": "3-5",
+            "flip_rate_pct": 46.24189120350544,
+            "dots": 221827
+          },
+          {
+            "abs_dluma": "6-10",
+            "flip_rate_pct": 46.44532095528993,
+            "dots": 415790
+          },
+          {
+            "abs_dluma": "11-20",
+            "flip_rate_pct": 47.414897621268224,
+            "dots": 1078642
+          },
+          {
+            "abs_dluma": "21-40",
+            "flip_rate_pct": 48.21463921086326,
+            "dots": 1899392
+          },
+          {
+            "abs_dluma": "41-200",
+            "flip_rate_pct": 48.38047576767409,
+            "dots": 2341521
+          }
+        ]
+      },
+      {
+        "label": "EMPTY (no subject)",
+        "path": "/home/proart/projects/glasses/.capture_keep/empty1.nv12",
+        "n_frames_used": 400,
+        "n_frames_available": 3750,
+        "mean_luma": 49.69857259114583,
+        "adjacent_mad_raw": 39.34364181939223,
+        "adjacent_mad_gain_normalised": 0.8092197017047326,
+        "dot_flip_rate_median_pct": 50.0,
+        "dot_flip_rate_min_pct": 25.0,
+        "dot_flip_rate_max_pct": 50.0,
+        "gradient_on_to_far": 1.2204160156452046,
+        "dither_gradient": [
+          {
+            "abs_dluma": "1-2",
+            "flip_rate_pct": 47.72727272727273,
+            "dots": 44
+          },
+          {
+            "abs_dluma": "3-5",
+            "flip_rate_pct": 50.204081632653065,
+            "dots": 245
+          },
+          {
+            "abs_dluma": "6-10",
+            "flip_rate_pct": 53.333333333333336,
+            "dots": 30
+          },
+          {
+            "abs_dluma": "21-40",
+            "flip_rate_pct": 43.74086607314949,
+            "dots": 1229619
+          },
+          {
+            "abs_dluma": "41-200",
+            "flip_rate_pct": 39.10737987328072,
+            "dots": 4898702
+          }
+        ]
+      }
+    ],
+    "previous_empty_over_occupied_flip_rate": 1.0375574169143476,
+    "previous_verdict": "The delta SURVIVES an empty room. Most of what the character field reports as change is produced by the camera and the threshold, not by a person in the room.",
+    "verdict_changed": "YES, AND IT FLIPS. The previous run put the empty room at 50.00% and the occupied room at 48.19% and concluded the delta was the camera's. At the correct stride the empty room is 0.00% and the occupied room is 0.62%, and the conclusion reverses: the delta is the subject. The previous 'camera' conclusion was the torn frame, not the camera. Note also that the empty capture was read from /home/proart/projects/glasses/.capture_keep/empty1.nv12, which is byte-identical (sha256 da348cc...) to the /mnt/c/proart_capture/empty1.nv12 used now, so the input did not change."
+  }
 }

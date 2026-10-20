@@ -26,6 +26,18 @@ of 1.917, with 79% of the excess in the top 5% of pixels. If a big vision
 model can read that off a single frame, it is a real teacher and not a
 memoriser.
 
+THOSE NUMBERS HAVE MOVED, AND THE REASON MATTERS.
+
+They were measured on a torn signal. Re-measured at the correct frame stride
+on 2026-10-20 (`experiments/pose_test.py`), facing-and-speaking differs from
+facing-and-silent by 0.2506 counts against A's own within-condition split of
+0.2006 -- 1.25x, which does not clear the 1.25x margin the test was given
+before the numbers were seen -- with 31% of the excess in the top 5% of
+pixels. So the camera-channel speech signal is no longer established, and the
+question this probe asks of a cloud model is open rather than confirmed. The
+probe is still worth running: the point of it is whether a large vision model
+can read a cue that the camera channel has not been shown to carry.
+
 THE CONTROLS, and this is the part that matters.
 
   BLANK. A frame of nothing. A model that answers from the prompt rather than
@@ -61,6 +73,7 @@ student trained on motion maps cannot give us.
 from __future__ import annotations
 
 import base64
+import hashlib
 import json
 import os
 import struct
@@ -76,14 +89,25 @@ import numpy as np
 ROOT = Path(__file__).resolve().parents[1]
 ACCOUNT = os.environ.get("CF_ACCOUNT_ID", "049ff5e84ecf636b53b162cbb580aae6")
 W, H = 160, 96
-FB = W * H * 3 // 2
 YS = W * H
+if str(ROOT) not in sys.path:
+    sys.path.insert(0, str(ROOT))
+from src.nv12 import read_luma  # noqa: E402
 
 MODELS = [
     "@cf/meta/llama-4-scout-17b-16e-instruct",
     "@cf/meta/llama-3.2-11b-vision-instruct",
     "@cf/llava-hf/llava-1.5-7b-hf",
 ]
+
+
+def sha256_file(path) -> str:
+    """SHA-256 of a file, read in chunks."""
+    h = hashlib.sha256()
+    with open(path, "rb") as f:
+        for chunk in iter(lambda: f.read(1 << 20), b""):
+            h.update(chunk)
+    return h.hexdigest()
 
 
 # -- minimal PNG writer (no PIL in this env) ---------------------------------
@@ -105,10 +129,18 @@ def write_png(path: Path, img: np.ndarray) -> bytes:
 
 
 def load_y(path: Path, nf: int = 200):
-    raw = np.frombuffer(path.read_bytes(), dtype=np.uint8)
-    n = min(nf, len(raw) // FB)
-    Y = raw[:n * FB].reshape(n, FB)[:, :YS].reshape(n, H, W)
-    return Y
+    """The luma plane of the first `nf` frames.
+
+    The frame layout is DETECTED from the file's content by `src/nv12.py` --
+    the candidate whose luma has the smallest mean consecutive |diff| wins,
+    and an ambiguous file is an error rather than a guess. The captures on
+    disk carry 19,200 bytes per 160x96 frame, not the 23,040 a standard-NV12
+    reader assumes; read at 23,040 all but every sixth frame is torn. See
+    `src/nv12.py` and `docs/research/NV12-STRIDE.md`.
+    """
+    luma, _layout = read_luma(path, width=W, height=H)
+    n = min(nf, len(luma))
+    return luma[:n]
 
 
 def cf_raw(model: str, body: dict, timeout: float = 180.0):
@@ -181,9 +213,25 @@ def cf_vision(model: str, image_b64: str, question: str,
 
 
 def says_yes(text: str) -> bool | None:
+    """Parse the probe's answer.
+
+    THE PROBE'S OWN VOCABULARY IS "SPEAKING" / "NOT SPEAKING", and the
+    parser used to look for "yes"/"no" -- so a perfectly correct
+    "SPEAKING." was logged as `parsed=None` and the primary metric of the
+    primary probe was measuring nothing. The vocabulary is checked first;
+    the yes/no logic is kept as a fallback.
+
+    This is NOT a stride fix and the numbers it changes are not attributed
+    to one: it is a separate defect in the measurement, found while
+    re-running the probe on the corrected frames.
+    """
     t = (text or "").strip().lower()
     if not t:
         return None
+    if "not speaking" in t:
+        return False
+    if "speaking" in t:
+        return True
     yi = t.find("yes")
     no = t.find("no")
     if yi < 0 and no < 0:
@@ -215,6 +263,13 @@ def main():
 
     YA = load_y(Path(a.speaking))
     YC = load_y(Path(a.silent))
+    layout_a, layout_c = None, None
+    for p, store in ((a.speaking, "a"), (a.silent, "c")):
+        _l, lay = read_luma(Path(p), width=W, height=H)
+        if store == "a":
+            layout_a = lay
+        else:
+            layout_c = lay
     fa = write_png(tmp / "speak.png", YA[a.frame])
     fc = write_png(tmp / "silent.png", YC[a.frame])
     fb = write_png(tmp / "blank.png", np.full((H, W), 128, np.uint8))
@@ -263,6 +318,49 @@ def main():
     out = {"question": question,
            "frame_index": a.frame,
            "models": results,
+           "provenance": {
+               "generated_by": "experiments/cloud_vision_probe.py",
+               "script_path": str(Path(__file__).resolve()),
+               "script_sha256": sha256_file(Path(__file__).resolve()),
+               "python": sys.executable,
+               "command_line": " ".join(sys.argv),
+               "cli_args": list(sys.argv[1:]),
+               "captures": {
+                   "speaking": {
+                       "path": str(Path(a.speaking).resolve()),
+                       "sha256": sha256_file(a.speaking),
+                       "bytes": Path(a.speaking).stat().st_size,
+                       "layout": layout_a.name,
+                       "stride_bytes": layout_a.stride,
+                       "n_frames": layout_a.n_frames,
+                       "layout_evidence": layout_a.as_dict(),
+                   },
+                   "silent": {
+                       "path": str(Path(a.silent).resolve()),
+                       "sha256": sha256_file(a.silent),
+                       "bytes": Path(a.silent).stat().st_size,
+                       "layout": layout_c.name,
+                       "stride_bytes": layout_c.stride,
+                       "n_frames": layout_c.n_frames,
+                       "layout_evidence": layout_c.as_dict(),
+                   },
+               },
+           },
+           "supersedes": {
+               "why": ("Re-run on 2026-10-20. The previous run read the "
+                       "captures at W*H*3//2 = 23,040 bytes per frame; the "
+                       "captures on disk carry 19,200 bytes per frame, so the "
+                       "frame that was sent to the model was a TORN frame: "
+                       "rows 0..71 of one frame and rows 72..95 of the next. "
+                       "The previous answers are recorded here rather than "
+                       "silently overwritten."),
+               "previous_stride_bytes": 23040,
+               "previous_frame_index": 120,
+               "previous_note": (
+                   "A model is credited only if it beats the blank and the "
+                   "template-only floors. Accuracy alone is not the headline; "
+                   "the margin over the controls is."),
+           },
            "note": ("A model is credited only if it beats the blank and the "
                     "template-only floors. Accuracy alone is not the "
                     "headline; the margin over the controls is.")}

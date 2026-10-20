@@ -31,7 +31,7 @@ headline is the MARGIN over those controls, never the raw separation.
 
   C1 WITHIN-CONDITION SPLIT. Split a condition's own frames in half and
      compare the halves. This is the null the A-vs-B number must beat.
-  C2 EMPTY ROOM. The same comparison, run on 3750 frames of an empty dark
+  C2 EMPTY ROOM. The same comparison, run on 4500 frames of an empty dark
      room, split into five 750-frame blocks. A feature that separates two
      blocks of an empty room is reading the banding.
   C3 LABEL PERMUTATION. Pool the facing and turned frames, relabel them at
@@ -120,6 +120,7 @@ explicitly.
 from __future__ import annotations
 
 import argparse
+import hashlib
 import json
 import sys
 from pathlib import Path
@@ -128,8 +129,10 @@ import numpy as np
 
 ROOT = Path(__file__).resolve().parents[1]
 FRAME_W, FRAME_H = 160, 96
-FB = FRAME_W * FRAME_H * 3 // 2
 Y_SIZE = FRAME_W * FRAME_H
+if str(ROOT) not in sys.path:
+    sys.path.insert(0, str(ROOT))
+from src.nv12 import detect_layout, read_luma  # noqa: E402
 
 DEFAULT_A = "/mnt/c/proart_capture/A.nv12"
 DEFAULT_B = "/mnt/c/proart_capture/B.nv12"
@@ -174,20 +177,68 @@ def _span_index(W: int):
 # IO
 # --------------------------------------------------------------------------
 
-def load_y(path: Path, nf: int | None = None) -> np.ndarray:
-    """Read the luma plane of an NV12 capture as (n, H, W) float32.
+def sha256_file(path) -> str:
+    """SHA-256 of a file, read in chunks."""
+    h = hashlib.sha256()
+    with open(path, "rb") as f:
+        for chunk in iter(lambda: f.read(1 << 20), b""):
+            h.update(chunk)
+    return h.hexdigest()
 
-    An NV12 frame is W*H*3//2 bytes: the W*H luma bytes first, then the
-    interleaved chroma. Only the luma plane is used here.
+
+def capture_identity(path: Path) -> dict:
+    """Where a capture is, what it is, and how it was laid out."""
+    layout = detect_layout(path, width=FRAME_W, height=FRAME_H)
+    return {
+        "path": str(Path(path).resolve()),
+        "sha256": sha256_file(path),
+        "bytes": Path(path).stat().st_size,
+        "layout": layout.name,
+        "stride_bytes": layout.stride,
+        "n_frames": layout.n_frames,
+        "layout_evidence": layout.as_dict(),
+    }
+
+
+def _read_luma(path: Path):
+    """`read_luma`, with the one-candidate case handled.
+
+    `src.nv12.read_luma` reports its margin over the runner-up as NaN when
+    only ONE candidate stride divides the file -- the unambiguous case -- and
+    so rejects it. Only that case is handled here; a genuine ambiguity, where
+    two candidates are close, still raises.
     """
-    raw = np.fromfile(str(path), dtype=np.uint8)
-    n = len(raw) // FB
+    try:
+        return read_luma(path, width=FRAME_W, height=FRAME_H)
+    except ValueError:
+        found = detect_layout(path, width=FRAME_W, height=FRAME_H)
+        if found.runner_up_name != "(none)":
+            raise
+        return read_luma(path, width=FRAME_W, height=FRAME_H,
+                         layout=found.name)
+
+
+def load_y(path: Path, nf: int | None = None) -> np.ndarray:
+    """Read the luma plane of a capture as (n, H, W) float32.
+
+    The frame layout is DETECTED from the file's content by `src/nv12.py`: the
+    candidate whose luma has the smallest mean consecutive |diff| wins, and a
+    file that cannot decide is an error rather than a guess. Nothing here
+    computes a stride by hand.
+
+    The captures on disk are NOT standard NV12. `C:\\proart_capture\\
+    nv12small.py` writes 15,360 luma bytes + 1,920 U + 1,920 V per 160x96
+    frame -- 19,200 bytes -- not the `W*H*3//2` = 23,040 that a standard-NV12
+    reader assumes. Read at 23,040, all but every sixth frame is torn: rows
+    0..71 from frame k and rows 72..95 from frame k+1. See `src/nv12.py` and
+    `docs/research/NV12-STRIDE.md`.
+    """
+    luma, _layout = _read_luma(path)
     if nf is not None:
-        n = min(n, nf)
-    if n <= 0:
+        luma = luma[:nf]
+    if len(luma) == 0:
         raise ValueError(f"{path}: no complete frames")
-    return raw[:n * FB].reshape(n, FB)[:, :Y_SIZE] \
-        .reshape(n, FRAME_H, FRAME_W).astype(np.float32)
+    return luma.astype(np.float32)
 
 
 def row_remove(F: np.ndarray) -> np.ndarray:
@@ -206,13 +257,18 @@ def row_remove(F: np.ndarray) -> np.ndarray:
 
 
 def iter_blocks(path: Path, block: int):
-    """Yield (start, block_frames) over a capture without holding all of it."""
+    """Yield (start, block_frames) over a capture without holding all of it.
+
+    The stride is the DETECTED one -- see `src/nv12.py` and `load_y`.
+    """
+    layout = detect_layout(path, width=FRAME_W, height=FRAME_H)
+    stride = layout.stride
     raw = np.memmap(str(path), dtype=np.uint8, mode="r")
-    n = len(raw) // FB
+    n = len(raw) // stride
     for s in range(0, n, block):
-        b = raw[s * FB:(s + block) * FB]
-        yield s, b.reshape(len(b) // FB, FB)[:, :Y_SIZE] \
-            .reshape(len(b) // FB, FRAME_H, FRAME_W).astype(np.float32)
+        b = raw[s * stride:(s + block) * stride]
+        yield s, b.reshape(len(b) // stride, stride)[:, :Y_SIZE] \
+            .reshape(len(b) // stride, FRAME_H, FRAME_W).astype(np.float32)
 
 
 # --------------------------------------------------------------------------
@@ -963,6 +1019,7 @@ def main() -> int:
     # -- load the real captures -------------------------------------------
     paths = {"A": Path(a.a), "B": Path(a.b), "C": Path(a.c)}
     emp = Path(a.empty)
+    captures = {}
     if not emp.is_file() and Path(DEFAULT_EMPTY_ALT).is_file():
         emp = Path(DEFAULT_EMPTY_ALT)
     missing = [f"{k} ({v})" for k, v in paths.items() if not v.is_file()]
@@ -986,6 +1043,9 @@ def main() -> int:
             R = load_y(p, a.nf)
             raw[lab] = row_remove(R)
             conds[lab] = condition_features(R)
+            ident = capture_identity(p)
+            ident["frames_used"] = int(len(R))
+            captures[lab] = ident
             print(f"  {lab} {p}  {len(R)} frames")
         empty_blocks = []
         nblocks = 0
@@ -994,6 +1054,10 @@ def main() -> int:
             nblocks += 1
             if nblocks >= 5:
                 break
+        ident = capture_identity(emp)
+        ident["frames_used"] = int(nblocks * a.nf)
+        ident["blocks"] = nblocks
+        captures["EMPTY"] = ident
         print(f"  EMPTY {emp}  {nblocks} block(s) of {a.nf} frames")
 
         # -- C4 the spatial nulls ------------------------------------------
@@ -1091,6 +1155,37 @@ def main() -> int:
                 "includes session-to-session change",
                 "condition D (turned and silent) has never been recorded",
             ],
+            "provenance": {
+                "generated_by": "experiments/pose_feature_search.py",
+                "script_path": str(Path(__file__).resolve()),
+                "script_sha256": sha256_file(Path(__file__).resolve()),
+                "python": sys.executable,
+                "command_line": " ".join(sys.argv),
+                "cli_args": list(sys.argv[1:]),
+                "frames_per_condition": a.nf,
+                "captures": captures if conds is not None else {},
+            },
+            "supersedes": {
+                "why": ("Re-measured on 2026-10-20 at the CORRECT frame "
+                        "stride. The previous run read the captures at "
+                        "W*H*3//2 = 23,040 bytes per frame; the captures on "
+                        "disk carry 19,200 bytes per frame, so all but every "
+                        "sixth frame was torn. The previous verdict and its "
+                        "margin are recorded here rather than silently "
+                        "overwritten."),
+                "previous_stride_bytes": 23040,
+                "previous_best_feature": "mirror_cov",
+                "previous_best_margin": 0.814,
+                "previous_verdict": (
+                    "1 feature(s) separate facing from turned beyond their "
+                    "controls: mirror_cov. The B capture IS statistically "
+                    "distinguishable from the two facing captures: A and C -- "
+                    "both facing -- agree with each other, and B differs from "
+                    "both."),
+                "previous_motion_vs_pose_mirror_cov": {
+                    "A_vs_C": 0.246, "B_vs_C": 0.851, "control": 0.282,
+                    "reading": "POSE-like (B differs, A~C)"},
+            },
         }
         p = Path(a.json)
         p.write_text(json.dumps(payload, indent=2, default=float))

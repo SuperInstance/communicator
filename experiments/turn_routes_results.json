@@ -5179,7 +5179,7 @@
   "provenance": {
     "generated_by": "experiments/turn_routes.py",
     "script_path": "/home/proart/projects/communicator/experiments/turn_routes.py",
-    "script_sha256": "e59f41a9c940854d35a2294d62af11a7cace2dfffdfa9dc7c6d966069cd171f8",
+    "script_sha256": "2ec9d2f630a87a02f8f40405e95c96b5f39711bf4a1881247e0ebf4e4a485994",
     "cells": [
       {
         "path": "/home/proart/projects/communicator/examples/realaudio/alice01_excerpt.wav",
@@ -5211,26 +5211,15 @@
       "acoustic",
       "smartturn"
     ],
-    "cli_args": [
-      "--stages",
-      "acoustic,smartturn",
-      "--per-cell",
-      "4",
-      "--permutations",
-      "20000",
-      "--perm-seed",
-      "7",
-      "--out",
-      "/home/proart/projects/communicator/experiments/turn_routes_results.json"
-    ],
-    "command_line": "--stages acoustic,smartturn --per-cell 4 --permutations 20000 --perm-seed 7 --out /home/proart/projects/communicator/experiments/turn_routes_results.json",
+    "cli_args": [],
+    "command_line": "",
     "parameters": {
       "per_cell": 4,
       "limit": 0,
       "causal": false,
       "permutations": 20000,
       "perm_seed": 7,
-      "out": "/home/proart/projects/communicator/experiments/turn_routes_results.json",
+      "out": "experiments/turn_routes_results.json",
       "silence_lengths": [
         0.15,
         0.3,
@@ -5252,5 +5241,5 @@
     }
   },
   "reproducible": true,
-  "elapsed_s": 24.21
+  "elapsed_s": 27.39
 }

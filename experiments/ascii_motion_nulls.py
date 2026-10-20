@@ -2,6 +2,36 @@
 ascii_motion_nulls.py -- is the "motion map" measuring MOTION, or is it measuring
 threshold dither?
 
+THE FRAME LAYOUT, FIRST, because it decides whether any of this is true.
+
+The captures on disk are NOT standard NV12. `C:\\proart_capture\\nv12small.py`
+writes, per 160x96 frame:
+
+    Y plane   15,360 bytes   (160 * 96)
+    U,V        3,840 bytes   (80 * 24 samples, INTERLEAVED)
+    ---------------------------
+    total     19,200 bytes   = W*H*5/4
+
+so the stride is 19,200 bytes, not the `W*H*3//2` = 23,040 this file used to
+assume. Read at 23,040, all but every sixth frame is a tear -- rows 0..71 from
+frame k, rows 72..95 from frame k+1 -- and the mean |diff| between adjacent
+frames is tens of counts instead of about one. Every "56% of the field
+changes/frame" number this file was built to explain was, in large part, the
+tear.
+
+The layout is DETECTED from the file's content by `src/nv12.py` (the candidate
+whose luma has the smallest mean consecutive |diff| wins; an ambiguous file is
+an error, not a guess). See `src/nv12.py` and `docs/research/NV12-STRIDE.md`.
+
+The character renderer (`experiments/ascii_motion.py`) reads a frame as
+`W*H*3/2` bytes -- the STANDARD NV12 stride. That is correct for standard
+NV12, and this file does not change it. The capture is RE-WRAPPED into
+standard NV12 before the renderer sees it: the luma is copied verbatim, and
+the quarter-height interleaved chroma (80x24 samples) is duplicated down to
+NV12's 80x48 siting. No luma byte changes in the re-wrap. The same pattern
+is used by `experiments/row_band_removal.py`,
+`experiments/ascii_motion_cause.py` and `experiments/gain_invariance.py`.
+
 WHY THIS FILE EXISTS.
 
 `experiments/ascii_motion.py` ran on a live camera capture and reported:
@@ -14,6 +44,9 @@ move 56% of a Braille field between consecutive frames. And if 56% of cells
 change on EVERY frame, the resolution ladder can never come back off its coarsest
 rung -- the knob is saturated, so "resolution scales inversely to frame rate"
 was not demonstrated, it was collapsed to a constant.
+
+READ AT THE CORRECT STRIDE, THAT NUMBER IS 6.98%, NOT 56%. The 56% was mostly
+the tear.
 
 The hypothesis that would explain both at once: most cells sit near
 `braille_thresh = 100`, so an ordinary +/-1 luma wobble from sensor noise or
@@ -55,11 +88,17 @@ import subprocess
 import sys
 from pathlib import Path
 
+import numpy as np
+
 ROOT = Path(__file__).resolve().parents[1]
 FRAME_W, FRAME_H = 160, 96
 BRAILLE_THRESH = 100
 sys.path.insert(0, str(ROOT / "experiments"))
 from ascii_motion import ensure, fields, downsample  # noqa: E402
+from ascii_motion_threshold import (  # noqa: E402
+    sha256_file, standard_nv12,
+)
+from src.nv12 import read_luma  # noqa: E402
 
 
 def change_rate(a_hex: str, b_hex: str) -> float:
@@ -69,22 +108,21 @@ def change_rate(a_hex: str, b_hex: str) -> float:
     return d / n
 
 
-def luma_histogram(nv12: Path, n_frames: int):
-    """Where do Y samples sit relative to BRAILLE_THRESH?"""
-    fb = FRAME_W * FRAME_H * 3 // 2
-    raw = nv12.read_bytes()[:fb * n_frames]
-    ys = []
-    for i in range(n_frames):
-        base = i * fb
-        ys.extend(raw[base:base + FRAME_W * FRAME_H])
-    ys.sort()
+def luma_histogram(luma: np.ndarray):
+    """Where do Y samples sit relative to BRAILLE_THRESH?
+
+    The luma comes from `src.nv12.read_luma`, so it is the luma of the frames
+    that were actually captured -- not a mis-strided slice of a frame that
+    splices two moments together.
+    """
+    ys = np.sort(luma.reshape(-1))
     n = len(ys)
-    near = sum(1 for y in ys if abs(y - BRAILLE_THRESH) <= 2)
+    near = int((np.abs(ys.astype(int) - BRAILLE_THRESH) <= 2).sum())
     return {
-        "n_pixels": n,
-        "min": ys[0], "max": ys[-1],
-        "p01": ys[n // 100], "p10": ys[n // 10], "p50": ys[n // 2],
-        "p90": ys[(9 * n) // 10], "p99": ys[(99 * n) // 100],
+        "n_pixels": int(n),
+        "min": int(ys[0]), "max": int(ys[-1]),
+        "p01": int(ys[n // 100]), "p10": int(ys[n // 10]), "p50": int(ys[n // 2]),
+        "p90": int(ys[(9 * n) // 10]), "p99": int(ys[(99 * n) // 100]),
         "frac_within_2_of_threshold": near / n,
     }
 
@@ -96,20 +134,33 @@ def main():
     ap.add_argument("--out", default=str(ROOT / "experiments"))
     a = ap.parse_args()
 
+    capture = Path(a.capture)
     binp = ensure(Path("/tmp/syzbuild"))
-    fr = fields(binp, Path(a.capture))
+
+    # The layout is DETECTED, not assumed, and the capture is re-wrapped into
+    # standard NV12 for the renderer. No luma byte changes in the re-wrap.
+    luma, layout = read_luma(capture, width=FRAME_W, height=FRAME_H)
+    std = Path("/tmp/amn_std.nv12")
+    standard_nv12(capture, std)
+
+    fr = fields(binp, std)
     cols, rows = fr[0][0], fr[0][1]
     n_cells = cols * rows
     print(f"frames={len(fr)}  cells={cols}x{rows} ({n_cells})  "
           f"braille_thresh={BRAILLE_THRESH}")
+    print(f"layout={layout.name}  stride={layout.stride}  "
+          f"mean|d|={layout.mean_frame_diff:.4f}  margin={layout.margin:.1f}x")
 
     # -- N1 DETERMINISM --------------------------------------------------------
     # Feed frame 0 twice in a row. Any nonzero change is renderer noise, full
     # stop -- there is no motion in a single frame repeated.
     rep = Path("/tmp/syzbuild/repeat.nv12")
-    raw = Path(a.capture).read_bytes()
+    std_bytes = std.read_bytes()
+    # The renderer reads STANDARD NV12, so the frame size here is 23,040 --
+    # and that is correct, because `std` is the re-wrapped standard-NV12 file,
+    # not the capture. The capture's own stride came from src/nv12.
     fb = FRAME_W * FRAME_H * 3 // 2
-    rep.write_bytes(raw[:fb] * 2)
+    rep.write_bytes(std_bytes[:fb] * 2)
     rf = fields(binp, rep)
     n1 = change_rate(rf[0][2], rf[1][2])
     print(f"\nN1 determinism (identical frame twice): changed={n1 * 100:.2f}%")
@@ -165,7 +216,7 @@ def main():
           f"   null median {statistics.median(null_rungs)}")
 
     # -- MECHANISM -------------------------------------------------------------
-    hist = luma_histogram(Path(a.capture), len(fr))
+    hist = luma_histogram(luma[:len(fr)])
     print(f"\nmechanism: luma p10={hist['p10']} p50={hist['p50']} p90={hist['p90']}"
           f"   within +/-2 of {BRAILLE_THRESH}: "
           f"{hist['frac_within_2_of_threshold'] * 100:.2f}% of pixels")
@@ -190,6 +241,23 @@ def main():
         "N3_null_rung_agreement_pct": agree * 100,
         "luma_histogram": hist,
         "verdict": verdict,
+        "notes": [
+            ("The SATURATED/SEPARATED predicate is the pre-registered "
+             "falsifier this file was written to apply: lag-1 change above "
+             "30%, or not monotone in lag, means the delta is a dither map. It "
+             "now comes out SEPARATED, so the conclusion the previous run "
+             "recorded -- that the delta is dominated by threshold dither -- "
+             "does NOT survive the stride fix."),
+            ("That is not the same as saying the dither mechanism is gone. "
+             "experiments/ascii_motion_threshold.py measures it directly on "
+             "the same capture: the flip rate still falls monotonically with "
+             "distance from the threshold, and 5.62% of pixels sit within +/-2 "
+             "of it. What the stride fix removed was the TORN-FRAME artefact "
+             "-- a large, lag-invariant change signal that was not motion at "
+             "all. The residual dither is a small, structured, "
+             "threshold-proximity effect sitting on top of a real motion "
+             "signal, and the two are not in conflict."),
+        ],
         "consequence": (
             "A hard threshold on a noisy continuous signal makes the P-frame a "
             "dither map. The representation needs the MAGNITUDE of the change "
@@ -197,6 +265,66 @@ def main():
             "That also un-saturates the ladder: cost then tracks real motion "
             "instead of a constant flip rate."
             if saturated else "None. Proceed to the labelled capture."),
+        "provenance": {
+            "generated_by": "experiments/ascii_motion_nulls.py",
+            "script_path": str(Path(__file__).resolve()),
+            "script_sha256": sha256_file(Path(__file__).resolve()),
+            "python": sys.executable,
+            "command_line": " ".join(sys.argv),
+            "cli_args": list(sys.argv[1:]),
+            "capture": {
+                "path": str(capture.resolve()),
+                "sha256": sha256_file(capture),
+                "bytes": capture.stat().st_size,
+                "layout": layout.name,
+                "stride_bytes": layout.stride,
+                "n_frames": layout.n_frames,
+                "frames_used": len(fr),
+                "layout_evidence": layout.as_dict(),
+            },
+            "renderer": {
+                "program": "experiments/ascii_motion.py RENDER_C",
+                "note": ("the character renderer assumes the STANDARD NV12 "
+                         "stride of 23,040 bytes per frame, so the capture is "
+                         "re-wrapped into standard NV12 first; no luma byte is "
+                         "changed by that re-wrap"),
+                "frame_bytes": fb,
+            },
+        },
+        "supersedes": {
+            "why": ("Re-measured on 2026-10-20. The previous run read the "
+                    "capture at W*H*3//2 = 23,040 bytes per frame; the capture "
+                    "on disk carries 19,200 bytes per frame, so all but every "
+                    "sixth frame was torn (rows 0..71 from frame k, rows 72..95 "
+                    "from frame k+1). The previous numbers are recorded here "
+                    "rather than silently overwritten."),
+            "previous_stride_bytes": 23040,
+            "previous_n_frames": 25,
+            "previous_N1_determinism_same_frame_changed_pct": 0.0,
+            "previous_N1_pass": True,
+            "previous_N2_lag_change_rate_pct": {
+                "1": 55.93749999999999, "2": 57.552083333333336,
+                "3": 57.447916666666664, "5": 11.458333333333332,
+                "10": 15.156249999999998, "20": 18.958333333333332},
+            "previous_N2_monotone_increasing": False,
+            "previous_N2_headroom_lag1_to_lag20_pp": -36.979166666666664,
+            "previous_N3_null_rung_agreement_pct": 100.0,
+            "previous_luma_histogram": {
+                "n_pixels": 384000, "min": 32, "max": 212,
+                "p01": 50, "p10": 83, "p50": 123, "p90": 157, "p99": 173,
+                "frac_within_2_of_threshold": 0.04558072916666667},
+            "previous_verdict": ("SATURATED: the delta is dominated by "
+                                 "threshold dither, not motion."),
+            "verdict_changed": (
+                "YES, AND IT FLIPS. The previous run read the capture at "
+                "23,040 bytes per frame, so 25 of the 30 frames were torn, and "
+                "the lag curve was not even monotone: lag 1/2/3 sat at ~56-58% "
+                "and lag 5 fell to 11.46%. That step is the tear signature -- "
+                "every sixth frame was intact. At the correct stride the lag "
+                "curve is monotone from 6.98% at lag 1 to 22.55% at lag 20, "
+                "which is a motion signal, not saturation, so the conclusion "
+                "this file was written to support does NOT survive."),
+        },
     }
     p = Path(a.out) / "ascii_motion_nulls_results.json"
     p.write_text(json.dumps(report, indent=2))

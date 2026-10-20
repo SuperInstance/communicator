@@ -8,69 +8,115 @@
     "active",
     "area"
   ],
+  "frame_layouts": {
+    "A": {
+      "layout": "y_uv_halfres",
+      "stride_bytes": 19200,
+      "n_frames": 900,
+      "luma_bytes": 15360,
+      "mean_consecutive_frame_diff": 0.544891,
+      "runner_up_layout": "luma_only",
+      "runner_up_mean_consecutive_frame_diff": 43.554164,
+      "margin_over_runner_up": 79.932,
+      "chroma": "interleaved U,V, 80x24 samples"
+    },
+    "B": {
+      "layout": "y_uv_halfres",
+      "stride_bytes": 19200,
+      "n_frames": 900,
+      "luma_bytes": 15360,
+      "mean_consecutive_frame_diff": 0.433207,
+      "runner_up_layout": "luma_only",
+      "runner_up_mean_consecutive_frame_diff": 37.730449,
+      "margin_over_runner_up": 87.096,
+      "chroma": "interleaved U,V, 80x24 samples"
+    },
+    "C": {
+      "layout": "y_uv_halfres",
+      "stride_bytes": 19200,
+      "n_frames": 900,
+      "luma_bytes": 15360,
+      "mean_consecutive_frame_diff": 0.366688,
+      "runner_up_layout": "luma_only",
+      "runner_up_mean_consecutive_frame_diff": 42.921703,
+      "margin_over_runner_up": 117.052,
+      "chroma": "interleaved U,V, 80x24 samples"
+    },
+    "empty1": {
+      "layout": "y_uv_halfres",
+      "stride_bytes": 19200,
+      "n_frames": 4500,
+      "luma_bytes": 15360,
+      "mean_consecutive_frame_diff": 0.005277,
+      "runner_up_layout": "luma_only",
+      "runner_up_mean_consecutive_frame_diff": 39.293797,
+      "margin_over_runner_up": 7446.099,
+      "chroma": "interleaved U,V, 80x24 samples"
+    }
+  },
   "sessions": {
     "A": {
       "total": {
-        "raw_best_r": 0.0829,
-        "raw_best_lag_s": 5.024,
-        "detrended_best_r": 0.0656,
-        "detrended_best_lag_s": 2.336
+        "raw_best_r": 0.0756,
+        "raw_best_lag_s": 5.92,
+        "detrended_best_r": 0.0863,
+        "detrended_best_lag_s": 3.264
       },
       "active": {
-        "raw_best_r": 0.0956,
-        "raw_best_lag_s": 4.64,
-        "detrended_best_r": 0.0776,
-        "detrended_best_lag_s": 9.472
+        "raw_best_r": 0.1415,
+        "raw_best_lag_s": 3.296,
+        "detrended_best_r": 0.1536,
+        "detrended_best_lag_s": 4.672
       },
       "area": {
-        "raw_best_r": 0.1055,
-        "raw_best_lag_s": 5.504,
-        "detrended_best_r": 0.0673,
-        "detrended_best_lag_s": 2.304
+        "raw_best_r": 0.074,
+        "raw_best_lag_s": 5.632,
+        "detrended_best_r": 0.0782,
+        "detrended_best_lag_s": 0.928
       },
       "speech_mean": 0.6946,
       "n_speech_hops": 936
     },
     "B": {
       "total": {
-        "raw_best_r": 0.0823,
-        "raw_best_lag_s": 7.936,
-        "detrended_best_r": 0.0299,
-        "detrended_best_lag_s": 1.44
+        "raw_best_r": 0.0544,
+        "raw_best_lag_s": 4.96,
+        "detrended_best_r": 0.0458,
+        "detrended_best_lag_s": 4.96
       },
       "active": {
-        "raw_best_r": 0.0637,
-        "raw_best_lag_s": 7.936,
-        "detrended_best_r": 0.0247,
-        "detrended_best_lag_s": 3.456
+        "raw_best_r": 0.0879,
+        "raw_best_lag_s": -9.152,
+        "detrended_best_r": 0.087,
+        "detrended_best_lag_s": -11.584
       },
       "area": {
-        "raw_best_r": 0.0604,
-        "raw_best_lag_s": 7.776,
-        "detrended_best_r": 0.0245,
-        "detrended_best_lag_s": 4.8
+        "raw_best_r": 0.1439,
+        "raw_best_lag_s": 7.872,
+        "detrended_best_r": 0.1851,
+        "detrended_best_lag_s": 11.168
       },
       "speech_mean": 0.6567,
       "n_speech_hops": 936
     },
     "C": {
       "total": {
-        "raw_best_r": 0.1896,
-        "raw_best_lag_s": -0.064,
-        "detrended_best_r": 0.1032,
-        "detrended_best_lag_s": -0.064
+        "raw_best_r": 0.2617,
+        "raw_best_lag_s": 0.384,
+        "detrended_best_r": 0.2121,
+        "detrended_best_lag_s": 0.384
       },
       "active": {
-        "raw_best_r": 0.222,
-        "raw_best_lag_s": -0.096,
-        "detrended_best_r": 0.113,
-        "detrended_best_lag_s": -0.096
+        "raw_best_r": 0.2037,
+        "raw_best_lag_s": -4.288,
+        "detrended_best_r": 0.1492,
+        "detrended_best_lag_s": 0.384
       },
       "area": {
-        "raw_best_r": 0.1555,
-        "raw_best_lag_s": -0.096,
-        "detrended_best_r": 0.0784,
-        "detrended_best_lag_s": -0.096
+        "raw_best_r": 0.2757,
+        "raw_best_lag_s": -0.672,
+        "detrended_best_r": 0.1612,
+        "detrended_best_lag_s": -9.216
       },
       "speech_mean": 0.0019,
       "n_speech_hops": 936
@@ -79,82 +125,103 @@
   "controls": {
     "scrambled_audio_A": {
       "total": {
-        "raw_best_r": 0.0495,
-        "raw_best_lag_s": 5.984,
-        "detrended_best_r": 0.0554,
-        "detrended_best_lag_s": -1.184
+        "raw_best_r": 0.0951,
+        "raw_best_lag_s": 0.0,
+        "detrended_best_r": 0.0985,
+        "detrended_best_lag_s": 0.0
       },
       "active": {
-        "raw_best_r": 0.0458,
-        "raw_best_lag_s": -11.872,
-        "detrended_best_r": 0.0608,
-        "detrended_best_lag_s": -7.2
+        "raw_best_r": 0.1365,
+        "raw_best_lag_s": -1.664,
+        "detrended_best_r": 0.1199,
+        "detrended_best_lag_s": -1.664
       },
       "area": {
-        "raw_best_r": 0.0495,
-        "raw_best_lag_s": 0.64,
-        "detrended_best_r": 0.0558,
-        "detrended_best_lag_s": -8.352
+        "raw_best_r": 0.103,
+        "raw_best_lag_s": 0.0,
+        "detrended_best_r": 0.0994,
+        "detrended_best_lag_s": 0.0
       }
     },
     "wrong_session_A_audio_C_video": {
       "total": {
-        "raw_best_r": 0.0835,
-        "raw_best_lag_s": 4.672,
-        "detrended_best_r": 0.0547,
-        "detrended_best_lag_s": 2.336
+        "raw_best_r": 0.0543,
+        "raw_best_lag_s": 5.888,
+        "detrended_best_r": 0.0393,
+        "detrended_best_lag_s": 11.168
       },
       "active": {
-        "raw_best_r": 0.0931,
-        "raw_best_lag_s": 4.64,
-        "detrended_best_r": 0.0677,
-        "detrended_best_lag_s": 2.272
+        "raw_best_r": 0.0974,
+        "raw_best_lag_s": -2.656,
+        "detrended_best_r": 0.0954,
+        "detrended_best_lag_s": 4.288
       },
       "area": {
-        "raw_best_r": 0.0789,
-        "raw_best_lag_s": 4.64,
-        "detrended_best_r": 0.0566,
-        "detrended_best_lag_s": 2.304
+        "raw_best_r": 0.1108,
+        "raw_best_lag_s": -9.92,
+        "detrended_best_r": 0.1283,
+        "detrended_best_lag_s": -9.92
       }
     },
     "wrong_session_C_audio_A_video": {
       "total": {
-        "raw_best_r": 0.2634,
-        "raw_best_lag_s": -0.064,
-        "detrended_best_r": 0.1128,
-        "detrended_best_lag_s": -0.064
+        "raw_best_r": 0.5361,
+        "raw_best_lag_s": 0.384,
+        "detrended_best_r": 0.5575,
+        "detrended_best_lag_s": 0.384
       },
       "active": {
-        "raw_best_r": 0.2159,
-        "raw_best_lag_s": -0.096,
-        "detrended_best_r": 0.1017,
-        "detrended_best_lag_s": -0.096
+        "raw_best_r": 0.3537,
+        "raw_best_lag_s": -7.328,
+        "detrended_best_r": 0.3357,
+        "detrended_best_lag_s": -7.328
       },
       "area": {
-        "raw_best_r": 0.3029,
-        "raw_best_lag_s": -0.096,
-        "detrended_best_r": 0.1267,
-        "detrended_best_lag_s": -0.096
+        "raw_best_r": 0.4996,
+        "raw_best_lag_s": 0.384,
+        "detrended_best_r": 0.4722,
+        "detrended_best_lag_s": 0.384
+      }
+    },
+    "blank_room": {
+      "total": {
+        "raw_best_r": 0.4331,
+        "raw_best_lag_s": -8.128,
+        "detrended_best_r": 0.5451,
+        "detrended_best_lag_s": -8.128
+      },
+      "active": {
+        "raw_best_r": 0.4331,
+        "raw_best_lag_s": -8.128,
+        "detrended_best_r": 0.5451,
+        "detrended_best_lag_s": -8.128
+      },
+      "area": {
+        "raw_best_r": 0.0919,
+        "raw_best_lag_s": 3.616,
+        "detrended_best_r": 0.0832,
+        "detrended_best_lag_s": -0.768
       }
     }
   },
   "headline": {
     "active_real_sessions": [
-      0.0776,
-      0.0247,
-      0.113
+      0.1536,
+      0.087,
+      0.1492
     ],
     "active_controls": [
-      0.0608,
-      0.0677,
-      0.1017
+      0.1199,
+      0.0954,
+      0.3357,
+      0.5451
     ],
     "total_real_sessions": [
-      0.0656,
-      0.0299,
-      0.1032
+      0.0863,
+      0.0458,
+      0.2121
     ],
-    "margin_over_the_worst_control": -0.077,
+    "margin_over_the_worst_control": -0.4581,
     "the_video_carries_a_time_aligned_speaking_signal": false,
     "reading": "the ACTIVE envelope is the candidate: the top 5% of pixels, where ROW-BAND-REMOVAL.md measured 79% of the speaking/silent difference. The TOTAL envelope is the negative case: total change does not distinguish speaking from silent, so a correlation there would be about drift."
   }

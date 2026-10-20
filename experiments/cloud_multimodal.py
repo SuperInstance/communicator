@@ -14,6 +14,22 @@ multimodal model CAN look at the footage. The question is whether it knows
 anything, and the answer to that is not its accuracy -- it is its accuracy
 relative to controls.
 
+THE FRAME LAYOUT, AND WHAT IT CHANGED.
+
+The captures on disk are NOT standard NV12: `C:\\proart_capture\\nv12small.py`
+writes 19,200 bytes per 160x96 frame (15,360 luma + 1,920 U + 1,920 V), not
+the `W*H*3//2` = 23,040 that every experiment here used to assume. Read at
+23,040, all but every sixth frame is torn -- rows 0..71 of one frame and rows
+72..95 of the next -- so every frame that was sent to a model was a collage
+of two of them. The layout is DETECTED from the file's content by
+`src/nv12.py`; see `src/nv12.py` and `docs/research/NV12-STRIDE.md`.
+
+The previous run's speaking arm had 11 frames rather than 12 for a reason
+that was not visible in the results: the wrong stride produced 750 frames
+instead of 900, and one of the VAD-picked frames (817) fell off the end and
+was dropped. The two arms therefore had DIFFERENT denominators, which is the
+shape of every wrong number in this project's history. They match now.
+
 THE FIRST PROBE, and why it is not yet a result.
 
 One frame per condition, Llama 3.2 Vision 11B:
@@ -75,6 +91,7 @@ to be fooled.
 from __future__ import annotations
 
 import base64
+import hashlib
 import json
 import os
 import struct
@@ -90,8 +107,10 @@ import numpy as np
 ROOT = Path(__file__).resolve().parents[1]
 ACCOUNT = os.environ.get("CF_ACCOUNT_ID", "049ff5e84ecf636b53b162cbb580aae6")
 W, H = 160, 96
-FB = W * H * 3 // 2
 YS = W * H
+if str(ROOT) not in sys.path:
+    sys.path.insert(0, str(ROOT))
+from src.nv12 import read_luma  # noqa: E402
 
 Q_YESNO = ("Is the person in this image SPEAKING (their mouth is moving or "
            "open, as if talking) or NOT SPEAKING (mouth closed, still)? "
@@ -109,6 +128,30 @@ Q_FACING = ("Listen to this recording. Does the speaker sound like they are "
             "exactly one word: FACING or AWAY.")
 
 
+def sha256_file(path) -> str:
+    """SHA-256 of a file, read in chunks."""
+    h = hashlib.sha256()
+    with open(path, "rb") as f:
+        for chunk in iter(lambda: f.read(1 << 20), b""):
+            h.update(chunk)
+    return h.hexdigest()
+
+
+def capture_identity(path) -> dict:
+    """Where a capture is, what it is, and how it was laid out."""
+    p = Path(path)
+    _luma, layout = read_luma(p, width=W, height=H)
+    return {
+        "path": str(p.resolve()),
+        "sha256": sha256_file(p),
+        "bytes": p.stat().st_size,
+        "layout": layout.name,
+        "stride_bytes": layout.stride,
+        "n_frames": layout.n_frames,
+        "layout_evidence": layout.as_dict(),
+    }
+
+
 def write_png(img: np.ndarray) -> bytes:
     h, w = img.shape
     raw = b"".join(b"\x00" + img[r].tobytes() for r in range(h))
@@ -124,7 +167,15 @@ def write_png(img: np.ndarray) -> bytes:
 
 
 def load_y(path: Path, nf: int | None = None):
-    """Load the luma plane of an NV12 file.
+    """Load the luma plane of a capture.
+
+    The frame layout is DETECTED from the file's content by `src/nv12.py` --
+    the candidate whose luma has the smallest mean consecutive |diff| wins,
+    and an ambiguous file is an error rather than a guess. The captures on
+    disk carry 19,200 bytes per 160x96 frame, not the 23,040 a standard-NV12
+    reader assumes; read at 23,040 all but every sixth frame is torn (rows
+    0..71 of frame k, rows 72..95 of frame k+1). See `src/nv12.py` and
+    `docs/research/NV12-STRIDE.md`.
 
     `nf` DEFAULTS TO ALL FRAMES. An earlier version defaulted to 400, which
     silently truncated every session at frame 400 (13.3 s) -- and, because the
@@ -134,10 +185,9 @@ def load_y(path: Path, nf: int | None = None):
     different denominators, which is the shape of every wrong number in this
     project's history.
     """
-    raw = np.frombuffer(path.read_bytes(), dtype=np.uint8)
-    total = len(raw) // FB
-    n = total if nf is None else min(nf, total)
-    return raw[:n * FB].reshape(n, FB)[:, :YS].reshape(n, H, W)
+    luma, _layout = read_luma(path, width=W, height=H)
+    n = len(luma) if nf is None else min(nf, len(luma))
+    return luma[:n]
 
 
 def cf_raw(model: str, body: dict, timeout: float = 180.0):
@@ -550,6 +600,13 @@ def main():
     YC = load_y(Path(a.silent))
     YB = load_y(Path(a.turned)) if Path(a.turned).is_file() else None
 
+    captures = {
+        "speaking": capture_identity(a.speaking),
+        "silent": capture_identity(a.silent),
+    }
+    if YB is not None:
+        captures["turned"] = capture_identity(a.turned)
+
     # THE FRAME SELECTION, which is where the label comes from.
     #
     # Speaking conditions: frames inside DETECTED SPEECH, so every frame's
@@ -849,7 +906,58 @@ def main():
                "a good result here is a demonstration that the signal "
                "exists; the leave-one-session-out test is what would certify "
                "a teacher",
-           ]}
+           ],
+           "provenance": {
+               "generated_by": "experiments/cloud_multimodal.py",
+               "script_path": str(Path(__file__).resolve()),
+               "script_sha256": sha256_file(Path(__file__).resolve()),
+               "python": sys.executable,
+               "command_line": " ".join(sys.argv),
+               "cli_args": list(sys.argv[1:]),
+               "captures": captures,
+           },
+           "supersedes": {
+               "why": ("Re-run on 2026-10-20. The previous run read the "
+                       "captures at W*H*3//2 = 23,040 bytes per frame; the "
+                       "captures on disk carry 19,200 bytes per frame, so "
+                       "every frame that was sent to the model was a TORN "
+                       "frame -- rows 0..71 of one frame and rows 72..95 of "
+                       "the next. The previous answers are recorded here "
+                       "rather than silently overwritten."),
+               "previous_stride_bytes": 23040,
+               "previous_frame_indices": {
+                   "speak": [58, 134, 188, 245, 323, 391, 464, 537, 603, 689, 747],
+                   "silent": [30, 50, 70, 90, 110, 130, 150, 170, 190, 210,
+                              230, 250],
+                   "turned": [56, 120, 169, 252, 319, 378, 440, 506, 584, 669],
+               },
+               "previous_frames_per_condition": 11,
+               "previous_model": "@cf/meta/llama-3.2-11b-vision-instruct",
+               "previous_speak_accuracy": 0.45454545454545453,
+               "previous_silent_accuracy": 1.0,
+               "previous_blank_accuracy": None,
+               "previous_margin_over_silent_class": 0.45454545454545453,
+               "previous_note": (
+                   "The speaking condition had 11 frames, not 12, because one "
+                   "of the VAD-picked frames (817) was past the end of the "
+                   "750 frames the WRONG stride produced. At the correct "
+                   "stride the capture has 900 frames and all 12 survive, so "
+                   "the denominators now match across conditions."),
+               "run_to_run_spread": (
+                   "THIS ENDPOINT IS NOT DETERMINISTIC at temperature 0.0. Five "
+                   "identical runs of this script on the same frames gave a "
+                   "margin over the silent class of 0.583, 0.667, 0.583, 0.667 "
+                   "and 0.583, and the frames that moved were not always the "
+                   "same ones: in the last run the SPEAKING arm scored 8/12 "
+                   "and the SILENT arm 11/12, where earlier runs had the "
+                   "silent arm at 12/12. The verdict (USABLE) is the same in "
+                   "every run and the margin is far above the 0.0 silent and "
+                   "blank floors, but the number carries that jitter and "
+                   "should be read as 'about 0.6', not to three decimals. A "
+                   "twelve-frame arm cannot resolve a difference of one "
+                   "frame; the previous run's 0.455 and this one's 0.583 are "
+                   "the same measurement."),
+           }}
     p = Path(a.out) / "cloud_multimodal_results.json"
     p.parent.mkdir(parents=True, exist_ok=True)
     p.write_text(json.dumps(out, indent=2))

@@ -72,6 +72,10 @@ SR = 16000
 HOP = 512                       # 32 ms: the VAD's own frame size
 CAPTURES = Path("/mnt/c/proart_capture")
 
+# The capture frame size. The captures are 160x96; see `maps_from_capture`
+# for why the stride cannot be assumed.
+FRAME_W, FRAME_H = 160, 96
+
 # The corpus metadata records 600 frames as 20.0 s, so the capture ran at
 # 30 fps. The frames and the audio are separate recordings, so this is the
 # VIDEO's clock, not a shared one.
@@ -242,32 +246,60 @@ def load_maps(npz_path: Path) -> np.ndarray:
     return d["maps"]
 
 
+def maps_from_capture(nv12_path: Path) -> tuple[np.ndarray, dict]:
+    """The motion maps of a capture, read at the layout the file actually has.
+
+    READ THIS BEFORE TRUSTING ANY NUMBER IN THIS FILE.
+
+    The captures are NOT standard NV12 frames. They are 19,200 bytes each
+    (luma 160x96, then a U plane and a V plane at 80x24), written by
+    `nv12small.py`. Reading them at the usual 23,040 bytes produces torn
+    frames -- rows 0..71 from one moment and rows 72..95 from the next --
+    and 80% of every "frame" is a splice. The committed version of this
+    measurement was made on exactly those torn frames, and its numbers are
+    withdrawn in `docs/research/NV12-STRIDE.md`.
+
+    `src.nv12.read_luma` detects the layout from the content and reports the
+    margin over the runner-up, so the frame count and the stride are
+    recorded rather than assumed.
+    """
+    from src import nv12
+    luma, layout = nv12.read_luma(nv12_path, width=FRAME_W, height=FRAME_H)
+    Y = luma.astype(np.float64)
+    prof = np.median(Y, axis=2)
+    g = prof.mean(axis=1, keepdims=True)
+    Yr = Y - (prof - g)[:, :, None]
+    d = np.abs(np.diff(Yr, axis=0))
+    maps = d.reshape(d.shape[0], FRAME_H // 2, 2, FRAME_W // 2, 2).mean(axis=(2, 4))
+    return maps, layout.as_dict()
+
+
 def main(argv=None) -> int:
     ap = argparse.ArgumentParser(description=__doc__.splitlines()[0])
-    ap.add_argument("--corpus", default=str(CAPTURES / "corpus"))
     ap.add_argument("--captures", default=str(CAPTURES))
     ap.add_argument("--out", default=str(ROOT / "experiments" /
                                          "audio_video_alignment_results.json"))
     args = ap.parse_args(argv)
-    corpus = Path(args.corpus)
     caps = Path(args.captures)
 
     max_lag = int(OFFSET_SEARCH_S * SR / HOP)
 
-    speech, motion = {}, {}
+    speech, motion, layouts = {}, {}, {}
     for name in ("A", "B", "C"):
         wav = caps / f"{name}.wav"
-        npz = corpus / f"{name}_seed.npz"
-        if not (wav.is_file() and npz.is_file()):
+        nv = caps / f"{name}.nv12"
+        if not (wav.is_file() and nv.is_file()):
             continue
         s_env = speech_envelope_hop(wav)
         speech[name] = s_env
-        motion[name] = motion_envelopes(load_maps(npz), len(s_env))
+        maps, layouts[name] = maps_from_capture(nv)
+        motion[name] = motion_envelopes(maps, len(s_env))
 
     results = {"video_fps": VIDEO_FPS, "hop_samples": HOP,
                "hop_ms": int(HOP / SR * 1000),
                "offset_search_s": OFFSET_SEARCH_S,
                "envelopes": ("total", "active", "area"),
+               "frame_layouts": layouts,
                "sessions": {}, "controls": {}}
 
     def compare(spk, mov, label, bucket):
@@ -303,10 +335,11 @@ def main(argv=None) -> int:
         compare(speech["C"], motion["A"], "wrong_session_C_audio_A_video",
                 results["controls"])
     empty_wav = caps / "empty1.wav"
-    empty_npz = corpus / "empty1_seed.npz"
-    if empty_wav.is_file() and empty_npz.is_file():
+    empty_nv = caps / "empty1.nv12"
+    if empty_wav.is_file() and empty_nv.is_file():
         s_env = speech_envelope_hop(empty_wav)
-        mov = motion_envelopes(load_maps(empty_npz), len(s_env))
+        maps, layouts["empty1"] = maps_from_capture(empty_nv)
+        mov = motion_envelopes(maps, len(s_env))
         compare(s_env, mov, "blank_room", results["controls"])
 
     # --- the headline ----------------------------------------------------

@@ -4,66 +4,168 @@
   "results": {
     "none": {
       "occupied": {
-        "flip_pct": 48.190104166666664,
-        "min": 33.932291666666664,
-        "max": 56.822916666666664
+        "flip_pct": 0.625,
+        "min": 0.0,
+        "max": 17.643229166666664
       },
       "turned": {
-        "flip_pct": 40.345052083333336,
-        "min": 29.420572916666664,
-        "max": 48.69140625
+        "flip_pct": 0.5143229166666666,
+        "min": 0.0,
+        "max": 1.640625
       },
       "empty": {
-        "flip_pct": 50.0,
-        "min": 25.0,
-        "max": 50.0
+        "flip_pct": 0.0,
+        "min": 0.0,
+        "max": 0.0
       }
     },
     "subtract": {
       "occupied": {
-        "flip_pct": 48.56770833333333,
-        "min": 45.54036458333333,
-        "max": 50.501302083333336
+        "flip_pct": 1.7903645833333333,
+        "min": 0.0,
+        "max": 4.576822916666667
       },
       "turned": {
-        "flip_pct": 44.921875,
-        "min": 39.752604166666664,
-        "max": 46.90755208333333
+        "flip_pct": 1.4973958333333335,
+        "min": 0.0,
+        "max": 2.5325520833333335
       },
       "empty": {
-        "flip_pct": 0.013020833333333334,
-        "min": 0.006510416666666667,
-        "max": 0.052083333333333336
+        "flip_pct": 0.0,
+        "min": 0.0,
+        "max": 0.0
       }
     },
     "divide": {
       "occupied": {
-        "flip_pct": 49.303385416666664,
-        "min": 44.40104166666667,
-        "max": 50.76171874999999
+        "flip_pct": 1.6471354166666667,
+        "min": 0.0,
+        "max": 4.12109375
       },
       "turned": {
-        "flip_pct": 46.184895833333336,
-        "min": 43.450520833333336,
-        "max": 47.350260416666664
+        "flip_pct": 1.3151041666666667,
+        "min": 0.0,
+        "max": 1.9986979166666665
       },
       "empty": {
-        "flip_pct": 0.05859375,
-        "min": 0.03255208333333333,
-        "max": 0.09114583333333333
+        "flip_pct": 0.0,
+        "min": 0.0,
+        "max": 0.0
       }
     }
   },
-  "best_mode": [
-    "divide",
-    49.303385416666664,
-    0.05859375
-  ],
+  "best_mode": null,
   "limits": [
     "the row estimate is contaminated where a subject fills more than half a row's columns -- the filter can partly remove a close subject, which is why the occupied number matters",
     "the empty capture is later and darker; only within-condition comparisons are clean",
     "one capture per condition, no error bars",
-    "the reconstruction cannot restore the original absolute luma, only the row-structured part of the change, so the threshold is applied to a reconstructed image"
+    "the reconstruction cannot restore the original absolute luma, only the row-structured part of the change, so the threshold is applied to a reconstructed image",
+    "the temporal-median comparison numbers quoted in the verdict (0.48% at k=5) come from experiments/temporal_median_fix.py, which reads its capture at the OLD 23,040 stride and has not been re-run. They are quoted as they stand, not re-measured here."
   ],
-  "verdict": "ROW REMOVAL WORKS AND BEATS THE TEMPORAL MEDIAN. Mode 'divide': empty room 0.06%, occupied 49.30%. The occupied rate STAYS HIGH, which is the thing the temporal median could not do -- at k=5 it fell to 0.48%. No latency, no motion smearing, no frame averaging. Facing vs head-turned gap is 3.12 pp."
+  "supersedes": {
+    "why": "These numbers were RE-MEASURED on 2026-10-20. The previous run read the captures at W*H*3//2 = 23,040 bytes per frame, but the captures on disk carry 19,200 bytes per frame, so all but every sixth frame was torn (rows 0..71 from frame k, rows 72..95 from frame k+1). The previous numbers are recorded here rather than silently overwritten.",
+    "previous_stride_bytes": 23040,
+    "previous_results": {
+      "none": {
+        "occupied": 48.190104166666664,
+        "turned": 40.345052083333336,
+        "empty": 50.0
+      },
+      "subtract": {
+        "occupied": 48.56770833333333,
+        "turned": 44.921875,
+        "empty": 0.013020833333333334
+      },
+      "divide": {
+        "occupied": 49.303385416666664,
+        "turned": 46.184895833333336,
+        "empty": 0.05859375
+      }
+    },
+    "previous_best_mode": [
+      "divide",
+      49.303385416666664,
+      0.05859375
+    ],
+    "previous_verdict": "ROW REMOVAL WORKS AND BEATS THE TEMPORAL MEDIAN. Mode 'divide': empty room 0.06%, occupied 49.30%. The occupied rate STAYS HIGH, which is the thing the temporal median could not do -- at k=5 it fell to 0.48%. No latency, no motion smearing, no frame averaging. Facing vs head-turned gap is 3.12 pp."
+  },
+  "provenance": {
+    "generated_by": "experiments/row_band_removal.py",
+    "script_path": "/home/proart/projects/communicator/experiments/row_band_removal.py",
+    "script_sha256": "0498fc25c655ea37ba69c70501a42f46cb5a99ff68f42ab836a2ee3b0c0ee91d",
+    "python": "/home/proart/projects/glasses/.venv/bin/python",
+    "command_line": "experiments/row_band_removal.py",
+    "cli_args": [],
+    "captures": {
+      "occupied": {
+        "path": "/mnt/c/proart_capture/A.nv12",
+        "sha256": "b65cf944aa4e8a65932d4c140335a495fa6a1707f28025d40fb08d31fa33bc73",
+        "bytes": 17280000,
+        "layout": "y_uv_halfres",
+        "stride_bytes": 19200,
+        "n_frames": 900,
+        "frames_used": 400,
+        "layout_evidence": {
+          "layout": "y_uv_halfres",
+          "stride_bytes": 19200,
+          "n_frames": 900,
+          "luma_bytes": 15360,
+          "mean_consecutive_frame_diff": 0.544891,
+          "runner_up_layout": "luma_only",
+          "runner_up_mean_consecutive_frame_diff": 43.554164,
+          "margin_over_runner_up": 79.932,
+          "chroma": "interleaved U,V, 80x24 samples"
+        }
+      },
+      "turned": {
+        "path": "/mnt/c/proart_capture/B.nv12",
+        "sha256": "c87269568fabea99d39bc40b46e9a8d3026c72c241d8194f7d9c27181e893e04",
+        "bytes": 17280000,
+        "layout": "y_uv_halfres",
+        "stride_bytes": 19200,
+        "n_frames": 900,
+        "frames_used": 400,
+        "layout_evidence": {
+          "layout": "y_uv_halfres",
+          "stride_bytes": 19200,
+          "n_frames": 900,
+          "luma_bytes": 15360,
+          "mean_consecutive_frame_diff": 0.433207,
+          "runner_up_layout": "luma_only",
+          "runner_up_mean_consecutive_frame_diff": 37.730449,
+          "margin_over_runner_up": 87.096,
+          "chroma": "interleaved U,V, 80x24 samples"
+        }
+      },
+      "empty": {
+        "path": "/home/proart/projects/glasses/.capture_keep/empty1.nv12",
+        "sha256": "da348ccaf08c030dedea4b2e070ceb1149a4f11d3e9287e8212a480a58c05303",
+        "bytes": 86400000,
+        "layout": "y_uv_halfres",
+        "stride_bytes": 19200,
+        "n_frames": 4500,
+        "frames_used": 400,
+        "layout_evidence": {
+          "layout": "y_uv_halfres",
+          "stride_bytes": 19200,
+          "n_frames": 4500,
+          "luma_bytes": 15360,
+          "mean_consecutive_frame_diff": 0.005277,
+          "runner_up_layout": "luma_only",
+          "runner_up_mean_consecutive_frame_diff": 39.293797,
+          "margin_over_runner_up": 7446.099,
+          "chroma": "interleaved U,V, 80x24 samples"
+        }
+      }
+    },
+    "renderer": {
+      "program": "experiments/ascii_motion_threshold.py CHANNELS_C",
+      "note": "the character renderer assumes the STANDARD NV12 stride of 23,040 bytes per frame, so the frames it is given are re-wrapped into standard NV12 first; no luma byte is changed by that re-wrap",
+      "frame_bytes": 23040,
+      "luma_bytes": 15360,
+      "braille_thresh": 100
+    },
+    "frames_requested": 400
+  },
+  "verdict": "THE PREMISE WAS A STRIDE ARTEFACT, AND THE CONCLUSION OF THE PREVIOUS RUN DOES NOT SURVIVE. With NO removal at all the empty room flips 0.00% of dots per frame, the occupied capture 0.62%, the turned capture 0.51%. There is no saturated flip rate and therefore no row-constant banding for this filter to remove: the 50.00% empty-room figure that motivated the experiment was a torn-frame artefact of reading a 19,200-byte frame at a 23,040-byte stride. Row removal now makes the occupied rate WORSE rather than better (1.79% subtract, 1.65% divide, against 0.62% with none), because there is no banding to subtract and the filter only adds its own noise. The character delta is not saturated in this capture, so the whole 'the character field flips 50% with nobody in the room' line of reasoning is withdrawn."
 }

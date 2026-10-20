@@ -106,10 +106,34 @@ def _assert_every_scalar_is_named(obj, where):
 # -- synthetic fixtures --------------------------------------------------------
 
 def _write_nv12(path: Path, n_frames: int, seed: int, moving: bool) -> Path:
-    """A synthetic 160x96 NV12 capture: a bright square that moves."""
+    """A synthetic 160x96 capture in the layout the captures on disk use.
+
+    WHY THIS LAYOUT, AND NOT STANDARD NV12.
+
+    `C:\\proart_capture\\nv12small.py` writes, per 160x96 frame:
+
+        Y plane    15,360 bytes   (160 * 96)
+        U plane     1,920 bytes
+        V plane     1,920 bytes
+        -------------------------
+        total      19,200 bytes   = W*H*5/4
+
+    so the stride of a real capture is 19,200, not the W*H*3//2 = 23,040 that
+    a standard-NV12 reader assumes. `src/nv12.py` DETECTS the layout from the
+    file's content, and the fixture is written in the real layout so that the
+    detection is exercised rather than bypassed. (The chroma order does not
+    matter to the reader, which takes the luma plane only; the U and V planes
+    are written separately here because that is what the writer does.)
+
+    A frame is a bright square that moves (or does not) on a noisy
+    background, so consecutive frames are similar -- which is what the layout
+    detector scores, and what makes the detection unambiguous.
+    """
     rng = np.random.default_rng(seed)
     W, H = 160, 96
-    fb = W * H * 3 // 2
+    luma_bytes = W * H
+    chroma_bytes = luma_bytes // 8          # 1,920 each for U and V
+    stride = luma_bytes + 2 * chroma_bytes  # 19,200
     buf = bytearray()
     for i in range(n_frames):
         y = np.full((H, W), 40, dtype=np.uint8)
@@ -121,7 +145,9 @@ def _write_nv12(path: Path, n_frames: int, seed: int, moving: bool) -> Path:
         y = np.clip(y.astype(np.int16)
                     + rng.integers(-3, 4, size=(H, W)), 0, 255).astype(np.uint8)
         buf += y.tobytes()
-        buf += bytes(fb - W * H)
+        buf += bytes(chroma_bytes)          # U
+        buf += bytes(chroma_bytes)          # V
+    assert len(buf) == n_frames * stride
     path.write_bytes(bytes(buf))
     return path
 

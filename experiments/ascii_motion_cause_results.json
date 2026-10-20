@@ -1,33 +1,51 @@
 {
   "question": "is the frame-to-frame character delta dominated by the camera's auto-exposure loop rather than by subject motion?",
   "capture": "/mnt/c/proart_capture/small.nv12",
-  "n_frames": 25,
+  "n_frames": 30,
+  "layout": "y_uv_halfres",
+  "stride_bytes": 19200,
+  "layout_evidence": {
+    "layout": "y_uv_halfres",
+    "stride_bytes": 19200,
+    "n_frames": 30,
+    "luma_bytes": 15360,
+    "mean_consecutive_frame_diff": 1.374715,
+    "runner_up_layout": "standard_nv12",
+    "runner_up_mean_consecutive_frame_diff": 30.666062,
+    "margin_over_runner_up": 22.307,
+    "chroma": "interleaved U,V, 80x24 samples"
+  },
   "live_mean_luma": [
     111.15709635416667,
-    114.26796875,
-    122.75227864583333,
-    125.1623046875,
-    124.64296875,
+    111.2248046875,
+    121.25475260416667,
+    121.5015625,
+    121.94876302083334,
+    121.8455078125,
     121.61171875,
-    121.296484375,
-    121.84889322916666,
-    123.19485677083334,
-    123.5009765625,
+    121.07330729166667,
+    120.60260416666667,
+    120.22239583333334,
+    119.64993489583334,
+    119.45338541666666,
     119.333203125,
-    119.82161458333333,
-    120.90657552083333,
-    122.66575520833334,
-    123.05638020833334,
+    119.2677734375,
+    119.21751302083334,
+    119.18619791666667,
+    119.13235677083334,
+    119.1072265625,
     119.12682291666667,
-    119.71516927083333,
-    120.87135416666666,
-    122.69505208333334,
-    122.896875,
+    119.12395833333333,
+    119.104296875,
+    119.09661458333333,
+    119.09986979166666,
+    119.08059895833334,
     119.06888020833334,
-    119.6767578125,
-    120.87623697916666,
-    122.71868489583333,
-    122.86380208333334
+    119.0712890625,
+    119.08958333333334,
+    119.08235677083333,
+    119.0974609375,
+    119.11796875
   ],
   "static_control_mean_luma": [
     111.15709635416667,
@@ -54,59 +72,137 @@
     111.15709635416667,
     111.15709635416667,
     111.15709635416667,
+    111.15709635416667,
+    111.15709635416667,
+    111.15709635416667,
+    111.15709635416667,
+    111.15709635416667,
     111.15709635416667
   ],
-  "mean_luma_span_live": 14.005208333333329,
+  "mean_luma_span_live": 10.791666666666671,
   "mean_luma_span_static_control": 0.0,
-  "p90_luma_span_live": 15,
+  "p90_luma_span_live": 13,
   "autocorr_live": {
-    "1": 0.566242514238466,
-    "2": -0.4500510660624538,
-    "3": -0.67826060303455,
-    "4": -0.20833551882903464,
-    "5": 0.4361381191587739,
-    "6": 0.07815759537394676
+    "1": 0.6421461108862158,
+    "2": -0.07744883945298421,
+    "3": -0.25868855996574985,
+    "4": -0.42389879464855196,
+    "5": -0.5455088326543016,
+    "6": -0.626399424297389
   },
   "autocorr_static_control": {
-    "1": 1.0000000000000002,
-    "2": 1.0000000000000002,
-    "3": 1.0,
+    "1": null,
+    "2": null,
+    "3": null,
     "4": null,
-    "5": null,
-    "6": null
+    "5": 1.0,
+    "6": 1.0000000000000002
   },
-  "corr_mean_vs_p90_per_frame": 0.6781609605645532,
-  "oscillating": true,
+  "corr_mean_vs_p90_per_frame": 0.9694702855359787,
+  "oscillating": false,
   "cross_test_exposure_vs_delta_by_lag": {
     "1": {
-      "mean_abs_dY": 1.8037082248263878,
-      "cell_change_pct": 55.29730902777777
+      "mean_abs_dY": 0.47519980244252896,
+      "cell_change_pct": 8.631465517241379
     },
     "2": {
-      "mean_abs_dY": 3.325498188405798,
-      "cell_change_pct": 58.47826086956521
+      "mean_abs_dY": 0.9705426897321432,
+      "cell_change_pct": 11.986607142857144
     },
     "3": {
-      "mean_abs_dY": 3.561931818181819,
-      "cell_change_pct": 58.546401515151516
+      "mean_abs_dY": 1.1122805748456783,
+      "cell_change_pct": 13.705632716049385
     },
     "4": {
-      "mean_abs_dY": 2.629439484126983,
-      "cell_change_pct": 55.74652777777778
+      "mean_abs_dY": 1.247829026442307,
+      "cell_change_pct": 15.160256410256409
     },
     "5": {
-      "mean_abs_dY": 1.3930078124999987,
-      "cell_change_pct": 14.518229166666668
+      "mean_abs_dY": 1.356434895833333,
+      "cell_change_pct": 16.372916666666665
     },
     "6": {
-      "mean_abs_dY": 2.30575657894737,
-      "cell_change_pct": 55.57291666666666
+      "mean_abs_dY": 1.4619140624999993,
+      "cell_change_pct": 17.369791666666668
     }
   },
-  "cross_test_correlation": 0.7021488392201023,
-  "lag1_autocorr": 0.566242514238466,
-  "autocorr_trough": -0.67826060303455,
+  "cross_test_correlation": 0.9918606273601989,
+  "lag1_autocorr": 0.6421461108862158,
+  "autocorr_trough": -0.25868855996574985,
   "hunt_period_frames": 3,
-  "verdict": "EXPOSURE OSCILLATION. Consecutive frames sit at opposite phases of a hunting gain loop. The character delta is dominated by the camera's AGC, not the subject.",
-  "consequence": "Any I/P representation built on raw frame subtraction of this capture would be spending its budget on the exposure cycle. Either the capture is normalised (lock exposure) or the P-frame must be taken against a per-frame gain-compensated reference. Until that is settled, no motion claim from a live webcam capture is admissible."
+  "verdict": "NO EXPOSURE OSCILLATION AT THIS CADENCE. The mean-luma autocorrelation decays smoothly (lag 1 +0.642 -> lag 6 -0.626) with no negative trough at lag 2-3, which is the signature of a slow settling ramp (10.79 counts of span) rather than a hunting loop, and the character delta ACCUMULATES with lag instead of collapsing -- the opposite of the previous run's flat ~55% profile with a single dip at lag 5.",
+  "consequence": "The camera's gain still moves WITH the character delta across lags (correlation +0.992), so a capture whose exposure is not locked still mixes camera and subject in the delta. But the gain here is a slow settling ramp, not a hunt, and the character delta grows with lag the way real change does. The previous run's verdict -- 'EXPOSURE OSCILLATION, the delta is dominated by the camera's AGC' -- was measured on a torn signal and does not survive; this capture is NOT unusable for motion work on the grounds of an exposure hunt. Locking exposure is still worth doing, as a control rather than as a rescue.",
+  "supersedes": {
+    "why": "Re-measured on 2026-10-20. The previous run read the capture at W*H*3//2 = 23,040 bytes per frame; the capture on disk carries 19,200 bytes per frame, so all but every sixth frame was torn. The previous numbers are recorded here rather than silently overwritten.",
+    "previous_stride_bytes": 23040,
+    "previous_n_frames": 25,
+    "previous_mean_luma_span_live": 14.005208333333329,
+    "previous_autocorr_live": {
+      "1": 0.566242514238466,
+      "2": -0.4500510660624538,
+      "3": -0.67826060303455,
+      "4": -0.20833551882903464,
+      "5": 0.4361381191587739,
+      "6": 0.07815759537394676
+    },
+    "previous_oscillating": true,
+    "previous_cross_test_correlation": 0.7021488392201023,
+    "previous_cross_test_by_lag": {
+      "1": {
+        "mean_abs_dY": 1.8037082248263878,
+        "cell_change_pct": 55.29730902777777
+      },
+      "2": {
+        "mean_abs_dY": 3.325498188405798,
+        "cell_change_pct": 58.47826086956521
+      },
+      "3": {
+        "mean_abs_dY": 3.561931818181819,
+        "cell_change_pct": 58.546401515151516
+      },
+      "4": {
+        "mean_abs_dY": 2.629439484126983,
+        "cell_change_pct": 55.74652777777778
+      },
+      "5": {
+        "mean_abs_dY": 1.3930078124999987,
+        "cell_change_pct": 14.518229166666668
+      },
+      "6": {
+        "mean_abs_dY": 2.30575657894737,
+        "cell_change_pct": 55.57291666666666
+      }
+    },
+    "previous_verdict": "EXPOSURE OSCILLATION. Consecutive frames sit at opposite phases of a hunting gain loop. The character delta is dominated by the camera's AGC, not the subject."
+  },
+  "provenance": {
+    "generated_by": "experiments/ascii_motion_cause.py",
+    "script_path": "/home/proart/projects/communicator/experiments/ascii_motion_cause.py",
+    "script_sha256": "56b84d096c16afcb9ed966fec86bdea7e3523af3de9a41b07dcce9bb9b8a7570",
+    "python": "/home/proart/projects/glasses/.venv/bin/python",
+    "command_line": "experiments/ascii_motion_cause.py --capture /mnt/c/proart_capture/small.nv12",
+    "cli_args": [
+      "--capture",
+      "/mnt/c/proart_capture/small.nv12"
+    ],
+    "capture": {
+      "path": "/mnt/c/proart_capture/small.nv12",
+      "sha256": "e0c980ca8f1f177b7538e61d938e2c13fb0f2bfed948a9e54c6e7274c93ed591",
+      "bytes": 576000,
+      "layout": "y_uv_halfres",
+      "stride_bytes": 19200,
+      "n_frames": 30,
+      "layout_evidence": {
+        "layout": "y_uv_halfres",
+        "stride_bytes": 19200,
+        "n_frames": 30,
+        "luma_bytes": 15360,
+        "mean_consecutive_frame_diff": 1.374715,
+        "runner_up_layout": "standard_nv12",
+        "runner_up_mean_consecutive_frame_diff": 30.666062,
+        "margin_over_runner_up": 22.307,
+        "chroma": "interleaved U,V, 80x24 samples"
+      }
+    }
+  }
 }

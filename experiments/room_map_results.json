@@ -5,8 +5,31 @@
     "onsets in the tail analysis include door and chair events; they are transients, not calibrated reverberation events",
     "the median composite assumes a static scene; its sliding window drift is reported so that assumption can be checked"
   ],
+  "provenance": {
+    "generated_by": "experiments/room_map.py",
+    "script_path": "/home/proart/projects/communicator/experiments/room_map.py",
+    "script_sha256": "3698756b04b99f13d18e0585f9d065b2453b0f0493c7d842160ac6c9f3e7a9d3",
+    "python": "/home/proart/projects/glasses/.venv/bin/python",
+    "command_line": "experiments/room_map.py",
+    "cli_args": [],
+    "inputs": {
+      "wav": {
+        "path": "/mnt/c/proart_capture/empty1.wav",
+        "sha256": "f4bedc789ff1e807c789b083efac188bbd5207c15d3ea74698ae928b3576c0bc",
+        "bytes": 4797044
+      },
+      "nv12": {
+        "path": "/mnt/c/proart_capture/empty1.nv12",
+        "sha256": "da348ccaf08c030dedea4b2e070ceb1149a4f11d3e9287e8212a480a58c05303",
+        "bytes": 86400000,
+        "layout": "y_uv_halfres",
+        "stride_bytes": 19200,
+        "n_frames": 4500
+      }
+    }
+  },
   "audio": {
-    "path": "/home/proart/projects/glasses/.capture_keep/empty1.wav",
+    "path": "/mnt/c/proart_capture/empty1.wav",
     "sample_rate": 16000,
     "duration_s": 149.90625,
     "rms_amplitude": 6.928661713302038,
@@ -66,14 +89,48 @@
     "rt60_median_ms": null
   },
   "vision": {
-    "path": "/home/proart/projects/glasses/.capture_keep/empty1.nv12",
+    "path": "/mnt/c/proart_capture/empty1.nv12",
     "n_frames": 2000,
-    "mean_luma": 49.70077926432292,
-    "adjacent_mad_raw": 39.315094363588045,
-    "adjacent_mad_gain_normalised": 0.808906145981632,
+    "capture_n_frames": 4500,
+    "layout": "y_uv_halfres",
+    "stride_bytes": 19200,
+    "layout_evidence": {
+      "layout": "y_uv_halfres",
+      "stride_bytes": 19200,
+      "n_frames": 4500,
+      "luma_bytes": 15360,
+      "mean_consecutive_frame_diff": 0.005277,
+      "runner_up_layout": "luma_only",
+      "runner_up_mean_consecutive_frame_diff": 39.293797,
+      "margin_over_runner_up": 7446.099,
+      "chroma": "interleaved U,V, 80x24 samples"
+    },
+    "mean_luma": 30.08675413411458,
+    "adjacent_mad_raw": 0.006262278274553943,
+    "adjacent_mad_gain_normalised": 0.0002290792430768626,
     "median_map_windows": 9,
-    "median_map_step_drift_mean": 0.0001708984375,
-    "median_map_step_drift_max": 0.00048828125,
+    "median_map_step_drift_mean": 0.0059814453125,
+    "median_map_step_drift_max": 0.006510416666666667,
     "median_map_pgm": "/home/proart/projects/communicator/experiments/room_median_map.pgm"
+  },
+  "supersedes": {
+    "why": "Re-measured on 2026-10-20. The previous run read the capture at W*H*3//2 = 23,040 bytes per frame; the capture on disk carries 19,200 bytes per frame, so all but every sixth frame was torn. The previous numbers are recorded here rather than silently overwritten.",
+    "previous_stride_bytes": 23040,
+    "previous_n_frames": 3750,
+    "previous_input_paths": {
+      "nv12": "/home/proart/projects/glasses/.capture_keep/empty1.nv12",
+      "wav": "/home/proart/projects/glasses/.capture_keep/empty1.wav"
+    },
+    "previous_input_paths_note": "The previous run read the same BYTES from a different path (the .capture_keep copy). The SHA-256 is identical, so this is a path change, not a data change; the audio section is unch apart from the path field.",
+    "previous_vision": {
+      "n_frames": 2000,
+      "mean_luma": 49.70077926432292,
+      "adjacent_mad_raw": 39.315094363588045,
+      "adjacent_mad_gain_normalised": 0.808906145981632,
+      "median_map_windows": 9,
+      "median_map_step_drift_mean": 0.0001708984375,
+      "median_map_step_drift_max": 0.00048828125
+    },
+    "previous_verdict": null
   }
 }

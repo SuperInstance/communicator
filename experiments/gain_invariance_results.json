@@ -6,60 +6,210 @@
       "label": "OCCUPIED (facing, speaking)",
       "path": "/mnt/c/proart_capture/A.nv12",
       "n_frames": 400,
-      "mean_luma": 111.17517106119791,
-      "clipped_fraction_after_norm": 1.6276041666666666e-07,
-      "adjacent_mad_raw": 43.68600162515664,
-      "adjacent_mad_normalised": 43.2263463019528,
-      "mad_reduction_x": 1.0106336843737143,
-      "flip_raw_pct": 48.190104166666664,
-      "flip_raw_min": 33.932291666666664,
-      "flip_raw_max": 56.822916666666664,
-      "flip_normalised_pct": 51.42578125,
-      "flip_normalised_min": 38.88671875,
-      "flip_normalised_max": 55.67057291666667
+      "capture_n_frames": 900,
+      "layout": "y_uv_halfres",
+      "stride_bytes": 19200,
+      "layout_evidence": {
+        "layout": "y_uv_halfres",
+        "stride_bytes": 19200,
+        "n_frames": 900,
+        "luma_bytes": 15360,
+        "mean_consecutive_frame_diff": 0.544891,
+        "runner_up_layout": "luma_only",
+        "runner_up_mean_consecutive_frame_diff": 43.554164,
+        "margin_over_runner_up": 79.932,
+        "chroma": "interleaved U,V, 80x24 samples"
+      },
+      "mean_luma": 106.51885872395833,
+      "clipped_fraction_after_norm": 0.0,
+      "adjacent_mad_raw": 0.6154657477025898,
+      "adjacent_mad_normalised": 0.593485340956558,
+      "mad_reduction_x": 1.0370361409611306,
+      "flip_raw_pct": 0.625,
+      "flip_raw_min": 0.0,
+      "flip_raw_max": 17.643229166666664,
+      "flip_normalised_pct": 0.6315104166666666,
+      "flip_normalised_min": 0.0,
+      "flip_normalised_max": 2.75390625
     },
     {
       "label": "TURNED (head away, same words)",
       "path": "/mnt/c/proart_capture/B.nv12",
       "n_frames": 400,
-      "mean_luma": 115.36425211588542,
+      "capture_n_frames": 900,
+      "layout": "y_uv_halfres",
+      "stride_bytes": 19200,
+      "layout_evidence": {
+        "layout": "y_uv_halfres",
+        "stride_bytes": 19200,
+        "n_frames": 900,
+        "luma_bytes": 15360,
+        "mean_consecutive_frame_diff": 0.433207,
+        "runner_up_layout": "luma_only",
+        "runner_up_mean_consecutive_frame_diff": 37.730449,
+        "margin_over_runner_up": 87.096,
+        "chroma": "interleaved U,V, 80x24 samples"
+      },
+      "mean_luma": 112.26129036458333,
       "clipped_fraction_after_norm": 0.0,
-      "adjacent_mad_raw": 37.93195521355472,
-      "adjacent_mad_normalised": 37.93207187891604,
-      "mad_reduction_x": 0.9999969243609552,
-      "flip_raw_pct": 40.345052083333336,
-      "flip_raw_min": 29.420572916666664,
-      "flip_raw_max": 48.69140625,
-      "flip_normalised_pct": 41.217447916666664,
-      "flip_normalised_min": 30.7421875,
-      "flip_normalised_max": 46.458333333333336
+      "adjacent_mad_raw": 0.44620829417293234,
+      "adjacent_mad_normalised": 0.45050712719298247,
+      "mad_reduction_x": 0.990457791318785,
+      "flip_raw_pct": 0.5143229166666666,
+      "flip_raw_min": 0.0,
+      "flip_raw_max": 1.640625,
+      "flip_normalised_pct": 0.52734375,
+      "flip_normalised_min": 0.0,
+      "flip_normalised_max": 1.0546875
     },
     {
       "label": "EMPTY (nobody)",
       "path": "/home/proart/projects/glasses/.capture_keep/empty1.nv12",
       "n_frames": 400,
-      "mean_luma": 49.69857259114583,
+      "capture_n_frames": 4500,
+      "layout": "y_uv_halfres",
+      "stride_bytes": 19200,
+      "layout_evidence": {
+        "layout": "y_uv_halfres",
+        "stride_bytes": 19200,
+        "n_frames": 4500,
+        "luma_bytes": 15360,
+        "mean_consecutive_frame_diff": 0.005277,
+        "runner_up_layout": "luma_only",
+        "runner_up_mean_consecutive_frame_diff": 39.293797,
+        "margin_over_runner_up": 7446.099,
+        "chroma": "interleaved U,V, 80x24 samples"
+      },
+      "mean_luma": 30.083698079427084,
       "clipped_fraction_after_norm": 0.0,
-      "adjacent_mad_raw": 39.34364181939223,
-      "adjacent_mad_normalised": 44.29305767674394,
-      "mad_reduction_x": 0.8882575257397414,
-      "flip_raw_pct": 50.0,
-      "flip_raw_min": 25.0,
-      "flip_raw_max": 50.0,
-      "flip_normalised_pct": 50.0,
-      "flip_normalised_min": 24.973958333333332,
-      "flip_normalised_max": 50.0
+      "adjacent_mad_raw": 0.005648887844611529,
+      "adjacent_mad_normalised": 0.27465375678780285,
+      "mad_reduction_x": 0.020567305944319752,
+      "flip_raw_pct": 0.0,
+      "flip_raw_min": 0.0,
+      "flip_raw_max": 0.0,
+      "flip_normalised_pct": 0.0,
+      "flip_normalised_min": 0.0,
+      "flip_normalised_max": 0.0
     }
   ],
+  "provenance": {
+    "generated_by": "experiments/gain_invariance.py",
+    "script_path": "/home/proart/projects/communicator/experiments/gain_invariance.py",
+    "script_sha256": "b0e1ec1f0f4cc78f135d3f22df22b7871db1c9b0ada74dec3cf28bb350e0daa6",
+    "python": "/home/proart/projects/glasses/.venv/bin/python",
+    "command_line": "experiments/gain_invariance.py",
+    "cli_args": [],
+    "frames_requested": 400,
+    "inputs": {
+      "OCCUPIED (facing, speaking)": {
+        "path": "/mnt/c/proart_capture/A.nv12",
+        "sha256": "b65cf944aa4e8a65932d4c140335a495fa6a1707f28025d40fb08d31fa33bc73",
+        "bytes": 17280000,
+        "layout": "y_uv_halfres",
+        "stride_bytes": 19200,
+        "n_frames": 900,
+        "frames_used": 400,
+        "layout_evidence": {
+          "layout": "y_uv_halfres",
+          "stride_bytes": 19200,
+          "n_frames": 900,
+          "luma_bytes": 15360,
+          "mean_consecutive_frame_diff": 0.544891,
+          "runner_up_layout": "luma_only",
+          "runner_up_mean_consecutive_frame_diff": 43.554164,
+          "margin_over_runner_up": 79.932,
+          "chroma": "interleaved U,V, 80x24 samples"
+        }
+      },
+      "TURNED (head away, same words)": {
+        "path": "/mnt/c/proart_capture/B.nv12",
+        "sha256": "c87269568fabea99d39bc40b46e9a8d3026c72c241d8194f7d9c27181e893e04",
+        "bytes": 17280000,
+        "layout": "y_uv_halfres",
+        "stride_bytes": 19200,
+        "n_frames": 900,
+        "frames_used": 400,
+        "layout_evidence": {
+          "layout": "y_uv_halfres",
+          "stride_bytes": 19200,
+          "n_frames": 900,
+          "luma_bytes": 15360,
+          "mean_consecutive_frame_diff": 0.433207,
+          "runner_up_layout": "luma_only",
+          "runner_up_mean_consecutive_frame_diff": 37.730449,
+          "margin_over_runner_up": 87.096,
+          "chroma": "interleaved U,V, 80x24 samples"
+        }
+      },
+      "EMPTY (nobody)": {
+        "path": "/home/proart/projects/glasses/.capture_keep/empty1.nv12",
+        "sha256": "da348ccaf08c030dedea4b2e070ceb1149a4f11d3e9287e8212a480a58c05303",
+        "bytes": 86400000,
+        "layout": "y_uv_halfres",
+        "stride_bytes": 19200,
+        "n_frames": 4500,
+        "frames_used": 400,
+        "layout_evidence": {
+          "layout": "y_uv_halfres",
+          "stride_bytes": 19200,
+          "n_frames": 4500,
+          "luma_bytes": 15360,
+          "mean_consecutive_frame_diff": 0.005277,
+          "runner_up_layout": "luma_only",
+          "runner_up_mean_consecutive_frame_diff": 39.293797,
+          "margin_over_runner_up": 7446.099,
+          "chroma": "interleaved U,V, 80x24 samples"
+        }
+      }
+    },
+    "renderer": {
+      "program": "experiments/ascii_motion_threshold.py CHANNELS_C",
+      "note": "the character renderer assumes the STANDARD NV12 stride of 23,040 bytes per frame, so both the raw and the normalised frames are written out in standard NV12 first; no luma byte is changed by that re-wrap",
+      "frame_bytes": 23040,
+      "luma_bytes": 15360,
+      "braille_thresh": 100
+    }
+  },
+  "supersedes": {
+    "why": "Re-measured on 2026-10-20. The previous run read the captures at W*H*3//2 = 23,040 bytes per frame; the captures on disk carry 19,200 bytes per frame, so all but every sixth frame was torn. The previous numbers are recorded here rather than silently overwritten.",
+    "previous_stride_bytes": 23040,
+    "previous_captures": {
+      "OCCUPIED (facing, speaking)": {
+        "adjacent_mad_raw": 43.686,
+        "flip_raw_pct": 48.19,
+        "flip_normalised_pct": 51.426,
+        "mean_luma": 111.18
+      },
+      "TURNED (head away, same words)": {
+        "adjacent_mad_raw": 37.932,
+        "flip_raw_pct": 40.345,
+        "flip_normalised_pct": 41.217,
+        "mean_luma": 115.36
+      },
+      "EMPTY (nobody)": {
+        "adjacent_mad_raw": 39.3436,
+        "flip_raw_pct": 50.0,
+        "flip_normalised_pct": 50.0,
+        "mean_luma": 49.7
+      }
+    },
+    "previous_empty_over_occupied_normalised": 0.9722749715153817,
+    "previous_empty_over_occupied_raw": 1.0375574169143476,
+    "previous_facing_vs_turned_normalised_gap_pp": 10.208333333333336,
+    "previous_original_capture_recovered": true,
+    "previous_verdict": "THE FIX DOES NOT WORK. The empty room still reports a large flip rate after gain normalisation, so the auto-exposure hunt is not the whole mechanism."
+  },
   "limits": [
     "normalisation changes what the fixed braille_thresh means, so normalised numbers are comparable WITHIN this script only, not to any earlier report",
-    "the empty room was captured dark (mean luma ~50 vs ~111 occupied) and the two captures are hours apart; gain normalisation removes frame-to-frame drift, not a global difference between two recordings",
+    "the empty room was captured dark (mean luma ~30 vs ~107 occupied) and the two captures are hours apart; gain normalisation removes frame-to-frame drift, not a global difference between two recordings",
     "one capture per condition, no error bars",
     "per-frame normalisation also removes genuine global lighting changes, which is an accepted trade, not a free win"
   ],
-  "empty_over_occupied_normalised": 0.9722749715153817,
-  "empty_over_occupied_raw": 1.0375574169143476,
-  "verdict": "THE FIX DOES NOT WORK. The empty room still reports a large flip rate after gain normalisation, so the auto-exposure hunt is not the whole mechanism. Do NOT spend the morning on a capture that will still be uninterpretable -- the next thing to try is hysteresis (a dot keeps its bit until its luma crosses the threshold by a margin), which attacks the remaining per-dot instability directly.",
-  "facing_vs_turned_normalised_gap_pp": 10.208333333333336,
-  "original_capture_recovered": true
+  "empty_over_occupied_normalised": 0.0,
+  "empty_over_occupied_raw": 0.0,
+  "verdict": "THE PROBLEM THIS SCRIPT WAS WRITTEN TO FIX DID NOT EXIST. BEFORE any normalisation the empty room already flips 0.00% of dots per frame, against 0.62% for the occupied capture. The 50.00% empty-room figure that motivated gain normalisation was a torn-frame artefact of reading a 19,200-byte frame at a 23,040-byte stride. Gain normalisation is therefore not needed and does nothing: it moves the occupied rate from 0.62% to 0.63% (1.0x quieter) and the empty rate from 0.00% to 0.00%. The honest conclusion is that the character delta in these captures is small and clean, that the flip-rate saturation this project has been reasoning about for months was never in the data, and that the next question is not how to suppress a 50% flip rate but whether a small, real one carries usable signal.",
+  "facing_vs_turned_normalised_gap_pp": 0.10416666666666663,
+  "original_capture_recovered": false,
+  "original_capture_recovered_note": "The previous run reported a 10.21 pp gap and 'original capture RECOVERED'. That was a stride artefact: at the correct stride the gap is 0.10 pp, which is nothing. The recovery claim is WITHDRAWN."
 }

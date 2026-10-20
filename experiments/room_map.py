@@ -38,10 +38,20 @@ LOOK.
     noise and the exposure hunt are zero-mean-ish, so the median removes them and
     keeps the scene. This is the cheapest denoiser in the project and it is
     completely standard -- but it has never been run here on a long capture,
-    because every capture so far has been 25 to 750 frames of a moving subject.
+    because every capture so far has been 30 to 900 frames of a moving subject.
   * TEMPORAL STABILITY OF THE MAP. How much does the median composite move as
     the window slides? If a room map is stable, the substrate is static and
     differences between it and any future capture are content, not camera.
+
+THE FRAME LAYOUT.
+
+The captures on disk are NOT standard NV12: `C:\\proart_capture\\nv12small.py`
+writes 19,200 bytes per 160x96 frame (15,360 luma + 1,920 U + 1,920 V), not
+the `W*H*3//2` = 23,040 a standard-NV12 reader assumes. Read at 23,040, all
+but every sixth frame is torn. The layout is DETECTED from the file's content
+by `src/nv12.py` -- the candidate whose luma has the smallest mean consecutive
+|diff| wins, and an ambiguous file is an error rather than a guess. See
+`src/nv12.py` and `docs/research/NV12-STRIDE.md`.
 
 LIMITS, STATED BEFORE THE NUMBERS.
 
@@ -57,15 +67,29 @@ LIMITS, STATED BEFORE THE NUMBERS.
 
 from __future__ import annotations
 
+import hashlib
 import json
 import math
 import statistics
 import wave
 from array import array
 from pathlib import Path
+import sys
 
 ROOT = Path(__file__).resolve().parents[1]
 FRAME_W, FRAME_H = 160, 96
+if str(ROOT) not in sys.path:
+    sys.path.insert(0, str(ROOT))
+from src.nv12 import read_luma  # noqa: E402
+
+
+def sha256_file(path) -> str:
+    """SHA-256 of a file, read in chunks."""
+    h = hashlib.sha256()
+    with open(path, "rb") as f:
+        for chunk in iter(lambda: f.read(1 << 20), b""):
+            h.update(chunk)
+    return h.hexdigest()
 
 
 def read_wav_mono(path: Path):
@@ -184,11 +208,12 @@ def median_composite(frames, n):
 
 def vision_report(path: Path):
     import numpy as np
-    fb = FRAME_W * FRAME_H * 3 // 2
-    raw = np.frombuffer(path.read_bytes(), dtype=np.uint8)
-    nf = len(raw) // fb
-    F = raw[: nf * fb].reshape(nf, fb)[:, : FRAME_W * FRAME_H] \
-           .reshape(nf, FRAME_H, FRAME_W)
+    # The layout is DETECTED from the file's content, not assumed -- see
+    # `src/nv12.py`. The captures on disk are 19,200 bytes per frame, not the
+    # 23,040 a standard-NV12 reader assumes.
+    luma, layout = read_luma(path, width=FRAME_W, height=FRAME_H)
+    nf = layout.n_frames
+    F = luma
     n = min(nf, 2000)
     F = F[:n].astype(np.float64)
     means = F.reshape(n, -1).mean(axis=1)[:, None, None]
@@ -211,6 +236,10 @@ def vision_report(path: Path):
     Path(out).write_bytes(f"P5\n{FRAME_W} {FRAME_H}\n255\n".encode() + med.tobytes())
     return {
         "path": str(path), "n_frames": n,
+        "capture_n_frames": int(nf),
+        "layout": layout.name,
+        "stride_bytes": layout.stride,
+        "layout_evidence": layout.as_dict(),
         "mean_luma": float(F.mean()),
         "adjacent_mad_raw": raw_mad,
         "adjacent_mad_gain_normalised": norm_mad,
@@ -236,11 +265,25 @@ def main():
                   "they are transients, not calibrated reverberation events",
                   "the median composite assumes a static scene; its sliding "
                   "window drift is reported so that assumption can be checked",
-              ]}
+              ],
+              "provenance": {
+                  "generated_by": "experiments/room_map.py",
+                  "script_path": str(Path(__file__).resolve()),
+                  "script_sha256": sha256_file(Path(__file__).resolve()),
+                  "python": sys.executable,
+                  "command_line": " ".join(sys.argv),
+                  "cli_args": list(sys.argv[1:]),
+                  "inputs": {},
+              }}
 
     if Path(a.wav).is_file():
         ar = audio_report(Path(a.wav))
         report["audio"] = ar
+        report["provenance"]["inputs"]["wav"] = {
+            "path": str(Path(a.wav).resolve()),
+            "sha256": sha256_file(a.wav),
+            "bytes": Path(a.wav).stat().st_size,
+        }
         print(f"AUDIO  {ar['duration_s']:.1f}s  rms {ar['rms_dbfs']:.1f} dBFS  "
               f"p95 {ar['peak_95pct']}")
         print(f"       loudest bin {ar['loudest_bin_hz']} Hz")
@@ -256,6 +299,42 @@ def main():
     if Path(a.nv12).is_file():
         vr = vision_report(Path(a.nv12))
         report["vision"] = vr
+        report["provenance"]["inputs"]["nv12"] = {
+            "path": str(Path(a.nv12).resolve()),
+            "sha256": sha256_file(a.nv12),
+            "bytes": Path(a.nv12).stat().st_size,
+            "layout": vr["layout"],
+            "stride_bytes": vr["stride_bytes"],
+            "n_frames": vr["capture_n_frames"],
+        }
+        report["supersedes"] = {
+            "why": ("Re-measured on 2026-10-20. The previous run read the "
+                    "capture at W*H*3//2 = 23,040 bytes per frame; the "
+                    "capture on disk carries 19,200 bytes per frame, so all "
+                    "but every sixth frame was torn. The previous numbers are "
+                    "recorded here rather than silently overwritten."),
+            "previous_stride_bytes": 23040,
+            "previous_n_frames": 3750,
+            "previous_input_paths": {
+                "nv12": "/home/proart/projects/glasses/.capture_keep/empty1.nv12",
+                "wav": "/home/proart/projects/glasses/.capture_keep/empty1.wav",
+            },
+            "previous_input_paths_note": (
+                "The previous run read the same BYTES from a different path "
+                "(the .capture_keep copy). The SHA-256 is identical, so this "
+                "is a path change, not a data change; the audio section is "
+                "unch apart from the path field."),
+            "previous_vision": {
+                "n_frames": 2000,
+                "mean_luma": 49.70077926432292,
+                "adjacent_mad_raw": 39.315094363588045,
+                "adjacent_mad_gain_normalised": 0.808906145981632,
+                "median_map_windows": 9,
+                "median_map_step_drift_mean": 0.0001708984375,
+                "median_map_step_drift_max": 0.00048828125,
+            },
+            "previous_verdict": None,
+        }
         print(f"\nVISION {vr['n_frames']} frames  mean luma {vr['mean_luma']:.2f}")
         print(f"       adjacent MAD raw {vr['adjacent_mad_raw']:.3f} "
               f"-> gain-normalised {vr['adjacent_mad_gain_normalised']:.4f}")

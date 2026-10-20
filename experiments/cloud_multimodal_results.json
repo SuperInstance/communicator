@@ -1,6 +1,6 @@
 {
   "question": "Is the person in this image SPEAKING (their mouth is moving or open, as if talking) or NOT SPEAKING (mouth closed, still)? Answer with exactly one word: SPEAKING or NOT SPEAKING.",
-  "frames_per_condition": 11,
+  "frames_per_condition": 12,
   "frame_indices": {
     "speak": [
       58,
@@ -13,7 +13,8 @@
       537,
       603,
       689,
-      747
+      747,
+      817
     ],
     "silent": [
       30,
@@ -39,32 +40,35 @@
       440,
       506,
       584,
-      669
+      669,
+      761,
+      832
     ]
   },
   "frame_selection": "speaking frames are aligned to DETECTED SPEECH segments from src/vad.py, so each frame's label holds at that frame's own timestamp; silent frames are spread over the session",
   "models": {
     "@cf/meta/llama-3.2-11b-vision-instruct": {
       "speak": {
-        "right": 5,
-        "wrong": 6,
+        "right": 8,
+        "wrong": 4,
         "unparsed": 0,
         "errors": 0,
-        "accuracy": 0.45454545454545453,
-        "said_speaking": 5,
-        "said_speaking_rate": 0.45454545454545453,
+        "accuracy": 0.6666666666666666,
+        "said_speaking": 8,
+        "said_speaking_rate": 0.6666666666666666,
         "texts": [
-          "NOT SPEAKING.",
-          "NOT SPEAKING.",
-          "NOT SPEAKING.",
           "SPEAKING.",
-          "NOT SPEAKING.",
+          "SPEAKING.",
           "SPEAKING.",
           "SPEAKING.",
           "NOT SPEAKING.",
           "NOT SPEAKING.",
           "SPEAKING.",
-          "SPEAKING."
+          "SPEAKING.",
+          "SPEAKING.",
+          "NOT SPEAKING.",
+          "SPEAKING.",
+          "NOT SPEAKING."
         ]
       },
       "silent": {
@@ -109,50 +113,16 @@
           "NOT SPEAKING.",
           "NOT SPEAKING.",
           "NOT SPEAKING.",
+          "NOT SPEAKING.",
           "NOT SPEAKING."
         ]
       },
-      "sensitivity_says_speaking_on_speech_frames": 0.45454545454545453,
+      "sensitivity_says_speaking_on_speech_frames": 0.6666666666666666,
       "false_positive_rate_on_silent_person_present": 0.0,
       "false_positive_rate_on_blank": 0.0,
-      "margin_over_silent_person_present": 0.45454545454545453,
-      "margin_over_blank_secondary": 0.45454545454545453,
+      "margin_over_silent_person_present": 0.6666666666666666,
+      "margin_over_blank_secondary": 0.6666666666666666,
       "usable": true
-    },
-    "clef-omni-audio": {
-      "speak": {
-        "parsed": true,
-        "p_yes": 0.8003,
-        "text": "",
-        "answers_raw": "{'q1': {'type': 'choice', 'choice': 'yes', 'probabilities': {'yes': 0.8003, 'no': 0.1997}, 'confidence': 0.3608}}",
-        "error": null,
-        "detail": "",
-        "elapsed_s": 1.04
-      },
-      "silent": {
-        "parsed": false,
-        "p_yes": 0.0345,
-        "text": "",
-        "answers_raw": "{'q1': {'type': 'choice', 'choice': 'no', 'probabilities': {'yes': 0.0345, 'no': 0.9655}, 'confidence': 0.8667}}",
-        "error": null,
-        "detail": "",
-        "elapsed_s": 1.14
-      },
-      "audio_margin_p_yes_speak_minus_silent": 0.7658,
-      "facing_A": {
-        "parsed": true,
-        "p_facing": 0.9147,
-        "text": "",
-        "answers_raw": "{'q1': {'type': 'choice', 'choice': 'facing', 'probabilities': {'facing': 0.9147, 'away': 0.0853}, 'confidence': 0.6881}}"
-      },
-      "facing_B": {
-        "parsed": true,
-        "p_facing": 0.9059,
-        "text": "",
-        "answers_raw": "{'q1': {'type': 'choice', 'choice': 'facing', 'probabilities': {'facing': 0.9059, 'away': 0.0941}, 'confidence': 0.6589}}"
-      },
-      "facing_separation": 0.0,
-      "facing_probability_margin": 0.008799999999999919
     }
   },
   "note": "The margin over the blank control is the headline, not the accuracy. A model that answers NOT SPEAKING to everything scores 50% on a two-class task and 100% on the silent class, which is why the blank control is run at the same count as the real conditions.",
@@ -160,5 +130,128 @@
     "one session per condition, one speaker, one room",
     "frames from one session are correlated, so the effective sample size is far below the frame count",
     "a good result here is a demonstration that the signal exists; the leave-one-session-out test is what would certify a teacher"
-  ]
+  ],
+  "provenance": {
+    "generated_by": "experiments/cloud_multimodal.py",
+    "script_path": "/home/proart/projects/communicator/experiments/cloud_multimodal.py",
+    "script_sha256": "c97fc03643b0291026ed61b3219bc331130b2f8ebe074d0c800722505c4b7db7",
+    "python": "/home/proart/projects/glasses/.venv/bin/python",
+    "command_line": "experiments/cloud_multimodal.py --frames 12",
+    "cli_args": [
+      "--frames",
+      "12"
+    ],
+    "captures": {
+      "speaking": {
+        "path": "/mnt/c/proart_capture/A.nv12",
+        "sha256": "b65cf944aa4e8a65932d4c140335a495fa6a1707f28025d40fb08d31fa33bc73",
+        "bytes": 17280000,
+        "layout": "y_uv_halfres",
+        "stride_bytes": 19200,
+        "n_frames": 900,
+        "layout_evidence": {
+          "layout": "y_uv_halfres",
+          "stride_bytes": 19200,
+          "n_frames": 900,
+          "luma_bytes": 15360,
+          "mean_consecutive_frame_diff": 0.544891,
+          "runner_up_layout": "luma_only",
+          "runner_up_mean_consecutive_frame_diff": 43.554164,
+          "margin_over_runner_up": 79.932,
+          "chroma": "interleaved U,V, 80x24 samples"
+        }
+      },
+      "silent": {
+        "path": "/mnt/c/proart_capture/C.nv12",
+        "sha256": "937ac321bc436ea41b50508b5431f7c6862f32641c127c7800191b9ce080e5cf",
+        "bytes": 17280000,
+        "layout": "y_uv_halfres",
+        "stride_bytes": 19200,
+        "n_frames": 900,
+        "layout_evidence": {
+          "layout": "y_uv_halfres",
+          "stride_bytes": 19200,
+          "n_frames": 900,
+          "luma_bytes": 15360,
+          "mean_consecutive_frame_diff": 0.366688,
+          "runner_up_layout": "luma_only",
+          "runner_up_mean_consecutive_frame_diff": 42.921703,
+          "margin_over_runner_up": 117.052,
+          "chroma": "interleaved U,V, 80x24 samples"
+        }
+      },
+      "turned": {
+        "path": "/mnt/c/proart_capture/B.nv12",
+        "sha256": "c87269568fabea99d39bc40b46e9a8d3026c72c241d8194f7d9c27181e893e04",
+        "bytes": 17280000,
+        "layout": "y_uv_halfres",
+        "stride_bytes": 19200,
+        "n_frames": 900,
+        "layout_evidence": {
+          "layout": "y_uv_halfres",
+          "stride_bytes": 19200,
+          "n_frames": 900,
+          "luma_bytes": 15360,
+          "mean_consecutive_frame_diff": 0.433207,
+          "runner_up_layout": "luma_only",
+          "runner_up_mean_consecutive_frame_diff": 37.730449,
+          "margin_over_runner_up": 87.096,
+          "chroma": "interleaved U,V, 80x24 samples"
+        }
+      }
+    }
+  },
+  "supersedes": {
+    "why": "Re-run on 2026-10-20. The previous run read the captures at W*H*3//2 = 23,040 bytes per frame; the captures on disk carry 19,200 bytes per frame, so every frame that was sent to the model was a TORN frame -- rows 0..71 of one frame and rows 72..95 of the next. The previous answers are recorded here rather than silently overwritten.",
+    "previous_stride_bytes": 23040,
+    "previous_frame_indices": {
+      "speak": [
+        58,
+        134,
+        188,
+        245,
+        323,
+        391,
+        464,
+        537,
+        603,
+        689,
+        747
+      ],
+      "silent": [
+        30,
+        50,
+        70,
+        90,
+        110,
+        130,
+        150,
+        170,
+        190,
+        210,
+        230,
+        250
+      ],
+      "turned": [
+        56,
+        120,
+        169,
+        252,
+        319,
+        378,
+        440,
+        506,
+        584,
+        669
+      ]
+    },
+    "previous_frames_per_condition": 11,
+    "previous_model": "@cf/meta/llama-3.2-11b-vision-instruct",
+    "previous_speak_accuracy": 0.45454545454545453,
+    "previous_silent_accuracy": 1.0,
+    "previous_blank_accuracy": null,
+    "previous_margin_over_silent_class": 0.45454545454545453,
+    "previous_note": "The speaking condition had 11 frames, not 12, because one of the VAD-picked frames (817) was past the end of the 750 frames the WRONG stride produced. At the correct stride the capture has 900 frames and all 12 survive, so the denominators now match across conditions.",
+    "run_to_run_spread": "THIS ENDPOINT IS NOT DETERMINISTIC at temperature 0.0. Five identical runs of this script on the same frames gave a margin over the silent class of 0.583, 0.667, 0.583, 0.667 and 0.583, and the frames that moved were not always the same ones: in the last run the SPEAKING arm scored 8/12 and the SILENT arm 11/12, where earlier runs had the silent arm at 12/12. The verdict (USABLE) is the same in every run and the margin is far above the 0.0 silent and blank floors, but the number carries that jitter and should be read as 'about 0.6', not to three decimals. A twelve-frame arm cannot resolve a difference of one frame; the previous run's 0.455 and this one's 0.583 are the same measurement."
+  }
 }

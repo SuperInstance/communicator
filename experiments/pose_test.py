@@ -1,6 +1,19 @@
 """
 pose_test.py -- can the camera alone tell facing from head-turned?
 
+THE FRAME LAYOUT, FIRST.
+
+The captures on disk are NOT standard NV12. `C:\\proart_capture\\nv12small.py`
+writes 15,360 luma bytes + 1,920 U + 1,920 V per 160x96 frame -- 19,200 bytes
+-- not the `W*H*3//2` = 23,040 this file used to assume. Read at 23,040, all
+but every sixth frame is torn (rows 0..71 from frame k, rows 72..95 from frame
+k+1) and the 750 frames that come out are not 750 frames of anything.
+
+The layout is DETECTED from the file's content by `src/nv12.py` -- the
+candidate whose luma has the smallest mean consecutive |diff| wins, and an
+ambiguous file is an error rather than a guess. Nothing here computes a stride
+by hand. See `src/nv12.py` and `docs/research/NV12-STRIDE.md`.
+
 THE TEST, PROPERLY SPECIFIED.
 
 Everything this project tried before failed one of two ways. The audio routes
@@ -75,6 +88,7 @@ previous three-condition run deserved.
 
 from __future__ import annotations
 
+import hashlib
 import json
 import sys
 from pathlib import Path
@@ -83,15 +97,28 @@ import numpy as np
 
 ROOT = Path(__file__).resolve().parents[1]
 FRAME_W, FRAME_H = 160, 96
-FB = FRAME_W * FRAME_H * 3 // 2
-Y_SIZE = FRAME_W * FRAME_H
+if str(ROOT) not in sys.path:
+    sys.path.insert(0, str(ROOT))
+from src.nv12 import read_luma  # noqa: E402
+
+
+def sha256_file(path) -> str:
+    """SHA-256 of a file, read in chunks."""
+    h = hashlib.sha256()
+    with open(path, "rb") as f:
+        for chunk in iter(lambda: f.read(1 << 20), b""):
+            h.update(chunk)
+    return h.hexdigest()
 
 
 def load_y(path: Path, nf: int):
-    raw = np.frombuffer(path.read_bytes(), dtype=np.uint8)
-    n = min(nf, len(raw) // FB)
-    return raw[:n * FB].reshape(n, FB)[:, :Y_SIZE].reshape(n, FRAME_H, FRAME_W) \
-        .astype(np.float64)
+    """The luma of the first `nf` frames, as float64.
+
+    The layout is detected, not assumed -- see `src/nv12.py`.
+    """
+    luma, layout = read_luma(path, width=FRAME_W, height=FRAME_H)
+    n = min(nf, layout.n_frames)
+    return luma[:n].astype(np.float64), layout
 
 
 def row_remove(F):
@@ -123,10 +150,22 @@ def main():
     a = ap.parse_args()
 
     caps = {}
+    inputs = {}
     for key, p in (("A_facing_speaking", a.occupied), ("B_turned_speaking", a.turned),
                    ("C_facing_silent", a.silent), ("EMPTY", a.empty)):
         if Path(p).is_file():
-            caps[key] = row_remove(load_y(Path(p), 1200))
+            F, layout = load_y(Path(p), 1200)
+            caps[key] = row_remove(F)
+            inputs[key] = {
+                "path": str(Path(p).resolve()),
+                "sha256": sha256_file(p),
+                "bytes": Path(p).stat().st_size,
+                "layout": layout.name,
+                "stride_bytes": layout.stride,
+                "n_frames": layout.n_frames,
+                "frames_used": int(len(F)),
+                "layout_evidence": layout.as_dict(),
+            }
 
     if "A_facing_speaking" not in caps or "EMPTY" not in caps:
         sys.exit("need at least the facing capture and the empty capture")
@@ -202,21 +241,69 @@ def main():
         "null_map_mean": float(null.mean()), "null_map_max": float(null.max()),
         "null_map_p99": float(np.percentile(null, 99)),
         "results": results,
+        "supersedes": {
+            "why": ("Re-measured on 2026-10-20. The previous run read the "
+                    "captures at W*H*3//2 = 23,040 bytes per frame; the "
+                    "captures on disk carry 19,200 bytes per frame, so all "
+                    "but every sixth frame was torn and the 'drift' and the "
+                    "'difference' both measured that tear. The previous "
+                    "numbers are recorded here rather than silently "
+                    "overwritten."),
+            "previous_stride_bytes": 23040,
+            "previous_n_frames": {"A_facing_speaking": 750,
+                                  "B_turned_speaking": 750,
+                                  "C_facing_silent": 750,
+                                  "EMPTY": 3750},
+            "previous_null_map_mean": 43.560,
+            "previous_results": {
+                "A_vs_B": {"mean_abs_diff": 9.182},
+                "A_vs_C": {"mean_abs_diff": 4.914},
+                "within_A_facing_speaking": {"mean_abs_diff": 2.878},
+                "within_B_turned_speaking": {"mean_abs_diff": 1.917},
+                "A_vs_B_shifted": {"mean_abs_diff": 9.178},
+            },
+            "previous_verdict": (
+                "NO POSE SIGNAL IN THIS STATISTIC. A-vs-B is 9.182 and the "
+                "time-shifted control is 9.178 -- indistinguishable. The "
+                "apparent difference between facing and turned is the scene "
+                "changing over time, not a head direction. SPEECH IS VISIBLE. "
+                "Facing-and-speaking vs facing-and-silent differ by 4.914 "
+                "against A's own within-condition split of 2.878 (1.7x), and "
+                "the excess is 79% concentrated in the top 5% of pixels -- it "
+                "is LOCALISED, which is what a real signal looks like and "
+                "what the A-vs-B comparison is not."),
+        },
+        "provenance": {
+            "generated_by": "experiments/pose_test.py",
+            "script_path": str(Path(__file__).resolve()),
+            "script_sha256": sha256_file(Path(__file__).resolve()),
+            "python": sys.executable,
+            "command_line": " ".join(sys.argv),
+            "cli_args": list(sys.argv[1:]),
+            "captures": inputs,
+            "fps_assumed": 30.0,
+            "window_s": [a.t0, a.t1],
+        },
         "limits": [
             "the empty capture is later and darker than the others; the null "
             "floor is therefore probably an OVER-estimate, which makes the "
             "test conservative rather than optimistic",
             "THIS STATISTIC IS BLIND TO HEAD POSE, and that is now known "
             "rather than assumed. A separate search over fourteen candidate "
-            "features (experiments/pose_feature_search.py) finds one that "
-            "does separate facing from turned: mirror_cov, the frame's "
-            "covariance with its own horizontal mirror, margin +0.814, and "
-            "pose-consistent because the first and last captures of the run "
-            "agree with each other while only the middle one differs. So the "
-            "null below is a property of the CHANGE-MAP MAGNITUDE, and the "
-            "earlier explanation -- that the head turn was too small to "
-            "register -- was an assumption resting on a blind instrument. "
-            "See docs/research/POSE-FEATURE.md.",
+            "features (experiments/pose_feature_search.py) was RE-RUN at the "
+            "correct frame stride on 2026-10-20 and now finds NO clean pose "
+            "signal. mirror_cov, the frame's covariance with its own "
+            "horizontal mirror, still separates facing from turned (margin "
+            "+1.083) but ALSO separates the two FACING conditions (A-vs-C "
+            "0.418 against a control of 0.331), so it reads as motion or "
+            "session rather than as pose. The previous run's claim that "
+            "mirror_cov was pose-consistent (margin +0.814, 'A and C agree, "
+            "only B differs') was measured on torn frames and does not "
+            "survive. So the null below is a property of the CHANGE-MAP "
+            "MAGNITUDE, and the earlier explanation -- that the head turn "
+            "was too small to register -- is an assumption resting on a "
+            "blind instrument, which the re-run neither confirms nor "
+            "refutes. See docs/research/POSE-FEATURE.md.",
             "one capture per condition, no error bars, no cross-validation",
             "this measures a POSE signal. It does not measure whether anyone "
             "is talking to you",
@@ -274,15 +361,37 @@ def main():
     # sits in the top 5% of pixels, which is what a real signal looks like
     # and what the A-vs-B comparison is not.
     if ac is not None and half_a is not None:
+        ratio = ac / half_a
         if ac > half_a * MARGIN:
             out["speech_verdict"] = (
                 f"SPEECH IS VISIBLE. Facing-and-speaking vs facing-and-silent "
                 f"differ by {ac:.3f} against A's own within-condition split of "
-                f"{half_a:.3f} ({ac / half_a:.1f}x), and the excess is "
+                f"{half_a:.3f} ({ratio:.1f}x), and the excess is "
                 f"{ac_loc * 100:.0f}% concentrated in the top 5% of pixels -- "
                 "it is LOCALISED, which is what a real signal looks like and "
                 "what the A-vs-B comparison is not. The camera channel does "
                 "carry information about whether someone is speaking.")
+        else:
+            # The previous run reported 4.914 against a split of 2.878 -- 1.7x
+            # -- and called it "SPEECH IS VISIBLE". That was measured on a
+            # torn signal. On the clean signal the ratio is at the margin
+            # rather than over it, so the conclusion does not carry. It is
+            # said here rather than left out, because a missing verdict reads
+            # as "not measured" and this one WAS measured and FAILED.
+            out["speech_verdict"] = (
+                f"THE SPEECH SIGNAL DOES NOT CLEAR ITS OWN CONTROL. Facing-and-"
+                f"speaking vs facing-and-silent differ by {ac:.4f} against A's "
+                f"own within-condition split of {half_a:.4f} ({ratio:.3f}x), "
+                f"which does not clear the {MARGIN}x margin this test was given "
+                f"before the numbers were seen (it misses by "
+                f"{MARGIN - ratio:.4f} in ratio, i.e. "
+                f"{MARGIN * half_a - ac:.6f} counts), and the excess is only "
+                f"{ac_loc * 100:.0f}% localised in the top 5% of pixels "
+                "against 79% before. The previous run reported 1.71x and "
+                "'SPEECH IS VISIBLE'; it was measuring a torn signal. On the "
+                "clean signal this statistic does NOT establish that speech is "
+                "visible in the camera channel, and the honest reading is that "
+                "the question is open again rather than answered.")
     out["verdict"] = (out.get("pose_verdict", "") + " " +
                       out.get("speech_verdict", "")).strip()
     p = Path(a.out) / "pose_test_results.json"

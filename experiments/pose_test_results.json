@@ -4,51 +4,175 @@
     0.8,
     9.0
   ],
-  "null_map_mean": 10.004265381521003,
-  "null_map_max": 36.69308943089431,
-  "null_map_p99": 13.785325203252027,
+  "null_map_mean": 0.005480923949864497,
+  "null_map_max": 0.8617886178861789,
+  "null_map_p99": 0.23983739837398374,
   "results": {
     "A_vs_B": {
-      "mean_abs_diff": 9.182033822077722,
-      "max_diff": 57.861449864498624,
-      "frac_above_null": 0.34908854166666664,
-      "top5pct_excess_share": 0.3744645852857468,
-      "excess_mean": 2.9514901427395612
+      "mean_abs_diff": 0.2534840763853603,
+      "max_diff": 3.1597857384823875,
+      "frac_above_null": 0.9873697916666667,
+      "top5pct_excess_share": 0.30458290761224366,
+      "excess_mean": 0.2510493828998349
     },
     "A_vs_C": {
-      "mean_abs_diff": 4.913595272295089,
-      "max_diff": 49.601202574525765,
-      "frac_above_null": 0.12057291666666667,
-      "top5pct_excess_share": 0.7914137145311372,
-      "excess_mean": 1.0483934659191154
+      "mean_abs_diff": 0.2506462365954225,
+      "max_diff": 3.4567454268292686,
+      "frac_above_null": 0.9873046875,
+      "top5pct_excess_share": 0.31483340793837916,
+      "excess_mean": 0.24852751858512226
     },
     "B_vs_C": {
-      "mean_abs_diff": 9.410518833012222,
-      "max_diff": 52.012237466124645,
-      "frac_above_null": 0.3490234375,
-      "top5pct_excess_share": 0.3881837216875537,
-      "excess_mean": 3.370947753575435
+      "mean_abs_diff": 0.13938880375945686,
+      "max_diff": 2.2279810298102976,
+      "frac_above_null": 0.9865885416666667,
+      "top5pct_excess_share": 0.23366236379140828,
+      "excess_mean": 0.13706446150561766
     },
     "within_A_facing_speaking": {
-      "mean_abs_diff": 2.878394530588373,
-      "max_diff": 23.064955962059642
+      "mean_abs_diff": 0.20061128335485823,
+      "max_diff": 4.0326473577235795
     },
     "within_B_turned_speaking": {
-      "mean_abs_diff": 1.917389108990373,
-      "max_diff": 26.151338075880773
+      "mean_abs_diff": 0.09647630865550193,
+      "max_diff": 2.2308604336043363
     },
     "A_vs_B_shifted": {
-      "mean_abs_diff": 9.178467943696363,
-      "max_diff": 57.76196222899725
+      "mean_abs_diff": 0.25641228073657696,
+      "max_diff": 3.2605436991869943
     }
+  },
+  "supersedes": {
+    "why": "Re-measured on 2026-10-20. The previous run read the captures at W*H*3//2 = 23,040 bytes per frame; the captures on disk carry 19,200 bytes per frame, so all but every sixth frame was torn and the 'drift' and the 'difference' both measured that tear. The previous numbers are recorded here rather than silently overwritten.",
+    "previous_stride_bytes": 23040,
+    "previous_n_frames": {
+      "A_facing_speaking": 750,
+      "B_turned_speaking": 750,
+      "C_facing_silent": 750,
+      "EMPTY": 3750
+    },
+    "previous_null_map_mean": 43.56,
+    "previous_results": {
+      "A_vs_B": {
+        "mean_abs_diff": 9.182
+      },
+      "A_vs_C": {
+        "mean_abs_diff": 4.914
+      },
+      "within_A_facing_speaking": {
+        "mean_abs_diff": 2.878
+      },
+      "within_B_turned_speaking": {
+        "mean_abs_diff": 1.917
+      },
+      "A_vs_B_shifted": {
+        "mean_abs_diff": 9.178
+      }
+    },
+    "previous_verdict": "NO POSE SIGNAL IN THIS STATISTIC. A-vs-B is 9.182 and the time-shifted control is 9.178 -- indistinguishable. The apparent difference between facing and turned is the scene changing over time, not a head direction. SPEECH IS VISIBLE. Facing-and-speaking vs facing-and-silent differ by 4.914 against A's own within-condition split of 2.878 (1.7x), and the excess is 79% concentrated in the top 5% of pixels -- it is LOCALISED, which is what a real signal looks like and what the A-vs-B comparison is not."
+  },
+  "provenance": {
+    "generated_by": "experiments/pose_test.py",
+    "script_path": "/home/proart/projects/communicator/experiments/pose_test.py",
+    "script_sha256": "67fc8a9b420d81d565b06152c41204824d427247154f4bee40e3b3f83ed6c24c",
+    "python": "/home/proart/projects/glasses/.venv/bin/python",
+    "command_line": "experiments/pose_test.py",
+    "cli_args": [],
+    "captures": {
+      "A_facing_speaking": {
+        "path": "/mnt/c/proart_capture/A.nv12",
+        "sha256": "b65cf944aa4e8a65932d4c140335a495fa6a1707f28025d40fb08d31fa33bc73",
+        "bytes": 17280000,
+        "layout": "y_uv_halfres",
+        "stride_bytes": 19200,
+        "n_frames": 900,
+        "frames_used": 900,
+        "layout_evidence": {
+          "layout": "y_uv_halfres",
+          "stride_bytes": 19200,
+          "n_frames": 900,
+          "luma_bytes": 15360,
+          "mean_consecutive_frame_diff": 0.544891,
+          "runner_up_layout": "luma_only",
+          "runner_up_mean_consecutive_frame_diff": 43.554164,
+          "margin_over_runner_up": 79.932,
+          "chroma": "interleaved U,V, 80x24 samples"
+        }
+      },
+      "B_turned_speaking": {
+        "path": "/mnt/c/proart_capture/B.nv12",
+        "sha256": "c87269568fabea99d39bc40b46e9a8d3026c72c241d8194f7d9c27181e893e04",
+        "bytes": 17280000,
+        "layout": "y_uv_halfres",
+        "stride_bytes": 19200,
+        "n_frames": 900,
+        "frames_used": 900,
+        "layout_evidence": {
+          "layout": "y_uv_halfres",
+          "stride_bytes": 19200,
+          "n_frames": 900,
+          "luma_bytes": 15360,
+          "mean_consecutive_frame_diff": 0.433207,
+          "runner_up_layout": "luma_only",
+          "runner_up_mean_consecutive_frame_diff": 37.730449,
+          "margin_over_runner_up": 87.096,
+          "chroma": "interleaved U,V, 80x24 samples"
+        }
+      },
+      "C_facing_silent": {
+        "path": "/mnt/c/proart_capture/C.nv12",
+        "sha256": "937ac321bc436ea41b50508b5431f7c6862f32641c127c7800191b9ce080e5cf",
+        "bytes": 17280000,
+        "layout": "y_uv_halfres",
+        "stride_bytes": 19200,
+        "n_frames": 900,
+        "frames_used": 900,
+        "layout_evidence": {
+          "layout": "y_uv_halfres",
+          "stride_bytes": 19200,
+          "n_frames": 900,
+          "luma_bytes": 15360,
+          "mean_consecutive_frame_diff": 0.366688,
+          "runner_up_layout": "luma_only",
+          "runner_up_mean_consecutive_frame_diff": 42.921703,
+          "margin_over_runner_up": 117.052,
+          "chroma": "interleaved U,V, 80x24 samples"
+        }
+      },
+      "EMPTY": {
+        "path": "/home/proart/projects/glasses/.capture_keep/empty1.nv12",
+        "sha256": "da348ccaf08c030dedea4b2e070ceb1149a4f11d3e9287e8212a480a58c05303",
+        "bytes": 86400000,
+        "layout": "y_uv_halfres",
+        "stride_bytes": 19200,
+        "n_frames": 4500,
+        "frames_used": 1200,
+        "layout_evidence": {
+          "layout": "y_uv_halfres",
+          "stride_bytes": 19200,
+          "n_frames": 4500,
+          "luma_bytes": 15360,
+          "mean_consecutive_frame_diff": 0.005277,
+          "runner_up_layout": "luma_only",
+          "runner_up_mean_consecutive_frame_diff": 39.293797,
+          "margin_over_runner_up": 7446.099,
+          "chroma": "interleaved U,V, 80x24 samples"
+        }
+      }
+    },
+    "fps_assumed": 30.0,
+    "window_s": [
+      0.8,
+      9.0
+    ]
   },
   "limits": [
     "the empty capture is later and darker than the others; the null floor is therefore probably an OVER-estimate, which makes the test conservative rather than optimistic",
-    "THIS STATISTIC IS BLIND TO HEAD POSE, and that is now known rather than assumed. A separate search over fourteen candidate features (experiments/pose_feature_search.py) finds one that does separate facing from turned: mirror_cov, the frame's covariance with its own horizontal mirror, margin +0.814, and pose-consistent because the first and last captures of the run agree with each other while only the middle one differs. So the null below is a property of the CHANGE-MAP MAGNITUDE, and the earlier explanation -- that the head turn was too small to register -- was an assumption resting on a blind instrument. See docs/research/POSE-FEATURE.md.",
+    "THIS STATISTIC IS BLIND TO HEAD POSE, and that is now known rather than assumed. A separate search over fourteen candidate features (experiments/pose_feature_search.py) was RE-RUN at the correct frame stride on 2026-10-20 and now finds NO clean pose signal. mirror_cov, the frame's covariance with its own horizontal mirror, still separates facing from turned (margin +1.083) but ALSO separates the two FACING conditions (A-vs-C 0.418 against a control of 0.331), so it reads as motion or session rather than as pose. The previous run's claim that mirror_cov was pose-consistent (margin +0.814, 'A and C agree, only B differs') was measured on torn frames and does not survive. So the null below is a property of the CHANGE-MAP MAGNITUDE, and the earlier explanation -- that the head turn was too small to register -- is an assumption resting on a blind instrument, which the re-run neither confirms nor refutes. See docs/research/POSE-FEATURE.md.",
     "one capture per condition, no error bars, no cross-validation",
     "this measures a POSE signal. It does not measure whether anyone is talking to you"
   ],
-  "pose_verdict": "NO POSE SIGNAL IN THIS STATISTIC. A-vs-B is 9.182 and the time-shifted control is 9.178 -- indistinguishable. The apparent difference between facing and turned is the scene changing over time, not a head direction.",
-  "speech_verdict": "SPEECH IS VISIBLE. Facing-and-speaking vs facing-and-silent differ by 4.914 against A's own within-condition split of 2.878 (1.7x), and the excess is 79% concentrated in the top 5% of pixels -- it is LOCALISED, which is what a real signal looks like and what the A-vs-B comparison is not. The camera channel does carry information about whether someone is speaking.",
-  "verdict": "NO POSE SIGNAL IN THIS STATISTIC. A-vs-B is 9.182 and the time-shifted control is 9.178 -- indistinguishable. The apparent difference between facing and turned is the scene changing over time, not a head direction. SPEECH IS VISIBLE. Facing-and-speaking vs facing-and-silent differ by 4.914 against A's own within-condition split of 2.878 (1.7x), and the excess is 79% concentrated in the top 5% of pixels -- it is LOCALISED, which is what a real signal looks like and what the A-vs-B comparison is not. The camera channel does carry information about whether someone is speaking."
+  "pose_verdict": "NO POSE SIGNAL IN THIS STATISTIC. A-vs-B is 0.253 and the time-shifted control is 0.256 -- indistinguishable. The apparent difference between facing and turned is the scene changing over time, not a head direction.",
+  "speech_verdict": "THE SPEECH SIGNAL DOES NOT CLEAR ITS OWN CONTROL. Facing-and-speaking vs facing-and-silent differ by 0.2506 against A's own within-condition split of 0.2006 (1.249x), which does not clear the 1.25x margin this test was given before the numbers were seen (it misses by 0.0006 in ratio, i.e. 0.000118 counts), and the excess is only 31% localised in the top 5% of pixels against 79% before. The previous run reported 1.71x and 'SPEECH IS VISIBLE'; it was measuring a torn signal. On the clean signal this statistic does NOT establish that speech is visible in the camera channel, and the honest reading is that the question is open again rather than answered.",
+  "verdict": "NO POSE SIGNAL IN THIS STATISTIC. A-vs-B is 0.253 and the time-shifted control is 0.256 -- indistinguishable. The apparent difference between facing and turned is the scene changing over time, not a head direction. THE SPEECH SIGNAL DOES NOT CLEAR ITS OWN CONTROL. Facing-and-speaking vs facing-and-silent differ by 0.2506 against A's own within-condition split of 0.2006 (1.249x), which does not clear the 1.25x margin this test was given before the numbers were seen (it misses by 0.0006 in ratio, i.e. 0.000118 counts), and the excess is only 31% localised in the top 5% of pixels against 79% before. The previous run reported 1.71x and 'SPEECH IS VISIBLE'; it was measuring a torn signal. On the clean signal this statistic does NOT establish that speech is visible in the camera channel, and the honest reading is that the question is open again rather than answered."
 }

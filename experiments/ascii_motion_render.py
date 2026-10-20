@@ -9,7 +9,31 @@ Casey asked for, and `docs/research/ASCII-MOTION.md` is where it was first
 measured -- and where the first two attempts at it turned out to be measuring
 the camera rather than the scene.
 
-WHAT HAS CHANGED SINCE, AND WHY THIS FILE EXISTS NOW.
+WHAT CHANGED ON 2026-10-20, AND WHAT THIS FILE THEREFORE DOES NOT CLAIM.
+
+Every number quoted in the two paragraphs below was measured on a TORN signal.
+The captures on disk carry 19,200 bytes per 160x96 frame, not the
+`W*H*3//2` = 23,040 that every experiment here used to assume, so all but
+every sixth frame was a collage of two real ones. Re-measured at the correct
+stride (`experiments/row_band_removal.py`, `experiments/pose_test.py`,
+`experiments/gain_invariance.py`):
+
+  * the empty room flips 0.00% of its dots per frame, not 50.00%. There was
+    no auto-exposure nuisance to remove, and the row-band filter that was
+    built to remove it now makes the occupied rate slightly WORSE.
+  * facing-and-speaking differs from facing-and-silent by 0.2506 counts
+    against A's own within-condition split of 0.2006 -- 1.25x, which does
+    not clear the 1.25x margin the test was given before the numbers were
+    seen -- with 31% of the excess in the top 5% of pixels, not 79%.
+
+So the argument this file was built to support -- that the character
+representation carries a measurable, localised speech signal in the frame
+difference that a single-frame teacher cannot see -- is NOT YET established.
+It is the hypothesis the instrument is for, and the instrument is still worth
+building. What is not claimed is a result. The corpus to test it on is
+`/mnt/c/proart_capture/corpus_v2`, seeded at the correct stride.
+
+THE OLD ARGUMENT, KEPT AS THE RECORD OF WHAT WAS BELIEVED.
 
 The first attempt rendered SYZYGY'S BRAILLE FIELD and took the frame-to-frame
 difference. That was measured to be useless: an empty room flipped 50.00% of
