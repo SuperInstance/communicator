@@ -373,6 +373,14 @@ RECIPES: dict[str, Recipe] = {
         skip="needs the Cloudflare Workers AI API (network)",
         inputs=["/mnt/c/proart_capture/A.nv12"],
     ),
+    "vlm_image_retention.py": Recipe(
+        script="vlm_image_retention.py",
+        skip=("needs the GPU and the Qwen2.5-VL-3B weights in the local "
+              "Hugging Face cache; the weights are not in the repository"),
+        inputs=["/mnt/c/proart_capture/A.nv12",
+                "/mnt/c/proart_capture/C.nv12",
+                "/mnt/c/proart_capture/empty1.nv12"],
+    ),
     "combined_filter.py": Recipe(
         script="combined_filter.py",
         runs=[Run(argv=[], expect="combined_filter_results.json")],

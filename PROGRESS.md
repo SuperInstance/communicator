@@ -1619,3 +1619,108 @@ recipes, all verified to reproduce: `mouth_detector`, `nv12_stride_audit`,
 scripts write next to themselves, and one has no `--out` at all), and the
 two that need MediaPipe and WavLM are skipped with a stated reason rather
 than silently.
+
+## 2026-10-20 (night, later) — the instrument was discarding the evidence of its own failures
+
+**Full account: `docs/research/NIGHT-REPORT-2026-10-20.md`.**
+
+The stride was the night's first result and it is in the section above.
+This is the second half of the night: three defects in the **measurement
+instrument**, found by reading the code rather than by a test failing, and
+a fourth result that says the instrument cannot currently answer the
+questions being asked of it.
+
+**THREE DEFECTS IN THE INSTRUMENT.**
+
+1. **The client was discarding the evidence of its own failures.**
+   `debrief.py::_http_json` rebuilt every response as `{"text": text}` and
+   threw away `finish_reason` and `usage`, so a response **cut off at the
+   output cap** was indistinguishable on the wire from a finished one.
+   `cloud_llm`'s existing retry for reasoning models fires only on
+   **empty** content, which a truncated answer never has. Three of the nine
+   committed audit runs were exactly this — and a truncated answer that
+   still *parses* had its missing claims **scored as wrong**, so the
+   director was silently charged for claims it never got to answer.
+2. **The local path had never worked.** Every `ollama:`/`local:` call
+   returned `no_result`, because the response parser understood only
+   Cloudflare's shape and ollama puts the message at the **top level**. No
+   local model had ever been scored.
+3. **A copy of the thing that measures the thing.** The pool's per-note
+   diagnostic was a second copy of the keep-set builder with the **old**
+   front-truncation still in it, so it measured a pool that was **not** the
+   pool used: it said 3 of 49 notes keep their tail; the pool actually
+   used kept **51 of 51**.
+
+**THE HYPOTHESIS THAT WAS REFUTED FIRST.** "Too much material for the
+smaller models' windows" is **false**, and the control is structural: **in
+blind mode the material does not enter the prompt at all.** At 140,000,
+60,000 and 40,000 characters of material budget the prompt is 3,031
+characters and **701 tokens** every time, and the failure happened at the
+**smallest** budget. The budget that ran out was the **output** budget. A
+fit ladder treating "unparseable" as "does not fit" would have walked
+*down* past budgets that worked. Truncation rate: **3 in 14** identical
+calls; **3 of 3 recovered** by asking for 4× the output budget.
+
+**THE UNCOMFORTABLE RESULT.** With the transport clean, all 21
+re-measured runs carry 10 of 10 verdicts and the hosted spread **did not
+move** (median 0.0555 before and after the fix). The variance is the
+model's own indecision: the headline moves **only when a claim flips to
+"uncertain"** (blind gpt-oss: 0, 0, 1, 1; context qwen3: 5, 3, 4). The
+audit set has nine false claims, so the headline is **quantised at
+1/9 = 0.1111**, and the observed spreads are **0.111 and 0.222** — one and
+two quanta. **The instrument's noise is the size of its resolution**, and
+the effect the sweep claimed was **+0.1111**, exactly one quantum.
+
+**THE NEW METHOD, AND THE TRAP IT FELL INTO.** `debrief_paired_analysis.py`
+compares the arms **claim by claim**, which is the unit the metric can
+resolve. It was run twice:
+
+| step | claim-level (n=9, the pre-registered unit) | pooled over repeats (n=27) |
+|---|---|---|
+| 20,000 → 60,000 | p = 0.6250 · p = 1.0000 | 0.5078 · 1.0000 |
+| 60,000 → 140,000 | p = 0.2500 · p = 0.5000 | **0.0391** · 0.2188 |
+| 140,000 → 240,000 | p = 1.0000 · p = 1.0000 (all nine agree, both runs) | 0.5078 · 1.0000 |
+
+**Never significant at the claim level, in either run.** The pooled
+statistic crosses 0.05 in one run and not in the next: counting the same
+nine claims three times adds **variance**, not evidence. The script's
+first implementation **violated its own pre-registered rule** by pooling;
+the fix is in the code and the pooled figure is kept and labelled.
+
+**AND THE ARITHMETIC THAT SHOULD HAVE BEEN SAID FIRST.** A two-sided
+exact sign test on **three** paired samples has a smallest attainable p of
+**0.25**, so the old sweep's design could not have produced a significant
+result **at any effect size**. Its label, "EFFECT RESOLVED", was not
+available to that design. The verdict now: **"more evidence makes the
+director better" is NOT SUPPORTED.**
+
+**LANE 8 — RETAINING THE IMAGE VS DESCRIBING IT** (the OpenVLHarness
+claim, arXiv 2610.26860). Local Qwen2.5-VL-3B on the RTX 4050, one
+forward pass per frame, score = logit of `SPEAKING` minus logit of
+`NOT SPEAKING`. **Verdict: a null.** The character rendering separated
+speaking from silent **better** (AUC 0.9562 vs 0.7784) but ranked the
+**empty room above the silent person** (0.9970); the picture was the only
+one of the two that still knew a room from a man (0.0034). The scramble
+control drops the image arm below chance (0.4062) and the text arm only to
+0.6438 — **at 160×96 the description retains more usable spatial
+information than the picture does.** A correction to the lane's own brief:
+**capture B is a SPEAKING take**, so C is the pose-matched negative class.
+
+**WHAT A CORRECTION BLOCK IN THE RECORD GOT WRONG.** The previous top
+block said the acoustics figure ("73.5") "now reaches the prompt". The
+only `73.5` in the pool is **`AMI EN2002a 73.5 %`** — an unrelated number.
+`"-73.5 dBFS"`, `"73.496"`, `"119 transients"` and `"RT60"` are all
+**absent**. So the director accuses the one true claim **because the
+deciding number never arrived**, and that sentence, and the conclusion
+drawn from it, are **withdrawn**.
+
+**THE NEXT PIECE OF WORK, AND IT IS NOT OPTIONAL.** Until the instrument
+can resolve a one-claim difference, every comparison of the director is
+uninterpretable. That means an audit set of roughly **forty** claims whose
+labels are **derived from the results files**, with **more than one true
+item** so that specificity is not a single bit.
+
+**STILL NEEDS A HUMAN:** the corpus recording, **Condition D (turned AND
+silent)** above all — it is the highest-value take for two independent
+reasons — and the two-microphone dialogue. The capture tool is fixed and
+synced to `/mnt/c/proart_capture/corpus_capture_win.py`.
