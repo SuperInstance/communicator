@@ -1,5 +1,68 @@
 # Composing the two filters, and what still blocks the teacher
 
+> ## CORRECTION (2026-10-20, overnight) — the table below was measured on TORN FRAMES, and the "clean instrument" is withdrawn
+>
+> Every number in §1 and §2 of this file was computed on frames that were
+> **torn between two real moments**: every reader in the repo read the
+> captures at a 23,040-byte stride when the files are 19,200, so 80% of
+> every "frame" was rows 0..71 of one moment spliced to rows 72..95 of the
+> next. The full account is `docs/research/NV12-STRIDE.md`.
+>
+> **A tear IS a horizontal band.** The "LED flicker banding" this file was
+> written to remove was the tear, so the whole nuisance was an artefact of
+> the reader. `experiments/combined_filter.py`, re-run at the correct
+> stride, now says:
+>
+> > "THE FILTERS ARE NOT NEEDED, AND THE PREMISE IS WITHDRAWN. At the
+> > correct stride the motion field is not saturated: the raw variant's
+> > saturation is 0.5999 on condition A and 0.0154 on the empty capture,
+> > against 0.9973 and 0.4173 before the stride fix. The composition of
+> > row-band removal with a temporal median does not improve the speech
+> > signal-to-noise ratio -- 1.410 raw against 1.389 for the most
+> > aggressive variant -- because there is no longer a nuisance for either
+> > of them to remove."
+>
+> **The corrected numbers, in the same order as the table below:**
+>
+> | variant | empty saturation | A flip rate | A saturation | A-vs-C gap | SNR | top-5% share |
+> |---|---:|---:|---:|---:|---:|---:|
+> | raw | 0.0154 | 0.0000883 | 0.5999 | 0.2262 | **1.410** | 42.8% |
+> | row | 0.0154 | 0.0000864 | 0.6529 | 0.2492 | 1.411 | 39.8% |
+> | median3 | 0.0073 | 0.0000759 | 0.5120 | 0.2144 | 1.352 | 42.1% |
+> | row+median3 | 0.0073 | 0.0000759 | 0.6023 | 0.2355 | 1.386 | 39.0% |
+> | row+median5 | 0.0000 | 0.0000602 | 0.6378 | 0.2190 | 1.389 | 38.1% |
+>
+> **What this withdraws from this file:**
+>
+>  - **"The composition is worth having", and the 21× / 28× figures.** Every
+>    flip rate is now of order **1e-4**, so a "21× improvement" over a
+>    1e-4 number is a ratio of two noises. The SNR is flat at **1.35–1.41**
+>    across all five variants, and the *raw* variant is within **0.001** of
+>    the best. There is nothing for the filters to buy.
+>  - **§4's "The representation is solved ... That is a clean instrument."**
+>    The representation was never the problem. There is no saturation to
+>    clean.
+>  - **§2's "SNR is flat at ~1.85"** becomes 1.35–1.41, and the
+>    interpretation stands in strengthened form: cleaning the field does not
+>    buy contrast, because there is no noise to clean.
+>
+> **What survives, and it is the more important half:** the teacher is
+> blocked on **data**, not on the representation. Two sessions per class
+> cannot tell "speaking" from "this recording".
+>
+> **AND THE RECOMMENDATION WAS CARRIED OUT, AND IT DID NOT MATTER.** This
+> file's own verdict said: "The honest recommendation is to use the raw
+> representation, keep the zero latency, and re-run the teacher on it."
+> That re-run is now done — `docs/research/TEACHER-RAW-REPRESENTATION.md` —
+> and it ran the teacher on all four representations. The answer: **no
+> representation beats the teacher's own controls**, and the best of them
+> (`row`) beats raw by **four of 48 test windows** (+0.0833). The
+> representation is not the blocker. Neither is the filter. It is the
+> number of independent sessions, and condition D.
+>
+> The original text below is kept visible, per the house rule that a
+> falsified claim stays in the record.
+
 **Status: the representation is now clean. The teacher is still blocked — and
 the blocker is data, not modelling.**
 
@@ -140,6 +203,19 @@ because that drift is not shared between sessions.
 gives an **empty-room saturation of 0.0348** and an **occupied flip rate of
 0.0014**, with the speech signal 35.7% concentrated in the top 5% of pixels.
 That is a clean instrument.
+
+> **CORRECTION (2026-10-20, overnight) — WITHDRAWN.** "The representation is
+> solved" and "that is a clean instrument" are both false, and the sentence
+> above was measured on torn frames. At the correct stride the empty room
+> shows an empty saturation of **0.0154 with no filter at all** (0.0073 with
+> the temporal median, 0.0000 with row+median5), and the occupied flip rate
+> is of order **1e-4** for every variant. There is no saturation, so there
+> was never a dirty instrument to clean, and the SNR is flat at 1.35–1.41
+> across all five variants — the raw variant is within 0.001 of the best.
+> The teacher re-run on all four representations
+> (`docs/research/TEACHER-RAW-REPRESENTATION.md`) confirms it: **no
+> representation beats the teacher's own controls.** The blocker was never
+> here.
 
 **The teacher is blocked on data.** The gap between a temporal split and
 leave-one-session-out is not a modelling failure that more features or a
