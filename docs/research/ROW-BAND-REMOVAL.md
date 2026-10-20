@@ -135,8 +135,29 @@ control, which is the only kind of margin that means anything.
 ### But speech IS visible, and that is a real finding
 
 **A (facing, speaking) vs C (facing, silent): 4.914 against a within-condition
-split of 1.917 — 2.6× — with 79% of the excess concentrated in the top 5% of
+split of 2.878 — 1.71× — with 79% of the excess concentrated in the top 5% of
 pixels.**
+
+> **CORRECTION (2026-10-19).** This was published as *"split of 1.917 — 2.6×"*.
+> The contrast is **A-vs-C**, so the matched control is **A's own**
+> within-condition split, `within_A_facing_speaking.mean_abs_diff` = **2.878**,
+> which the table in §3 above prints correctly. The 1.917 it used is
+> `within_B_turned_speaking` — condition **B**'s split — and B is the
+> condition with the largest cross-condition difference in the set
+> (B-vs-C = 9.411). 4.914 / 1.917 = 2.56× (the published figure);
+> 4.914 / 2.878 = **1.71×**. Settled by `experiments/pose_test_results.json`;
+> `NOTES-AUDIT.md` F1.
+>
+> **The conclusion is unchanged, and the qualitative result is the stronger
+> half of it**: `frac_above_null` for A-vs-C is 12.1 % against 34.9 % for
+> A-vs-B, and the top-5 % share is 79.1 %. Speech IS visible and IS localised.
+> Only the factor was wrong.
+>
+> **The same wrong pair is still hard-coded in code.** The `speech_verdict` and
+> `verdict` strings inside `experiments/pose_test_results.json` still read
+> "1.917 (2.6x)". That file is a result artefact and is not editable from the
+> notes, so it **still needs fixing in code** — the number in this note and
+> the number in that JSON now disagree.
 
 The localisation is the tell. The A-vs-B difference spreads diffusely (37.4% in
 the top 5%); the A-vs-C difference concentrates (79.1%). That is what a real
@@ -174,8 +195,23 @@ drift   : adjacent-frame MAD 39.344 counts  (raw)
 drift   : after row-band removal 9.909 counts   OK - below ~5
 ```
 
+> **NOT REPRODUCIBLE (2026-10-19).** This quoted block is **not an output of
+> `experiments/syzygy_capture_win.py` at any revision**. That script prints
+> `OK - below ~5` **only** when the value is below 5
+> (`syzygy_capture_win.py:203-208`: `'OK - below ~5' if mad_row < 5 else
+> 'TOO HIGH'`), and 9.909 ≥ 5, so the second line as printed here could not
+> have come from it. `git log -p` confirms the threshold has never been other
+> than 5. The value 9.909 has no counterpart in any result file either.
+> `NOTES-AUDIT.md` F6.
+
 **Aim for the row-removed residual under ~5.** If it stays high, the banding is
 not the only problem and different lighting is needed first.
+
+> **And the note's own quoted measurement fails that target.** 9.909 is not
+> "under ~5" — it is nearly twice it — sitting under an OK verdict the script
+> cannot issue. So the standing target set immediately above is currently
+> **unmet**, whatever the verdict says, and the drift figure that would settle
+> it has to be re-measured and printed by the script itself.
 
 ## 5. Limits
 

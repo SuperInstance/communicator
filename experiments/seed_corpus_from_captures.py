@@ -21,7 +21,8 @@ indistinguishable from a time-shifted control -- so the "facing" question has
 no signal in this data and any score on it is noise.
 
 The "speaking" question IS valid here: A is speaking and C is silent, and
-those differ by 4.914 counts against a within-condition split of 1.917, with
+those differ by 4.914 counts against A's own within-condition split of 2.878
+(1.7x), with
 79% of the excess localised. That is a real, measured difference, so a teacher
 that can read it should be able to tell A from C. This is the first honest test
 of whether a text model can read motion rendered as characters.

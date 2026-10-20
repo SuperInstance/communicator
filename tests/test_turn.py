@@ -22,7 +22,8 @@ way to lose data that was already measured correctly.
 
 THE MEASUREMENT THAT SHAPED THE MODULE, AND IT IS UNCOMFORTABLE.
 
-Across 465 s of real recorded speech, pauses of 3 s or more:
+Across the seven cells of real recorded speech (485.01 s on disk; the 465 s
+in earlier revisions of this comment was wrong), pauses of 3 s or more:
 
     cell          audio_s   max_gap   gaps >= 3 s
     narration        90.0     1.980              0

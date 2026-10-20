@@ -77,6 +77,7 @@ move when there is a real corpus.
 
 from __future__ import annotations
 
+import hashlib
 import json
 import sys
 from pathlib import Path
@@ -86,6 +87,108 @@ import numpy as np
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT / "experiments"))
 from ascii_motion_render import load_session  # noqa: E402
+
+
+# -- provenance ---------------------------------------------------------------
+# A number without its inputs cannot be traced. The `both` artefact committed
+# at HEAD carried a leave-one-session-out accuracy of 0.675 that no corpus on
+# disk reproduces: the corpus that produced it is gone, and the file did not
+# record WHICH corpus that was. So every result this script writes records
+# the identity of its inputs -- the corpus, each session file and its
+# SHA-256, the script's own SHA-256, and the exact command line -- and says
+# so in one boolean a reader can check.
+#
+# `verify_provenance` re-checks a persisted result against what is on disk
+# NOW. A result that cannot be verified is a bare number, and says so.
+
+def sha256_file(path) -> str:
+    """SHA-256 of a file, read in chunks."""
+    h = hashlib.sha256()
+    with open(path, "rb") as f:
+        for chunk in iter(lambda: f.read(1 << 20), b""):
+            h.update(chunk)
+    return h.hexdigest()
+
+
+def session_fingerprint(npz_path) -> dict:
+    """The identity of one corpus session: where it is and what it is."""
+    p = Path(npz_path).resolve()
+    out = {"npz_path": str(p)}
+    if not p.is_file():
+        out["problem"] = "the npz file is not on disk"
+        return out
+    out["npz_sha256"] = sha256_file(p)
+    try:
+        with np.load(p) as d:
+            maps = d["maps"]
+            out["n_frames"] = int(maps.shape[0])
+            out["map_shape"] = [int(v) for v in maps.shape[1:]]
+            out["scale"] = float(d["scale"])
+    except Exception as exc:                     # noqa: BLE001
+        out["problem"] = f"could not read the npz: {exc}"
+    return out
+
+
+def corpus_fingerprint(session_ids) -> str:
+    """One hash over the whole loaded corpus, order-independent."""
+    h = hashlib.sha256()
+    for s in sorted(session_ids, key=lambda s: s.get("npz_path", "")):
+        h.update(s.get("npz_path", "").encode())
+        h.update(b"\0")
+        h.update((s.get("npz_sha256") or "").encode())
+        h.update(b"\n")
+    return h.hexdigest()
+
+
+def build_provenance(corpus_path, session_ids, cli_args, parameters) -> dict:
+    """The provenance block, and whether it is complete."""
+    script = Path(__file__).resolve()
+    prov = {
+        "generated_by": "experiments/teacher_conventional.py",
+        "script_path": str(script),
+        "script_sha256": sha256_file(script) if script.is_file() else None,
+        "corpus_path": str(Path(corpus_path).resolve()),
+        "cli_args": list(cli_args),
+        "command_line": " ".join(str(x) for x in cli_args),
+        "parameters": dict(parameters),
+        "sessions": list(session_ids),
+    }
+    prov["corpus_fingerprint"] = corpus_fingerprint(prov["sessions"])
+    prov["problems"] = [f"{s.get('npz_path')}: {s['problem']}"
+                         for s in prov["sessions"] if s.get("problem")]
+    return prov
+
+
+def verify_provenance(result) -> dict:
+    """
+    Re-check a persisted result against what is on disk NOW.
+
+    Returns {"ok": bool, "problems": [str]}. A result with no provenance block
+    is not ok: it is a bare number.
+    """
+    problems = []
+    prov = result.get("provenance")
+    if not prov:
+        return {"ok": False,
+                "problems": ["the result carries no provenance block"]}
+    for key in ("corpus_path", "script_sha256", "cli_args", "sessions"):
+        if not prov.get(key):
+            problems.append(f"provenance is missing {key}")
+    script = prov.get("script_path")
+    if script and Path(script).is_file():
+        if sha256_file(script) != prov.get("script_sha256"):
+            problems.append("the script has changed since the result was written")
+    for s in prov.get("sessions", []):
+        path = Path(s.get("npz_path", ""))
+        if not path.is_file():
+            problems.append(f"{path} is not on disk")
+            continue
+        if sha256_file(path) != s.get("npz_sha256"):
+            problems.append(f"{path} has changed since the result was written")
+    if not problems and corpus_fingerprint(prov.get("sessions", [])) != \
+            prov.get("corpus_fingerprint"):
+        problems.append("the corpus fingerprint does not match the sessions")
+    return {"ok": not problems, "problems": problems}
 
 
 # -- features -----------------------------------------------------------------
@@ -244,7 +347,53 @@ def build(sessions, k, stride, max_per, shuffle_seed=None, mode="summary",
     return np.stack(Xs), np.array(ys), gs
 
 
-def main():
+def leave_one_session_out(X, y, groups, names, label_of=None,
+                           corpus_fingerprint=None):
+    """
+    Leave-one-session-out, one row per session that CAN be held out.
+
+    A fold that leaves a single class in the training set is not a fold -- it
+    is a degenerate fit -- so it is reported in `skipped`, with the reason,
+    instead of being quietly dropped. That is the whole point of the change:
+    a table cell can only be transcribed from a row that exists, and the
+    sessions with NO row are named, so "A 0.000, C 0.650" cannot be written
+    for a session C that has no row.
+
+    Returns (rows, skipped).
+    """
+    loo = []
+    skipped = []
+    for name in names:
+        tr2 = [i for i, g in enumerate(groups) if g != name]
+        te2 = [i for i, g in enumerate(groups) if g == name]
+        if not te2:
+            skipped.append({"held_out": name,
+                            "reason": "this session contributed no windows"})
+            continue
+        if len(set(y[tr2])) < 2:
+            left = sorted(set(int(v) for v in y[tr2]))
+            skipped.append({
+                "held_out": name,
+                "reason": (f"holding out this session leaves a single class in "
+                           f"the training set (labels {left}), so the fold is "
+                           "not defined"),
+            })
+            continue
+        m2, s2 = X[tr2].mean(axis=0), X[tr2].std(axis=0) + 1e-9
+        w3 = fit_logistic((X[tr2] - m2) / s2, y[tr2].astype(float))
+        p3, _ = predict((X[te2] - m2) / s2, w3)
+        row = {"held_out": name, "acc": float((p3 == y[te2]).mean()),
+               "n": len(te2)}
+        if label_of is not None and name in label_of:
+            row["held_out_label"] = int(label_of[name])
+        if corpus_fingerprint is not None:
+            # so a row cannot be attributed to the wrong corpus
+            row["corpus_fingerprint"] = corpus_fingerprint
+        loo.append(row)
+    return loo, skipped
+
+
+def main(argv=None):
     import argparse
     ap = argparse.ArgumentParser()
     ap.add_argument("--corpus", default="/mnt/c/proart_capture/corpus")
@@ -257,7 +406,7 @@ def main():
                     choices=("summary", "map", "both", "region",
                              "region+map"))
     ap.add_argument("--out", default=str(ROOT / "experiments"))
-    a = ap.parse_args()
+    a = ap.parse_args(argv)
 
     corpus = Path(a.corpus)
     sessions = []
@@ -282,6 +431,22 @@ def main():
     print(f"task={a.task}  windows={len(X)}  features={X.shape[1]}  "
           f"sessions={names}")
     print(f"  labels: " + ", ".join(f"{n}={s[2]}" for n, s in zip(names, sessions)))
+
+    # -- provenance: what this run read, and what produced it ---------------
+    used_argv = list(sys.argv[1:]) if argv is None else list(argv)
+    session_ids = []
+    for name, _maps, label, npz_p, _meta in sessions:
+        fid = session_fingerprint(npz_p)
+        fid["name"] = name
+        fid["label"] = int(label)
+        session_ids.append(fid)
+    provenance = build_provenance(
+        corpus, session_ids, used_argv,
+        {"task": a.task, "features": a.features, "k": a.k, "stride": a.stride,
+         "max_per": a.max_per, "train_frac": a.train_frac, "out": str(a.out)})
+    fingerprint = provenance["corpus_fingerprint"]
+    print(f"  corpus {provenance['corpus_path']}  "
+          f"fingerprint {fingerprint[:16]}")
 
     # -- time split: first train_frac of each session trains, the rest tests --
     tr, te = [], []
@@ -331,23 +496,49 @@ def main():
     res["acc_test_blank"] = float((pred == y[te]).mean())
 
     # -- CONTROL 3: leave-one-session-out -----------------------------------
-    loo = []
-    for name in names:
-        tr2 = [i for i, g in enumerate(groups) if g != name]
-        te2 = [i for i, g in enumerate(groups) if g == name]
-        if len(set(y[tr2])) < 2 or not te2:
-            continue
-        m2, s2 = X[tr2].mean(axis=0), X[tr2].std(axis=0) + 1e-9
-        w3 = fit_logistic((X[tr2] - m2) / s2, y[tr2].astype(float))
-        p3, _ = predict((X[te2] - m2) / s2, w3)
-        loo.append({"held_out": name, "acc": float((p3 == y[te2]).mean()),
-                    "n": len(te2)})
+    label_of = {s[0]: s[2] for s in sessions}
+    loo, loo_skipped = leave_one_session_out(X, y, groups, names, label_of,
+                                             corpus_fingerprint=fingerprint)
     res["leave_one_session_out"] = loo
 
     margin = res["acc_test"] - max(res["acc_test_spatially_scrambled"],
                                    res["acc_test_blank"])
     res["margin_over_best_control"] = margin
     res["usable"] = bool(margin >= 0.10)
+
+    # The LOO table, persisted in a shape that cannot be mis-transcribed: one
+    # object KEYED BY FEATURE SET, each row carrying the feature set's name,
+    # the held-out session, the accuracy and n -- and, at the feature-set
+    # level, the margin over the best control and the two control values
+    # themselves. The bare list above is kept for anything that reads it.
+    res["leave_one_session_out_by_feature_set"] = {
+        a.features: {
+            "feature_set": a.features,
+            "task": a.task,
+            "margin_over_best_control": margin,
+            "control_spatially_scrambled": res["acc_test_spatially_scrambled"],
+            "control_blank": res["acc_test_blank"],
+            "best_control": max(res["acc_test_spatially_scrambled"],
+                                res["acc_test_blank"]),
+            "rows": [dict(r, feature_set=a.features) for r in loo],
+            "held_out_sessions": [r["held_out"] for r in loo],
+            "skipped_sessions": loo_skipped,
+            "n_rows": len(loo),
+        }
+    }
+    # Every session in the run, with its label, so a reader can tell a
+    # session that has no LOO row from a session that does not exist.
+    res["sessions"] = [{"name": s[0], "label": int(s[2])} for s in sessions]
+
+    # What this run read, and what produced it. A result that cannot say
+    # where it came from is a bare number, and `reproducible` says so.
+    res["provenance"] = provenance
+    res["reproducible"] = bool(
+        provenance.get("script_sha256")
+        and provenance.get("corpus_fingerprint")
+        and provenance.get("cli_args") is not None
+        and all(s.get("npz_sha256") for s in provenance.get("sessions", []))
+        and not provenance.get("problems"))
 
     print(f"\n  train acc            {res['acc_train']:.3f}")
     print(f"  TEST acc             {res['acc_test']:.3f}   "
@@ -359,6 +550,9 @@ def main():
           f"{'USABLE' if res['usable'] else 'NOT USABLE'}")
     print("  leave-one-session-out: " + ", ".join(
         f"{d['held_out']} {d['acc']:.3f}" for d in loo))
+    for sk in loo_skipped:
+        print(f"  leave-one-session-out: {sk['held_out']} -- NO ROW "
+              f"({sk['reason']})")
 
     res["limits"] = [
         "two labelled sessions, one speaker, one room, one lighting state",

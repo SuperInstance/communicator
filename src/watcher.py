@@ -658,7 +658,9 @@ class Watcher:
             # carrying NO event that says "this was six seconds".
             #
             # Measured on the real corpus before this existed: the longest
-            # pause the watcher emitted across 465 s of speech was 0.790 s,
+            # pause the watcher emitted across the corpus was 0.790 s
+            # (485.01 s of speech on disk; the 465 s in earlier revisions of
+            # this comment was wrong -- NOTES-AUDIT.md F7),
             # so a 3 s turn threshold could never have matched anything. The
             # segmentation was right and the reporting was not.
             if self._pause_run_start is None:

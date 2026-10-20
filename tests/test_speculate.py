@@ -4,9 +4,16 @@ Tests for the speculation gate -- acting before you are sure, reversibly.
 WHY THE MECHANISM EXISTS AT ALL.
 
 `turn.py` ends a turn on 3 s of silence. Across the seven-cell real corpus
-(465 s, 680 measured pause runs) it fires on ZERO, because the longest gap
-anywhere outside one essay is 2.4 s. So a peripheral built on it does not
-respond slowly -- it does not respond at all.
+it fires on ZERO of the 673 distinct silence runs measured on that population
+-- or on ZERO of the 1671 pause events the watcher reports over them --
+because the longest gap anywhere outside one essay is 2.4 s. So a peripheral
+built on it does not respond slowly -- it does not respond at all.
+
+(The cells on disk total 485.01 s, not the 465 s quoted in earlier revisions,
+and the code now measures 1671 pause events (673 silence runs) rather than
+680 runs. The conclusion is
+unaffected: 3 s exceeds the longest gap either way.
+`docs/research/NOTES-AUDIT.md` F7, F8.)
 
 And `docs/research/TURN-ROUTES.md` showed the decision cannot be made better
 by looking harder. At the moment of decision, "the turn ended" and "the
@@ -91,7 +98,7 @@ WHAT CHANGED, AND WHAT DID NOT.
 THE PROSE ABOVE QUOTES A CORPUS THAT IS NOT THE ONE ON DISK. THE ONES THE
 CODE MEASURES TODAY, over the same seven declared cells:
 
-    1671 pause runs                        (prose says 680 / 676)
+    1671 pause events (673 silence runs)   (prose: 673 runs / 1671 events)
     min 0.160 s   median 0.380 s   max 2.540 s     (prose: 0.320 / 2.440)
     speculate_s=0.30 reach rate 75.3%              (prose: 53.8%)
     share below the rejected 1.20 s: 94.4%        (prose: 96.9%)

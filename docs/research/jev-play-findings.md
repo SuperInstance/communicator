@@ -395,6 +395,13 @@ broken experiment.
 The shape question was then repeated 8× per case: **24/24, perfectly stable.**
 The symbolic encoding is not a lucky draw.
 
+> **UNSETTLED (2026-10-19).** "24/24" is **3 cases × 8 re-asks of the same
+> input** — the effective n is 3, not 24, and the 24 per-repeat outcomes are not
+> in the results file. The count is left as printed and is **not** settled.
+> **What would settle it:** store the per-repeat outcomes and report the number
+> of distinct cases beside the repeat count. Flagged as a candidate, not a
+> finding — `NOTES-AUDIT.md` F13.
+
 **But the level does not survive.** Asked for the mean pitch *band* instead of
 the shape, the symbolic arm scores 0/3 and unstable (1/3 on one run, 0/3 on
 the next) — `rising` → "high", `falling` → "low", `flat` → "low". A follow-up

@@ -1,0 +1,426 @@
+{
+  "mode": "blind",
+  "results": [
+    {
+      "model": "@cf/openai/gpt-oss-120b",
+      "mode": "blind",
+      "n_requested": 8,
+      "seed": 20261019,
+      "materials_chars": 0,
+      "prompt_sha256": "5870ad6bb1989c07727c57ea01c417aa0a014674824d48ee8a692665e6e1100c",
+      "prompt_chars": 3031,
+      "n_claims": 10,
+      "control": {
+        "what": "a deterministic stub director, scored the same number of times with the same scorer",
+        "headline_spread": 0.0,
+        "n_distinct_headlines": 1,
+        "headlines": [
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0
+        ],
+        "n_unstable_claims": 0
+      },
+      "degenerate_baselines": {
+        "always_accept": {
+          "sensitivity": 0.0,
+          "specificity": 1.0,
+          "headline": 0.0
+        },
+        "always_reject": {
+          "sensitivity": 1.0,
+          "specificity": 0.0,
+          "headline": 0.0
+        }
+      },
+      "result": {
+        "n_runs": 8,
+        "n_scored": 8,
+        "n_unparseable": 0,
+        "headlines": [
+          0.4285714285714286,
+          -0.04761904761904767,
+          0.4285714285714286,
+          0.4285714285714286,
+          -0.19047619047619047,
+          -0.19047619047619047,
+          0.2857142857142856,
+          0.4285714285714286
+        ],
+        "distinct_headlines": [
+          -0.19047619047619047,
+          -0.04761904761904767,
+          0.2857142857142856,
+          0.4285714285714286
+        ],
+        "n_distinct_headlines": 4,
+        "headline_min": -0.19047619047619047,
+        "headline_max": 0.4285714285714286,
+        "headline_median": 0.3571428571428571,
+        "headline_mean": 0.19642857142857142,
+        "headline_spread": 0.6190476190476191,
+        "sensitivity_min": 0.14285714285714285,
+        "sensitivity_max": 0.42857142857142855,
+        "specificity_min": 0.6666666666666666,
+        "specificity_max": 1.0,
+        "n_unstable_claims": 4,
+        "unstable_claims": [
+          {
+            "index": 2,
+            "claim": "Removing each row's median across the columns before differencing frames takes an empty room's character-cell flip rate from 50.00% down to 0.01%, while leaving the occupied room's column structure unchanged.",
+            "is_false_claim": false,
+            "correct_count": 6,
+            "distinct_verdicts": 2,
+            "verdict_counts": {
+              "supported": 6,
+              "unsupported": 2
+            },
+            "stable": false,
+            "unstable_and_false_claim": false
+          },
+          {
+            "index": 3,
+            "claim": "The watcher's memory use grows quadratically with session length, so a long session will eventually exhaust the device.",
+            "is_false_claim": true,
+            "correct_count": 6,
+            "distinct_verdicts": 2,
+            "verdict_counts": {
+              "unsupported": 6,
+              "uncertain": 2
+            },
+            "stable": false,
+            "unstable_and_false_claim": true
+          },
+          {
+            "index": 4,
+            "claim": "A local large language model given an ASCII rendering of the room can label whether the person is speaking, at a useful margin over a blank control.",
+            "is_false_claim": true,
+            "correct_count": 4,
+            "distinct_verdicts": 2,
+            "verdict_counts": {
+              "unsupported": 4,
+              "uncertain": 4
+            },
+            "stable": false,
+            "unstable_and_false_claim": true
+          },
+          {
+            "index": 9,
+            "claim": "Composing row-wise band removal with a temporal median filter of width 3 reduced the occupied motion-map flip rate from 0.0299 to 0.0014, a 21x improvement over row removal alone, while the signal-to-noise ratio stayed flat at about 1.83.",
+            "is_false_claim": false,
+            "correct_count": 7,
+            "distinct_verdicts": 2,
+            "verdict_counts": {
+              "supported": 7,
+              "unsupported": 1
+            },
+            "stable": false,
+            "unstable_and_false_claim": false
+          }
+        ],
+        "per_claim": [
+          {
+            "index": 0,
+            "claim": "The room's own acoustic noise floor measured -73.5 dBFS, with 119 transients detected and zero valid RT60 estimates obtainable from it.",
+            "is_false_claim": false,
+            "correct_count": 8,
+            "distinct_verdicts": 1,
+            "verdict_counts": {
+              "supported": 8
+            },
+            "stable": true,
+            "unstable_and_false_claim": false
+          },
+          {
+            "index": 1,
+            "claim": "Reducing the gate's field threshold to 0.30 removed 14.5x of the camera's frame-to-frame drift, measured as the mean absolute difference between consecutive frames.",
+            "is_false_claim": true,
+            "correct_count": 0,
+            "distinct_verdicts": 1,
+            "verdict_counts": {
+              "supported": 8
+            },
+            "stable": true,
+            "unstable_and_false_claim": false
+          },
+          {
+            "index": 2,
+            "claim": "Removing each row's median across the columns before differencing frames takes an empty room's character-cell flip rate from 50.00% down to 0.01%, while leaving the occupied room's column structure unchanged.",
+            "is_false_claim": false,
+            "correct_count": 6,
+            "distinct_verdicts": 2,
+            "verdict_counts": {
+              "supported": 6,
+              "unsupported": 2
+            },
+            "stable": false,
+            "unstable_and_false_claim": false
+          },
+          {
+            "index": 3,
+            "claim": "The watcher's memory use grows quadratically with session length, so a long session will eventually exhaust the device.",
+            "is_false_claim": true,
+            "correct_count": 6,
+            "distinct_verdicts": 2,
+            "verdict_counts": {
+              "unsupported": 6,
+              "uncertain": 2
+            },
+            "stable": false,
+            "unstable_and_false_claim": true
+          },
+          {
+            "index": 4,
+            "claim": "A local large language model given an ASCII rendering of the room can label whether the person is speaking, at a useful margin over a blank control.",
+            "is_false_claim": true,
+            "correct_count": 4,
+            "distinct_verdicts": 2,
+            "verdict_counts": {
+              "unsupported": 4,
+              "uncertain": 4
+            },
+            "stable": false,
+            "unstable_and_false_claim": true
+          },
+          {
+            "index": 5,
+            "claim": "Applying a per-frame gain normalisation to the camera's brightness reduced the frame-to-frame drift from 43.3 counts to 0.81 counts, a reduction of roughly fifty times.",
+            "is_false_claim": true,
+            "correct_count": 0,
+            "distinct_verdicts": 1,
+            "verdict_counts": {
+              "supported": 8
+            },
+            "stable": true,
+            "unstable_and_false_claim": false
+          },
+          {
+            "index": 6,
+            "claim": "A conventional teacher model trained on motion maps scored 1.000 on a temporal split of one session and 0.000 when the test session was held out, which shows the model learned the recording rather than speaking.",
+            "is_false_claim": true,
+            "correct_count": 0,
+            "distinct_verdicts": 1,
+            "verdict_counts": {
+              "supported": 8
+            },
+            "stable": true,
+            "unstable_and_false_claim": false
+          },
+          {
+            "index": 7,
+            "claim": "The ASCII character map reliably detects whether a person is moving in the frame: an occupied room flips 48.19% of its character cells per frame against 50.00% for an empty room, so the motion is being measured.",
+            "is_false_claim": true,
+            "correct_count": 8,
+            "distinct_verdicts": 1,
+            "verdict_counts": {
+              "unsupported": 8
+            },
+            "stable": true,
+            "unstable_and_false_claim": false
+          },
+          {
+            "index": 8,
+            "claim": "31.8% of the frames the watcher processes are never actually measured by the speech detector, because the gate returns early.",
+            "is_false_claim": true,
+            "correct_count": 0,
+            "distinct_verdicts": 1,
+            "verdict_counts": {
+              "supported": 8
+            },
+            "stable": true,
+            "unstable_and_false_claim": false
+          },
+          {
+            "index": 9,
+            "claim": "Composing row-wise band removal with a temporal median filter of width 3 reduced the occupied motion-map flip rate from 0.0299 to 0.0014, a 21x improvement over row removal alone, while the signal-to-noise ratio stayed flat at about 1.83.",
+            "is_false_claim": false,
+            "correct_count": 7,
+            "distinct_verdicts": 2,
+            "verdict_counts": {
+              "supported": 7,
+              "unsupported": 1
+            },
+            "stable": false,
+            "unstable_and_false_claim": false
+          }
+        ]
+      },
+      "errors": [],
+      "runs": [
+        {
+          "headline": 0.4285714285714286,
+          "sensitivity": 0.42857142857142855,
+          "specificity": 1.0,
+          "uncertain": 0,
+          "unparseable": 0,
+          "error": null,
+          "elapsed_s": 23.7,
+          "verdicts": [
+            "supported",
+            "supported",
+            "supported",
+            "unsupported",
+            "unsupported",
+            "supported",
+            "supported",
+            "unsupported",
+            "supported",
+            "supported"
+          ]
+        },
+        {
+          "headline": -0.04761904761904767,
+          "sensitivity": 0.2857142857142857,
+          "specificity": 0.6666666666666666,
+          "uncertain": 1,
+          "unparseable": 0,
+          "error": null,
+          "elapsed_s": 9.57,
+          "verdicts": [
+            "supported",
+            "supported",
+            "unsupported",
+            "unsupported",
+            "uncertain",
+            "supported",
+            "supported",
+            "unsupported",
+            "supported",
+            "supported"
+          ]
+        },
+        {
+          "headline": 0.4285714285714286,
+          "sensitivity": 0.42857142857142855,
+          "specificity": 1.0,
+          "uncertain": 0,
+          "unparseable": 0,
+          "error": null,
+          "elapsed_s": 15.21,
+          "verdicts": [
+            "supported",
+            "supported",
+            "supported",
+            "unsupported",
+            "unsupported",
+            "supported",
+            "supported",
+            "unsupported",
+            "supported",
+            "supported"
+          ]
+        },
+        {
+          "headline": 0.4285714285714286,
+          "sensitivity": 0.42857142857142855,
+          "specificity": 1.0,
+          "uncertain": 0,
+          "unparseable": 0,
+          "error": null,
+          "elapsed_s": 17.97,
+          "verdicts": [
+            "supported",
+            "supported",
+            "supported",
+            "unsupported",
+            "unsupported",
+            "supported",
+            "supported",
+            "unsupported",
+            "supported",
+            "supported"
+          ]
+        },
+        {
+          "headline": -0.19047619047619047,
+          "sensitivity": 0.14285714285714285,
+          "specificity": 0.6666666666666666,
+          "uncertain": 2,
+          "unparseable": 0,
+          "error": null,
+          "elapsed_s": 12.69,
+          "verdicts": [
+            "supported",
+            "supported",
+            "unsupported",
+            "uncertain",
+            "uncertain",
+            "supported",
+            "supported",
+            "unsupported",
+            "supported",
+            "supported"
+          ]
+        },
+        {
+          "headline": -0.19047619047619047,
+          "sensitivity": 0.14285714285714285,
+          "specificity": 0.6666666666666666,
+          "uncertain": 2,
+          "unparseable": 0,
+          "error": null,
+          "elapsed_s": 11.1,
+          "verdicts": [
+            "supported",
+            "supported",
+            "supported",
+            "uncertain",
+            "uncertain",
+            "supported",
+            "supported",
+            "unsupported",
+            "supported",
+            "unsupported"
+          ]
+        },
+        {
+          "headline": 0.2857142857142856,
+          "sensitivity": 0.2857142857142857,
+          "specificity": 1.0,
+          "uncertain": 1,
+          "unparseable": 0,
+          "error": null,
+          "elapsed_s": 15.7,
+          "verdicts": [
+            "supported",
+            "supported",
+            "supported",
+            "unsupported",
+            "uncertain",
+            "supported",
+            "supported",
+            "unsupported",
+            "supported",
+            "supported"
+          ]
+        },
+        {
+          "headline": 0.4285714285714286,
+          "sensitivity": 0.42857142857142855,
+          "specificity": 1.0,
+          "uncertain": 0,
+          "unparseable": 0,
+          "error": null,
+          "elapsed_s": 22.91,
+          "verdicts": [
+            "supported",
+            "supported",
+            "supported",
+            "unsupported",
+            "unsupported",
+            "supported",
+            "supported",
+            "unsupported",
+            "supported",
+            "supported"
+          ]
+        }
+      ]
+    }
+  ]
+}

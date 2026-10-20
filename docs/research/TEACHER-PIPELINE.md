@@ -18,8 +18,17 @@ not assumed.
 `experiments/teacher_bench.py` renders the motion field as characters and asks
 a local model a question with a known answer. The question was the *speaking*
 one, which has real signal: facing-and-speaking differs from facing-and-silent
-by 4.914 counts against a within-condition split of 1.917, with 79% of the
+by 4.914 counts against a within-condition split of **2.878**, with 79% of the
 excess localised.
+
+> **CORRECTION (2026-10-19).** The split was published as **1.917**, giving
+> 2.6×. The contrast is **A-vs-C**, so the matched control is A's own
+> within-split, `within_A_facing_speaking.mean_abs_diff` = **2.878**; 1.917 is
+> condition B's split. The factor is **1.71×** (4.914 / 2.878). Settled by
+> `experiments/pose_test_results.json`; `NOTES-AUDIT.md` F1. The same wrong
+> pair is still in the `speech_verdict` and `verdict` strings inside that JSON
+> and **still needs fixing in code** — the result file is not editable from
+> the notes.
 
 Every model, with the real input, the spatially-shuffled input, and a blank:
 
@@ -70,16 +79,63 @@ The pipeline runs end to end and the controls are wired up:
 |---|---:|---:|---:|---:|---|
 | summary | 1.000 | 0.792 | 0.667 | +0.208 | **A 0.000, B 0.000** |
 | map | 1.000 | 0.938 | 0.667 | +0.062 | A 0.000, B 1.000 |
-| both | 1.000 | 0.979 | 0.667 | +0.021 | A 0.000, C 0.650 |
+| both | 1.000 | 0.979 | 0.667 | +0.021 | A 0.000, B 0.000 |
 
-The temporal split says **1.000**. Leave-one-session-out says **0.000** on the
-held-out session for every feature set.
+The temporal split says **1.000**. Leave-one-session-out says **0.000** on
+held-out A for every feature set, and **0.000 / 1.000 / 0.0 / 0.200** on
+held-out B for summary / map / both / region+map.
+
+> **CORRECTION (2026-10-19).** This said *"Leave-one-session-out says **0.000**
+> on the held-out session for every feature set"*, and the `both` row read
+> "A 0.000, **C** 0.650". Held-out accuracy per feature set, from
+> `experiments/teacher_conventional_speaking{,_summary,_region,_map,_both,_region+map}.json`:
+>
+> | feature set | LOO A | LOO B |
+> |---|---:|---:|
+> | summary | 0.0 | 0.0 |
+> | region | 0.0 | 0.0 |
+> | map | 0.0 | **1.000** |
+> | both | 0.0 | 0.0 |
+> | region+map | 0.0 | **0.200** |
+>
+> **Two of five are not 0.000.** The notes audit settled this against a
+> committed `speaking_both.json` holding B **0.675**; the experiment has since
+> been re-run and that file now holds B **0.0**, with the scrambled control
+> **0.979** and the margin **0.0208** — which is what the `both` row above
+> already printed for its other columns.
+>
+> And the **0.650 has no source**: no result
+> file contains a held-out session "C" for this task, and 0.650 matches neither
+> candidate source (B 0.675 in `speaking_both.json`, B 0.200 in
+> `speaking_region+map.json`). The cell is now B 0.000.
+> `NOTES-AUDIT.md` F3.
+>
+> **FURTHER CORRECTION (2026-10-19) — the 0.675 is withdrawn too.** The block
+> above still offers B 0.675 as a "candidate source" for the 0.650, which
+> treats it as a measurement. It is not one. The 0.675 **does not reproduce**:
+> re-running the committed script against the committed corpus reproduces every
+> other column of that artefact exactly — test 1.000, scrambled 1.000, blank
+> 0.667, margin +0.000 — and returns LOO **A 0.000, B 0.000**. Neither the code
+> nor the data is the variable: the corpus rebuilds byte for byte from the
+> captures, and a sweep of 352 configurations over the parameters the artefact
+> never recorded (filter variant × stride × max-per × frame count × task)
+> never produces 0.675 *together with* the artefact's other columns.
+>
+> The other four feature sets' artefacts reproduce bit-exactly, so the
+> two-of-five verdict above stands on numbers that do reproduce — **map** B
+> **1.000** and **region+map** B **0.200**. What was wrong was the *provenance*
+> of one artefact, not the verdict. Result files now carry the identity of the
+> corpus they were measured on, so a number that cannot be traced cannot be
+> quoted again. See `COMBINED-FILTER.md`, `ARTIFACT-REPRODUCIBILITY.md`.
 
 That contradiction is the finding. The temporal split puts train and test in
 the same twenty-second window, minutes apart, and a model can score 1.000 by
 learning *what this room looks like at 19:52*. The leave-one-session-out is
-the only split here that can tell "speaking" from "this recording", and it says
-the model learned the recording.
+the only split here that can tell "speaking" from "this recording", and on the
+one feature set with a real margin over its controls — `summary` — it says the
+model learned the recording: **0.000 on both held-out sessions**. (`map` does
+score 1.000 on held-out B, but its scrambled control is 0.938, so it is not
+beating its own control either.)
 
 **No teacher is validated. The controls are working exactly as intended** — this
 is what a gate is for.

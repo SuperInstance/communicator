@@ -38,6 +38,23 @@
 
 **Status:** retracted. Nothing here is a defect in `GATE_FIELD`.
 
+> ### ⚠ CORRECTION (2026-10-19) — the body below was never amended
+>
+> The banner above withdraws the finding, but the body it retracts was left
+> standing, and a reader who arrives at §"The measurement" finds it asserting
+> the withdrawn claim. Four passages are corrected in place below: the **14×
+> factor** (two places), the **"Not the LSTM, and not a warm-up artefact"**
+> dismissal, and the **"The cause is buffer trimming"** attribution.
+>
+> What the body should have said, from
+> `experiments/gate_peak_verdict_results.json`: `whole_signal_max` =
+> **0.7293** at **t = 0.064 s, frame 2 of 500**, and **every per-record ratio is
+> 1.000** (median 1.000, worst 1.000) when each record's own absolute index
+> range is looked up in one gate series over the whole stream. So the 0.7293
+> peak **is** the LSTM start-up transient — exactly what the body rules out —
+> and buffer trimming is not the cause, because `GATE_FIELD` does not
+> under-report. `NOTES-AUDIT.md` F5.
+
 ---
 
 ## The claim being made
@@ -74,9 +91,25 @@ production does — one continuous gate, 100 ms chunks:
 The true peak is constant at 0.7293. The reported value is ~0.05 at every
 duration. That is a factor of **14**.
 
+> **WITHDRAWN (2026-10-19).** The factor of 14 is the retracted quantity. It
+> divided the gate's max over the **whole signal** (0.7293, at t = 0.064 s)
+> by one record's value at t ≥ 4 s (0.0503) — two different intervals. With one
+> gate over the whole stream, every record's ratio is **1.000**. No 14× exists.
+> `experiments/gate_peak_verdict_results.json`; `NOTES-AUDIT.md` F5.
+
 ## Cause
 
-Not the LSTM, and not a warm-up artefact. Running one continuous gate over the
+~~Not the LSTM, and not a warm-up artefact.~~ **REVERSED (2026-10-19).** The
+peak at **t ≈ 0.064 s** *is* the LSTM start-up transient — the retraction in the
+banner says so and this body asserted the opposite. What the measurement does
+show is that the maximum is identical over the first 0.5 s, the first 2 s and
+all 16 s, which is a property of the signal, not evidence against a warm-up.
+The control the original docstring used ("max over the first 0.5 s gives the
+same 0.7293") could not exclude a warm-up at all: the transient sits inside the
+first 0.5 s, so that control returns the transient's value either way.
+`NOTES-AUDIT.md` F5.
+
+Running one continuous gate over the
 same signal, the maximum occurs at **t ≈ 0.064 s** and is identical whether you
 take the max over the first 0.5 s, the first 2 s, or all 16 s:
 
@@ -85,7 +118,14 @@ amp  max 0-0.5s  max 0-1s  max 0-2s  max 0-8s
 0.05      0.7293    0.7293    0.7293    0.7293
 ```
 
-The cause is **buffer trimming**. `_trim` discards gate probabilities whose
+~~The cause is **buffer trimming**.~~ **REJECTED (2026-10-19).** Buffer
+trimming is the competing explanation the retraction rejects: `_trim` does
+discard probabilities whose frames start before the new buffer origin, but
+`GATE_FIELD` reports the gate's max over the record's **own** interval, and
+measured that way every record's ratio is **1.000** (worst 1.000). Nothing is
+under-reported, so nothing needs a cause. `NOTES-AUDIT.md` F5.
+
+`_trim` discards gate probabilities whose
 frames start before the new buffer origin, and by the time a 4-second segment
 closes, the buffer holds 6400 samples — 0.4 s. The peak lives at 0.064 s and is
 long gone. After 8 s of audio the watcher's `_gate_probs` held **25 entries
@@ -104,6 +144,13 @@ The design rationale is that a human can find the segments the gate dismissed
 and check them. A value that is off by 14× and systematically **under-reports
 speech on long segments** cannot support that. Every long-segment dismissal is
 recorded as near-silence when the gate's own opinion of that segment was 0.73.
+
+> **WITHDRAWN (2026-10-19).** This paragraph asserts the withdrawn 14× factor
+> and the under-reporting it caused. There is no under-reporting: with each
+> record's own interval looked up in one gate series, every ratio is **1.000**
+> and the field matches its own interval (`field_matches_own_interval: true`).
+> The audit trail is not wrong — there is nothing to audit away.
+> `experiments/gate_peak_verdict_results.json`; `NOTES-AUDIT.md` F5.
 
 It also means the documented limit and the production number describe different
 things. `tests/test_vad.py::TestDeclaredLimits` measures `seg_max` over a

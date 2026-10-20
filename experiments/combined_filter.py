@@ -70,6 +70,7 @@ number is the one that counts and it is reported whatever it says.
 
 from __future__ import annotations
 
+import hashlib
 import json
 import sys
 from pathlib import Path
@@ -83,6 +84,58 @@ YS = W * H
 
 sys.path.insert(0, str(ROOT / "experiments"))
 from ascii_motion_render import load_session  # noqa: E402
+
+
+# -- provenance ---------------------------------------------------------------
+# The numbers here are only meaningful against the captures they were read
+# from, so the result records which captures those were -- path and SHA-256
+# -- the script's own SHA-256, and the exact command line.
+
+def sha256_file(path) -> str:
+    """SHA-256 of a file, read in chunks."""
+    h = hashlib.sha256()
+    with open(path, "rb") as f:
+        for chunk in iter(lambda: f.read(1 << 20), b""):
+            h.update(chunk)
+    return h.hexdigest()
+
+
+def file_identity(path) -> dict:
+    """Where an input file is, and what it is."""
+    p = Path(path).resolve()
+    out = {"path": str(p)}
+    if not p.is_file():
+        out["problem"] = "the file is not on disk"
+        return out
+    out["sha256"] = sha256_file(p)
+    out["bytes"] = p.stat().st_size
+    return out
+
+
+def build_provenance(corpus_path, empty_capture, sessions, cli_args,
+                     parameters) -> dict:
+    """The provenance block, and whether it is complete."""
+    script = Path(__file__).resolve()
+    prov = {
+        "generated_by": "experiments/combined_filter.py",
+        "script_path": str(script),
+        "script_sha256": sha256_file(script) if script.is_file() else None,
+        "corpus_path": str(Path(corpus_path).resolve()),
+        "empty_capture": empty_capture,
+        "sessions": list(sessions),
+        "cli_args": list(cli_args),
+        "command_line": " ".join(str(x) for x in cli_args),
+        "parameters": dict(parameters),
+    }
+    prov["problems"] = ([f"{empty_capture.get('path')}: "
+                         f"{empty_capture['problem']}"]
+                        if empty_capture.get("problem") else [])
+    for s in prov["sessions"]:
+        # a session whose capture is missing contributes nothing to the
+        # measurement, so it is recorded but it is not a broken input
+        if s.get("problem") and s.get("used", True):
+            prov["problems"].append(f"{s.get('path')}: {s['problem']}")
+    return prov
 
 
 def row_band_remove(Y: np.ndarray) -> np.ndarray:
@@ -110,6 +163,102 @@ def load_raw(path: Path, nf: int):
     n = min(nf, len(raw) // FB)
     Y = raw[:n * FB].reshape(n, FB)[:, :YS].reshape(n, H, W).astype(np.float64)
     return Y
+
+
+# -- what every number in the output MEANS -------------------------------------
+# The printed header row did not line up with the values under it -- it named
+# six columns and printed seven -- so a reader (or a note) read the OCCUPIED
+# flip rate as the empty-room saturation. The fix is not a better table: it
+# is that every scalar in the results file carries its own name and its own
+# definition, so `empty_saturation` and `A_flip` cannot be confused by
+# anyone who has not read this file.
+
+_UNIT_PAIR_FRACTION = "fraction of consecutive motion-map pairs, in (0, 1]"
+_UNIT_PIXEL_FRACTION = "fraction of pixels, in (0, 1]"
+_UNIT_SHARE = "fraction of the excess, in (0, 1]"
+_UNIT_COUNTS = "motion-map counts (arbitrary units)"
+_UNIT_RATIO = "dimensionless ratio"
+
+
+def _definition(name):
+    """(unit, definition) for one scalar, named by the scalar itself."""
+    if name == "empty_flip":
+        return (_UNIT_PAIR_FRACTION,
+                "NOT MEASURED by this script: the empty capture's flip rate is "
+                "never computed, so this is null for every variant")
+    if name == "empty_saturation":
+        return (_UNIT_PIXEL_FRACTION,
+                "fraction of pixels in the EMPTY capture whose change-map value "
+                "exceeds 1% of that map's own 99.5th-percentile value")
+    if name == "A_vs_C.mean_abs_diff":
+        return (_UNIT_COUNTS,
+                "mean absolute difference between the mean change maps of "
+                "condition A and condition C over frames 30-270")
+    if name == "A_vs_C.max_diff":
+        return (_UNIT_COUNTS,
+                "maximum absolute difference between the mean change maps of "
+                "condition A and condition C over frames 30-270")
+    if name == "A_vs_C.within_condition_split":
+        return (_UNIT_COUNTS,
+                "within-condition control: mean absolute difference between the "
+                "first and second temporal halves of condition A's change map "
+                "over frames 30-270")
+    if name == "A_vs_C.snr":
+        return (_UNIT_RATIO,
+                "A_vs_C.mean_abs_diff divided by A_vs_C.within_condition_split")
+    if name == "A_vs_C.top5pct_excess_share":
+        return (_UNIT_SHARE,
+                "share of the excess over the 95th percentile of the null that "
+                "falls in the most active 5% of pixels (localisation)")
+    if "_gap." in name:
+        cond = name.split("_gap.")[0]
+        leaf = name.split("_gap.", 1)[1]
+        if leaf == "mean_abs_diff":
+            return (_UNIT_COUNTS,
+                    f"mean absolute difference between the first and second "
+                    f"6-frame block of condition {cond}'s change map "
+                    f"(0.8 s to 9.0 s)")
+        if leaf == "max_diff":
+            return (_UNIT_COUNTS,
+                    f"maximum absolute difference between the first and second "
+                    f"6-frame block of condition {cond}'s change map "
+                    f"(0.8 s to 9.0 s)")
+        if leaf == "top5pct_excess_share":
+            return (_UNIT_SHARE,
+                    f"share of the excess over the median that falls in the most "
+                    f"active 5% of pixels for condition {cond}")
+    if name.endswith("_flip"):
+        cond = name[:-len("_flip")]
+        return (_UNIT_PAIR_FRACTION,
+                f"fraction of consecutive motion-map pairs on condition {cond} "
+                f"whose change exceeds half the maximum change in that run")
+    if name.endswith("_saturation"):
+        cond = name[:-len("_saturation")]
+        return (_UNIT_PIXEL_FRACTION,
+                f"fraction of pixels on condition {cond} whose change-map value "
+                f"exceeds 1% of that map's own 99.5th-percentile value")
+    raise KeyError(f"no definition recorded for {name!r}")
+
+
+def _flatten(prefix, obj):
+    """Every scalar in a nested dict, under its own dotted name."""
+    out = {}
+    for k, v in obj.items():
+        name = f"{prefix}.{k}" if prefix else k
+        if isinstance(v, dict):
+            out.update(_flatten(name, v))
+        else:
+            out[name] = v
+    return out
+
+
+def describe(row_out):
+    """{scalar_name: {value, unit, definition}} for one variant."""
+    out = {}
+    for name, value in _flatten("", row_out).items():
+        unit, definition = _definition(name)
+        out[name] = {"value": value, "unit": unit, "definition": definition}
+    return out
 
 
 def variant_maps(Y: np.ndarray, row: bool, k: int) -> np.ndarray:
@@ -146,18 +295,19 @@ def speech_gap(maps: np.ndarray, t0: float, t1: float, w: int = 6):
             "top5pct_excess_share": loc}
 
 
-def main():
+def main(argv=None):
     import argparse
     ap = argparse.ArgumentParser()
     ap.add_argument("--empty", default="/home/proart/projects/glasses/.capture_keep/empty1.nv12")
     ap.add_argument("--corpus", default="/mnt/c/proart_capture/corpus")
     ap.add_argument("--nf", type=int, default=400)
     ap.add_argument("--out", default=str(ROOT / "experiments"))
-    a = ap.parse_args()
+    a = ap.parse_args(argv)
 
     E = load_raw(Path(a.empty), a.nf)
     corpus = Path(a.corpus)
     sess = {}
+    session_ids = []
     for meta_p in sorted(corpus.glob("*.json")):
         npz = meta_p.with_suffix(".npz")
         if not npz.is_file():
@@ -170,8 +320,15 @@ def main():
         src = meta.get("source")
         if src and Path(src).is_file():
             sess[meta["condition"]] = (load_raw(Path(src), a.nf), meta)
+            ident = file_identity(src)
+            ident["used"] = True
         else:
             sess[meta["condition"]] = (None, meta)
+            ident = {"path": str(Path(src).resolve()) if src else None,
+                     "used": False,
+                     "problem": "the source capture is not on disk"}
+        ident["name"] = meta["condition"]
+        session_ids.append(ident)
 
     variants = {
         "raw": (False, 1),
@@ -182,8 +339,12 @@ def main():
     }
 
     results = {}
+    # The header names the values that are actually printed under it. The old
+    # header had six names for seven values, so "loc" sat over the SNR column
+    # and the top-5% share had no name at all.
     print(f"{'variant':14s} {'empty flip':>11s} {'empty sat':>10s} "
-          f"{'occ flip':>9s} {'occ sat':>8s} {'A-vs-C gap':>12s} {'loc':>6s}")
+          f"{'A flip':>9s} {'A sat':>8s} {'A-vs-C gap':>12s} {'SNR':>6s} "
+          f"{'top5%':>6s}")
     for name, (row, k) in variants.items():
         mE = variant_maps(E, row, k)
         row_out = {"empty_flip": None, "empty_saturation": saturation(mE)}
@@ -240,10 +401,37 @@ def main():
               f"{g.get('snr', 0):6.2f} "
               f"{g.get('top5pct_excess_share', 0) * 100:5.1f}%")
 
+    # Every scalar the file contains, named by its own key and described by
+    # its own definition. `variants` is kept as it was, for anything that
+    # already reads it; `summary` is the self-describing layer.
+    definitions = {}
+    for row in results.values():
+        for name in _flatten("", row):
+            if name not in definitions:
+                unit, definition = _definition(name)
+                definitions[name] = {"unit": unit, "definition": definition}
+
+    used_argv = list(sys.argv[1:]) if argv is None else list(argv)
+    provenance = build_provenance(
+        corpus, file_identity(a.empty), session_ids, used_argv,
+        {"nf": a.nf, "out": str(a.out),
+         "variants": {k: {"row_band_removal": v[0], "temporal_median_k": v[1]}
+                      for k, v in variants.items()}})
+
     out = {"question": ("does composing row-band removal with a temporal median "
                         "de-saturate the motion field and make the speech "
                         "signal stand out more?"),
+           "definitions": definitions,
            "variants": results,
+           "summary": {name: describe(row) for name, row in results.items()},
+           "provenance": provenance,
+           "reproducible": bool(
+               provenance.get("script_sha256")
+               and provenance.get("empty_capture", {}).get("sha256")
+               and provenance.get("cli_args") is not None
+               and all(s.get("sha256") for s in provenance.get("sessions", [])
+                       if s.get("used", True))
+               and not provenance.get("problems")),
            "limits": [
                "two labelled sessions per class; the composition can make a "
                "teacher MORE LIKELY to pass its gate but cannot make one pass",

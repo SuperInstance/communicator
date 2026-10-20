@@ -307,8 +307,18 @@ which is a property of the model and not of the audio.
   measurement. See [E1](#e1-screening-candidate-architectures-against-typed-criteria).
 - **Structuring a decomposition.** The single best result in this file is not an answer,
   it is the *shape* of the question set: five failure-framed Nouls combined with `max`
-  surviving an adversarial input that defeated a holistic Noul by a factor of 13
-  (0.940 vs 0.070). That shape transfers to any classifier-shaped task, audio or not.
+  surviving an adversarial input that defeated a holistic Noul by a factor of **10.4**
+  (0.940 vs 0.090). That shape transfers to any classifier-shaped task, audio or not.
+
+  > **CORRECTION (2026-10-19).** This said *"a factor of 13 (0.940 vs 0.070)"*.
+  > `docs/research/alwayson/jev_alwayson_results.json` holds **one** run:
+  > `e2_audio_gate.hum_ADVERSARIAL` holistic **0.09**, `max_battery` **0.94**,
+  > ratio **10.44×**. The 0.070 is the **run-2** holistic score from the
+  > run-to-run variance paragraph below, and **the two runs were never stored
+  > separately** — so the published "13" paired a run-1 battery score with a
+  > run-2 holistic score. `alwayson/README.md` prints the same comparison as
+  > 10 (0.940 vs 0.090), which is the stored run. Settled by that result file;
+  > `NOTES-AUDIT.md` F9.
 - Detecting that a heuristic is **not describable in language**. If narrow questions about
   a rule cannot separate the classes, the rule probably is not a rule.
 

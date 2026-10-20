@@ -50,7 +50,8 @@ falsified, plus claims that are still standing:
     - an LLM teacher able to label speech from ASCII grids
     - a "31.8% of frames never measured" figure
     - a conventional teacher scoring 0.000 on leave-one-session-out for
-      EVERY feature set (two of the five are 1.000, 0.675 and 0.200)
+      EVERY feature set (the motion-map feature set scores 1.000 on a held-out
+      session, and region+map scores 0.200)
   STILL STANDING (the director should NOT reject these)
     - row-band removal taking the empty room's dot flip from 50.00% to 0.01%
     - the room being silent at -73.5 dBFS with zero valid RT60 estimates
@@ -59,13 +60,23 @@ falsified, plus claims that are still standing:
 
 THE AUDIT SET IS AUDITED TOO. An audit of `docs/research/` against the result
 files found that TWO of these ten claims were mis-marked when the set was
-first written: the leave-one-out claim was marked TRUE although two of five
-feature sets score above 0.6 on a held-out session, and the composed-filter
+first written: the leave-one-out claim was marked TRUE although the motion-map
+feature set scores 1.000 on a held-out session, and the composed-filter
 claim was marked TRUE although "21x over either filter" uses the better of
 the two singles and calls a flip rate a saturation. Both were corrected and
 the audit was re-run, and the set now holds SEVEN false claims and THREE
 true ones. An audit set that has not been audited is a quiz with the answers
 written on it.
+
+AND THE AUDIT SET IS AUDITED AGAIN. A third value (0.675, for the `both`
+feature set) appeared in the committed teacher artefact and was copied into
+this description. It does not reproduce: the same script, the same arguments
+and the same corpus reproduce every other column of that artefact exactly and
+return 0.000 for the held-out session. The value is withdrawn, and the
+leave-one-out claim's FALSITY now rests entirely on numbers that do
+reproduce -- map 1.000 and region+map 0.200. The claim's truth value did not
+change; the evidence for it did, and the evidence is now traceable.
+`NOTES-AUDIT.md` F3, `COMBINED-FILTER.md`, `ARTIFACT-REPRODUCIBILITY.md`.
 
 The score has two halves, because a reviewer that rejects EVERYTHING is as
 useless as one that accepts everything:
@@ -547,35 +558,39 @@ def collect_materials(limit: int = 140000) -> str:
 
 # ---------------------------------------------------------------------- audit
 
-def run_audit(model: str, mode: str, seed: int = 20261019,
-              materials_limit: int | None = None) -> dict:
+def audit_pairs(seed: int = 20261019):
+    """The audit set, shuffled with a fixed seed. Deterministic."""
     pairs = list(AUDIT_SET)
     random.Random(seed).shuffle(pairs)
+    return pairs
+
+
+def build_audit_prompt(mode: str, pairs, materials_limit: int | None = None):
+    """The audit prompt for a given material budget.
+
+    A pure function of (mode, pairs, materials_limit) and the files on disk.
+    That purity is the point: it is what lets the SAME prompt be sent N times
+    and the director's run-to-run repeatability be measured against it.
+    Returns (prompt, materials_chars).
+    """
     claims = "\n".join(f"{n}. {c}" for n, (c, _) in enumerate(pairs))
+    if mode == "context":
+        lim = materials_limit if materials_limit else FIT_LADDER[-1]
+        return (AUDIT_PROMPT.replace(
+            "{claims}",
+            claims + "\n\n=== RESEARCH NOTES AND RESULTS (for reference) ===\n"
+            + collect_materials(limit=lim)), lim)
+    return AUDIT_PROMPT.replace("{claims}", claims), 0
 
-    def _mk(lim):
-        if mode == "context":
-            return AUDIT_PROMPT.replace(
-                "{claims}",
-                claims + "\n\n=== RESEARCH NOTES AND RESULTS (for reference) ===\n"
-                + collect_materials(limit=lim))
-        return AUDIT_PROMPT.replace("{claims}", claims)
 
-    if materials_limit:
-        r = call_model(model, _mk(materials_limit), 3000)
-        lim = materials_limit
-    else:
-        r, lim = call_with_fit(model, _mk, 3000)
-    if r.get("error"):
-        return {"model": model, "mode": mode, "error": r.get("error"),
-                "detail": r.get("detail"), "elapsed_s": r.get("elapsed_s")}
+def score_audit(pairs, obj, model: str = "", mode: str = "", lim: int = 0,
+                elapsed=None, raw: str = "") -> dict:
+    """Turn a parsed verdict object into the scores.
 
-    obj = extract_json(r.get("text") or "")
-    if not obj or "verdicts" not in obj:
-        return {"model": model, "mode": mode, "error": "unparseable",
-                "raw": (r.get("text") or "")[:2000],
-                "elapsed_s": r.get("elapsed_s")}
-
+    A pure function of (pairs, obj): the same verdicts always give the same
+    headline. Whatever varies between runs of the director is the MODEL's
+    variation, not the scoring's.
+    """
     by_index = {}
     for v in obj.get("verdicts") or []:
         try:
@@ -651,8 +666,34 @@ def run_audit(model: str, mode: str, seed: int = 20261019,
             "uncertain": unc,
             "detections": det, "n_false": n_false, "n_true": n_true,
             "unparseable": sum(1 for x in rows if x["verdict"] == "unparseable"),
-            "elapsed_s": r.get("elapsed_s"), "rows": rows,
-            "raw": (r.get("text") or "")[:1500]}
+            "elapsed_s": elapsed, "rows": rows,
+            "raw": raw[:1500]}
+
+
+def run_audit(model: str, mode: str, seed: int = 20261019,
+              materials_limit: int | None = None) -> dict:
+    pairs = audit_pairs(seed)
+
+    def _mk(lim):
+        return build_audit_prompt(mode, pairs, lim)[0]
+
+    if materials_limit:
+        r = call_model(model, _mk(materials_limit), 3000)
+        lim = materials_limit
+    else:
+        r, lim = call_with_fit(model, _mk, 3000)
+    if r.get("error"):
+        return {"model": model, "mode": mode, "error": r.get("error"),
+                "detail": r.get("detail"), "elapsed_s": r.get("elapsed_s")}
+
+    obj = extract_json(r.get("text") or "")
+    if not obj or "verdicts" not in obj:
+        return {"model": model, "mode": mode, "error": "unparseable",
+                "raw": (r.get("text") or "")[:2000],
+                "elapsed_s": r.get("elapsed_s")}
+
+    return score_audit(pairs, obj, model, mode, lim, r.get("elapsed_s"),
+                       r.get("text") or "")
 
 
 # -------------------------------------------------------------------- debrief

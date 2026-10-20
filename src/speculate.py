@@ -3,11 +3,25 @@ speculate -- act before you are sure, and be able to take it back.
 
 WHY THIS EXISTS, WITH THE NUMBER THAT FORCED IT.
 
-Across the seven-cell real corpus (465 s, 680 measured pause runs) the 3 s
-turn decision in `turn.py` fires on ZERO of them. The longest gap anywhere in
-the corpus outside a single essay is 2.4 s. So a peripheral built on it does
-not respond slowly — it does not respond at all, and "wait for certainty" has
-a measured cost of "never".
+Across the seven-cell real corpus the 3 s turn decision in `turn.py` fires
+on ZERO of the 673 distinct silence runs measured on the population this
+number was taken from — or on ZERO of the 1671 pause EVENTS the watcher
+reports over them, since it re-reports an open pause every 0.25 s. The
+longest gap anywhere in that corpus outside a single essay is
+2.4 s. So a peripheral built on it does not respond slowly — it does not
+respond at all, and "wait for certainty" has a measured cost of "never".
+
+TWO NUMBERS HERE ARE STALE, and they are stale in the corpus, not in the
+mechanism. The cells on disk total 485.01 s, not the 465 s quoted in earlier
+revisions, and the code now measures 673 silence runs (1671 pause events)
+over those cells rather than the 680 runs this statistic was taken from.
+The 680 is not exactly reproducible, because the population behind it no
+longer exists: the same measurement gives 673 runs adaptively, 647 events
+energy-only, and 665 runs on a hypothetical 465 s corpus — so truncating
+poetry to 15 s moves the count AWAY from 680, not towards it. The
+conclusion -- the 3 s
+threshold fires on none of them -- is unaffected, because 3 s exceeds the
+longest gap either way. `docs/research/NOTES-AUDIT.md` F7, F8.
 
 At the same time, `docs/research/TURN-ROUTES.md` established that the
 decision cannot be made better by looking harder:

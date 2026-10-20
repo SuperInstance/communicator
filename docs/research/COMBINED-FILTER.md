@@ -84,8 +84,37 @@ Regenerated the corpus with `row+median3` and re-ran the teacher:
 |---|---:|---:|---:|---:|---|
 | summary | 1.000 | 0.792 | 0.667 | +0.208 | A 0.000, B 0.000 |
 | map | 1.000 | 0.938 | 0.667 | +0.062 | A 0.000, B 1.000 |
-| both | 1.000 | 0.979 | 0.667 | +0.021 | A 0.000, C 0.650 |
-| **both, row+median3** | 1.000 | **1.000** | 0.667 | **+0.000** | A 0.000, B 0.675 |
+| both | 1.000 | 0.979 | 0.667 | +0.021 | A 0.000, B 0.000 |
+| **both, row+median3** | 1.000 | **1.000** | 0.667 | **+0.000** | A 0.000, B 0.000 |
+
+> **CORRECTION (2026-10-19) — both LOO cells in this table were wrong, and one
+> of them was wrong in a way worth recording.**
+>
+> The `both` row read **"A 0.000, C 0.650"**. There is **no session C** with a
+> leave-one-session-out row: holding out C leaves only label 1 in the training
+> set, so the fold is undefined. The experiment now reports that as a *skipped*
+> fold with its reason, rather than dropping it silently — a cell can only be
+> transcribed from a row that exists. The cell is **A 0.000, B 0.000**.
+>
+> The `both, row+median3` row read **"A 0.000, B 0.675"**. That 0.675 was real
+> in a committed artefact (`experiments/teacher_conventional_speaking_both.json`
+> at `7a4dff5`) but **it does not reproduce.** Re-running the committed script
+> against the committed corpus reproduces every other column of that artefact
+> exactly — test 1.000, scrambled 1.000, blank 0.667, margin +0.000 — and
+> returns LOO **A 0.000, B 0.000**. Neither the code nor the data is the
+> variable: the corpus rebuilds **byte for byte** from the captures
+> (`seed_corpus_from_captures.py --filter row+median3` yields three
+> SHA-256-identical `.npz` files), and a sweep of **352 configurations** over
+> the parameters the artefact never recorded (filter variant × stride ×
+> max-per × frame count × task) never produces 0.675 *together with* the
+> artefact's other columns. The cell is now **A 0.000, B 0.000**, and **0.675 is
+> withdrawn as a measurement of this corpus.** `NOTES-AUDIT.md` F3,
+> `ARTIFACT-REPRODUCIBILITY.md`.
+>
+> The lesson is not "the teacher got worse". The other four feature sets
+> reproduce bit-exactly, so the numbers this document's argument rests on are
+> unaffected. The lesson is that **a committed number is not a result until it
+> carries the identity of its inputs** — and that one did not.
 
 **The composed representation makes the teacher worse, not better** — the
 spatially-scrambled control now scores 1.000, exactly as the real input does.

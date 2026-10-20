@@ -122,6 +122,14 @@ isolation inflates **1.60–1.83×** against YIN's **1.074**. The prediction abo
 the *shape* was right. The magnitude is two orders of magnitude too small to
 touch the decision.
 
+> **UNSETTLED (2026-10-19).** "YIN's **1.074**" is not YIN measured on its own —
+> it is the **whole ungated watcher** (YIN plus segmenter plus buffer
+> management). **YIN was never measured in isolation.** The number is left as
+> printed and is **not** settled; the relative cache penalty (1.107) is computed
+> correctly and is unaffected. **What would settle it:** measure YIN in
+> isolation under the same flush protocol, or rename the number. Flagged as a
+> candidate, not a finding — `NOTES-AUDIT.md` F14.
+
 **But the 10% is not cleanly resolved from noise.** Pairing all 5×5 run
 combinations:
 

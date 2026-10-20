@@ -3786,5 +3786,212 @@
       "disagreement": 0.1446
     }
   ],
-  "elapsed_s": 13.32
+  "summary": {
+    "n_cases": 180,
+    "cases_by_truth": {
+      "end": 60,
+      "mid": 60,
+      "none": 12,
+      "resume": 48
+    },
+    "cases_by_cell": {
+      "children": 45,
+      "dialogue": 45,
+      "essay": 45,
+      "narration": 45
+    },
+    "causal": true,
+    "tie_convention": "ties count 0.5 toward the concordance and are excluded from the denominator, so the denominator counts only the decided pairs (the `aucc` convention)",
+    "primary_contrast": "end_vs_resume",
+    "stages": {
+      "acoustic": {
+        "n_scored": 180,
+        "mean_p_end_by_truth": {
+          "end": 0.00636,
+          "resume": 0.0067,
+          "mid": 0.007523333333333334,
+          "none": 0.005
+        },
+        "concordance_all_pairs": 0.7847682119205298,
+        "pair_concordance": {
+          "end_vs_resume": 0.6666666666666666,
+          "end_vs_mid": 0.6748768472906403,
+          "end_vs_none": 1.0,
+          "resume_vs_mid": 0.8918918918918919,
+          "resume_vs_none": 1.0,
+          "mid_vs_none": 1.0
+        },
+        "control_concordance_vs_none": {
+          "end_vs_none": 1.0,
+          "resume_vs_none": 1.0,
+          "mid_vs_none": 1.0
+        },
+        "permutation_null": {
+          "contrast": "end_vs_resume",
+          "observed_concordance": 0.6666666666666666,
+          "null_mean": 0.8338932588193612,
+          "null_sd": 0.04740048871285141,
+          "null_min": 0.6666666666666666,
+          "null_max": 0.9792484576556366,
+          "null_p95": 0.908256880733945,
+          "permutations": 20000,
+          "hits": 20000,
+          "p_value": 1.0,
+          "seed": 7
+        }
+      },
+      "smartturn": {
+        "n_scored": 180,
+        "mean_p_end_by_truth": {
+          "end": 0.6142079666666667,
+          "resume": 0.47842225,
+          "mid": 0.5523155666666667,
+          "none": 0.5597114166666667
+        },
+        "concordance_all_pairs": 0.5541217972521352,
+        "pair_concordance": {
+          "end_vs_resume": 0.6247394023627519,
+          "end_vs_mid": 0.5902506963788301,
+          "end_vs_none": 0.5488826815642458,
+          "resume_vs_mid": 0.46202090592334494,
+          "resume_vs_none": 0.4355400696864111,
+          "mid_vs_none": 0.4637883008356546
+        },
+        "control_concordance_vs_none": {
+          "end_vs_none": 0.5488826815642458,
+          "resume_vs_none": 0.4355400696864111,
+          "mid_vs_none": 0.4637883008356546
+        },
+        "permutation_null": {
+          "contrast": "end_vs_resume",
+          "observed_concordance": 0.6247394023627519,
+          "null_mean": 0.5078950695078068,
+          "null_sd": 0.057572310781332944,
+          "null_min": 0.2867971091133439,
+          "null_max": 0.7160949868073878,
+          "null_p95": 0.6026843670014209,
+          "permutations": 20000,
+          "hits": 417,
+          "p_value": 0.02085,
+          "seed": 7
+        }
+      }
+    },
+    "disagreement_by_truth": {
+      "end": {
+        "mean": 0.303935,
+        "median": 0.4363,
+        "max": 0.4896,
+        "n": 60
+      },
+      "resume": {
+        "mean": 0.2358583333333333,
+        "median": 0.3139,
+        "max": 0.4821,
+        "n": 48
+      },
+      "mid": {
+        "mean": 0.2723966666666667,
+        "median": 0.3654,
+        "max": 0.4859,
+        "n": 60
+      },
+      "none": {
+        "mean": 0.27735,
+        "median": 0.387,
+        "max": 0.4893,
+        "n": 12
+      }
+    },
+    "circularity_check": {
+      "acoustic": {
+        "mean_p_end_end": 0.00636,
+        "mean_p_end_resume": 0.0067,
+        "verdict": "INTERRUPTS PEOPLE"
+      },
+      "smartturn": {
+        "mean_p_end_end": 0.6142079666666667,
+        "mean_p_end_resume": 0.47842225,
+        "verdict": "separates them"
+      }
+    }
+  },
+  "provenance": {
+    "generated_by": "experiments/turn_routes.py",
+    "script_path": "/home/proart/projects/communicator/experiments/turn_routes.py",
+    "script_sha256": "e59f41a9c940854d35a2294d62af11a7cace2dfffdfa9dc7c6d966069cd171f8",
+    "cells": [
+      {
+        "path": "/home/proart/projects/communicator/examples/realaudio/alice01_excerpt.wav",
+        "sha256": "0b83c9c6038273565fc7056a62843460fa9c5d17497ff858b98081aa914f75d7",
+        "bytes": 7938044,
+        "name": "narration"
+      },
+      {
+        "path": "/home/proart/projects/communicator/examples/realaudio/corpus/essay_perpetual_peace_librivox.wav",
+        "sha256": "a3b7212251fe571e8e14d96b25a42e8f46eda94160a00e7a376d06e4493746b4",
+        "bytes": 2400044,
+        "name": "essay"
+      },
+      {
+        "path": "/home/proart/projects/communicator/examples/realaudio/corpus/shortstory_shortstory058_1405_librivox.wav",
+        "sha256": "4261c667a495ba7c107fdd5d4028946f3b6e55dce8535946dcfb0c8e75f5146e",
+        "bytes": 2400044,
+        "name": "dialogue"
+      },
+      {
+        "path": "/home/proart/projects/communicator/examples/realaudio/corpus/children_english_fairy_tales_joy_librivox.wav",
+        "sha256": "67dc248634d4f5e589f75bc1029b039c8be60db6d71962f07d95d26af5b7f9c0",
+        "bytes": 2400044,
+        "name": "children"
+      }
+    ],
+    "skipped_cells": [],
+    "stages": [
+      "acoustic",
+      "smartturn"
+    ],
+    "cli_args": [
+      "--causal",
+      "--per-cell",
+      "3",
+      "--stages",
+      "acoustic,smartturn",
+      "--permutations",
+      "20000",
+      "--perm-seed",
+      "7",
+      "--out",
+      "/home/proart/projects/communicator/experiments/turn_routes_causal_results.json"
+    ],
+    "command_line": "--causal --per-cell 3 --stages acoustic,smartturn --permutations 20000 --perm-seed 7 --out /home/proart/projects/communicator/experiments/turn_routes_causal_results.json",
+    "parameters": {
+      "per_cell": 3,
+      "limit": 0,
+      "causal": true,
+      "permutations": 20000,
+      "perm_seed": 7,
+      "out": "/home/proart/projects/communicator/experiments/turn_routes_causal_results.json",
+      "silence_lengths": [
+        0.15,
+        0.3,
+        0.6,
+        1.0,
+        1.5
+      ]
+    },
+    "problems": [],
+    "smartturn_model": {
+      "path": "/home/proart/projects/communicator/.scratch/st2/pkg/pipecat/audio/turn/smart_turn/data/smart-turn-v3.2-cpu.onnx",
+      "sha256": "2bb026316b14a660486a75b1733cd3fbab8c2fd0314dc9af7be49f8cca967e4f",
+      "bytes": 8679182
+    },
+    "smartturn_features": {
+      "path": "/home/proart/projects/communicator/.scratch/st2/pkg/pipecat/audio/turn/smart_turn/_whisper_features.py",
+      "sha256": "c4eb415855fc2c66ea09ad1189a18396ce9b26d060b2b9ced39b9b81a0f60342",
+      "bytes": 6810
+    }
+  },
+  "reproducible": true,
+  "elapsed_s": 16.48
 }

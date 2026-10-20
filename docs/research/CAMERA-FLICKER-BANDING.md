@@ -106,6 +106,15 @@ So the instruction I gave you this morning — bigger turn, clearer framing — 
 the wrong lever. It would help a little, and change nothing about the fact that
 ~70% of the frame-to-frame variation is the lamps.
 
+> **UNSETTLED (2026-10-19).** The "~70%" share is **not** derived from two
+> quantities measured over the same thing: it divides a **spatial** standard
+> deviation (31.312) by a **temporal** MAD (43.686). For a Gaussian,
+> MAD = 0.6745σ, so on its own terms the share would be ≈48 %, not 71.7 %. The
+> number is left as printed and is **not** settled. **What would settle it:**
+> decompose each frame pair into a row-constant part and a column-varying part
+> and report the fraction of the *temporal residual* explained by the row term.
+> Flagged as a candidate, not a finding — `NOTES-AUDIT.md` F12.
+
 ### What to change instead
 
 1. **Change the lighting.** This is the lever. A different lamp, or daylight,

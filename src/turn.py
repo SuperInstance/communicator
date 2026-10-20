@@ -10,10 +10,17 @@ being wrong:
     "is the turn over?"          this module, `TURN_END_S` = 3 s
 
 The adoption plan wanted to merge them into one constant at 200 ms. Measured
-across seven cells of real speech (465 s, 465 gaps) that costs 46 pauses,
-17.8% of them all, concentrated in dramatic and children's speech where the
-pause structure IS the prosody. See `tests/test_pause_threshold.py` and the
-retraction in `docs/research/ADOPTION-PLAN.md` §3.
+across seven cells of real speech that costs 46 of the 259 pauses the 150 ms
+trigger keeps -- 17.8% -- concentrated in dramatic and children's speech
+where the pause structure IS the prosody. See `tests/test_pause_threshold.py`
+and the retraction in `docs/research/ADOPTION-PLAN.md` §3.
+
+THE CORPUS LENGTH: the seven cells on disk total 485.01 s, not the 465 s
+that earlier revisions of this comment quoted. That length was the ONLY
+thing wrong: re-measuring on the current corpus reproduces every cell of the
+published pause table exactly, and the 17.8% with it -- the counts were
+always right and the corpus length beside them was not.
+`docs/research/PAUSE-THRESHOLD.md`, `docs/research/NOTES-AUDIT.md` F7.
 
 So the 3 s decision sits ON TOP of the pause stream and never removes
 anything from it. A pause that does not reach the turn threshold is still a

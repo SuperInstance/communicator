@@ -41,14 +41,26 @@ now quantified. It is not a subtle degradation. On a room with a fan, our watche
 structurally wrong in the same direction.
 
 **silero-vad separates cleanly on every class**, including the hum that specifically breaks
-us, and it does it at a threshold (0.5) sitting in a gap **28× wide on the mean** and
-**5.4× wide on the worst-case max** (0.1736 music vs 0.7530 speech).
+us, and it does it at a threshold (0.5) sitting in a gap **93.0× wide on the mean**
+(0.7530 worst speech mean ÷ 0.0081 worst non-speech mean) and **5.76× wide on the
+worst-case max** (1.0000 worst speech max ÷ 0.1736 worst non-speech max, music).
+
+> **CORRECTION (2026-10-19).** This said *"a gap 28× wide on the mean and 5.4×
+> wide on the worst-case max (0.1736 music vs 0.7530 speech)"*. **No
+> derivation in `hotpath_measurements.json` yields 28 or 5.4.** From
+> `silero_v5_scores.current_v5_opset16`: worst speech mean **0.7530**
+> (speech_jane) and max **1.0000**; worst non-speech mean **0.0081** (white
+> noise) and max **0.1736** (music). So the derivable figures are **93.0× on
+> the mean** (0.7530 / 0.0081) and **5.76× on the max** (1.0000 / 0.1736), and
+> the note's own parenthetical pair (0.7530 / 0.1736) is **4.34×**. **The
+> underlying separation is not wrong — the file supports a LARGER mean gap than
+> 28×.** `NOTES-AUDIT.md` F10.
 
 ## 2. Cost: nobody here is close to the bottleneck
 
 | Component | Cost, 1 thread | % of one core at 1× realtime |
 |---|---:|---:|
-| **our watcher** (`src/watcher.py`) | **39.13 ms per 100 ms push** | **39.1%** |
+| **our watcher** (`src/watcher.py`) | **39.13 ms per 100 ms push** (mean of the 6 non-speech fixtures) | **39.1%** |
 | **silero-vad v5**, one 32 ms chunk | **74.9 μs** | **0.23%** |
 | openWakeWord full stack, all 6 heads | 1.63 ms per 80 ms | 2.04% |
 | openWakeWord, shared front only | 0.92 ms per 80 ms | 1.15% |
@@ -58,6 +70,22 @@ us, and it does it at a threshold (0.5) sitting in a gap **28× wide on the mean
 *"No model, no network, microseconds."* It is measured at **39.13 ms per 100 ms of audio**
 — 39.1% of a core, a realtime ratio of only **2.56×**, and it is *model-free arithmetic*
 that is 39% of a core. The docstring is wrong by three orders of magnitude.
+
+**That 39.13 ms is the mean over the SIX NON-SPEECH fixtures** (hum 31.913, fan
+41.095, clicks 48.387, music 33.877, white noise 39.307, silence 40.153 ms).
+On **real speech** the watcher is **21.9–36.1 ms** (speech_jane 21.945,
+speech_mycroft 24.666, speech_alexa 36.124; mean 27.578 ms) — a realtime ratio
+of **2.77–4.56×**, against **2.1×** (48.387 ms, keyboard clicks) for the
+non-speech worst case.
+
+> **CORRECTION (2026-10-19) — "39.1% of a core" had no denominator.** From
+> `hotpath_measurements.json` → `watcher`: the six non-speech fixtures above
+> average **39.122 ms**; the three speech fixtures average **27.578 ms**. The
+> rate is real and the trade-off is sound — "a gate that costs 0.23% of a core
+> to delete a 39%-of-a-core failure mode" is correct precisely because 39.1%
+> is the non-speech cost — but the population has to be named, and the **8× Pi
+> projection (313% of a core) below is the non-speech worst case stated as the
+> general case**. `NOTES-AUDIT.md` F11.
 
 That does not disqualify it — 39% of one core to run all day is affordable, and on this CPU
 it is well clear of saturation. But it changes the framing: **the hot path is not nearly
@@ -71,7 +99,10 @@ classified as speech, because that is when the YIN pitch tracker runs.
 **Caveat on every number here:** this is a 24-core x86 desktop CPU, not the target
 peripheral. A Raspberry Pi 3 core is roughly 4–8× slower per core. At 8× pessimism:
 silero 1.8% of a core (fine), watcher 313% of a core (**saturated — this becomes the
-problem**), openWakeWord 16% (fine). **On a Pi-class target our watcher would not keep up,
+problem**; this is the **non-speech** projection — 39.122 ms mean, 48.387 ms worst case
+— and on speech the same 8× gives 176–289% of a core (221% at the 27.578 ms speech
+mean), so the saturation is real on both populations), openWakeWord 16% (fine).
+**On a Pi-class target our watcher would not keep up,
 and it is the thing that is easy to fix**: `src/watcher.py:319-325` runs a YIN pitch
 tracker over the whole window of every speech segment, and it is the dominant cost.
 
@@ -183,7 +214,7 @@ Properties that matter:
 ### The known risk, stated plainly
 
 My non-speech signals are synthetic and clean. Real rooms have reverb, competing speech,
-music beds and HVAC that this battery does not model. **The 28× mean separation is measured
+music beds and HVAC that this battery does not model. **The 93.0× mean separation is measured
 on 3 speech clips and 6 synthetic signals and is not a certification.** Before adopting, the
 measurement to run is the real-room fixture lane (`LANE-FIXTURES.md`) with actual recordings
 of the fan that is currently breaking us. That is a day of work and it is the gate on this

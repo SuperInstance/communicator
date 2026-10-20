@@ -37,9 +37,22 @@ Speech fixtures are the repo's own test WAVs (`tests/data/alexa_test.wav` etc., 
 
 **This is a clean separation.** Worst non-speech is music at 0.0052 mean / 0.1736 max.
 Worst speech is 0.7530 mean. The threshold of 0.5 that silero uses by default
-(`utils_vad.py:283`) sits in a gap that is **28× wider on the mean** than the distance to
-the noisiest non-speech, and the separation holds across *every* non-speech class we
+(`utils_vad.py:283`) sits in a gap that is **93.0× wide on the mean**
+(0.7530 worst speech mean ÷ 0.0081 worst non-speech mean, white noise) and
+**5.76× wide on the worst-case max** (1.0000 worst speech max ÷ 0.1736 worst
+non-speech max, music). The separation holds across *every* non-speech class we
 tested, including the periodic hum that specifically breaks us.
+
+> **CORRECTION (2026-10-19).** This said *"28× wider on the mean"*. **No
+> derivation in `hotpath_measurements.json` yields 28.** From
+> `silero_v5_scores.current_v5_opset16`: worst speech mean **0.7530**
+> (speech_jane), worst speech max **1.0000**; non-speech means 0.0036 (hum),
+> 0.0063 (fan), 0.0054 (clicks), 0.0052 (music), **0.0081 (white noise)**,
+> 0.0067 (silence); non-speech max **0.1736** (music). So the derivable
+> figures are **93.0× on the mean** (0.7530 / 0.0081) and **5.76× on the
+> worst-case max** (1.0000 / 0.1736); the note's own parenthetical pair
+> (0.7530 / 0.1736) is **4.34×**. **The underlying separation is not wrong —
+> the file supports a LARGER mean gap than 28×.** `NOTES-AUDIT.md` F10.
 
 So: **silero-vad fixes the exact failure that our watcher declares, at 0.23% of a core.**
 That is the single most important measured result in this lane.
@@ -87,7 +100,8 @@ time. **The 32 ms chunk is the right operating point** — smaller chunks cost t
 fixed overhead more often, and larger chunks are rejected by the model anyway (§4).
 
 Budget check: at one 32 ms chunk per 32 ms of audio, silero costs **0.23% of one core**.
-Our watcher costs 39.1%. silero is not close to being the bottleneck and could be run at
+Our watcher costs 39.1% (mean over the six non-speech fixtures; 21.9–36.1 ms
+on real speech). silero is not close to being the bottleneck and could be run at
 1 kHz if we wanted.
 
 ## 3. Model sizes and parameter counts (from the artifacts)

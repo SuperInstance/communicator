@@ -9,17 +9,79 @@ result.*
 ## The problem
 
 `src/turn.py` ends a turn on 3 s of sustained silence. Across the seven-cell
-real corpus (465 s, **680 measured pause runs**) it fires on **zero**:
+real corpus (485 s, **673 distinct silence runs / 1671 pause events** — the
+population is corrected below) it fires on **zero**:
 
 | cell | audio | longest pause run | turns at 3 s |
 |---|---|---|---|
-| narration | 90.0 s | 1.810 s | 0 |
-| poetry | 20.0 s | 1.180 s | 0 |
-| essay | 75.0 s | 1.230 s | 0 |
-| dialogue | 75.0 s | 0.980 s | 0 |
-| shakespeare | 75.0 s | 1.430 s | 0 |
-| children | 75.0 s | 1.580 s | 0 |
-| oration | 75.0 s | 2.440 s | 0 |
+| narration | 90.0 s | 1.830 s | 0 |
+| poetry | 20.011 s | 1.200 s | 0 |
+| essay | 75.0 s | 1.560 s | 0 |
+| dialogue | 75.0 s | 1.530 s | 0 |
+| shakespeare | 75.0 s | 1.450 s | 0 |
+| children | 75.0 s | 1.600 s | 0 |
+| oration | 75.0 s | 2.540 s | 0 |
+
+> **CORRECTION (2026-10-19) — the corpus length.** This said **465 s**; the
+> seven cells in the table above sum to **485 s**, and measured on disk they
+> total **485.01 s** (narration 90.000, poetry 20.011, and 75.000 each for
+> essay / dialogue / shakespeare / children / oration —
+> `examples/realaudio/alice01_excerpt.wav` plus `examples/realaudio/corpus/*.wav`).
+> The 20 s discrepancy is exactly the poetry cell. **The same wrong 465 s is
+> hard-coded in six code and test sites** — `src/turn.py:13`,
+> `src/speculate.py:6`, `src/watcher.py:661`, `tests/test_turn.py:25`,
+> `tests/test_speculate.py:7`, `experiments/turn_routes.py:8` — and **still
+> needs fixing there**; notes cannot fix a docstring. `NOTES-AUDIT.md` F7.
+>
+> **CORRECTION (2026-10-19, later the same day) — the six sites have been
+> fixed since.** The 465 s no longer stands as a live figure at any of them:
+> `src/turn.py:18`, `src/speculate.py:13`, `src/watcher.py:662`,
+> `tests/test_turn.py:25` and `tests/test_speculate.py:11` now quote 485.01 s
+> and record the 465 s as the wrong earlier figure, and
+> `experiments/turn_routes.py` carries no corpus length at all. What is
+> **still** stale at those sites is the *population* wording, not the length —
+> see the next two blocks.
+
+> **CORRECTION (2026-10-19) — the pause-run population, re-measured.** The "680
+> measured pause runs" this section used to claim is **not** what the
+> repository measures today, and the population behind it no longer exists.
+> Measured on the corpus that is on disk: **673 distinct silence runs / 1671
+> pause events**. The 1671 reproduces `tests/test_speculate.py:99-100`
+> **exactly** (min **0.160 s** / median **0.380 s** / max **2.540 s**) because
+> it is an **event** count — the watcher re-reports an *open* pause every
+> `PAUSE_REPORT_S = 0.25 s` (`src/watcher.py:202`), so one silence run yields
+> several events. The 680 was a **run** count; it is 7 runs (**1.03%**) from
+> today's 673, and it is **not exactly reproducible** under any method tried,
+> because the count moves with the population: 673 distinct runs (adaptive),
+> 1671 events (adaptive), 647 events (energy-only, adaptive off), 262 silence
+> runs from the energy method at 0.150 s, and **665** runs (1656 events) on
+> the hypothetical 465 s corpus that the misstated length implies.
+> Truncating the poetry cell to the 15 s that 465 s implies moves the run
+> count **down** to 665 — *away* from 680, not up towards it — so the 465 s
+> misstatement does not explain the 680. Every rate computed on the 680
+> population is a rate on a population that cannot be re-derived. The table
+> above is now on the 673-run population. `docs/research/PAUSE-THRESHOLD.md` §5;
+> `NOTES-AUDIT.md` F8.
+
+> **STILL TO FIX (2026-10-19) — outside this file's write lane.** None of these
+> were edited; a note cannot fix a docstring.
+>
+> * `experiments/turn_routes.py:8` — the module docstring still says "across
+>   680 measured pause runs the longest is 2.1 s". Today's longest run is
+>   **2.540 s** (oration) on **673** runs / 1671 events.
+> * `experiments/turn_routes.py:125` — still quotes "real inter-utterance gaps
+>   run 0.11-0.64 s". The **0.11 s** end of that range is the leading-silence
+>   artefact (`src/energy.py:290`); the inter-utterance range starts at
+>   **0.15 s**.
+> * `src/speculate.py:7,14` and `tests/test_speculate.py:7,12,99` — still call
+>   the 1671 "1671 pause **runs**". They are pause **events**; 673 is the
+>   run count.
+> * `src/turn.py:13,19-21` — "costs 46 pauses, 17.8% **of them all**" still
+>   has no denominator (it is 46 of the 259 pauses the 150 ms trigger keeps),
+>   and the claim that "the pause counts and the 17.8% were measured on that
+>   older 465 s population and need re-measuring" is now **falsified**: every
+>   cell of the pause table reproduces exactly on the current corpus. Only the
+>   length stated beside the table was misstated.
 
 A peripheral that never speaks is also a failure. "The threshold is correct and
 the material is atypical" is not a place to stop.
@@ -321,19 +383,34 @@ so those are counted separately rather than called turn ends.
 
 | threshold | silence runs | speaker resumed | at file end | would have interrupted |
 |---|---|---|---|---|
-| 0.6 s | 54 | 53 | 0 | **98.1%** |
-| 0.9 s | 38 | 38 | 0 | **100.0%** |
-| 1.2 s | 24 | 24 | 0 | **100.0%** |
+| 0.6 s | 170 | 169 | 1 | **99.41%** |
+| 0.9 s | 71 | 70 | 1 | **98.59%** |
+| 1.2 s | 35 | 35 | 0 | **100.0%** |
 | 1.5 s | 15 | 15 | 0 | **100.0%** |
 | 1.8 s | 6 | 6 | 0 | **100.0%** |
 | 2.1 s | 2 | 2 | 0 | **100.0%** |
+
+> **CORRECTION (2026-10-19) — this table has been re-measured.** Every rate in
+> the version published here (98.1% and 100.0% ×5) was computed on the
+> **680-run** pause population, which the repository no longer measures — the
+> 1671 it records is an **event** count, not a run count. The table above is
+> re-measured on today's **673-run** population: 170 / 71 / 35 / 15 / 6 / 2
+> silence runs, 99.41% / 98.59% / 100.0% ×4, and **1** run "at file end" at
+> 0.6 s and 0.9 s. The three highest-threshold rows (1.5 / 1.8 / 2.1 s)
+> reproduce the old table exactly; the three lowest do not. The *conclusion* —
+> in recorded speech, silence is essentially never a turn end — is unchanged,
+> and is now **verified on a population that can be re-derived**: at every
+> threshold from 0.6 s up, at least 98% of the silence runs were followed by
+> the speaker coming back, and the one exception is the end of a recording.
+> Full measurement: `docs/research/PAUSE-THRESHOLD.md` §5 and
+> `experiments/pause_threshold_results.json`. `NOTES-AUDIT.md` F8.
 
 **In recorded speech, silence is essentially never a turn end. The speaker
 comes back.**
 
 That single fact explains every other number in this document:
 
-* Why the 3 s threshold fires on nothing — the longest silence in 465 s of
+* Why the 3 s threshold fires on nothing — the longest silence in 485 s of
   seven cells is 2.54 s.
 * Why speculation scores ~0.536 with 84 interruptions — the manufactured END
   cases (speech, then silence, then *nothing*) do not resemble the corpus,

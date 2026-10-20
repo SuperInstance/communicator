@@ -33,7 +33,7 @@ Measured on this machine, same six signals, same clips, one thread:
 | white noise | **89%** | 0.0081 |
 | near-silence | **89%** | 0.0067 |
 | real speech | 3.46 s | **0.88** |
-| **cost, 1 thread** | **39.1% of a core** | **0.23% of a core** |
+| **cost, 1 thread** | **39.1% of a core** (mean of the 6 non-speech fixtures) | **0.23% of a core** |
 
 Two things, and both are uncomfortable.
 
@@ -47,16 +47,35 @@ wrong in the same direction.
 **The docstring is wrong by three orders of magnitude.** `src/watcher.py:1`
 says *"No model, no network, microseconds."* It is measured at **39.13 ms per
 100 ms of audio** — a realtime ratio of 2.56×, and it is model-free arithmetic.
+**That 39.13 ms is the mean over the SIX NON-SPEECH fixtures.** On real speech
+the watcher is **21.9–36.1 ms** (speech_jane 21.945, speech_mycroft 24.666,
+speech_alexa 36.124; mean 27.578 ms) — a realtime ratio of **2.77–4.56×**,
+against 2.1× (48.387 ms, keyboard clicks, the worst case).
+
+> **CORRECTION (2026-10-19) — "39.1% of a core" had no denominator.** From
+> `docs/research/alwayson/hotpath_measurements.json` → `watcher`: hum_60hz
+> 31.913, fan_noise 41.095, keyboard_clicks 48.387, music_triad 33.877,
+> white_noise 39.307, silence 40.153 ms (mean **39.122**); speech_alexa 36.124,
+> speech_mycroft 24.666, speech_jane 21.945 ms (mean **27.578**). So 39.1% is
+> the **non-speech** cost and the speech cost is **21.9–36.1 ms**. The rate is
+> real and the trade-off is sound — "a gate that costs 0.23% of a core to
+> delete a 39%-of-a-core failure mode" is correct precisely because 39.1% is
+> the non-speech cost — but the population has to be named, and the **8× Pi
+> projection (313% of a core) is the non-speech worst case stated as the
+> general case**. `NOTES-AUDIT.md` F11.
 
 On this desktop that is affordable. **On a Pi-class target it is not** — at 8×
-pessimism the watcher needs 313% of a core while silero needs 1.8%. The
+pessimism the watcher needs **313% of a core**, which is the **non-speech**
+projection (39.122 ms mean, 48.387 ms worst), while silero needs 1.8%. The
 dominant cost is `src/watcher.py:319-325`, which runs the YIN tracker across
 the whole window of every speech segment, and it runs precisely when the
 segmenter is wrong about a hum.
 
 **Decision: put a silero-vad ONNX gate in front of the watcher.** MIT, 2.220
 MB, 309,633 params, 74.9 μs per 32 ms chunk. A gate that costs 0.23% of a core
-to delete a 39%-of-a-core failure mode is the best trade available.
+to delete a 39%-of-a-core failure mode is the best trade available — where
+**39% is the non-speech cost** (mean over the six non-speech fixtures; the
+speech cost is 21.9–36.1 ms, 2.77–4.56× realtime).
 
 **The dependency trap, stated because it decides the implementation:**
 `pip install silero-vad` **installs torch anyway** — `pyproject.toml:32` puts
@@ -99,18 +118,42 @@ trigger and a **20×-too-eager decision**.
 > ### RETRACTED, PARTLY: do NOT raise `MIN_SILENCE_S` to 200 ms.
 >
 > Measured on the seven-cell real corpus (`examples/realaudio/corpus/`), the
-> shortest pause a human voice actually takes is **110 ms**, in dramatic
-> speech. Real inter-utterance gaps by cell:
+> shortest **inter-utterance** pause a human voice actually takes is **150 ms**
+> — in poetry, essay, dramatic speech and children's speech alike — and that
+> is *at* the shipped 150 ms trigger, not below it. Real inter-utterance gaps
+> by cell (the leading silence of each file excluded — see the correction
+> below):
 >
 > | cell | gaps | shortest | p05 | median |
 > |---|---|---|---|---|
 > | narration | 45 | 0.170 | 0.210 | 0.640 |
 > | poetry | 7 | 0.150 | 0.150 | 0.510 |
 > | essay | 33 | 0.150 | 0.160 | 0.760 |
-> | dialogue | 35 | 0.130 | 0.160 | 0.450 |
-> | shakespeare | 62 | **0.110** | 0.160 | 0.380 |
-> | children | 78 | **0.110** | 0.160 | 0.300 |
+> | dialogue | 34 | 0.160 | 0.170 | 0.470 |
+> | shakespeare | 61 | 0.150 | 0.160 | 0.380 |
+> | children | 77 | 0.150 | 0.160 | 0.300 |
 > | oration | 2 | 0.310 | 0.310 | 0.380 |
+>
+> **CORRECTION (2026-10-19) — "the shortest pause a human voice actually takes
+> is 110 ms" was a leading-silence artefact, not a pause.** The 0.110 s figure
+> is not an inter-utterance pause at all: it is the silence **before the first
+> word** of the shakespeare and children cells, and it survives the silence
+> filter only because `src/energy.py:290` keeps the first segment of a file
+> unconditionally (`kept = [segs[0]]`), so the leading segment bypasses
+> `min_silence_s` entirely. The dialogue cell carried the same artefact at
+> 0.130 s. On the artefact-free population the shortest **inter-utterance**
+> pause in the corpus is **0.150 s** (poetry, essay, shakespeare, children) —
+> *at* the shipped trigger, not below it. The table above is the artefact-free
+> population: the **gaps** count loses one in dialogue, shakespeare and
+> children (45 / 7 / 33 / **34** / **61** / **77** / 2), the **shortest** column
+> reads 0.160 / 0.150 / 0.150 there, and dialogue's p05 moves 0.160 → 0.170 and
+> its median 0.450 → 0.470 on the same `sorted[n//2]` convention the table
+> already used (the standard median of that population is 0.460; the result
+> file records both). No other cell changes. The **trigger table below is
+> unaffected**: the artefact is below 0.150 s, so the 0.150 trigger already
+> excludes it, and `@0.150` / `@0.200` / `lost` are identical with and without
+> it. Measurement: `docs/research/PAUSE-THRESHOLD.md` §3–§4 and
+> `experiments/pause_threshold_results.json`.
 >
 > Raising the trigger from 150 ms to 200 ms costs:
 >
@@ -125,24 +168,44 @@ trigger and a **20×-too-eager decision**.
 > | oration | 2 | 2 | 0 |
 > | **TOTAL** | **259** | **213** | **46 (17.8%)** |
 >
-> **17.8% of all real pauses disappear.** A pause is not decoration: it is the
-> event the §4.1 baseline table counts and every TEMPO calculation divides by,
-> so this is data loss presented as a tuning change. And it lands worst on
-> exactly the two cells that are hardest to replace — dramatic and children's
-> speech, where the pause structure *is* the prosody.
+> **17.8% of the real pauses disappear — 46 of the 259 pauses the 150 ms
+> trigger keeps.** A pause is not decoration: it is the event the §4.1
+> baseline table counts and every TEMPO calculation divides by, so this is data
+> loss presented as a tuning change. And it lands worst on exactly the two
+> cells that are hardest to replace — dramatic and children's speech, where the
+> pause structure *is* the prosody.
+>
+> **CORRECTION (2026-10-19) — "of all real pauses" had no denominator.**
+> 17.8% is 46 / 259: the pauses the shipped **150 ms trigger** reports. It is
+> 17.6% of the 262 silence runs the method returns, and 7.1% (44 of 622) of
+> the silence segments with no `min_silence_s` filter at all. The number
+> survives; the phrase "all real pauses" does not.
+> `docs/research/PAUSE-THRESHOLD.md` §3.
 >
 > The mistake was treating a **trigger** constant as a **decision** constant.
-> 150 ms is measured to sit *below* the shortest real pause in every cell, so
-> it is correctly placed for deciding "the voice stopped" and is 20× too eager
-> only for deciding "the turn is over". Those are different questions and the
-> fix belongs to the second one:
+> 150 ms is measured to sit **at** the shortest real inter-utterance pause in
+> four cells (poetry, essay, shakespeare and children, 0.150 s) and **above**
+> it in the other three (narration 0.170, dialogue 0.160, oration 0.310) — it
+> is never below it in any cell — so it is correctly placed for deciding "the
+> voice stopped" and is 20× too eager only for deciding "the turn is over".
+> Those are different questions and the fix belongs to the second one:
 >
-> * **Keep `MIN_SILENCE_S = 0.150`.** It is measured to be right.
+> **CORRECTION (2026-10-19) — "below the shortest real pause in every cell" is
+> false.** On the artefact-free population 150 ms sits **at** 0.150 s in poetry,
+> essay, shakespeare and children, and **above** it in narration (0.170 s),
+> dialogue (0.160 s) and oration (0.310 s). It is never below the shortest real
+> pause in any cell — which is why the conclusion below still holds — but the
+> margin claimed for it does not exist. `docs/research/PAUSE-THRESHOLD.md` §3–§4.
+>
+> * **Keep `MIN_SILENCE_S = 0.150`.** It is measured to be right: 150 ms sits
+>   at, not below, the shortest real inter-utterance pause in four cells, and
+>   raising it to 200 ms loses 17.8% of the real pauses it keeps (46 of 259).
 > * Add the 3 s end-of-turn decision as a **separate** stage that consumes
 >   pause events and emits turn boundaries — it must never filter them.
 >
 > The 150 ms/3 s split below survives; the "raise the trigger to 200 ms"
-> half of it does not. See `tests/test_pause_threshold.py`.
+> half of it does not. See `tests/test_pause_threshold.py` and
+> `docs/research/PAUSE-THRESHOLD.md`.
 
 The shape worth adopting is three-stage, and it is cheap:
 
@@ -315,7 +378,7 @@ what it showed.**
 |---|---|---|---|
 | 1 | **silero-vad ONNX gate in front of the watcher** | ~1 day | **DONE** `8eb05f6` — 31.8% → 2.4% of a core on hum, pitch data bit-identical on 30 s of real speech |
 | 2 | **Correct `src/watcher.py`'s docstring** | 5 min | **DONE** `8eb05f6` |
-| 3 | ~~**Split 150 ms into a 200 ms trigger and a 3 s decision**~~ | 2 h | **PARTLY FALSIFIED** — the 200 ms trigger half costs 17.8% of real pauses. Keep 150 ms; add 3 s as a separate stage. See §3. |
+| 3 | ~~**Split 150 ms into a 200 ms trigger and a 3 s decision**~~ | 2 h | **PARTLY FALSIFIED** — the 200 ms trigger half costs 17.8% of the real pauses the 150 ms trigger keeps (46 of 259). Keep 150 ms; add 3 s as a separate stage. See §3. |
 | 4 | **Locally adaptive threshold** (reimplement `peakpicker.c:110-117`) | 3 h | **DONE, and the plan was wrong about it** `77dd5c2` — a *median* threshold discards 94% of real speech; a 20th-percentile one beats the global bar on every axis. §3. |
 | 5 | **Test the 3 s decision against a waveform-only classifier** (smart-turn v3.2) | 2 days | **DONE** `4024cd9`, and **the silence premise underneath it is now measured false** — see §9 |
 | 6 | Speculation gate (OPEN/HOLDING/DROPPING) | 3 days | **DONE** `3172077` — best accuracy 0.536 at 0.40 s, 84 interruptions; no bar reaches 90% |
@@ -346,9 +409,16 @@ it monotonically, because in a multi-party meeting the long silences are where
 reproduce.
 
 **The cheap pitch rescue is dead too.** Zero of six corpus cells show the
-monotone jump a speaker change needs; four of six do not exceed pure intonation
+monotone jump a speaker change needs; two of six do not exceed pure intonation
 inside one speaker's own speech. Independently, on the AMI corpus F0 separates
 two voice *classes* but not the speakers within one (0.5σ and 0.3σ apart).
+
+> **CORRECTION (2026-10-19).** This said "four of six do not exceed pure
+> intonation", which inverted the count and contradicted the sentence beside
+> it. `experiments/f0_speaker_change_results.json` holds
+> `cells_long_exceed_control: 4`, `cells_long_under_control: 2` — **two of six**
+> fall below the control (narration, shakespeare), and `F0-SPEAKER-CHANGE.md`'s
+> table agrees. `NOTES-AUDIT.md` F2.
 
 So the decision in items 5–6 cannot be made from a duration threshold, and that
 is now a measured fact rather than an open question. What remains is to find a

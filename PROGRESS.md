@@ -1059,3 +1059,116 @@ corpus needs **condition D** plus a real 90° turn with the glasses off if
 they restrict it. The pose signal exists and is measurable; what is missing
 is the control that attributes it to the head. The capture is ready; the
 data is the gate.
+
+---
+
+## 2026-10-19 (evening) — provenance, and a director that will not sit still
+
+**A committed number is not a result until it carries the identity of its
+inputs.** The conventional teacher's committed artefact
+`teacher_conventional_speaking_both.json` held a leave-one-session-out
+accuracy of **0.675** for the held-out session B, and four documents quoted
+it. It **does not reproduce**. The committed script, the committed corpus,
+the committed arguments, at temperature zero and in the same order: every
+other column of that artefact comes back **exactly** — test 1.000, scrambled
+1.000, blank 0.667, margin +0.000 — and the held-out session comes back
+**0.000**.
+
+Neither the code nor the data is the variable. The script at `7a4dff5` and at
+`HEAD` are byte-identical and both return 0.000. The corpus rebuilds **byte
+for byte** from the captures (`seed_corpus_from_captures.py --filter
+row+median3` produces three SHA-256-identical `.npz` files). And the artefact
+never recorded which corpus produced it, nor its stride, max-per, frame
+count or task — so the run cannot even be *specified* from what was
+committed. A sweep of **352 configurations** over those unrecorded parameters
+never produces 0.675 together with the artefact's other columns.
+
+The other four feature sets' artefacts reproduce bit-exactly, so the verdict
+they support — *"leave-one-out is 0.000 for every feature set" is **false*** —
+stands on numbers that do reproduce (**map** B 1.000, **region+map** B
+0.200). **0.675 is withdrawn.** It is now impossible for this to recur by
+accident: `teacher_conventional.py`, `combined_filter.py` and
+`turn_routes.py` all persist a `provenance` block naming the corpus path,
+each session file's SHA-256, the script's own SHA-256, the command line and
+the parameters, plus a `corpus_fingerprint` over the session files — and
+`verify_provenance()` re-checks every one of those against disk. A number
+that cannot say where it came from now says so.
+
+**The LLM director does not reproduce either, and nobody had checked.**
+`docs/research/LLM-DIRECTOR.md` asserted that *"the models' outputs are
+deterministic at temperature 0 for the Meta and OpenAI endpoints"*. That was
+asserted, not measured, and it is **false**. `experiments/director_repeatability.py`
+holds the prompt **byte-identical** (SHA-256 recorded) and sends it again:
+
+| mode | material | runs | distinct headlines | min | median | max | spread |
+|---|---|---:|---:|---:|---:|---:|---:|
+| blind | none (3,031 chars) | 8 | **4** | −0.190 | +0.357 | +0.429 | **0.619** |
+| context | 60,000 chars | 6 | **3** | −0.143 | +0.262 | +0.333 | **0.476** |
+| context | 140,000 chars | 6 | **3** | +0.381 | +0.619 | **+1.000** | **0.619** |
+
+The control that makes this a measurement rather than an anecdote: a
+deterministic stub director, scored the same number of times with the same
+scorer, gives a spread of **0.000** and one distinct headline every time.
+The harness adds no variance; the model does.
+
+So the **+0.857** this project has been quoting for the director is **one
+draw out of six**: `+1.000, +0.381, +0.857, +0.381, +0.381, +0.857`. And
+what matters more than the spread is *which* verdicts move: at the full
+material budget, **three of the four unstable claims are known-FALSE ones**,
+and on the *"gain normalisation cut the drift from 43.3 to 0.81 counts, a
+reduction of roughly fifty times"* claim — one of this project's own
+retractions — the director answered `unsupported` three times and
+**`supported` three times**. With the whole evidence base in front of it, it
+endorsed a known-false claim on half its runs. On a known-**true** claim it
+made two false accusations in eight runs.
+
+**The director is still worth having, and it is still a triage filter — but
+the filter has to be run more than once, and the useful output is the
+per-claim stability, not the aggregate.** A score that can be +1.000 or
++0.381 for the same input cannot be a pass/fail gate for anything. This
+matters for the plan that put an LLM between experiments: the director can
+be asked what to check next, and its answer must be checked.
+
+**The pause table survives; one of its numbers does not.** `experiments/pause_threshold.py`
+copies the gap-detection method **byte-for-byte** from
+`tests/test_pause_threshold.py` and verifies the copy at run time. Every cell
+of the published table reproduces exactly on the corpus that is actually on
+disk (**485.011 s**, not 465 s), and the headline survives: **46 of the 259
+pauses the 150 ms trigger keeps = 17.76%**. But *"the shortest pause a human
+voice actually takes is 110 ms"* is an **artefact**: `src/energy.py:290`
+(`kept = [segs[0]]`) lets a file's **first** segment escape the
+`min_silence_s` filter, so what was being measured was the silence *before
+the first word*. Artefact-free, the shortest inter-utterance pause is
+**0.150 s** — *at* the shipped trigger, not below it. The defect is reported
+and measured both ways; it is **not** patched here, because patching it
+changes every watcher-based number in the repo and is its own piece of work.
+
+**And the 680 is resolved, in the direction that matters.** 1671 is a
+**pause-event** count — the watcher re-reports an open pause every 0.25 s —
+and it reproduces exactly. The distinct **run** count is **673**, 1.03% from
+the 680, and the population behind the 680 no longer exists: the count is 673
+adaptive, 647 energy-only, 262 on the energy population, and **665** on a
+hypothetical 465 s corpus. **The 465 s misstatement moves the count away from
+680, not towards it.**
+
+**The notes get audited twice more.** Round one found 14 findings (10
+confirmed) in the fourteen research notes it covered. Round two covered the
+other **49 documents** and found **16** more (10 confirmed) — including a
+per-axis spread table in `voiceloop/` that is contradicted by the file it
+claims to come from, a "6/9 first option" count where the file's own field
+says **3/9**, and two source-vs-prose comparisons in `alwayson/PYANNOTE.md`
+that divide a whole-tree byte count by a package-only count. The four
+corrections from round one are in the tree; the sixteen from round two are
+written up and pending.
+
+**The Windows bundle is re-synced and verified**: `corpus_capture_win.py` and
+`src/` on `C:\proart_capture` match the repo byte-for-byte, and the bundled
+stimulus loads as **14 lines in stanzas of 4/4/4/2**.
+
+**What is still blocked is still the data.** The teacher needs **≥ 63
+independent sessions per class**, the corpus needs **condition D** (turned
+*and* silent — the single most valuable missing take, because it separates
+"the head turned" from "something else moved" in one comparison), and B and D
+need a real 90° turn with the glasses off if they restrict it. The pose
+signal is in the capture and measurable; the control that attributes it to
+the head has not been recorded.

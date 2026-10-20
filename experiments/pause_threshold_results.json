@@ -1,0 +1,1156 @@
+{
+  "schema": "pause-threshold/1",
+  "generated_utc": "2026-10-20T05:16:51+00:00",
+  "script": {
+    "path": "/home/proart/projects/communicator/experiments/pause_threshold.py",
+    "sha256": "86a72dc43ace6b00d250b0083d13f81b4cd1d6145a2158074eaf74eb1a953216",
+    "elapsed_s": 105.3
+  },
+  "method": {
+    "source_file": "tests/test_pause_threshold.py",
+    "gaps_helper_lines": "90-99",
+    "cells_lines": "77-87",
+    "copied_verbatim": true,
+    "copy_check": {
+      "source_file": "/home/proart/projects/communicator/tests/test_pause_threshold.py",
+      "gaps_helper_lines": "90-99",
+      "cells_lines": "77-87",
+      "gaps_helper_identical": true,
+      "cells_identical": true,
+      "ok": true
+    },
+    "parameters": {
+      "sample_rate_hz": 16000,
+      "frame_len_samples": 800,
+      "hop_samples": 160,
+      "hop_s": 0.01,
+      "frame_grid": "energy.rms_series(samples, 800, 160, 16000)",
+      "segmenter": "src/energy.py:segment()",
+      "peak_rms": "max(f.rms for f in ef) -- the cell's own peak frame",
+      "min_silence_s": 0.15,
+      "min_speech_s": 0.06,
+      "adaptive_threshold": false,
+      "gap_definition": "durations of the non-speech segments returned by energy.segment()"
+    },
+    "conventions": {
+      "p05": "nearest-rank, sorted[ceil(0.05*n)-1] -- the convention that reproduces the published table",
+      "p05_alternative_linear": "linear interpolation between order statistics (recorded alongside)",
+      "median_standard": "mean of the two middle values for even n",
+      "median_published": "sorted[n//2] -- the upper middle value for even n; what the published table used"
+    }
+  },
+  "corpus": {
+    "total_duration_s_on_disk": 485.011125,
+    "total_duration_s_published": 465.0,
+    "total_duration_s_audit": 485.01,
+    "matches_published_465_s": false,
+    "matches_audit_485_01_s": true,
+    "per_cell_duration_s": {
+      "narration": 90.0,
+      "poetry": 20.011125,
+      "essay": 75.0,
+      "dialogue": 75.0,
+      "shakespeare": 75.0,
+      "children": 75.0,
+      "oration": 75.0
+    }
+  },
+  "cells": {
+    "narration": {
+      "cell": "narration",
+      "input": {
+        "path": "/home/proart/projects/communicator/examples/realaudio/alice01_excerpt.wav",
+        "sha256": "0b83c9c6038273565fc7056a62843460fa9c5d17497ff858b98081aa914f75d7",
+        "bytes": 7938044,
+        "file_sample_rate": 44100,
+        "file_samples": 3969000,
+        "file_duration_s": 90.0,
+        "file_channels": 1,
+        "file_sample_width_bytes": 2,
+        "resampled": true,
+        "analysis_sample_rate": 16000,
+        "analysis_samples": 1440000,
+        "analysis_duration_s": 90.0
+      },
+      "gaps": {
+        "n": 45,
+        "shortest_s": 0.17,
+        "p05_s_nearest_rank": 0.21,
+        "p05_s_linear": 0.21,
+        "median_s_standard": 0.64,
+        "median_s_published_convention": 0.64,
+        "max_s": 1.98,
+        "durations_s": [
+          0.21,
+          0.36,
+          0.72,
+          1.98,
+          0.51,
+          1.38,
+          0.48,
+          1.08,
+          0.8,
+          0.75,
+          0.44,
+          0.17,
+          0.51,
+          1.29,
+          1.28,
+          0.5,
+          0.79,
+          0.24,
+          0.21,
+          0.73,
+          0.72,
+          0.37,
+          0.63,
+          0.66,
+          0.72,
+          0.53,
+          0.25,
+          0.96,
+          0.89,
+          0.64,
+          0.26,
+          0.23,
+          1.07,
+          1.06,
+          0.64,
+          1.07,
+          0.68,
+          0.17,
+          0.44,
+          0.68,
+          1.16,
+          0.39,
+          0.45,
+          1.17,
+          0.44
+        ],
+        "durations_sha256": "f53eb8c3ee1461c1c58833f17741e646ab7543ca6ac12609ff8431fb6cfdc21e",
+        "durations_bytes_len": 405
+      },
+      "trigger": {
+        "at_0_150": 45,
+        "at_0_200": 43,
+        "lost": 2,
+        "lost_pct": 4.444444
+      },
+      "leading_silence_artefact": null,
+      "sub_threshold_gaps_s": [],
+      "unexpected_sub_threshold_gaps_s": [],
+      "resume_table": {
+        "0.6": {
+          "silence_runs": 25,
+          "speaker_resumed": 25,
+          "at_file_end": 0,
+          "would_have_interrupted_pct": 100.0
+        },
+        "0.9": {
+          "silence_runs": 11,
+          "speaker_resumed": 11,
+          "at_file_end": 0,
+          "would_have_interrupted_pct": 100.0
+        },
+        "1.2": {
+          "silence_runs": 4,
+          "speaker_resumed": 4,
+          "at_file_end": 0,
+          "would_have_interrupted_pct": 100.0
+        },
+        "1.5": {
+          "silence_runs": 1,
+          "speaker_resumed": 1,
+          "at_file_end": 0,
+          "would_have_interrupted_pct": 100.0
+        },
+        "1.8": {
+          "silence_runs": 1,
+          "speaker_resumed": 1,
+          "at_file_end": 0,
+          "would_have_interrupted_pct": 100.0
+        },
+        "2.1": {
+          "silence_runs": 0,
+          "speaker_resumed": 0,
+          "at_file_end": 0,
+          "would_have_interrupted_pct": null
+        }
+      },
+      "corrected_without_leading_artefact": {
+        "n": 45,
+        "shortest_s": 0.17,
+        "p05_s_nearest_rank": 0.21,
+        "median_s_standard": 0.64,
+        "at_0_150": 45,
+        "at_0_200": 43,
+        "lost": 2,
+        "lost_pct": 4.444444
+      }
+    },
+    "poetry": {
+      "cell": "poetry",
+      "input": {
+        "path": "/home/proart/projects/communicator/examples/realaudio/corpus/poetry_weeds_by_the_wall_1702_librivox.wav",
+        "sha256": "250716341db1c3c8d0db0c1590f18d0f4a2c27729afbd0a444953c0e0e4180a4",
+        "bytes": 640400,
+        "file_sample_rate": 16000,
+        "file_samples": 320178,
+        "file_duration_s": 20.011125,
+        "file_channels": 1,
+        "file_sample_width_bytes": 2,
+        "resampled": false,
+        "analysis_sample_rate": 16000,
+        "analysis_samples": 320178,
+        "analysis_duration_s": 20.011125
+      },
+      "gaps": {
+        "n": 7,
+        "shortest_s": 0.15,
+        "p05_s_nearest_rank": 0.15,
+        "p05_s_linear": 0.255,
+        "median_s_standard": 0.51,
+        "median_s_published_convention": 0.51,
+        "max_s": 5.1,
+        "durations_s": [
+          0.51,
+          0.5,
+          0.15,
+          0.58,
+          1.74,
+          0.5,
+          5.1
+        ],
+        "durations_sha256": "9299acf994fb88b1934a97262bb8f840a442e543035b917b338b807fa014d519",
+        "durations_bytes_len": 63
+      },
+      "trigger": {
+        "at_0_150": 7,
+        "at_0_200": 6,
+        "lost": 1,
+        "lost_pct": 14.285714
+      },
+      "leading_silence_artefact": null,
+      "sub_threshold_gaps_s": [],
+      "unexpected_sub_threshold_gaps_s": [],
+      "resume_table": {
+        "0.6": {
+          "silence_runs": 2,
+          "speaker_resumed": 1,
+          "at_file_end": 1,
+          "would_have_interrupted_pct": 50.0
+        },
+        "0.9": {
+          "silence_runs": 2,
+          "speaker_resumed": 1,
+          "at_file_end": 1,
+          "would_have_interrupted_pct": 50.0
+        },
+        "1.2": {
+          "silence_runs": 2,
+          "speaker_resumed": 1,
+          "at_file_end": 1,
+          "would_have_interrupted_pct": 50.0
+        },
+        "1.5": {
+          "silence_runs": 2,
+          "speaker_resumed": 1,
+          "at_file_end": 1,
+          "would_have_interrupted_pct": 50.0
+        },
+        "1.8": {
+          "silence_runs": 1,
+          "speaker_resumed": 0,
+          "at_file_end": 1,
+          "would_have_interrupted_pct": 0.0
+        },
+        "2.1": {
+          "silence_runs": 1,
+          "speaker_resumed": 0,
+          "at_file_end": 1,
+          "would_have_interrupted_pct": 0.0
+        }
+      },
+      "corrected_without_leading_artefact": {
+        "n": 7,
+        "shortest_s": 0.15,
+        "p05_s_nearest_rank": 0.15,
+        "median_s_standard": 0.51,
+        "at_0_150": 7,
+        "at_0_200": 6,
+        "lost": 1,
+        "lost_pct": 14.285714
+      }
+    },
+    "essay": {
+      "cell": "essay",
+      "input": {
+        "path": "/home/proart/projects/communicator/examples/realaudio/corpus/essay_perpetual_peace_librivox.wav",
+        "sha256": "a3b7212251fe571e8e14d96b25a42e8f46eda94160a00e7a376d06e4493746b4",
+        "bytes": 2400044,
+        "file_sample_rate": 16000,
+        "file_samples": 1200000,
+        "file_duration_s": 75.0,
+        "file_channels": 1,
+        "file_sample_width_bytes": 2,
+        "resampled": false,
+        "analysis_sample_rate": 16000,
+        "analysis_samples": 1200000,
+        "analysis_duration_s": 75.0
+      },
+      "gaps": {
+        "n": 33,
+        "shortest_s": 0.15,
+        "p05_s_nearest_rank": 0.16,
+        "p05_s_linear": 0.166,
+        "median_s_standard": 0.76,
+        "median_s_published_convention": 0.76,
+        "max_s": 4.53,
+        "durations_s": [
+          0.76,
+          1.57,
+          1.3,
+          1.59,
+          0.15,
+          0.17,
+          0.18,
+          0.52,
+          0.17,
+          2.22,
+          0.6,
+          1.89,
+          4.53,
+          0.71,
+          0.18,
+          1.06,
+          3.48,
+          0.94,
+          0.16,
+          0.81,
+          2.16,
+          0.17,
+          0.18,
+          0.33,
+          0.94,
+          0.24,
+          1.23,
+          0.44,
+          0.18,
+          1.67,
+          1.28,
+          0.26,
+          1.32
+        ],
+        "durations_sha256": "ea47a7e25932271abaf831bc8e50077de7cacf66148e870c949a539a0576204c",
+        "durations_bytes_len": 297
+      },
+      "trigger": {
+        "at_0_150": 33,
+        "at_0_200": 24,
+        "lost": 9,
+        "lost_pct": 27.272727
+      },
+      "leading_silence_artefact": null,
+      "sub_threshold_gaps_s": [],
+      "unexpected_sub_threshold_gaps_s": [],
+      "resume_table": {
+        "0.6": {
+          "silence_runs": 19,
+          "speaker_resumed": 19,
+          "at_file_end": 0,
+          "would_have_interrupted_pct": 100.0
+        },
+        "0.9": {
+          "silence_runs": 15,
+          "speaker_resumed": 15,
+          "at_file_end": 0,
+          "would_have_interrupted_pct": 100.0
+        },
+        "1.2": {
+          "silence_runs": 12,
+          "speaker_resumed": 12,
+          "at_file_end": 0,
+          "would_have_interrupted_pct": 100.0
+        },
+        "1.5": {
+          "silence_runs": 8,
+          "speaker_resumed": 8,
+          "at_file_end": 0,
+          "would_have_interrupted_pct": 100.0
+        },
+        "1.8": {
+          "silence_runs": 5,
+          "speaker_resumed": 5,
+          "at_file_end": 0,
+          "would_have_interrupted_pct": 100.0
+        },
+        "2.1": {
+          "silence_runs": 4,
+          "speaker_resumed": 4,
+          "at_file_end": 0,
+          "would_have_interrupted_pct": 100.0
+        }
+      },
+      "corrected_without_leading_artefact": {
+        "n": 33,
+        "shortest_s": 0.15,
+        "p05_s_nearest_rank": 0.16,
+        "median_s_standard": 0.76,
+        "at_0_150": 33,
+        "at_0_200": 24,
+        "lost": 9,
+        "lost_pct": 27.272727
+      }
+    },
+    "dialogue": {
+      "cell": "dialogue",
+      "input": {
+        "path": "/home/proart/projects/communicator/examples/realaudio/corpus/shortstory_shortstory058_1405_librivox.wav",
+        "sha256": "4261c667a495ba7c107fdd5d4028946f3b6e55dce8535946dcfb0c8e75f5146e",
+        "bytes": 2400044,
+        "file_sample_rate": 16000,
+        "file_samples": 1200000,
+        "file_duration_s": 75.0,
+        "file_channels": 1,
+        "file_sample_width_bytes": 2,
+        "resampled": false,
+        "analysis_sample_rate": 16000,
+        "analysis_samples": 1200000,
+        "analysis_duration_s": 75.0
+      },
+      "gaps": {
+        "n": 35,
+        "shortest_s": 0.13,
+        "p05_s_nearest_rank": 0.16,
+        "p05_s_linear": 0.167,
+        "median_s_standard": 0.45,
+        "median_s_published_convention": 0.45,
+        "max_s": 1.13,
+        "durations_s": [
+          0.13,
+          0.42,
+          0.68,
+          0.39,
+          0.54,
+          0.35,
+          0.17,
+          0.61,
+          0.16,
+          0.51,
+          0.82,
+          0.47,
+          0.23,
+          0.73,
+          0.2,
+          0.19,
+          0.51,
+          0.33,
+          0.2,
+          0.92,
+          0.61,
+          1.13,
+          0.45,
+          0.42,
+          0.32,
+          0.47,
+          0.33,
+          0.43,
+          0.48,
+          0.75,
+          0.54,
+          0.4,
+          0.5,
+          0.47,
+          0.35
+        ],
+        "durations_sha256": "1fa2c2a5f340480bd0aff582d8eb3a699792b935bd45b8625911e09a1cfc0ab6",
+        "durations_bytes_len": 315
+      },
+      "trigger": {
+        "at_0_150": 34,
+        "at_0_200": 30,
+        "lost": 4,
+        "lost_pct": 11.764706
+      },
+      "leading_silence_artefact": {
+        "start_s": 0.025,
+        "end_s": 0.155,
+        "duration_s": 0.13
+      },
+      "sub_threshold_gaps_s": [
+        0.13
+      ],
+      "unexpected_sub_threshold_gaps_s": [],
+      "resume_table": {
+        "0.6": {
+          "silence_runs": 8,
+          "speaker_resumed": 8,
+          "at_file_end": 0,
+          "would_have_interrupted_pct": 100.0
+        },
+        "0.9": {
+          "silence_runs": 2,
+          "speaker_resumed": 2,
+          "at_file_end": 0,
+          "would_have_interrupted_pct": 100.0
+        },
+        "1.2": {
+          "silence_runs": 0,
+          "speaker_resumed": 0,
+          "at_file_end": 0,
+          "would_have_interrupted_pct": null
+        },
+        "1.5": {
+          "silence_runs": 0,
+          "speaker_resumed": 0,
+          "at_file_end": 0,
+          "would_have_interrupted_pct": null
+        },
+        "1.8": {
+          "silence_runs": 0,
+          "speaker_resumed": 0,
+          "at_file_end": 0,
+          "would_have_interrupted_pct": null
+        },
+        "2.1": {
+          "silence_runs": 0,
+          "speaker_resumed": 0,
+          "at_file_end": 0,
+          "would_have_interrupted_pct": null
+        }
+      },
+      "corrected_without_leading_artefact": {
+        "n": 34,
+        "shortest_s": 0.16,
+        "p05_s_nearest_rank": 0.17,
+        "median_s_standard": 0.46,
+        "at_0_150": 34,
+        "at_0_200": 30,
+        "lost": 4,
+        "lost_pct": 11.764706
+      }
+    },
+    "shakespeare": {
+      "cell": "shakespeare",
+      "input": {
+        "path": "/home/proart/projects/communicator/examples/realaudio/corpus/shakespeare_midsummernightsdream_1201_librivox.wav",
+        "sha256": "81d9184fe917994c7e6d2ab2e9a5afb0924a2aec5d89fac0d44118dc6736cbe5",
+        "bytes": 2400044,
+        "file_sample_rate": 16000,
+        "file_samples": 1200000,
+        "file_duration_s": 75.0,
+        "file_channels": 1,
+        "file_sample_width_bytes": 2,
+        "resampled": false,
+        "analysis_sample_rate": 16000,
+        "analysis_samples": 1200000,
+        "analysis_duration_s": 75.0
+      },
+      "gaps": {
+        "n": 62,
+        "shortest_s": 0.11,
+        "p05_s_nearest_rank": 0.16,
+        "p05_s_linear": 0.16,
+        "median_s_standard": 0.375,
+        "median_s_published_convention": 0.38,
+        "max_s": 2.1,
+        "durations_s": [
+          0.11,
+          1.25,
+          0.79,
+          0.72,
+          0.89,
+          0.22,
+          0.29,
+          0.47,
+          0.99,
+          0.54,
+          0.19,
+          1.08,
+          0.81,
+          0.16,
+          0.23,
+          0.29,
+          0.2,
+          1.03,
+          0.39,
+          0.32,
+          0.96,
+          0.23,
+          0.18,
+          2.1,
+          0.16,
+          0.31,
+          0.46,
+          1.13,
+          0.2,
+          0.77,
+          0.9,
+          0.18,
+          1.44,
+          0.19,
+          0.88,
+          0.67,
+          0.21,
+          0.78,
+          0.69,
+          0.18,
+          0.2,
+          0.22,
+          0.17,
+          0.19,
+          0.47,
+          0.29,
+          0.73,
+          0.38,
+          0.32,
+          0.21,
+          0.59,
+          0.15,
+          0.2,
+          0.87,
+          0.27,
+          0.79,
+          0.2,
+          0.37,
+          0.42,
+          0.16,
+          1.26,
+          0.57
+        ],
+        "durations_sha256": "2348ca9eba2c0fc449cf33d326de780bece6059a02b0099d355bc851a42470f8",
+        "durations_bytes_len": 558
+      },
+      "trigger": {
+        "at_0_150": 61,
+        "at_0_200": 46,
+        "lost": 15,
+        "lost_pct": 24.590164
+      },
+      "leading_silence_artefact": {
+        "start_s": 0.025,
+        "end_s": 0.135,
+        "duration_s": 0.11
+      },
+      "sub_threshold_gaps_s": [
+        0.11
+      ],
+      "unexpected_sub_threshold_gaps_s": [],
+      "resume_table": {
+        "0.6": {
+          "silence_runs": 22,
+          "speaker_resumed": 22,
+          "at_file_end": 0,
+          "would_have_interrupted_pct": 100.0
+        },
+        "0.9": {
+          "silence_runs": 9,
+          "speaker_resumed": 9,
+          "at_file_end": 0,
+          "would_have_interrupted_pct": 100.0
+        },
+        "1.2": {
+          "silence_runs": 4,
+          "speaker_resumed": 4,
+          "at_file_end": 0,
+          "would_have_interrupted_pct": 100.0
+        },
+        "1.5": {
+          "silence_runs": 1,
+          "speaker_resumed": 1,
+          "at_file_end": 0,
+          "would_have_interrupted_pct": 100.0
+        },
+        "1.8": {
+          "silence_runs": 1,
+          "speaker_resumed": 1,
+          "at_file_end": 0,
+          "would_have_interrupted_pct": 100.0
+        },
+        "2.1": {
+          "silence_runs": 1,
+          "speaker_resumed": 1,
+          "at_file_end": 0,
+          "would_have_interrupted_pct": 100.0
+        }
+      },
+      "corrected_without_leading_artefact": {
+        "n": 61,
+        "shortest_s": 0.15,
+        "p05_s_nearest_rank": 0.16,
+        "median_s_standard": 0.38,
+        "at_0_150": 61,
+        "at_0_200": 46,
+        "lost": 15,
+        "lost_pct": 24.590164
+      }
+    },
+    "children": {
+      "cell": "children",
+      "input": {
+        "path": "/home/proart/projects/communicator/examples/realaudio/corpus/children_english_fairy_tales_joy_librivox.wav",
+        "sha256": "67dc248634d4f5e589f75bc1029b039c8be60db6d71962f07d95d26af5b7f9c0",
+        "bytes": 2400044,
+        "file_sample_rate": 16000,
+        "file_samples": 1200000,
+        "file_duration_s": 75.0,
+        "file_channels": 1,
+        "file_sample_width_bytes": 2,
+        "resampled": false,
+        "analysis_sample_rate": 16000,
+        "analysis_samples": 1200000,
+        "analysis_duration_s": 75.0
+      },
+      "gaps": {
+        "n": 78,
+        "shortest_s": 0.11,
+        "p05_s_nearest_rank": 0.16,
+        "p05_s_linear": 0.16,
+        "median_s_standard": 0.3,
+        "median_s_published_convention": 0.3,
+        "max_s": 1.96,
+        "durations_s": [
+          0.11,
+          0.24,
+          0.4,
+          0.83,
+          0.35,
+          0.22,
+          0.15,
+          0.45,
+          0.28,
+          0.5,
+          0.38,
+          0.93,
+          0.18,
+          0.2,
+          0.78,
+          0.17,
+          0.27,
+          0.18,
+          0.94,
+          0.16,
+          0.43,
+          0.2,
+          0.31,
+          1.06,
+          0.18,
+          0.18,
+          1.05,
+          0.24,
+          0.21,
+          0.87,
+          0.45,
+          0.31,
+          1.96,
+          0.24,
+          0.69,
+          0.24,
+          0.4,
+          0.48,
+          0.28,
+          0.42,
+          0.81,
+          0.19,
+          0.65,
+          0.27,
+          1.19,
+          0.24,
+          0.3,
+          0.3,
+          1.46,
+          0.36,
+          0.19,
+          0.63,
+          0.21,
+          0.21,
+          0.59,
+          0.49,
+          0.94,
+          0.18,
+          0.21,
+          0.25,
+          0.29,
+          0.64,
+          1.66,
+          0.24,
+          0.16,
+          0.35,
+          1.45,
+          0.16,
+          0.17,
+          0.16,
+          0.24,
+          1.73,
+          0.25,
+          0.2,
+          0.33,
+          0.23,
+          0.51,
+          1.59
+        ],
+        "durations_sha256": "baf74ed500894269d260fa99c75e1d24bae2f36759267e56677ea6f76e8da95f",
+        "durations_bytes_len": 702
+      },
+      "trigger": {
+        "at_0_150": 77,
+        "at_0_200": 62,
+        "lost": 15,
+        "lost_pct": 19.480519
+      },
+      "leading_silence_artefact": {
+        "start_s": 0.025,
+        "end_s": 0.135,
+        "duration_s": 0.11
+      },
+      "sub_threshold_gaps_s": [
+        0.11
+      ],
+      "unexpected_sub_threshold_gaps_s": [],
+      "resume_table": {
+        "0.6": {
+          "silence_runs": 20,
+          "speaker_resumed": 20,
+          "at_file_end": 0,
+          "would_have_interrupted_pct": 100.0
+        },
+        "0.9": {
+          "silence_runs": 12,
+          "speaker_resumed": 12,
+          "at_file_end": 0,
+          "would_have_interrupted_pct": 100.0
+        },
+        "1.2": {
+          "silence_runs": 6,
+          "speaker_resumed": 6,
+          "at_file_end": 0,
+          "would_have_interrupted_pct": 100.0
+        },
+        "1.5": {
+          "silence_runs": 4,
+          "speaker_resumed": 4,
+          "at_file_end": 0,
+          "would_have_interrupted_pct": 100.0
+        },
+        "1.8": {
+          "silence_runs": 1,
+          "speaker_resumed": 1,
+          "at_file_end": 0,
+          "would_have_interrupted_pct": 100.0
+        },
+        "2.1": {
+          "silence_runs": 0,
+          "speaker_resumed": 0,
+          "at_file_end": 0,
+          "would_have_interrupted_pct": null
+        }
+      },
+      "corrected_without_leading_artefact": {
+        "n": 77,
+        "shortest_s": 0.15,
+        "p05_s_nearest_rank": 0.16,
+        "median_s_standard": 0.3,
+        "at_0_150": 77,
+        "at_0_200": 62,
+        "lost": 15,
+        "lost_pct": 19.480519
+      }
+    },
+    "oration": {
+      "cell": "oration",
+      "input": {
+        "path": "/home/proart/projects/communicator/examples/realaudio/corpus/oration_jfks19620912.wav",
+        "sha256": "a0e55371637efa1a2a8aec367b5e64e11910bcf5d7fdbf7f0d054fd848f4681d",
+        "bytes": 2400044,
+        "file_sample_rate": 16000,
+        "file_samples": 1200000,
+        "file_duration_s": 75.0,
+        "file_channels": 1,
+        "file_sample_width_bytes": 2,
+        "resampled": false,
+        "analysis_sample_rate": 16000,
+        "analysis_samples": 1200000,
+        "analysis_duration_s": 75.0
+      },
+      "gaps": {
+        "n": 2,
+        "shortest_s": 0.31,
+        "p05_s_nearest_rank": 0.31,
+        "p05_s_linear": 0.3135,
+        "median_s_standard": 0.345,
+        "median_s_published_convention": 0.38,
+        "max_s": 0.38,
+        "durations_s": [
+          0.31,
+          0.38
+        ],
+        "durations_sha256": "3b74256884f49d6b82aacd1ad8b0d0e169c4bca1538244cbc2b14dbeafe46ee9",
+        "durations_bytes_len": 18
+      },
+      "trigger": {
+        "at_0_150": 2,
+        "at_0_200": 2,
+        "lost": 0,
+        "lost_pct": 0.0
+      },
+      "leading_silence_artefact": null,
+      "sub_threshold_gaps_s": [],
+      "unexpected_sub_threshold_gaps_s": [],
+      "resume_table": {
+        "0.6": {
+          "silence_runs": 0,
+          "speaker_resumed": 0,
+          "at_file_end": 0,
+          "would_have_interrupted_pct": null
+        },
+        "0.9": {
+          "silence_runs": 0,
+          "speaker_resumed": 0,
+          "at_file_end": 0,
+          "would_have_interrupted_pct": null
+        },
+        "1.2": {
+          "silence_runs": 0,
+          "speaker_resumed": 0,
+          "at_file_end": 0,
+          "would_have_interrupted_pct": null
+        },
+        "1.5": {
+          "silence_runs": 0,
+          "speaker_resumed": 0,
+          "at_file_end": 0,
+          "would_have_interrupted_pct": null
+        },
+        "1.8": {
+          "silence_runs": 0,
+          "speaker_resumed": 0,
+          "at_file_end": 0,
+          "would_have_interrupted_pct": null
+        },
+        "2.1": {
+          "silence_runs": 0,
+          "speaker_resumed": 0,
+          "at_file_end": 0,
+          "would_have_interrupted_pct": null
+        }
+      },
+      "corrected_without_leading_artefact": {
+        "n": 2,
+        "shortest_s": 0.31,
+        "p05_s_nearest_rank": 0.31,
+        "median_s_standard": 0.345,
+        "at_0_150": 2,
+        "at_0_200": 2,
+        "lost": 0,
+        "lost_pct": 0.0
+      }
+    }
+  },
+  "totals": {
+    "gaps": 262,
+    "at_0_150": 259,
+    "at_0_200": 213,
+    "lost": 46,
+    "lost_pct": 17.7606,
+    "corrected_without_leading_artefact": {
+      "gaps": 259,
+      "at_0_150": 259,
+      "at_0_200": 213,
+      "lost": 46,
+      "lost_pct": 17.7606
+    }
+  },
+  "published_table_comparison": {
+    "published_source": "docs/research/ADOPTION-PLAN.md:124-145",
+    "per_cell": {},
+    "total": {},
+    "identical": true
+  },
+  "known_defect": {
+    "where": "src/energy.py:290 -- `kept = [segs[0]]`",
+    "what": "the first segment of a file escapes the min_silence_s filter, so a file's LEADING silence is reported as a gap",
+    "effect_here": {
+      "dialogue": {
+        "start_s": 0.025,
+        "end_s": 0.155,
+        "duration_s": 0.13
+      },
+      "shakespeare": {
+        "start_s": 0.025,
+        "end_s": 0.135,
+        "duration_s": 0.11
+      },
+      "children": {
+        "start_s": 0.025,
+        "end_s": 0.135,
+        "duration_s": 0.11
+      }
+    },
+    "affects_headline": true,
+    "note": "the artefact is below 0.150 s, so it is already excluded by the 0.150 trigger; the @0.150 / @0.200 / lost columns and the 17.8% are identical with and without it. It does change the 'gaps' and 'shortest' columns, and the claim that the shortest real pause is 0.110 s."
+  },
+  "watcher_pause_run_population": {
+    "skipped": false,
+    "method": {
+      "source": "tests/test_speculate.py::_corpus_pause_runs (lines 409-426)",
+      "watcher": "src/watcher.py",
+      "adaptive": true,
+      "chunk_samples": 1600,
+      "filter": "PAUSE events with run_s > 0.15",
+      "note": "the watcher reports an OPEN pause every PAUSE_REPORT_S = 0.25 s (src/watcher.py:202), so one silence run yields several events; distinct runs are reconstructed from t1 - run_s, which is the run start by construction (src/watcher.py:443 and :668)"
+    },
+    "events_gt_0_15": 1671,
+    "distinct_silence_runs": 673,
+    "event_min_s": 0.16,
+    "event_median_s": 0.38,
+    "event_max_s": 2.54,
+    "run_min_s": 0.01,
+    "run_median_s": 0.35,
+    "run_max_s": 2.54,
+    "max_pause_s_constant": 3.0,
+    "longest_run_below_max_pause_s": true,
+    "flush_clamp_note": "the longest run is below MAX_PAUSE_S, so no run was flushed and the flush clamp (src/watcher.py:679) did not shift any reconstructed run start",
+    "per_cell": {
+      "narration": {
+        "pause_events_gt_0_15": 299,
+        "pause_events_all": 321,
+        "distinct_silence_runs": 126,
+        "max_run_s": 1.8301,
+        "min_run_s": 0.01,
+        "median_run_s": 0.355
+      },
+      "poetry": {
+        "pause_events_gt_0_15": 59,
+        "pause_events_all": 66,
+        "distinct_silence_runs": 29,
+        "max_run_s": 1.2,
+        "min_run_s": 0.13,
+        "median_run_s": 0.45
+      },
+      "essay": {
+        "pause_events_gt_0_15": 263,
+        "pause_events_all": 281,
+        "distinct_silence_runs": 109,
+        "max_run_s": 1.56,
+        "min_run_s": 0.08,
+        "median_run_s": 0.33
+      },
+      "dialogue": {
+        "pause_events_gt_0_15": 269,
+        "pause_events_all": 292,
+        "distinct_silence_runs": 115,
+        "max_run_s": 1.53,
+        "min_run_s": 0.03,
+        "median_run_s": 0.33
+      },
+      "shakespeare": {
+        "pause_events_gt_0_15": 286,
+        "pause_events_all": 311,
+        "distinct_silence_runs": 124,
+        "max_run_s": 1.45,
+        "min_run_s": 0.03,
+        "median_run_s": 0.34
+      },
+      "children": {
+        "pause_events_gt_0_15": 214,
+        "pause_events_all": 229,
+        "distinct_silence_runs": 89,
+        "max_run_s": 1.6,
+        "min_run_s": 0.07,
+        "median_run_s": 0.3
+      },
+      "oration": {
+        "pause_events_gt_0_15": 281,
+        "pause_events_all": 289,
+        "distinct_silence_runs": 81,
+        "max_run_s": 2.54,
+        "min_run_s": 0.07,
+        "median_run_s": 0.53
+      }
+    },
+    "addendum2_resume_table": {
+      "0.6": {
+        "silence_runs": 170,
+        "speaker_resumed": 169,
+        "at_file_end": 1,
+        "would_have_interrupted_pct": 99.4118
+      },
+      "0.9": {
+        "silence_runs": 71,
+        "speaker_resumed": 70,
+        "at_file_end": 1,
+        "would_have_interrupted_pct": 98.5915
+      },
+      "1.2": {
+        "silence_runs": 35,
+        "speaker_resumed": 35,
+        "at_file_end": 0,
+        "would_have_interrupted_pct": 100.0
+      },
+      "1.5": {
+        "silence_runs": 15,
+        "speaker_resumed": 15,
+        "at_file_end": 0,
+        "would_have_interrupted_pct": 100.0
+      },
+      "1.8": {
+        "silence_runs": 6,
+        "speaker_resumed": 6,
+        "at_file_end": 0,
+        "would_have_interrupted_pct": 100.0
+      },
+      "2.1": {
+        "silence_runs": 2,
+        "speaker_resumed": 2,
+        "at_file_end": 0,
+        "would_have_interrupted_pct": 100.0
+      }
+    },
+    "elapsed_s": 101.2
+  },
+  "energy_population_resume_table": {
+    "population": "the silence runs of the verbatim _gaps() method, i.e. the SAME population as the pause table above",
+    "thresholds": {
+      "0.6": {
+        "silence_runs": 96,
+        "speaker_resumed": 95,
+        "at_file_end": 1,
+        "would_have_interrupted_pct": 98.9583
+      },
+      "0.9": {
+        "silence_runs": 51,
+        "speaker_resumed": 50,
+        "at_file_end": 1,
+        "would_have_interrupted_pct": 98.0392
+      },
+      "1.2": {
+        "silence_runs": 28,
+        "speaker_resumed": 27,
+        "at_file_end": 1,
+        "would_have_interrupted_pct": 96.4286
+      },
+      "1.5": {
+        "silence_runs": 16,
+        "speaker_resumed": 15,
+        "at_file_end": 1,
+        "would_have_interrupted_pct": 93.75
+      },
+      "1.8": {
+        "silence_runs": 9,
+        "speaker_resumed": 8,
+        "at_file_end": 1,
+        "would_have_interrupted_pct": 88.8889
+      },
+      "2.1": {
+        "silence_runs": 6,
+        "speaker_resumed": 5,
+        "at_file_end": 1,
+        "would_have_interrupted_pct": 83.3333
+      }
+    }
+  },
+  "prose_claims": {
+    "pause_runs_prose": 680,
+    "pause_runs_repository": 1671
+  }
+}

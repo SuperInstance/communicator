@@ -11,7 +11,7 @@ WHAT THE MEASUREMENTS SAY THE DATA MUST LOOK LIKE.
 
 1. THE SIGNAL IS MOTION, NOT APPEARANCE. `ROW-BAND-REMOVAL.md` measured
    facing-and-speaking against facing-and-silent: they differ by 4.914 counts
-   against a within-condition split of 1.917, with 79% of the excess
+   against A's own within-condition split of 2.878 (1.7x), with 79% of the excess
    concentrated in the top 5% of pixels. A single still frame does not contain
    that information -- it is in the frame-to-frame DIFFERENCE. So the corpus
    stores differences, not frames. This also happens to make the corpus small

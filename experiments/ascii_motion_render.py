@@ -24,7 +24,8 @@ So the representation Casey wanted is now BUILDABLE, and it is the right input
 for a teacher model, for one concrete reason:
 
     THE SIGNAL IS MOTION. Facing-and-speaking differs from facing-and-silent
-    by 4.914 counts against a within-condition split of 1.917, with 79% of the
+    by 4.914 counts against A's own within-condition split of 2.878 (1.7x),
+    with 79% of the
     excess in the top 5% of pixels -- the mouth. That information is in the
     frame-to-frame DIFFERENCE and is NOT in any single frame.
 

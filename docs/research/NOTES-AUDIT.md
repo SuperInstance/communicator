@@ -72,13 +72,45 @@ it says four do not exceed, then names the two that do.
 | summary | 0.0 | 0.0 |
 | region | 0.0 | 0.0 |
 | **map** | 0.0 | **1.000** |
-| **both** | 0.0 | **0.675** |
+| both | 0.0 | 0.0 |
 | **region+map** | 0.0 | **0.200** |
 
-Two of five are not 0.000. Separately, `TEACHER-PIPELINE.md:71-73`'s `both`
-row reads `A 0.000, C 0.650`, and **no result file contains a held-out
-session "C"** for this task; `0.650` matches neither candidate source
-(`B 0.675` or `B 0.200`).
+Two of five are not 0.000 — **map** and **region+map**. Separately,
+`TEACHER-PIPELINE.md:71-73`'s `both` row read `A 0.000, C 0.650`, and **no
+result file contains a held-out session "C"** for this task; `0.650` matched
+neither candidate source (B 0.675 or B 0.200).
+
+> **AMENDED (2026-10-19) — F3's own table had a bad cell, and it is the same
+> defect F3 is about.** This table listed `both` as **B 0.675**, taken from the
+> committed artefact `experiments/teacher_conventional_speaking_both.json` at
+> `7a4dff5`. That number **does not reproduce.** Re-running the committed
+> script against the committed corpus reproduces every other column of that
+> artefact exactly — test 1.000, scrambled 1.000, blank 0.667, margin +0.000 —
+> and returns LOO A 0.000, B 0.000.
+>
+> It is not a code problem and it is not a data problem:
+>
+> - The **script** at `7a4dff5` and at `HEAD` are identical, and both return
+>   0.000.
+> - The **corpus** rebuilds byte for byte from the captures
+>   (`seed_corpus_from_captures.py --filter row+median3` produces three
+>   SHA-256-identical `.npz` files), so the input is not the variable either.
+> - The artefact **never recorded** which corpus produced it, nor its stride,
+>   max-per, frame count or task — so the run cannot even be *specified* from
+>   what was committed. A sweep of 352 configurations over those unrecorded
+>   parameters never produces 0.675 together with the artefact's other columns.
+>
+> The other four feature sets' artefacts reproduce bit-exactly from
+> `/mnt/c/proart_capture/corpus`, so the **verdict** ("0.000 for every feature
+> set" is false) stands on numbers that do reproduce: map **1.000** and
+> region+map **0.200**. The **0.675 is withdrawn.** Result files now carry the
+> identity of their corpus, so an untraceable number cannot be quoted again.
+> `COMBINED-FILTER.md`, `ARTIFACT-REPRODUCIBILITY.md`.
+>
+> The generalisable lesson, and it is F3's own lesson one level up: **an audit
+> that trusts a result file inherits that file's provenance defects.** The audit
+> was right that the claim was false; it was wrong about which number made it
+> false.
 
 ### F4 — The "empty saturation" column holds the OCCUPIED flip rate
 

@@ -5,7 +5,8 @@ against ground truth that is KNOWN because we cut it ourselves.
 WHY THIS EXPERIMENT EXISTS.
 
 `turn.py` uses duration and it produces ZERO boundaries on six of seven real
-corpus cells: across 680 measured pause runs the longest is 2.1 s, so a 3 s
+corpus cells: across 673 measured silence runs (1671 pause events) the
+longest is 2.54 s, so a 3 s
 threshold never fires. A peripheral that never speaks is also a failure, so
 "the threshold is correct and the material is atypical" is not a place to
 stop.
@@ -73,6 +74,7 @@ from __future__ import annotations
 
 import argparse
 import base64
+import hashlib
 import json
 import math
 import os
@@ -121,10 +123,67 @@ CELLS = {
 }
 
 # Silence lengths swept. Chosen from the MEASURED pause distribution in
-# tests/test_pause_threshold.py: real inter-utterance gaps run 0.11-0.64 s
+# tests/test_pause_threshold.py: real inter-utterance gaps run 0.15-0.64 s
 # with a median around 0.30, so this spans "breath" to "long enough that a
-# human would start talking".
+# human would start talking". (The 0.11 s end that earlier revisions of this
+# comment quoted was the silence BEFORE THE FIRST WORD, which `energy.py`
+# lets escape the min_silence_s filter -- it is not an inter-utterance gap.
+# `docs/research/PAUSE-THRESHOLD.md`.)
 SILENCE_LENGTHS = (0.15, 0.30, 0.60, 1.00, 1.50)
+
+
+# -- provenance ---------------------------------------------------------------
+# A concordance is only a claim about the audio it was computed from, so the
+# result records which audio that was -- path and SHA-256 per cell -- plus the
+# model file for the route that uses one, the script's own SHA-256, and the
+# exact command line.
+
+def sha256_file(path) -> str:
+    """SHA-256 of a file, read in chunks."""
+    h = hashlib.sha256()
+    with open(path, "rb") as f:
+        for chunk in iter(lambda: f.read(1 << 20), b""):
+            h.update(chunk)
+    return h.hexdigest()
+
+
+def file_identity(path) -> dict:
+    """Where an input file is, and what it is."""
+    p = Path(path)
+    out = {"path": str(p.resolve())}
+    if not p.is_file():
+        out["problem"] = "the file is not on disk"
+        return out
+    out["sha256"] = sha256_file(p)
+    out["bytes"] = p.stat().st_size
+    return out
+
+
+def build_provenance(cells, stages, cli_args, parameters,
+                     skipped_cells=None) -> dict:
+    """The provenance block, and whether it is complete."""
+    script = Path(__file__).resolve()
+    prov = {
+        "generated_by": "experiments/turn_routes.py",
+        "script_path": str(script),
+        "script_sha256": sha256_file(script) if script.is_file() else None,
+        "cells": list(cells),
+        "skipped_cells": list(skipped_cells or []),
+        "stages": list(stages),
+        "cli_args": list(cli_args),
+        "command_line": " ".join(str(x) for x in cli_args),
+        "parameters": dict(parameters),
+        "problems": [],
+    }
+    for c in prov["cells"]:
+        if c.get("problem"):
+            prov["problems"].append(f"{c.get('path')}: {c['problem']}")
+    if "smartturn" in stages:
+        prov["smartturn_model"] = file_identity(SMARTTURN_ONNX)
+        prov["smartturn_features"] = file_identity(SMARTTURN_FEATURES)
+        if prov["smartturn_model"].get("problem"):
+            prov["problems"].append("the smart-turn model is not on disk")
+    return prov
 
 
 # -- the manufactured corpus -----------------------------------------------
@@ -624,7 +683,203 @@ def spread(pvals):
     return math.sqrt(sum((x - m) ** 2 for x in v) / len(v))
 
 
-def main():
+# -- the summary, PERSISTED ----------------------------------------------------
+# The headline statistics were printed to STDOUT and stored nowhere, so a note
+# could quote a number that no result file held and nothing would notice the
+# disagreement. The same numbers are computed here and written into the
+# results JSON, each under a key that NAMES it.
+#
+# THE TIE CONVENTION is `aucc`'s and is recorded in the output itself: a tie
+# contributes 0.5 to the numerator and NOTHING to the denominator, so the
+# denominator counts only the decided pairs. The concordance figures quoted in
+# docs/research/TURN-ROUTES.md were computed this way, so the persisted
+# numbers have to use it and not the more common "ties count in the
+# denominator" convention.
+
+PAIR_CONTRASTS = (("end", "resume"), ("end", "mid"), ("end", "none"),
+                   ("resume", "mid"), ("resume", "none"), ("mid", "none"))
+CONTROL_CONTRASTS = (("end", "none"), ("resume", "none"), ("mid", "none"))
+PRIMARY_CONTRAST = ("end", "resume")
+TIE_CONVENTION = ("ties count 0.5 toward the concordance and are excluded from "
+                  "the denominator, so the denominator counts only the decided "
+                  "pairs (the `aucc` convention)")
+
+
+def pair_concordance(a, b):
+    """
+    Concordance between two groups of scores, in `aucc`'s tie convention.
+
+    Returns the fraction of decided pairs on which the first group scores
+    higher, or None when there is nothing to compare.
+    """
+    xs = [v for v in a if v is not None]
+    ys = [v for v in b if v is not None]
+    if not xs or not ys:
+        return None
+    conc = disc = 0.0
+    for x in xs:
+        for y in ys:
+            if x > y:
+                conc += 1.0
+            elif x == y:
+                conc += 0.5
+            else:
+                disc += 1.0
+    total = conc + disc
+    return (conc / total) if total else None
+
+
+def _concordance_np(xs, ys):
+    """`pair_concordance` for numpy arrays -- the permutation null calls this
+    20000 times, so the inner loop cannot be in Python."""
+    diff = xs[:, None] - ys[None, :]
+    conc = float((diff > 0).sum()) + 0.5 * float((diff == 0).sum())
+    disc = float((diff < 0).sum())
+    total = conc + disc
+    return (conc / total) if total else None
+
+
+def permutation_null(a, b, n_perm=20000, seed=7):
+    """
+    Label-permutation null for one contrast.
+
+    The two groups' labels are shuffled among the cases that carry either of
+    them and the concordance is recomputed. The null mean is MEASURED and not
+    assumed to be 0.5: under this tie convention a null draw is biased
+    slightly upward by its ties, and the figure the notes quote (0.5079) is a
+    measured number, not a definition of chance.
+
+    Returns None when there is nothing to permute.
+    """
+    xs = np.asarray([v for v in a if v is not None], dtype=np.float64)
+    ys = np.asarray([v for v in b if v is not None], dtype=np.float64)
+    if len(xs) == 0 or len(ys) == 0:
+        return None
+    observed = _concordance_np(xs, ys)
+    pooled = np.concatenate([xs, ys])
+    n_hi = len(xs)
+    labels = np.array(["hi"] * n_hi + ["lo"] * len(ys))
+    rng = np.random.default_rng(seed)
+    null = np.zeros(int(n_perm), dtype=np.float64)
+    for i in range(int(n_perm)):
+        lab = labels[rng.permutation(len(pooled))]
+        v = _concordance_np(pooled[lab == "hi"], pooled[lab == "lo"])
+        null[i] = v if v is not None else 0.0
+    hits = int((null >= observed).sum())
+    return {
+        "contrast": f"{PRIMARY_CONTRAST[0]}_vs_{PRIMARY_CONTRAST[1]}",
+        "observed_concordance": float(observed),
+        "null_mean": float(null.mean()) if n_perm else None,
+        "null_sd": float(null.std(ddof=1)) if n_perm > 1 else None,
+        "null_min": float(null.min()) if n_perm else None,
+        "null_max": float(null.max()) if n_perm else None,
+        "null_p95": float(np.percentile(null, 95)) if n_perm else None,
+        "permutations": int(n_perm),
+        "hits": hits,
+        "p_value": (hits / n_perm) if n_perm else None,
+        "seed": int(seed),
+    }
+
+
+def build_summary(results, stages, permutations=20000, seed=7, causal=False):
+    """
+    The headline statistics, as a dict that can be persisted.
+
+    Every scalar sits under a key that names it: the observed concordance, the
+    measured null mean and its spread, the hit count, the permutation count,
+    the p value, and each control's concordance.
+    """
+    by_truth = {}
+    by_cell = {}
+    for r in results:
+        by_truth.setdefault(r.get("truth"), []).append(r)
+        cell = r.get("cell")
+        by_cell[cell] = by_cell.get(cell, 0) + 1
+
+    def scores(stage, truth):
+        return [r[stage].get("p_end") for r in by_truth.get(truth, [])
+                if r.get(stage) and r[stage].get("p_end") is not None]
+
+    summary = {
+        "n_cases": len(results),
+        "cases_by_truth": {t: len(v) for t, v in sorted(by_truth.items())},
+        "cases_by_cell": {c: n for c, n in sorted(by_cell.items())},
+        "causal": bool(causal),
+        "tie_convention": TIE_CONVENTION,
+        "primary_contrast": f"{PRIMARY_CONTRAST[0]}_vs_{PRIMARY_CONTRAST[1]}",
+        "stages": {},
+    }
+
+    for stage in stages:
+        means = {}
+        for truth in ("end", "resume", "mid", "none"):
+            v = scores(stage, truth)
+            means[truth] = (sum(v) / len(v)) if v else None
+        pairs = {f"{hi}_vs_{lo}": pair_concordance(scores(stage, hi),
+                                                   scores(stage, lo))
+                 for hi, lo in PAIR_CONTRASTS}
+        by_t = {t: scores(stage, t)
+                for t in ("end", "resume", "mid", "none")}
+        summary["stages"][stage] = {
+            "n_scored": sum(1 for r in results if r.get(stage)),
+            "mean_p_end_by_truth": means,
+            "concordance_all_pairs": aucc(by_t),
+            "pair_concordance": pairs,
+            "control_concordance_vs_none": {
+                f"{hi}_vs_none": pairs[f"{hi}_vs_none"]
+                for hi, _ in CONTROL_CONTRASTS},
+            "permutation_null": permutation_null(
+                scores(stage, PRIMARY_CONTRAST[0]),
+                scores(stage, PRIMARY_CONTRAST[1]),
+                n_perm=permutations, seed=seed),
+        }
+
+    dis = {}
+    for truth in ("end", "resume", "mid", "none"):
+        v = sorted(r["disagreement"] for r in by_truth.get(truth, [])
+                   if r.get("disagreement") is not None)
+        if v:
+            dis[truth] = {"mean": sum(v) / len(v), "median": v[len(v) // 2],
+                          "max": max(v), "n": len(v)}
+    summary["disagreement_by_truth"] = dis
+
+    circ = {}
+    for stage in stages:
+        ends = scores(stage, "end")
+        res = scores(stage, "resume")
+        if not ends or not res:
+            continue
+        fe = sum(ends) / len(ends)
+        fr = sum(res) / len(res)
+        circ[stage] = {
+            "mean_p_end_end": fe,
+            "mean_p_end_resume": fr,
+            "verdict": ("INTERRUPTS PEOPLE" if fr >= fe * 0.8
+                        else "separates them"),
+        }
+    summary["circularity_check"] = circ
+    return summary
+
+
+def print_summary(summary):
+    """Print the persisted summary, so stdout and the results file agree."""
+    print("\nSUMMARY (the same numbers are persisted in the results file)")
+    for stage, s in summary["stages"].items():
+        print(f"  {stage}:")
+        print(f"    concordance, {summary['primary_contrast']}: "
+              f"{s['pair_concordance'].get(summary['primary_contrast'])}")
+        ctl = s.get("control_concordance_vs_none", {})
+        print("    controls vs none: " + ", ".join(
+            f"{k} {v}" for k, v in ctl.items()))
+        n = s.get("permutation_null")
+        if n:
+            print(f"    permutation null: mean {n['null_mean']:.4f} "
+                  f"sd {n['null_sd']:.4f}  hits {n['hits']}/{n['permutations']}"
+                  f"  p = {n['p_value']:.4f}")
+    print(f"  tie convention: {summary['tie_convention']}")
+
+
+def main(argv=None):
     ap = argparse.ArgumentParser()
     ap.add_argument("--stages", default="acoustic,smartturn")
     ap.add_argument("--per-cell", type=int, default=4)
@@ -634,7 +889,11 @@ def main():
                     help="score only the audio a live system would have at "
                          "the moment of decision (no future)")
     ap.add_argument("--out", default="experiments/turn_routes_results.json")
-    args = ap.parse_args()
+    ap.add_argument("--permutations", type=int, default=20000,
+                    help="permutations for the measured null distribution")
+    ap.add_argument("--perm-seed", type=int, default=7,
+                    help="seed for the permutation null")
+    args = ap.parse_args(argv)
     stages = [s.strip() for s in args.stages.split(",") if s.strip()]
 
     runners = {"acoustic": score_acoustic, "smartturn": score_smartturn,
@@ -646,10 +905,18 @@ def main():
             ap.error(f"unknown stage {s!r}; pick from {sorted(runners)}")
 
     cases = []
+    cell_ids = []
+    skipped_cells = []
     for cell, path in CELLS.items():
         if not path.is_file():
             print(f"skip {cell}: absent")
+            ident = file_identity(path)
+            ident["name"] = cell
+            skipped_cells.append(ident)
             continue
+        ident = file_identity(path)
+        ident["name"] = cell
+        cell_ids.append(ident)
         samples = wavio.read_wav(str(path)).samples
         built = (build_cases(samples, cell, args.per_cell)
                  + build_resume_cases(samples, cell, args.per_cell))
@@ -768,9 +1035,30 @@ def main():
         print("  A large gap means the model was reading my description of")
         print("  the answer rather than anything about the speaker.")
 
+    summary = build_summary(results, stages,
+                            permutations=args.permutations,
+                            seed=args.perm_seed, causal=args.causal)
+    print_summary(summary)
+
+    used_argv = list(sys.argv[1:]) if argv is None else list(argv)
+    provenance = build_provenance(
+        cell_ids, stages, used_argv,
+        {"per_cell": args.per_cell, "limit": args.limit, "causal": args.causal,
+         "permutations": args.permutations, "perm_seed": args.perm_seed,
+         "out": str(args.out),
+         "silence_lengths": list(SILENCE_LENGTHS)},
+        skipped_cells=skipped_cells)
+
     out = Path(args.out)
     out.write_text(json.dumps({
         "stages": stages, "causal": args.causal, "results": results,
+        "summary": summary,
+        "provenance": provenance,
+        "reproducible": bool(
+            provenance.get("script_sha256")
+            and provenance.get("cli_args") is not None
+            and all(c.get("sha256") for c in provenance.get("cells", []))
+            and not provenance.get("problems")),
         "elapsed_s": round(time.perf_counter() - t0, 2),
     }, indent=2))
     print(f"\nwrote {out}")

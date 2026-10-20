@@ -48,7 +48,8 @@ manufactured a false positive once already.
 CANDIDATE TEACHERS, and why these.
 
 The signal is MOTION -- facing-and-speaking differs from facing-and-silent by
-4.914 counts against a within-condition split of 1.917, with 79% of the excess
+4.914 counts against A's own within-condition split of 2.878 (1.7x), with 79%
+of the excess
 in the top 5% of pixels. Single frames do not contain it. So the teacher reads
 a SEQUENCE, rendered as text, which a text-only model can do. That is why no
 vision model is required, and it is also why the SHUFFLE control is the

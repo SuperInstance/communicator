@@ -1,5 +1,83 @@
 {
   "question": "does composing row-band removal with a temporal median de-saturate the motion field and make the speech signal stand out more?",
+  "definitions": {
+    "empty_flip": {
+      "unit": "fraction of consecutive motion-map pairs, in (0, 1]",
+      "definition": "NOT MEASURED by this script: the empty capture's flip rate is never computed, so this is null for every variant"
+    },
+    "empty_saturation": {
+      "unit": "fraction of pixels, in (0, 1]",
+      "definition": "fraction of pixels in the EMPTY capture whose change-map value exceeds 1% of that map's own 99.5th-percentile value"
+    },
+    "A_flip": {
+      "unit": "fraction of consecutive motion-map pairs, in (0, 1]",
+      "definition": "fraction of consecutive motion-map pairs on condition A whose change exceeds half the maximum change in that run"
+    },
+    "A_saturation": {
+      "unit": "fraction of pixels, in (0, 1]",
+      "definition": "fraction of pixels on condition A whose change-map value exceeds 1% of that map's own 99.5th-percentile value"
+    },
+    "A_gap.mean_abs_diff": {
+      "unit": "motion-map counts (arbitrary units)",
+      "definition": "mean absolute difference between the first and second 6-frame block of condition A's change map (0.8 s to 9.0 s)"
+    },
+    "A_gap.max_diff": {
+      "unit": "motion-map counts (arbitrary units)",
+      "definition": "maximum absolute difference between the first and second 6-frame block of condition A's change map (0.8 s to 9.0 s)"
+    },
+    "A_gap.top5pct_excess_share": {
+      "unit": "fraction of the excess, in (0, 1]",
+      "definition": "share of the excess over the median that falls in the most active 5% of pixels for condition A"
+    },
+    "B_flip": {
+      "unit": "fraction of consecutive motion-map pairs, in (0, 1]",
+      "definition": "fraction of consecutive motion-map pairs on condition B whose change exceeds half the maximum change in that run"
+    },
+    "B_saturation": {
+      "unit": "fraction of pixels, in (0, 1]",
+      "definition": "fraction of pixels on condition B whose change-map value exceeds 1% of that map's own 99.5th-percentile value"
+    },
+    "C_flip": {
+      "unit": "fraction of consecutive motion-map pairs, in (0, 1]",
+      "definition": "fraction of consecutive motion-map pairs on condition C whose change exceeds half the maximum change in that run"
+    },
+    "C_saturation": {
+      "unit": "fraction of pixels, in (0, 1]",
+      "definition": "fraction of pixels on condition C whose change-map value exceeds 1% of that map's own 99.5th-percentile value"
+    },
+    "C_gap.mean_abs_diff": {
+      "unit": "motion-map counts (arbitrary units)",
+      "definition": "mean absolute difference between the first and second 6-frame block of condition C's change map (0.8 s to 9.0 s)"
+    },
+    "C_gap.max_diff": {
+      "unit": "motion-map counts (arbitrary units)",
+      "definition": "maximum absolute difference between the first and second 6-frame block of condition C's change map (0.8 s to 9.0 s)"
+    },
+    "C_gap.top5pct_excess_share": {
+      "unit": "fraction of the excess, in (0, 1]",
+      "definition": "share of the excess over the median that falls in the most active 5% of pixels for condition C"
+    },
+    "A_vs_C.mean_abs_diff": {
+      "unit": "motion-map counts (arbitrary units)",
+      "definition": "mean absolute difference between the mean change maps of condition A and condition C over frames 30-270"
+    },
+    "A_vs_C.max_diff": {
+      "unit": "motion-map counts (arbitrary units)",
+      "definition": "maximum absolute difference between the mean change maps of condition A and condition C over frames 30-270"
+    },
+    "A_vs_C.within_condition_split": {
+      "unit": "motion-map counts (arbitrary units)",
+      "definition": "within-condition control: mean absolute difference between the first and second temporal halves of condition A's change map over frames 30-270"
+    },
+    "A_vs_C.snr": {
+      "unit": "dimensionless ratio",
+      "definition": "A_vs_C.mean_abs_diff divided by A_vs_C.within_condition_split"
+    },
+    "A_vs_C.top5pct_excess_share": {
+      "unit": "fraction of the excess, in (0, 1]",
+      "definition": "share of the excess over the 95th percentile of the null that falls in the most active 5% of pixels (localisation)"
+    }
+  },
   "variants": {
     "raw": {
       "empty_flip": null,
@@ -137,6 +215,566 @@
       }
     }
   },
+  "summary": {
+    "raw": {
+      "empty_flip": {
+        "value": null,
+        "unit": "fraction of consecutive motion-map pairs, in (0, 1]",
+        "definition": "NOT MEASURED by this script: the empty capture's flip rate is never computed, so this is null for every variant"
+      },
+      "empty_saturation": {
+        "value": 0.4172540726817043,
+        "unit": "fraction of pixels, in (0, 1]",
+        "definition": "fraction of pixels in the EMPTY capture whose change-map value exceeds 1% of that map's own 99.5th-percentile value"
+      },
+      "A_flip": {
+        "value": 0.06634409024288107,
+        "unit": "fraction of consecutive motion-map pairs, in (0, 1]",
+        "definition": "fraction of consecutive motion-map pairs on condition A whose change exceeds half the maximum change in that run"
+      },
+      "A_saturation": {
+        "value": 0.9972927109440267,
+        "unit": "fraction of pixels, in (0, 1]",
+        "definition": "fraction of pixels on condition A whose change-map value exceeds 1% of that map's own 99.5th-percentile value"
+      },
+      "A_gap.mean_abs_diff": {
+        "value": 6.113118489583332,
+        "unit": "motion-map counts (arbitrary units)",
+        "definition": "mean absolute difference between the first and second 6-frame block of condition A's change map (0.8 s to 9.0 s)"
+      },
+      "A_gap.max_diff": {
+        "value": 42.291666666666664,
+        "unit": "motion-map counts (arbitrary units)",
+        "definition": "maximum absolute difference between the first and second 6-frame block of condition A's change map (0.8 s to 9.0 s)"
+      },
+      "A_gap.top5pct_excess_share": {
+        "value": 0.326825526229356,
+        "unit": "fraction of the excess, in (0, 1]",
+        "definition": "share of the excess over the median that falls in the most active 5% of pixels for condition A"
+      },
+      "B_flip": {
+        "value": 0.10066739949748743,
+        "unit": "fraction of consecutive motion-map pairs, in (0, 1]",
+        "definition": "fraction of consecutive motion-map pairs on condition B whose change exceeds half the maximum change in that run"
+      },
+      "B_saturation": {
+        "value": 0.9989067721386801,
+        "unit": "fraction of pixels, in (0, 1]",
+        "definition": "fraction of pixels on condition B whose change-map value exceeds 1% of that map's own 99.5th-percentile value"
+      },
+      "C_flip": {
+        "value": 0.08439528371021776,
+        "unit": "fraction of consecutive motion-map pairs, in (0, 1]",
+        "definition": "fraction of consecutive motion-map pairs on condition C whose change exceeds half the maximum change in that run"
+      },
+      "C_saturation": {
+        "value": 0.9975524749373433,
+        "unit": "fraction of pixels, in (0, 1]",
+        "definition": "fraction of pixels on condition C whose change-map value exceeds 1% of that map's own 99.5th-percentile value"
+      },
+      "C_gap.mean_abs_diff": {
+        "value": 4.637109375,
+        "unit": "motion-map counts (arbitrary units)",
+        "definition": "mean absolute difference between the first and second 6-frame block of condition C's change map (0.8 s to 9.0 s)"
+      },
+      "C_gap.max_diff": {
+        "value": 48.41666666666666,
+        "unit": "motion-map counts (arbitrary units)",
+        "definition": "maximum absolute difference between the first and second 6-frame block of condition C's change map (0.8 s to 9.0 s)"
+      },
+      "C_gap.top5pct_excess_share": {
+        "value": 0.38784024379806264,
+        "unit": "fraction of the excess, in (0, 1]",
+        "definition": "share of the excess over the median that falls in the most active 5% of pixels for condition C"
+      },
+      "A_vs_C.mean_abs_diff": {
+        "value": 3.941455078125,
+        "unit": "motion-map counts (arbitrary units)",
+        "definition": "mean absolute difference between the mean change maps of condition A and condition C over frames 30-270"
+      },
+      "A_vs_C.max_diff": {
+        "value": 28.387499999999996,
+        "unit": "motion-map counts (arbitrary units)",
+        "definition": "maximum absolute difference between the mean change maps of condition A and condition C over frames 30-270"
+      },
+      "A_vs_C.within_condition_split": {
+        "value": 1.9757606336805555,
+        "unit": "motion-map counts (arbitrary units)",
+        "definition": "within-condition control: mean absolute difference between the first and second temporal halves of condition A's change map over frames 30-270"
+      },
+      "A_vs_C.snr": {
+        "value": 1.9949051575051584,
+        "unit": "dimensionless ratio",
+        "definition": "A_vs_C.mean_abs_diff divided by A_vs_C.within_condition_split"
+      },
+      "A_vs_C.top5pct_excess_share": {
+        "value": 0.2491961541906909,
+        "unit": "fraction of the excess, in (0, 1]",
+        "definition": "share of the excess over the 95th percentile of the null that falls in the most active 5% of pixels (localisation)"
+      }
+    },
+    "row": {
+      "empty_flip": {
+        "value": null,
+        "unit": "fraction of consecutive motion-map pairs, in (0, 1]",
+        "definition": "NOT MEASURED by this script: the empty capture's flip rate is never computed, so this is null for every variant"
+      },
+      "empty_saturation": {
+        "value": 0.488390246449457,
+        "unit": "fraction of pixels, in (0, 1]",
+        "definition": "fraction of pixels in the EMPTY capture whose change-map value exceeds 1% of that map's own 99.5th-percentile value"
+      },
+      "A_flip": {
+        "value": 0.029909312185929647,
+        "unit": "fraction of consecutive motion-map pairs, in (0, 1]",
+        "definition": "fraction of consecutive motion-map pairs on condition A whose change exceeds half the maximum change in that run"
+      },
+      "A_saturation": {
+        "value": 0.9987005273600669,
+        "unit": "fraction of pixels, in (0, 1]",
+        "definition": "fraction of pixels on condition A whose change-map value exceeds 1% of that map's own 99.5th-percentile value"
+      },
+      "A_gap.mean_abs_diff": {
+        "value": 6.4902154993127885,
+        "unit": "motion-map counts (arbitrary units)",
+        "definition": "mean absolute difference between the first and second 6-frame block of condition A's change map (0.8 s to 9.0 s)"
+      },
+      "A_gap.max_diff": {
+        "value": 49.55381944444446,
+        "unit": "motion-map counts (arbitrary units)",
+        "definition": "maximum absolute difference between the first and second 6-frame block of condition A's change map (0.8 s to 9.0 s)"
+      },
+      "A_gap.top5pct_excess_share": {
+        "value": 0.34383667370540183,
+        "unit": "fraction of the excess, in (0, 1]",
+        "definition": "share of the excess over the median that falls in the most active 5% of pixels for condition A"
+      },
+      "B_flip": {
+        "value": 0.05949408500837521,
+        "unit": "fraction of consecutive motion-map pairs, in (0, 1]",
+        "definition": "fraction of consecutive motion-map pairs on condition B whose change exceeds half the maximum change in that run"
+      },
+      "B_saturation": {
+        "value": 0.9993871397243108,
+        "unit": "fraction of pixels, in (0, 1]",
+        "definition": "fraction of pixels on condition B whose change-map value exceeds 1% of that map's own 99.5th-percentile value"
+      },
+      "C_flip": {
+        "value": 0.0364936662479062,
+        "unit": "fraction of consecutive motion-map pairs, in (0, 1]",
+        "definition": "fraction of consecutive motion-map pairs on condition C whose change exceeds half the maximum change in that run"
+      },
+      "C_saturation": {
+        "value": 0.9990523182957394,
+        "unit": "fraction of pixels, in (0, 1]",
+        "definition": "fraction of pixels on condition C whose change-map value exceeds 1% of that map's own 99.5th-percentile value"
+      },
+      "C_gap.mean_abs_diff": {
+        "value": 4.203007789894386,
+        "unit": "motion-map counts (arbitrary units)",
+        "definition": "mean absolute difference between the first and second 6-frame block of condition C's change map (0.8 s to 9.0 s)"
+      },
+      "C_gap.max_diff": {
+        "value": 54.33072916666666,
+        "unit": "motion-map counts (arbitrary units)",
+        "definition": "maximum absolute difference between the first and second 6-frame block of condition C's change map (0.8 s to 9.0 s)"
+      },
+      "C_gap.top5pct_excess_share": {
+        "value": 0.4201214920418101,
+        "unit": "fraction of the excess, in (0, 1]",
+        "definition": "share of the excess over the median that falls in the most active 5% of pixels for condition C"
+      },
+      "A_vs_C.mean_abs_diff": {
+        "value": 4.480712147465457,
+        "unit": "motion-map counts (arbitrary units)",
+        "definition": "mean absolute difference between the mean change maps of condition A and condition C over frames 30-270"
+      },
+      "A_vs_C.max_diff": {
+        "value": 38.0480251736111,
+        "unit": "motion-map counts (arbitrary units)",
+        "definition": "maximum absolute difference between the mean change maps of condition A and condition C over frames 30-270"
+      },
+      "A_vs_C.within_condition_split": {
+        "value": 2.440874803331164,
+        "unit": "motion-map counts (arbitrary units)",
+        "definition": "within-condition control: mean absolute difference between the first and second temporal halves of condition A's change map over frames 30-270"
+      },
+      "A_vs_C.snr": {
+        "value": 1.8356992916434887,
+        "unit": "dimensionless ratio",
+        "definition": "A_vs_C.mean_abs_diff divided by A_vs_C.within_condition_split"
+      },
+      "A_vs_C.top5pct_excess_share": {
+        "value": 0.2810078226642143,
+        "unit": "fraction of the excess, in (0, 1]",
+        "definition": "share of the excess over the 95th percentile of the null that falls in the most active 5% of pixels (localisation)"
+      }
+    },
+    "median3": {
+      "empty_flip": {
+        "value": null,
+        "unit": "fraction of consecutive motion-map pairs, in (0, 1]",
+        "definition": "NOT MEASURED by this script: the empty capture's flip rate is never computed, so this is null for every variant"
+      },
+      "empty_saturation": {
+        "value": 0.03907881683375104,
+        "unit": "fraction of pixels, in (0, 1]",
+        "definition": "fraction of pixels in the EMPTY capture whose change-map value exceeds 1% of that map's own 99.5th-percentile value"
+      },
+      "A_flip": {
+        "value": 0.040910280569514235,
+        "unit": "fraction of consecutive motion-map pairs, in (0, 1]",
+        "definition": "fraction of consecutive motion-map pairs on condition A whose change exceeds half the maximum change in that run"
+      },
+      "A_saturation": {
+        "value": 0.788421574770259,
+        "unit": "fraction of pixels, in (0, 1]",
+        "definition": "fraction of pixels on condition A whose change-map value exceeds 1% of that map's own 99.5th-percentile value"
+      },
+      "A_gap.mean_abs_diff": {
+        "value": 6.845453559027777,
+        "unit": "motion-map counts (arbitrary units)",
+        "definition": "mean absolute difference between the first and second 6-frame block of condition A's change map (0.8 s to 9.0 s)"
+      },
+      "A_gap.max_diff": {
+        "value": 63.208333333333336,
+        "unit": "motion-map counts (arbitrary units)",
+        "definition": "maximum absolute difference between the first and second 6-frame block of condition A's change map (0.8 s to 9.0 s)"
+      },
+      "A_gap.top5pct_excess_share": {
+        "value": 0.35664113089095284,
+        "unit": "fraction of the excess, in (0, 1]",
+        "definition": "share of the excess over the median that falls in the most active 5% of pixels for condition A"
+      },
+      "B_flip": {
+        "value": 0.07213868823283082,
+        "unit": "fraction of consecutive motion-map pairs, in (0, 1]",
+        "definition": "fraction of consecutive motion-map pairs on condition B whose change exceeds half the maximum change in that run"
+      },
+      "B_saturation": {
+        "value": 0.7878171992481203,
+        "unit": "fraction of pixels, in (0, 1]",
+        "definition": "fraction of pixels on condition B whose change-map value exceeds 1% of that map's own 99.5th-percentile value"
+      },
+      "C_flip": {
+        "value": 0.02391842022613065,
+        "unit": "fraction of consecutive motion-map pairs, in (0, 1]",
+        "definition": "fraction of consecutive motion-map pairs on condition C whose change exceeds half the maximum change in that run"
+      },
+      "C_saturation": {
+        "value": 0.7897556390977444,
+        "unit": "fraction of pixels, in (0, 1]",
+        "definition": "fraction of pixels on condition C whose change-map value exceeds 1% of that map's own 99.5th-percentile value"
+      },
+      "C_gap.mean_abs_diff": {
+        "value": 4.502918836805557,
+        "unit": "motion-map counts (arbitrary units)",
+        "definition": "mean absolute difference between the first and second 6-frame block of condition C's change map (0.8 s to 9.0 s)"
+      },
+      "C_gap.max_diff": {
+        "value": 46.58333333333333,
+        "unit": "motion-map counts (arbitrary units)",
+        "definition": "maximum absolute difference between the first and second 6-frame block of condition C's change map (0.8 s to 9.0 s)"
+      },
+      "C_gap.top5pct_excess_share": {
+        "value": 0.4323865694441848,
+        "unit": "fraction of the excess, in (0, 1]",
+        "definition": "share of the excess over the median that falls in the most active 5% of pixels for condition C"
+      },
+      "A_vs_C.mean_abs_diff": {
+        "value": 2.415796169704861,
+        "unit": "motion-map counts (arbitrary units)",
+        "definition": "mean absolute difference between the mean change maps of condition A and condition C over frames 30-270"
+      },
+      "A_vs_C.max_diff": {
+        "value": 16.759375,
+        "unit": "motion-map counts (arbitrary units)",
+        "definition": "maximum absolute difference between the mean change maps of condition A and condition C over frames 30-270"
+      },
+      "A_vs_C.within_condition_split": {
+        "value": 1.2631770833333333,
+        "unit": "motion-map counts (arbitrary units)",
+        "definition": "within-condition control: mean absolute difference between the first and second temporal halves of condition A's change map over frames 30-270"
+      },
+      "A_vs_C.snr": {
+        "value": 1.9124762486427795,
+        "unit": "dimensionless ratio",
+        "definition": "A_vs_C.mean_abs_diff divided by A_vs_C.within_condition_split"
+      },
+      "A_vs_C.top5pct_excess_share": {
+        "value": 0.23431477443946322,
+        "unit": "fraction of the excess, in (0, 1]",
+        "definition": "share of the excess over the 95th percentile of the null that falls in the most active 5% of pixels (localisation)"
+      }
+    },
+    "row+median3": {
+      "empty_flip": {
+        "value": null,
+        "unit": "fraction of consecutive motion-map pairs, in (0, 1]",
+        "definition": "NOT MEASURED by this script: the empty capture's flip rate is never computed, so this is null for every variant"
+      },
+      "empty_saturation": {
+        "value": 0.0347874895572264,
+        "unit": "fraction of pixels, in (0, 1]",
+        "definition": "fraction of pixels in the EMPTY capture whose change-map value exceeds 1% of that map's own 99.5th-percentile value"
+      },
+      "A_flip": {
+        "value": 0.0014447236180904523,
+        "unit": "fraction of consecutive motion-map pairs, in (0, 1]",
+        "definition": "fraction of consecutive motion-map pairs on condition A whose change exceeds half the maximum change in that run"
+      },
+      "A_saturation": {
+        "value": 0.8324815946115288,
+        "unit": "fraction of pixels, in (0, 1]",
+        "definition": "fraction of pixels on condition A whose change-map value exceeds 1% of that map's own 99.5th-percentile value"
+      },
+      "A_gap.mean_abs_diff": {
+        "value": 4.371495734320747,
+        "unit": "motion-map counts (arbitrary units)",
+        "definition": "mean absolute difference between the first and second 6-frame block of condition A's change map (0.8 s to 9.0 s)"
+      },
+      "A_gap.max_diff": {
+        "value": 38.863932291666686,
+        "unit": "motion-map counts (arbitrary units)",
+        "definition": "maximum absolute difference between the first and second 6-frame block of condition A's change map (0.8 s to 9.0 s)"
+      },
+      "A_gap.top5pct_excess_share": {
+        "value": 0.35922371253683083,
+        "unit": "fraction of the excess, in (0, 1]",
+        "definition": "share of the excess over the median that falls in the most active 5% of pixels for condition A"
+      },
+      "B_flip": {
+        "value": 0.04754174518425461,
+        "unit": "fraction of consecutive motion-map pairs, in (0, 1]",
+        "definition": "fraction of consecutive motion-map pairs on condition B whose change exceeds half the maximum change in that run"
+      },
+      "B_saturation": {
+        "value": 0.8022686925647452,
+        "unit": "fraction of pixels, in (0, 1]",
+        "definition": "fraction of pixels on condition B whose change-map value exceeds 1% of that map's own 99.5th-percentile value"
+      },
+      "C_flip": {
+        "value": 0.009323309254606366,
+        "unit": "fraction of consecutive motion-map pairs, in (0, 1]",
+        "definition": "fraction of consecutive motion-map pairs on condition C whose change exceeds half the maximum change in that run"
+      },
+      "C_saturation": {
+        "value": 0.8233696219715957,
+        "unit": "fraction of pixels, in (0, 1]",
+        "definition": "fraction of pixels on condition C whose change-map value exceeds 1% of that map's own 99.5th-percentile value"
+      },
+      "C_gap.mean_abs_diff": {
+        "value": 2.9114390620478874,
+        "unit": "motion-map counts (arbitrary units)",
+        "definition": "mean absolute difference between the first and second 6-frame block of condition C's change map (0.8 s to 9.0 s)"
+      },
+      "C_gap.max_diff": {
+        "value": 71.97699652777779,
+        "unit": "motion-map counts (arbitrary units)",
+        "definition": "maximum absolute difference between the first and second 6-frame block of condition C's change map (0.8 s to 9.0 s)"
+      },
+      "C_gap.top5pct_excess_share": {
+        "value": 0.4488674513422159,
+        "unit": "fraction of the excess, in (0, 1]",
+        "definition": "share of the excess over the median that falls in the most active 5% of pixels for condition C"
+      },
+      "A_vs_C.mean_abs_diff": {
+        "value": 1.806422117727774,
+        "unit": "motion-map counts (arbitrary units)",
+        "definition": "mean absolute difference between the mean change maps of condition A and condition C over frames 30-270"
+      },
+      "A_vs_C.max_diff": {
+        "value": 38.17597656250001,
+        "unit": "motion-map counts (arbitrary units)",
+        "definition": "maximum absolute difference between the mean change maps of condition A and condition C over frames 30-270"
+      },
+      "A_vs_C.within_condition_split": {
+        "value": 0.9890424968578198,
+        "unit": "motion-map counts (arbitrary units)",
+        "definition": "within-condition control: mean absolute difference between the first and second temporal halves of condition A's change map over frames 30-270"
+      },
+      "A_vs_C.snr": {
+        "value": 1.8264352881365187,
+        "unit": "dimensionless ratio",
+        "definition": "A_vs_C.mean_abs_diff divided by A_vs_C.within_condition_split"
+      },
+      "A_vs_C.top5pct_excess_share": {
+        "value": 0.35745491937550006,
+        "unit": "fraction of the excess, in (0, 1]",
+        "definition": "share of the excess over the 95th percentile of the null that falls in the most active 5% of pixels (localisation)"
+      }
+    },
+    "row+median5": {
+      "empty_flip": {
+        "value": null,
+        "unit": "fraction of consecutive motion-map pairs, in (0, 1]",
+        "definition": "NOT MEASURED by this script: the empty capture's flip rate is never computed, so this is null for every variant"
+      },
+      "empty_saturation": {
+        "value": 0.0,
+        "unit": "fraction of pixels, in (0, 1]",
+        "definition": "fraction of pixels in the EMPTY capture whose change-map value exceeds 1% of that map's own 99.5th-percentile value"
+      },
+      "A_flip": {
+        "value": 0.00013086264656616414,
+        "unit": "fraction of consecutive motion-map pairs, in (0, 1]",
+        "definition": "fraction of consecutive motion-map pairs on condition A whose change exceeds half the maximum change in that run"
+      },
+      "A_saturation": {
+        "value": 0.41675804093567254,
+        "unit": "fraction of pixels, in (0, 1]",
+        "definition": "fraction of pixels on condition A whose change-map value exceeds 1% of that map's own 99.5th-percentile value"
+      },
+      "A_gap.mean_abs_diff": {
+        "value": 0.4977777551721643,
+        "unit": "motion-map counts (arbitrary units)",
+        "definition": "mean absolute difference between the first and second 6-frame block of condition A's change map (0.8 s to 9.0 s)"
+      },
+      "A_gap.max_diff": {
+        "value": 5.780815972222226,
+        "unit": "motion-map counts (arbitrary units)",
+        "definition": "maximum absolute difference between the first and second 6-frame block of condition A's change map (0.8 s to 9.0 s)"
+      },
+      "A_gap.top5pct_excess_share": {
+        "value": 0.4165223758205294,
+        "unit": "fraction of the excess, in (0, 1]",
+        "definition": "share of the excess over the median that falls in the most active 5% of pixels for condition A"
+      },
+      "B_flip": {
+        "value": 0.0002558364740368509,
+        "unit": "fraction of consecutive motion-map pairs, in (0, 1]",
+        "definition": "fraction of consecutive motion-map pairs on condition B whose change exceeds half the maximum change in that run"
+      },
+      "B_saturation": {
+        "value": 0.4131285244360902,
+        "unit": "fraction of pixels, in (0, 1]",
+        "definition": "fraction of pixels on condition B whose change-map value exceeds 1% of that map's own 99.5th-percentile value"
+      },
+      "C_flip": {
+        "value": 0.00022770100502512563,
+        "unit": "fraction of consecutive motion-map pairs, in (0, 1]",
+        "definition": "fraction of consecutive motion-map pairs on condition C whose change exceeds half the maximum change in that run"
+      },
+      "C_saturation": {
+        "value": 0.4010410139933166,
+        "unit": "fraction of pixels, in (0, 1]",
+        "definition": "fraction of pixels on condition C whose change-map value exceeds 1% of that map's own 99.5th-percentile value"
+      },
+      "C_gap.mean_abs_diff": {
+        "value": 0.4846679687499984,
+        "unit": "motion-map counts (arbitrary units)",
+        "definition": "mean absolute difference between the first and second 6-frame block of condition C's change map (0.8 s to 9.0 s)"
+      },
+      "C_gap.max_diff": {
+        "value": 5.0546875,
+        "unit": "motion-map counts (arbitrary units)",
+        "definition": "maximum absolute difference between the first and second 6-frame block of condition C's change map (0.8 s to 9.0 s)"
+      },
+      "C_gap.top5pct_excess_share": {
+        "value": 0.2981017192593941,
+        "unit": "fraction of the excess, in (0, 1]",
+        "definition": "share of the excess over the median that falls in the most active 5% of pixels for condition C"
+      },
+      "A_vs_C.mean_abs_diff": {
+        "value": 0.1875217748571325,
+        "unit": "motion-map counts (arbitrary units)",
+        "definition": "mean absolute difference between the mean change maps of condition A and condition C over frames 30-270"
+      },
+      "A_vs_C.max_diff": {
+        "value": 1.131070963541666,
+        "unit": "motion-map counts (arbitrary units)",
+        "definition": "maximum absolute difference between the mean change maps of condition A and condition C over frames 30-270"
+      },
+      "A_vs_C.within_condition_split": {
+        "value": 0.10273797211823638,
+        "unit": "motion-map counts (arbitrary units)",
+        "definition": "within-condition control: mean absolute difference between the first and second temporal halves of condition A's change map over frames 30-270"
+      },
+      "A_vs_C.snr": {
+        "value": 1.825243101365894,
+        "unit": "dimensionless ratio",
+        "definition": "A_vs_C.mean_abs_diff divided by A_vs_C.within_condition_split"
+      },
+      "A_vs_C.top5pct_excess_share": {
+        "value": 0.23937845958521506,
+        "unit": "fraction of the excess, in (0, 1]",
+        "definition": "share of the excess over the 95th percentile of the null that falls in the most active 5% of pixels (localisation)"
+      }
+    }
+  },
+  "provenance": {
+    "generated_by": "experiments/combined_filter.py",
+    "script_path": "/home/proart/projects/communicator/experiments/combined_filter.py",
+    "script_sha256": "566b1cf0d2517b0ee893dd04218d4b00a464b6c4c3010d4b65c78e900b352fce",
+    "corpus_path": "/mnt/c/proart_capture/corpus",
+    "empty_capture": {
+      "path": "/home/proart/projects/glasses/.capture_keep/empty1.nv12",
+      "sha256": "da348ccaf08c030dedea4b2e070ceb1149a4f11d3e9287e8212a480a58c05303",
+      "bytes": 86400000
+    },
+    "sessions": [
+      {
+        "path": "/mnt/c/proart_capture/A.nv12",
+        "sha256": "b65cf944aa4e8a65932d4c140335a495fa6a1707f28025d40fb08d31fa33bc73",
+        "bytes": 17280000,
+        "used": true,
+        "name": "A"
+      },
+      {
+        "path": "/mnt/c/proart_capture/B.nv12",
+        "sha256": "c87269568fabea99d39bc40b46e9a8d3026c72c241d8194f7d9c27181e893e04",
+        "bytes": 17280000,
+        "used": true,
+        "name": "B"
+      },
+      {
+        "path": "/mnt/c/proart_capture/C.nv12",
+        "sha256": "937ac321bc436ea41b50508b5431f7c6862f32641c127c7800191b9ce080e5cf",
+        "bytes": 17280000,
+        "used": true,
+        "name": "C"
+      }
+    ],
+    "cli_args": [
+      "--empty",
+      "/home/proart/projects/glasses/.capture_keep/empty1.nv12",
+      "--corpus",
+      "/mnt/c/proart_capture/corpus",
+      "--nf",
+      "400",
+      "--out",
+      "/home/proart/projects/communicator/experiments"
+    ],
+    "command_line": "--empty /home/proart/projects/glasses/.capture_keep/empty1.nv12 --corpus /mnt/c/proart_capture/corpus --nf 400 --out /home/proart/projects/communicator/experiments",
+    "parameters": {
+      "nf": 400,
+      "out": "/home/proart/projects/communicator/experiments",
+      "variants": {
+        "raw": {
+          "row_band_removal": false,
+          "temporal_median_k": 1
+        },
+        "row": {
+          "row_band_removal": true,
+          "temporal_median_k": 1
+        },
+        "median3": {
+          "row_band_removal": false,
+          "temporal_median_k": 3
+        },
+        "row+median3": {
+          "row_band_removal": true,
+          "temporal_median_k": 3
+        },
+        "row+median5": {
+          "row_band_removal": true,
+          "temporal_median_k": 5
+        }
+      }
+    },
+    "problems": []
+  },
+  "reproducible": true,
   "limits": [
     "two labelled sessions per class; the composition can make a teacher MORE LIKELY to pass its gate but cannot make one pass",
     "the empty capture is later and darker than the occupied ones",

@@ -18,16 +18,148 @@
     {
       "held_out": "A",
       "acc": 0.0,
-      "n": 40
+      "n": 40,
+      "held_out_label": 1,
+      "corpus_fingerprint": "5f6327786ad0713f6ebb02de80ee9562f725ede492f036e9788b92481c2e5121"
     },
     {
       "held_out": "B",
       "acc": 0.0,
-      "n": 40
+      "n": 40,
+      "held_out_label": 1,
+      "corpus_fingerprint": "5f6327786ad0713f6ebb02de80ee9562f725ede492f036e9788b92481c2e5121"
     }
   ],
   "margin_over_best_control": 0.3125,
   "usable": true,
+  "leave_one_session_out_by_feature_set": {
+    "region": {
+      "feature_set": "region",
+      "task": "speaking",
+      "margin_over_best_control": 0.3125,
+      "control_spatially_scrambled": 0.6875,
+      "control_blank": 0.6666666666666666,
+      "best_control": 0.6875,
+      "rows": [
+        {
+          "held_out": "A",
+          "acc": 0.0,
+          "n": 40,
+          "held_out_label": 1,
+          "corpus_fingerprint": "5f6327786ad0713f6ebb02de80ee9562f725ede492f036e9788b92481c2e5121",
+          "feature_set": "region"
+        },
+        {
+          "held_out": "B",
+          "acc": 0.0,
+          "n": 40,
+          "held_out_label": 1,
+          "corpus_fingerprint": "5f6327786ad0713f6ebb02de80ee9562f725ede492f036e9788b92481c2e5121",
+          "feature_set": "region"
+        }
+      ],
+      "held_out_sessions": [
+        "A",
+        "B"
+      ],
+      "skipped_sessions": [
+        {
+          "held_out": "C",
+          "reason": "holding out this session leaves a single class in the training set (labels [1]), so the fold is not defined"
+        }
+      ],
+      "n_rows": 2
+    }
+  },
+  "sessions": [
+    {
+      "name": "A",
+      "label": 1
+    },
+    {
+      "name": "B",
+      "label": 1
+    },
+    {
+      "name": "C",
+      "label": 0
+    }
+  ],
+  "provenance": {
+    "generated_by": "experiments/teacher_conventional.py",
+    "script_path": "/home/proart/projects/communicator/experiments/teacher_conventional.py",
+    "script_sha256": "69e11ea247c3fb1ab617c4ea94b028c2ec8ff38a6e6325c2ba5ffa23f370a974",
+    "corpus_path": "/mnt/c/proart_capture/corpus",
+    "cli_args": [
+      "--corpus",
+      "/mnt/c/proart_capture/corpus",
+      "--task",
+      "speaking",
+      "--features",
+      "region",
+      "--k",
+      "6",
+      "--stride",
+      "5",
+      "--max-per",
+      "40",
+      "--train-frac",
+      "0.6",
+      "--out",
+      "/home/proart/projects/communicator/experiments"
+    ],
+    "command_line": "--corpus /mnt/c/proart_capture/corpus --task speaking --features region --k 6 --stride 5 --max-per 40 --train-frac 0.6 --out /home/proart/projects/communicator/experiments",
+    "parameters": {
+      "task": "speaking",
+      "features": "region",
+      "k": 6,
+      "stride": 5,
+      "max_per": 40,
+      "train_frac": 0.6,
+      "out": "/home/proart/projects/communicator/experiments"
+    },
+    "sessions": [
+      {
+        "npz_path": "/mnt/c/proart_capture/corpus/A_seed.npz",
+        "npz_sha256": "24e6aede96b851f4a23664b7287135013c65c73dc146e7cc726414042d119c0f",
+        "n_frames": 599,
+        "map_shape": [
+          48,
+          80
+        ],
+        "scale": 143.2708282470703,
+        "name": "A",
+        "label": 1
+      },
+      {
+        "npz_path": "/mnt/c/proart_capture/corpus/B_seed.npz",
+        "npz_sha256": "0a9e1014b6d6705686e2bb18fee97703026436675cd1450d1c8587712bfa5a6a",
+        "n_frames": 599,
+        "map_shape": [
+          48,
+          80
+        ],
+        "scale": 131.3177032470703,
+        "name": "B",
+        "label": 1
+      },
+      {
+        "npz_path": "/mnt/c/proart_capture/corpus/C_seed.npz",
+        "npz_sha256": "8c807237e26184d5ed45e1bc30a175d3173fb770c539c4235faab46a15e92247",
+        "n_frames": 599,
+        "map_shape": [
+          48,
+          80
+        ],
+        "scale": 140.046875,
+        "name": "C",
+        "label": 0
+      }
+    ],
+    "corpus_fingerprint": "5f6327786ad0713f6ebb02de80ee9562f725ede492f036e9788b92481c2e5121",
+    "problems": []
+  },
+  "reproducible": true,
   "limits": [
     "two labelled sessions, one speaker, one room, one lighting state",
     "the temporal split is over a ~20 s window, so train and test are highly correlated in time",

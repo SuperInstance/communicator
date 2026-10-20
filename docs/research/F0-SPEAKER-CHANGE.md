@@ -50,9 +50,18 @@ Median `|f2−f1|/f1`, by pause band, against the same-speaker control:
 | shakespeare | 66 | 0.184 | 0.144 | **0.086** | **0.173** | −0.179 | 0.925 |
 
 **Zero of six cells** show the monotone increase the hypothesis predicts.
-**Four of six** have a long-pause band that does not exceed pure intonation
+**Two of six** have a long-pause band that does not exceed pure intonation
 inside a single speaker's own speech; in **narration and shakespeare the long
 band is below the control** — the "hand-off" signal is smaller than phrasing.
+
+> **CORRECTION (2026-10-19).** This said *"**Four of six** have a long-pause
+> band that does not exceed pure intonation inside a single speaker's own
+> speech"* — which inverted the count and contradicted its own second clause
+> (it named two cells). `experiments/f0_speaker_change_results.json` holds
+> `cells_long_exceed_control: 4`, `cells_long_under_control: 2`, and the table
+> above agrees with it: **narration** (0.174 long vs 0.204 control) and
+> **shakespeare** (0.086 vs 0.173) are the two under the control; the other
+> four exceed it. Settled by that result file; `NOTES-AUDIT.md` F2.
 
 Only `children` is significant, at ρ = +0.341, p = 0.0061. Across six cells
 that is a Bonferroni-corrected p of 0.037: it survives correction, and it is

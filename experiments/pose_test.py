@@ -206,9 +206,17 @@ def main():
             "the empty capture is later and darker than the others; the null "
             "floor is therefore probably an OVER-estimate, which makes the "
             "test conservative rather than optimistic",
-            "A and B are only 30 s of speech each and the head turn was "
-            "constrained; a null here is evidence about the capture, not "
-            "about vision",
+            "THIS STATISTIC IS BLIND TO HEAD POSE, and that is now known "
+            "rather than assumed. A separate search over fourteen candidate "
+            "features (experiments/pose_feature_search.py) finds one that "
+            "does separate facing from turned: mirror_cov, the frame's "
+            "covariance with its own horizontal mirror, margin +0.814, and "
+            "pose-consistent because the first and last captures of the run "
+            "agree with each other while only the middle one differs. So the "
+            "null below is a property of the CHANGE-MAP MAGNITUDE, and the "
+            "earlier explanation -- that the head turn was too small to "
+            "register -- was an assumption resting on a blind instrument. "
+            "See docs/research/POSE-FEATURE.md.",
             "one capture per condition, no error bars, no cross-validation",
             "this measures a POSE signal. It does not measure whether anyone "
             "is talking to you",
@@ -216,8 +224,24 @@ def main():
     }
     ab = results.get("A_vs_B", {}).get("mean_abs_diff")
     ab_sh = results.get("A_vs_B_shifted", {}).get("mean_abs_diff")
+    # THE CONTROLS, AND WHICH ONE MATCHES WHICH CONTRAST.
+    #
+    # The first version took `min(...)` over every within-condition split,
+    # which is the most FAVOURABLE null available rather than the matched
+    # one: it picked condition B's 1.917 to divide the A-vs-C contrast of
+    # 4.914, giving "2.6x". The condition in the A-vs-C contrast is A, so
+    # the matched control is A's own within-split, 2.878, and the factor is
+    # 1.71x. (NOTES-AUDIT.md F1.)
+    #
+    # For the A-vs-B contrast the matched control is not obvious -- the
+    # conservative choice is the LARGER of the two splits, so that a claim
+    # has to clear the least favourable null. The verdict is unchanged
+    # either way: 9.182 against a time-shifted control of 9.178 is nothing.
+    half_a = results.get("within_A_facing_speaking", {}).get("mean_abs_diff")
+    half_b = results.get("within_B_turned_speaking", {}).get("mean_abs_diff")
     half = min((v["mean_abs_diff"] for k, v in results.items()
                 if k.startswith("within_")), default=None)
+    half_pose = max((x for x in (half_a, half_b) if x is not None), default=None)
     ac = results.get("A_vs_C", {}).get("mean_abs_diff")
     ac_loc = results.get("A_vs_C", {}).get("top5pct_excess_share")
 
@@ -227,30 +251,34 @@ def main():
     # control is the whole point of the test, and a real pose signal has to
     # clear it by a wide margin, not by a rounding error.
     MARGIN = 1.25
-    if ab is not None and ab_sh is not None and half is not None:
-        if ab > ab_sh * MARGIN and ab > half * MARGIN:
+    if ab is not None and ab_sh is not None and half_pose is not None:
+        if ab > ab_sh * MARGIN and ab > half_pose * MARGIN:
             out["pose_verdict"] = (
                 f"A-vs-B ({ab:.3f}) clears the time-shifted control "
                 f"({ab_sh:.3f}) by more than {MARGIN}x. There is a localised "
                 "pose signal above the null.")
         else:
             out["pose_verdict"] = (
-                f"NO POSE SIGNAL. A-vs-B is {ab:.3f} and the time-shifted "
-                f"control is {ab_sh:.3f} -- indistinguishable. The apparent "
-                "difference between facing and turned is the scene changing "
-                "over time, not a head direction. This is a statement about "
-                "the CAPTURE, not about vision: the head turn was too small to "
-                "register (Casey reported the glasses restricting it), so a "
-                "null here is the expected outcome and not evidence against "
-                "the idea.")
+                f"NO POSE SIGNAL IN THIS STATISTIC. A-vs-B is {ab:.3f} and the "
+                f"time-shifted control is {ab_sh:.3f} -- indistinguishable. The "
+                "apparent difference between facing and turned is the scene "
+                "changing over time, not a head direction.")
 
     # THE OTHER HALF, and it is the better half.
-    if ac is not None and half is not None:
-        if ac > half * MARGIN:
+    #
+    # The control is A's OWN within-split, because A is the condition in the
+    # A-vs-C contrast. The earlier version divided by the minimum split
+    # across all conditions -- 1.917, which belongs to B -- and printed
+    # "2.6x". Against the matched control it is 1.71x. The conclusion is
+    # unchanged and the localisation is what carries it: 79% of the excess
+    # sits in the top 5% of pixels, which is what a real signal looks like
+    # and what the A-vs-B comparison is not.
+    if ac is not None and half_a is not None:
+        if ac > half_a * MARGIN:
             out["speech_verdict"] = (
                 f"SPEECH IS VISIBLE. Facing-and-speaking vs facing-and-silent "
-                f"differ by {ac:.3f} against a within-condition split of "
-                f"{half:.3f} ({ac / half:.1f}x), and the excess is "
+                f"differ by {ac:.3f} against A's own within-condition split of "
+                f"{half_a:.3f} ({ac / half_a:.1f}x), and the excess is "
                 f"{ac_loc * 100:.0f}% concentrated in the top 5% of pixels -- "
                 "it is LOCALISED, which is what a real signal looks like and "
                 "what the A-vs-B comparison is not. The camera channel does "

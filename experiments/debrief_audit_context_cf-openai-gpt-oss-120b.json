@@ -1,0 +1,117 @@
+{
+  "mode": "context",
+  "results": [
+    {
+      "model": "@cf/openai/gpt-oss-120b",
+      "mode": "context",
+      "materials_chars": 140000,
+      "sensitivity_rejected_false_claims": 0.8571428571428571,
+      "specificity_kept_true_claims": 1.0,
+      "headline_sens_plus_spec_minus_1": 0.8571428571428572,
+      "sensitivity_not_endorsing_false_claims": 0.8571428571428571,
+      "specificity_not_accusing_true_claims": 1.0,
+      "headline_lenient": 0.8571428571428572,
+      "false_positives": 0,
+      "true_positives": 3,
+      "uncertain": 0,
+      "detections": 6,
+      "n_false": 7,
+      "n_true": 3,
+      "unparseable": 0,
+      "elapsed_s": 37.53,
+      "rows": [
+        {
+          "index": 0,
+          "is_false_claim": false,
+          "verdict": "supported",
+          "rejected": false,
+          "correct": true,
+          "reason": "Room acoustic measurements directly report -73.5 dBFS, 119 transients, and zero RT60 estimates.",
+          "claim": "The room's own acoustic noise floor measured -73.5 dBFS, with 119 transients detected and zero valid RT60 estimates obtainable from it."
+        },
+        {
+          "index": 1,
+          "is_false_claim": true,
+          "verdict": "unsupported",
+          "rejected": true,
+          "correct": true,
+          "reason": "The 14.5\u00d7 reduction claim was retracted as a mis\u2011comparison of intervals.",
+          "claim": "Reducing the gate's field threshold to 0.30 removed 14.5x of the camera's frame-to-frame drift, measured as the mean absolute difference between consecutive frames."
+        },
+        {
+          "index": 2,
+          "is_false_claim": false,
+          "verdict": "supported",
+          "rejected": false,
+          "correct": true,
+          "reason": "Row\u2011median removal drops empty\u2011room flip rate to ~0.01% while occupied flip stays near 48%.",
+          "claim": "Removing each row's median across the columns before differencing frames takes an empty room's character-cell flip rate from 50.00% down to 0.01%, while leaving the occupied room's column structure unchanged."
+        },
+        {
+          "index": 3,
+          "is_false_claim": true,
+          "verdict": "unsupported",
+          "rejected": true,
+          "correct": true,
+          "reason": "No evidence of quadratic memory growth for the watcher is provided.",
+          "claim": "The watcher's memory use grows quadratically with session length, so a long session will eventually exhaust the device."
+        },
+        {
+          "index": 4,
+          "is_false_claim": true,
+          "verdict": "unsupported",
+          "rejected": true,
+          "correct": true,
+          "reason": "Gain normalisation was shown to have essentially no effect, not a ~50\u00d7 reduction.",
+          "claim": "A local large language model given an ASCII rendering of the room can label whether the person is speaking, at a useful margin over a blank control."
+        },
+        {
+          "index": 5,
+          "is_false_claim": true,
+          "verdict": "unsupported",
+          "rejected": true,
+          "correct": true,
+          "reason": "Per\u2011frame gain normalisation reduction was demonstrated to be ~1\u00d7, not ~50\u00d7.",
+          "claim": "Applying a per-frame gain normalisation to the camera's brightness reduced the frame-to-frame drift from 43.3 counts to 0.81 counts, a reduction of roughly fifty times."
+        },
+        {
+          "index": 6,
+          "is_false_claim": true,
+          "verdict": "supported",
+          "rejected": false,
+          "correct": false,
+          "reason": "Conventional teacher on motion maps scores 1.000 on temporal split and 0.000 when held\u2011out.",
+          "claim": "A conventional teacher model trained on motion maps scored 1.000 on a temporal split of one session and 0.000 when the test session was held out, which shows the model learned the recording rather than speaking."
+        },
+        {
+          "index": 7,
+          "is_false_claim": true,
+          "verdict": "unsupported",
+          "rejected": true,
+          "correct": true,
+          "reason": "Empty\u2011room flip rate exceeds occupied; the delta does not reliably measure motion.",
+          "claim": "The ASCII character map reliably detects whether a person is moving in the frame: an occupied room flips 48.19% of its character cells per frame against 50.00% for an empty room, so the motion is being measured."
+        },
+        {
+          "index": 8,
+          "is_false_claim": true,
+          "verdict": "unsupported",
+          "rejected": true,
+          "correct": true,
+          "reason": "The 31.8% figure is unmeasured and identified as false in the audit.",
+          "claim": "31.8% of the frames the watcher processes are never actually measured by the speech detector, because the gate returns early."
+        },
+        {
+          "index": 9,
+          "is_false_claim": false,
+          "verdict": "supported",
+          "rejected": false,
+          "correct": true,
+          "reason": "Row\u2011band + median\u20113 reduces occupied flip from 0.0299 to 0.0014 (\u224821\u00d7) with SNR \u22481.83.",
+          "claim": "Composing row-wise band removal with a temporal median filter of width 3 reduced the occupied motion-map flip rate from 0.0299 to 0.0014, a 21x improvement over row removal alone, while the signal-to-noise ratio stayed flat at about 1.83."
+        }
+      ],
+      "raw": "{\n  \"verdicts\": [\n    {\"index\": 0, \"verdict\": \"supported\", \"reason\": \"Room acoustic measurements directly report -73.5 dBFS, 119 transients, and zero RT60 estimates.\"},\n    {\"index\": 1, \"verdict\": \"unsupported\", \"reason\": \"The 14.5\u00d7 reduction claim was retracted as a mis\u2011comparison of intervals.\"},\n    {\"index\": 2, \"verdict\": \"supported\", \"reason\": \"Row\u2011median removal drops empty\u2011room flip rate to ~0.01% while occupied flip stays near 48%.\"},\n    {\"index\": 3, \"verdict\": \"unsupported\", \"reason\": \"No evidence of quadratic memory growth for the watcher is provided.\"},\n    {\"index\": 4, \"verdict\": \"unsupported\", \"reason\": \"Gain normalisation was shown to have essentially no effect, not a ~50\u00d7 reduction.\"},\n    {\"index\": 5, \"verdict\": \"unsupported\", \"reason\": \"Per\u2011frame gain normalisation reduction was demonstrated to be ~1\u00d7, not ~50\u00d7.\"},\n    {\"index\": 6, \"verdict\": \"supported\", \"reason\": \"Conventional teacher on motion maps scores 1.000 on temporal split and 0.000 when held\u2011out.\"},\n    {\"index\": 7, \"verdict\": \"unsupported\", \"reason\": \"Empty\u2011room flip rate exceeds occupied; the delta does not reliably measure motion.\"},\n    {\"index\": 8, \"verdict\": \"unsupported\", \"reason\": \"The 31.8% figure is unmeasured and identified as false in the audit.\"},\n    {\"index\": 9, \"verdict\": \"supported\", \"reason\": \"Row\u2011band + median\u20113 reduces occupied flip from 0.0299 to 0.0014 (\u224821\u00d7) with SNR \u22481.83.\"}\n  ]\n}"
+    }
+  ]
+}

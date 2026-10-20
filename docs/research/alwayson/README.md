@@ -121,14 +121,24 @@ silero-vad on the same clips: 0.0036–0.0081 mean, max 0.1736, never above 0.5.
 `src/watcher.py:1` — *"No model, no network, microseconds."*
 
 Measured in the numpy-only venv, no onnxruntime involved: **39.13 ms per 100 ms of audio**.
-That is 39.1% of a core and a realtime ratio of **2.56×**.
+That is 39.1% of a core and a realtime ratio of **2.56×**. **That 39.13 ms is the mean
+over the SIX NON-SPEECH fixtures** (hum 31.913, fan 41.095, clicks 48.387, music 33.877,
+white noise 39.307, silence 40.153 ms). **On real speech the watcher is 21.9–36.1 ms**
+(speech_jane 21.945, speech_mycroft 24.666, speech_alexa 36.124; mean 27.578 ms) —
+a realtime ratio of **2.77–4.56×**.
 
 It is still affordable on this CPU and still nothing like a model. But the docstring is
 wrong by ~1000×, and it reframes the economics: the hot path is the second-largest cost in
 the system, so anything removable from it is worth removing. A 0.23% gate that deletes a
-39% failure mode is the best trade in this lane — and gated, the YIN tracker would only
-run on real speech (21.9 ms per push, measured) instead of on every periodic hum (48.4 ms
-per push, measured, worst case).
+39% failure mode is the best trade in this lane — where 39% is the **non-speech** cost —
+and gated, the YIN tracker would only run on real speech (21.9 ms per push, measured)
+instead of on every periodic hum (48.4 ms per push, measured, worst case).
+
+> **CORRECTION (2026-10-19) — "39.1% of a core" had no denominator.** From
+> `hotpath_measurements.json` → `watcher`: the six non-speech fixtures average **39.122 ms**;
+> the three speech fixtures average **27.578 ms**. The 8× Pi projection (313% of a core)
+> further down is the **non-speech worst case stated as the general case**. The rate is real
+> and the trade-off is sound; the population was missing. `NOTES-AUDIT.md` F11.
 
 **The lesson I did not expect:** I set out to evaluate three external libraries and ended up
 with the most actionable finding about our own code.
@@ -216,8 +226,9 @@ the model rejected it. The cap is real — `max_frames=512` at `model.py:7`,
 Full detail in [JEV-AS-INSTRUMENT.md](JEV-AS-INSTRUMENT.md). The short version:
 
 **Good:** a failure-framed battery of narrow Nouls combined with `max` **survived an
-adversarial input that defeated a holistic judge by a factor of 10** (0.940 vs 0.090 on a
-hum that insisted it was an emergency). It also screened my four candidates correctly and
+adversarial input that defeated a holistic judge by a factor of 10.4** (0.940 vs 0.090 on a
+hum that insisted it was an emergency — the single stored run in
+`jev_alwayson_results.json`). It also screened my four candidates correctly and
 independently agreed with my own measurements.
 
 **Bad:** it cannot hear audio, so every "result" is its reading of a description *I* wrote
@@ -231,14 +242,27 @@ options. That trap is the reason the rule is "never ask it to derive; ask it to 
 
 ## The part I still do not know
 
-- **My non-speech signals are synthetic and clean.** The 28× separation is measured on
+- **My non-speech signals are synthetic and clean.** The **93.0×** mean separation
+  (0.7530 worst speech mean ÷ 0.0081 worst non-speech mean) is measured on
   3 real speech clips and 6 clean synthetic signals. Real rooms have reverb, competing
   speech and music beds this battery does not model. **The recommendation is gated on
   re-measuring on the real-room fixture lane** with the actual fan that is currently
   breaking us.
+
+  > **CORRECTION (2026-10-19).** This said "The 28× separation". **No derivation in
+  > `hotpath_measurements.json` yields 28.** From
+  > `silero_v5_scores.current_v5_opset16`: worst speech mean **0.7530** (speech_jane),
+  > worst speech max **1.0000**; worst non-speech mean **0.0081** (white noise), worst
+  > non-speech max **0.1736** (music). Derivable: **93.0× on the mean**
+  > (0.7530 / 0.0081) and **5.76× on the max** (1.0000 / 0.1736); the parenthetical
+  > pair (0.7530 / 0.1736) is **4.34×**. **The separation is not wrong — the file
+  > supports a LARGER mean gap than 28×.** `NOTES-AUDIT.md` F10.
 - **Everything is a 24-core x86 desktop CPU.** At a pessimistic 8× per-core penalty the
-  watcher needs 313% of a core — **saturated** — while silero needs 1.8%. So on a Pi-class
-  target, profiling the YIN pitch tracker becomes the top priority, not a nice-to-have.
+  watcher needs 313% of a core — **saturated** — while silero needs 1.8%. That 313% is the
+  **non-speech** projection (39.122 ms mean, 48.387 ms worst case); on speech the same 8×
+  gives 176–289% of a core (221% at the 27.578 ms speech mean), so it is saturated on both
+  populations. So on a Pi-class target, profiling the YIN pitch tracker becomes the top
+  priority, not a nice-to-have.
 - **silero's own benchmark is a wiki page, not a repo artifact**, so their 189 μs is not
   reproducible from source.
 - I did not measure pyannote at all — I concluded it is structurally unfit before spending
