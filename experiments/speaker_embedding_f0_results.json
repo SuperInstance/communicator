@@ -1,0 +1,6042 @@
+{
+  "schema": "speaker-embedding-f0/1",
+  "generated_utc": "2026-10-20T10:15:27+00:00",
+  "script": {
+    "path": "/home/proart/projects/communicator/experiments/speaker_embedding_f0.py",
+    "sha256": "c69b5c352279efe30bd3dce8f41a45d1034031da4d2476d2a67e9954485a6a22",
+    "elapsed_s": 839.3
+  },
+  "environment": {
+    "python": "3.12.15",
+    "torch": "2.6.0+cu124",
+    "transformers": "5.20.2",
+    "numpy": "1.26.4",
+    "cuda_available": true,
+    "device_name": "NVIDIA GeForce RTX 4050 Laptop GPU",
+    "executable": "/home/proart/projects/gpu-venv/bin/python"
+  },
+  "model": {
+    "id": "microsoft/wavlm-base-plus-sv",
+    "revision": "feb593a6c23c1cc3d9510425c29b0a14d2b07b1e",
+    "class": "transformers.AutoModelForAudioXVector",
+    "pretrained_by": "Microsoft (the WavLM x-vector recipe for speaker verification)",
+    "licence_note": "model weights are MIT; the AUDIO is the AMI Meeting Corpus, CC-BY-4.0, and is what the attribution obligation attaches to",
+    "embedding_dim": 512
+  },
+  "models_considered": {
+    "note": "the instrument selection, recorded so the choice can be argued with. The attempts below were made while developing this file; only the first one produced the committed numbers.",
+    "used": {
+      "id": "microsoft/wavlm-base-plus-sv",
+      "revision": "feb593a6c23c1cc3d9510425c29b0a14d2b07b1e",
+      "why": "ungated, a pinned revision SHA, a single `transformers` class, and a published same-speaker threshold on its own model card that this file measures and reproduces"
+    },
+    "tried_and_not_used": {
+      "speechbrain/spkrec-ecapa-voxceleb": {
+        "status": "installed into the GPU venv and run once as a diagnostic on the headset channels; it showed the same weakness as WavLM at 1 s windows, which is what identified the LENGTH defect rather than the model",
+        "why_not_the_headline": "speechbrain fetches its checkpoint at run time, so the weights cannot be pinned by revision SHA the way this project pins its inputs",
+        "install_note": "speechbrain 1.1.2 needed torchaudio 2.6.0+cu124 (to match the existing torch 2.6.0+cu124) and requests; both went into the GPU venv, never into the repo's .venv"
+      },
+      "microsoft/wavlm-base-plus": {
+        "status": "considered, not downloaded",
+        "why_not": "the plain backbone has no x-vector head, and training one is out of scope for a measurement"
+      },
+      "microsoft/unispeech-sat-base-plus": {
+        "status": "available, not used",
+        "why_not": "a different pretraining with the same x-vector head, so it was the natural second instrument, but the time went into the controls instead"
+      }
+    }
+  },
+  "model_card_selfcheck": {
+    "purpose": "same-speaker distance on the model card's own example (Librispeech, speaker 1272); the card's same-speaker threshold is cosine similarity 0.86, i.e. distance 0.14",
+    "card_threshold_distance": 0.14,
+    "durations_s": [
+      5.86,
+      4.82,
+      12.48
+    ],
+    "same_speaker_distance": {
+      "n": 3,
+      "n_non_finite": 0,
+      "mean": 0.027222,
+      "std": 0.00073,
+      "mad_sigma": 3e-06,
+      "median": 0.027643,
+      "p05": 0.026379,
+      "p95": 0.027645,
+      "min": 0.026379,
+      "max": 0.027645
+    },
+    "by_clip_length": {
+      "1.0s": {
+        "n": 3,
+        "n_non_finite": 0,
+        "mean": 0.204703,
+        "std": 0.020376,
+        "mad_sigma": 0.004201,
+        "median": 0.215022,
+        "p05": 0.181231,
+        "p95": 0.217855,
+        "min": 0.181231,
+        "max": 0.217855
+      },
+      "3.0s": {
+        "n": 3,
+        "n_non_finite": 0,
+        "mean": 0.060031,
+        "std": 0.023994,
+        "mad_sigma": 0.032116,
+        "median": 0.058501,
+        "p05": 0.036839,
+        "p95": 0.084754,
+        "min": 0.036839,
+        "max": 0.084754
+      }
+    },
+    "status": "ran"
+  },
+  "method": {
+    "reader": "src/wavio.py:read_wav (mono, 16 kHz)",
+    "sample_rate_hz": 16000,
+    "embedding_unit": "the WHOLE annotated turn, embedded as one utterance with the model's own feature extractor (padding + attention mask)",
+    "distance": "cosine distance = 1 - cosine similarity",
+    "preprocessor": "the model's own preprocessor_config.json: do_normalize=false, return_attention_mask=true",
+    "separation_form": "separation_sigma_mad = (median(between) - median(within)) / mad_sigma(within)",
+    "populations": "all_audible is the primary population; solo_only applies the F0 experiment's no-overlap rule and is much smaller",
+    "boundary_clip_s": 2.0,
+    "min_input_s": 2.0,
+    "min_input_s_rationale": {
+      "why": "the x-vector head's TDNN convolutions need a minimum input length; below roughly 2 s the forward pass returns NaN or raises 'Kernel size can't be greater than actual input size'. Every utterance is padded to at least min_input_s with the attention mask keeping the padding out of the pooling.",
+      "measured_before_the_rule": "5 of the 394 boundary clips in an earlier run came back non-finite",
+      "n_clips_shorter_than_min_input_s": 209,
+      "n_clips_total": 394
+    },
+    "padding": "every utterance is padded to ONE length for the whole call (the longest in it, and never less than min_input_s) with the attention mask keeping the padding out of the pooling, so an embedding depends on its own audio and not on its batch",
+    "non_finite_embeddings_total": 0
+  },
+  "inputs": {
+    "ami_sdm_EN2002a_turns.wav": {
+      "path": "examples/realtwospeaker/ami_sdm_EN2002a_turns.wav",
+      "sha256": "81bb9fa7c7906c367a87596a7eea1e48061b687233896e24744d840c828494ae",
+      "sidecar": "examples/realtwospeaker/ami_sdm_EN2002a_turns.segments.json",
+      "sidecar_sha256": "3ade45cb595e95ec770a46a496d2ebaf93650c2ae52d6a2034eb042dc8a77895",
+      "meeting_id": "EN2002a",
+      "audible_segments": 203,
+      "annotated_segments": 314,
+      "reader": "src/wavio.py:read_wav",
+      "sample_rate": 16000,
+      "source_sample_rate": 16000,
+      "poisoned_samples": 0,
+      "duration_s": 420.0
+    },
+    "ami_sdm_EN2002b_turns.wav": {
+      "path": "examples/realtwospeaker/ami_sdm_EN2002b_turns.wav",
+      "sha256": "00969809d226827f128b487148f69d862b309448e4d11692a2d1ef40c33f5a27",
+      "sidecar": "examples/realtwospeaker/ami_sdm_EN2002b_turns.segments.json",
+      "sidecar_sha256": "bacbe9b78f87ffae6a8b6ede6b59a86305d85265d1701eca803f41332afe791b",
+      "meeting_id": "EN2002b",
+      "audible_segments": 158,
+      "annotated_segments": 230,
+      "reader": "src/wavio.py:read_wav",
+      "sample_rate": 16000,
+      "source_sample_rate": 16000,
+      "poisoned_samples": 0,
+      "duration_s": 420.0
+    }
+  },
+  "turn_population": {
+    "audible_turns_total": 361,
+    "headline_min_len_s": 2.0,
+    "headline_turns": 145,
+    "per_speaker_turns": {
+      "FEO070": 23,
+      "FEO072": 39,
+      "MEE071": 31,
+      "MEE073": 52
+    },
+    "per_speaker_voiced_frames": {
+      "FEO070": 4811,
+      "FEO072": 7900,
+      "MEE071": 6290,
+      "MEE073": 11569
+    },
+    "per_speaker_overlapped_turns": {
+      "FEO070": 19,
+      "FEO072": 24,
+      "MEE071": 27,
+      "MEE073": 28
+    }
+  },
+  "length_sweep": {
+    "why": "the embedding's discriminative power is a function of how much audio it is given; a 1.0 s window of speech is not enough for this model, and reporting one point of this curve without the curve would be a measurement reported as a property",
+    "headline_min_len_s": 2.0,
+    "headline_rule": "the longest minimum in the sweep that still leaves every speaker with at least 20 turns, so the enrolment/test split is not degenerate; NOT the point with the largest separation",
+    "sweep": {
+      "0.5": {
+        "min_len_s": 0.5,
+        "n_turns": 281,
+        "per_speaker_turns": {
+          "FEO070": 46,
+          "FEO072": 75,
+          "MEE071": 85,
+          "MEE073": 75
+        },
+        "pairs": {
+          "FEO070|FEO072": {
+            "within_speaker": {
+              "n": 3810,
+              "n_non_finite": 0,
+              "mean": 0.313258,
+              "std": 0.185034,
+              "mad_sigma": 0.212704,
+              "median": 0.297189,
+              "p05": 0.055595,
+              "p95": 0.65017,
+              "min": 0.013776,
+              "max": 0.878461
+            },
+            "between_speaker": {
+              "n": 3450,
+              "n_non_finite": 0,
+              "mean": 0.324215,
+              "std": 0.176182,
+              "mad_sigma": 0.205393,
+              "median": 0.302594,
+              "p05": 0.089365,
+              "p95": 0.646111,
+              "min": 0.036192,
+              "max": 0.865727
+            },
+            "separation": {
+              "separation_sigma_mad": 0.0254,
+              "separation_sigma_std": 0.0592,
+              "mean_ratio": 1.035,
+              "median_ratio": 1.0182,
+              "formula": "separation_sigma_mad = (median(between) - median(within)) / mad_sigma(within)"
+            },
+            "f0_same_turns_same_arithmetic": {
+              "within_speaker": {
+                "n": 3810,
+                "n_non_finite": 0,
+                "mean": 61.280776,
+                "std": 46.244157,
+                "mad_sigma": 58.243377,
+                "median": 55.933927,
+                "p05": 3.569298,
+                "p95": 138.340683,
+                "min": 0.01184,
+                "max": 213.991771
+              },
+              "between_speaker": {
+                "n": 3450,
+                "n_non_finite": 0,
+                "mean": 60.07772,
+                "std": 45.994802,
+                "mad_sigma": 56.761934,
+                "median": 54.058593,
+                "p05": 3.173738,
+                "p95": 137.066438,
+                "min": 0.029646,
+                "max": 218.409549
+              },
+              "separation": {
+                "separation_sigma_mad": -0.0322,
+                "separation_sigma_std": -0.026,
+                "mean_ratio": 0.9804,
+                "median_ratio": 0.9665,
+                "formula": "separation_sigma_mad = (median(between) - median(within)) / mad_sigma(within)"
+              }
+            },
+            "f0_doc_style": {
+              "form": "difference of the two speakers' pooled voiced-frame median F0, over the pooled within-speaker MAD sigma of the frame values -- the arithmetic of docs/research/F0-SPEAKER-CHANGE.md",
+              "median_f0_hz": {
+                "FEO070": 189.77,
+                "FEO072": 197.89
+              },
+              "median_delta_hz": 8.12,
+              "pooled_within_speaker_mad_sigma_hz": 67.19,
+              "pooled_sigma_definition": "root-mean-square of the per-speaker MAD sigmas -- the noise floor experiments/twospeaker_verify.py uses",
+              "pooled_frames_mad_sigma_hz": 62.04,
+              "per_speaker_mad_sigma_hz": {
+                "FEO070": 78.11,
+                "FEO072": 54.11
+              },
+              "separation_sigma": 0.1208,
+              "voiced_frames": {
+                "FEO070": 6022,
+                "FEO072": 10322
+              }
+            }
+          },
+          "MEE071|MEE073": {
+            "within_speaker": {
+              "n": 6345,
+              "n_non_finite": 0,
+              "mean": 0.320777,
+              "std": 0.182775,
+              "mad_sigma": 0.210917,
+              "median": 0.30205,
+              "p05": 0.066965,
+              "p95": 0.649966,
+              "min": 0.023739,
+              "max": 0.899591
+            },
+            "between_speaker": {
+              "n": 6375,
+              "n_non_finite": 0,
+              "mean": 0.395181,
+              "std": 0.151163,
+              "mad_sigma": 0.157257,
+              "median": 0.384871,
+              "p05": 0.160816,
+              "p95": 0.661439,
+              "min": 0.057948,
+              "max": 0.980299
+            },
+            "separation": {
+              "separation_sigma_mad": 0.3927,
+              "separation_sigma_std": 0.4071,
+              "mean_ratio": 1.2319,
+              "median_ratio": 1.2742,
+              "formula": "separation_sigma_mad = (median(between) - median(within)) / mad_sigma(within)"
+            },
+            "f0_same_turns_same_arithmetic": {
+              "within_speaker": {
+                "n": 6345,
+                "n_non_finite": 0,
+                "mean": 25.883464,
+                "std": 39.167712,
+                "mad_sigma": 11.223978,
+                "median": 10.625558,
+                "p05": 0.902289,
+                "p95": 111.448017,
+                "min": 0.000677,
+                "max": 263.054054
+              },
+              "between_speaker": {
+                "n": 6375,
+                "n_non_finite": 0,
+                "mean": 28.054343,
+                "std": 38.89747,
+                "mad_sigma": 12.963024,
+                "median": 14.252937,
+                "p05": 1.332672,
+                "p95": 115.227822,
+                "min": 0.001747,
+                "max": 261.250735
+              },
+              "separation": {
+                "separation_sigma_mad": 0.3232,
+                "separation_sigma_std": 0.0554,
+                "mean_ratio": 1.0839,
+                "median_ratio": 1.3414,
+                "formula": "separation_sigma_mad = (median(between) - median(within)) / mad_sigma(within)"
+              }
+            },
+            "f0_doc_style": {
+              "form": "difference of the two speakers' pooled voiced-frame median F0, over the pooled within-speaker MAD sigma of the frame values -- the arithmetic of docs/research/F0-SPEAKER-CHANGE.md",
+              "median_f0_hz": {
+                "MEE071": 111.37,
+                "MEE073": 101.88
+              },
+              "median_delta_hz": 9.49,
+              "pooled_within_speaker_mad_sigma_hz": 12.41,
+              "pooled_sigma_definition": "root-mean-square of the per-speaker MAD sigmas -- the noise floor experiments/twospeaker_verify.py uses",
+              "pooled_frames_mad_sigma_hz": 14.95,
+              "per_speaker_mad_sigma_hz": {
+                "MEE071": 12.88,
+                "MEE073": 11.92
+              },
+              "separation_sigma": 0.7644,
+              "voiced_frames": {
+                "MEE071": 9263,
+                "MEE073": 12913
+              }
+            }
+          },
+          "FEO070|MEE071": {
+            "within_speaker": {
+              "n": 4605,
+              "n_non_finite": 0,
+              "mean": 0.354472,
+              "std": 0.173223,
+              "mad_sigma": 0.186297,
+              "median": 0.346572,
+              "p05": 0.084267,
+              "p95": 0.660323,
+              "min": 0.017874,
+              "max": 0.899591
+            },
+            "between_speaker": {
+              "n": 3910,
+              "n_non_finite": 0,
+              "mean": 0.450192,
+              "std": 0.146759,
+              "mad_sigma": 0.154544,
+              "median": 0.434906,
+              "p05": 0.232837,
+              "p95": 0.705616,
+              "min": 0.07937,
+              "max": 0.945752
+            },
+            "separation": {
+              "separation_sigma_mad": 0.4742,
+              "separation_sigma_std": 0.5526,
+              "mean_ratio": 1.27,
+              "median_ratio": 1.2549,
+              "formula": "separation_sigma_mad = (median(between) - median(within)) / mad_sigma(within)"
+            },
+            "f0_same_turns_same_arithmetic": {
+              "within_speaker": {
+                "n": 4605,
+                "n_non_finite": 0,
+                "mean": 30.909923,
+                "std": 37.09845,
+                "mad_sigma": 16.135118,
+                "median": 14.254298,
+                "p05": 1.147737,
+                "p95": 111.412917,
+                "min": 0.000677,
+                "max": 204.136914
+              },
+              "between_speaker": {
+                "n": 3910,
+                "n_non_finite": 0,
+                "mean": 70.258605,
+                "std": 47.707633,
+                "mad_sigma": 60.099331,
+                "median": 80.390336,
+                "p05": 3.973739,
+                "p95": 142.834008,
+                "min": 0.005418,
+                "max": 214.583948
+              },
+              "separation": {
+                "separation_sigma_mad": 4.0989,
+                "separation_sigma_std": 1.0607,
+                "mean_ratio": 2.273,
+                "median_ratio": 5.6397,
+                "formula": "separation_sigma_mad = (median(between) - median(within)) / mad_sigma(within)"
+              }
+            },
+            "f0_doc_style": {
+              "form": "difference of the two speakers' pooled voiced-frame median F0, over the pooled within-speaker MAD sigma of the frame values -- the arithmetic of docs/research/F0-SPEAKER-CHANGE.md",
+              "median_f0_hz": {
+                "FEO070": 189.77,
+                "MEE071": 111.37
+              },
+              "median_delta_hz": 78.41,
+              "pooled_within_speaker_mad_sigma_hz": 55.98,
+              "pooled_sigma_definition": "root-mean-square of the per-speaker MAD sigmas -- the noise floor experiments/twospeaker_verify.py uses",
+              "pooled_frames_mad_sigma_hz": 27.88,
+              "per_speaker_mad_sigma_hz": {
+                "FEO070": 78.11,
+                "MEE071": 12.88
+              },
+              "separation_sigma": 1.4006,
+              "voiced_frames": {
+                "FEO070": 6022,
+                "MEE071": 9263
+              }
+            }
+          }
+        }
+      },
+      "1.0": {
+        "min_len_s": 1.0,
+        "n_turns": 218,
+        "per_speaker_turns": {
+          "FEO070": 37,
+          "FEO072": 60,
+          "MEE071": 58,
+          "MEE073": 63
+        },
+        "pairs": {
+          "FEO070|FEO072": {
+            "within_speaker": {
+              "n": 2436,
+              "n_non_finite": 0,
+              "mean": 0.249296,
+              "std": 0.169022,
+              "mad_sigma": 0.163011,
+              "median": 0.203382,
+              "p05": 0.045563,
+              "p95": 0.585975,
+              "min": 0.013776,
+              "max": 0.854823
+            },
+            "between_speaker": {
+              "n": 2220,
+              "n_non_finite": 0,
+              "mean": 0.265986,
+              "std": 0.160668,
+              "mad_sigma": 0.15293,
+              "median": 0.220397,
+              "p05": 0.079339,
+              "p95": 0.573232,
+              "min": 0.036192,
+              "max": 0.835293
+            },
+            "separation": {
+              "separation_sigma_mad": 0.1044,
+              "separation_sigma_std": 0.0987,
+              "mean_ratio": 1.0669,
+              "median_ratio": 1.0837,
+              "formula": "separation_sigma_mad = (median(between) - median(within)) / mad_sigma(within)"
+            },
+            "f0_same_turns_same_arithmetic": {
+              "within_speaker": {
+                "n": 2436,
+                "n_non_finite": 0,
+                "mean": 55.68567,
+                "std": 43.937395,
+                "mad_sigma": 52.318216,
+                "median": 44.545556,
+                "p05": 3.057395,
+                "p95": 130.764425,
+                "min": 0.031056,
+                "max": 195.790833
+              },
+              "between_speaker": {
+                "n": 2220,
+                "n_non_finite": 0,
+                "mean": 54.043833,
+                "std": 43.381372,
+                "mad_sigma": 50.35808,
+                "median": 42.268949,
+                "p05": 2.522905,
+                "p95": 129.15078,
+                "min": 0.029646,
+                "max": 197.988036
+              },
+              "separation": {
+                "separation_sigma_mad": -0.0435,
+                "separation_sigma_std": -0.0374,
+                "mean_ratio": 0.9705,
+                "median_ratio": 0.9489,
+                "formula": "separation_sigma_mad = (median(between) - median(within)) / mad_sigma(within)"
+              }
+            },
+            "f0_doc_style": {
+              "form": "difference of the two speakers' pooled voiced-frame median F0, over the pooled within-speaker MAD sigma of the frame values -- the arithmetic of docs/research/F0-SPEAKER-CHANGE.md",
+              "median_f0_hz": {
+                "FEO070": 191.66,
+                "FEO072": 198.24
+              },
+              "median_delta_hz": 6.57,
+              "pooled_within_speaker_mad_sigma_hz": 63.2,
+              "pooled_sigma_definition": "root-mean-square of the per-speaker MAD sigmas -- the noise floor experiments/twospeaker_verify.py uses",
+              "pooled_frames_mad_sigma_hz": 58.64,
+              "per_speaker_mad_sigma_hz": {
+                "FEO070": 73.44,
+                "FEO072": 50.94
+              },
+              "separation_sigma": 0.104,
+              "voiced_frames": {
+                "FEO070": 5742,
+                "FEO072": 9787
+              }
+            }
+          },
+          "MEE071|MEE073": {
+            "within_speaker": {
+              "n": 3606,
+              "n_non_finite": 0,
+              "mean": 0.25459,
+              "std": 0.168285,
+              "mad_sigma": 0.166848,
+              "median": 0.210888,
+              "p05": 0.056202,
+              "p95": 0.585728,
+              "min": 0.023739,
+              "max": 0.849267
+            },
+            "between_speaker": {
+              "n": 3654,
+              "n_non_finite": 0,
+              "mean": 0.375735,
+              "std": 0.143539,
+              "mad_sigma": 0.152927,
+              "median": 0.374084,
+              "p05": 0.151524,
+              "p95": 0.622073,
+              "min": 0.069682,
+              "max": 0.877559
+            },
+            "separation": {
+              "separation_sigma_mad": 0.9781,
+              "separation_sigma_std": 0.7199,
+              "mean_ratio": 1.4758,
+              "median_ratio": 1.7739,
+              "formula": "separation_sigma_mad = (median(between) - median(within)) / mad_sigma(within)"
+            },
+            "f0_same_turns_same_arithmetic": {
+              "within_speaker": {
+                "n": 3606,
+                "n_non_finite": 0,
+                "mean": 22.464565,
+                "std": 32.746933,
+                "mad_sigma": 10.073564,
+                "median": 9.856248,
+                "p05": 0.898689,
+                "p95": 108.177033,
+                "min": 0.00457,
+                "max": 176.893049
+              },
+              "between_speaker": {
+                "n": 3654,
+                "n_non_finite": 0,
+                "mean": 23.891682,
+                "std": 30.521548,
+                "mad_sigma": 12.086213,
+                "median": 13.516993,
+                "p05": 1.325557,
+                "p95": 102.669158,
+                "min": 0.001747,
+                "max": 175.08973
+              },
+              "separation": {
+                "separation_sigma_mad": 0.3634,
+                "separation_sigma_std": 0.0436,
+                "mean_ratio": 1.0635,
+                "median_ratio": 1.3714,
+                "formula": "separation_sigma_mad = (median(between) - median(within)) / mad_sigma(within)"
+              }
+            },
+            "f0_doc_style": {
+              "form": "difference of the two speakers' pooled voiced-frame median F0, over the pooled within-speaker MAD sigma of the frame values -- the arithmetic of docs/research/F0-SPEAKER-CHANGE.md",
+              "median_f0_hz": {
+                "MEE071": 111.29,
+                "MEE073": 101.62
+              },
+              "median_delta_hz": 9.67,
+              "pooled_within_speaker_mad_sigma_hz": 12.3,
+              "pooled_sigma_definition": "root-mean-square of the per-speaker MAD sigmas -- the noise floor experiments/twospeaker_verify.py uses",
+              "pooled_frames_mad_sigma_hz": 14.8,
+              "per_speaker_mad_sigma_hz": {
+                "MEE071": 12.87,
+                "MEE073": 11.7
+              },
+              "separation_sigma": 0.7863,
+              "voiced_frames": {
+                "MEE071": 8169,
+                "MEE073": 12326
+              }
+            }
+          },
+          "FEO070|MEE071": {
+            "within_speaker": {
+              "n": 2319,
+              "n_non_finite": 0,
+              "mean": 0.28302,
+              "std": 0.160276,
+              "mad_sigma": 0.169788,
+              "median": 0.259624,
+              "p05": 0.058799,
+              "p95": 0.585567,
+              "min": 0.017874,
+              "max": 0.854823
+            },
+            "between_speaker": {
+              "n": 2146,
+              "n_non_finite": 0,
+              "mean": 0.427766,
+              "std": 0.125504,
+              "mad_sigma": 0.126551,
+              "median": 0.418603,
+              "p05": 0.237556,
+              "p95": 0.649043,
+              "min": 0.085143,
+              "max": 0.841851
+            },
+            "separation": {
+              "separation_sigma_mad": 0.9363,
+              "separation_sigma_std": 0.9031,
+              "mean_ratio": 1.5114,
+              "median_ratio": 1.6123,
+              "formula": "separation_sigma_mad = (median(between) - median(within)) / mad_sigma(within)"
+            },
+            "f0_same_turns_same_arithmetic": {
+              "within_speaker": {
+                "n": 2319,
+                "n_non_finite": 0,
+                "mean": 27.980846,
+                "std": 33.957927,
+                "mad_sigma": 14.845942,
+                "median": 13.31477,
+                "p05": 1.149845,
+                "p95": 107.301753,
+                "min": 0.00457,
+                "max": 195.790833
+              },
+              "between_speaker": {
+                "n": 2146,
+                "n_non_finite": 0,
+                "mean": 75.054481,
+                "std": 43.516751,
+                "mad_sigma": 41.734617,
+                "median": 84.512224,
+                "p05": 5.132934,
+                "p95": 134.420387,
+                "min": 0.050957,
+                "max": 206.237867
+              },
+              "separation": {
+                "separation_sigma_mad": 4.7958,
+                "separation_sigma_std": 1.3862,
+                "mean_ratio": 2.6824,
+                "median_ratio": 6.3473,
+                "formula": "separation_sigma_mad = (median(between) - median(within)) / mad_sigma(within)"
+              }
+            },
+            "f0_doc_style": {
+              "form": "difference of the two speakers' pooled voiced-frame median F0, over the pooled within-speaker MAD sigma of the frame values -- the arithmetic of docs/research/F0-SPEAKER-CHANGE.md",
+              "median_f0_hz": {
+                "FEO070": 191.66,
+                "MEE071": 111.29
+              },
+              "median_delta_hz": 80.38,
+              "pooled_within_speaker_mad_sigma_hz": 52.72,
+              "pooled_sigma_definition": "root-mean-square of the per-speaker MAD sigmas -- the noise floor experiments/twospeaker_verify.py uses",
+              "pooled_frames_mad_sigma_hz": 30.25,
+              "per_speaker_mad_sigma_hz": {
+                "FEO070": 73.44,
+                "MEE071": 12.87
+              },
+              "separation_sigma": 1.5246,
+              "voiced_frames": {
+                "FEO070": 5742,
+                "MEE071": 8169
+              }
+            }
+          }
+        }
+      },
+      "1.5": {
+        "min_len_s": 1.5,
+        "n_turns": 177,
+        "per_speaker_turns": {
+          "FEO070": 30,
+          "FEO072": 50,
+          "MEE071": 42,
+          "MEE073": 55
+        },
+        "pairs": {
+          "FEO070|FEO072": {
+            "within_speaker": {
+              "n": 1660,
+              "n_non_finite": 0,
+              "mean": 0.234069,
+              "std": 0.172303,
+              "mad_sigma": 0.159478,
+              "median": 0.179542,
+              "p05": 0.038309,
+              "p95": 0.579729,
+              "min": 0.013776,
+              "max": 0.802844
+            },
+            "between_speaker": {
+              "n": 1500,
+              "n_non_finite": 0,
+              "mean": 0.247737,
+              "std": 0.152592,
+              "mad_sigma": 0.137854,
+              "median": 0.201029,
+              "p05": 0.074637,
+              "p95": 0.543424,
+              "min": 0.036192,
+              "max": 0.817789
+            },
+            "separation": {
+              "separation_sigma_mad": 0.1347,
+              "separation_sigma_std": 0.0793,
+              "mean_ratio": 1.0584,
+              "median_ratio": 1.1197,
+              "formula": "separation_sigma_mad = (median(between) - median(within)) / mad_sigma(within)"
+            },
+            "f0_same_turns_same_arithmetic": {
+              "within_speaker": {
+                "n": 1660,
+                "n_non_finite": 0,
+                "mean": 54.891828,
+                "std": 42.890298,
+                "mad_sigma": 52.866484,
+                "median": 45.9404,
+                "p05": 3.350344,
+                "p95": 125.528037,
+                "min": 0.031056,
+                "max": 195.790833
+              },
+              "between_speaker": {
+                "n": 1500,
+                "n_non_finite": 0,
+                "mean": 54.211012,
+                "std": 43.183408,
+                "mad_sigma": 51.12517,
+                "median": 43.569802,
+                "p05": 2.487201,
+                "p95": 127.951146,
+                "min": 0.029646,
+                "max": 197.988036
+              },
+              "separation": {
+                "separation_sigma_mad": -0.0448,
+                "separation_sigma_std": -0.0159,
+                "mean_ratio": 0.9876,
+                "median_ratio": 0.9484,
+                "formula": "separation_sigma_mad = (median(between) - median(within)) / mad_sigma(within)"
+              }
+            },
+            "f0_doc_style": {
+              "form": "difference of the two speakers' pooled voiced-frame median F0, over the pooled within-speaker MAD sigma of the frame values -- the arithmetic of docs/research/F0-SPEAKER-CHANGE.md",
+              "median_f0_hz": {
+                "FEO070": 190.98,
+                "FEO072": 196.9
+              },
+              "median_delta_hz": 5.93,
+              "pooled_within_speaker_mad_sigma_hz": 64.13,
+              "pooled_sigma_definition": "root-mean-square of the per-speaker MAD sigmas -- the noise floor experiments/twospeaker_verify.py uses",
+              "pooled_frames_mad_sigma_hz": 59.14,
+              "per_speaker_mad_sigma_hz": {
+                "FEO070": 74.45,
+                "FEO072": 51.8
+              },
+              "separation_sigma": 0.0924,
+              "voiced_frames": {
+                "FEO070": 5325,
+                "FEO072": 9058
+              }
+            }
+          },
+          "MEE071|MEE073": {
+            "within_speaker": {
+              "n": 2346,
+              "n_non_finite": 0,
+              "mean": 0.197378,
+              "std": 0.140003,
+              "mad_sigma": 0.104803,
+              "median": 0.155207,
+              "p05": 0.049618,
+              "p95": 0.497844,
+              "min": 0.023739,
+              "max": 0.792967
+            },
+            "between_speaker": {
+              "n": 2310,
+              "n_non_finite": 0,
+              "mean": 0.36631,
+              "std": 0.145081,
+              "mad_sigma": 0.163813,
+              "median": 0.367697,
+              "p05": 0.136202,
+              "p95": 0.602719,
+              "min": 0.069682,
+              "max": 0.85155
+            },
+            "separation": {
+              "separation_sigma_mad": 2.0275,
+              "separation_sigma_std": 1.2066,
+              "mean_ratio": 1.8559,
+              "median_ratio": 2.3691,
+              "formula": "separation_sigma_mad = (median(between) - median(within)) / mad_sigma(within)"
+            },
+            "f0_same_turns_same_arithmetic": {
+              "within_speaker": {
+                "n": 2346,
+                "n_non_finite": 0,
+                "mean": 14.511348,
+                "std": 19.749328,
+                "mad_sigma": 8.173377,
+                "median": 8.476581,
+                "p05": 0.805461,
+                "p95": 53.593974,
+                "min": 0.014395,
+                "max": 136.219382
+              },
+              "between_speaker": {
+                "n": 2310,
+                "n_non_finite": 0,
+                "mean": 18.042315,
+                "std": 20.417429,
+                "mad_sigma": 10.71949,
+                "median": 12.972615,
+                "p05": 1.331608,
+                "p95": 48.009754,
+                "min": 0.009228,
+                "max": 144.717834
+              },
+              "separation": {
+                "separation_sigma_mad": 0.5501,
+                "separation_sigma_std": 0.1788,
+                "mean_ratio": 1.2433,
+                "median_ratio": 1.5304,
+                "formula": "separation_sigma_mad = (median(between) - median(within)) / mad_sigma(within)"
+              }
+            },
+            "f0_doc_style": {
+              "form": "difference of the two speakers' pooled voiced-frame median F0, over the pooled within-speaker MAD sigma of the frame values -- the arithmetic of docs/research/F0-SPEAKER-CHANGE.md",
+              "median_f0_hz": {
+                "MEE071": 111.5,
+                "MEE073": 101.27
+              },
+              "median_delta_hz": 10.23,
+              "pooled_within_speaker_mad_sigma_hz": 12.3,
+              "pooled_sigma_definition": "root-mean-square of the per-speaker MAD sigmas -- the noise floor experiments/twospeaker_verify.py uses",
+              "pooled_frames_mad_sigma_hz": 14.62,
+              "per_speaker_mad_sigma_hz": {
+                "MEE071": 13.26,
+                "MEE073": 11.25
+              },
+              "separation_sigma": 0.8317,
+              "voiced_frames": {
+                "MEE071": 7248,
+                "MEE073": 11792
+              }
+            }
+          },
+          "FEO070|MEE071": {
+            "within_speaker": {
+              "n": 1296,
+              "n_non_finite": 0,
+              "mean": 0.220579,
+              "std": 0.133339,
+              "mad_sigma": 0.133423,
+              "median": 0.191411,
+              "p05": 0.050309,
+              "p95": 0.480343,
+              "min": 0.017874,
+              "max": 0.687265
+            },
+            "between_speaker": {
+              "n": 1260,
+              "n_non_finite": 0,
+              "mean": 0.403555,
+              "std": 0.104716,
+              "mad_sigma": 0.102316,
+              "median": 0.392514,
+              "p05": 0.249959,
+              "p95": 0.598735,
+              "min": 0.127521,
+              "max": 0.739357
+            },
+            "separation": {
+              "separation_sigma_mad": 1.5073,
+              "separation_sigma_std": 1.3723,
+              "mean_ratio": 1.8295,
+              "median_ratio": 2.0506,
+              "formula": "separation_sigma_mad = (median(between) - median(within)) / mad_sigma(within)"
+            },
+            "f0_same_turns_same_arithmetic": {
+              "within_speaker": {
+                "n": 1296,
+                "n_non_finite": 0,
+                "mean": 28.410182,
+                "std": 36.04471,
+                "mad_sigma": 13.580636,
+                "median": 12.272809,
+                "p05": 1.196607,
+                "p95": 110.207876,
+                "min": 0.078306,
+                "max": 195.790833
+              },
+              "between_speaker": {
+                "n": 1260,
+                "n_non_finite": 0,
+                "mean": 74.163537,
+                "std": 43.489947,
+                "mad_sigma": 40.943301,
+                "median": 83.299135,
+                "p05": 4.850252,
+                "p95": 133.486179,
+                "min": 0.050957,
+                "max": 199.542733
+              },
+              "separation": {
+                "separation_sigma_mad": 5.23,
+                "separation_sigma_std": 1.2694,
+                "mean_ratio": 2.6105,
+                "median_ratio": 6.7873,
+                "formula": "separation_sigma_mad = (median(between) - median(within)) / mad_sigma(within)"
+              }
+            },
+            "f0_doc_style": {
+              "form": "difference of the two speakers' pooled voiced-frame median F0, over the pooled within-speaker MAD sigma of the frame values -- the arithmetic of docs/research/F0-SPEAKER-CHANGE.md",
+              "median_f0_hz": {
+                "FEO070": 190.98,
+                "MEE071": 111.5
+              },
+              "median_delta_hz": 79.47,
+              "pooled_within_speaker_mad_sigma_hz": 53.47,
+              "pooled_sigma_definition": "root-mean-square of the per-speaker MAD sigmas -- the noise floor experiments/twospeaker_verify.py uses",
+              "pooled_frames_mad_sigma_hz": 31.74,
+              "per_speaker_mad_sigma_hz": {
+                "FEO070": 74.45,
+                "MEE071": 13.26
+              },
+              "separation_sigma": 1.4863,
+              "voiced_frames": {
+                "FEO070": 5325,
+                "MEE071": 7248
+              }
+            }
+          }
+        }
+      },
+      "2.0": {
+        "min_len_s": 2.0,
+        "n_turns": 145,
+        "per_speaker_turns": {
+          "FEO070": 23,
+          "FEO072": 39,
+          "MEE071": 31,
+          "MEE073": 52
+        },
+        "pairs": {
+          "FEO070|FEO072": {
+            "within_speaker": {
+              "n": 994,
+              "n_non_finite": 0,
+              "mean": 0.196059,
+              "std": 0.153437,
+              "mad_sigma": 0.125367,
+              "median": 0.133501,
+              "p05": 0.031456,
+              "p95": 0.491007,
+              "min": 0.013776,
+              "max": 0.624913
+            },
+            "between_speaker": {
+              "n": 897,
+              "n_non_finite": 0,
+              "mean": 0.214017,
+              "std": 0.142773,
+              "mad_sigma": 0.098649,
+              "median": 0.153268,
+              "p05": 0.063383,
+              "p95": 0.5103,
+              "min": 0.036192,
+              "max": 0.591435
+            },
+            "separation": {
+              "separation_sigma_mad": 0.1577,
+              "separation_sigma_std": 0.117,
+              "mean_ratio": 1.0916,
+              "median_ratio": 1.1481,
+              "formula": "separation_sigma_mad = (median(between) - median(within)) / mad_sigma(within)"
+            },
+            "f0_same_turns_same_arithmetic": {
+              "within_speaker": {
+                "n": 994,
+                "n_non_finite": 0,
+                "mean": 50.374055,
+                "std": 42.395749,
+                "mad_sigma": 43.62482,
+                "median": 34.935231,
+                "p05": 2.82254,
+                "p95": 120.259464,
+                "min": 0.031056,
+                "max": 195.790833
+              },
+              "between_speaker": {
+                "n": 897,
+                "n_non_finite": 0,
+                "mean": 49.545648,
+                "std": 42.731772,
+                "mad_sigma": 42.711492,
+                "median": 34.688467,
+                "p05": 2.06739,
+                "p95": 120.120095,
+                "min": 0.029646,
+                "max": 197.988036
+              },
+              "separation": {
+                "separation_sigma_mad": -0.0057,
+                "separation_sigma_std": -0.0195,
+                "mean_ratio": 0.9836,
+                "median_ratio": 0.9929,
+                "formula": "separation_sigma_mad = (median(between) - median(within)) / mad_sigma(within)"
+              }
+            },
+            "f0_doc_style": {
+              "form": "difference of the two speakers' pooled voiced-frame median F0, over the pooled within-speaker MAD sigma of the frame values -- the arithmetic of docs/research/F0-SPEAKER-CHANGE.md",
+              "median_f0_hz": {
+                "FEO070": 189.54,
+                "FEO072": 196.99
+              },
+              "median_delta_hz": 7.44,
+              "pooled_within_speaker_mad_sigma_hz": 59.08,
+              "pooled_sigma_definition": "root-mean-square of the per-speaker MAD sigmas -- the noise floor experiments/twospeaker_verify.py uses",
+              "pooled_frames_mad_sigma_hz": 54.59,
+              "per_speaker_mad_sigma_hz": {
+                "FEO070": 70.58,
+                "FEO072": 44.72
+              },
+              "separation_sigma": 0.126,
+              "voiced_frames": {
+                "FEO070": 4811,
+                "FEO072": 7900
+              }
+            }
+          },
+          "MEE071|MEE073": {
+            "within_speaker": {
+              "n": 1791,
+              "n_non_finite": 0,
+              "mean": 0.166923,
+              "std": 0.112261,
+              "mad_sigma": 0.087013,
+              "median": 0.134159,
+              "p05": 0.046123,
+              "p95": 0.398457,
+              "min": 0.023739,
+              "max": 0.713616
+            },
+            "between_speaker": {
+              "n": 1612,
+              "n_non_finite": 0,
+              "mean": 0.360964,
+              "std": 0.147101,
+              "mad_sigma": 0.166603,
+              "median": 0.363227,
+              "p05": 0.130332,
+              "p95": 0.594163,
+              "min": 0.069682,
+              "max": 0.85155
+            },
+            "separation": {
+              "separation_sigma_mad": 2.6326,
+              "separation_sigma_std": 1.7285,
+              "mean_ratio": 2.1625,
+              "median_ratio": 2.7074,
+              "formula": "separation_sigma_mad = (median(between) - median(within)) / mad_sigma(within)"
+            },
+            "f0_same_turns_same_arithmetic": {
+              "within_speaker": {
+                "n": 1791,
+                "n_non_finite": 0,
+                "mean": 12.470514,
+                "std": 16.469359,
+                "mad_sigma": 7.346104,
+                "median": 7.834099,
+                "p05": 0.764299,
+                "p95": 37.119548,
+                "min": 0.014395,
+                "max": 136.219382
+              },
+              "between_speaker": {
+                "n": 1612,
+                "n_non_finite": 0,
+                "mean": 16.565244,
+                "std": 20.781569,
+                "mad_sigma": 9.607945,
+                "median": 11.675291,
+                "p05": 1.218322,
+                "p95": 41.010825,
+                "min": 0.009228,
+                "max": 144.717834
+              },
+              "separation": {
+                "separation_sigma_mad": 0.5229,
+                "separation_sigma_std": 0.2486,
+                "mean_ratio": 1.3284,
+                "median_ratio": 1.4903,
+                "formula": "separation_sigma_mad = (median(between) - median(within)) / mad_sigma(within)"
+              }
+            },
+            "f0_doc_style": {
+              "form": "difference of the two speakers' pooled voiced-frame median F0, over the pooled within-speaker MAD sigma of the frame values -- the arithmetic of docs/research/F0-SPEAKER-CHANGE.md",
+              "median_f0_hz": {
+                "MEE071": 111.58,
+                "MEE073": 101.3
+              },
+              "median_delta_hz": 10.27,
+              "pooled_within_speaker_mad_sigma_hz": 12.46,
+              "pooled_sigma_definition": "root-mean-square of the per-speaker MAD sigmas -- the noise floor experiments/twospeaker_verify.py uses",
+              "pooled_frames_mad_sigma_hz": 14.42,
+              "per_speaker_mad_sigma_hz": {
+                "MEE071": 13.65,
+                "MEE073": 11.14
+              },
+              "separation_sigma": 0.8244,
+              "voiced_frames": {
+                "MEE071": 6290,
+                "MEE073": 11569
+              }
+            }
+          },
+          "FEO070|MEE071": {
+            "within_speaker": {
+              "n": 718,
+              "n_non_finite": 0,
+              "mean": 0.197556,
+              "std": 0.130202,
+              "mad_sigma": 0.134623,
+              "median": 0.1706,
+              "p05": 0.041696,
+              "p95": 0.458225,
+              "min": 0.017874,
+              "max": 0.602357
+            },
+            "between_speaker": {
+              "n": 713,
+              "n_non_finite": 0,
+              "mean": 0.389489,
+              "std": 0.097932,
+              "mad_sigma": 0.099907,
+              "median": 0.378082,
+              "p05": 0.243612,
+              "p95": 0.563626,
+              "min": 0.127521,
+              "max": 0.730718
+            },
+            "separation": {
+              "separation_sigma_mad": 1.5412,
+              "separation_sigma_std": 1.4741,
+              "mean_ratio": 1.9715,
+              "median_ratio": 2.2162,
+              "formula": "separation_sigma_mad = (median(between) - median(within)) / mad_sigma(within)"
+            },
+            "f0_same_turns_same_arithmetic": {
+              "within_speaker": {
+                "n": 718,
+                "n_non_finite": 0,
+                "mean": 28.652762,
+                "std": 36.634603,
+                "mad_sigma": 13.125675,
+                "median": 11.947485,
+                "p05": 1.305836,
+                "p95": 110.392009,
+                "min": 0.078306,
+                "max": 195.790833
+              },
+              "between_speaker": {
+                "n": 713,
+                "n_non_finite": 0,
+                "mean": 76.391434,
+                "std": 41.392025,
+                "mad_sigma": 29.855398,
+                "median": 84.280934,
+                "p05": 4.941011,
+                "p95": 132.467482,
+                "min": 0.125465,
+                "max": 199.542733
+              },
+              "separation": {
+                "separation_sigma_mad": 5.5108,
+                "separation_sigma_std": 1.3031,
+                "mean_ratio": 2.6661,
+                "median_ratio": 7.0543,
+                "formula": "separation_sigma_mad = (median(between) - median(within)) / mad_sigma(within)"
+              }
+            },
+            "f0_doc_style": {
+              "form": "difference of the two speakers' pooled voiced-frame median F0, over the pooled within-speaker MAD sigma of the frame values -- the arithmetic of docs/research/F0-SPEAKER-CHANGE.md",
+              "median_f0_hz": {
+                "FEO070": 189.54,
+                "MEE071": 111.58
+              },
+              "median_delta_hz": 77.96,
+              "pooled_within_speaker_mad_sigma_hz": 50.83,
+              "pooled_sigma_definition": "root-mean-square of the per-speaker MAD sigmas -- the noise floor experiments/twospeaker_verify.py uses",
+              "pooled_frames_mad_sigma_hz": 32.91,
+              "per_speaker_mad_sigma_hz": {
+                "FEO070": 70.58,
+                "MEE071": 13.65
+              },
+              "separation_sigma": 1.5338,
+              "voiced_frames": {
+                "FEO070": 4811,
+                "MEE071": 6290
+              }
+            }
+          }
+        }
+      },
+      "3.0": {
+        "min_len_s": 3.0,
+        "n_turns": 89,
+        "per_speaker_turns": {
+          "FEO070": 14,
+          "FEO072": 20,
+          "MEE071": 19,
+          "MEE073": 36
+        },
+        "pairs": {
+          "FEO070|FEO072": {
+            "within_speaker": {
+              "n": 281,
+              "n_non_finite": 0,
+              "mean": 0.082196,
+              "std": 0.063474,
+              "mad_sigma": 0.040299,
+              "median": 0.062303,
+              "p05": 0.02068,
+              "p95": 0.223284,
+              "min": 0.013776,
+              "max": 0.34644
+            },
+            "between_speaker": {
+              "n": 280,
+              "n_non_finite": 0,
+              "mean": 0.132111,
+              "std": 0.073031,
+              "mad_sigma": 0.04535,
+              "median": 0.113911,
+              "p05": 0.05534,
+              "p95": 0.328987,
+              "min": 0.037507,
+              "max": 0.409764
+            },
+            "separation": {
+              "separation_sigma_mad": 1.2806,
+              "separation_sigma_std": 0.7864,
+              "mean_ratio": 1.6073,
+              "median_ratio": 1.8283,
+              "formula": "separation_sigma_mad = (median(between) - median(within)) / mad_sigma(within)"
+            },
+            "f0_same_turns_same_arithmetic": {
+              "within_speaker": {
+                "n": 281,
+                "n_non_finite": 0,
+                "mean": 37.636009,
+                "std": 38.334653,
+                "mad_sigma": 21.179488,
+                "median": 19.287241,
+                "p05": 1.544728,
+                "p95": 109.627679,
+                "min": 0.10735,
+                "max": 140.086144
+              },
+              "between_speaker": {
+                "n": 280,
+                "n_non_finite": 0,
+                "mean": 40.956929,
+                "std": 40.577074,
+                "mad_sigma": 22.350673,
+                "median": 19.70379,
+                "p05": 1.568611,
+                "p95": 114.060935,
+                "min": 0.029646,
+                "max": 148.432606
+              },
+              "separation": {
+                "separation_sigma_mad": 0.0197,
+                "separation_sigma_std": 0.0866,
+                "mean_ratio": 1.0882,
+                "median_ratio": 1.0216,
+                "formula": "separation_sigma_mad = (median(between) - median(within)) / mad_sigma(within)"
+              }
+            },
+            "f0_doc_style": {
+              "form": "difference of the two speakers' pooled voiced-frame median F0, over the pooled within-speaker MAD sigma of the frame values -- the arithmetic of docs/research/F0-SPEAKER-CHANGE.md",
+              "median_f0_hz": {
+                "FEO070": 187.79,
+                "FEO072": 198.93
+              },
+              "median_delta_hz": 11.13,
+              "pooled_within_speaker_mad_sigma_hz": 53.85,
+              "pooled_sigma_definition": "root-mean-square of the per-speaker MAD sigmas -- the noise floor experiments/twospeaker_verify.py uses",
+              "pooled_frames_mad_sigma_hz": 41.51,
+              "per_speaker_mad_sigma_hz": {
+                "FEO070": 69.65,
+                "FEO072": 30.81
+              },
+              "separation_sigma": 0.2067,
+              "voiced_frames": {
+                "FEO070": 3673,
+                "FEO072": 5532
+              }
+            }
+          },
+          "MEE071|MEE073": {
+            "within_speaker": {
+              "n": 801,
+              "n_non_finite": 0,
+              "mean": 0.135291,
+              "std": 0.093979,
+              "mad_sigma": 0.069431,
+              "median": 0.106506,
+              "p05": 0.038963,
+              "p95": 0.343304,
+              "min": 0.023739,
+              "max": 0.522427
+            },
+            "between_speaker": {
+              "n": 684,
+              "n_non_finite": 0,
+              "mean": 0.369543,
+              "std": 0.127129,
+              "mad_sigma": 0.140567,
+              "median": 0.377978,
+              "p05": 0.144668,
+              "p95": 0.565777,
+              "min": 0.077964,
+              "max": 0.65727
+            },
+            "separation": {
+              "separation_sigma_mad": 3.91,
+              "separation_sigma_std": 2.4926,
+              "mean_ratio": 2.7315,
+              "median_ratio": 3.5489,
+              "formula": "separation_sigma_mad = (median(between) - median(within)) / mad_sigma(within)"
+            },
+            "f0_same_turns_same_arithmetic": {
+              "within_speaker": {
+                "n": 801,
+                "n_non_finite": 0,
+                "mean": 12.853895,
+                "std": 18.789923,
+                "mad_sigma": 6.606934,
+                "median": 6.947903,
+                "p05": 0.764299,
+                "p95": 48.645323,
+                "min": 0.014395,
+                "max": 136.219382
+              },
+              "between_speaker": {
+                "n": 684,
+                "n_non_finite": 0,
+                "mean": 18.329685,
+                "std": 25.452925,
+                "mad_sigma": 9.463751,
+                "median": 10.862299,
+                "p05": 1.161736,
+                "p95": 97.85227,
+                "min": 0.022638,
+                "max": 144.717834
+              },
+              "separation": {
+                "separation_sigma_mad": 0.5925,
+                "separation_sigma_std": 0.2914,
+                "mean_ratio": 1.426,
+                "median_ratio": 1.5634,
+                "formula": "separation_sigma_mad = (median(between) - median(within)) / mad_sigma(within)"
+              }
+            },
+            "f0_doc_style": {
+              "form": "difference of the two speakers' pooled voiced-frame median F0, over the pooled within-speaker MAD sigma of the frame values -- the arithmetic of docs/research/F0-SPEAKER-CHANGE.md",
+              "median_f0_hz": {
+                "MEE071": 111.39,
+                "MEE073": 101.16
+              },
+              "median_delta_hz": 10.22,
+              "pooled_within_speaker_mad_sigma_hz": 12.8,
+              "pooled_sigma_definition": "root-mean-square of the per-speaker MAD sigmas -- the noise floor experiments/twospeaker_verify.py uses",
+              "pooled_frames_mad_sigma_hz": 13.86,
+              "per_speaker_mad_sigma_hz": {
+                "MEE071": 14.71,
+                "MEE073": 10.55
+              },
+              "separation_sigma": 0.7987,
+              "voiced_frames": {
+                "MEE071": 4658,
+                "MEE073": 9112
+              }
+            }
+          },
+          "FEO070|MEE071": {
+            "within_speaker": {
+              "n": 262,
+              "n_non_finite": 0,
+              "mean": 0.144481,
+              "std": 0.102685,
+              "mad_sigma": 0.092715,
+              "median": 0.118494,
+              "p05": 0.030378,
+              "p95": 0.349544,
+              "min": 0.017874,
+              "max": 0.423719
+            },
+            "between_speaker": {
+              "n": 266,
+              "n_non_finite": 0,
+              "mean": 0.390233,
+              "std": 0.07851,
+              "mad_sigma": 0.086267,
+              "median": 0.383045,
+              "p05": 0.278603,
+              "p95": 0.535806,
+              "min": 0.221888,
+              "max": 0.578035
+            },
+            "separation": {
+              "separation_sigma_mad": 2.8534,
+              "separation_sigma_std": 2.3933,
+              "mean_ratio": 2.7009,
+              "median_ratio": 3.2326,
+              "formula": "separation_sigma_mad = (median(between) - median(within)) / mad_sigma(within)"
+            },
+            "f0_same_turns_same_arithmetic": {
+              "within_speaker": {
+                "n": 262,
+                "n_non_finite": 0,
+                "mean": 31.546118,
+                "std": 38.189756,
+                "mad_sigma": 15.348613,
+                "median": 14.527277,
+                "p05": 1.192501,
+                "p95": 110.775308,
+                "min": 0.078306,
+                "max": 136.219382
+              },
+              "between_speaker": {
+                "n": 266,
+                "n_non_finite": 0,
+                "mean": 66.374468,
+                "std": 38.011433,
+                "mad_sigma": 30.667267,
+                "median": 80.180191,
+                "p05": 3.098202,
+                "p95": 109.497223,
+                "min": 0.166977,
+                "max": 132.467482
+              },
+              "separation": {
+                "separation_sigma_mad": 4.2774,
+                "separation_sigma_std": 0.912,
+                "mean_ratio": 2.104,
+                "median_ratio": 5.5193,
+                "formula": "separation_sigma_mad = (median(between) - median(within)) / mad_sigma(within)"
+              }
+            },
+            "f0_doc_style": {
+              "form": "difference of the two speakers' pooled voiced-frame median F0, over the pooled within-speaker MAD sigma of the frame values -- the arithmetic of docs/research/F0-SPEAKER-CHANGE.md",
+              "median_f0_hz": {
+                "FEO070": 187.79,
+                "MEE071": 111.39
+              },
+              "median_delta_hz": 76.4,
+              "pooled_within_speaker_mad_sigma_hz": 50.33,
+              "pooled_sigma_definition": "root-mean-square of the per-speaker MAD sigmas -- the noise floor experiments/twospeaker_verify.py uses",
+              "pooled_frames_mad_sigma_hz": 32.19,
+              "per_speaker_mad_sigma_hz": {
+                "FEO070": 69.65,
+                "MEE071": 14.71
+              },
+              "separation_sigma": 1.5179,
+              "voiced_frames": {
+                "FEO070": 3673,
+                "MEE071": 4658
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "headline": {
+    "units": "sigma, as in the F0 document: the within-speaker spread of the distance distribution",
+    "comparison_point_from_f0_doc": {
+      "FEO070|FEO072": 0.5,
+      "MEE071|MEE073": 0.3,
+      "source": "docs/research/F0-SPEAKER-CHANGE.md",
+      "note": "the document's 0.48 / 0.33 are reproduced here as the `f0_doc_style` block of each pair, on this turn set, with the document's own arithmetic"
+    },
+    "pairs": {
+      "FEO070|FEO072": {
+        "a": "FEO070",
+        "b": "FEO072",
+        "turns": {
+          "FEO070": 23,
+          "FEO072": 39
+        },
+        "within_speaker": {
+          "n": 994,
+          "n_non_finite": 0,
+          "mean": 0.196059,
+          "std": 0.153437,
+          "mad_sigma": 0.125367,
+          "median": 0.133501,
+          "p05": 0.031456,
+          "p95": 0.491007,
+          "min": 0.013776,
+          "max": 0.624913
+        },
+        "between_speaker": {
+          "n": 897,
+          "n_non_finite": 0,
+          "mean": 0.214017,
+          "std": 0.142773,
+          "mad_sigma": 0.098649,
+          "median": 0.153268,
+          "p05": 0.063383,
+          "p95": 0.5103,
+          "min": 0.036192,
+          "max": 0.591435
+        },
+        "separation": {
+          "separation_sigma_mad": 0.1577,
+          "separation_sigma_std": 0.117,
+          "mean_ratio": 1.0916,
+          "median_ratio": 1.1481,
+          "formula": "separation_sigma_mad = (median(between) - median(within)) / mad_sigma(within)"
+        },
+        "f0_same_turns_same_arithmetic": {
+          "within_speaker": {
+            "n": 994,
+            "n_non_finite": 0,
+            "mean": 50.374055,
+            "std": 42.395749,
+            "mad_sigma": 43.62482,
+            "median": 34.935231,
+            "p05": 2.82254,
+            "p95": 120.259464,
+            "min": 0.031056,
+            "max": 195.790833
+          },
+          "between_speaker": {
+            "n": 897,
+            "n_non_finite": 0,
+            "mean": 49.545648,
+            "std": 42.731772,
+            "mad_sigma": 42.711492,
+            "median": 34.688467,
+            "p05": 2.06739,
+            "p95": 120.120095,
+            "min": 0.029646,
+            "max": 197.988036
+          },
+          "separation": {
+            "separation_sigma_mad": -0.0057,
+            "separation_sigma_std": -0.0195,
+            "mean_ratio": 0.9836,
+            "median_ratio": 0.9929,
+            "formula": "separation_sigma_mad = (median(between) - median(within)) / mad_sigma(within)"
+          },
+          "note": "the pitch instrument in the SAME shape as the embedding headline: a within-speaker distance distribution and a between-speaker distance distribution over |delta f0| between turns"
+        },
+        "f0_doc_style": {
+          "form": "difference of the two speakers' pooled voiced-frame median F0, over the pooled within-speaker MAD sigma of the frame values -- the arithmetic of docs/research/F0-SPEAKER-CHANGE.md",
+          "median_f0_hz": {
+            "FEO070": 189.54,
+            "FEO072": 196.99
+          },
+          "median_delta_hz": 7.44,
+          "pooled_within_speaker_mad_sigma_hz": 59.08,
+          "pooled_sigma_definition": "root-mean-square of the per-speaker MAD sigmas -- the noise floor experiments/twospeaker_verify.py uses",
+          "pooled_frames_mad_sigma_hz": 54.59,
+          "per_speaker_mad_sigma_hz": {
+            "FEO070": 70.58,
+            "FEO072": 44.72
+          },
+          "separation_sigma": 0.126,
+          "voiced_frames": {
+            "FEO070": 4811,
+            "FEO072": 7900
+          }
+        },
+        "f0_turn_level": {
+          "form": "difference of the two speakers' median per-turn F0 over the pooled within-speaker MAD sigma of the per-turn medians",
+          "median_f0_hz": {
+            "FEO070": 195.81,
+            "FEO072": 192.36
+          },
+          "median_delta_hz": 3.45,
+          "pooled_within_speaker_mad_sigma_hz": 23.32,
+          "separation_sigma": 0.1478
+        },
+        "verification_2speaker": {
+          "eer": {
+            "eer": 0.333333,
+            "eer_definition": "min over thresholds of max(miss_rate, false_alarm_rate)",
+            "at_threshold": 0.07812947236256673,
+            "miss_rate": 0.3,
+            "false_alarm_rate": 0.333333,
+            "crossing": {
+              "threshold": 0.020754136370101595,
+              "miss_rate": 0.0,
+              "false_alarm_rate": 1.0
+            },
+            "n_target": 30,
+            "n_impostor": 30
+          },
+          "target_scores": [
+            0.176556,
+            0.148358,
+            0.064803,
+            0.098443,
+            0.070628,
+            0.066221,
+            0.320157,
+            0.088184,
+            0.281581,
+            0.133694,
+            0.0855,
+            0.403076,
+            0.099306,
+            0.09929,
+            0.094023,
+            0.089345,
+            0.084851,
+            0.113067,
+            0.041347,
+            0.071231,
+            0.393472,
+            0.256747,
+            0.047441,
+            0.056009,
+            0.088118,
+            0.425404,
+            0.100221,
+            0.074802,
+            0.064001,
+            0.078129
+          ],
+          "impostor_scores": [
+            0.027619,
+            0.35498,
+            0.209366,
+            0.020754,
+            0.021738,
+            0.061342,
+            0.422384,
+            0.05559,
+            0.056154,
+            0.049569,
+            0.048043,
+            0.216535,
+            0.076796,
+            0.077737,
+            0.09151,
+            0.066732,
+            0.064398,
+            0.348481,
+            0.039126,
+            0.246448,
+            0.151566,
+            0.040577,
+            0.432048,
+            0.058291,
+            0.037932,
+            0.060953,
+            0.064122,
+            0.035024,
+            0.09428,
+            0.032382
+          ]
+        },
+        "shuffled_label_null": {
+          "observed_separation_sigma_mad": 0.1577,
+          "null": {
+            "n": 200,
+            "n_non_finite": 0,
+            "mean": 0.002531,
+            "std": 0.062096,
+            "mad_sigma": 0.048629,
+            "median": -0.00715,
+            "p05": -0.0891,
+            "p95": 0.125,
+            "min": -0.11,
+            "max": 0.2338
+          },
+          "permutation_test": {
+            "p_value": 0.024876,
+            "n_null": 200,
+            "n_null_at_least_as_extreme": 4,
+            "tail": "at_or_above_observed",
+            "direction": "higher is better",
+            "null_mean": 0.0025,
+            "null_max": 0.2338,
+            "null_median": -0.0072
+          }
+        },
+        "verdict": {
+          "resolved": false,
+          "criteria": {
+            "separation_sigma_mad_at_least": 1.0,
+            "two_speaker_eer_at_most": 0.25,
+            "shuffled_label_null_p_at_most": 0.05
+          },
+          "checks": {
+            "separation_sigma_mad": {
+              "value": 0.1577,
+              "at_least": 1.0,
+              "pass": false
+            },
+            "two_speaker_eer": {
+              "value": 0.333333,
+              "at_most": 0.25,
+              "pass": false
+            },
+            "shuffled_label_null_p": {
+              "value": 0.024876,
+              "at_most": 0.05,
+              "pass": true
+            }
+          },
+          "failed": [
+            "separation_sigma_mad",
+            "two_speaker_eer"
+          ]
+        }
+      },
+      "MEE071|MEE073": {
+        "a": "MEE071",
+        "b": "MEE073",
+        "turns": {
+          "MEE071": 31,
+          "MEE073": 52
+        },
+        "within_speaker": {
+          "n": 1791,
+          "n_non_finite": 0,
+          "mean": 0.166923,
+          "std": 0.112261,
+          "mad_sigma": 0.087013,
+          "median": 0.134159,
+          "p05": 0.046123,
+          "p95": 0.398457,
+          "min": 0.023739,
+          "max": 0.713616
+        },
+        "between_speaker": {
+          "n": 1612,
+          "n_non_finite": 0,
+          "mean": 0.360964,
+          "std": 0.147101,
+          "mad_sigma": 0.166603,
+          "median": 0.363227,
+          "p05": 0.130332,
+          "p95": 0.594163,
+          "min": 0.069682,
+          "max": 0.85155
+        },
+        "separation": {
+          "separation_sigma_mad": 2.6326,
+          "separation_sigma_std": 1.7285,
+          "mean_ratio": 2.1625,
+          "median_ratio": 2.7074,
+          "formula": "separation_sigma_mad = (median(between) - median(within)) / mad_sigma(within)"
+        },
+        "f0_same_turns_same_arithmetic": {
+          "within_speaker": {
+            "n": 1791,
+            "n_non_finite": 0,
+            "mean": 12.470514,
+            "std": 16.469359,
+            "mad_sigma": 7.346104,
+            "median": 7.834099,
+            "p05": 0.764299,
+            "p95": 37.119548,
+            "min": 0.014395,
+            "max": 136.219382
+          },
+          "between_speaker": {
+            "n": 1612,
+            "n_non_finite": 0,
+            "mean": 16.565244,
+            "std": 20.781569,
+            "mad_sigma": 9.607945,
+            "median": 11.675291,
+            "p05": 1.218322,
+            "p95": 41.010825,
+            "min": 0.009228,
+            "max": 144.717834
+          },
+          "separation": {
+            "separation_sigma_mad": 0.5229,
+            "separation_sigma_std": 0.2486,
+            "mean_ratio": 1.3284,
+            "median_ratio": 1.4903,
+            "formula": "separation_sigma_mad = (median(between) - median(within)) / mad_sigma(within)"
+          },
+          "note": "the pitch instrument in the SAME shape as the embedding headline: a within-speaker distance distribution and a between-speaker distance distribution over |delta f0| between turns"
+        },
+        "f0_doc_style": {
+          "form": "difference of the two speakers' pooled voiced-frame median F0, over the pooled within-speaker MAD sigma of the frame values -- the arithmetic of docs/research/F0-SPEAKER-CHANGE.md",
+          "median_f0_hz": {
+            "MEE071": 111.58,
+            "MEE073": 101.3
+          },
+          "median_delta_hz": 10.27,
+          "pooled_within_speaker_mad_sigma_hz": 12.46,
+          "pooled_sigma_definition": "root-mean-square of the per-speaker MAD sigmas -- the noise floor experiments/twospeaker_verify.py uses",
+          "pooled_frames_mad_sigma_hz": 14.42,
+          "per_speaker_mad_sigma_hz": {
+            "MEE071": 13.65,
+            "MEE073": 11.14
+          },
+          "separation_sigma": 0.8244,
+          "voiced_frames": {
+            "MEE071": 6290,
+            "MEE073": 11569
+          }
+        },
+        "f0_turn_level": {
+          "form": "difference of the two speakers' median per-turn F0 over the pooled within-speaker MAD sigma of the per-turn medians",
+          "median_f0_hz": {
+            "MEE071": 109.71,
+            "MEE073": 100.9
+          },
+          "median_delta_hz": 8.81,
+          "pooled_within_speaker_mad_sigma_hz": 9.07,
+          "separation_sigma": 0.9713
+        },
+        "verification_2speaker": {
+          "eer": {
+            "eer": 0.121951,
+            "eer_definition": "min over thresholds of max(miss_rate, false_alarm_rate)",
+            "at_threshold": 0.17555324534101857,
+            "miss_rate": 0.073171,
+            "false_alarm_rate": 0.121951,
+            "crossing": {
+              "threshold": 0.02117053654129708,
+              "miss_rate": 0.0,
+              "false_alarm_rate": 1.0
+            },
+            "n_target": 41,
+            "n_impostor": 41
+          },
+          "target_scores": [
+            0.239139,
+            0.361865,
+            0.253584,
+            0.388581,
+            0.313806,
+            0.315451,
+            0.412977,
+            0.175553,
+            0.182772,
+            0.397447,
+            0.258417,
+            0.316746,
+            0.297798,
+            0.513355,
+            0.217872,
+            0.386016,
+            0.319916,
+            0.389178,
+            0.32514,
+            0.309807,
+            0.458113,
+            0.295812,
+            0.325495,
+            0.371029,
+            0.378378,
+            0.217522,
+            0.103812,
+            0.213652,
+            0.219096,
+            0.276524,
+            0.224752,
+            0.567258,
+            0.205601,
+            0.160903,
+            0.38807,
+            0.354051,
+            0.307119,
+            0.094362,
+            0.34411,
+            0.335154,
+            0.401175
+          ],
+          "impostor_scores": [
+            0.223622,
+            0.087211,
+            0.084655,
+            0.103895,
+            0.098605,
+            0.111554,
+            0.172032,
+            0.237232,
+            0.074332,
+            0.046819,
+            0.039123,
+            0.263016,
+            0.084119,
+            0.092082,
+            0.048019,
+            0.047148,
+            0.061443,
+            0.10161,
+            0.037996,
+            0.03172,
+            0.071434,
+            0.062924,
+            0.046204,
+            0.409676,
+            0.048809,
+            0.114982,
+            0.021171,
+            0.049839,
+            0.123395,
+            0.077677,
+            0.049924,
+            0.046135,
+            0.06716,
+            0.05892,
+            0.055799,
+            0.100916,
+            0.024649,
+            0.031337,
+            0.05518,
+            0.042914,
+            0.208752
+          ]
+        },
+        "shuffled_label_null": {
+          "observed_separation_sigma_mad": 2.6326,
+          "null": {
+            "n": 200,
+            "n_non_finite": 0,
+            "mean": 0.001625,
+            "std": 0.045946,
+            "mad_sigma": 0.037955,
+            "median": -0.00555,
+            "p05": -0.0585,
+            "p95": 0.0771,
+            "min": -0.0791,
+            "max": 0.2069
+          },
+          "permutation_test": {
+            "p_value": 0.004975,
+            "n_null": 200,
+            "n_null_at_least_as_extreme": 0,
+            "tail": "at_or_above_observed",
+            "direction": "higher is better",
+            "null_mean": 0.0016,
+            "null_max": 0.2069,
+            "null_median": -0.0056
+          }
+        },
+        "verdict": {
+          "resolved": true,
+          "criteria": {
+            "separation_sigma_mad_at_least": 1.0,
+            "two_speaker_eer_at_most": 0.25,
+            "shuffled_label_null_p_at_most": 0.05
+          },
+          "checks": {
+            "separation_sigma_mad": {
+              "value": 2.6326,
+              "at_least": 1.0,
+              "pass": true
+            },
+            "two_speaker_eer": {
+              "value": 0.121951,
+              "at_most": 0.25,
+              "pass": true
+            },
+            "shuffled_label_null_p": {
+              "value": 0.004975,
+              "at_most": 0.05,
+              "pass": true
+            }
+          },
+          "failed": []
+        }
+      }
+    },
+    "all_pairs": {
+      "FEO070|FEO072": {
+        "separation_sigma_mad": 0.1577,
+        "separation_sigma_std": 0.117,
+        "mean_ratio": 1.0916,
+        "median_ratio": 1.1481,
+        "formula": "separation_sigma_mad = (median(between) - median(within)) / mad_sigma(within)"
+      },
+      "FEO070|MEE071": {
+        "separation_sigma_mad": 1.5412,
+        "separation_sigma_std": 1.4741,
+        "mean_ratio": 1.9715,
+        "median_ratio": 2.2162,
+        "formula": "separation_sigma_mad = (median(between) - median(within)) / mad_sigma(within)"
+      },
+      "FEO070|MEE073": {
+        "separation_sigma_mad": 5.9174,
+        "separation_sigma_std": 3.1145,
+        "mean_ratio": 3.3914,
+        "median_ratio": 4.9118,
+        "formula": "separation_sigma_mad = (median(between) - median(within)) / mad_sigma(within)"
+      },
+      "FEO072|MEE071": {
+        "separation_sigma_mad": 1.5872,
+        "separation_sigma_std": 1.304,
+        "mean_ratio": 1.8786,
+        "median_ratio": 2.2888,
+        "formula": "separation_sigma_mad = (median(between) - median(within)) / mad_sigma(within)"
+      },
+      "FEO072|MEE073": {
+        "separation_sigma_mad": 4.9967,
+        "separation_sigma_std": 2.9356,
+        "mean_ratio": 3.2091,
+        "median_ratio": 4.5269,
+        "formula": "separation_sigma_mad = (median(between) - median(within)) / mad_sigma(within)"
+      },
+      "MEE071|MEE073": {
+        "separation_sigma_mad": 2.6326,
+        "separation_sigma_std": 1.7285,
+        "mean_ratio": 2.1625,
+        "median_ratio": 2.7074,
+        "formula": "separation_sigma_mad = (median(between) - median(within)) / mad_sigma(within)"
+      }
+    },
+    "solo_only_population": {
+      "FEO070|FEO072": {
+        "turns": {
+          "FEO070": 4,
+          "FEO072": 15
+        },
+        "within_speaker": {
+          "n": 111,
+          "n_non_finite": 0,
+          "mean": 0.115305,
+          "std": 0.079261,
+          "mad_sigma": 0.084524,
+          "median": 0.096319,
+          "p05": 0.022143,
+          "p95": 0.25289,
+          "min": 0.013776,
+          "max": 0.367604
+        },
+        "between_speaker": {
+          "n": 60,
+          "n_non_finite": 0,
+          "mean": 0.13398,
+          "std": 0.050129,
+          "mad_sigma": 0.05787,
+          "median": 0.122088,
+          "p05": 0.0654,
+          "p95": 0.236008,
+          "min": 0.0573,
+          "max": 0.24752
+        },
+        "separation": {
+          "separation_sigma_mad": 0.3049,
+          "separation_sigma_std": 0.2356,
+          "mean_ratio": 1.162,
+          "median_ratio": 1.2675,
+          "formula": "separation_sigma_mad = (median(between) - median(within)) / mad_sigma(within)"
+        }
+      },
+      "MEE071|MEE073": {
+        "turns": {
+          "MEE071": 4,
+          "MEE073": 24
+        },
+        "within_speaker": {
+          "n": 282,
+          "n_non_finite": 0,
+          "mean": 0.110033,
+          "std": 0.051754,
+          "mad_sigma": 0.048147,
+          "median": 0.10149,
+          "p05": 0.043045,
+          "p95": 0.204467,
+          "min": 0.030899,
+          "max": 0.353778
+        },
+        "between_speaker": {
+          "n": 96,
+          "n_non_finite": 0,
+          "mean": 0.438121,
+          "std": 0.100379,
+          "mad_sigma": 0.10504,
+          "median": 0.432236,
+          "p05": 0.255493,
+          "p95": 0.581248,
+          "min": 0.215192,
+          "max": 0.652195
+        },
+        "separation": {
+          "separation_sigma_mad": 6.8695,
+          "separation_sigma_std": 6.3394,
+          "mean_ratio": 3.9817,
+          "median_ratio": 4.2589,
+          "formula": "separation_sigma_mad = (median(between) - median(within)) / mad_sigma(within)"
+        }
+      }
+    },
+    "f0_document_reproduction": {
+      "file": "ami_sdm_EN2002a_turns.wav",
+      "population": "every audible segment that does not overlap another speaker -- the F0 document's own rule",
+      "n_turns": 53,
+      "pooled_within_speaker_mad_sigma_hz": 22.28,
+      "pooled_sigma_definition": "root-mean-square of the per-speaker MAD sigmas, as experiments/twospeaker_verify.py defines it",
+      "per_speaker_mad_sigma_hz": {
+        "FEO070": 27.92,
+        "FEO072": 31.58,
+        "MEE071": 9.85,
+        "MEE073": 10.57
+      },
+      "document_value_to_check": {
+        "FEO070|FEO072": 0.48,
+        "MEE071|MEE073": 0.33,
+        "source": "experiments/twospeaker_verify_results.json / docs/research/F0-SPEAKER-CHANGE.md"
+      },
+      "pairs": {
+        "FEO070|FEO072": {
+          "form": "difference of the two speakers' pooled voiced-frame median F0, over the pooled within-speaker MAD sigma of the frame values -- the arithmetic of docs/research/F0-SPEAKER-CHANGE.md",
+          "median_f0_hz": {
+            "FEO070": 196.91,
+            "FEO072": 207.5
+          },
+          "median_delta_hz": 10.6,
+          "pooled_within_speaker_mad_sigma_hz": 22.28,
+          "pooled_sigma_definition": "root-mean-square of the per-speaker MAD sigmas -- the noise floor experiments/twospeaker_verify.py uses",
+          "pooled_frames_mad_sigma_hz": 33.25,
+          "per_speaker_mad_sigma_hz": {
+            "FEO070": 27.92,
+            "FEO072": 31.58
+          },
+          "separation_sigma": 0.4756,
+          "voiced_frames": {
+            "FEO070": 552,
+            "FEO072": 1661
+          },
+          "document_value": 0.48,
+          "matches_document": true
+        },
+        "MEE071|MEE073": {
+          "form": "difference of the two speakers' pooled voiced-frame median F0, over the pooled within-speaker MAD sigma of the frame values -- the arithmetic of docs/research/F0-SPEAKER-CHANGE.md",
+          "median_f0_hz": {
+            "MEE071": 111.3,
+            "MEE073": 103.97
+          },
+          "median_delta_hz": 7.32,
+          "pooled_within_speaker_mad_sigma_hz": 22.28,
+          "pooled_sigma_definition": "root-mean-square of the per-speaker MAD sigmas -- the noise floor experiments/twospeaker_verify.py uses",
+          "pooled_frames_mad_sigma_hz": 10.94,
+          "per_speaker_mad_sigma_hz": {
+            "MEE071": 9.85,
+            "MEE073": 10.57
+          },
+          "separation_sigma": 0.3288,
+          "voiced_frames": {
+            "MEE071": 778,
+            "MEE073": 914
+          },
+          "document_value": 0.33,
+          "matches_document": true
+        }
+      }
+    }
+  },
+  "verification_4speaker": {
+    "enrol_test_split": {
+      "FEO070": {
+        "enrol": 12,
+        "test": 11
+      },
+      "FEO072": {
+        "enrol": 20,
+        "test": 19
+      },
+      "MEE071": {
+        "enrol": 16,
+        "test": 15
+      },
+      "MEE073": {
+        "enrol": 26,
+        "test": 26
+      }
+    },
+    "eer": {
+      "eer": 0.169014,
+      "eer_definition": "min over thresholds of max(miss_rate, false_alarm_rate)",
+      "at_threshold": 0.172122913559964,
+      "miss_rate": 0.126761,
+      "false_alarm_rate": 0.169014,
+      "crossing": {
+        "threshold": 0.020754136370101595,
+        "miss_rate": 0.0,
+        "false_alarm_rate": 1.0
+      },
+      "n_target": 213,
+      "n_impostor": 71
+    },
+    "target_scores": [
+      0.071231,
+      0.33013,
+      0.601191,
+      0.393472,
+      0.304951,
+      0.333692,
+      0.256747,
+      0.287823,
+      0.286985,
+      0.047441,
+      0.324444,
+      0.580463,
+      0.056009,
+      0.338545,
+      0.586147,
+      0.088118,
+      0.413344,
+      0.649061,
+      0.425404,
+      0.262757,
+      0.172123,
+      0.100221,
+      0.399892,
+      0.607516,
+      0.074802,
+      0.384915,
+      0.628606,
+      0.064001,
+      0.363381,
+      0.530409,
+      0.078129,
+      0.305831,
+      0.540572,
+      0.176556,
+      0.207724,
+      0.348863,
+      0.148358,
+      0.215299,
+      0.579308,
+      0.064803,
+      0.366096,
+      0.571969,
+      0.098443,
+      0.388429,
+      0.590666,
+      0.070628,
+      0.327647,
+      0.544283,
+      0.066221,
+      0.297298,
+      0.510556,
+      0.320157,
+      0.47704,
+      0.400326,
+      0.088184,
+      0.282728,
+      0.600667,
+      0.281581,
+      0.12917,
+      0.279795,
+      0.133694,
+      0.415707,
+      0.466092,
+      0.0855,
+      0.290125,
+      0.599676,
+      0.403076,
+      0.344079,
+      0.220905,
+      0.099306,
+      0.293197,
+      0.623704,
+      0.09929,
+      0.266801,
+      0.567021,
+      0.094023,
+      0.302738,
+      0.545097,
+      0.089345,
+      0.331325,
+      0.526494,
+      0.084851,
+      0.251352,
+      0.549233,
+      0.113067,
+      0.355405,
+      0.516514,
+      0.041347,
+      0.339128,
+      0.559135,
+      0.489109,
+      0.457569,
+      0.103812,
+      0.397801,
+      0.377165,
+      0.213652,
+      0.349612,
+      0.362483,
+      0.219096,
+      0.351712,
+      0.369862,
+      0.276524,
+      0.374625,
+      0.372714,
+      0.224752,
+      0.239366,
+      0.18951,
+      0.567258,
+      0.355299,
+      0.329548,
+      0.205601,
+      0.451073,
+      0.464358,
+      0.160903,
+      0.255212,
+      0.184173,
+      0.38807,
+      0.254631,
+      0.189747,
+      0.354051,
+      0.282778,
+      0.217199,
+      0.307119,
+      0.3789,
+      0.371919,
+      0.094362,
+      0.215328,
+      0.17346,
+      0.34411,
+      0.321174,
+      0.352404,
+      0.335154,
+      0.250701,
+      0.213149,
+      0.401175,
+      0.465054,
+      0.450763,
+      0.239139,
+      0.552161,
+      0.540642,
+      0.361865,
+      0.427916,
+      0.426123,
+      0.253584,
+      0.606693,
+      0.591633,
+      0.388581,
+      0.527515,
+      0.493692,
+      0.313806,
+      0.470879,
+      0.455594,
+      0.315451,
+      0.669186,
+      0.639573,
+      0.412977,
+      0.432466,
+      0.4103,
+      0.175553,
+      0.191014,
+      0.218238,
+      0.182772,
+      0.601178,
+      0.583897,
+      0.397447,
+      0.56458,
+      0.548323,
+      0.258417,
+      0.516676,
+      0.498792,
+      0.316746,
+      0.460099,
+      0.4426,
+      0.297798,
+      0.708592,
+      0.687577,
+      0.513355,
+      0.479532,
+      0.452543,
+      0.217872,
+      0.609429,
+      0.571555,
+      0.386016,
+      0.510172,
+      0.494548,
+      0.319916,
+      0.554885,
+      0.52469,
+      0.389178,
+      0.55413,
+      0.521043,
+      0.32514,
+      0.529221,
+      0.504079,
+      0.309807,
+      0.625228,
+      0.604173,
+      0.458113,
+      0.53435,
+      0.510324,
+      0.295812,
+      0.532468,
+      0.513138,
+      0.325495,
+      0.611936,
+      0.590426,
+      0.371029,
+      0.608885,
+      0.56489,
+      0.378378,
+      0.264189,
+      0.266473,
+      0.217522
+    ],
+    "impostor_scores": [
+      0.027619,
+      0.35498,
+      0.209366,
+      0.020754,
+      0.021738,
+      0.061342,
+      0.422384,
+      0.05559,
+      0.056154,
+      0.049569,
+      0.048043,
+      0.216535,
+      0.076796,
+      0.077737,
+      0.09151,
+      0.066732,
+      0.064398,
+      0.348481,
+      0.039126,
+      0.246448,
+      0.151566,
+      0.040577,
+      0.432048,
+      0.058291,
+      0.037932,
+      0.060953,
+      0.064122,
+      0.035024,
+      0.09428,
+      0.032382,
+      0.223622,
+      0.087211,
+      0.084655,
+      0.103895,
+      0.098605,
+      0.111554,
+      0.172032,
+      0.237232,
+      0.074332,
+      0.046819,
+      0.039123,
+      0.263016,
+      0.084119,
+      0.092082,
+      0.048019,
+      0.047148,
+      0.061443,
+      0.10161,
+      0.037996,
+      0.03172,
+      0.071434,
+      0.062924,
+      0.046204,
+      0.409676,
+      0.048809,
+      0.114982,
+      0.021171,
+      0.049839,
+      0.123395,
+      0.077677,
+      0.049924,
+      0.046135,
+      0.06716,
+      0.05892,
+      0.055799,
+      0.100916,
+      0.024649,
+      0.031337,
+      0.05518,
+      0.042914,
+      0.208752
+    ],
+    "trials": [
+      {
+        "enrol": "FEO070",
+        "test_speaker": "FEO070",
+        "same_speaker": true,
+        "score": 0.027619
+      },
+      {
+        "enrol": "FEO072",
+        "test_speaker": "FEO070",
+        "same_speaker": false,
+        "score": 0.071231
+      },
+      {
+        "enrol": "MEE071",
+        "test_speaker": "FEO070",
+        "same_speaker": false,
+        "score": 0.33013
+      },
+      {
+        "enrol": "MEE073",
+        "test_speaker": "FEO070",
+        "same_speaker": false,
+        "score": 0.601191
+      },
+      {
+        "enrol": "FEO070",
+        "test_speaker": "FEO070",
+        "same_speaker": true,
+        "score": 0.35498
+      },
+      {
+        "enrol": "FEO072",
+        "test_speaker": "FEO070",
+        "same_speaker": false,
+        "score": 0.393472
+      },
+      {
+        "enrol": "MEE071",
+        "test_speaker": "FEO070",
+        "same_speaker": false,
+        "score": 0.304951
+      },
+      {
+        "enrol": "MEE073",
+        "test_speaker": "FEO070",
+        "same_speaker": false,
+        "score": 0.333692
+      },
+      {
+        "enrol": "FEO070",
+        "test_speaker": "FEO070",
+        "same_speaker": true,
+        "score": 0.209366
+      },
+      {
+        "enrol": "FEO072",
+        "test_speaker": "FEO070",
+        "same_speaker": false,
+        "score": 0.256747
+      },
+      {
+        "enrol": "MEE071",
+        "test_speaker": "FEO070",
+        "same_speaker": false,
+        "score": 0.287823
+      },
+      {
+        "enrol": "MEE073",
+        "test_speaker": "FEO070",
+        "same_speaker": false,
+        "score": 0.286985
+      },
+      {
+        "enrol": "FEO070",
+        "test_speaker": "FEO070",
+        "same_speaker": true,
+        "score": 0.020754
+      },
+      {
+        "enrol": "FEO072",
+        "test_speaker": "FEO070",
+        "same_speaker": false,
+        "score": 0.047441
+      },
+      {
+        "enrol": "MEE071",
+        "test_speaker": "FEO070",
+        "same_speaker": false,
+        "score": 0.324444
+      },
+      {
+        "enrol": "MEE073",
+        "test_speaker": "FEO070",
+        "same_speaker": false,
+        "score": 0.580463
+      },
+      {
+        "enrol": "FEO070",
+        "test_speaker": "FEO070",
+        "same_speaker": true,
+        "score": 0.021738
+      },
+      {
+        "enrol": "FEO072",
+        "test_speaker": "FEO070",
+        "same_speaker": false,
+        "score": 0.056009
+      },
+      {
+        "enrol": "MEE071",
+        "test_speaker": "FEO070",
+        "same_speaker": false,
+        "score": 0.338545
+      },
+      {
+        "enrol": "MEE073",
+        "test_speaker": "FEO070",
+        "same_speaker": false,
+        "score": 0.586147
+      },
+      {
+        "enrol": "FEO070",
+        "test_speaker": "FEO070",
+        "same_speaker": true,
+        "score": 0.061342
+      },
+      {
+        "enrol": "FEO072",
+        "test_speaker": "FEO070",
+        "same_speaker": false,
+        "score": 0.088118
+      },
+      {
+        "enrol": "MEE071",
+        "test_speaker": "FEO070",
+        "same_speaker": false,
+        "score": 0.413344
+      },
+      {
+        "enrol": "MEE073",
+        "test_speaker": "FEO070",
+        "same_speaker": false,
+        "score": 0.649061
+      },
+      {
+        "enrol": "FEO070",
+        "test_speaker": "FEO070",
+        "same_speaker": true,
+        "score": 0.422384
+      },
+      {
+        "enrol": "FEO072",
+        "test_speaker": "FEO070",
+        "same_speaker": false,
+        "score": 0.425404
+      },
+      {
+        "enrol": "MEE071",
+        "test_speaker": "FEO070",
+        "same_speaker": false,
+        "score": 0.262757
+      },
+      {
+        "enrol": "MEE073",
+        "test_speaker": "FEO070",
+        "same_speaker": false,
+        "score": 0.172123
+      },
+      {
+        "enrol": "FEO070",
+        "test_speaker": "FEO070",
+        "same_speaker": true,
+        "score": 0.05559
+      },
+      {
+        "enrol": "FEO072",
+        "test_speaker": "FEO070",
+        "same_speaker": false,
+        "score": 0.100221
+      },
+      {
+        "enrol": "MEE071",
+        "test_speaker": "FEO070",
+        "same_speaker": false,
+        "score": 0.399892
+      },
+      {
+        "enrol": "MEE073",
+        "test_speaker": "FEO070",
+        "same_speaker": false,
+        "score": 0.607516
+      },
+      {
+        "enrol": "FEO070",
+        "test_speaker": "FEO070",
+        "same_speaker": true,
+        "score": 0.056154
+      },
+      {
+        "enrol": "FEO072",
+        "test_speaker": "FEO070",
+        "same_speaker": false,
+        "score": 0.074802
+      },
+      {
+        "enrol": "MEE071",
+        "test_speaker": "FEO070",
+        "same_speaker": false,
+        "score": 0.384915
+      },
+      {
+        "enrol": "MEE073",
+        "test_speaker": "FEO070",
+        "same_speaker": false,
+        "score": 0.628606
+      },
+      {
+        "enrol": "FEO070",
+        "test_speaker": "FEO070",
+        "same_speaker": true,
+        "score": 0.049569
+      },
+      {
+        "enrol": "FEO072",
+        "test_speaker": "FEO070",
+        "same_speaker": false,
+        "score": 0.064001
+      },
+      {
+        "enrol": "MEE071",
+        "test_speaker": "FEO070",
+        "same_speaker": false,
+        "score": 0.363381
+      },
+      {
+        "enrol": "MEE073",
+        "test_speaker": "FEO070",
+        "same_speaker": false,
+        "score": 0.530409
+      },
+      {
+        "enrol": "FEO070",
+        "test_speaker": "FEO070",
+        "same_speaker": true,
+        "score": 0.048043
+      },
+      {
+        "enrol": "FEO072",
+        "test_speaker": "FEO070",
+        "same_speaker": false,
+        "score": 0.078129
+      },
+      {
+        "enrol": "MEE071",
+        "test_speaker": "FEO070",
+        "same_speaker": false,
+        "score": 0.305831
+      },
+      {
+        "enrol": "MEE073",
+        "test_speaker": "FEO070",
+        "same_speaker": false,
+        "score": 0.540572
+      },
+      {
+        "enrol": "FEO070",
+        "test_speaker": "FEO072",
+        "same_speaker": false,
+        "score": 0.176556
+      },
+      {
+        "enrol": "FEO072",
+        "test_speaker": "FEO072",
+        "same_speaker": true,
+        "score": 0.216535
+      },
+      {
+        "enrol": "MEE071",
+        "test_speaker": "FEO072",
+        "same_speaker": false,
+        "score": 0.207724
+      },
+      {
+        "enrol": "MEE073",
+        "test_speaker": "FEO072",
+        "same_speaker": false,
+        "score": 0.348863
+      },
+      {
+        "enrol": "FEO070",
+        "test_speaker": "FEO072",
+        "same_speaker": false,
+        "score": 0.148358
+      },
+      {
+        "enrol": "FEO072",
+        "test_speaker": "FEO072",
+        "same_speaker": true,
+        "score": 0.076796
+      },
+      {
+        "enrol": "MEE071",
+        "test_speaker": "FEO072",
+        "same_speaker": false,
+        "score": 0.215299
+      },
+      {
+        "enrol": "MEE073",
+        "test_speaker": "FEO072",
+        "same_speaker": false,
+        "score": 0.579308
+      },
+      {
+        "enrol": "FEO070",
+        "test_speaker": "FEO072",
+        "same_speaker": false,
+        "score": 0.064803
+      },
+      {
+        "enrol": "FEO072",
+        "test_speaker": "FEO072",
+        "same_speaker": true,
+        "score": 0.077737
+      },
+      {
+        "enrol": "MEE071",
+        "test_speaker": "FEO072",
+        "same_speaker": false,
+        "score": 0.366096
+      },
+      {
+        "enrol": "MEE073",
+        "test_speaker": "FEO072",
+        "same_speaker": false,
+        "score": 0.571969
+      },
+      {
+        "enrol": "FEO070",
+        "test_speaker": "FEO072",
+        "same_speaker": false,
+        "score": 0.098443
+      },
+      {
+        "enrol": "FEO072",
+        "test_speaker": "FEO072",
+        "same_speaker": true,
+        "score": 0.09151
+      },
+      {
+        "enrol": "MEE071",
+        "test_speaker": "FEO072",
+        "same_speaker": false,
+        "score": 0.388429
+      },
+      {
+        "enrol": "MEE073",
+        "test_speaker": "FEO072",
+        "same_speaker": false,
+        "score": 0.590666
+      },
+      {
+        "enrol": "FEO070",
+        "test_speaker": "FEO072",
+        "same_speaker": false,
+        "score": 0.070628
+      },
+      {
+        "enrol": "FEO072",
+        "test_speaker": "FEO072",
+        "same_speaker": true,
+        "score": 0.066732
+      },
+      {
+        "enrol": "MEE071",
+        "test_speaker": "FEO072",
+        "same_speaker": false,
+        "score": 0.327647
+      },
+      {
+        "enrol": "MEE073",
+        "test_speaker": "FEO072",
+        "same_speaker": false,
+        "score": 0.544283
+      },
+      {
+        "enrol": "FEO070",
+        "test_speaker": "FEO072",
+        "same_speaker": false,
+        "score": 0.066221
+      },
+      {
+        "enrol": "FEO072",
+        "test_speaker": "FEO072",
+        "same_speaker": true,
+        "score": 0.064398
+      },
+      {
+        "enrol": "MEE071",
+        "test_speaker": "FEO072",
+        "same_speaker": false,
+        "score": 0.297298
+      },
+      {
+        "enrol": "MEE073",
+        "test_speaker": "FEO072",
+        "same_speaker": false,
+        "score": 0.510556
+      },
+      {
+        "enrol": "FEO070",
+        "test_speaker": "FEO072",
+        "same_speaker": false,
+        "score": 0.320157
+      },
+      {
+        "enrol": "FEO072",
+        "test_speaker": "FEO072",
+        "same_speaker": true,
+        "score": 0.348481
+      },
+      {
+        "enrol": "MEE071",
+        "test_speaker": "FEO072",
+        "same_speaker": false,
+        "score": 0.47704
+      },
+      {
+        "enrol": "MEE073",
+        "test_speaker": "FEO072",
+        "same_speaker": false,
+        "score": 0.400326
+      },
+      {
+        "enrol": "FEO070",
+        "test_speaker": "FEO072",
+        "same_speaker": false,
+        "score": 0.088184
+      },
+      {
+        "enrol": "FEO072",
+        "test_speaker": "FEO072",
+        "same_speaker": true,
+        "score": 0.039126
+      },
+      {
+        "enrol": "MEE071",
+        "test_speaker": "FEO072",
+        "same_speaker": false,
+        "score": 0.282728
+      },
+      {
+        "enrol": "MEE073",
+        "test_speaker": "FEO072",
+        "same_speaker": false,
+        "score": 0.600667
+      },
+      {
+        "enrol": "FEO070",
+        "test_speaker": "FEO072",
+        "same_speaker": false,
+        "score": 0.281581
+      },
+      {
+        "enrol": "FEO072",
+        "test_speaker": "FEO072",
+        "same_speaker": true,
+        "score": 0.246448
+      },
+      {
+        "enrol": "MEE071",
+        "test_speaker": "FEO072",
+        "same_speaker": false,
+        "score": 0.12917
+      },
+      {
+        "enrol": "MEE073",
+        "test_speaker": "FEO072",
+        "same_speaker": false,
+        "score": 0.279795
+      },
+      {
+        "enrol": "FEO070",
+        "test_speaker": "FEO072",
+        "same_speaker": false,
+        "score": 0.133694
+      },
+      {
+        "enrol": "FEO072",
+        "test_speaker": "FEO072",
+        "same_speaker": true,
+        "score": 0.151566
+      },
+      {
+        "enrol": "MEE071",
+        "test_speaker": "FEO072",
+        "same_speaker": false,
+        "score": 0.415707
+      },
+      {
+        "enrol": "MEE073",
+        "test_speaker": "FEO072",
+        "same_speaker": false,
+        "score": 0.466092
+      },
+      {
+        "enrol": "FEO070",
+        "test_speaker": "FEO072",
+        "same_speaker": false,
+        "score": 0.0855
+      },
+      {
+        "enrol": "FEO072",
+        "test_speaker": "FEO072",
+        "same_speaker": true,
+        "score": 0.040577
+      },
+      {
+        "enrol": "MEE071",
+        "test_speaker": "FEO072",
+        "same_speaker": false,
+        "score": 0.290125
+      },
+      {
+        "enrol": "MEE073",
+        "test_speaker": "FEO072",
+        "same_speaker": false,
+        "score": 0.599676
+      },
+      {
+        "enrol": "FEO070",
+        "test_speaker": "FEO072",
+        "same_speaker": false,
+        "score": 0.403076
+      },
+      {
+        "enrol": "FEO072",
+        "test_speaker": "FEO072",
+        "same_speaker": true,
+        "score": 0.432048
+      },
+      {
+        "enrol": "MEE071",
+        "test_speaker": "FEO072",
+        "same_speaker": false,
+        "score": 0.344079
+      },
+      {
+        "enrol": "MEE073",
+        "test_speaker": "FEO072",
+        "same_speaker": false,
+        "score": 0.220905
+      },
+      {
+        "enrol": "FEO070",
+        "test_speaker": "FEO072",
+        "same_speaker": false,
+        "score": 0.099306
+      },
+      {
+        "enrol": "FEO072",
+        "test_speaker": "FEO072",
+        "same_speaker": true,
+        "score": 0.058291
+      },
+      {
+        "enrol": "MEE071",
+        "test_speaker": "FEO072",
+        "same_speaker": false,
+        "score": 0.293197
+      },
+      {
+        "enrol": "MEE073",
+        "test_speaker": "FEO072",
+        "same_speaker": false,
+        "score": 0.623704
+      },
+      {
+        "enrol": "FEO070",
+        "test_speaker": "FEO072",
+        "same_speaker": false,
+        "score": 0.09929
+      },
+      {
+        "enrol": "FEO072",
+        "test_speaker": "FEO072",
+        "same_speaker": true,
+        "score": 0.037932
+      },
+      {
+        "enrol": "MEE071",
+        "test_speaker": "FEO072",
+        "same_speaker": false,
+        "score": 0.266801
+      },
+      {
+        "enrol": "MEE073",
+        "test_speaker": "FEO072",
+        "same_speaker": false,
+        "score": 0.567021
+      },
+      {
+        "enrol": "FEO070",
+        "test_speaker": "FEO072",
+        "same_speaker": false,
+        "score": 0.094023
+      },
+      {
+        "enrol": "FEO072",
+        "test_speaker": "FEO072",
+        "same_speaker": true,
+        "score": 0.060953
+      },
+      {
+        "enrol": "MEE071",
+        "test_speaker": "FEO072",
+        "same_speaker": false,
+        "score": 0.302738
+      },
+      {
+        "enrol": "MEE073",
+        "test_speaker": "FEO072",
+        "same_speaker": false,
+        "score": 0.545097
+      },
+      {
+        "enrol": "FEO070",
+        "test_speaker": "FEO072",
+        "same_speaker": false,
+        "score": 0.089345
+      },
+      {
+        "enrol": "FEO072",
+        "test_speaker": "FEO072",
+        "same_speaker": true,
+        "score": 0.064122
+      },
+      {
+        "enrol": "MEE071",
+        "test_speaker": "FEO072",
+        "same_speaker": false,
+        "score": 0.331325
+      },
+      {
+        "enrol": "MEE073",
+        "test_speaker": "FEO072",
+        "same_speaker": false,
+        "score": 0.526494
+      },
+      {
+        "enrol": "FEO070",
+        "test_speaker": "FEO072",
+        "same_speaker": false,
+        "score": 0.084851
+      },
+      {
+        "enrol": "FEO072",
+        "test_speaker": "FEO072",
+        "same_speaker": true,
+        "score": 0.035024
+      },
+      {
+        "enrol": "MEE071",
+        "test_speaker": "FEO072",
+        "same_speaker": false,
+        "score": 0.251352
+      },
+      {
+        "enrol": "MEE073",
+        "test_speaker": "FEO072",
+        "same_speaker": false,
+        "score": 0.549233
+      },
+      {
+        "enrol": "FEO070",
+        "test_speaker": "FEO072",
+        "same_speaker": false,
+        "score": 0.113067
+      },
+      {
+        "enrol": "FEO072",
+        "test_speaker": "FEO072",
+        "same_speaker": true,
+        "score": 0.09428
+      },
+      {
+        "enrol": "MEE071",
+        "test_speaker": "FEO072",
+        "same_speaker": false,
+        "score": 0.355405
+      },
+      {
+        "enrol": "MEE073",
+        "test_speaker": "FEO072",
+        "same_speaker": false,
+        "score": 0.516514
+      },
+      {
+        "enrol": "FEO070",
+        "test_speaker": "FEO072",
+        "same_speaker": false,
+        "score": 0.041347
+      },
+      {
+        "enrol": "FEO072",
+        "test_speaker": "FEO072",
+        "same_speaker": true,
+        "score": 0.032382
+      },
+      {
+        "enrol": "MEE071",
+        "test_speaker": "FEO072",
+        "same_speaker": false,
+        "score": 0.339128
+      },
+      {
+        "enrol": "MEE073",
+        "test_speaker": "FEO072",
+        "same_speaker": false,
+        "score": 0.559135
+      },
+      {
+        "enrol": "FEO070",
+        "test_speaker": "MEE071",
+        "same_speaker": false,
+        "score": 0.489109
+      },
+      {
+        "enrol": "FEO072",
+        "test_speaker": "MEE071",
+        "same_speaker": false,
+        "score": 0.457569
+      },
+      {
+        "enrol": "MEE071",
+        "test_speaker": "MEE071",
+        "same_speaker": true,
+        "score": 0.223622
+      },
+      {
+        "enrol": "MEE073",
+        "test_speaker": "MEE071",
+        "same_speaker": false,
+        "score": 0.103812
+      },
+      {
+        "enrol": "FEO070",
+        "test_speaker": "MEE071",
+        "same_speaker": false,
+        "score": 0.397801
+      },
+      {
+        "enrol": "FEO072",
+        "test_speaker": "MEE071",
+        "same_speaker": false,
+        "score": 0.377165
+      },
+      {
+        "enrol": "MEE071",
+        "test_speaker": "MEE071",
+        "same_speaker": true,
+        "score": 0.087211
+      },
+      {
+        "enrol": "MEE073",
+        "test_speaker": "MEE071",
+        "same_speaker": false,
+        "score": 0.213652
+      },
+      {
+        "enrol": "FEO070",
+        "test_speaker": "MEE071",
+        "same_speaker": false,
+        "score": 0.349612
+      },
+      {
+        "enrol": "FEO072",
+        "test_speaker": "MEE071",
+        "same_speaker": false,
+        "score": 0.362483
+      },
+      {
+        "enrol": "MEE071",
+        "test_speaker": "MEE071",
+        "same_speaker": true,
+        "score": 0.084655
+      },
+      {
+        "enrol": "MEE073",
+        "test_speaker": "MEE071",
+        "same_speaker": false,
+        "score": 0.219096
+      },
+      {
+        "enrol": "FEO070",
+        "test_speaker": "MEE071",
+        "same_speaker": false,
+        "score": 0.351712
+      },
+      {
+        "enrol": "FEO072",
+        "test_speaker": "MEE071",
+        "same_speaker": false,
+        "score": 0.369862
+      },
+      {
+        "enrol": "MEE071",
+        "test_speaker": "MEE071",
+        "same_speaker": true,
+        "score": 0.103895
+      },
+      {
+        "enrol": "MEE073",
+        "test_speaker": "MEE071",
+        "same_speaker": false,
+        "score": 0.276524
+      },
+      {
+        "enrol": "FEO070",
+        "test_speaker": "MEE071",
+        "same_speaker": false,
+        "score": 0.374625
+      },
+      {
+        "enrol": "FEO072",
+        "test_speaker": "MEE071",
+        "same_speaker": false,
+        "score": 0.372714
+      },
+      {
+        "enrol": "MEE071",
+        "test_speaker": "MEE071",
+        "same_speaker": true,
+        "score": 0.098605
+      },
+      {
+        "enrol": "MEE073",
+        "test_speaker": "MEE071",
+        "same_speaker": false,
+        "score": 0.224752
+      },
+      {
+        "enrol": "FEO070",
+        "test_speaker": "MEE071",
+        "same_speaker": false,
+        "score": 0.239366
+      },
+      {
+        "enrol": "FEO072",
+        "test_speaker": "MEE071",
+        "same_speaker": false,
+        "score": 0.18951
+      },
+      {
+        "enrol": "MEE071",
+        "test_speaker": "MEE071",
+        "same_speaker": true,
+        "score": 0.111554
+      },
+      {
+        "enrol": "MEE073",
+        "test_speaker": "MEE071",
+        "same_speaker": false,
+        "score": 0.567258
+      },
+      {
+        "enrol": "FEO070",
+        "test_speaker": "MEE071",
+        "same_speaker": false,
+        "score": 0.355299
+      },
+      {
+        "enrol": "FEO072",
+        "test_speaker": "MEE071",
+        "same_speaker": false,
+        "score": 0.329548
+      },
+      {
+        "enrol": "MEE071",
+        "test_speaker": "MEE071",
+        "same_speaker": true,
+        "score": 0.172032
+      },
+      {
+        "enrol": "MEE073",
+        "test_speaker": "MEE071",
+        "same_speaker": false,
+        "score": 0.205601
+      },
+      {
+        "enrol": "FEO070",
+        "test_speaker": "MEE071",
+        "same_speaker": false,
+        "score": 0.451073
+      },
+      {
+        "enrol": "FEO072",
+        "test_speaker": "MEE071",
+        "same_speaker": false,
+        "score": 0.464358
+      },
+      {
+        "enrol": "MEE071",
+        "test_speaker": "MEE071",
+        "same_speaker": true,
+        "score": 0.237232
+      },
+      {
+        "enrol": "MEE073",
+        "test_speaker": "MEE071",
+        "same_speaker": false,
+        "score": 0.160903
+      },
+      {
+        "enrol": "FEO070",
+        "test_speaker": "MEE071",
+        "same_speaker": false,
+        "score": 0.255212
+      },
+      {
+        "enrol": "FEO072",
+        "test_speaker": "MEE071",
+        "same_speaker": false,
+        "score": 0.184173
+      },
+      {
+        "enrol": "MEE071",
+        "test_speaker": "MEE071",
+        "same_speaker": true,
+        "score": 0.074332
+      },
+      {
+        "enrol": "MEE073",
+        "test_speaker": "MEE071",
+        "same_speaker": false,
+        "score": 0.38807
+      },
+      {
+        "enrol": "FEO070",
+        "test_speaker": "MEE071",
+        "same_speaker": false,
+        "score": 0.254631
+      },
+      {
+        "enrol": "FEO072",
+        "test_speaker": "MEE071",
+        "same_speaker": false,
+        "score": 0.189747
+      },
+      {
+        "enrol": "MEE071",
+        "test_speaker": "MEE071",
+        "same_speaker": true,
+        "score": 0.046819
+      },
+      {
+        "enrol": "MEE073",
+        "test_speaker": "MEE071",
+        "same_speaker": false,
+        "score": 0.354051
+      },
+      {
+        "enrol": "FEO070",
+        "test_speaker": "MEE071",
+        "same_speaker": false,
+        "score": 0.282778
+      },
+      {
+        "enrol": "FEO072",
+        "test_speaker": "MEE071",
+        "same_speaker": false,
+        "score": 0.217199
+      },
+      {
+        "enrol": "MEE071",
+        "test_speaker": "MEE071",
+        "same_speaker": true,
+        "score": 0.039123
+      },
+      {
+        "enrol": "MEE073",
+        "test_speaker": "MEE071",
+        "same_speaker": false,
+        "score": 0.307119
+      },
+      {
+        "enrol": "FEO070",
+        "test_speaker": "MEE071",
+        "same_speaker": false,
+        "score": 0.3789
+      },
+      {
+        "enrol": "FEO072",
+        "test_speaker": "MEE071",
+        "same_speaker": false,
+        "score": 0.371919
+      },
+      {
+        "enrol": "MEE071",
+        "test_speaker": "MEE071",
+        "same_speaker": true,
+        "score": 0.263016
+      },
+      {
+        "enrol": "MEE073",
+        "test_speaker": "MEE071",
+        "same_speaker": false,
+        "score": 0.094362
+      },
+      {
+        "enrol": "FEO070",
+        "test_speaker": "MEE071",
+        "same_speaker": false,
+        "score": 0.215328
+      },
+      {
+        "enrol": "FEO072",
+        "test_speaker": "MEE071",
+        "same_speaker": false,
+        "score": 0.17346
+      },
+      {
+        "enrol": "MEE071",
+        "test_speaker": "MEE071",
+        "same_speaker": true,
+        "score": 0.084119
+      },
+      {
+        "enrol": "MEE073",
+        "test_speaker": "MEE071",
+        "same_speaker": false,
+        "score": 0.34411
+      },
+      {
+        "enrol": "FEO070",
+        "test_speaker": "MEE071",
+        "same_speaker": false,
+        "score": 0.321174
+      },
+      {
+        "enrol": "FEO072",
+        "test_speaker": "MEE071",
+        "same_speaker": false,
+        "score": 0.352404
+      },
+      {
+        "enrol": "MEE071",
+        "test_speaker": "MEE071",
+        "same_speaker": true,
+        "score": 0.092082
+      },
+      {
+        "enrol": "MEE073",
+        "test_speaker": "MEE071",
+        "same_speaker": false,
+        "score": 0.335154
+      },
+      {
+        "enrol": "FEO070",
+        "test_speaker": "MEE071",
+        "same_speaker": false,
+        "score": 0.250701
+      },
+      {
+        "enrol": "FEO072",
+        "test_speaker": "MEE071",
+        "same_speaker": false,
+        "score": 0.213149
+      },
+      {
+        "enrol": "MEE071",
+        "test_speaker": "MEE071",
+        "same_speaker": true,
+        "score": 0.048019
+      },
+      {
+        "enrol": "MEE073",
+        "test_speaker": "MEE071",
+        "same_speaker": false,
+        "score": 0.401175
+      },
+      {
+        "enrol": "FEO070",
+        "test_speaker": "MEE073",
+        "same_speaker": false,
+        "score": 0.465054
+      },
+      {
+        "enrol": "FEO072",
+        "test_speaker": "MEE073",
+        "same_speaker": false,
+        "score": 0.450763
+      },
+      {
+        "enrol": "MEE071",
+        "test_speaker": "MEE073",
+        "same_speaker": false,
+        "score": 0.239139
+      },
+      {
+        "enrol": "MEE073",
+        "test_speaker": "MEE073",
+        "same_speaker": true,
+        "score": 0.047148
+      },
+      {
+        "enrol": "FEO070",
+        "test_speaker": "MEE073",
+        "same_speaker": false,
+        "score": 0.552161
+      },
+      {
+        "enrol": "FEO072",
+        "test_speaker": "MEE073",
+        "same_speaker": false,
+        "score": 0.540642
+      },
+      {
+        "enrol": "MEE071",
+        "test_speaker": "MEE073",
+        "same_speaker": false,
+        "score": 0.361865
+      },
+      {
+        "enrol": "MEE073",
+        "test_speaker": "MEE073",
+        "same_speaker": true,
+        "score": 0.061443
+      },
+      {
+        "enrol": "FEO070",
+        "test_speaker": "MEE073",
+        "same_speaker": false,
+        "score": 0.427916
+      },
+      {
+        "enrol": "FEO072",
+        "test_speaker": "MEE073",
+        "same_speaker": false,
+        "score": 0.426123
+      },
+      {
+        "enrol": "MEE071",
+        "test_speaker": "MEE073",
+        "same_speaker": false,
+        "score": 0.253584
+      },
+      {
+        "enrol": "MEE073",
+        "test_speaker": "MEE073",
+        "same_speaker": true,
+        "score": 0.10161
+      },
+      {
+        "enrol": "FEO070",
+        "test_speaker": "MEE073",
+        "same_speaker": false,
+        "score": 0.606693
+      },
+      {
+        "enrol": "FEO072",
+        "test_speaker": "MEE073",
+        "same_speaker": false,
+        "score": 0.591633
+      },
+      {
+        "enrol": "MEE071",
+        "test_speaker": "MEE073",
+        "same_speaker": false,
+        "score": 0.388581
+      },
+      {
+        "enrol": "MEE073",
+        "test_speaker": "MEE073",
+        "same_speaker": true,
+        "score": 0.037996
+      },
+      {
+        "enrol": "FEO070",
+        "test_speaker": "MEE073",
+        "same_speaker": false,
+        "score": 0.527515
+      },
+      {
+        "enrol": "FEO072",
+        "test_speaker": "MEE073",
+        "same_speaker": false,
+        "score": 0.493692
+      },
+      {
+        "enrol": "MEE071",
+        "test_speaker": "MEE073",
+        "same_speaker": false,
+        "score": 0.313806
+      },
+      {
+        "enrol": "MEE073",
+        "test_speaker": "MEE073",
+        "same_speaker": true,
+        "score": 0.03172
+      },
+      {
+        "enrol": "FEO070",
+        "test_speaker": "MEE073",
+        "same_speaker": false,
+        "score": 0.470879
+      },
+      {
+        "enrol": "FEO072",
+        "test_speaker": "MEE073",
+        "same_speaker": false,
+        "score": 0.455594
+      },
+      {
+        "enrol": "MEE071",
+        "test_speaker": "MEE073",
+        "same_speaker": false,
+        "score": 0.315451
+      },
+      {
+        "enrol": "MEE073",
+        "test_speaker": "MEE073",
+        "same_speaker": true,
+        "score": 0.071434
+      },
+      {
+        "enrol": "FEO070",
+        "test_speaker": "MEE073",
+        "same_speaker": false,
+        "score": 0.669186
+      },
+      {
+        "enrol": "FEO072",
+        "test_speaker": "MEE073",
+        "same_speaker": false,
+        "score": 0.639573
+      },
+      {
+        "enrol": "MEE071",
+        "test_speaker": "MEE073",
+        "same_speaker": false,
+        "score": 0.412977
+      },
+      {
+        "enrol": "MEE073",
+        "test_speaker": "MEE073",
+        "same_speaker": true,
+        "score": 0.062924
+      },
+      {
+        "enrol": "FEO070",
+        "test_speaker": "MEE073",
+        "same_speaker": false,
+        "score": 0.432466
+      },
+      {
+        "enrol": "FEO072",
+        "test_speaker": "MEE073",
+        "same_speaker": false,
+        "score": 0.4103
+      },
+      {
+        "enrol": "MEE071",
+        "test_speaker": "MEE073",
+        "same_speaker": false,
+        "score": 0.175553
+      },
+      {
+        "enrol": "MEE073",
+        "test_speaker": "MEE073",
+        "same_speaker": true,
+        "score": 0.046204
+      },
+      {
+        "enrol": "FEO070",
+        "test_speaker": "MEE073",
+        "same_speaker": false,
+        "score": 0.191014
+      },
+      {
+        "enrol": "FEO072",
+        "test_speaker": "MEE073",
+        "same_speaker": false,
+        "score": 0.218238
+      },
+      {
+        "enrol": "MEE071",
+        "test_speaker": "MEE073",
+        "same_speaker": false,
+        "score": 0.182772
+      },
+      {
+        "enrol": "MEE073",
+        "test_speaker": "MEE073",
+        "same_speaker": true,
+        "score": 0.409676
+      },
+      {
+        "enrol": "FEO070",
+        "test_speaker": "MEE073",
+        "same_speaker": false,
+        "score": 0.601178
+      },
+      {
+        "enrol": "FEO072",
+        "test_speaker": "MEE073",
+        "same_speaker": false,
+        "score": 0.583897
+      },
+      {
+        "enrol": "MEE071",
+        "test_speaker": "MEE073",
+        "same_speaker": false,
+        "score": 0.397447
+      },
+      {
+        "enrol": "MEE073",
+        "test_speaker": "MEE073",
+        "same_speaker": true,
+        "score": 0.048809
+      },
+      {
+        "enrol": "FEO070",
+        "test_speaker": "MEE073",
+        "same_speaker": false,
+        "score": 0.56458
+      },
+      {
+        "enrol": "FEO072",
+        "test_speaker": "MEE073",
+        "same_speaker": false,
+        "score": 0.548323
+      },
+      {
+        "enrol": "MEE071",
+        "test_speaker": "MEE073",
+        "same_speaker": false,
+        "score": 0.258417
+      },
+      {
+        "enrol": "MEE073",
+        "test_speaker": "MEE073",
+        "same_speaker": true,
+        "score": 0.114982
+      },
+      {
+        "enrol": "FEO070",
+        "test_speaker": "MEE073",
+        "same_speaker": false,
+        "score": 0.516676
+      },
+      {
+        "enrol": "FEO072",
+        "test_speaker": "MEE073",
+        "same_speaker": false,
+        "score": 0.498792
+      },
+      {
+        "enrol": "MEE071",
+        "test_speaker": "MEE073",
+        "same_speaker": false,
+        "score": 0.316746
+      },
+      {
+        "enrol": "MEE073",
+        "test_speaker": "MEE073",
+        "same_speaker": true,
+        "score": 0.021171
+      },
+      {
+        "enrol": "FEO070",
+        "test_speaker": "MEE073",
+        "same_speaker": false,
+        "score": 0.460099
+      },
+      {
+        "enrol": "FEO072",
+        "test_speaker": "MEE073",
+        "same_speaker": false,
+        "score": 0.4426
+      },
+      {
+        "enrol": "MEE071",
+        "test_speaker": "MEE073",
+        "same_speaker": false,
+        "score": 0.297798
+      },
+      {
+        "enrol": "MEE073",
+        "test_speaker": "MEE073",
+        "same_speaker": true,
+        "score": 0.049839
+      },
+      {
+        "enrol": "FEO070",
+        "test_speaker": "MEE073",
+        "same_speaker": false,
+        "score": 0.708592
+      },
+      {
+        "enrol": "FEO072",
+        "test_speaker": "MEE073",
+        "same_speaker": false,
+        "score": 0.687577
+      },
+      {
+        "enrol": "MEE071",
+        "test_speaker": "MEE073",
+        "same_speaker": false,
+        "score": 0.513355
+      },
+      {
+        "enrol": "MEE073",
+        "test_speaker": "MEE073",
+        "same_speaker": true,
+        "score": 0.123395
+      },
+      {
+        "enrol": "FEO070",
+        "test_speaker": "MEE073",
+        "same_speaker": false,
+        "score": 0.479532
+      },
+      {
+        "enrol": "FEO072",
+        "test_speaker": "MEE073",
+        "same_speaker": false,
+        "score": 0.452543
+      },
+      {
+        "enrol": "MEE071",
+        "test_speaker": "MEE073",
+        "same_speaker": false,
+        "score": 0.217872
+      },
+      {
+        "enrol": "MEE073",
+        "test_speaker": "MEE073",
+        "same_speaker": true,
+        "score": 0.077677
+      },
+      {
+        "enrol": "FEO070",
+        "test_speaker": "MEE073",
+        "same_speaker": false,
+        "score": 0.609429
+      },
+      {
+        "enrol": "FEO072",
+        "test_speaker": "MEE073",
+        "same_speaker": false,
+        "score": 0.571555
+      },
+      {
+        "enrol": "MEE071",
+        "test_speaker": "MEE073",
+        "same_speaker": false,
+        "score": 0.386016
+      },
+      {
+        "enrol": "MEE073",
+        "test_speaker": "MEE073",
+        "same_speaker": true,
+        "score": 0.049924
+      },
+      {
+        "enrol": "FEO070",
+        "test_speaker": "MEE073",
+        "same_speaker": false,
+        "score": 0.510172
+      },
+      {
+        "enrol": "FEO072",
+        "test_speaker": "MEE073",
+        "same_speaker": false,
+        "score": 0.494548
+      },
+      {
+        "enrol": "MEE071",
+        "test_speaker": "MEE073",
+        "same_speaker": false,
+        "score": 0.319916
+      },
+      {
+        "enrol": "MEE073",
+        "test_speaker": "MEE073",
+        "same_speaker": true,
+        "score": 0.046135
+      },
+      {
+        "enrol": "FEO070",
+        "test_speaker": "MEE073",
+        "same_speaker": false,
+        "score": 0.554885
+      },
+      {
+        "enrol": "FEO072",
+        "test_speaker": "MEE073",
+        "same_speaker": false,
+        "score": 0.52469
+      },
+      {
+        "enrol": "MEE071",
+        "test_speaker": "MEE073",
+        "same_speaker": false,
+        "score": 0.389178
+      },
+      {
+        "enrol": "MEE073",
+        "test_speaker": "MEE073",
+        "same_speaker": true,
+        "score": 0.06716
+      },
+      {
+        "enrol": "FEO070",
+        "test_speaker": "MEE073",
+        "same_speaker": false,
+        "score": 0.55413
+      },
+      {
+        "enrol": "FEO072",
+        "test_speaker": "MEE073",
+        "same_speaker": false,
+        "score": 0.521043
+      },
+      {
+        "enrol": "MEE071",
+        "test_speaker": "MEE073",
+        "same_speaker": false,
+        "score": 0.32514
+      },
+      {
+        "enrol": "MEE073",
+        "test_speaker": "MEE073",
+        "same_speaker": true,
+        "score": 0.05892
+      },
+      {
+        "enrol": "FEO070",
+        "test_speaker": "MEE073",
+        "same_speaker": false,
+        "score": 0.529221
+      },
+      {
+        "enrol": "FEO072",
+        "test_speaker": "MEE073",
+        "same_speaker": false,
+        "score": 0.504079
+      },
+      {
+        "enrol": "MEE071",
+        "test_speaker": "MEE073",
+        "same_speaker": false,
+        "score": 0.309807
+      },
+      {
+        "enrol": "MEE073",
+        "test_speaker": "MEE073",
+        "same_speaker": true,
+        "score": 0.055799
+      },
+      {
+        "enrol": "FEO070",
+        "test_speaker": "MEE073",
+        "same_speaker": false,
+        "score": 0.625228
+      },
+      {
+        "enrol": "FEO072",
+        "test_speaker": "MEE073",
+        "same_speaker": false,
+        "score": 0.604173
+      },
+      {
+        "enrol": "MEE071",
+        "test_speaker": "MEE073",
+        "same_speaker": false,
+        "score": 0.458113
+      },
+      {
+        "enrol": "MEE073",
+        "test_speaker": "MEE073",
+        "same_speaker": true,
+        "score": 0.100916
+      },
+      {
+        "enrol": "FEO070",
+        "test_speaker": "MEE073",
+        "same_speaker": false,
+        "score": 0.53435
+      },
+      {
+        "enrol": "FEO072",
+        "test_speaker": "MEE073",
+        "same_speaker": false,
+        "score": 0.510324
+      },
+      {
+        "enrol": "MEE071",
+        "test_speaker": "MEE073",
+        "same_speaker": false,
+        "score": 0.295812
+      },
+      {
+        "enrol": "MEE073",
+        "test_speaker": "MEE073",
+        "same_speaker": true,
+        "score": 0.024649
+      },
+      {
+        "enrol": "FEO070",
+        "test_speaker": "MEE073",
+        "same_speaker": false,
+        "score": 0.532468
+      },
+      {
+        "enrol": "FEO072",
+        "test_speaker": "MEE073",
+        "same_speaker": false,
+        "score": 0.513138
+      },
+      {
+        "enrol": "MEE071",
+        "test_speaker": "MEE073",
+        "same_speaker": false,
+        "score": 0.325495
+      },
+      {
+        "enrol": "MEE073",
+        "test_speaker": "MEE073",
+        "same_speaker": true,
+        "score": 0.031337
+      },
+      {
+        "enrol": "FEO070",
+        "test_speaker": "MEE073",
+        "same_speaker": false,
+        "score": 0.611936
+      },
+      {
+        "enrol": "FEO072",
+        "test_speaker": "MEE073",
+        "same_speaker": false,
+        "score": 0.590426
+      },
+      {
+        "enrol": "MEE071",
+        "test_speaker": "MEE073",
+        "same_speaker": false,
+        "score": 0.371029
+      },
+      {
+        "enrol": "MEE073",
+        "test_speaker": "MEE073",
+        "same_speaker": true,
+        "score": 0.05518
+      },
+      {
+        "enrol": "FEO070",
+        "test_speaker": "MEE073",
+        "same_speaker": false,
+        "score": 0.608885
+      },
+      {
+        "enrol": "FEO072",
+        "test_speaker": "MEE073",
+        "same_speaker": false,
+        "score": 0.56489
+      },
+      {
+        "enrol": "MEE071",
+        "test_speaker": "MEE073",
+        "same_speaker": false,
+        "score": 0.378378
+      },
+      {
+        "enrol": "MEE073",
+        "test_speaker": "MEE073",
+        "same_speaker": true,
+        "score": 0.042914
+      },
+      {
+        "enrol": "FEO070",
+        "test_speaker": "MEE073",
+        "same_speaker": false,
+        "score": 0.264189
+      },
+      {
+        "enrol": "FEO072",
+        "test_speaker": "MEE073",
+        "same_speaker": false,
+        "score": 0.266473
+      },
+      {
+        "enrol": "MEE071",
+        "test_speaker": "MEE073",
+        "same_speaker": false,
+        "score": 0.217522
+      },
+      {
+        "enrol": "MEE073",
+        "test_speaker": "MEE073",
+        "same_speaker": true,
+        "score": 0.208752
+      }
+    ]
+  },
+  "controls": {
+    "same_speaker_control": {
+      "FEO070": {
+        "n_turns": 23,
+        "distances": {
+          "n": 253,
+          "n_non_finite": 0,
+          "mean": 0.198908,
+          "std": 0.170006,
+          "mad_sigma": 0.10072,
+          "median": 0.110437,
+          "p05": 0.030395,
+          "p95": 0.529935,
+          "min": 0.017874,
+          "max": 0.602357
+        }
+      },
+      "FEO072": {
+        "n_turns": 39,
+        "distances": {
+          "n": 741,
+          "n_non_finite": 0,
+          "mean": 0.195087,
+          "std": 0.147465,
+          "mad_sigma": 0.128123,
+          "median": 0.141057,
+          "p05": 0.031555,
+          "p95": 0.479741,
+          "min": 0.013776,
+          "max": 0.624913
+        }
+      },
+      "MEE071": {
+        "n_turns": 31,
+        "distances": {
+          "n": 465,
+          "n_non_finite": 0,
+          "mean": 0.19682,
+          "std": 0.102459,
+          "mad_sigma": 0.098607,
+          "median": 0.186264,
+          "p05": 0.053447,
+          "p95": 0.38598,
+          "min": 0.024248,
+          "max": 0.585728
+        }
+      },
+      "MEE073": {
+        "n_turns": 52,
+        "distances": {
+          "n": 1326,
+          "n_non_finite": 0,
+          "mean": 0.156439,
+          "std": 0.11369,
+          "mad_sigma": 0.073707,
+          "median": 0.120809,
+          "p05": 0.044031,
+          "p95": 0.409264,
+          "min": 0.023739,
+          "max": 0.713616
+        }
+      },
+      "_pooled": {
+        "n": 2785,
+        "n_non_finite": 0,
+        "mean": 0.177322,
+        "std": 0.12921,
+        "mad_sigma": 0.100074,
+        "median": 0.134159,
+        "p05": 0.040055,
+        "p95": 0.453134,
+        "min": 0.013776,
+        "max": 0.713616
+      },
+      "_note": "the same-speaker control: distances between two turns of the SAME speaker. Any method must not fire on this population."
+    },
+    "shuffled_label_null": {
+      "n_permutations": 200,
+      "seed": 20261020,
+      "method": "speaker labels permuted over turns, per-speaker turn counts preserved, separation recomputed from scratch",
+      "separation_sigma_mad": {
+        "FEO070|FEO072": {
+          "n": 200,
+          "n_non_finite": 0,
+          "mean": 0.002531,
+          "std": 0.062096,
+          "mad_sigma": 0.048629,
+          "median": -0.00715,
+          "p05": -0.0891,
+          "p95": 0.125,
+          "min": -0.11,
+          "max": 0.2338
+        },
+        "MEE071|MEE073": {
+          "n": 200,
+          "n_non_finite": 0,
+          "mean": 0.001625,
+          "std": 0.045946,
+          "mad_sigma": 0.037955,
+          "median": -0.00555,
+          "p05": -0.0585,
+          "p95": 0.0771,
+          "min": -0.0791,
+          "max": 0.2069
+        }
+      },
+      "mean_ratio": {
+        "FEO070|FEO072": {
+          "n": 200,
+          "n_non_finite": 0,
+          "mean": 1.000881,
+          "std": 0.028873,
+          "mad_sigma": 0.018977,
+          "median": 0.99475,
+          "p05": 0.9683,
+          "p95": 1.0632,
+          "min": 0.9492,
+          "max": 1.1048
+        },
+        "MEE071|MEE073": {
+          "n": 200,
+          "n_non_finite": 0,
+          "mean": 1.001838,
+          "std": 0.022933,
+          "mad_sigma": 0.020831,
+          "median": 0.9991,
+          "p05": 0.9735,
+          "p95": 1.0484,
+          "min": 0.9629,
+          "max": 1.0969
+        }
+      },
+      "raw": {
+        "FEO070|FEO072": [
+          0.0373,
+          -0.0092,
+          -0.0342,
+          -0.0283,
+          -0.0906,
+          -0.0211,
+          -0.0073,
+          -0.0159,
+          -0.013,
+          0.0233,
+          0.0492,
+          -0.0282,
+          0.0593,
+          -0.0093,
+          0.1165,
+          -0.0238,
+          -0.084,
+          0.025,
+          -0.0173,
+          -0.0426,
+          -0.0317,
+          -0.0983,
+          -0.0351,
+          -0.0549,
+          -0.0125,
+          0.2338,
+          -0.0481,
+          -0.0012,
+          -0.0084,
+          0.0179,
+          -0.0283,
+          -0.0027,
+          -0.0323,
+          -0.007,
+          0.0604,
+          -0.0716,
+          -0.0312,
+          -0.0755,
+          0.1274,
+          0.0117,
+          -0.0457,
+          0.0286,
+          0.0267,
+          0.0153,
+          0.0361,
+          0.0548,
+          0.0174,
+          -0.0339,
+          0.22,
+          0.0123,
+          -0.0203,
+          -0.0046,
+          0.0133,
+          -0.0546,
+          -0.0859,
+          -0.0523,
+          -0.0822,
+          0.0151,
+          0.0227,
+          -0.0243,
+          -0.0534,
+          -0.0798,
+          -0.0192,
+          0.1041,
+          -0.0327,
+          -0.0464,
+          -0.1069,
+          -0.0183,
+          -0.0104,
+          -0.0745,
+          0.0132,
+          -0.0196,
+          -0.0539,
+          0.0388,
+          -0.0276,
+          0.014,
+          0.0511,
+          0.0145,
+          -0.0121,
+          0.0018,
+          -0.0227,
+          0.0349,
+          0.0155,
+          0.0593,
+          -0.0417,
+          0.0879,
+          0.0747,
+          0.0086,
+          -0.068,
+          0.0605,
+          0.0009,
+          -0.0708,
+          -0.0208,
+          -0.0362,
+          -0.0536,
+          -0.093,
+          0.0295,
+          -0.0379,
+          -0.0091,
+          -0.0286,
+          0.067,
+          -0.0606,
+          -0.0615,
+          -0.0891,
+          -0.017,
+          -0.11,
+          0.1376,
+          0.0263,
+          0.0082,
+          0.125,
+          -0.025,
+          -0.0038,
+          -0.0126,
+          0.0168,
+          -0.0024,
+          0.0064,
+          0.1348,
+          0.1003,
+          -0.0894,
+          0.0061,
+          0.2181,
+          0.0114,
+          0.0048,
+          0.0062,
+          0.031,
+          0.0001,
+          -0.0534,
+          -0.0583,
+          -0.0006,
+          -0.0191,
+          -0.0473,
+          -0.0569,
+          -0.0045,
+          0.0488,
+          -0.0445,
+          -0.0653,
+          0.021,
+          -0.0154,
+          -0.1045,
+          0.0433,
+          0.0085,
+          0.0598,
+          -0.0033,
+          0.0037,
+          -0.0117,
+          0.1601,
+          0.0369,
+          0.1236,
+          0.0211,
+          -0.0497,
+          0.0299,
+          0.0087,
+          0.1571,
+          0.0651,
+          -0.0725,
+          -0.0006,
+          0.0474,
+          -0.0145,
+          -0.0364,
+          0.1561,
+          0.0595,
+          0.0464,
+          0.052,
+          0.0175,
+          0.0345,
+          0.0203,
+          -0.0278,
+          -0.0197,
+          -0.0042,
+          -0.0167,
+          -0.0958,
+          -0.0283,
+          -0.0109,
+          -0.0133,
+          -0.0542,
+          -0.0018,
+          0.0494,
+          -0.038,
+          -0.0302,
+          -0.0633,
+          0.044,
+          -0.0526,
+          -0.0375,
+          -0.0972,
+          0.0446,
+          -0.0385,
+          0.1069,
+          0.1069,
+          0.0279,
+          0.1329,
+          0.0525,
+          -0.0432,
+          -0.0384,
+          -0.0148,
+          -0.0236,
+          -0.0583,
+          0.1234,
+          0.116,
+          0.0673,
+          0.0224
+        ],
+        "MEE071|MEE073": [
+          -0.0358,
+          0.0698,
+          0.0289,
+          -0.0278,
+          -0.0274,
+          -0.014,
+          -0.0081,
+          0.0251,
+          0.0177,
+          -0.0031,
+          -0.0243,
+          -0.0029,
+          -0.0248,
+          0.0104,
+          -0.0151,
+          -0.0519,
+          -0.0107,
+          0.0171,
+          0.0,
+          -0.0396,
+          -0.0132,
+          -0.0276,
+          -0.0585,
+          0.0336,
+          -0.0057,
+          -0.0482,
+          -0.0071,
+          -0.0465,
+          -0.0414,
+          -0.0295,
+          0.1198,
+          0.0639,
+          -0.0169,
+          0.0431,
+          0.0452,
+          0.0517,
+          0.0509,
+          -0.005,
+          0.0673,
+          0.0056,
+          -0.0315,
+          -0.0516,
+          -0.0085,
+          -0.0102,
+          0.0279,
+          -0.019,
+          0.0137,
+          0.0003,
+          0.0401,
+          0.1247,
+          0.0201,
+          0.0163,
+          0.0441,
+          -0.0627,
+          -0.011,
+          0.1228,
+          -0.0135,
+          -0.0216,
+          -0.0604,
+          -0.071,
+          0.033,
+          0.1125,
+          -0.0123,
+          -0.0135,
+          -0.0174,
+          0.1474,
+          -0.025,
+          -0.0279,
+          0.0235,
+          0.0493,
+          -0.0416,
+          -0.0031,
+          -0.0472,
+          0.0877,
+          -0.0076,
+          -0.0112,
+          0.0426,
+          0.0331,
+          -0.0444,
+          -0.0406,
+          0.0202,
+          -0.0481,
+          0.0121,
+          -0.0293,
+          -0.0188,
+          0.0179,
+          0.0003,
+          -0.0438,
+          -0.0161,
+          -0.0302,
+          0.0616,
+          0.0197,
+          -0.0535,
+          0.0225,
+          -0.0699,
+          -0.0101,
+          0.1908,
+          0.0296,
+          0.0219,
+          0.0166,
+          -0.0791,
+          0.0155,
+          -0.0003,
+          -0.0593,
+          -0.0054,
+          -0.0094,
+          0.0448,
+          -0.0219,
+          0.0149,
+          -0.0303,
+          0.0384,
+          -0.047,
+          0.0034,
+          0.0237,
+          -0.0398,
+          -0.0525,
+          0.0307,
+          -0.0334,
+          -0.0317,
+          0.0348,
+          0.0455,
+          -0.0344,
+          -0.0045,
+          -0.0514,
+          0.0266,
+          0.0023,
+          -0.0213,
+          0.051,
+          -0.0228,
+          -0.0501,
+          -0.0249,
+          -0.0107,
+          0.0205,
+          0.0451,
+          -0.0094,
+          -0.0076,
+          -0.0152,
+          0.0145,
+          0.0119,
+          0.0031,
+          0.0737,
+          -0.0106,
+          0.0358,
+          -0.0609,
+          -0.055,
+          -0.0327,
+          0.0004,
+          -0.0222,
+          -0.0125,
+          -0.0217,
+          -0.0157,
+          0.0892,
+          0.0221,
+          -0.0275,
+          -0.0308,
+          0.2069,
+          0.0583,
+          -0.0219,
+          0.022,
+          0.0102,
+          0.02,
+          -0.0354,
+          0.0036,
+          0.0027,
+          -0.0693,
+          0.0771,
+          0.0359,
+          0.0049,
+          0.0152,
+          0.0085,
+          -0.039,
+          0.0543,
+          0.0236,
+          -0.0521,
+          -0.0251,
+          -0.0511,
+          -0.0449,
+          0.1508,
+          0.0232,
+          0.0058,
+          -0.0062,
+          0.0653,
+          -0.0553,
+          0.0161,
+          0.0184,
+          0.0131,
+          0.019,
+          -0.0629,
+          0.0074,
+          -0.0086,
+          0.0107,
+          -0.0285,
+          0.0148,
+          -0.0271,
+          0.0029,
+          -0.0478,
+          -0.0396,
+          -0.0052,
+          -0.0513,
+          -0.0349
+        ]
+      }
+    },
+    "crop_and_scramble_nulls": {
+      "time_reversed": {
+        "FEO070|FEO072": {
+          "separation": {
+            "separation_sigma_mad": 0.0989,
+            "separation_sigma_std": 0.1263,
+            "mean_ratio": 1.0739,
+            "median_ratio": 1.0591,
+            "formula": "separation_sigma_mad = (median(between) - median(within)) / mad_sigma(within)"
+          },
+          "within_speaker": {
+            "n": 994,
+            "n_non_finite": 0,
+            "mean": 0.234782,
+            "std": 0.137287,
+            "mad_sigma": 0.124711,
+            "median": 0.208593,
+            "p05": 0.071749,
+            "p95": 0.526154,
+            "min": 0.035195,
+            "max": 0.785549
+          },
+          "between_speaker": {
+            "n": 897,
+            "n_non_finite": 0,
+            "mean": 0.252126,
+            "std": 0.144275,
+            "mad_sigma": 0.131153,
+            "median": 0.220927,
+            "p05": 0.073376,
+            "p95": 0.55746,
+            "min": 0.040389,
+            "max": 0.746623
+          }
+        },
+        "MEE071|MEE073": {
+          "separation": {
+            "separation_sigma_mad": 1.7569,
+            "separation_sigma_std": 1.0359,
+            "mean_ratio": 1.6863,
+            "median_ratio": 2.0211,
+            "formula": "separation_sigma_mad = (median(between) - median(within)) / mad_sigma(within)"
+          },
+          "within_speaker": {
+            "n": 1791,
+            "n_non_finite": 0,
+            "mean": 0.157784,
+            "std": 0.104534,
+            "mad_sigma": 0.074782,
+            "median": 0.128668,
+            "p05": 0.049277,
+            "p95": 0.356547,
+            "min": 0.021817,
+            "max": 0.674901
+          },
+          "between_speaker": {
+            "n": 1612,
+            "n_non_finite": 0,
+            "mean": 0.266072,
+            "std": 0.12422,
+            "mad_sigma": 0.142672,
+            "median": 0.260056,
+            "p05": 0.086606,
+            "p95": 0.477998,
+            "min": 0.0396,
+            "max": 0.644839
+          }
+        }
+      },
+      "gain_scaled": {
+        "FEO070|FEO072": {
+          "separation": {
+            "separation_sigma_mad": -0.023,
+            "separation_sigma_std": 0.036,
+            "mean_ratio": 1.0227,
+            "median_ratio": 0.981,
+            "formula": "separation_sigma_mad = (median(between) - median(within)) / mad_sigma(within)"
+          },
+          "within_speaker": {
+            "n": 994,
+            "n_non_finite": 0,
+            "mean": 0.247307,
+            "std": 0.156125,
+            "mad_sigma": 0.184585,
+            "median": 0.223643,
+            "p05": 0.04659,
+            "p95": 0.530182,
+            "min": 0.017605,
+            "max": 0.70454
+          },
+          "between_speaker": {
+            "n": 897,
+            "n_non_finite": 0,
+            "mean": 0.252931,
+            "std": 0.146401,
+            "mad_sigma": 0.153749,
+            "median": 0.219393,
+            "p05": 0.079128,
+            "p95": 0.522436,
+            "min": 0.03691,
+            "max": 0.707261
+          }
+        },
+        "MEE071|MEE073": {
+          "separation": {
+            "separation_sigma_mad": 2.3542,
+            "separation_sigma_std": 2.1837,
+            "mean_ratio": 2.1897,
+            "median_ratio": 2.3957,
+            "formula": "separation_sigma_mad = (median(between) - median(within)) / mad_sigma(within)"
+          },
+          "within_speaker": {
+            "n": 1791,
+            "n_non_finite": 0,
+            "mean": 0.179937,
+            "std": 0.098029,
+            "mad_sigma": 0.097509,
+            "median": 0.164468,
+            "p05": 0.050714,
+            "p95": 0.367251,
+            "min": 0.022337,
+            "max": 0.571255
+          },
+          "between_speaker": {
+            "n": 1612,
+            "n_non_finite": 0,
+            "mean": 0.394,
+            "std": 0.148879,
+            "mad_sigma": 0.170522,
+            "median": 0.394023,
+            "p05": 0.157919,
+            "p95": 0.63128,
+            "min": 0.056141,
+            "max": 0.854852
+          }
+        }
+      },
+      "white_noise": {
+        "FEO070|FEO072": {
+          "separation": {
+            "separation_sigma_mad": 0.0244,
+            "separation_sigma_std": 0.0557,
+            "mean_ratio": 1.0456,
+            "median_ratio": 1.0251,
+            "formula": "separation_sigma_mad = (median(between) - median(within)) / mad_sigma(within)"
+          },
+          "within_speaker": {
+            "n": 994,
+            "n_non_finite": 0,
+            "mean": 0.098141,
+            "std": 0.080379,
+            "mad_sigma": 0.072217,
+            "median": 0.07022,
+            "p05": 0.013105,
+            "p95": 0.255497,
+            "min": 0.00395,
+            "max": 0.32813
+          },
+          "between_speaker": {
+            "n": 897,
+            "n_non_finite": 0,
+            "mean": 0.102619,
+            "std": 0.084084,
+            "mad_sigma": 0.075762,
+            "median": 0.07198,
+            "p05": 0.012984,
+            "p95": 0.256056,
+            "min": 0.003469,
+            "max": 0.362187
+          }
+        },
+        "MEE071|MEE073": {
+          "separation": {
+            "separation_sigma_mad": -0.0032,
+            "separation_sigma_std": -0.0101,
+            "mean_ratio": 0.9917,
+            "median_ratio": 0.9972,
+            "formula": "separation_sigma_mad = (median(between) - median(within)) / mad_sigma(within)"
+          },
+          "within_speaker": {
+            "n": 1791,
+            "n_non_finite": 0,
+            "mean": 0.084232,
+            "std": 0.069611,
+            "mad_sigma": 0.051925,
+            "median": 0.059161,
+            "p05": 0.015464,
+            "p95": 0.22939,
+            "min": 0.006436,
+            "max": 0.359553
+          },
+          "between_speaker": {
+            "n": 1612,
+            "n_non_finite": 0,
+            "mean": 0.083529,
+            "std": 0.06936,
+            "mad_sigma": 0.051707,
+            "median": 0.058997,
+            "p05": 0.015188,
+            "p95": 0.234402,
+            "min": 0.006337,
+            "max": 0.324368
+          }
+        }
+      },
+      "description": {
+        "time_reversed": "the waveform reversed in time. If the separation survives, the measurement is about the VOICE, not about the temporal detail of the utterance.",
+        "gain_scaled": "each turn multiplied by a log-uniform random gain in [0.1, 10]. This model's preprocessor has do_normalize=false, so gain is NOT normalised away by construction; this measures what it actually costs.",
+        "white_noise": "each turn replaced by noise of the same length and RMS. There is no speaker in the audio at all, so any separation that survives here is an artefact."
+      }
+    }
+  },
+  "turn_change_task": {
+    "definition": {
+      "positive": "consecutive annotated turns with DIFFERENT speakers",
+      "negative_same_speaker": "consecutive annotated turns with the SAME speaker",
+      "negative_within_turn": "one turn split in half (no change at all)",
+      "score": "cosine distance between the last clip before the boundary and the first clip after it",
+      "clip_s": 2.0,
+      "clip_rule": "the last/first BOUNDARY_W_S seconds of the turn, clipped to the turn when the turn is shorter"
+    },
+    "n_boundaries": 197,
+    "n_clips_shorter_than_min_input_s": 209,
+    "n_clips_total": 394,
+    "n_positive_different_speaker": 78,
+    "n_negative_same_speaker": 119,
+    "n_within_turn_controls": 57,
+    "boundary_side_seconds": {
+      "n": 197,
+      "n_non_finite": 0,
+      "mean": 1.028376,
+      "std": 0.699853,
+      "mad_sigma": 0.859908,
+      "median": 0.88,
+      "p05": 0.2,
+      "p95": 2.0,
+      "min": 0.02,
+      "max": 2.0
+    },
+    "embedding": {
+      "eer_vs_same_speaker": {
+        "eer": 0.260504,
+        "eer_definition": "min over thresholds of max(miss_rate, false_alarm_rate)",
+        "at_threshold": 0.45816958591400425,
+        "miss_rate": 0.25641,
+        "false_alarm_rate": 0.260504,
+        "crossing": {
+          "threshold": 0.026925699837270334,
+          "miss_rate": 0.0,
+          "false_alarm_rate": 1.0
+        },
+        "n_target": 78,
+        "n_impostor": 119
+      },
+      "eer_vs_same_speaker_and_within_turn": {
+        "eer": 0.221591,
+        "eer_definition": "min over thresholds of max(miss_rate, false_alarm_rate)",
+        "at_threshold": 0.410520971100628,
+        "miss_rate": 0.217949,
+        "false_alarm_rate": 0.221591,
+        "crossing": {
+          "threshold": 0.026925699837270334,
+          "miss_rate": 0.0,
+          "false_alarm_rate": 1.0
+        },
+        "n_target": 78,
+        "n_impostor": 176
+      },
+      "eer_restricted_to_boundaries_with_1p5s_on_both_sides": {
+        "eer": 0.175439,
+        "eer_definition": "min over thresholds of max(miss_rate, false_alarm_rate)",
+        "at_threshold": 0.2587341996047128,
+        "miss_rate": 0.125,
+        "false_alarm_rate": 0.175439,
+        "crossing": {
+          "threshold": 0.026925699837270334,
+          "miss_rate": 0.0,
+          "false_alarm_rate": 1.0
+        },
+        "n_target": 8,
+        "n_impostor": 57
+      },
+      "positive_scores": [
+        0.652637,
+        0.4995,
+        0.289868,
+        0.742953,
+        0.593691,
+        0.694117,
+        0.674133,
+        0.70083,
+        0.683012,
+        0.726555,
+        0.28088,
+        0.482348,
+        0.425215,
+        0.383602,
+        0.844743,
+        0.79217,
+        0.540509,
+        0.52744,
+        0.703356,
+        0.48854,
+        0.122872,
+        0.625555,
+        0.349851,
+        0.664032,
+        0.727226,
+        0.391903,
+        0.69155,
+        0.591314,
+        0.709615,
+        0.140521,
+        0.459773,
+        0.528552,
+        0.529828,
+        0.507943,
+        0.359532,
+        0.797358,
+        0.37151,
+        0.45817,
+        0.589361,
+        0.447055,
+        1.0,
+        0.53223,
+        0.626042,
+        0.742327,
+        0.815334,
+        0.258734,
+        0.693677,
+        0.345097,
+        0.410521,
+        0.396018,
+        0.397875,
+        0.819921,
+        0.892848,
+        0.377623,
+        0.31883,
+        0.713267,
+        1.0,
+        0.70348,
+        0.473304,
+        0.487556,
+        0.832734,
+        0.840552,
+        0.471565,
+        0.664734,
+        0.704858,
+        0.126095,
+        0.525223,
+        0.571233,
+        0.660623,
+        0.615007,
+        0.483607,
+        0.602488,
+        1.0,
+        1.0,
+        0.734784,
+        0.31309,
+        0.681133,
+        0.671811
+      ],
+      "negative_same_speaker_scores": [
+        0.214865,
+        0.121875,
+        0.273443,
+        0.608077,
+        0.239708,
+        0.174678,
+        0.21974,
+        0.391483,
+        0.485393,
+        0.607713,
+        1.0,
+        0.369421,
+        0.573859,
+        0.107449,
+        0.87078,
+        0.550276,
+        0.895514,
+        0.583488,
+        0.351456,
+        0.320259,
+        0.426078,
+        0.298826,
+        0.0588,
+        0.642341,
+        0.092728,
+        0.093483,
+        0.108089,
+        0.16655,
+        0.113704,
+        0.202512,
+        0.579529,
+        0.722583,
+        0.060543,
+        0.459531,
+        0.252787,
+        0.289419,
+        0.486342,
+        0.163116,
+        0.173094,
+        0.408796,
+        0.524128,
+        0.306148,
+        0.173976,
+        0.177467,
+        0.218354,
+        0.387797,
+        0.230668,
+        0.066306,
+        0.137025,
+        0.266668,
+        0.114312,
+        0.075997,
+        0.615952,
+        0.051585,
+        0.5781,
+        0.122089,
+        0.32953,
+        0.609393,
+        0.086343,
+        0.074163,
+        0.359967,
+        0.683005,
+        0.457294,
+        0.296614,
+        0.219913,
+        0.10482,
+        0.100066,
+        0.828111,
+        0.276557,
+        0.428248,
+        0.500173,
+        0.15352,
+        0.044242,
+        0.114433,
+        0.667917,
+        0.52216,
+        0.161281,
+        0.605675,
+        0.146777,
+        0.216779,
+        0.111278,
+        0.086571,
+        0.160742,
+        0.148594,
+        0.120743,
+        0.128919,
+        0.104927,
+        0.108188,
+        0.026926,
+        0.60516,
+        0.468844,
+        0.532212,
+        0.172099,
+        0.196217,
+        0.125707,
+        0.06672,
+        0.153581,
+        0.090372,
+        0.078387,
+        0.263624,
+        0.114214,
+        0.088269,
+        0.458625,
+        0.230072,
+        0.171002,
+        0.548631,
+        0.144784,
+        0.089421,
+        0.222487,
+        0.124574,
+        0.096432,
+        0.226942,
+        0.07337,
+        0.134182,
+        0.245662,
+        0.259849,
+        0.579321,
+        0.168924,
+        0.698514
+      ],
+      "within_turn_scores": [
+        0.266031,
+        0.192448,
+        0.171093,
+        0.35506,
+        0.218332,
+        0.278027,
+        0.215635,
+        0.641619,
+        0.062164,
+        0.218848,
+        0.103169,
+        0.240966,
+        0.514194,
+        0.189069,
+        0.302248,
+        0.216409,
+        0.180299,
+        0.630938,
+        0.177262,
+        0.279941,
+        0.186254,
+        0.077523,
+        0.069778,
+        0.115615,
+        0.301289,
+        0.753198,
+        0.101031,
+        0.272542,
+        0.076643,
+        0.321571,
+        0.14345,
+        0.039777,
+        0.47865,
+        0.233234,
+        0.201273,
+        0.047397,
+        0.056415,
+        0.051451,
+        0.094487,
+        0.066624,
+        0.104933,
+        0.142438,
+        0.116429,
+        0.159028,
+        0.066239,
+        0.189419,
+        0.381705,
+        0.162867,
+        0.129842,
+        0.090067,
+        0.32627,
+        0.283254,
+        0.292141,
+        0.141021,
+        0.094076,
+        0.224628,
+        0.398056
+      ],
+      "positive": {
+        "n": 78,
+        "n_non_finite": 0,
+        "mean": 0.58069,
+        "std": 0.201496,
+        "mad_sigma": 0.188044,
+        "median": 0.592502,
+        "p05": 0.258734,
+        "p95": 1.0,
+        "min": 0.122872,
+        "max": 1.0
+      },
+      "negative_same_speaker": {
+        "n": 119,
+        "n_non_finite": 0,
+        "mean": 0.295941,
+        "std": 0.220145,
+        "mad_sigma": 0.177429,
+        "median": 0.21974,
+        "p05": 0.066306,
+        "p95": 0.698514,
+        "min": 0.026926,
+        "max": 1.0
+      },
+      "within_turn": {
+        "n": 57,
+        "n_non_finite": 0,
+        "mean": 0.218322,
+        "std": 0.153778,
+        "mad_sigma": 0.131889,
+        "median": 0.189069,
+        "p05": 0.051451,
+        "p95": 0.630938,
+        "min": 0.039777,
+        "max": 0.753198
+      }
+    },
+    "f0_baseline": {
+      "eer_vs_same_speaker": {
+        "eer": 0.346154,
+        "eer_definition": "min over thresholds of max(miss_rate, false_alarm_rate)",
+        "at_threshold": 33.552637635825064,
+        "miss_rate": 0.346154,
+        "false_alarm_rate": 0.344538,
+        "crossing": {
+          "threshold": 0.23103496533393297,
+          "miss_rate": 0.0,
+          "false_alarm_rate": 1.0
+        },
+        "n_target": 78,
+        "n_impostor": 119
+      },
+      "positive_scores": [
+        7.375117,
+        26.259138,
+        205.377733,
+        183.282503,
+        172.582367,
+        9.882147,
+        96.622568,
+        135.349619,
+        129.676051,
+        14.659285,
+        105.793767,
+        138.654002,
+        15.807714,
+        139.895367,
+        97.097648,
+        129.122845,
+        99.266418,
+        111.108837,
+        127.480862,
+        17.247792,
+        6.570503,
+        31.506269,
+        96.324832,
+        6.59408,
+        134.104256,
+        2.14747,
+        46.310415,
+        19.191177,
+        97.45475,
+        40.455758,
+        84.803289,
+        102.081727,
+        90.64439,
+        82.78989,
+        74.58483,
+        9.818158,
+        21.144772,
+        4.786231,
+        122.331522,
+        133.429801,
+        30.382435,
+        41.723559,
+        19.256647,
+        82.280394,
+        98.643445,
+        75.06063,
+        106.485799,
+        4.752722,
+        10.048074,
+        7.203827,
+        91.137954,
+        81.52857,
+        103.849964,
+        82.992533,
+        225.368321,
+        111.883222,
+        135.441699,
+        97.032246,
+        89.781603,
+        190.884809,
+        129.695805,
+        123.385976,
+        5.620056,
+        100.733758,
+        103.617965,
+        27.345389,
+        3.13245,
+        119.493681,
+        100.049799,
+        18.647934,
+        11.325094,
+        12.019103,
+        105.809296,
+        110.710504,
+        111.42193,
+        89.652423,
+        8.008098,
+        9.914866
+      ],
+      "negative_same_speaker_scores": [
+        22.460767,
+        2.749618,
+        162.945828,
+        252.472891,
+        5.817651,
+        3.777761,
+        4.346557,
+        40.209283,
+        102.770434,
+        84.555298,
+        111.065968,
+        4.815808,
+        0.231035,
+        5.490502,
+        3.510929,
+        5.909598,
+        2.379088,
+        95.30142,
+        25.16196,
+        15.419484,
+        33.552638,
+        12.186527,
+        7.907572,
+        128.679368,
+        6.776839,
+        8.238085,
+        27.100902,
+        34.013882,
+        14.979982,
+        58.656665,
+        42.391813,
+        147.403682,
+        6.764937,
+        15.416868,
+        3.231366,
+        51.035286,
+        99.179625,
+        1.92145,
+        71.707332,
+        33.253466,
+        71.5905,
+        1.112564,
+        25.470005,
+        16.207744,
+        7.454417,
+        20.564056,
+        105.015329,
+        13.334445,
+        133.896915,
+        76.041253,
+        41.462899,
+        119.884934,
+        89.94747,
+        36.533637,
+        7.355171,
+        1.712686,
+        24.224047,
+        17.077202,
+        8.899828,
+        31.167009,
+        6.770631,
+        0.323437,
+        13.892582,
+        2.969762,
+        14.901744,
+        116.988032,
+        1.838709,
+        114.411936,
+        159.406232,
+        110.571033,
+        47.37746,
+        90.498113,
+        5.823491,
+        87.636548,
+        20.86426,
+        40.726687,
+        3.523499,
+        109.989979,
+        86.819483,
+        72.341735,
+        11.376939,
+        6.880142,
+        4.154811,
+        9.13801,
+        8.690616,
+        10.915249,
+        9.376956,
+        9.124513,
+        6.326844,
+        11.41131,
+        20.041514,
+        1.991592,
+        33.999105,
+        3.366426,
+        3.620683,
+        4.680282,
+        3.759491,
+        1.963477,
+        2.975269,
+        5.053055,
+        3.751071,
+        4.987491,
+        92.615069,
+        0.707642,
+        4.875811,
+        51.963875,
+        88.55385,
+        88.206059,
+        88.709042,
+        5.495121,
+        2.749686,
+        5.281225,
+        18.875526,
+        0.697399,
+        2.669018,
+        8.851561,
+        8.559924,
+        19.752257,
+        11.722494
+      ],
+      "positive": {
+        "n": 78,
+        "n_non_finite": 0,
+        "mean": 77.512032,
+        "std": 55.675662,
+        "mad_sigma": 65.081574,
+        "median": 90.212997,
+        "p05": 4.786231,
+        "p95": 183.282503,
+        "min": 2.14747,
+        "max": 225.368321
+      },
+      "negative_same_speaker": {
+        "n": 119,
+        "n_non_finite": 0,
+        "mean": 36.893177,
+        "std": 46.401155,
+        "mad_sigma": 16.520458,
+        "median": 13.892582,
+        "p05": 1.712686,
+        "p95": 128.679368,
+        "min": 0.231035,
+        "max": 252.472891
+      },
+      "note": "the same boundaries, scored by |median f0 before - median f0 after| in Hz"
+    },
+    "shuffled_label_null": {
+      "n_permutations": 200,
+      "seed": 20261020,
+      "observed_eer": 0.260504,
+      "null_eer": {
+        "n": 200,
+        "n_non_finite": 0,
+        "mean": 0.499653,
+        "std": 0.042807,
+        "mad_sigma": 0.042403,
+        "median": 0.5,
+        "p05": 0.433566,
+        "p95": 0.568966,
+        "min": 0.402878,
+        "max": 0.623288
+      },
+      "permutation_test": {
+        "p_value": 0.004975,
+        "n_null": 200,
+        "n_null_at_least_as_extreme": 0,
+        "tail": "at_or_below_observed",
+        "direction": "lower is better",
+        "null_mean": 0.4997,
+        "null_max": 0.6233,
+        "null_median": 0.5
+      },
+      "note": "the boundary geometry and the scores are held fixed; only the speaker labels over the turns are permuted, so the hand-off / same-speaker classes are reassigned at random"
+    },
+    "degenerate_baselines": {
+      "constant_decision_always_change": {
+        "eer": 0.5,
+        "note": "predicting 'speaker changed' for every boundary scores EER 0.5 by construction. It is written down so the headline cannot be read without it."
+      },
+      "constant_decision_always_same": {
+        "eer": 0.5,
+        "note": "the mirror image; also 0.5 by construction."
+      }
+    }
+  },
+  "headset_channel_reference": {
+    "role": "channel-separated reference: one headset microphone per speaker, so speaker identity is separation of the recording, not an inference",
+    "min_len_s": 2.0,
+    "per_speaker_turns": {
+      "FEO070": 2,
+      "FEO072": 6,
+      "MEE071": 4,
+      "MEE073": 7
+    },
+    "pairs": {
+      "FEO070|FEO072": {
+        "within_speaker": {
+          "n": 16,
+          "n_non_finite": 0,
+          "mean": 0.06769,
+          "std": 0.020954,
+          "mad_sigma": 0.021684,
+          "median": 0.069337,
+          "p05": 0.036587,
+          "p95": 0.117126,
+          "min": 0.036587,
+          "max": 0.117126
+        },
+        "between_speaker": {
+          "n": 12,
+          "n_non_finite": 0,
+          "mean": 0.090746,
+          "std": 0.041375,
+          "mad_sigma": 0.034797,
+          "median": 0.076738,
+          "p05": 0.048122,
+          "p95": 0.17475,
+          "min": 0.048122,
+          "max": 0.17475
+        },
+        "separation": {
+          "separation_sigma_mad": 0.3413,
+          "separation_sigma_std": 1.1003,
+          "mean_ratio": 1.3406,
+          "median_ratio": 1.1067,
+          "formula": "separation_sigma_mad = (median(between) - median(within)) / mad_sigma(within)"
+        }
+      },
+      "MEE071|MEE073": {
+        "within_speaker": {
+          "n": 27,
+          "n_non_finite": 0,
+          "mean": 0.205427,
+          "std": 0.215251,
+          "mad_sigma": 0.076501,
+          "median": 0.098642,
+          "p05": 0.038286,
+          "p95": 0.614948,
+          "min": 0.033312,
+          "max": 0.619062
+        },
+        "between_speaker": {
+          "n": 28,
+          "n_non_finite": 0,
+          "mean": 0.443138,
+          "std": 0.135361,
+          "mad_sigma": 0.138923,
+          "median": 0.428329,
+          "p05": 0.229493,
+          "p95": 0.689987,
+          "min": 0.210627,
+          "max": 0.708414
+        },
+        "separation": {
+          "separation_sigma_mad": 4.3096,
+          "separation_sigma_std": 1.1043,
+          "mean_ratio": 2.1572,
+          "median_ratio": 4.3423,
+          "formula": "separation_sigma_mad = (median(between) - median(within)) / mad_sigma(within)"
+        }
+      }
+    }
+  },
+  "realaudio_exploratory": {
+    "status": "EXPLORATORY -- no per-turn speaker ground truth exists in this corpus, so nothing here is evidence about speaker accuracy",
+    "window_s": 3.0,
+    "hop_s": 1.5,
+    "narration": {
+      "path": "examples/realaudio/alice01_excerpt.wav",
+      "sha256": "0b83c9c6038273565fc7056a62843460fa9c5d17497ff858b98081aa914f75d7",
+      "duration_s": 90.0,
+      "n_windows": 59,
+      "pairwise_distance": {
+        "n": 1711,
+        "n_non_finite": 0,
+        "mean": 0.141569,
+        "std": 0.071059,
+        "mad_sigma": 0.065749,
+        "median": 0.129534,
+        "p05": 0.048746,
+        "p95": 0.278673,
+        "min": 0.01464,
+        "max": 0.528454
+      },
+      "adjacent_window_distance": {
+        "n": 58,
+        "n_non_finite": 0,
+        "mean": 0.080019,
+        "std": 0.074134,
+        "mad_sigma": 0.039311,
+        "median": 0.055579,
+        "p05": 0.017865,
+        "p95": 0.181843,
+        "min": 0.01464,
+        "max": 0.427799
+      },
+      "label_free_two_cluster_split": {
+        "centres": [
+          0.10196,
+          0.223849
+        ],
+        "cluster_sizes": [
+          1155,
+          556
+        ],
+        "centre_separation_in_pooled_std": 1.7158,
+        "note": "a split whose centres sit close together is NOT a voice split; this is a label-free structure check, not a speaker count"
+      },
+      "median_f0_hz": 229.44,
+      "voiced_frames": 4478,
+      "ground_truth": "NONE"
+    },
+    "poetry": {
+      "path": "examples/realaudio/corpus/poetry_weeds_by_the_wall_1702_librivox.wav",
+      "sha256": "250716341db1c3c8d0db0c1590f18d0f4a2c27729afbd0a444953c0e0e4180a4",
+      "duration_s": 20.011125,
+      "n_windows": 12,
+      "pairwise_distance": {
+        "n": 66,
+        "n_non_finite": 0,
+        "mean": 0.139299,
+        "std": 0.142104,
+        "mad_sigma": 0.038009,
+        "median": 0.059853,
+        "p05": 0.014986,
+        "p95": 0.384301,
+        "min": 0.005459,
+        "max": 0.396719
+      },
+      "adjacent_window_distance": {
+        "n": 11,
+        "n_non_finite": 0,
+        "mean": 0.062922,
+        "std": 0.110541,
+        "mad_sigma": 0.02464,
+        "median": 0.027586,
+        "p05": 0.005459,
+        "p95": 0.389133,
+        "min": 0.005459,
+        "max": 0.389133
+      },
+      "label_free_two_cluster_split": {
+        "centres": [
+          0.047839,
+          0.349655
+        ],
+        "cluster_sizes": [
+          46,
+          20
+        ],
+        "centre_separation_in_pooled_std": 2.1402,
+        "note": "a split whose centres sit close together is NOT a voice split; this is a label-free structure check, not a speaker count"
+      },
+      "median_f0_hz": 195.61,
+      "voiced_frames": 783,
+      "ground_truth": "NONE"
+    },
+    "essay": {
+      "path": "examples/realaudio/corpus/essay_perpetual_peace_librivox.wav",
+      "sha256": "a3b7212251fe571e8e14d96b25a42e8f46eda94160a00e7a376d06e4493746b4",
+      "duration_s": 75.0,
+      "n_windows": 49,
+      "pairwise_distance": {
+        "n": 1176,
+        "n_non_finite": 0,
+        "mean": 0.134297,
+        "std": 0.145155,
+        "mad_sigma": 0.052219,
+        "median": 0.08734,
+        "p05": 0.031914,
+        "p95": 0.469988,
+        "min": 0.004914,
+        "max": 0.813423
+      },
+      "adjacent_window_distance": {
+        "n": 48,
+        "n_non_finite": 0,
+        "mean": 0.087372,
+        "std": 0.127111,
+        "mad_sigma": 0.033752,
+        "median": 0.042473,
+        "p05": 0.015151,
+        "p95": 0.342719,
+        "min": 0.013785,
+        "max": 0.716777
+      },
+      "label_free_two_cluster_split": {
+        "centres": [
+          0.094718,
+          0.555558
+        ],
+        "cluster_sizes": [
+          1075,
+          101
+        ],
+        "centre_separation_in_pooled_std": 3.1762,
+        "note": "a split whose centres sit close together is NOT a voice split; this is a label-free structure check, not a speaker count"
+      },
+      "median_f0_hz": 89.55,
+      "voiced_frames": 2297,
+      "ground_truth": "NONE"
+    },
+    "dialogue": {
+      "path": "examples/realaudio/corpus/shortstory_shortstory058_1405_librivox.wav",
+      "sha256": "4261c667a495ba7c107fdd5d4028946f3b6e55dce8535946dcfb0c8e75f5146e",
+      "duration_s": 75.0,
+      "n_windows": 49,
+      "pairwise_distance": {
+        "n": 1176,
+        "n_non_finite": 0,
+        "mean": 0.080538,
+        "std": 0.03283,
+        "mad_sigma": 0.030016,
+        "median": 0.07426,
+        "p05": 0.036538,
+        "p95": 0.142141,
+        "min": 0.014337,
+        "max": 0.228069
+      },
+      "adjacent_window_distance": {
+        "n": 48,
+        "n_non_finite": 0,
+        "mean": 0.048381,
+        "std": 0.025371,
+        "mad_sigma": 0.021018,
+        "median": 0.039696,
+        "p05": 0.01947,
+        "p95": 0.097399,
+        "min": 0.014337,
+        "max": 0.115346
+      },
+      "label_free_two_cluster_split": {
+        "centres": [
+          0.061531,
+          0.117551
+        ],
+        "cluster_sizes": [
+          777,
+          399
+        ],
+        "centre_separation_in_pooled_std": 1.7071,
+        "note": "a split whose centres sit close together is NOT a voice split; this is a label-free structure check, not a speaker count"
+      },
+      "median_f0_hz": 109.15,
+      "voiced_frames": 4158,
+      "ground_truth": "NONE"
+    },
+    "shakespeare": {
+      "path": "examples/realaudio/corpus/shakespeare_midsummernightsdream_1201_librivox.wav",
+      "sha256": "81d9184fe917994c7e6d2ab2e9a5afb0924a2aec5d89fac0d44118dc6736cbe5",
+      "duration_s": 75.0,
+      "n_windows": 49,
+      "pairwise_distance": {
+        "n": 1176,
+        "n_non_finite": 0,
+        "mean": 0.318019,
+        "std": 0.210424,
+        "mad_sigma": 0.242956,
+        "median": 0.256501,
+        "p05": 0.056785,
+        "p95": 0.653508,
+        "min": 0.014623,
+        "max": 0.719308
+      },
+      "adjacent_window_distance": {
+        "n": 48,
+        "n_non_finite": 0,
+        "mean": 0.08416,
+        "std": 0.096818,
+        "mad_sigma": 0.041891,
+        "median": 0.057094,
+        "p05": 0.018829,
+        "p95": 0.243216,
+        "min": 0.014623,
+        "max": 0.532738
+      },
+      "label_free_two_cluster_split": {
+        "centres": [
+          0.172855,
+          0.571716
+        ],
+        "cluster_sizes": [
+          748,
+          428
+        ],
+        "centre_separation_in_pooled_std": 1.8963,
+        "note": "a split whose centres sit close together is NOT a voice split; this is a label-free structure check, not a speaker count"
+      },
+      "median_f0_hz": 154.48,
+      "voiced_frames": 3956,
+      "ground_truth": "NONE"
+    },
+    "children": {
+      "path": "examples/realaudio/corpus/children_english_fairy_tales_joy_librivox.wav",
+      "sha256": "67dc248634d4f5e589f75bc1029b039c8be60db6d71962f07d95d26af5b7f9c0",
+      "duration_s": 75.0,
+      "n_windows": 49,
+      "pairwise_distance": {
+        "n": 1176,
+        "n_non_finite": 0,
+        "mean": 0.058019,
+        "std": 0.028424,
+        "mad_sigma": 0.024269,
+        "median": 0.051339,
+        "p05": 0.023393,
+        "p95": 0.112575,
+        "min": 0.008837,
+        "max": 0.206939
+      },
+      "adjacent_window_distance": {
+        "n": 48,
+        "n_non_finite": 0,
+        "mean": 0.031793,
+        "std": 0.021876,
+        "mad_sigma": 0.014186,
+        "median": 0.026869,
+        "p05": 0.012743,
+        "p95": 0.069277,
+        "min": 0.008837,
+        "max": 0.139458
+      },
+      "label_free_two_cluster_split": {
+        "centres": [
+          0.043089,
+          0.093254
+        ],
+        "cluster_sizes": [
+          826,
+          350
+        ],
+        "centre_separation_in_pooled_std": 1.7656,
+        "note": "a split whose centres sit close together is NOT a voice split; this is a label-free structure check, not a speaker count"
+      },
+      "median_f0_hz": 180.77,
+      "voiced_frames": 3996,
+      "ground_truth": "NONE"
+    },
+    "oration": {
+      "path": "examples/realaudio/corpus/oration_jfks19620912.wav",
+      "sha256": "a0e55371637efa1a2a8aec367b5e64e11910bcf5d7fdbf7f0d054fd848f4681d",
+      "duration_s": 75.0,
+      "n_windows": 49,
+      "pairwise_distance": {
+        "n": 1176,
+        "n_non_finite": 0,
+        "mean": 0.118922,
+        "std": 0.059375,
+        "mad_sigma": 0.049479,
+        "median": 0.105125,
+        "p05": 0.048526,
+        "p95": 0.236754,
+        "min": 0.011401,
+        "max": 0.418903
+      },
+      "adjacent_window_distance": {
+        "n": 48,
+        "n_non_finite": 0,
+        "mean": 0.075173,
+        "std": 0.040509,
+        "mad_sigma": 0.03686,
+        "median": 0.066566,
+        "p05": 0.023925,
+        "p95": 0.138455,
+        "min": 0.011401,
+        "max": 0.227348
+      },
+      "label_free_two_cluster_split": {
+        "centres": [
+          0.090181,
+          0.198861
+        ],
+        "cluster_sizes": [
+          865,
+          311
+        ],
+        "centre_separation_in_pooled_std": 1.8312,
+        "note": "a split whose centres sit close together is NOT a voice split; this is a label-free structure check, not a speaker count"
+      },
+      "median_f0_hz": 196.12,
+      "voiced_frames": 4795,
+      "ground_truth": "NONE"
+    }
+  },
+  "falsified": [
+    "FEO070|FEO072: the pair is NOT resolved by the embedding (0.1577 sigma, 2-speaker EER 0.333333). Failed: separation_sigma_mad, two_speaker_eer. Pitch could not resolve it either, and neither can the embedding."
+  ]
+}

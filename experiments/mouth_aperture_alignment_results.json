@@ -1,0 +1,3080 @@
+{
+  "identity": {
+    "script": "experiments/mouth_aperture_alignment.py",
+    "question": "does the MOUTH's motion, measured with a face landmark model, track the AUDIO's speech in time?",
+    "run_utc": "2026-10-20T09:56:30+00:00",
+    "python": "3.12.15",
+    "numpy": "1.26.4",
+    "opencv": "4.11.0",
+    "mediapipe": "0.10.21",
+    "landmark_model": {
+      "model": "MediaPipe FaceMesh (mp.solutions.face_mesh.FaceMesh)",
+      "static_image_mode": true,
+      "max_num_faces": 1,
+      "refine_landmarks": true,
+      "min_detection_confidence": 0.05,
+      "min_tracking_confidence": 0.05,
+      "n_landmarks": 478,
+      "bundled_model_files": {
+        "/home/proart/projects/gpu-venv/lib/python3.12/site-packages/mediapipe/modules/face_landmark/face_landmark_with_attention.tflite": {
+          "sha256": "e06a804e0144f9929eda782122916b35d60c697c3c9344013ca2bbe76a6ce2b4",
+          "bytes": 2495106
+        },
+        "/home/proart/projects/gpu-venv/lib/python3.12/site-packages/mediapipe/modules/face_landmark/face_landmark.tflite": {
+          "sha256": "1055cb9d4a9ca8b8c688902a3a5194311138ba256bcc94e336d8373a5f30c814",
+          "bytes": 1242398
+        },
+        "/home/proart/projects/gpu-venv/lib/python3.12/site-packages/mediapipe/modules/palm_detection/palm_detection_full.tflite": {
+          "sha256": "1b14e9422c6ad006cde6581a46c8b90dd573c07ab7f3934b5589e7cea3f89a54",
+          "bytes": 2339846
+        },
+        "/home/proart/projects/gpu-venv/lib/python3.12/site-packages/mediapipe/modules/palm_detection/palm_detection_lite.tflite": {
+          "sha256": "e9a4aaddf90dda56a87235303cf00e4c2d3fb28725f68fd88772997dac905c18",
+          "bytes": 1985440
+        },
+        "/home/proart/projects/gpu-venv/lib/python3.12/site-packages/mediapipe/modules/iris_landmark/iris_landmark.tflite": {
+          "sha256": "d1744d2a09c25f501d39eba4faff47e53ecca8852c5ce19bce8eeac39357521f",
+          "bytes": 2640568
+        }
+      }
+    },
+    "upscale_factor": 4,
+    "upscale_interpolation": "cv2.INTER_CUBIC",
+    "upscale_sensitivity_factors": [
+      1,
+      6
+    ],
+    "landmark_indices": {
+      "upper_inner_lip": 13,
+      "lower_inner_lip": 14,
+      "mouth_corner_right": 61,
+      "mouth_corner_left": 291,
+      "nose_tip": 1,
+      "chin_bottom": 152,
+      "forehead_top": 10,
+      "eye_outer_right": 33,
+      "eye_outer_left": 263
+    },
+    "video_fps": 30.0,
+    "fps_evidence": "900 frames = 30.00 s at 30 fps against a 29.981 s recording (36.0 s at 25 fps); the empty room is 4500 frames = 150.00 s at 30 fps against 149.906 s (180 s at 25 fps). The frame rate is DERIVED from the two spans agreeing, not assumed. Read at the repository's 23040-byte stride the video would be 25 s for 30 s of audio, which is the same disagreement seen from the other side.",
+    "record_layout": {
+      "record_bytes": 19200,
+      "luma_bytes": 15360,
+      "chroma_bytes": 3840,
+      "frame_w": 160,
+      "frame_h": 96,
+      "note": "each record is 15360 bytes of 160x96 luma followed by 3840 bytes of chroma. The file is NOT NV12: the writer ('/mnt/c/proart_capture/nv12small.py') appends the INTERLEAVED uv plane, so the stride is 19200 and not 23040, and there is no V plane of its own.",
+      "writer": "/mnt/c/proart_capture/nv12small.py",
+      "torn_stride_for_comparison": 23040
+    },
+    "correction": {
+      "date": "2026-10-20",
+      "what": "the stride. Every reader in this repository assumed a 23040-byte NV12 frame; the files are 19200-byte records. Read at 23040, every frame is torn between two real frames. This lane was written against the CORRECTED stride from the start and has never published a number computed on the torn reading; the torn reading is run only as a labelled sensitivity row.",
+      "affects": "the seeded corpus maps, and therefore TEACHER-LOO-FOLDS.md \u00a72 and \u00a73, which were computed on torn frames. Those two sections are measured on an instrument that was reading a tear, not the person."
+    },
+    "correlation_params": {
+      "hop_samples": 512,
+      "hop_s": 0.032,
+      "offset_search_s": 15.0,
+      "max_lag_hops": 468,
+      "n_lags_searched": 937,
+      "detrend_window_s": 2.0,
+      "detrend_window_hops": 62,
+      "detrend": "2 s moving average, from audio_video_alignment.detrend; both signals are detrended before every comparison",
+      "statistic": "max over lags of the Pearson correlation on the 32 ms hop grid",
+      "lag_sign": "a POSITIVE lag means the mouth signal leads the speech envelope, the same convention as audio_video_alignment.correlate",
+      "imported_from": "experiments/audio_video_alignment.py"
+    },
+    "audio_gate": {
+      "module": "src/vad.py",
+      "model": "models/silero_vad.onnx",
+      "frame_samples": 512,
+      "sample_rate": 16000,
+      "note": "the repo's own gate, so 'speech' means the same thing here as it does everywhere else"
+    }
+  },
+  "inputs": {
+    "/mnt/c/proart_capture/A.nv12": {
+      "sha256": "b65cf944aa4e8a65932d4c140335a495fa6a1707f28025d40fb08d31fa33bc73",
+      "bytes": 17280000
+    },
+    "/mnt/c/proart_capture/A.wav": {
+      "sha256": "708d35bec71e74f84a06eb397fa313a721ca583183ecf609a56a802b4eed1c2f",
+      "bytes": 959444
+    },
+    "/mnt/c/proart_capture/B.nv12": {
+      "sha256": "c87269568fabea99d39bc40b46e9a8d3026c72c241d8194f7d9c27181e893e04",
+      "bytes": 17280000
+    },
+    "/mnt/c/proart_capture/B.wav": {
+      "sha256": "c013fd540751f844a335cf462a92a51f79fc9f06c4fb5114c966c379fff5503d",
+      "bytes": 959444
+    },
+    "/mnt/c/proart_capture/C.nv12": {
+      "sha256": "937ac321bc436ea41b50508b5431f7c6862f32641c127c7800191b9ce080e5cf",
+      "bytes": 17280000
+    },
+    "/mnt/c/proart_capture/C.wav": {
+      "sha256": "c30058a41b0b59ea17cc46f746d26f870c8bcdfcabd00a21ed46b6f5c8a90280",
+      "bytes": 959444
+    },
+    "/mnt/c/proart_capture/empty1.nv12": {
+      "sha256": "da348ccaf08c030dedea4b2e070ceb1149a4f11d3e9287e8212a480a58c05303",
+      "bytes": 86400000
+    },
+    "/mnt/c/proart_capture/empty1.wav": {
+      "sha256": "f4bedc789ff1e807c789b083efac188bbd5207c15d3ea74698ae928b3576c0bc",
+      "bytes": 4797044
+    },
+    "/home/proart/projects/communicator/models/silero_vad.onnx": {
+      "sha256": "1a153a22f4509e292a94e67d6f9b85e8deb25b4988682b7e174c65279d8788e3",
+      "bytes": 2327524
+    },
+    "/home/proart/projects/communicator/experiments/audio_video_alignment.py": {
+      "sha256": "ce23c0be34cb58350fd022502cc676aa532de9904a297e46d2a8192fd1f0f4f1",
+      "bytes": 14854
+    },
+    "/home/proart/projects/communicator/experiments/audio_video_alignment_results.json": {
+      "sha256": "4ce8adc1dd14db422a13a8a0b3f6c1e000ab545321861c968de2280c49ab7021",
+      "bytes": 4123
+    }
+  },
+  "detection": {
+    "A": {
+      "n_frames": 900,
+      "n_faces_detected": 900,
+      "detection_fraction": 1.0,
+      "frame_indices_used": "all"
+    },
+    "B": {
+      "n_frames": 900,
+      "n_faces_detected": 900,
+      "detection_fraction": 1.0,
+      "frame_indices_used": "all"
+    },
+    "C": {
+      "n_frames": 900,
+      "n_faces_detected": 900,
+      "detection_fraction": 1.0,
+      "frame_indices_used": "all"
+    },
+    "empty1": {
+      "n_frames": 4500,
+      "n_faces_detected": 0,
+      "detection_fraction": 0.0
+    }
+  },
+  "sessions": {
+    "A": {
+      "speech": {
+        "mean": 0.6946,
+        "max": 1.0,
+        "frac_over_0.5": 0.7062,
+        "n_hops": 936,
+        "duration_s": 29.952
+      },
+      "signals": {
+        "mouth_aperture": {
+          "signal": "mouth_aperture",
+          "mean": 0.028365,
+          "sd": 0.015948,
+          "best_r": 0.2052,
+          "best_lag_hops": 209,
+          "best_lag_s": 6.688,
+          "lags_tried": 937,
+          "gap_fill": {
+            "n_detected": 900,
+            "n_filled": 0,
+            "max_gap_frames": 0,
+            "n_frames": 900
+          },
+          "defined": true,
+          "r_at_lag_zero": -0.1763
+        },
+        "mouth_width": {
+          "signal": "mouth_width",
+          "mean": 0.337786,
+          "sd": 0.014765,
+          "best_r": 0.2982,
+          "best_lag_hops": 72,
+          "best_lag_s": 2.304,
+          "lags_tried": 937,
+          "gap_fill": {
+            "n_detected": 900,
+            "n_filled": 0,
+            "max_gap_frames": 0,
+            "n_frames": 900
+          },
+          "defined": true,
+          "r_at_lag_zero": -0.0721
+        },
+        "jaw_open": {
+          "signal": "jaw_open",
+          "mean": 0.465457,
+          "sd": 0.011655,
+          "best_r": 0.2353,
+          "best_lag_hops": 279,
+          "best_lag_s": 8.928,
+          "lags_tried": 937,
+          "gap_fill": {
+            "n_detected": 900,
+            "n_filled": 0,
+            "max_gap_frames": 0,
+            "n_frames": 900
+          },
+          "defined": true,
+          "r_at_lag_zero": -0.0752
+        },
+        "eye_distance": {
+          "signal": "eye_distance",
+          "mean": 0.631638,
+          "sd": 0.009551,
+          "best_r": 0.1977,
+          "best_lag_hops": 378,
+          "best_lag_s": 12.096,
+          "lags_tried": 937,
+          "gap_fill": {
+            "n_detected": 900,
+            "n_filled": 0,
+            "max_gap_frames": 0,
+            "n_frames": 900
+          },
+          "defined": true,
+          "r_at_lag_zero": 0.0677
+        },
+        "mouth_aperture_px": {
+          "signal": "mouth_aperture_px",
+          "mean": 1.244071,
+          "sd": 0.707021,
+          "best_r": 0.2063,
+          "best_lag_hops": 209,
+          "best_lag_s": 6.688,
+          "lags_tried": 937,
+          "gap_fill": {
+            "n_detected": 900,
+            "n_filled": 0,
+            "max_gap_frames": 0,
+            "n_frames": 900
+          },
+          "defined": true,
+          "r_at_lag_zero": -0.1725
+        },
+        "face_height_px": {
+          "signal": "face_height_px",
+          "mean": 43.53921,
+          "sd": 1.195073,
+          "best_r": 0.2313,
+          "best_lag_hops": -70,
+          "best_lag_s": -2.24,
+          "lags_tried": 937,
+          "gap_fill": {
+            "n_detected": 900,
+            "n_filled": 0,
+            "max_gap_frames": 0,
+            "n_frames": 900
+          },
+          "defined": true,
+          "r_at_lag_zero": -0.0577
+        },
+        "head_cx": {
+          "signal": "head_cx",
+          "mean": 78.382505,
+          "sd": 3.652746,
+          "best_r": 0.232,
+          "best_lag_hops": 135,
+          "best_lag_s": 4.32,
+          "lags_tried": 937,
+          "gap_fill": {
+            "n_detected": 900,
+            "n_filled": 0,
+            "max_gap_frames": 0,
+            "n_frames": 900
+          },
+          "defined": true,
+          "r_at_lag_zero": 0.2158
+        },
+        "head_cy": {
+          "signal": "head_cy",
+          "mean": 43.910833,
+          "sd": 1.383682,
+          "best_r": 0.3316,
+          "best_lag_hops": 18,
+          "best_lag_s": 0.576,
+          "lags_tried": 937,
+          "gap_fill": {
+            "n_detected": 900,
+            "n_filled": 0,
+            "max_gap_frames": 0,
+            "n_frames": 900
+          },
+          "defined": true,
+          "r_at_lag_zero": -0.086
+        }
+      },
+      "landmarks": {
+        "upper_inner_lip": {
+          "index": 13,
+          "n": 900,
+          "mean_x_px": 78.6,
+          "mean_y_px": 52.52,
+          "sd_x_px": 3.59,
+          "sd_y_px": 1.56
+        },
+        "lower_inner_lip": {
+          "index": 14,
+          "n": 900,
+          "mean_x_px": 78.66,
+          "mean_y_px": 53.76,
+          "sd_x_px": 3.55,
+          "sd_y_px": 1.68
+        },
+        "mouth_corner_right": {
+          "index": 61,
+          "n": 900,
+          "mean_x_px": 71.01,
+          "mean_y_px": 53.21,
+          "sd_x_px": 3.3,
+          "sd_y_px": 1.61
+        },
+        "mouth_corner_left": {
+          "index": 291,
+          "n": 900,
+          "mean_x_px": 85.71,
+          "mean_y_px": 53.01,
+          "sd_x_px": 3.27,
+          "sd_y_px": 1.52
+        },
+        "nose_tip": {
+          "index": 1,
+          "n": 900,
+          "mean_x_px": 78.83,
+          "mean_y_px": 45.39,
+          "sd_x_px": 4.56,
+          "sd_y_px": 1.58
+        },
+        "chin_bottom": {
+          "index": 152,
+          "n": 900,
+          "mean_x_px": 78.47,
+          "mean_y_px": 65.57,
+          "sd_x_px": 3.01,
+          "sd_y_px": 1.72
+        },
+        "forehead_top": {
+          "index": 10,
+          "n": 900,
+          "mean_x_px": 78.44,
+          "mean_y_px": 22.09,
+          "sd_x_px": 4.7,
+          "sd_y_px": 1.09
+        },
+        "eye_outer_right": {
+          "index": 33,
+          "n": 900,
+          "mean_x_px": 64.51,
+          "mean_y_px": 35.93,
+          "sd_x_px": 3.89,
+          "sd_y_px": 1.41
+        },
+        "eye_outer_left": {
+          "index": 263,
+          "n": 900,
+          "mean_x_px": 91.98,
+          "mean_y_px": 35.49,
+          "sd_x_px": 3.79,
+          "sd_y_px": 1.3
+        }
+      },
+      "head_motion": {
+        "centroid_sd_x_px": 3.653,
+        "centroid_sd_y_px": 1.3832,
+        "head_cy_lag1_autocorrelation": 0.981,
+        "head_cy_detrended_sd_px": 0.3926
+      },
+      "stride_evidence": {
+        "correct_19200_luma160x96": {
+          "stride_bytes": 19200,
+          "n_frames": 900,
+          "mean_consecutive_abs_diff": 0.5449,
+          "mean_consecutive_correlation": 0.999
+        },
+        "repo_assumed_23040_luma160x96": {
+          "stride_bytes": 23040,
+          "n_frames": 750,
+          "mean_consecutive_abs_diff": 43.5596,
+          "mean_consecutive_correlation": -0.0359
+        },
+        "reading": "the correct stride makes consecutive frames nearly identical (correlation near 1, mean consecutive difference near zero). The 23040-byte stride that the repository uses tears every frame between two real frames, so its consecutive difference is two orders of magnitude larger and its correlation is near zero."
+      }
+    },
+    "B": {
+      "speech": {
+        "mean": 0.6567,
+        "max": 1.0,
+        "frac_over_0.5": 0.6624,
+        "n_hops": 936,
+        "duration_s": 29.952
+      },
+      "signals": {
+        "mouth_aperture": {
+          "signal": "mouth_aperture",
+          "mean": 0.027667,
+          "sd": 0.0154,
+          "best_r": 0.1866,
+          "best_lag_hops": 152,
+          "best_lag_s": 4.864,
+          "lags_tried": 937,
+          "gap_fill": {
+            "n_detected": 900,
+            "n_filled": 0,
+            "max_gap_frames": 0,
+            "n_frames": 900
+          },
+          "defined": true,
+          "r_at_lag_zero": -0.1855
+        },
+        "mouth_width": {
+          "signal": "mouth_width",
+          "mean": 0.305103,
+          "sd": 0.018813,
+          "best_r": 0.3038,
+          "best_lag_hops": 56,
+          "best_lag_s": 1.792,
+          "lags_tried": 937,
+          "gap_fill": {
+            "n_detected": 900,
+            "n_filled": 0,
+            "max_gap_frames": 0,
+            "n_frames": 900
+          },
+          "defined": true,
+          "r_at_lag_zero": -0.1426
+        },
+        "jaw_open": {
+          "signal": "jaw_open",
+          "mean": 0.476634,
+          "sd": 0.009841,
+          "best_r": 0.3002,
+          "best_lag_hops": -11,
+          "best_lag_s": -0.352,
+          "lags_tried": 937,
+          "gap_fill": {
+            "n_detected": 900,
+            "n_filled": 0,
+            "max_gap_frames": 0,
+            "n_frames": 900
+          },
+          "defined": true,
+          "r_at_lag_zero": 0.0778
+        },
+        "eye_distance": {
+          "signal": "eye_distance",
+          "mean": 0.542204,
+          "sd": 0.025982,
+          "best_r": 0.1989,
+          "best_lag_hops": 14,
+          "best_lag_s": 0.448,
+          "lags_tried": 937,
+          "gap_fill": {
+            "n_detected": 900,
+            "n_filled": 0,
+            "max_gap_frames": 0,
+            "n_frames": 900
+          },
+          "defined": true,
+          "r_at_lag_zero": -0.1555
+        },
+        "mouth_aperture_px": {
+          "signal": "mouth_aperture_px",
+          "mean": 1.044682,
+          "sd": 0.581799,
+          "best_r": 0.1872,
+          "best_lag_hops": 152,
+          "best_lag_s": 4.864,
+          "lags_tried": 937,
+          "gap_fill": {
+            "n_detected": 900,
+            "n_filled": 0,
+            "max_gap_frames": 0,
+            "n_frames": 900
+          },
+          "defined": true,
+          "r_at_lag_zero": -0.1857
+        },
+        "face_height_px": {
+          "signal": "face_height_px",
+          "mean": 37.710852,
+          "sd": 0.534753,
+          "best_r": 0.24,
+          "best_lag_hops": 150,
+          "best_lag_s": 4.8,
+          "lags_tried": 937,
+          "gap_fill": {
+            "n_detected": 900,
+            "n_filled": 0,
+            "max_gap_frames": 0,
+            "n_frames": 900
+          },
+          "defined": true,
+          "r_at_lag_zero": -0.0864
+        },
+        "head_cx": {
+          "signal": "head_cx",
+          "mean": 76.128575,
+          "sd": 1.58833,
+          "best_r": 0.3641,
+          "best_lag_hops": -38,
+          "best_lag_s": -1.216,
+          "lags_tried": 937,
+          "gap_fill": {
+            "n_detected": 900,
+            "n_filled": 0,
+            "max_gap_frames": 0,
+            "n_frames": 900
+          },
+          "defined": true,
+          "r_at_lag_zero": -0.0627
+        },
+        "head_cy": {
+          "signal": "head_cy",
+          "mean": 44.193944,
+          "sd": 0.487356,
+          "best_r": 0.2945,
+          "best_lag_hops": 362,
+          "best_lag_s": 11.584,
+          "lags_tried": 937,
+          "gap_fill": {
+            "n_detected": 900,
+            "n_filled": 0,
+            "max_gap_frames": 0,
+            "n_frames": 900
+          },
+          "defined": true,
+          "r_at_lag_zero": -0.1908
+        }
+      },
+      "landmarks": {
+        "upper_inner_lip": {
+          "index": 13,
+          "n": 900,
+          "mean_x_px": 75.18,
+          "mean_y_px": 51.76,
+          "sd_x_px": 1.69,
+          "sd_y_px": 0.69
+        },
+        "lower_inner_lip": {
+          "index": 14,
+          "n": 900,
+          "mean_x_px": 75.36,
+          "mean_y_px": 52.79,
+          "sd_x_px": 1.65,
+          "sd_y_px": 0.53
+        },
+        "mouth_corner_right": {
+          "index": 61,
+          "n": 900,
+          "mean_x_px": 71.56,
+          "mean_y_px": 52.13,
+          "sd_x_px": 1.41,
+          "sd_y_px": 0.52
+        },
+        "mouth_corner_left": {
+          "index": 291,
+          "n": 900,
+          "mean_x_px": 83.06,
+          "mean_y_px": 52.05,
+          "sd_x_px": 1.82,
+          "sd_y_px": 0.56
+        },
+        "nose_tip": {
+          "index": 1,
+          "n": 900,
+          "mean_x_px": 70.32,
+          "mean_y_px": 46.18,
+          "sd_x_px": 2.09,
+          "sd_y_px": 0.71
+        },
+        "chin_bottom": {
+          "index": 152,
+          "n": 900,
+          "mean_x_px": 76.89,
+          "mean_y_px": 62.9,
+          "sd_x_px": 1.63,
+          "sd_y_px": 0.47
+        },
+        "forehead_top": {
+          "index": 10,
+          "n": 900,
+          "mean_x_px": 72.81,
+          "mean_y_px": 25.41,
+          "sd_x_px": 1.77,
+          "sd_y_px": 0.69
+        },
+        "eye_outer_right": {
+          "index": 33,
+          "n": 900,
+          "mean_x_px": 66.83,
+          "mean_y_px": 37.42,
+          "sd_x_px": 1.21,
+          "sd_y_px": 0.57
+        },
+        "eye_outer_left": {
+          "index": 263,
+          "n": 900,
+          "mean_x_px": 87.23,
+          "mean_y_px": 36.16,
+          "sd_x_px": 1.9,
+          "sd_y_px": 0.43
+        }
+      },
+      "head_motion": {
+        "centroid_sd_x_px": 1.5892,
+        "centroid_sd_y_px": 0.4882,
+        "head_cy_lag1_autocorrelation": 0.9356,
+        "head_cy_detrended_sd_px": 0.1827
+      },
+      "stride_evidence": {
+        "correct_19200_luma160x96": {
+          "stride_bytes": 19200,
+          "n_frames": 900,
+          "mean_consecutive_abs_diff": 0.4332,
+          "mean_consecutive_correlation": 0.9997
+        },
+        "repo_assumed_23040_luma160x96": {
+          "stride_bytes": 23040,
+          "n_frames": 750,
+          "mean_consecutive_abs_diff": 37.7402,
+          "mean_consecutive_correlation": 0.1461
+        },
+        "reading": "the correct stride makes consecutive frames nearly identical (correlation near 1, mean consecutive difference near zero). The 23040-byte stride that the repository uses tears every frame between two real frames, so its consecutive difference is two orders of magnitude larger and its correlation is near zero."
+      }
+    },
+    "C": {
+      "speech": {
+        "mean": 0.0019,
+        "max": 0.0989,
+        "frac_over_0.5": 0.0,
+        "n_hops": 936,
+        "duration_s": 29.952
+      },
+      "signals": {
+        "mouth_aperture": {
+          "signal": "mouth_aperture",
+          "mean": 0.000996,
+          "sd": 0.001398,
+          "best_r": 0.8011,
+          "best_lag_hops": -413,
+          "best_lag_s": -13.216,
+          "lags_tried": 937,
+          "gap_fill": {
+            "n_detected": 900,
+            "n_filled": 0,
+            "max_gap_frames": 0,
+            "n_frames": 900
+          },
+          "defined": true,
+          "r_at_lag_zero": -0.014
+        },
+        "mouth_width": {
+          "signal": "mouth_width",
+          "mean": 0.338715,
+          "sd": 0.010885,
+          "best_r": 0.4243,
+          "best_lag_hops": -389,
+          "best_lag_s": -12.448,
+          "lags_tried": 937,
+          "gap_fill": {
+            "n_detected": 900,
+            "n_filled": 0,
+            "max_gap_frames": 0,
+            "n_frames": 900
+          },
+          "defined": true,
+          "r_at_lag_zero": -0.0229
+        },
+        "jaw_open": {
+          "signal": "jaw_open",
+          "mean": 0.440892,
+          "sd": 0.00685,
+          "best_r": 0.3119,
+          "best_lag_hops": -410,
+          "best_lag_s": -13.12,
+          "lags_tried": 937,
+          "gap_fill": {
+            "n_detected": 900,
+            "n_filled": 0,
+            "max_gap_frames": 0,
+            "n_frames": 900
+          },
+          "defined": true,
+          "r_at_lag_zero": -0.0697
+        },
+        "eye_distance": {
+          "signal": "eye_distance",
+          "mean": 0.63637,
+          "sd": 0.009152,
+          "best_r": 0.3475,
+          "best_lag_hops": -314,
+          "best_lag_s": -10.048,
+          "lags_tried": 937,
+          "gap_fill": {
+            "n_detected": 900,
+            "n_filled": 0,
+            "max_gap_frames": 0,
+            "n_frames": 900
+          },
+          "defined": true,
+          "r_at_lag_zero": 0.052
+        },
+        "mouth_aperture_px": {
+          "signal": "mouth_aperture_px",
+          "mean": 0.039506,
+          "sd": 0.057076,
+          "best_r": 0.802,
+          "best_lag_hops": -413,
+          "best_lag_s": -13.216,
+          "lags_tried": 937,
+          "gap_fill": {
+            "n_detected": 900,
+            "n_filled": 0,
+            "max_gap_frames": 0,
+            "n_frames": 900
+          },
+          "defined": true,
+          "r_at_lag_zero": -0.0141
+        },
+        "face_height_px": {
+          "signal": "face_height_px",
+          "mean": 39.554524,
+          "sd": 0.666195,
+          "best_r": 0.2916,
+          "best_lag_hops": -408,
+          "best_lag_s": -13.056,
+          "lags_tried": 937,
+          "gap_fill": {
+            "n_detected": 900,
+            "n_filled": 0,
+            "max_gap_frames": 0,
+            "n_frames": 900
+          },
+          "defined": true,
+          "r_at_lag_zero": -0.0379
+        },
+        "head_cx": {
+          "signal": "head_cx",
+          "mean": 77.408116,
+          "sd": 1.183995,
+          "best_r": 0.2487,
+          "best_lag_hops": -462,
+          "best_lag_s": -14.784,
+          "lags_tried": 937,
+          "gap_fill": {
+            "n_detected": 900,
+            "n_filled": 0,
+            "max_gap_frames": 0,
+            "n_frames": 900
+          },
+          "defined": true,
+          "r_at_lag_zero": 0.0745
+        },
+        "head_cy": {
+          "signal": "head_cy",
+          "mean": 43.442601,
+          "sd": 0.371998,
+          "best_r": 0.3282,
+          "best_lag_hops": -160,
+          "best_lag_s": -5.12,
+          "lags_tried": 937,
+          "gap_fill": {
+            "n_detected": 900,
+            "n_filled": 0,
+            "max_gap_frames": 0,
+            "n_frames": 900
+          },
+          "defined": true,
+          "r_at_lag_zero": 0.0067
+        }
+      },
+      "landmarks": {
+        "upper_inner_lip": {
+          "index": 13,
+          "n": 900,
+          "mean_x_px": 76.95,
+          "mean_y_px": 51.86,
+          "sd_x_px": 1.18,
+          "sd_y_px": 0.31
+        },
+        "lower_inner_lip": {
+          "index": 14,
+          "n": 900,
+          "mean_x_px": 76.98,
+          "mean_y_px": 51.87,
+          "sd_x_px": 1.18,
+          "sd_y_px": 0.31
+        },
+        "mouth_corner_right": {
+          "index": 61,
+          "n": 900,
+          "mean_x_px": 70.4,
+          "mean_y_px": 51.37,
+          "sd_x_px": 1.12,
+          "sd_y_px": 0.31
+        },
+        "mouth_corner_left": {
+          "index": 291,
+          "n": 900,
+          "mean_x_px": 83.79,
+          "mean_y_px": 51.51,
+          "sd_x_px": 1.18,
+          "sd_y_px": 0.34
+        },
+        "nose_tip": {
+          "index": 1,
+          "n": 900,
+          "mean_x_px": 77.32,
+          "mean_y_px": 45.35,
+          "sd_x_px": 1.32,
+          "sd_y_px": 0.44
+        },
+        "chin_bottom": {
+          "index": 152,
+          "n": 900,
+          "mean_x_px": 77.09,
+          "mean_y_px": 62.78,
+          "sd_x_px": 1.16,
+          "sd_y_px": 0.3
+        },
+        "forehead_top": {
+          "index": 10,
+          "n": 900,
+          "mean_x_px": 77.94,
+          "mean_y_px": 23.24,
+          "sd_x_px": 1.27,
+          "sd_y_px": 0.74
+        },
+        "eye_outer_right": {
+          "index": 33,
+          "n": 900,
+          "mean_x_px": 65.03,
+          "mean_y_px": 35.93,
+          "sd_x_px": 1.28,
+          "sd_y_px": 0.52
+        },
+        "eye_outer_left": {
+          "index": 263,
+          "n": 900,
+          "mean_x_px": 90.2,
+          "mean_y_px": 35.79,
+          "sd_x_px": 1.2,
+          "sd_y_px": 0.5
+        }
+      },
+      "head_motion": {
+        "centroid_sd_x_px": 1.1835,
+        "centroid_sd_y_px": 0.3721,
+        "head_cy_lag1_autocorrelation": 0.937,
+        "head_cy_detrended_sd_px": 0.1009
+      },
+      "stride_evidence": {
+        "correct_19200_luma160x96": {
+          "stride_bytes": 19200,
+          "n_frames": 900,
+          "mean_consecutive_abs_diff": 0.3667,
+          "mean_consecutive_correlation": 0.9998
+        },
+        "repo_assumed_23040_luma160x96": {
+          "stride_bytes": 23040,
+          "n_frames": 750,
+          "mean_consecutive_abs_diff": 42.9348,
+          "mean_consecutive_correlation": -0.0363
+        },
+        "reading": "the correct stride makes consecutive frames nearly identical (correlation near 1, mean consecutive difference near zero). The 23040-byte stride that the repository uses tears every frame between two real frames, so its consecutive difference is two orders of magnitude larger and its correlation is near zero."
+      }
+    }
+  },
+  "controls": {
+    "scrambled_audio_A_mouth_aperture": {
+      "n_permutations": 25,
+      "seed": 20261020,
+      "best_r_mean": 0.0902,
+      "best_r_median": 0.0933,
+      "best_r_min": 0.0711,
+      "best_r_max": 0.11,
+      "best_r_values": [
+        0.0813,
+        0.0912,
+        0.0711,
+        0.0935,
+        0.0962,
+        0.11,
+        0.0977,
+        0.0972,
+        0.0887,
+        0.0933,
+        0.0872,
+        0.0793,
+        0.0996,
+        0.1031,
+        0.076,
+        0.094,
+        0.0808,
+        0.0949,
+        0.0759,
+        0.0902,
+        0.0725,
+        0.0935,
+        0.0987,
+        0.1001,
+        0.0889
+      ]
+    },
+    "scrambled_audio_A_eye_distance": {
+      "n_permutations": 25,
+      "seed": 20261020,
+      "best_r_mean": 0.0902,
+      "best_r_median": 0.0884,
+      "best_r_min": 0.0601,
+      "best_r_max": 0.1291,
+      "best_r_values": [
+        0.0753,
+        0.087,
+        0.0722,
+        0.0948,
+        0.0601,
+        0.1007,
+        0.0797,
+        0.1114,
+        0.0901,
+        0.0884,
+        0.0803,
+        0.0836,
+        0.0947,
+        0.0785,
+        0.1291,
+        0.0749,
+        0.101,
+        0.1105,
+        0.0845,
+        0.1087,
+        0.0974,
+        0.0766,
+        0.0933,
+        0.0831,
+        0.0994
+      ]
+    },
+    "scrambled_audio_A_mouth_width": {
+      "n_permutations": 25,
+      "seed": 20261020,
+      "best_r_mean": 0.0889,
+      "best_r_median": 0.0878,
+      "best_r_min": 0.0606,
+      "best_r_max": 0.1121,
+      "best_r_values": [
+        0.1037,
+        0.0705,
+        0.0795,
+        0.0724,
+        0.0606,
+        0.0793,
+        0.0878,
+        0.0957,
+        0.0699,
+        0.0825,
+        0.1062,
+        0.0975,
+        0.0964,
+        0.1043,
+        0.1,
+        0.1045,
+        0.1008,
+        0.0875,
+        0.1121,
+        0.0861,
+        0.0815,
+        0.0707,
+        0.0931,
+        0.0943,
+        0.0849
+      ]
+    },
+    "scrambled_audio_A_jaw_open": {
+      "n_permutations": 25,
+      "seed": 20261020,
+      "best_r_mean": 0.086,
+      "best_r_median": 0.0836,
+      "best_r_min": 0.069,
+      "best_r_max": 0.1034,
+      "best_r_values": [
+        0.0836,
+        0.0768,
+        0.1021,
+        0.0988,
+        0.069,
+        0.0746,
+        0.0967,
+        0.0847,
+        0.0905,
+        0.0982,
+        0.0831,
+        0.0796,
+        0.0834,
+        0.0856,
+        0.0801,
+        0.0955,
+        0.088,
+        0.0809,
+        0.0774,
+        0.0941,
+        0.0866,
+        0.0769,
+        0.0784,
+        0.0819,
+        0.1034
+      ]
+    },
+    "scrambled_audio_A_head_cx": {
+      "n_permutations": 25,
+      "seed": 20261020,
+      "best_r_mean": 0.0734,
+      "best_r_median": 0.0752,
+      "best_r_min": 0.0486,
+      "best_r_max": 0.0985,
+      "best_r_values": [
+        0.0685,
+        0.0655,
+        0.0756,
+        0.0718,
+        0.0558,
+        0.0766,
+        0.0697,
+        0.0865,
+        0.0985,
+        0.0738,
+        0.0486,
+        0.0795,
+        0.072,
+        0.0842,
+        0.0855,
+        0.074,
+        0.0557,
+        0.0825,
+        0.0826,
+        0.0752,
+        0.0778,
+        0.0538,
+        0.0759,
+        0.0571,
+        0.0879
+      ]
+    },
+    "scrambled_audio_A_head_cy": {
+      "n_permutations": 25,
+      "seed": 20261020,
+      "best_r_mean": 0.0646,
+      "best_r_median": 0.0653,
+      "best_r_min": 0.0415,
+      "best_r_max": 0.0881,
+      "best_r_values": [
+        0.0653,
+        0.0668,
+        0.0674,
+        0.0653,
+        0.0415,
+        0.0843,
+        0.0463,
+        0.0587,
+        0.0642,
+        0.0532,
+        0.0482,
+        0.0881,
+        0.0777,
+        0.0605,
+        0.0558,
+        0.0566,
+        0.0481,
+        0.0763,
+        0.0756,
+        0.0756,
+        0.0595,
+        0.0554,
+        0.0756,
+        0.073,
+        0.0761
+      ]
+    },
+    "scrambled_audio_B_mouth_aperture": {
+      "n_permutations": 25,
+      "seed": 20261020,
+      "best_r_mean": 0.0902,
+      "best_r_median": 0.0898,
+      "best_r_min": 0.0667,
+      "best_r_max": 0.1104,
+      "best_r_values": [
+        0.1104,
+        0.0742,
+        0.0917,
+        0.1085,
+        0.0857,
+        0.0902,
+        0.0858,
+        0.0898,
+        0.0928,
+        0.1087,
+        0.0869,
+        0.0824,
+        0.0753,
+        0.095,
+        0.0991,
+        0.0866,
+        0.1047,
+        0.0873,
+        0.0977,
+        0.0985,
+        0.0862,
+        0.0939,
+        0.0667,
+        0.0748,
+        0.0823
+      ]
+    },
+    "scrambled_audio_B_eye_distance": {
+      "n_permutations": 25,
+      "seed": 20261020,
+      "best_r_mean": 0.0877,
+      "best_r_median": 0.0848,
+      "best_r_min": 0.0677,
+      "best_r_max": 0.1375,
+      "best_r_values": [
+        0.0937,
+        0.0781,
+        0.0917,
+        0.0903,
+        0.0689,
+        0.0759,
+        0.0905,
+        0.0818,
+        0.101,
+        0.0926,
+        0.0756,
+        0.1375,
+        0.0937,
+        0.0773,
+        0.0839,
+        0.0936,
+        0.0707,
+        0.0693,
+        0.0848,
+        0.0944,
+        0.0677,
+        0.077,
+        0.0985,
+        0.0721,
+        0.131
+      ]
+    },
+    "scrambled_audio_B_mouth_width": {
+      "n_permutations": 25,
+      "seed": 20261020,
+      "best_r_mean": 0.092,
+      "best_r_median": 0.0917,
+      "best_r_min": 0.0574,
+      "best_r_max": 0.1306,
+      "best_r_values": [
+        0.1035,
+        0.0774,
+        0.0868,
+        0.1141,
+        0.1057,
+        0.0657,
+        0.1306,
+        0.1055,
+        0.1201,
+        0.0702,
+        0.0917,
+        0.0813,
+        0.0929,
+        0.0921,
+        0.0798,
+        0.1196,
+        0.0854,
+        0.0875,
+        0.0842,
+        0.0789,
+        0.0809,
+        0.0949,
+        0.0917,
+        0.0574,
+        0.1023
+      ]
+    },
+    "scrambled_audio_B_jaw_open": {
+      "n_permutations": 25,
+      "seed": 20261020,
+      "best_r_mean": 0.0868,
+      "best_r_median": 0.085,
+      "best_r_min": 0.0687,
+      "best_r_max": 0.1108,
+      "best_r_values": [
+        0.0766,
+        0.0946,
+        0.0704,
+        0.1015,
+        0.0935,
+        0.1004,
+        0.085,
+        0.0975,
+        0.084,
+        0.0764,
+        0.0824,
+        0.092,
+        0.0932,
+        0.0691,
+        0.0834,
+        0.1042,
+        0.0792,
+        0.0702,
+        0.0857,
+        0.1108,
+        0.0687,
+        0.0936,
+        0.0721,
+        0.0743,
+        0.1103
+      ]
+    },
+    "scrambled_audio_B_head_cx": {
+      "n_permutations": 25,
+      "seed": 20261020,
+      "best_r_mean": 0.0752,
+      "best_r_median": 0.074,
+      "best_r_min": 0.0544,
+      "best_r_max": 0.1133,
+      "best_r_values": [
+        0.0685,
+        0.0653,
+        0.0698,
+        0.1133,
+        0.0598,
+        0.0673,
+        0.0782,
+        0.0847,
+        0.074,
+        0.088,
+        0.0544,
+        0.0857,
+        0.0739,
+        0.0573,
+        0.0782,
+        0.0811,
+        0.0571,
+        0.0547,
+        0.0797,
+        0.0963,
+        0.0859,
+        0.0724,
+        0.0918,
+        0.06,
+        0.0835
+      ]
+    },
+    "scrambled_audio_B_head_cy": {
+      "n_permutations": 25,
+      "seed": 20261020,
+      "best_r_mean": 0.0821,
+      "best_r_median": 0.0822,
+      "best_r_min": 0.0622,
+      "best_r_max": 0.1232,
+      "best_r_values": [
+        0.0822,
+        0.0683,
+        0.0684,
+        0.0865,
+        0.0696,
+        0.0855,
+        0.0859,
+        0.0643,
+        0.0933,
+        0.0796,
+        0.0784,
+        0.0811,
+        0.0728,
+        0.0644,
+        0.1061,
+        0.0907,
+        0.1232,
+        0.083,
+        0.0789,
+        0.093,
+        0.0905,
+        0.0893,
+        0.0629,
+        0.0622,
+        0.0932
+      ]
+    },
+    "scrambled_audio_C_mouth_aperture": {
+      "n_permutations": 25,
+      "seed": 20261020,
+      "best_r_mean": 0.3701,
+      "best_r_median": 0.3647,
+      "best_r_min": 0.3479,
+      "best_r_max": 0.5037,
+      "best_r_values": [
+        0.3647,
+        0.3615,
+        0.3702,
+        0.5037,
+        0.3491,
+        0.3648,
+        0.3714,
+        0.3792,
+        0.3557,
+        0.3637,
+        0.3635,
+        0.3511,
+        0.3622,
+        0.3594,
+        0.3654,
+        0.3479,
+        0.3806,
+        0.3732,
+        0.3552,
+        0.3533,
+        0.3878,
+        0.3689,
+        0.3593,
+        0.3704,
+        0.3694
+      ]
+    },
+    "scrambled_audio_C_eye_distance": {
+      "n_permutations": 25,
+      "seed": 20261020,
+      "best_r_mean": 0.1121,
+      "best_r_median": 0.1075,
+      "best_r_min": 0.0803,
+      "best_r_max": 0.1545,
+      "best_r_values": [
+        0.0994,
+        0.1243,
+        0.1239,
+        0.1075,
+        0.1009,
+        0.085,
+        0.0967,
+        0.1456,
+        0.1265,
+        0.1349,
+        0.101,
+        0.1147,
+        0.1524,
+        0.0923,
+        0.107,
+        0.0994,
+        0.1451,
+        0.0996,
+        0.1545,
+        0.0803,
+        0.1092,
+        0.1243,
+        0.0819,
+        0.082,
+        0.1134
+      ]
+    },
+    "scrambled_audio_C_mouth_width": {
+      "n_permutations": 25,
+      "seed": 20261020,
+      "best_r_mean": 0.1329,
+      "best_r_median": 0.1324,
+      "best_r_min": 0.0941,
+      "best_r_max": 0.1783,
+      "best_r_values": [
+        0.108,
+        0.1466,
+        0.1396,
+        0.1223,
+        0.096,
+        0.1144,
+        0.1446,
+        0.1783,
+        0.1067,
+        0.1222,
+        0.1282,
+        0.118,
+        0.1441,
+        0.1123,
+        0.1324,
+        0.1092,
+        0.1521,
+        0.1614,
+        0.1562,
+        0.1345,
+        0.1576,
+        0.1522,
+        0.0941,
+        0.1146,
+        0.1781
+      ]
+    },
+    "scrambled_audio_C_jaw_open": {
+      "n_permutations": 25,
+      "seed": 20261020,
+      "best_r_mean": 0.1181,
+      "best_r_median": 0.1092,
+      "best_r_min": 0.0869,
+      "best_r_max": 0.2052,
+      "best_r_values": [
+        0.0891,
+        0.1338,
+        0.1069,
+        0.1341,
+        0.1502,
+        0.1246,
+        0.0942,
+        0.1104,
+        0.2052,
+        0.1413,
+        0.0963,
+        0.1,
+        0.1387,
+        0.1013,
+        0.0967,
+        0.149,
+        0.0995,
+        0.1092,
+        0.1394,
+        0.1054,
+        0.0869,
+        0.1067,
+        0.1099,
+        0.1056,
+        0.1182
+      ]
+    },
+    "scrambled_audio_C_head_cx": {
+      "n_permutations": 25,
+      "seed": 20261020,
+      "best_r_mean": 0.0821,
+      "best_r_median": 0.0811,
+      "best_r_min": 0.0539,
+      "best_r_max": 0.1189,
+      "best_r_values": [
+        0.0811,
+        0.0866,
+        0.0828,
+        0.1054,
+        0.0721,
+        0.0722,
+        0.0749,
+        0.1189,
+        0.084,
+        0.0703,
+        0.0736,
+        0.0987,
+        0.0844,
+        0.074,
+        0.1153,
+        0.0788,
+        0.0848,
+        0.0679,
+        0.0855,
+        0.0738,
+        0.0785,
+        0.0601,
+        0.0878,
+        0.0539,
+        0.0869
+      ]
+    },
+    "scrambled_audio_C_head_cy": {
+      "n_permutations": 25,
+      "seed": 20261020,
+      "best_r_mean": 0.0952,
+      "best_r_median": 0.0915,
+      "best_r_min": 0.0704,
+      "best_r_max": 0.1342,
+      "best_r_values": [
+        0.0769,
+        0.0967,
+        0.0798,
+        0.119,
+        0.0898,
+        0.0915,
+        0.0923,
+        0.1342,
+        0.0758,
+        0.0877,
+        0.1138,
+        0.085,
+        0.0811,
+        0.0709,
+        0.1162,
+        0.1159,
+        0.1206,
+        0.0936,
+        0.1068,
+        0.1082,
+        0.1046,
+        0.084,
+        0.0861,
+        0.0704,
+        0.0803
+      ]
+    },
+    "wrong_session_A_audio_C_video": {
+      "signal": "mouth_aperture",
+      "mean": 0.000996,
+      "sd": 0.001398,
+      "best_r": 0.1064,
+      "best_lag_hops": 256,
+      "best_lag_s": 8.192,
+      "lags_tried": 937,
+      "audio_session": "A",
+      "video_session": "C",
+      "audio_is_a_real_speech_envelope": true,
+      "content_differs": true,
+      "is_a_clean_control": true
+    },
+    "wrong_session_C_audio_A_video": {
+      "signal": "mouth_aperture",
+      "mean": 0.028365,
+      "sd": 0.015948,
+      "best_r": 0.1136,
+      "best_lag_hops": -419,
+      "best_lag_s": -13.408,
+      "lags_tried": 937,
+      "audio_session": "C",
+      "video_session": "A",
+      "audio_is_a_real_speech_envelope": false,
+      "content_differs": true,
+      "is_a_clean_control": false,
+      "note": "C's speech envelope is flat at 0.003, so this correlation is numerically unstable. Reported, not used to judge anything."
+    },
+    "wrong_session_B_audio_C_video": {
+      "signal": "mouth_aperture",
+      "mean": 0.000996,
+      "sd": 0.001398,
+      "best_r": 0.1221,
+      "best_lag_hops": 277,
+      "best_lag_s": 8.864,
+      "lags_tried": 937,
+      "audio_session": "B",
+      "video_session": "C",
+      "audio_is_a_real_speech_envelope": true,
+      "content_differs": true,
+      "is_a_clean_control": true
+    },
+    "wrong_session_C_audio_B_video": {
+      "signal": "mouth_aperture",
+      "mean": 0.027667,
+      "sd": 0.0154,
+      "best_r": 0.219,
+      "best_lag_hops": -130,
+      "best_lag_s": -4.16,
+      "lags_tried": 937,
+      "audio_session": "C",
+      "video_session": "B",
+      "audio_is_a_real_speech_envelope": false,
+      "content_differs": true,
+      "is_a_clean_control": false,
+      "note": "C's speech envelope is flat at 0.003, so this correlation is numerically unstable. Reported, not used to judge anything."
+    },
+    "wrong_session_A_audio_B_video": {
+      "signal": "mouth_aperture",
+      "mean": 0.027667,
+      "sd": 0.0154,
+      "best_r": 0.2782,
+      "best_lag_hops": 139,
+      "best_lag_s": 4.448,
+      "lags_tried": 937,
+      "audio_session": "A",
+      "video_session": "B",
+      "audio_is_a_real_speech_envelope": true,
+      "content_differs": false,
+      "is_a_clean_control": false,
+      "note": "A and B recite the SAME poem, so their speech envelopes agree with each other. This row measures content match, not session identity, and it is NOT used to judge the mouth."
+    },
+    "wrong_session_B_audio_A_video": {
+      "signal": "mouth_aperture",
+      "mean": 0.028365,
+      "sd": 0.015948,
+      "best_r": 0.2834,
+      "best_lag_hops": 77,
+      "best_lag_s": 2.464,
+      "lags_tried": 937,
+      "audio_session": "B",
+      "video_session": "A",
+      "audio_is_a_real_speech_envelope": true,
+      "content_differs": false,
+      "is_a_clean_control": false,
+      "note": "A and B recite the SAME poem, so their speech envelopes agree with each other. This row measures content match, not session identity, and it is NOT used to judge the mouth."
+    },
+    "eye_distance_A": {
+      "signal": "eye_distance",
+      "mean": 0.631638,
+      "sd": 0.009551,
+      "best_r": 0.1977,
+      "best_lag_hops": 378,
+      "best_lag_s": 12.096,
+      "lags_tried": 937
+    },
+    "eye_distance_B": {
+      "signal": "eye_distance",
+      "mean": 0.542204,
+      "sd": 0.025982,
+      "best_r": 0.1989,
+      "best_lag_hops": 14,
+      "best_lag_s": 0.448,
+      "lags_tried": 937
+    },
+    "eye_distance_C": {
+      "signal": "eye_distance",
+      "mean": 0.63637,
+      "sd": 0.009152,
+      "best_r": 0.3475,
+      "best_lag_hops": -314,
+      "best_lag_s": -10.048,
+      "lags_tried": 937
+    },
+    "mouth_aperture_partial_A": {
+      "signal": "mouth_aperture|head+eye removed",
+      "mean": 0.0,
+      "sd": 0.011382,
+      "best_r": 0.2385,
+      "best_lag_hops": -108,
+      "best_lag_s": -3.456,
+      "lags_tried": 937,
+      "variance_explained_by_the_controls": 0.2494,
+      "controls_regressed_out": [
+        "eye_distance",
+        "head_cx",
+        "head_cy",
+        "face_height_px"
+      ],
+      "scrambled_audio_null": {
+        "n_permutations": 25,
+        "seed": 20261020,
+        "best_r_mean": 0.093,
+        "best_r_median": 0.0928,
+        "best_r_min": 0.0766,
+        "best_r_max": 0.1141,
+        "best_r_values": [
+          0.0916,
+          0.0928,
+          0.0845,
+          0.0884,
+          0.0781,
+          0.0959,
+          0.107,
+          0.1003,
+          0.0967,
+          0.1115,
+          0.0825,
+          0.0766,
+          0.1141,
+          0.1053,
+          0.0872,
+          0.0957,
+          0.0841,
+          0.0953,
+          0.0916,
+          0.088,
+          0.0774,
+          0.096,
+          0.094,
+          0.0978,
+          0.0919
+        ]
+      },
+      "margin_over_scrambled_audio_null": 0.1455
+    },
+    "mouth_aperture_partial_B": {
+      "signal": "mouth_aperture|head+eye removed",
+      "mean": -0.0,
+      "sd": 0.011447,
+      "best_r": 0.2076,
+      "best_lag_hops": 60,
+      "best_lag_s": 1.92,
+      "lags_tried": 937,
+      "variance_explained_by_the_controls": 0.098,
+      "controls_regressed_out": [
+        "eye_distance",
+        "head_cx",
+        "head_cy",
+        "face_height_px"
+      ],
+      "scrambled_audio_null": {
+        "n_permutations": 25,
+        "seed": 20261020,
+        "best_r_mean": 0.0927,
+        "best_r_median": 0.0936,
+        "best_r_min": 0.0718,
+        "best_r_max": 0.123,
+        "best_r_values": [
+          0.1135,
+          0.0718,
+          0.0972,
+          0.123,
+          0.0928,
+          0.0867,
+          0.0906,
+          0.0871,
+          0.0937,
+          0.0936,
+          0.0967,
+          0.0888,
+          0.0754,
+          0.0959,
+          0.1,
+          0.0797,
+          0.1121,
+          0.1023,
+          0.0937,
+          0.104,
+          0.084,
+          0.0895,
+          0.0755,
+          0.0762,
+          0.0946
+        ]
+      },
+      "margin_over_scrambled_audio_null": 0.1149
+    },
+    "split_half_replication": {
+      "A_mouth_aperture": {
+        "full_best_r": 0.2052,
+        "full_best_lag_s": 6.688,
+        "half_best_lags_agree_within_s": 3.968,
+        "halves_agree_on_the_offset": false,
+        "both_halves_beat_their_own_null_at_the_full_lag": true,
+        "halves": {
+          "first_half": {
+            "r_at_the_full_best_lag": 0.2568,
+            "own_best_r": 0.2414,
+            "own_best_lag_s": -3.52,
+            "scrambled_null_mean": 0.1144,
+            "scrambled_null_max": 0.1471,
+            "beats_its_own_scrambled_null_at_the_full_lag": true
+          },
+          "second_half": {
+            "r_at_the_full_best_lag": 0.2043,
+            "own_best_r": 0.2776,
+            "own_best_lag_s": 0.448,
+            "scrambled_null_mean": 0.1221,
+            "scrambled_null_max": 0.163,
+            "beats_its_own_scrambled_null_at_the_full_lag": true
+          }
+        }
+      },
+      "A_eye_distance": {
+        "full_best_r": 0.1977,
+        "full_best_lag_s": 12.096,
+        "half_best_lags_agree_within_s": 1.6,
+        "halves_agree_on_the_offset": false,
+        "both_halves_beat_their_own_null_at_the_full_lag": true,
+        "halves": {
+          "first_half": {
+            "r_at_the_full_best_lag": 0.3441,
+            "own_best_r": 0.2022,
+            "own_best_lag_s": -0.352,
+            "scrambled_null_mean": 0.1153,
+            "scrambled_null_max": 0.1627,
+            "beats_its_own_scrambled_null_at_the_full_lag": true
+          },
+          "second_half": {
+            "r_at_the_full_best_lag": 0.3635,
+            "own_best_r": 0.3268,
+            "own_best_lag_s": 1.248,
+            "scrambled_null_mean": 0.1153,
+            "scrambled_null_max": 0.1632,
+            "beats_its_own_scrambled_null_at_the_full_lag": true
+          }
+        }
+      },
+      "A_head_cy": {
+        "full_best_r": 0.3316,
+        "full_best_lag_s": 0.576,
+        "half_best_lags_agree_within_s": 0.096,
+        "halves_agree_on_the_offset": true,
+        "both_halves_beat_their_own_null_at_the_full_lag": true,
+        "halves": {
+          "first_half": {
+            "r_at_the_full_best_lag": 0.2917,
+            "own_best_r": 0.2974,
+            "own_best_lag_s": 0.64,
+            "scrambled_null_mean": 0.0776,
+            "scrambled_null_max": 0.1085,
+            "beats_its_own_scrambled_null_at_the_full_lag": true
+          },
+          "second_half": {
+            "r_at_the_full_best_lag": 0.4396,
+            "own_best_r": 0.4377,
+            "own_best_lag_s": 0.544,
+            "scrambled_null_mean": 0.1055,
+            "scrambled_null_max": 0.1572,
+            "beats_its_own_scrambled_null_at_the_full_lag": true
+          }
+        }
+      },
+      "B_mouth_aperture": {
+        "full_best_r": 0.1866,
+        "full_best_lag_s": 4.864,
+        "half_best_lags_agree_within_s": 0.32,
+        "halves_agree_on_the_offset": true,
+        "both_halves_beat_their_own_null_at_the_full_lag": true,
+        "halves": {
+          "first_half": {
+            "r_at_the_full_best_lag": 0.2271,
+            "own_best_r": 0.1974,
+            "own_best_lag_s": 2.112,
+            "scrambled_null_mean": 0.1179,
+            "scrambled_null_max": 0.1512,
+            "beats_its_own_scrambled_null_at_the_full_lag": true
+          },
+          "second_half": {
+            "r_at_the_full_best_lag": 0.2994,
+            "own_best_r": 0.2558,
+            "own_best_lag_s": 1.792,
+            "scrambled_null_mean": 0.1139,
+            "scrambled_null_max": 0.165,
+            "beats_its_own_scrambled_null_at_the_full_lag": true
+          }
+        }
+      },
+      "B_eye_distance": {
+        "full_best_r": 0.1989,
+        "full_best_lag_s": 0.448,
+        "half_best_lags_agree_within_s": 6.944,
+        "halves_agree_on_the_offset": false,
+        "both_halves_beat_their_own_null_at_the_full_lag": true,
+        "halves": {
+          "first_half": {
+            "r_at_the_full_best_lag": 0.1801,
+            "own_best_r": 0.3106,
+            "own_best_lag_s": 4.128,
+            "scrambled_null_mean": 0.1098,
+            "scrambled_null_max": 0.1382,
+            "beats_its_own_scrambled_null_at_the_full_lag": true
+          },
+          "second_half": {
+            "r_at_the_full_best_lag": 0.2245,
+            "own_best_r": 0.3444,
+            "own_best_lag_s": -2.816,
+            "scrambled_null_mean": 0.1131,
+            "scrambled_null_max": 0.1477,
+            "beats_its_own_scrambled_null_at_the_full_lag": true
+          }
+        }
+      },
+      "B_head_cy": {
+        "full_best_r": 0.2945,
+        "full_best_lag_s": 11.584,
+        "half_best_lags_agree_within_s": 4.608,
+        "halves_agree_on_the_offset": false,
+        "both_halves_beat_their_own_null_at_the_full_lag": true,
+        "halves": {
+          "first_half": {
+            "r_at_the_full_best_lag": 0.5722,
+            "own_best_r": 0.4222,
+            "own_best_lag_s": 5.312,
+            "scrambled_null_mean": 0.1046,
+            "scrambled_null_max": 0.165,
+            "beats_its_own_scrambled_null_at_the_full_lag": true
+          },
+          "second_half": {
+            "r_at_the_full_best_lag": 0.2753,
+            "own_best_r": 0.2963,
+            "own_best_lag_s": 0.704,
+            "scrambled_null_mean": 0.1032,
+            "scrambled_null_max": 0.1497,
+            "beats_its_own_scrambled_null_at_the_full_lag": true
+          }
+        }
+      }
+    },
+    "session_matrix": {
+      "mouth_aperture": {
+        "video_A_vs_speech_A": {
+          "best_r": 0.2052,
+          "best_lag_s": 6.688
+        },
+        "video_A_vs_speech_B": {
+          "best_r": 0.2834,
+          "best_lag_s": 2.464
+        },
+        "video_A_vs_speech_C": {
+          "best_r": 0.1136,
+          "best_lag_s": -13.408
+        },
+        "video_B_vs_speech_A": {
+          "best_r": 0.2782,
+          "best_lag_s": 4.448
+        },
+        "video_B_vs_speech_B": {
+          "best_r": 0.1866,
+          "best_lag_s": 4.864
+        },
+        "video_B_vs_speech_C": {
+          "best_r": 0.219,
+          "best_lag_s": -4.16
+        },
+        "video_C_vs_speech_A": {
+          "best_r": 0.1064,
+          "best_lag_s": 8.192
+        },
+        "video_C_vs_speech_B": {
+          "best_r": 0.1221,
+          "best_lag_s": 8.864
+        },
+        "video_C_vs_speech_C": {
+          "best_r": 0.8011,
+          "best_lag_s": -13.216
+        }
+      },
+      "eye_distance": {
+        "video_A_vs_speech_A": {
+          "best_r": 0.1977,
+          "best_lag_s": 12.096
+        },
+        "video_A_vs_speech_B": {
+          "best_r": 0.1746,
+          "best_lag_s": 12.704
+        },
+        "video_A_vs_speech_C": {
+          "best_r": 0.2583,
+          "best_lag_s": -7.264
+        },
+        "video_B_vs_speech_A": {
+          "best_r": 0.2589,
+          "best_lag_s": 6.976
+        },
+        "video_B_vs_speech_B": {
+          "best_r": 0.1989,
+          "best_lag_s": 0.448
+        },
+        "video_B_vs_speech_C": {
+          "best_r": 0.2157,
+          "best_lag_s": -14.368
+        },
+        "video_C_vs_speech_A": {
+          "best_r": 0.2782,
+          "best_lag_s": 4.32
+        },
+        "video_C_vs_speech_B": {
+          "best_r": 0.2491,
+          "best_lag_s": 6.336
+        },
+        "video_C_vs_speech_C": {
+          "best_r": 0.3475,
+          "best_lag_s": -10.048
+        }
+      },
+      "mouth_width": {
+        "video_A_vs_speech_A": {
+          "best_r": 0.2982,
+          "best_lag_s": 2.304
+        },
+        "video_A_vs_speech_B": {
+          "best_r": 0.2113,
+          "best_lag_s": -3.264
+        },
+        "video_A_vs_speech_C": {
+          "best_r": 0.1917,
+          "best_lag_s": -2.496
+        },
+        "video_B_vs_speech_A": {
+          "best_r": 0.222,
+          "best_lag_s": -0.384
+        },
+        "video_B_vs_speech_B": {
+          "best_r": 0.3038,
+          "best_lag_s": 1.792
+        },
+        "video_B_vs_speech_C": {
+          "best_r": 0.287,
+          "best_lag_s": -8.704
+        },
+        "video_C_vs_speech_A": {
+          "best_r": 0.2361,
+          "best_lag_s": 8.864
+        },
+        "video_C_vs_speech_B": {
+          "best_r": 0.228,
+          "best_lag_s": 9.408
+        },
+        "video_C_vs_speech_C": {
+          "best_r": 0.4243,
+          "best_lag_s": -12.448
+        }
+      },
+      "head_cy": {
+        "video_A_vs_speech_A": {
+          "best_r": 0.3316,
+          "best_lag_s": 0.576
+        },
+        "video_A_vs_speech_B": {
+          "best_r": 0.1626,
+          "best_lag_s": 0.8
+        },
+        "video_A_vs_speech_C": {
+          "best_r": 0.2162,
+          "best_lag_s": -2.08
+        },
+        "video_B_vs_speech_A": {
+          "best_r": 0.3442,
+          "best_lag_s": 14.336
+        },
+        "video_B_vs_speech_B": {
+          "best_r": 0.2945,
+          "best_lag_s": 11.584
+        },
+        "video_B_vs_speech_C": {
+          "best_r": 0.4152,
+          "best_lag_s": -1.12
+        },
+        "video_C_vs_speech_A": {
+          "best_r": 0.2318,
+          "best_lag_s": 5.056
+        },
+        "video_C_vs_speech_B": {
+          "best_r": 0.2257,
+          "best_lag_s": 1.216
+        },
+        "video_C_vs_speech_C": {
+          "best_r": 0.3282,
+          "best_lag_s": -5.12
+        }
+      },
+      "_speech_to_speech_ceiling": {
+        "speech_A_vs_speech_B": {
+          "best_r": 0.3537,
+          "best_lag_s": -2.112
+        },
+        "speech_A_vs_speech_C": {
+          "best_r": 0.1454,
+          "best_lag_s": 8.288
+        },
+        "speech_B_vs_speech_C": {
+          "best_r": 0.1462,
+          "best_lag_s": 6.4
+        }
+      }
+    },
+    "lag_profile_peak": {
+      "A_mouth_aperture": {
+        "peak": 0.2052,
+        "mean": 0.0006,
+        "sd": 0.0732,
+        "peak_z": 2.795,
+        "n_lags": 937,
+        "frac_of_lags_above_half_the_peak": 0.0768
+      },
+      "A_eye_distance": {
+        "peak": 0.1977,
+        "mean": 0.0001,
+        "sd": 0.0834,
+        "peak_z": 2.37,
+        "n_lags": 937,
+        "frac_of_lags_above_half_the_peak": 0.1259
+      },
+      "A_head_cy": {
+        "peak": 0.3316,
+        "mean": -0.0004,
+        "sd": 0.088,
+        "peak_z": 3.773,
+        "n_lags": 937,
+        "frac_of_lags_above_half_the_peak": 0.0309
+      },
+      "B_mouth_aperture": {
+        "peak": 0.1866,
+        "mean": 0.0012,
+        "sd": 0.0811,
+        "peak_z": 2.286,
+        "n_lags": 937,
+        "frac_of_lags_above_half_the_peak": 0.1323
+      },
+      "B_eye_distance": {
+        "peak": 0.1989,
+        "mean": 0.0,
+        "sd": 0.0887,
+        "peak_z": 2.243,
+        "n_lags": 937,
+        "frac_of_lags_above_half_the_peak": 0.1377
+      },
+      "B_head_cy": {
+        "peak": 0.2945,
+        "mean": 0.0005,
+        "sd": 0.109,
+        "peak_z": 2.697,
+        "n_lags": 937,
+        "frac_of_lags_above_half_the_peak": 0.0928
+      },
+      "A_mouth_aperture_SCRAMBLED": {
+        "peak": 0.0813,
+        "mean": 0.0002,
+        "sd": 0.03,
+        "peak_z": 2.701,
+        "n_lags": 937,
+        "frac_of_lags_above_half_the_peak": 0.0971
+      },
+      "A_head_cy_SCRAMBLED": {
+        "peak": 0.0668,
+        "mean": 0.0001,
+        "sd": 0.0211,
+        "peak_z": 3.156,
+        "n_lags": 937,
+        "frac_of_lags_above_half_the_peak": 0.0736
+      }
+    },
+    "empty_room": {
+      "n_frames": 4500,
+      "n_faces_detected": 0,
+      "room_tone_mean": 0.0029,
+      "room_tone_max": 0.3632,
+      "room_tone_frac_over_0.5": 0.0,
+      "room_tone_n_hops": 4684,
+      "mouth_signal": {
+        "defined": false,
+        "note": "the landmark model detected NO face in any of the 4500 empty-room frames, so there is no mouth signal to correlate. The control is VACUOUS by construction, and that is itself the result: the model does not hallucinate a mouth in an empty room, so the empty room's motion cannot be a mouth."
+      },
+      "motion_localisation": {
+        "mean_map_energy": 0.005277,
+        "total_map_energy": 20.2641,
+        "top_1_pct_of_map_pixels": {
+          "pixel_fraction": 0.01,
+          "energy_fraction": 0.4502,
+          "row_range_px": [
+            46,
+            93
+          ],
+          "col_range_px": [
+            4,
+            151
+          ]
+        },
+        "top_5_pct_of_map_pixels": {
+          "pixel_fraction": 0.05,
+          "energy_fraction": 0.9763,
+          "row_range_px": [
+            22,
+            95
+          ],
+          "col_range_px": [
+            0,
+            159
+          ]
+        },
+        "top_20_pct_of_map_pixels": {
+          "pixel_fraction": 0.2,
+          "energy_fraction": 1.0,
+          "row_range_px": [
+            0,
+            95
+          ],
+          "col_range_px": [
+            0,
+            159
+          ]
+        },
+        "mouth_neighbourhood": {
+          "centre_px": [
+            78.63,
+            53.14
+          ],
+          "half_width_px": [
+            8,
+            5
+          ],
+          "n_map_cells": 40,
+          "energy_fraction": 0.000499,
+          "mean_energy_in_the_box": 0.000253,
+          "mean_energy_overall": 0.005277,
+          "box_is_above_the_frame_mean": false
+        },
+        "row_band_profile": [
+          {
+            "px_rows": [
+              0,
+              7
+            ],
+            "mean_energy": 1e-06
+          },
+          {
+            "px_rows": [
+              8,
+              15
+            ],
+            "mean_energy": 0.0
+          },
+          {
+            "px_rows": [
+              16,
+              23
+            ],
+            "mean_energy": 0.000277
+          },
+          {
+            "px_rows": [
+              24,
+              31
+            ],
+            "mean_energy": 0.000426
+          },
+          {
+            "px_rows": [
+              32,
+              39
+            ],
+            "mean_energy": 1.9e-05
+          },
+          {
+            "px_rows": [
+              40,
+              47
+            ],
+            "mean_energy": 0.002597
+          },
+          {
+            "px_rows": [
+              48,
+              55
+            ],
+            "mean_energy": 0.004807
+          },
+          {
+            "px_rows": [
+              56,
+              63
+            ],
+            "mean_energy": 0.006685
+          },
+          {
+            "px_rows": [
+              64,
+              71
+            ],
+            "mean_energy": 0.000818
+          },
+          {
+            "px_rows": [
+              72,
+              79
+            ],
+            "mean_energy": 0.004661
+          },
+          {
+            "px_rows": [
+              80,
+              87
+            ],
+            "mean_energy": 0.033601
+          },
+          {
+            "px_rows": [
+              88,
+              95
+            ],
+            "mean_energy": 0.009433
+          }
+        ],
+        "hottest_row_band": {
+          "px_rows": [
+            80,
+            87
+          ],
+          "mean_energy": 0.033601
+        }
+      },
+      "mouth_region_is_dominant": false,
+      "mouth_landmark_position_px": [
+        78.63,
+        53.14
+      ],
+      "occupied_take_motion_localisation": {
+        "mean_map_energy": 0.693255,
+        "total_map_energy": 2662.0982,
+        "top_1_pct_of_map_pixels": {
+          "pixel_fraction": 0.01,
+          "energy_fraction": 0.0358,
+          "row_range_px": [
+            30,
+            55
+          ],
+          "col_range_px": [
+            58,
+            97
+          ]
+        },
+        "top_5_pct_of_map_pixels": {
+          "pixel_fraction": 0.05,
+          "energy_fraction": 0.142,
+          "row_range_px": [
+            22,
+            65
+          ],
+          "col_range_px": [
+            56,
+            151
+          ]
+        },
+        "top_20_pct_of_map_pixels": {
+          "pixel_fraction": 0.2,
+          "energy_fraction": 0.3736,
+          "row_range_px": [
+            4,
+            95
+          ],
+          "col_range_px": [
+            0,
+            159
+          ]
+        },
+        "mouth_neighbourhood": {
+          "centre_px": [
+            78.63,
+            53.14
+          ],
+          "half_width_px": [
+            8,
+            5
+          ],
+          "n_map_cells": 40,
+          "energy_fraction": 0.025619,
+          "mean_energy_in_the_box": 1.705014,
+          "mean_energy_overall": 0.693255,
+          "box_is_above_the_frame_mean": true
+        },
+        "row_band_profile": [
+          {
+            "px_rows": [
+              0,
+              7
+            ],
+            "mean_energy": 0.498133
+          },
+          {
+            "px_rows": [
+              8,
+              15
+            ],
+            "mean_energy": 0.49928
+          },
+          {
+            "px_rows": [
+              16,
+              23
+            ],
+            "mean_energy": 0.674614
+          },
+          {
+            "px_rows": [
+              24,
+              31
+            ],
+            "mean_energy": 0.757776
+          },
+          {
+            "px_rows": [
+              32,
+              39
+            ],
+            "mean_energy": 1.041824
+          },
+          {
+            "px_rows": [
+              40,
+              47
+            ],
+            "mean_energy": 0.837575
+          },
+          {
+            "px_rows": [
+              48,
+              55
+            ],
+            "mean_energy": 0.817213
+          },
+          {
+            "px_rows": [
+              56,
+              63
+            ],
+            "mean_energy": 0.893177
+          },
+          {
+            "px_rows": [
+              64,
+              71
+            ],
+            "mean_energy": 0.68749
+          },
+          {
+            "px_rows": [
+              72,
+              79
+            ],
+            "mean_energy": 0.58657
+          },
+          {
+            "px_rows": [
+              80,
+              87
+            ],
+            "mean_energy": 0.510654
+          },
+          {
+            "px_rows": [
+              88,
+              95
+            ],
+            "mean_energy": 0.51475
+          }
+        ],
+        "hottest_row_band": {
+          "px_rows": [
+            32,
+            39
+          ],
+          "mean_energy": 1.041824
+        }
+      },
+      "occupied_take_mean_map_energy": 0.693255,
+      "empty_room_mean_map_energy": 0.005277,
+      "empty_room_energy_relative_to_the_occupied_take": 0.007612,
+      "energy_ratio_note": "the empty room's mean motion-map energy as a fraction of session A's, both from the SAME pipeline (row-band removal then 2x2 downsample). TEACHER-LOO-FOLDS.md \u00a72 quotes 0.0000066 for this ratio, measured on the TORN frames.",
+      "empty_room_motion_vs_A_speech": {
+        "total": {
+          "signal": "total",
+          "mean": 23.274562,
+          "sd": 2.471823,
+          "best_r": 0.1282,
+          "best_lag_hops": 26,
+          "best_lag_s": 0.832,
+          "lags_tried": 937
+        },
+        "active": {
+          "signal": "active",
+          "mean": 23.274562,
+          "sd": 2.471823,
+          "best_r": 0.1282,
+          "best_lag_hops": 26,
+          "best_lag_s": 0.832,
+          "lags_tried": 937
+        },
+        "area": {
+          "signal": "area",
+          "mean": 8.745256,
+          "sd": 4.921932,
+          "best_r": 0.0889,
+          "best_lag_hops": -72,
+          "best_lag_s": -2.304,
+          "lags_tried": 937
+        },
+        "active_scrambled_null": {
+          "n_permutations": 25,
+          "seed": 20261020,
+          "best_r_mean": 0.0914,
+          "best_r_median": 0.0872,
+          "best_r_min": 0.0779,
+          "best_r_max": 0.1173,
+          "best_r_values": [
+            0.1037,
+            0.0827,
+            0.0934,
+            0.1121,
+            0.0949,
+            0.0844,
+            0.0812,
+            0.093,
+            0.1093,
+            0.1131,
+            0.0845,
+            0.0792,
+            0.0831,
+            0.1173,
+            0.0872,
+            0.0933,
+            0.0865,
+            0.0823,
+            0.0972,
+            0.0988,
+            0.0804,
+            0.08,
+            0.0779,
+            0.0904,
+            0.0801
+          ]
+        }
+      }
+    },
+    "degenerate_baselines": {
+      "speech_envelope": {
+        "signal": "speech",
+        "n_random_lags": 20,
+        "self_vs_self_random_lag_r_mean": 0.0099,
+        "self_vs_self_random_lag_r_max": 0.2435,
+        "self_vs_self_max_over_lags_r_mean": 0.7243,
+        "self_vs_self_max_over_lags_r_min": 0.4773
+      },
+      "mouth_aperture_A": {
+        "signal": "mouth_aperture",
+        "n_random_lags": 20,
+        "self_vs_self_random_lag_r_mean": 0.0094,
+        "self_vs_self_random_lag_r_max": 0.1241,
+        "self_vs_self_max_over_lags_r_mean": 0.7154,
+        "self_vs_self_max_over_lags_r_min": 0.5541
+      }
+    },
+    "at_the_whole_frame_offset": {
+      "A": {
+        "source": "/home/proart/projects/communicator/experiments/audio_video_alignment_results.json",
+        "note": "TEACHER-LOO-FOLDS.md \u00a73's offsets, computed on the TORN frames; the mouth correlation is evaluated at the same offset in seconds on the correct frames",
+        "total": {
+          "whole_frame_lag_s": 2.336,
+          "mouth_aperture_r_at_that_offset": 0.0277
+        },
+        "active": {
+          "whole_frame_lag_s": 9.472,
+          "mouth_aperture_r_at_that_offset": 0.0162
+        },
+        "area": {
+          "whole_frame_lag_s": 2.304,
+          "mouth_aperture_r_at_that_offset": 0.0331
+        }
+      },
+      "B": {
+        "source": "/home/proart/projects/communicator/experiments/audio_video_alignment_results.json",
+        "note": "TEACHER-LOO-FOLDS.md \u00a73's offsets, computed on the TORN frames; the mouth correlation is evaluated at the same offset in seconds on the correct frames",
+        "total": {
+          "whole_frame_lag_s": 1.44,
+          "mouth_aperture_r_at_that_offset": -0.181
+        },
+        "active": {
+          "whole_frame_lag_s": 3.456,
+          "mouth_aperture_r_at_that_offset": 0.0852
+        },
+        "area": {
+          "whole_frame_lag_s": 4.8,
+          "mouth_aperture_r_at_that_offset": 0.1765
+        }
+      }
+    },
+    "whole_frame_motion_on_correct_frames": {
+      "A": {
+        "total": {
+          "signal": "total",
+          "mean": 2661.474588,
+          "sd": 2436.814862,
+          "best_r": 0.0863,
+          "best_lag_hops": 102,
+          "best_lag_s": 3.264,
+          "lags_tried": 937
+        },
+        "active": {
+          "signal": "active",
+          "mean": 567.314144,
+          "sd": 522.771422,
+          "best_r": 0.1536,
+          "best_lag_hops": 146,
+          "best_lag_s": 4.672,
+          "lags_tried": 937
+        },
+        "area": {
+          "signal": "area",
+          "mean": 12.753761,
+          "sd": 18.471483,
+          "best_r": 0.0782,
+          "best_lag_hops": 29,
+          "best_lag_s": 0.928,
+          "lags_tried": 937
+        },
+        "mean_map_energy": 0.6933
+      },
+      "B": {
+        "total": {
+          "signal": "total",
+          "mean": 2190.946804,
+          "sd": 1143.668678,
+          "best_r": 0.0458,
+          "best_lag_hops": 155,
+          "best_lag_s": 4.96,
+          "lags_tried": 937
+        },
+        "active": {
+          "signal": "active",
+          "mean": 302.903003,
+          "sd": 188.098687,
+          "best_r": 0.087,
+          "best_lag_hops": -362,
+          "best_lag_s": -11.584,
+          "lags_tried": 937
+        },
+        "area": {
+          "signal": "area",
+          "mean": 34.687564,
+          "sd": 55.806183,
+          "best_r": 0.1851,
+          "best_lag_hops": 349,
+          "best_lag_s": 11.168,
+          "lags_tried": 937
+        },
+        "mean_map_energy": 0.5699
+      },
+      "C": {
+        "total": {
+          "signal": "total",
+          "mean": 1902.001289,
+          "sd": 1044.206923,
+          "best_r": 0.2121,
+          "best_lag_hops": 12,
+          "best_lag_s": 0.384,
+          "lags_tried": 937
+        },
+        "active": {
+          "signal": "active",
+          "mean": 260.006633,
+          "sd": 170.574377,
+          "best_r": 0.1492,
+          "best_lag_hops": 12,
+          "best_lag_s": 0.384,
+          "lags_tried": 937
+        },
+        "area": {
+          "signal": "area",
+          "mean": 69.281453,
+          "sd": 98.597374,
+          "best_r": 0.1612,
+          "best_lag_hops": -288,
+          "best_lag_s": -9.216,
+          "lags_tried": 937
+        },
+        "mean_map_energy": 0.4948
+      }
+    }
+  },
+  "sensitivity": {
+    "torn_frames": {
+      "note": "the SAME pipeline on the 23040-byte stride the repository uses. Recorded so the difference between the two readings is visible rather than asserted.",
+      "n_frames": 750,
+      "n_faces_detected": 601,
+      "detection_fraction": 0.8013,
+      "gap_fill": {
+        "n_detected": 601,
+        "n_filled": 149,
+        "max_gap_frames": 2,
+        "n_frames": 750
+      },
+      "mouth_aperture": {
+        "signal": "mouth_aperture",
+        "mean": 0.018812,
+        "sd": 0.014999,
+        "best_r": 0.1439,
+        "best_lag_hops": 71,
+        "best_lag_s": 2.272,
+        "lags_tried": 937
+      },
+      "scrambled_audio_null": {
+        "n_permutations": 25,
+        "seed": 20261020,
+        "best_r_mean": 0.0902,
+        "best_r_median": 0.0902,
+        "best_r_min": 0.0726,
+        "best_r_max": 0.123,
+        "best_r_values": [
+          0.0726,
+          0.0751,
+          0.0787,
+          0.123,
+          0.0838,
+          0.075,
+          0.0782,
+          0.0945,
+          0.0915,
+          0.0959,
+          0.0781,
+          0.1013,
+          0.0874,
+          0.099,
+          0.1052,
+          0.0822,
+          0.1082,
+          0.0902,
+          0.0924,
+          0.0846,
+          0.0973,
+          0.0969,
+          0.0862,
+          0.0839,
+          0.0945
+        ]
+      },
+      "landmarks": {
+        "upper_inner_lip": {
+          "index": 13,
+          "n": 601,
+          "mean_x_px": 78.64,
+          "mean_y_px": 64.02,
+          "sd_x_px": 3.62,
+          "sd_y_px": 27.09
+        },
+        "lower_inner_lip": {
+          "index": 14,
+          "n": 601,
+          "mean_x_px": 78.67,
+          "mean_y_px": 65.0,
+          "sd_x_px": 3.59,
+          "sd_y_px": 26.79
+        },
+        "mouth_corner_right": {
+          "index": 61,
+          "n": 601,
+          "mean_x_px": 71.17,
+          "mean_y_px": 64.52,
+          "sd_x_px": 3.46,
+          "sd_y_px": 26.91
+        },
+        "mouth_corner_left": {
+          "index": 291,
+          "n": 601,
+          "mean_x_px": 85.63,
+          "mean_y_px": 64.33,
+          "sd_x_px": 3.4,
+          "sd_y_px": 26.89
+        },
+        "nose_tip": {
+          "index": 1,
+          "n": 601,
+          "mean_x_px": 78.82,
+          "mean_y_px": 56.89,
+          "sd_x_px": 4.74,
+          "sd_y_px": 27.14
+        },
+        "chin_bottom": {
+          "index": 152,
+          "n": 601,
+          "mean_x_px": 78.5,
+          "mean_y_px": 76.94,
+          "sd_x_px": 3.29,
+          "sd_y_px": 26.95
+        },
+        "forehead_top": {
+          "index": 10,
+          "n": 601,
+          "mean_x_px": 78.44,
+          "mean_y_px": 33.76,
+          "sd_x_px": 4.71,
+          "sd_y_px": 26.86
+        },
+        "eye_outer_right": {
+          "index": 33,
+          "n": 601,
+          "mean_x_px": 64.66,
+          "mean_y_px": 47.37,
+          "sd_x_px": 3.96,
+          "sd_y_px": 26.99
+        },
+        "eye_outer_left": {
+          "index": 263,
+          "n": 601,
+          "mean_x_px": 91.94,
+          "mean_y_px": 46.97,
+          "sd_x_px": 3.81,
+          "sd_y_px": 26.98
+        }
+      }
+    },
+    "upscale_1x": {
+      "n_faces_detected": 900,
+      "detection_fraction": 1.0,
+      "gap_fill": {
+        "n_detected": 900,
+        "n_filled": 0,
+        "max_gap_frames": 0,
+        "n_frames": 900
+      },
+      "mouth_aperture": {
+        "signal": "mouth_aperture",
+        "mean": 0.022565,
+        "sd": 0.014774,
+        "best_r": 0.2083,
+        "best_lag_hops": 209,
+        "best_lag_s": 6.688,
+        "lags_tried": 937
+      },
+      "scrambled_audio_null": {
+        "n_permutations": 25,
+        "seed": 20261020,
+        "best_r_mean": 0.0897,
+        "best_r_median": 0.089,
+        "best_r_min": 0.0642,
+        "best_r_max": 0.1116,
+        "best_r_values": [
+          0.072,
+          0.0871,
+          0.0926,
+          0.0933,
+          0.0938,
+          0.1055,
+          0.0855,
+          0.0871,
+          0.0845,
+          0.0869,
+          0.0817,
+          0.0773,
+          0.1116,
+          0.0934,
+          0.0948,
+          0.0873,
+          0.0939,
+          0.1016,
+          0.0884,
+          0.09,
+          0.0837,
+          0.089,
+          0.1036,
+          0.094,
+          0.0642
+        ]
+      },
+      "landmarks": {
+        "upper_inner_lip": {
+          "index": 13,
+          "n": 900,
+          "mean_x_px": 78.27,
+          "mean_y_px": 52.31,
+          "sd_x_px": 3.58,
+          "sd_y_px": 1.58
+        },
+        "lower_inner_lip": {
+          "index": 14,
+          "n": 900,
+          "mean_x_px": 78.32,
+          "mean_y_px": 53.3,
+          "sd_x_px": 3.54,
+          "sd_y_px": 1.66
+        },
+        "mouth_corner_right": {
+          "index": 61,
+          "n": 900,
+          "mean_x_px": 70.64,
+          "mean_y_px": 52.82,
+          "sd_x_px": 3.31,
+          "sd_y_px": 1.61
+        },
+        "mouth_corner_left": {
+          "index": 291,
+          "n": 900,
+          "mean_x_px": 85.37,
+          "mean_y_px": 52.66,
+          "sd_x_px": 3.26,
+          "sd_y_px": 1.53
+        },
+        "nose_tip": {
+          "index": 1,
+          "n": 900,
+          "mean_x_px": 78.54,
+          "mean_y_px": 45.06,
+          "sd_x_px": 4.56,
+          "sd_y_px": 1.61
+        },
+        "chin_bottom": {
+          "index": 152,
+          "n": 900,
+          "mean_x_px": 78.19,
+          "mean_y_px": 65.24,
+          "sd_x_px": 3.02,
+          "sd_y_px": 1.68
+        },
+        "forehead_top": {
+          "index": 10,
+          "n": 900,
+          "mean_x_px": 78.05,
+          "mean_y_px": 21.58,
+          "sd_x_px": 4.6,
+          "sd_y_px": 1.09
+        },
+        "eye_outer_right": {
+          "index": 33,
+          "n": 900,
+          "mean_x_px": 64.07,
+          "mean_y_px": 35.53,
+          "sd_x_px": 3.84,
+          "sd_y_px": 1.41
+        },
+        "eye_outer_left": {
+          "index": 263,
+          "n": 900,
+          "mean_x_px": 91.56,
+          "mean_y_px": 35.04,
+          "sd_x_px": 3.73,
+          "sd_y_px": 1.29
+        }
+      }
+    },
+    "upscale_6x": {
+      "n_faces_detected": 900,
+      "detection_fraction": 1.0,
+      "gap_fill": {
+        "n_detected": 900,
+        "n_filled": 0,
+        "max_gap_frames": 0,
+        "n_frames": 900
+      },
+      "mouth_aperture": {
+        "signal": "mouth_aperture",
+        "mean": 0.028633,
+        "sd": 0.016146,
+        "best_r": 0.2138,
+        "best_lag_hops": 209,
+        "best_lag_s": 6.688,
+        "lags_tried": 937
+      },
+      "scrambled_audio_null": {
+        "n_permutations": 25,
+        "seed": 20261020,
+        "best_r_mean": 0.0905,
+        "best_r_median": 0.0885,
+        "best_r_min": 0.0739,
+        "best_r_max": 0.1175,
+        "best_r_values": [
+          0.0803,
+          0.0828,
+          0.0739,
+          0.0901,
+          0.0978,
+          0.1175,
+          0.0996,
+          0.0967,
+          0.0857,
+          0.0949,
+          0.0883,
+          0.0794,
+          0.1028,
+          0.1005,
+          0.0775,
+          0.0848,
+          0.0829,
+          0.0957,
+          0.0747,
+          0.0885,
+          0.0745,
+          0.1003,
+          0.1032,
+          0.1043,
+          0.0846
+        ]
+      },
+      "landmarks": {
+        "upper_inner_lip": {
+          "index": 13,
+          "n": 900,
+          "mean_x_px": 78.64,
+          "mean_y_px": 52.56,
+          "sd_x_px": 3.59,
+          "sd_y_px": 1.56
+        },
+        "lower_inner_lip": {
+          "index": 14,
+          "n": 900,
+          "mean_x_px": 78.7,
+          "mean_y_px": 53.81,
+          "sd_x_px": 3.55,
+          "sd_y_px": 1.68
+        },
+        "mouth_corner_right": {
+          "index": 61,
+          "n": 900,
+          "mean_x_px": 71.04,
+          "mean_y_px": 53.25,
+          "sd_x_px": 3.31,
+          "sd_y_px": 1.61
+        },
+        "mouth_corner_left": {
+          "index": 291,
+          "n": 900,
+          "mean_x_px": 85.75,
+          "mean_y_px": 53.05,
+          "sd_x_px": 3.28,
+          "sd_y_px": 1.52
+        },
+        "nose_tip": {
+          "index": 1,
+          "n": 900,
+          "mean_x_px": 78.86,
+          "mean_y_px": 45.42,
+          "sd_x_px": 4.56,
+          "sd_y_px": 1.57
+        },
+        "chin_bottom": {
+          "index": 152,
+          "n": 900,
+          "mean_x_px": 78.51,
+          "mean_y_px": 65.62,
+          "sd_x_px": 3.01,
+          "sd_y_px": 1.72
+        },
+        "forehead_top": {
+          "index": 10,
+          "n": 900,
+          "mean_x_px": 78.49,
+          "mean_y_px": 22.14,
+          "sd_x_px": 4.71,
+          "sd_y_px": 1.09
+        },
+        "eye_outer_right": {
+          "index": 33,
+          "n": 900,
+          "mean_x_px": 64.56,
+          "mean_y_px": 35.97,
+          "sd_x_px": 3.89,
+          "sd_y_px": 1.41
+        },
+        "eye_outer_left": {
+          "index": 263,
+          "n": 900,
+          "mean_x_px": 92.02,
+          "mean_y_px": 35.54,
+          "sd_x_px": 3.78,
+          "sd_y_px": 1.3
+        }
+      }
+    }
+  },
+  "headline": {
+    "signal": "mouth_aperture",
+    "statistic": "max over +/-15 s of the Pearson correlation of the detrended signals on the 32 ms hop grid",
+    "offset_policy": "SEARCHED, not assumed to be zero. The audio and the video of A/B/C are separate recordings that were started independently, so their relative offset is unknown. The video is 30.00 s and the audio 29.98 s -- the same LENGTH, but equal length does not mean equal START, and the capture script's own docstring says the two were started independently. The +/-15 s search covers every relative start possible, because the video is 30 s long and the audio 30 s long.",
+    "A_mouth_aperture_best_r": 0.2052,
+    "A_mouth_aperture_best_lag_s": 6.688,
+    "A_mouth_aperture_r_at_lag_zero": -0.1763,
+    "B_mouth_aperture_best_r": 0.1866,
+    "B_mouth_aperture_best_lag_s": 4.864,
+    "B_mouth_aperture_r_at_lag_zero": -0.1855,
+    "mouth_aperture_best_r": 0.2052,
+    "scrambled_audio_null_r": 0.0902,
+    "margin_over_scrambled_audio_null": 0.115,
+    "scrambled_audio_null_max_r": 0.11,
+    "margin_over_scrambled_audio_null_max": 0.0952,
+    "eye_distance_best_r": 0.1989,
+    "wrong_session_best_r": 0.1221,
+    "wrong_session_same_content_best_r": 0.2834,
+    "wrong_session_same_content_note": "A's audio against B's video and B's audio against A's video. A and B are two takes of the same person reciting the SAME poem, so their speech envelopes agree with each other at a correlation far above this lane's null -- which is the CEILING for any signal that tracks speech content. These rows are reported and NOT used to judge the mouth.",
+    "wrong_session_c_audio_best_r": 0.219,
+    "wrong_session_c_audio_note": "C's speech envelope is a flat line at 0.003, so a correlation against it is the ratio of two near-constant signals and is numerically unstable. Reported, not used to judge anything.",
+    "mouth_width_best_r": 0.3038,
+    "mouth_width_note": "the horizontal distance between the mouth corners. A mouth that OPENS does not get wider, so this is a control on the same lips: if the mouth width correlates MORE than the mouth aperture, the correlation cannot be about the mouth opening.",
+    "head_vertical_motion_best_r": 0.3316,
+    "head_motion_note": "the vertical position of the face in the frame, which is the signal the eye-distance control is really measuring. It is recorded because it says what the correlation is ABOUT.",
+    "checks": {
+      "beats_the_scrambled_audio_null": true,
+      "beats_the_eye_distance_control": true,
+      "beats_the_mouth_width_control": false,
+      "beats_the_wrong_session_control": true,
+      "replicates_on_the_halves_of_the_recording": true
+    },
+    "the_mouth_tracks_the_speech": false,
+    "reading": "The mouth-aperture correlation at its best offset, MINUS the same max-over-lags statistic on the permuted speech. The verdict requires ALL FIVE checks: beating the scrambled-audio null; beating the eye-distance control (a landmark that must not track speech); beating the mouth-width control (a mouth that OPENS does not get WIDER); beating the clean wrong-session control; and replicating on the two halves of the recording. A correlation that beats the null but not the other controls is a correlation about the whole frame moving, not about a mouth."
+  }
+}
