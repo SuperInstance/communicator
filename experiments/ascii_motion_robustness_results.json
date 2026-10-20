@@ -129,7 +129,7 @@
   "provenance": {
     "generated_by": "experiments/ascii_motion_robustness.py",
     "script_path": "/home/proart/projects/communicator/experiments/ascii_motion_robustness.py",
-    "script_sha256": "59093e23e256a48dc142728afb94ad413c180d6852bc7b84dbd27c7123aa6055",
+    "script_sha256": "e53d39eb958408affc7ef9d3056fec56ca6fc7d79aec61ab6164083c0df02b4c",
     "python": "/home/proart/projects/glasses/.venv/bin/python",
     "command_line": "experiments/ascii_motion_robustness.py --capture /mnt/c/proart_capture/small.nv12",
     "cli_args": [

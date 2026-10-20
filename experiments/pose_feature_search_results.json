@@ -403,7 +403,7 @@
   "provenance": {
     "generated_by": "experiments/pose_feature_search.py",
     "script_path": "/home/proart/projects/communicator/experiments/pose_feature_search.py",
-    "script_sha256": "b2cd759989ddd7dde5b072c84226bd2919566dc983f5e8f6598d0c51b4f31c2f",
+    "script_sha256": "60ec6738fbe17a6feb571ce1dbe96971fa7fd4b1ac823a7a70164ef7bf313b45",
     "python": "/home/proart/projects/glasses/.venv/bin/python",
     "command_line": "experiments/pose_feature_search.py --json experiments/pose_feature_search_results.json",
     "cli_args": [

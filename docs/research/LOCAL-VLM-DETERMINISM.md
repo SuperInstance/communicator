@@ -245,9 +245,13 @@ nothing at all the moment they are not.
 > | `C.nv12` | **0.367** | 42.935 | 42.922 |
 >
 > The stride is now **detected per file** by that test, not assumed, and
-> recorded; and a third format exists (`experiments/corpus_capture_win.py`
-> writes **luma only**, 15,360 bytes per frame), so the detector tries all
-> three and reports every score.
+> recorded; and the detector tries all three candidate layouts and reports
+> every score. (A correction: this paragraph first said a third format
+> exists because `experiments/corpus_capture_win.py` writes **luma only**,
+> 15,360 bytes per frame. That is **false** — no script in this repo writes
+> a luma-only frame stream; the capture tool writes `.npz` change-map
+> archives. The `luma_only` layout is kept in the reader as something
+> realisable, and it is measured here as the third arm.)
 >
 > **What this changes here:** the first run of this lane read the captures at
 > 23,040 and at 25.00 fps. Its vision numbers (sensitivity 1.000, FPR silent

@@ -243,7 +243,7 @@
   },
   "provenance": {
     "script": "experiments/nv12_stride_audit.py",
-    "script_sha256": "19ab515ac410bf25279e1681b7b598a08f8dc4a2cdee548df9495bd2e6e583e7",
+    "script_sha256": "d4996516dff30f31ebc3e3682749dbfe78ddcbc233fd006f1e0b35d3fe24bd63",
     "captures_dir": "/mnt/c/proart_capture",
     "numpy": "2.5.4"
   }

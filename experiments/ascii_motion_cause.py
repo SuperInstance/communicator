@@ -4,7 +4,7 @@ ascii_motion_cause.py -- WHAT is changing? Per-frame global gain vs the delta.
 THE FRAME LAYOUT, FIRST.
 
 The captures on disk are NOT standard NV12. `C:\\proart_capture\\nv12small.py`
-writes 19,200 bytes per 160x96 frame (15,360 luma + 1,920 U + 1,920 V), not
+writes 19,200 bytes per 160x96 frame (15,360 luma + 3,840 of INTERLEAVED U,V at 80x24), not
 the `W*H*3//2` = 23,040 this file used to assume. Read at 23,040, all but
 every sixth frame is torn (rows 0..71 from frame k, rows 72..95 from frame
 k+1) and the mean |diff| between adjacent frames is 40 counts instead of

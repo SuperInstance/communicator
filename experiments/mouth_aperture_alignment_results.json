@@ -2,7 +2,7 @@
   "identity": {
     "script": "experiments/mouth_aperture_alignment.py",
     "question": "does the MOUTH's motion, measured with a face landmark model, track the AUDIO's speech in time?",
-    "run_utc": "2026-10-20T09:56:30+00:00",
+    "run_utc": "2026-10-20T11:59:44+00:00",
     "python": "3.12.15",
     "numpy": "1.26.4",
     "opencv": "4.11.0",
@@ -63,7 +63,7 @@
       "chroma_bytes": 3840,
       "frame_w": 160,
       "frame_h": 96,
-      "note": "each record is 15360 bytes of 160x96 luma followed by 3840 bytes of chroma. The file is NOT NV12: the writer ('/mnt/c/proart_capture/nv12small.py') appends the INTERLEAVED uv plane, so the stride is 19200 and not 23040, and there is no V plane of its own.",
+      "note": "each record is 15360 bytes of 160x96 luma followed by 3840 bytes of INTERLEAVED U,V chroma (80x24 samples). The file is NOT standard NV12: the writer ('/mnt/c/proart_capture/nv12small.py') appends the INTERLEAVED uv plane, so the stride is 19200 and not 23040.",
       "writer": "/mnt/c/proart_capture/nv12small.py",
       "torn_stride_for_comparison": 23040
     },
@@ -131,12 +131,12 @@
       "bytes": 2327524
     },
     "/home/proart/projects/communicator/experiments/audio_video_alignment.py": {
-      "sha256": "ce23c0be34cb58350fd022502cc676aa532de9904a297e46d2a8192fd1f0f4f1",
-      "bytes": 14854
+      "sha256": "9620fa7e1e62fc254e3f676c486d623f5a63a7b47b0270f3425bec67c9ba3075",
+      "bytes": 16303
     },
     "/home/proart/projects/communicator/experiments/audio_video_alignment_results.json": {
-      "sha256": "4ce8adc1dd14db422a13a8a0b3f6c1e000ab545321861c968de2280c49ab7021",
-      "bytes": 4123
+      "sha256": "d348855a2b23647552574a3682e571b195867d15d5ed26f4e3e36184534209d1",
+      "bytes": 6129
     }
   },
   "detection": {
@@ -2532,32 +2532,32 @@
         "source": "/home/proart/projects/communicator/experiments/audio_video_alignment_results.json",
         "note": "TEACHER-LOO-FOLDS.md \u00a73's offsets, computed on the TORN frames; the mouth correlation is evaluated at the same offset in seconds on the correct frames",
         "total": {
-          "whole_frame_lag_s": 2.336,
-          "mouth_aperture_r_at_that_offset": 0.0277
+          "whole_frame_lag_s": 3.264,
+          "mouth_aperture_r_at_that_offset": 0.0722
         },
         "active": {
-          "whole_frame_lag_s": 9.472,
-          "mouth_aperture_r_at_that_offset": 0.0162
+          "whole_frame_lag_s": 4.672,
+          "mouth_aperture_r_at_that_offset": -0.046
         },
         "area": {
-          "whole_frame_lag_s": 2.304,
-          "mouth_aperture_r_at_that_offset": 0.0331
+          "whole_frame_lag_s": 0.928,
+          "mouth_aperture_r_at_that_offset": 0.006
         }
       },
       "B": {
         "source": "/home/proart/projects/communicator/experiments/audio_video_alignment_results.json",
         "note": "TEACHER-LOO-FOLDS.md \u00a73's offsets, computed on the TORN frames; the mouth correlation is evaluated at the same offset in seconds on the correct frames",
         "total": {
-          "whole_frame_lag_s": 1.44,
-          "mouth_aperture_r_at_that_offset": -0.181
+          "whole_frame_lag_s": 4.96,
+          "mouth_aperture_r_at_that_offset": 0.1936
         },
         "active": {
-          "whole_frame_lag_s": 3.456,
-          "mouth_aperture_r_at_that_offset": 0.0852
+          "whole_frame_lag_s": -11.584,
+          "mouth_aperture_r_at_that_offset": 0.0949
         },
         "area": {
-          "whole_frame_lag_s": 4.8,
-          "mouth_aperture_r_at_that_offset": 0.1765
+          "whole_frame_lag_s": 11.168,
+          "mouth_aperture_r_at_that_offset": -0.0685
         }
       }
     },

@@ -28,9 +28,21 @@ The other thing pinned here is the arithmetic of the stored frames. The
 corpus stores row-band-removed change maps, quantised to uint8. Each of
 those three steps can fail quietly:
 
-  - `row_band_remove` must actually remove the LED flicker banding (a
-    per-row constant offset). If it does not, the stored maps are dominated
-    by the lighting and the subject's motion is a rounding error.
+  - `row_band_remove` must actually remove a per-row constant offset. If it
+    does not, the stored maps are dominated by the row structure and the
+    subject's motion is a rounding error.
+
+    > CORRECTION (2026-10-20). This bullet used to say the offset is "the
+    > LED flicker banding" and that an empty room "flips 50.00% of its dots".
+    > The 50.00% was an ARTEFACT: every reader in the repo read the captures
+    > at a 23,040-byte stride when the files are 19,200, so 80% of every
+    > "frame" was a tear between two real moments -- and a tear IS a
+    > horizontal band. On the corrected frames the empty room shows
+    > **0.0000%** banded pixels with NO filter at all, and the filter now
+    > makes the occupied rate slightly WORSE (1.79% against 0.62%). The
+    > filter's ARITHMETIC is still pinned here; its JUSTIFICATION is
+    > withdrawn. The capture now stores the unfiltered maps and the raw luma
+    > as well, so the representation is a post-hoc decision.
   - `change_maps` must be all zeros for a scene that did not move, and
     non-zero for one that did. A change map that is non-zero on a static
     scene is noise; one that is zero on a moving scene is a dead channel.

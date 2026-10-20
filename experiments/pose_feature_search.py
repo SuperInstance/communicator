@@ -227,7 +227,7 @@ def load_y(path: Path, nf: int | None = None) -> np.ndarray:
     computes a stride by hand.
 
     The captures on disk are NOT standard NV12. `C:\\proart_capture\\
-    nv12small.py` writes 15,360 luma bytes + 1,920 U + 1,920 V per 160x96
+    nv12small.py` writes 15,360 luma bytes + 3,840 bytes of INTERLEAVED U,V (80x24) per 160x96
     frame -- 19,200 bytes -- not the `W*H*3//2` = 23,040 that a standard-NV12
     reader assumes. Read at 23,040, all but every sixth frame is torn: rows
     0..71 from frame k and rows 72..95 from frame k+1. See `src/nv12.py` and

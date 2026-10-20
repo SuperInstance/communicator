@@ -74,7 +74,7 @@
   "provenance": {
     "generated_by": "experiments/pose_test.py",
     "script_path": "/home/proart/projects/communicator/experiments/pose_test.py",
-    "script_sha256": "67fc8a9b420d81d565b06152c41204824d427247154f4bee40e3b3f83ed6c24c",
+    "script_sha256": "a50a88c3a825d0b0d1d7cd15bbdf0dc6116b79c84c5eed96e0348215ada62b46",
     "python": "/home/proart/projects/glasses/.venv/bin/python",
     "command_line": "experiments/pose_test.py",
     "cli_args": [],

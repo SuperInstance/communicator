@@ -25,6 +25,43 @@ WHAT THE MEASUREMENTS SAY THE DATA MUST LOOK LIKE.
    stored corpus is already clean, and the same code path is what the on-device
    system will run.
 
+   > ## CORRECTION (2026-10-20) -- THE NUISANCE WAS NEVER THERE, AND THE
+   > FILTER IS NOW OPTIONAL
+   >
+   > The 50.00% was an ARTEFACT. Every reader in the repo read the captures at
+   > a 23,040-byte frame stride when the files are 19,200, so 80% of every
+   > "frame" was a tear between two real moments -- and a tear IS a horizontal
+   > band. The full account is `docs/research/NV12-STRIDE.md`.
+   >
+   > On the corrected frames the empty room shows **0.0000% banded pixels with
+   > NO filter at all**, where it had shown a perfect 50.00%. The occupied
+   > rate falls 48.19% -> 0.62%. And because there is no longer a nuisance to
+   > remove, the row-removal filter now makes the occupied rate **WORSE**
+   > (1.79%). `experiments/combined_filter.py` puts it as: "THE FILTERS ARE
+   > NOT NEEDED, AND THE PREMISE IS WITHDRAWN ... The honest recommendation
+   > is to use the raw representation, keep the zero latency, and re-run the
+   > teacher on it."
+   >
+   > So a filter whose justification is withdrawn must not be BAKED INTO THE
+   > CAPTURE, because a capture cannot be re-filtered once the raw frames are
+   > thrown away. This tool now stores, per take:
+   >
+   >   `maps`      the row-removed change maps   (unchanged key, unchanged
+   >               meaning -- every existing consumer keeps working)
+   >   `maps_raw`  the UNFILTERED change maps, with their own scale
+   >   `luma`      the raw luma frames, unfiltered
+   >
+   > and the metadata records which is which, so the representation is a
+   > POST-HOC DECISION rather than a permanent property of the recording.
+   >
+   > The raw luma is the part that matters most. The night's largest result --
+   > the speaking signal in the mouth, +0.733 sd against a +0.477 sd cheek
+   > control -- is measured on LUMA, not on change maps, and so are the
+   > MediaPipe face detections, the pose test, the room map and the
+   > empty-room control. A corpus of change maps alone could not carry the
+   > repo's best current finding, so storing the luma is what makes this
+   > corpus usable by the lanes that matter.
+
 3. THE TEACHER MUST BE BENCHMARKED AGAINST GROUND TRUTH BEFORE IT IS TRUSTED.
    So the corpus has two kinds of session, and the distinction is in the
    label:
@@ -206,13 +243,25 @@ def _find_src():
 
 
 def row_band_remove(ys: np.ndarray) -> np.ndarray:
-    """Remove the row-constant component: the LED flicker banding.
+    """Remove the row-constant component.
 
     Per-row MEDIAN across the columns, not mean -- a subject occupying a
     minority of a row's columns must not drag the estimate, and the median
-    ignores it. Verified in experiments/row_band_removal.py: an empty room's
-    row-profile std drops 45.98 -> 0.29 while the subject's column structure
-    is untouched (7.08 -> 7.18).
+    ignores it.
+
+    > CORRECTION (2026-10-20). The original justification for this function
+    > was LED flicker banding, and the numbers cited with it -- an empty
+    > room's row-profile std dropping 45.98 -> 0.29 while the subject's
+    > column structure went 7.08 -> 7.18 -- were measured on TORN frames. The
+    > "banding" was the tear (see the module docstring and
+    > `docs/research/NV12-STRIDE.md`). On the corrected frames there is no
+    > flicker nuisance to remove, and applying this filter makes the occupied
+    > banded rate slightly WORSE (1.79% against 0.62% with no filter).
+    >
+    > The function is KEPT, because it is cheap, because the on-device path
+    > may still want it, and because removing it now would change the meaning
+    > of the existing `maps` key. But it is no longer applied to the only
+    > copy of the data: the raw change maps and the raw luma are stored too.
     """
     prof = np.median(ys, axis=2)
     g = prof.mean(axis=1, keepdims=True)
@@ -220,7 +269,12 @@ def row_band_remove(ys: np.ndarray) -> np.ndarray:
 
 
 def change_maps(ys: np.ndarray) -> np.ndarray:
-    """Per-frame |frame(t+1) - frame(t)|, row-band-removed, downsampled."""
+    """Per-frame |frame(t+1) - frame(t)|, downsampled by 2x2.
+
+    The caller decides whether `ys` has been row-band-removed first; this
+    function does not filter anything, and the original docstring said it did,
+    which was a description of the call site rather than of the function.
+    """
     d = np.abs(np.diff(ys, axis=0))
     return d.reshape(d.shape[0], H // 2, 2, W // 2, 2).mean(axis=(2, 4))
 
@@ -370,25 +424,48 @@ def main():
                   f"{RATE}. The WAV is written with the rate it was ACTUALLY "
                   f"captured at.")
 
-        Y = np.frombuffer(b"".join(ys), np.uint8).reshape(len(ys), a.height,
-                                                          a.width).astype(np.float64)
-        Yr = row_band_remove(Y)
+        Y = np.ascontiguousarray(
+            np.frombuffer(b"".join(ys), np.uint8).reshape(len(ys), a.height,
+                                                           a.width))
+        Yf = Y.astype(np.float64)
+        Yr = row_band_remove(Yf)
+        # `maps` keeps its meaning: the row-removed change maps. The
+        # unfiltered maps and the raw luma are stored alongside so that the
+        # representation is a post-hoc decision (see the module docstring).
         maps = change_maps(Yr)
         q, scale = quantise(maps)
+        maps_raw = change_maps(Yf)
+        q_raw, scale_raw = quantise(maps_raw)
 
         # -- the drift diagnostic, the number that decides usability ---------
-        raw_mad = float(np.abs(np.diff(Y, axis=0)).mean())
+        # The threshold is ~9x the measured OCCUPIED baseline and ~1000x the
+        # measured EMPTY-ROOM baseline, on the CORRECTED stride: A.nv12
+        # drifts 0.545 and empty1.nv12 drifts 0.005. It was set when the
+        # tear made the number 43.560, so it has been re-derived against the
+        # real baselines rather than left to look meaningful.
+        DRIFT_OK = 5.0
+        raw_mad = float(np.abs(np.diff(Yf, axis=0)).mean())
         row_mad = float(np.abs(np.diff(Yr, axis=0)).mean())
         print(f"  drift raw {raw_mad:.2f}   "
               f"after row-band removal {row_mad:.2f}   "
-              f"{'OK' if row_mad < 5 else 'TOO HIGH -- change the lighting'}")
-        if row_mad >= 5:
+              f"{'OK' if row_mad < DRIFT_OK else 'TOO HIGH -- change the lighting'}")
+        if row_mad >= DRIFT_OK:
             print("  warn: the banding is not the only problem. The take is "
                   "saved but the drift will dominate the motion field.")
+        elif raw_mad > 2.0 * max(row_mad, 1e-6):
+            # A row-constant component is present and the filter IS removing
+            # something -- i.e. the case the filter exists for. Worth saying,
+            # because the filter is now optional and this is the measurement
+            # that would justify choosing it.
+            print(f"  note: the row-constant component is {raw_mad / max(row_mad, 1e-6):.1f}x "
+                  "the residual drift. The row-removed maps are the cleaner of "
+                  "the two; the raw maps and the luma are stored as well.")
 
         stamp = int(time.time())
         npz = out / f"{name}_{stamp}.npz"
-        np.savez_compressed(npz, maps=q, scale=np.float32(scale))
+        np.savez_compressed(npz, maps=q, scale=np.float32(scale),
+                            maps_raw=q_raw, scale_raw=np.float32(scale_raw),
+                            luma=Y)
 
         # -- the audio, with the rate it was ACTUALLY captured at ----------
         pcm = b"".join(af)
@@ -456,11 +533,23 @@ def main():
             "audio_seconds": round(audio_seconds, 3),
             "map_shape": list(q.shape[1:]),
             "map_scale": scale,
+            "map_scale_raw": scale_raw,
             "drift_raw": raw_mad,
             "drift_after_row_removal": row_mad,
             "timestamp": stamp,
             "rep": spec.get("rep"),
-            "filter": "row+median3",
+            # The label said "row+median3", but no temporal median of width 3
+            # was ever applied here -- the code subtracts each row's median
+            # across the columns and then differences consecutive frames. A
+            # label that asserts a falsehood is a landmine: a later reader
+            # would assume a filter that is not in the data. (CORRECTION
+            # 2026-10-20.)
+            "filter": "row",
+            # What is actually stored, per array. The representation is a
+            # post-hoc decision now, so it is recorded per array rather than
+            # as one property of the take.
+            "filters": {"maps": "row", "maps_raw": "none", "luma": "none"},
+            "arrays": ["maps", "maps_raw", "luma"],
         }
         (out / f"{name}_{stamp}.json").write_text(json.dumps(meta, indent=2))
         print(f"  wrote {npz.name}  ({npz.stat().st_size / 1024:.0f} kB)")

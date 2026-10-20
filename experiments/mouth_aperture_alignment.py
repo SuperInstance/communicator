@@ -28,7 +28,18 @@ The capture files are NOT the frames the repository thinks they are.
 
     /mnt/c/proart_capture/{A,B,C}.nv12 is NOT 750 NV12 frames of 160x96.
     Each record is 19200 bytes: 15360 bytes of 160x96 luma, followed by
-    3840 bytes of the U chroma plane (80x48). There is no V plane.
+    3840 bytes of INTERLEAVED U,V chroma (80x24 samples).
+
+    > CORRECTION (2026-10-20). This paragraph used to say the trailing
+    > 3,840 bytes were "the U chroma plane (80x48). There is no V plane."
+    > That is wrong on both counts. The chroma is INTERLEAVED -- U at even
+    > offsets, V at odd -- and it is 80x24 samples, half the VERTICAL
+    > resolution of a standard NV12 frame's chroma (80x48), which is exactly
+    > why the frame is 20% shorter. The writer builds it as
+    > `uv[:, 0] = u; uv[:, 1] = v` on an (N, 2) array, which in row-major
+    > order is U, V, U, V. The stride of 19,200 -- the load-bearing
+    > conclusion of this lane -- is unaffected, and so is every number
+    > below, because the luma is the first 15,360 bytes either way.
 
 The repository reads these files with a 23040-byte stride -- the full NV12
 frame size -- which is `experiments/seed_corpus_from_captures.py:41-42`,
@@ -37,7 +48,10 @@ That stride slides 24 rows per record, so every "frame" is TORN between two
 real frames and the scene appears to jump vertically by a quarter of its
 height on every single frame.
 
-Measured, not asserted:
+Measured, not asserted. Note that the 19,200 row correlates the WHOLE
+record (luma + chroma) reshaped as 160x120 -- it is a stride DETECTOR, not
+a luma reading, and the luma this lane analyses is always the first 15,360
+bytes:
 
     stride 15360 (H=96)   frame-to-frame correlation  -0.011
     stride 19200 (H=120)  frame-to-frame correlation  +0.999   <-- the truth
@@ -138,12 +152,14 @@ CAPTURES = Path("/mnt/c/proart_capture")
 #
 #     A record is 19200 bytes:
 #         15360 bytes of luma, 160 wide by 96 tall, greyscale
-#         3840 bytes of the U chroma plane, 80 wide by 48 tall
+#         3840 bytes of INTERLEAVED U,V chroma, 80 wide by 24 tall
 #
-#     There is no V plane, so the file is NOT NV12 and the stride is NOT
-#     23040. The 24 extra rows that a 23040-byte stride exposes are the
-#     U plane, which is why they read as a constant bright band (neutral
-#     chroma is 128; measured mean 129.9).
+#     There is no SEPARATE V plane -- the V samples are interleaved with
+#     the U samples, one byte each -- so the file is NOT standard NV12 and
+#     the stride is NOT 23040. The 4,080 extra bytes that a 23040-byte
+#     stride exposes are a mix of luma and chroma, which is why they read
+#     as a constant bright band (neutral chroma is 128; measured mean
+#     129.9).
 
 RECORD_BYTES = 19200
 LUMA_BYTES = 15360
@@ -889,12 +905,12 @@ def main(argv=None) -> int:
                 "frame_w": FRAME_W,
                 "frame_h": FRAME_H,
                 "note": ("each record is 15360 bytes of 160x96 luma "
-                         "followed by 3840 bytes of chroma. The file is NOT "
-                         "NV12: the writer "
+                         "followed by 3840 bytes of INTERLEAVED U,V chroma "
+                         "(80x24 samples). The file is NOT standard NV12: "
+                         "the writer "
                          "('/mnt/c/proart_capture/nv12small.py') appends "
                          "the INTERLEAVED uv plane, so the stride is 19200 "
-                         "and not 23040, and there is no V plane of its "
-                         "own."),
+                         "and not 23040."),
                 "writer": "/mnt/c/proart_capture/nv12small.py",
                 "torn_stride_for_comparison": TORN_RECORD_BYTES,
             },

@@ -47,8 +47,18 @@ The scripts are `experiments/mouth_aperture_alignment.py`; the results are
 > The files are **19,200-byte records**: 15,360 bytes of 160x96 luma
 > followed by 3,840 bytes of chroma. The writer is
 > `/mnt/c/proart_capture/nv12small.py`, which appends the *interleaved* uv
-> plane, so there is no V plane of its own and the stride is 19,200 and
-> not 23,040.
+> plane, so the stride is 19,200 and not 23,040.
+>
+> > **CORRECTION (2026-10-20) — "there is no V plane of its own" is wrong.**
+> > The trailing 3,840 bytes are **INTERLEAVED U,V** — U at even offsets, V
+> > at odd — and they are **80×24 samples**, half the *vertical* resolution
+> > of a standard NV12 frame's chroma (80×48). The stride of 19,200, which
+> > is the load-bearing conclusion of this lane, is unaffected, and so is
+> > every number here: the luma this lane analyses is the first 15,360
+> > bytes either way. (Two independent tools were checked, not assumed:
+> > `nv12small.py` and `syzygy_capture_win.py` both build the chroma the
+> > same way, `uv[:, 0] = u; uv[:, 1] = v` on an (N, 2) array, which in
+> > row-major order interleaves.)
 >
 > Read at 23,040, each "frame" is torn between two real frames and the
 > scene appears to jump a quarter of its height on every single frame.

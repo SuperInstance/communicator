@@ -92,7 +92,7 @@
   "provenance": {
     "generated_by": "experiments/row_band_removal.py",
     "script_path": "/home/proart/projects/communicator/experiments/row_band_removal.py",
-    "script_sha256": "0498fc25c655ea37ba69c70501a42f46cb5a99ff68f42ab836a2ee3b0c0ee91d",
+    "script_sha256": "eb61d9f6a2713809d1fed999b41dc139b0bd91864935f1a9a29bd5eea94b317b",
     "python": "/home/proart/projects/glasses/.venv/bin/python",
     "command_line": "experiments/row_band_removal.py",
     "cli_args": [],

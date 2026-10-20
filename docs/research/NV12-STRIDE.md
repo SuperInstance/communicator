@@ -98,7 +98,21 @@ bufs.append(y.tobytes() + uv.tobytes())
 |---|---:|---|---|
 | `standard_nv12` | 23,040 | luma + **interleaved** UV (80×48 samples) | a standard camera pipeline |
 | `y_uv_halfres` | 19,200 | luma + **interleaved** UV (80×24 samples) | **the old captures** |
-| `luma_only` | 15,360 | luma only, no chroma | `experiments/corpus_capture_win.py` |
+| `luma_only` | 15,360 | luma only, no chroma | **nothing writes this today** (see the correction below) |
+
+> **CORRECTION (2026-10-20) — nothing in this repo writes luma-only frames.**
+> This table first attributed `luma_only` to `experiments/corpus_capture_win.py`.
+> Checked rather than assumed: **no script here has ever written a luma-only
+> frame.** `corpus_capture_win.py` writes numpy change-map archives (`.npz`),
+> and the two tools that DO write frames — `C:\proart_capture\nv12small.py`
+> and `syzygy_capture_win.py` — both write 19,200-byte frames with
+> **interleaved** chroma, built the same way. The layout is kept in the
+> reader because a luma-only stream is a real thing to recognise, but the
+> attribution was false and a reader that assumed one would appear is a
+> landmine. (The `corpus_capture_win.py` output *has* changed — it now
+> stores the raw luma and the unfiltered change maps alongside the
+> row-removed ones — but it stores them in an `.npz`, not as a frame
+> stream.)
 
 > **CORRECTION (2026-10-20) — the chroma is INTERLEAVED, not planar, and
 > this file first said otherwise.** `nv12small.py` writes
@@ -253,8 +267,10 @@ numbers that were computed *from* the frames do not.
    tool's shared clock fixes that, and **condition D** (turned *and* silent)
    is still the highest-value take because it is what makes all four pose
    folds identifiable.
-4. **Watch the third format.** `corpus_capture_win.py` writes luma-only
-   frames. The readers are now correct for it; keep them that way.
+4. **Watch the third format.** The reader knows a `luma_only` layout, but
+   **nothing in this repo writes one** — see the correction in §3. If a
+   luma-only frame stream ever appears, the readers are already correct for
+   it; keep them that way.
 
 ## 9. How this was found, for the next time
 

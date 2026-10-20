@@ -12,8 +12,7 @@ They were written by `C:\\proart_capture\\nv12small.py`, which writes, per
 frame:
 
     Y plane   15,360 bytes   (160 x 96)
-    U plane    1,920 bytes   (80 x 24)
-    V plane    1,920 bytes   (80 x 24)
+    U,V        3,840 bytes   (80 x 24 samples, INTERLEAVED)
     -----------------------
     total     19,200 bytes   = W*H*5/4
 
@@ -28,7 +27,7 @@ cannot be argued with: the video's own length must agree with the audio's.
 THE THREE LAYOUTS. There are three, and they must not be confused:
 
     standard_nv12   W*H*3//2 = 23,040   luma + interleaved UV
-    y_uv_halfres    W*H*5//4 = 19,200   luma + U plane + V plane  <- the captures
+    y_uv_halfres    W*H*5//4 = 19,200   luma + interleaved UV  <- the captures
     luma_only       W*H     = 15,360   luma only   <- the new capture tool
 
 WHAT IT MEASURES.

@@ -178,7 +178,7 @@
   "provenance": {
     "generated_by": "experiments/ascii_motion_cause.py",
     "script_path": "/home/proart/projects/communicator/experiments/ascii_motion_cause.py",
-    "script_sha256": "56b84d096c16afcb9ed966fec86bdea7e3523af3de9a41b07dcce9bb9b8a7570",
+    "script_sha256": "6d6e61b2f8671384a9d4712e297604fef60487de2893380e9b6fe8add92c4f3a",
     "python": "/home/proart/projects/glasses/.venv/bin/python",
     "command_line": "experiments/ascii_motion_cause.py --capture /mnt/c/proart_capture/small.nv12",
     "cli_args": [

@@ -8,7 +8,7 @@
   "provenance": {
     "generated_by": "experiments/room_map.py",
     "script_path": "/home/proart/projects/communicator/experiments/room_map.py",
-    "script_sha256": "3698756b04b99f13d18e0585f9d065b2453b0f0493c7d842160ac6c9f3e7a9d3",
+    "script_sha256": "87eef8dcf75dc07e9c57692ad498ce6af660fbf9fa406d88ea6cac060760ced3",
     "python": "/home/proart/projects/glasses/.venv/bin/python",
     "command_line": "experiments/room_map.py",
     "cli_args": [],

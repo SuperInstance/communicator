@@ -5,7 +5,7 @@ one leverage point?
 THE FRAME LAYOUT, FIRST.
 
 The captures on disk are NOT standard NV12: `C:\\proart_capture\\nv12small.py`
-writes 19,200 bytes per 160x96 frame (15,360 luma + 1,920 U + 1,920 V), not
+writes 19,200 bytes per 160x96 frame (15,360 luma + 3,840 of INTERLEAVED U,V at 80x24), not
 the `W*H*3//2` = 23,040 this file used to assume. Read at 23,040, all but
 every sixth frame is torn. The layout is DETECTED from the file's content by
 `src/nv12.py` -- the candidate whose luma has the smallest mean consecutive

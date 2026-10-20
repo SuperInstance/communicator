@@ -46,13 +46,28 @@ it actually is, and `y_u_v_planar` survives only as a deprecated alias.
 
 THE THIRD FORMAT.
 
-`experiments/corpus_capture_win.py` writes the LUMA PLANE ONLY -- 15,360
-bytes per frame, no chroma at all. So there are three layouts in play and
-they must not be confused:
+> CORRECTION (2026-10-20). This paragraph used to say that
+> `experiments/corpus_capture_win.py` writes the LUMA PLANE ONLY -- 15,360
+> bytes per frame, no chroma at all. That is FALSE, and it was worth
+> checking rather than assuming: **no script in this repo has ever written
+> luma-only frames.** `corpus_capture_win.py` writes numpy change-map
+> archives (`.npz`), and the two tools that DO write frames --
+> `C:\proart_capture\nv12small.py` and `syzygy_capture_win.py` -- both write
+> 19,200-byte frames with INTERLEAVED chroma, and both build the chroma the
+> same way (`uv[:, 0] = u; uv[:, 1] = v` on an (N, 2) array is row-major,
+> which interleaves). So the reader's claim about the chroma being
+> interleaved holds for every writer in play.
+>
+> The `luma_only` layout is KEPT as something the detector can recognise --
+> a luma-only stream is a real thing -- but nothing here produces one, and
+> a reader that assumes one will appear is a landmine. It was the
+> ATTRIBUTION that was wrong, not the layout.
+
+So there are three layouts the reader knows, and they must not be confused:
 
     standard_nv12     W*H*3//2   luma + interleaved UV      (the ASSUMPTION)
-    y_uv_halfres      W*H*5//4   luma + interleaved UV      (the old captures)
-    luma_only         W*H        luma only                   (the new tool)
+    y_uv_halfres      W*H*5//4   luma + interleaved UV      (the captures)
+    luma_only         W*H        luma only                   (nothing writes it)
 
 Note the chroma: `y_uv_halfres` is INTERLEAVED and HALF-RESOLUTION, not
 planar. The name is the correction of a name that used to be `y_u_v_planar`

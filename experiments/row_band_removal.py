@@ -7,8 +7,7 @@ The captures this reads are NOT standard NV12. `C:\\proart_capture\\nv12small.py
 writes, per 160x96 frame:
 
     Y plane    15,360 bytes   (160 * 96)
-    U plane     1,920 bytes
-    V plane     1,920 bytes
+    U,V         3,840 bytes   (80 x 24 samples, INTERLEAVED)
     -------------------------
     total      19,200 bytes   = W*H*5/4
 

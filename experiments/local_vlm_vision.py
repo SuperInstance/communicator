@@ -154,8 +154,11 @@ CH = YS // 4                # 3840 chroma bytes (interleaved U,V) in the
                             # legacy capture format
 STRIDE_LEGACY = YS + CH     # 19200 -- what the captures on disk ACTUALLY use
 STRIDE_REPO_ASSUMED = YS + YS // 2   # 23040 -- what the repo's readers assume
-STRIDE_LUMA_ONLY = YS       # 15360 -- what experiments/corpus_capture_win.py
-                            # writes (luma only, no chroma)
+STRIDE_LUMA_ONLY = YS       # 15360 -- a LUMA-ONLY stride. Nothing in this
+                            # repo writes one (CORRECTION 2026-10-20: the
+                            # old comment here claimed corpus_capture_win.py
+                            # did, which is false -- it writes .npz change
+                            # maps). Kept as a measured third arm.
 
 # The strides this file will try, and the one the DETECTOR picks.
 STRIDE_CANDIDATES = (STRIDE_LEGACY, STRIDE_REPO_ASSUMED, STRIDE_LUMA_ONLY)
@@ -213,7 +216,10 @@ def load_luma(path: Path, stride: int) -> np.ndarray:
              interleaved chroma. Reading a legacy capture at this stride
              gives 750 frames of which 80% are TORN -- rows 0..71 from one
              real frame and rows 72..95 from the next.
-      15360  luma only, what `experiments/corpus_capture_win.py` writes.
+      15360  luma only. NO SCRIPT IN THIS REPO WRITES A LUMA-ONLY FRAME
+             STREAM -- the old comment here said `corpus_capture_win.py`
+             did, which is false (it writes .npz change maps). This stride is
+             kept as a measured third arm.
 
     So the stride is DETECTED (`detect_stride`), not assumed, and whichever
     stride is used is recorded in the results file.

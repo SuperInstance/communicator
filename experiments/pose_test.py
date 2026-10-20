@@ -4,7 +4,7 @@ pose_test.py -- can the camera alone tell facing from head-turned?
 THE FRAME LAYOUT, FIRST.
 
 The captures on disk are NOT standard NV12. `C:\\proart_capture\\nv12small.py`
-writes 15,360 luma bytes + 1,920 U + 1,920 V per 160x96 frame -- 19,200 bytes
+writes 15,360 luma bytes + 3,840 bytes of INTERLEAVED U,V (80x24) per 160x96 frame -- 19,200 bytes
 -- not the `W*H*3//2` = 23,040 this file used to assume. Read at 23,040, all
 but every sixth frame is torn (rows 0..71 from frame k, rows 72..95 from frame
 k+1) and the 750 frames that come out are not 750 frames of anything.

@@ -96,7 +96,7 @@
   "provenance": {
     "generated_by": "experiments/gain_invariance.py",
     "script_path": "/home/proart/projects/communicator/experiments/gain_invariance.py",
-    "script_sha256": "b0e1ec1f0f4cc78f135d3f22df22b7871db1c9b0ada74dec3cf28bb350e0daa6",
+    "script_sha256": "deab0070b2f6745dcc63ae3a3e178e985cc4934d58004d708ed8de9e9b6a205c",
     "python": "/home/proart/projects/glasses/.venv/bin/python",
     "command_line": "experiments/gain_invariance.py",
     "cli_args": [],
