@@ -1,0 +1,142 @@
+{
+  "question": "Is the person in this image SPEAKING (their mouth is moving or open, as if talking) or NOT SPEAKING (mouth closed, still)? Answer with exactly one word: SPEAKING or NOT SPEAKING.",
+  "frame_index": 120,
+  "models": {
+    "@cf/meta/llama-4-scout-17b-16e-instruct": {
+      "rows": [
+        {
+          "variant": "speak",
+          "truth": true,
+          "parsed": null,
+          "text": "",
+          "error": "agreement_failed",
+          "detail": "the licence gate did not accept 'agree'",
+          "elapsed_s": 0.0
+        },
+        {
+          "variant": "silent",
+          "truth": false,
+          "parsed": null,
+          "text": "SPEAKING.",
+          "error": null,
+          "detail": null,
+          "elapsed_s": 0.84
+        },
+        {
+          "variant": "blank",
+          "truth": null,
+          "parsed": false,
+          "text": "NOT SPEAKING.",
+          "error": null,
+          "detail": null,
+          "elapsed_s": 1.14
+        }
+      ],
+      "swap": [
+        {
+          "asked_as": "silent",
+          "shown": "speak",
+          "parsed": null,
+          "text": "SPEAKING."
+        },
+        {
+          "asked_as": "speak",
+          "shown": "silent",
+          "parsed": null,
+          "text": "SPEAKING."
+        }
+      ]
+    },
+    "@cf/meta/llama-3.2-11b-vision-instruct": {
+      "rows": [
+        {
+          "variant": "speak",
+          "truth": true,
+          "parsed": null,
+          "text": "SPEAKING.",
+          "error": null,
+          "detail": null,
+          "elapsed_s": 0.88
+        },
+        {
+          "variant": "silent",
+          "truth": false,
+          "parsed": false,
+          "text": "NOT SPEAKING.",
+          "error": null,
+          "detail": null,
+          "elapsed_s": 0.79
+        },
+        {
+          "variant": "blank",
+          "truth": null,
+          "parsed": false,
+          "text": "NOT SPEAKING.",
+          "error": null,
+          "detail": null,
+          "elapsed_s": 0.77
+        }
+      ],
+      "swap": [
+        {
+          "asked_as": "silent",
+          "shown": "speak",
+          "parsed": null,
+          "text": "SPEAKING."
+        },
+        {
+          "asked_as": "speak",
+          "shown": "silent",
+          "parsed": false,
+          "text": "NOT SPEAKING."
+        }
+      ]
+    },
+    "@cf/llava-hf/llava-1.5-7b-hf": {
+      "rows": [
+        {
+          "variant": "speak",
+          "truth": true,
+          "parsed": null,
+          "text": "",
+          "error": "agreement_failed",
+          "detail": "the licence gate did not accept 'agree'",
+          "elapsed_s": 0.0
+        },
+        {
+          "variant": "silent",
+          "truth": false,
+          "parsed": null,
+          "text": "",
+          "error": "http400",
+          "detail": "{\"errors\":[{\"message\":\"AiError: Bad input: Error: oneOf at '/' not met, 0 matches: Type mismatch of '/', 'string' not in 'object', required properties at '/' are 'image' (6ab1d47c-d23e-487b-b7fd-cd989d4c4786)\",\"code\":5006}],\"success\":false,\"result\":{},\"messages\":[]}",
+          "elapsed_s": 0.32
+        },
+        {
+          "variant": "blank",
+          "truth": null,
+          "parsed": null,
+          "text": "",
+          "error": "http400",
+          "detail": "{\"errors\":[{\"message\":\"AiError: Bad input: Error: oneOf at '/' not met, 0 matches: Type mismatch of '/', 'string' not in 'object', required properties at '/' are 'image' (7f70e619-d503-4371-af55-b9f4b891f44f)\",\"code\":5006}],\"success\":false,\"result\":{},\"messages\":[]}",
+          "elapsed_s": 0.29
+        }
+      ],
+      "swap": [
+        {
+          "asked_as": "silent",
+          "shown": "speak",
+          "parsed": null,
+          "text": ""
+        },
+        {
+          "asked_as": "speak",
+          "shown": "silent",
+          "parsed": null,
+          "text": ""
+        }
+      ]
+    }
+  },
+  "note": "A model is credited only if it beats the blank and the template-only floors. Accuracy alone is not the headline; the margin over the controls is."
+}

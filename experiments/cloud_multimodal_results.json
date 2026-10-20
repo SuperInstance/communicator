@@ -1,0 +1,473 @@
+{
+  "question": "Is the person in this image SPEAKING (their mouth is moving or open, as if talking) or NOT SPEAKING (mouth closed, still)? Answer with exactly one word: SPEAKING or NOT SPEAKING.",
+  "frames_per_condition": 6,
+  "frame_indices": {
+    "speak": [
+      58,
+      134,
+      188,
+      245,
+      323,
+      391
+    ],
+    "silent": [
+      30,
+      50,
+      70,
+      90,
+      110,
+      130,
+      150,
+      170,
+      190,
+      210,
+      230,
+      250
+    ],
+    "turned": [
+      56,
+      120,
+      169,
+      252,
+      319,
+      378
+    ]
+  },
+  "frame_selection": "speaking frames are aligned to DETECTED SPEECH segments from src/vad.py, so each frame's label holds at that frame's own timestamp; silent frames are spread over the session",
+  "models": {
+    "@cf/meta/llama-3.2-11b-vision-instruct": {
+      "speak": {
+        "right": 3,
+        "wrong": 3,
+        "unparsed": 0,
+        "errors": 0,
+        "accuracy": 0.5,
+        "said_speaking": 3,
+        "said_speaking_rate": 0.5,
+        "texts": [
+          "NOT SPEAKING.",
+          "NOT SPEAKING.",
+          "SPEAKING.",
+          "SPEAKING.",
+          "NOT SPEAKING.",
+          "SPEAKING."
+        ]
+      },
+      "silent": {
+        "right": 12,
+        "wrong": 0,
+        "unparsed": 0,
+        "errors": 0,
+        "accuracy": 1.0,
+        "said_speaking": 0,
+        "said_speaking_rate": 0.0,
+        "texts": [
+          "NOT SPEAKING.",
+          "NOT SPEAKING.",
+          "NOT SPEAKING.",
+          "NOT SPEAKING.",
+          "NOT SPEAKING.",
+          "NOT SPEAKING.",
+          "NOT SPEAKING.",
+          "NOT SPEAKING.",
+          "NOT SPEAKING.",
+          "NOT SPEAKING.",
+          "NOT SPEAKING.",
+          "NOT SPEAKING."
+        ]
+      },
+      "blank": {
+        "right": 0,
+        "wrong": 0,
+        "unparsed": 0,
+        "errors": 0,
+        "accuracy": null,
+        "said_speaking": 0,
+        "said_speaking_rate": 0.0,
+        "texts": [
+          "NOT SPEAKING.",
+          "NOT SPEAKING.",
+          "NOT SPEAKING.",
+          "NOT SPEAKING.",
+          "NOT SPEAKING.",
+          "NOT SPEAKING."
+        ]
+      },
+      "margin_speak_over_blank_false_positive": 0.5,
+      "usable": true,
+      "pose": {
+        "facing": {
+          "n": 6,
+          "parsed": 6,
+          "unparsed": 0,
+          "errors": 0,
+          "right": 6,
+          "wrong": 0,
+          "accuracy": 1.0,
+          "p_facing": 1.0,
+          "texts": [
+            "FACING.",
+            "FACING.",
+            "FACING.",
+            "FACING.",
+            "FACING.",
+            "FACING."
+          ]
+        },
+        "turned": {
+          "n": 6,
+          "parsed": 6,
+          "unparsed": 0,
+          "errors": 0,
+          "right": 2,
+          "wrong": 4,
+          "accuracy": 0.3333333333333333,
+          "p_facing": 0.6666666666666666,
+          "texts": [
+            "FACING.",
+            "FACING.",
+            "FACING.",
+            "AWAY.",
+            "FACING.",
+            "AWAY."
+          ]
+        },
+        "separation_p_facing_facing_minus_turned": 0.33333333333333337,
+        "usable": true
+      }
+    },
+    "@cf/meta/llama-4-scout-17b-16e-instruct": {
+      "speak": {
+        "right": 6,
+        "wrong": 0,
+        "unparsed": 0,
+        "errors": 0,
+        "accuracy": 1.0,
+        "said_speaking": 6,
+        "said_speaking_rate": 1.0,
+        "texts": [
+          "SPEAKING.",
+          "SPEAKING.",
+          "SPEAKING.",
+          "SPEAKING.",
+          "SPEAKING.",
+          "SPEAKING."
+        ]
+      },
+      "silent": {
+        "right": 2,
+        "wrong": 10,
+        "unparsed": 0,
+        "errors": 0,
+        "accuracy": 0.16666666666666666,
+        "said_speaking": 10,
+        "said_speaking_rate": 0.8333333333333334,
+        "texts": [
+          "SPEAKING.",
+          "SPEAKING.",
+          "SPEAKING.",
+          "SPEAKING.",
+          "SPEAKING.",
+          "SPEAKING.",
+          "SPEAKING.",
+          "NOT SPEAKING.",
+          "SPEAKING.",
+          "NOT SPEAKING.",
+          "SPEAKING.",
+          "SPEAKING."
+        ]
+      },
+      "blank": {
+        "right": 0,
+        "wrong": 0,
+        "unparsed": 0,
+        "errors": 0,
+        "accuracy": null,
+        "said_speaking": 0,
+        "said_speaking_rate": 0.0,
+        "texts": [
+          "NOT SPEAKING.",
+          "NOT SPEAKING.",
+          "NOT SPEAKING.",
+          "NOT SPEAKING.",
+          "NOT SPEAKING.",
+          "NOT SPEAKING."
+        ]
+      },
+      "margin_speak_over_blank_false_positive": 1.0,
+      "usable": true,
+      "pose": {
+        "facing": {
+          "n": 6,
+          "parsed": 6,
+          "unparsed": 0,
+          "errors": 0,
+          "right": 6,
+          "wrong": 0,
+          "accuracy": 1.0,
+          "p_facing": 1.0,
+          "texts": [
+            "FACING.",
+            "FACING.",
+            "FACING.",
+            "FACING.",
+            "FACING.",
+            "FACING."
+          ]
+        },
+        "turned": {
+          "n": 6,
+          "parsed": 6,
+          "unparsed": 0,
+          "errors": 0,
+          "right": 0,
+          "wrong": 6,
+          "accuracy": 0.0,
+          "p_facing": 1.0,
+          "texts": [
+            "FACING.",
+            "FACING.",
+            "FACING.",
+            "FACING.",
+            "FACING.",
+            "FACING."
+          ]
+        },
+        "separation_p_facing_facing_minus_turned": 0.0,
+        "usable": false
+      }
+    },
+    "@cf/llava-hf/llava-1.5-7b-hf": {
+      "speak": {
+        "right": 0,
+        "wrong": 0,
+        "unparsed": 0,
+        "errors": 6,
+        "accuracy": null,
+        "said_speaking": 0,
+        "said_speaking_rate": 0.0,
+        "texts": [
+          {
+            "error": "http400",
+            "detail": "{\"errors\":[{\"message\":\"AiError: Bad input: Error: oneOf at '/' not met, 0 matches: Type mismatch of '/', 'string' not in 'object', Type mismatch of '/image', 'array' not in 'string' (8f21a4e2-bad3-40b"
+          },
+          {
+            "error": "http400",
+            "detail": "{\"errors\":[{\"message\":\"AiError: Bad input: Error: oneOf at '/' not met, 0 matches: Type mismatch of '/', 'string' not in 'object', Type mismatch of '/image', 'array' not in 'string' (a8c46d4b-9bdb-474"
+          },
+          {
+            "error": "http400",
+            "detail": "{\"errors\":[{\"message\":\"AiError: Bad input: Error: oneOf at '/' not met, 0 matches: Type mismatch of '/', 'string' not in 'object', Type mismatch of '/image', 'array' not in 'string' (6f95970b-d91c-47c"
+          },
+          {
+            "error": "http400",
+            "detail": "{\"errors\":[{\"message\":\"AiError: Bad input: Error: oneOf at '/' not met, 0 matches: Type mismatch of '/', 'string' not in 'object', Type mismatch of '/image', 'array' not in 'string' (66fe09ee-47cb-482"
+          },
+          {
+            "error": "http400",
+            "detail": "{\"errors\":[{\"message\":\"AiError: Bad input: Error: oneOf at '/' not met, 0 matches: Type mismatch of '/', 'string' not in 'object', Type mismatch of '/image', 'array' not in 'string' (4ef4b64a-6da1-435"
+          },
+          {
+            "error": "http400",
+            "detail": "{\"errors\":[{\"message\":\"AiError: Bad input: Error: oneOf at '/' not met, 0 matches: Type mismatch of '/', 'string' not in 'object', Type mismatch of '/image', 'array' not in 'string' (f52d0099-69c2-435"
+          }
+        ]
+      },
+      "silent": {
+        "right": 0,
+        "wrong": 0,
+        "unparsed": 0,
+        "errors": 12,
+        "accuracy": null,
+        "said_speaking": 0,
+        "said_speaking_rate": 0.0,
+        "texts": [
+          {
+            "error": "http400",
+            "detail": "{\"errors\":[{\"message\":\"AiError: Bad input: Error: oneOf at '/' not met, 0 matches: Type mismatch of '/', 'string' not in 'object', Type mismatch of '/image', 'array' not in 'string' (b3cd98fc-33f3-41e"
+          },
+          {
+            "error": "http400",
+            "detail": "{\"errors\":[{\"message\":\"AiError: Bad input: Error: oneOf at '/' not met, 0 matches: Type mismatch of '/', 'string' not in 'object', Type mismatch of '/image', 'array' not in 'string' (fc546010-7bdf-432"
+          },
+          {
+            "error": "http400",
+            "detail": "{\"errors\":[{\"message\":\"AiError: Bad input: Error: oneOf at '/' not met, 0 matches: Type mismatch of '/', 'string' not in 'object', Type mismatch of '/image', 'array' not in 'string' (f96ad1fa-b595-423"
+          },
+          {
+            "error": "http400",
+            "detail": "{\"errors\":[{\"message\":\"AiError: Bad input: Error: oneOf at '/' not met, 0 matches: Type mismatch of '/', 'string' not in 'object', Type mismatch of '/image', 'array' not in 'string' (5fb8a378-d532-464"
+          },
+          {
+            "error": "http400",
+            "detail": "{\"errors\":[{\"message\":\"AiError: Bad input: Error: oneOf at '/' not met, 0 matches: Type mismatch of '/', 'string' not in 'object', Type mismatch of '/image', 'array' not in 'string' (4b543e7c-047d-498"
+          },
+          {
+            "error": "http400",
+            "detail": "{\"errors\":[{\"message\":\"AiError: Bad input: Error: oneOf at '/' not met, 0 matches: Type mismatch of '/', 'string' not in 'object', Type mismatch of '/image', 'array' not in 'string' (aabeeeb0-b97b-48a"
+          },
+          {
+            "error": "http400",
+            "detail": "{\"errors\":[{\"message\":\"AiError: Bad input: Error: oneOf at '/' not met, 0 matches: Type mismatch of '/', 'string' not in 'object', Type mismatch of '/image', 'array' not in 'string' (a2594987-09c9-455"
+          },
+          {
+            "error": "http400",
+            "detail": "{\"errors\":[{\"message\":\"AiError: Bad input: Error: oneOf at '/' not met, 0 matches: Type mismatch of '/', 'string' not in 'object', Type mismatch of '/image', 'array' not in 'string' (7952b16e-526a-49b"
+          },
+          {
+            "error": "http400",
+            "detail": "{\"errors\":[{\"message\":\"AiError: Bad input: Error: oneOf at '/' not met, 0 matches: Type mismatch of '/', 'string' not in 'object', Type mismatch of '/image', 'array' not in 'string' (793f22af-6bea-43c"
+          },
+          {
+            "error": "http400",
+            "detail": "{\"errors\":[{\"message\":\"AiError: Bad input: Error: oneOf at '/' not met, 0 matches: Type mismatch of '/', 'string' not in 'object', Type mismatch of '/image', 'array' not in 'string' (70ae9368-6ed0-4d7"
+          },
+          {
+            "error": "http400",
+            "detail": "{\"errors\":[{\"message\":\"AiError: Bad input: Error: oneOf at '/' not met, 0 matches: Type mismatch of '/', 'string' not in 'object', Type mismatch of '/image', 'array' not in 'string' (91122b60-ac46-4e2"
+          },
+          {
+            "error": "http400",
+            "detail": "{\"errors\":[{\"message\":\"AiError: Bad input: Error: oneOf at '/' not met, 0 matches: Type mismatch of '/', 'string' not in 'object', Type mismatch of '/image', 'array' not in 'string' (b75a4950-7b5f-4c5"
+          }
+        ]
+      },
+      "blank": {
+        "right": 0,
+        "wrong": 0,
+        "unparsed": 0,
+        "errors": 6,
+        "accuracy": null,
+        "said_speaking": 0,
+        "said_speaking_rate": 0.0,
+        "texts": [
+          {
+            "error": "http400",
+            "detail": "{\"errors\":[{\"message\":\"AiError: Bad input: Error: oneOf at '/' not met, 0 matches: Type mismatch of '/', 'string' not in 'object', Type mismatch of '/image', 'array' not in 'string' (17403c6f-03d4-40d"
+          },
+          {
+            "error": "http400",
+            "detail": "{\"errors\":[{\"message\":\"AiError: Bad input: Error: oneOf at '/' not met, 0 matches: Type mismatch of '/', 'string' not in 'object', Type mismatch of '/image', 'array' not in 'string' (04705494-166e-467"
+          },
+          {
+            "error": "http400",
+            "detail": "{\"errors\":[{\"message\":\"AiError: Bad input: Error: oneOf at '/' not met, 0 matches: Type mismatch of '/', 'string' not in 'object', Type mismatch of '/image', 'array' not in 'string' (1254bece-82ad-44e"
+          },
+          {
+            "error": "http400",
+            "detail": "{\"errors\":[{\"message\":\"AiError: Bad input: Error: oneOf at '/' not met, 0 matches: Type mismatch of '/', 'string' not in 'object', Type mismatch of '/image', 'array' not in 'string' (d332bcc9-840e-482"
+          },
+          {
+            "error": "http400",
+            "detail": "{\"errors\":[{\"message\":\"AiError: Bad input: Error: oneOf at '/' not met, 0 matches: Type mismatch of '/', 'string' not in 'object', Type mismatch of '/image', 'array' not in 'string' (af34451e-d1f5-4ae"
+          },
+          {
+            "error": "http400",
+            "detail": "{\"errors\":[{\"message\":\"AiError: Bad input: Error: oneOf at '/' not met, 0 matches: Type mismatch of '/', 'string' not in 'object', Type mismatch of '/image', 'array' not in 'string' (85c8aa68-d211-460"
+          }
+        ]
+      },
+      "margin_speak_over_blank_false_positive": null,
+      "usable": false,
+      "pose": {
+        "facing": {
+          "n": 6,
+          "parsed": 0,
+          "unparsed": 0,
+          "errors": 6,
+          "right": 0,
+          "wrong": 0,
+          "accuracy": null,
+          "p_facing": 0.0,
+          "texts": [
+            {
+              "error": "http400"
+            },
+            {
+              "error": "http400"
+            },
+            {
+              "error": "http400"
+            },
+            {
+              "error": "http400"
+            },
+            {
+              "error": "http400"
+            },
+            {
+              "error": "http400"
+            }
+          ]
+        },
+        "turned": {
+          "n": 6,
+          "parsed": 0,
+          "unparsed": 0,
+          "errors": 6,
+          "right": 0,
+          "wrong": 0,
+          "accuracy": null,
+          "p_facing": 0.0,
+          "texts": [
+            {
+              "error": "http400"
+            },
+            {
+              "error": "http400"
+            },
+            {
+              "error": "http400"
+            },
+            {
+              "error": "http400"
+            },
+            {
+              "error": "http400"
+            },
+            {
+              "error": "http400"
+            }
+          ]
+        },
+        "separation_p_facing_facing_minus_turned": 0.0,
+        "usable": false
+      }
+    },
+    "clef-omni-audio": {
+      "speak": {
+        "parsed": null,
+        "text": "",
+        "answers_raw": "None",
+        "error": "http422",
+        "detail": "{\"errors\":[{\"message\":\"AiError: AiError: Audio could not be decoded (0d767e70-6aaa-4a2a-819a-305ec44a6f66)\",\"code\":3030}],\"success\":false,\"result\":{},\"messages\":[]}",
+        "elapsed_s": 1.39
+      },
+      "silent": {
+        "parsed": null,
+        "text": "",
+        "answers_raw": "None",
+        "error": "http422",
+        "detail": "{\"errors\":[{\"message\":\"AiError: AiError: Audio could not be decoded (8de4b722-37fb-4924-9a34-04b22efe87a6)\",\"code\":3030}],\"success\":false,\"result\":{},\"messages\":[]}",
+        "elapsed_s": 1.54
+      },
+      "facing_A": {
+        "parsed": null,
+        "text": "",
+        "answers_raw": "None"
+      },
+      "facing_B": {
+        "parsed": null,
+        "text": "",
+        "answers_raw": "None"
+      },
+      "facing_separation": null
+    }
+  },
+  "note": "The margin over the blank control is the headline, not the accuracy. A model that answers NOT SPEAKING to everything scores 50% on a two-class task and 100% on the silent class, which is why the blank control is run at the same count as the real conditions.",
+  "limits": [
+    "one session per condition, one speaker, one room",
+    "frames from one session are correlated, so the effective sample size is far below the frame count",
+    "a good result here is a demonstration that the signal exists; the leave-one-session-out test is what would certify a teacher"
+  ]
+}
