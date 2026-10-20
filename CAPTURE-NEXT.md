@@ -63,26 +63,41 @@ different poems can never be silently pooled.
 
 ## THE ONE THING THAT MATTERS MOST
 
-**The turn in B and D must be a REAL 90° turn, and your glasses may not
-allow it.**
+**Condition D — turned AND silent — has never been recorded, and it is now
+the single most valuable missing take in the plan.**
 
-This is not a guess — it is in the last capture's own results file:
+Here is why, because it changed during this session. The previous capture
+said "NO POSE SIGNAL" and explained it away:
 
 > *"the head turn was too small to register (Casey reported the glasses
-> restricting it), so a null here is the expected outcome and not evidence
-> against the idea."*
+> restricting it)"*
 
-The pose question has been open for the whole project, and the previous
-capture cannot answer it **because the turn was not a turn**. A big vision
-model says FACING for 80 % of the B frames and for 100 % of the C frames
-(facing and silent), so it cannot read pose at this resolution either.
+That explanation was an **assumption resting on a blind instrument**. A
+later search over fourteen candidate statistics found one that does see it:
+`mirror_cov`, the frame's covariance with its own horizontal mirror. It
+separates the turned capture from both facing captures with margin **+0.814**
+— and the two facing captures (first and last of the run) agree with each
+other while only the middle one differs, so the difference is a manipulation
+and not a clock.
 
-**So: if the glasses restrict your head, take them off for B and D, or turn
-your shoulders as well as your head, or move further from the camera.** The
-script cannot check this for you — nothing in a 160×96 frame can tell a 20°
-turn from a 90° one. Condition **D** (turned and silent) is the one that
-separates "the model sees the head turn" from "the model sees the mouth
-moving", and **it has never been recorded**.
+**But nobody can yet say the difference is the HEAD.** In the turned capture
+the extra structure is at the frame's left edge, where a change of posture
+or a shift in the seat would look exactly the same. **Condition D settles
+it**: D is turned and silent, C is facing and silent. If D differs from C by
+the same margin B does, it is the head turn. If D looks like C, then B's
+difference was posture, seat or lighting, and the pose channel does not
+exist in this capture at all.
+
+**So: three repetitions of D are worth more than everything else in this
+plan.** And while you are at it —
+
+  - **Make the turn a real 90°.** If the glasses restrict your head, take
+    them off for B and D, or turn your shoulders as well, or move further
+    from the camera. Nothing in a 160×96 frame can tell a 20° turn from a
+    90° one, and the whole pose question turns on this.
+  - **Stay as still as you can otherwise.** The statistic sees the frame, not
+    the head, so a posture shift is indistinguishable from a head turn. It
+    is the one confound that cannot be measured away.
 
 ---
 

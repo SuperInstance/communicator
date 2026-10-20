@@ -1024,7 +1024,38 @@ The same poem is recited facing (A) and turned (B), which makes A-vs-B a
 clean **visual** test. Condition **D** (turned and silent) has still never been
 recorded and is required to de-confound pose from speech.
 
+**AND THE POSE SIGNAL IS IN THE CAPTURE — it was the statistic that was
+blind.** `experiments/pose_feature_search.py` runs fourteen candidate
+statistics against four controls each (within-split of A and of B, the EMPTY
+ROOM, a permutation null, a seam-free crop scramble, plus a synthetic
+positive control that 12 of the 14 features pass). Exactly one separates
+facing from turned: **`mirror_cov`, the frame's covariance with its own
+horizontal mirror**, margin **+0.814** over the largest control.
+
+The argument that it is pose and not a clock is about capture ORDER, not
+statistics: A (19:52) and C (19:55) are the two ends of the run and agree
+with each other (0.246, *under* the control 0.282) while only the middle
+capture B (19:54) differs (0.851). A monotonic drift would separate A from C
+at least as much as it separates either from B, and it does not.
+
+This overturns `pose_test.py`'s "NO POSE SIGNAL" and its explanation — *"the
+head turn was too small to register (Casey reported the glasses restricting
+it)"* — which was an **assumption resting on a blind instrument**. The
+cloud model still cannot read pose (separation 0.018, and the control fires:
+P(facing | facing AND silent) = 1.000), and the audio carries none at all
+(margin 0.0088), so the pose channel is **visual**, and the frame is big
+enough for a statistic even though it is not big enough for a model.
+
+**What is still not established is that the difference is the HEAD.** The
+statistics see the frame, and in B the extra structure is at the frame's left
+edge, where a posture or seat change would look identical. **Condition D
+(turned AND silent) has never been recorded and is now the single most
+valuable missing take in the plan** — it separates "the head turned" from
+"something else moved" in one comparison. See `docs/research/POSE-FEATURE.md`.
+
 **What is blocked on what.** The binding constraint is unchanged and now
-sharper: the teacher needs **≥ 63 independent sessions per class**, the corpus
-needs a real 90° turn plus condition D, and the pose signal is not visible at
-160×96 to the models available. The capture is ready; the data is the gate.
+sharper: the teacher needs **≥ 63 independent sessions per class**, and the
+corpus needs **condition D** plus a real 90° turn with the glasses off if
+they restrict it. The pose signal exists and is measurable; what is missing
+is the control that attributes it to the head. The capture is ready; the
+data is the gate.

@@ -123,11 +123,19 @@ says FACING for a person who is facing the camera and not speaking at all.
 So the model is not reading pose; it is reading *a person*, and its
 "facing" answer is nearly constant.
 
-**What is now known.** The 160×96 frame at this model's resolution does not
-carry the head-turn signal — or the turn in B was not 90°. Those are the
-two remaining explanations and the corpus cannot tell them apart yet, which
-is exactly why **condition D (turned and silent)** and a real 90° turn are
-required before this is worth measuring again. See `STIMULUS.md`.
+**What is now known.** The 160×96 frame at **this model's** resolution does
+not carry the head-turn signal — the model reads *a person*, not a pose.
+But **the frame itself does carry it**: a separate search over fourteen
+candidate statistics found `mirror_cov`, the frame's covariance with its own
+horizontal mirror, separating facing from turned with margin **+0.814**, and
+pose-consistent (A and C — the first and last captures — agree with each
+other and differ from the middle one). See `POSE-FEATURE.md`.
+
+**So the remaining question is not "is there a signal" but "is the signal in
+B the head".** These statistics see the frame, not the head, and in B the
+extra structure is at the frame's left edge, where a posture or seat change
+would look identical. **Condition D (turned and silent) is the control that
+separates those, and it has never been recorded.**
 
 ## 6. The audio arm confirms the design premise for the pose test
 
