@@ -403,7 +403,11 @@ def leave_one_session_out(X, y, groups, names, label_of=None,
 def main(argv=None):
     import argparse
     ap = argparse.ArgumentParser()
-    ap.add_argument("--corpus", default="/mnt/c/proart_capture/corpus")
+    ap.add_argument("--corpus", default="/mnt/c/proart_capture/corpus_v2")
+    # CORRECTED CORPUS. The old /mnt/c/proart_capture/corpus was seeded
+# at the wrong frame stride (23,040 instead of 19,200) and every frame
+# in it is a tear between two real frames. See
+# docs/research/NV12-STRIDE.md.
     ap.add_argument("--task", default="speaking", choices=("speaking", "facing"))
     ap.add_argument("--k", type=int, default=6)
     ap.add_argument("--stride", type=int, default=5)

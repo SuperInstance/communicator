@@ -1,5 +1,25 @@
 # ASCII motion: the character delta is half threshold dither, and the tone channel is a dead end
 
+
+> ## CORRECTION (2026-10-20) — the captures were read at the wrong frame stride
+>
+> Every number in this file was computed on **torn frames**. The captures
+> carry **19,200 bytes per frame** (luma 160×96 + interleaved U,V chroma at
+> 80×24), not the 23,040 of a standard NV12 frame, so every "frame" was
+> rows 0..71 of one moment spliced to rows 72..95 of the next.
+>
+> The full account, with the evidence and the fix, is
+> **`docs/research/NV12-STRIDE.md`**. The reader is now `src/nv12.py`, which
+> detects the layout from the content. The corrected corpus is
+> `/mnt/c/proart_capture/corpus_v2/`.
+>
+> **The measurements here are on torn frames.** The ASCII motion maps, the
+> 50.00% empty-room banded fraction and the 600-frame / 20.0 s corpus
+> geometry are all artefacts of the 23,040-byte stride. The corrected
+> corpus is 900 frames at 30 fps = 30.0 s. This document's existing
+> retraction of the threshold-dither mechanism stands on its own terms;
+> the numbers it retracts are now retracted again for a different reason.
+
 > ## ⚠ PARTIALLY RETRACTED — read `EMPTY-ROOM-CONTROL.md` first
 >
 > This document's central mechanism claim — "roughly half the delta is threshold

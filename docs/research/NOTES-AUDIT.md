@@ -1,5 +1,27 @@
 # NOTES AUDIT — every standing numeric claim checked against its result file
 
+
+> ## CORRECTION (2026-10-20) — the captures were read at the wrong frame stride
+>
+> Every number in this file was computed on **torn frames**. The captures
+> carry **19,200 bytes per frame** (luma 160×96 + interleaved U,V chroma at
+> 80×24), not the 23,040 of a standard NV12 frame, so every "frame" was
+> rows 0..71 of one moment spliced to rows 72..95 of the next.
+>
+> The full account, with the evidence and the fix, is
+> **`docs/research/NV12-STRIDE.md`**. The reader is now `src/nv12.py`, which
+> detects the layout from the content. The corrected corpus is
+> `/mnt/c/proart_capture/corpus_v2/`.
+>
+> **The 4.914-vs-2.878 claim in this audit is WITHDRAWN.** It was computed
+> on torn frames. On the corrected frames the A-vs-C difference is
+> **0.2506** against A's own within-condition split of **0.2006** — a
+> factor of **1.249**, against the pre-registered 1.25 threshold. **It
+> misses.** But the fraction of the difference above the null map rises
+> from 0.1206 to **0.9873**, so the separation is better in the way that
+> matters and worse in the way that was quoted. See
+> `docs/research/NV12-STRIDE.md` and `docs/research/ROW-BAND-REMOVAL.md`.
+
 **Measured 2026-10-19. 14 findings: 10 confirmed, 4 candidates. 22 claims
 checked and found sound.**
 

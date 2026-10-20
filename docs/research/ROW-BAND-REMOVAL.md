@@ -8,6 +8,57 @@ bands from mains-frequency LED flicker sampled by the rolling shutter) and
 proposed a temporal median as the fix. This file tests that proposal, finds a
 better one, and then runs the first properly-controlled pose test.
 
+> ## CORRECTION (2026-10-20) — the banding was a READER BUG, and it is now gone
+>
+> **The horizontal bands were not in the scene. They were in the code.**
+>
+> The captures are 19,200 bytes per frame — a 160×96 luma plane plus
+> interleaved U,V chroma at 80×24 — not the 23,040 bytes of a standard NV12
+> frame that every reader here assumed. Read at 23,040, each "frame" is rows
+> 0..71 of one real frame spliced to rows 72..95 of the next, and only every
+> sixth frame is intact. **A frame that is torn in half has two different
+> row-profiles, so its per-row statistics are bimodal — and a bimodal
+> row-profile is exactly what this file calls "banding."**
+>
+> Re-measured on the corrected frames (`experiments/row_band_removal.py`,
+> results file `experiments/row_band_removal_results.json`):
+>
+> | condition | banded fraction, **before** | banded fraction, **after** |
+> |---|---:|---:|
+> | empty room, **no filter at all** | 50.0000% | **0.0000%** |
+> | occupied (A), no filter | 48.1901% | **0.6250%** |
+> | turned (B), no filter | 40.3451% | **0.5143%** |
+> | occupied (A), row-subtract filter | 48.5677% | 1.7904% |
+>
+> **An empty room with no filter at all now shows 0.00% banding, where it
+> showed a perfect 50.00%.** There is no LED flicker to remove. The nuisance
+> term that `CAMERA-FLICKER-BANDING.md` characterised, and that this file
+> proposed a filter for, was a 20%-too-long frame stride.
+>
+> **And the filter now makes things worse.** With no banding to remove, the
+> row-subtract filter *raises* the occupied rate from 0.625% to 1.790% — it
+> is subtracting a real, spatial signal (the person's own row profile) as if
+> it were a nuisance. The conclusion of §1 below, "the banding removal is
+> solid", is **withdrawn**: the removal was removing the tear, and the tear
+> was the measurement.
+>
+> The full account, with the evidence and the fix, is
+> **`docs/research/NV12-STRIDE.md`**. The reader is now `src/nv12.py`, which
+> detects the layout from the content and reports the margin over the
+> runner-up.
+>
+> **What survives.** The second half of this file — the properly-controlled
+> pose test — is about the *contrast between takes*, not about banding, and
+> its numbers change but its direction does not. But the specific claim "the
+> camera channel carries a real signal" was resting on a 4.914-vs-2.878
+> margin computed on torn frames; on the corrected frames that margin is
+> **0.2506 vs 0.2006, a factor of 1.249** against a pre-registered 1.25
+> threshold. **It misses.** See `docs/research/POSE-FEATURE.md`.
+>
+> The §1 table below is from `experiments/temporal_median_fix.py`, which was
+> also reading at the wrong stride and is being re-measured. Its numbers are
+> **not** to be quoted until it has been.
+
 ---
 
 ## 1. The temporal median works, and is not good enough

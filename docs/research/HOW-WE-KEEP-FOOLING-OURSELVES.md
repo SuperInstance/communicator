@@ -1,5 +1,25 @@
 # How we keep fooling ourselves: four retractions, one shape
 
+
+> ## CORRECTION (2026-10-20) — the captures were read at the wrong frame stride
+>
+> Every number in this file was computed on **torn frames**. The captures
+> carry **19,200 bytes per frame** (luma 160×96 + interleaved U,V chroma at
+> 80×24), not the 23,040 of a standard NV12 frame, so every "frame" was
+> rows 0..71 of one moment spliced to rows 72..95 of the next.
+>
+> The full account, with the evidence and the fix, is
+> **`docs/research/NV12-STRIDE.md`**. The reader is now `src/nv12.py`, which
+> detects the layout from the content. The corrected corpus is
+> `/mnt/c/proart_capture/corpus_v2/`.
+>
+> **A FIFTH instance, and it is the largest.** A hard-coded constant — the
+> frame stride — sat in every reader, it was plausible, and every check on
+> it was derived from itself: the frame count was verified against a
+> frame count computed with the same wrong stride. The check has to come
+> from outside the assumption (the file size, the script on disk, the
+> audio's duration, a human eye). See `docs/research/NV12-STRIDE.md` §9.
+
 **Status: a synthesis, not a finding.** Every instance below is documented in
 detail elsewhere; this document exists because the *shape* repeats across three
 independent lanes, and a shape that repeats is worth naming.
@@ -16,6 +36,28 @@ independent lanes, and a shape that repeats is worth naming.
 | 4 | Watcher cost above 100% is a **realtime saturation floor** | A **numpy-fed harness** artifact worth ~2× (`math.isfinite` per sample against an `np.float32`). Nothing saturates; max is 49.1%. | cost |
 
 Three of the four were mine. One (#2) was a control that had never been run.
+
+> ## CORRECTION (2026-10-20) — a fifth retraction, and it is a different shape
+>
+> | # | Claim | What it actually was | Lane |
+> |---|---|---|---|
+> | 5 | "LED flicker banding" (a perfect **50.00%** in an empty room); the teacher's USABLE verdicts (**+0.208**, **+0.312**); a pose feature at **1.71×** | **Every reader in the repo hard-coded a 23,040-byte frame stride. The files are 19,200.** 80% of every "frame" was a tear between two real moments — rows 0..71 of frame *k* spliced to rows 72..95 of frame *k+1* — so the "motion" the repo measured was ~99% artefact. | vision |
+>
+> The full account is `docs/research/NV12-STRIDE.md`. Four of the five were
+> mine; #2 was again a control that had never been run, and the empty room
+> that killed it also killed #5 (an empty room shows **0.00%** banding on the
+> corrected frames, where it showed a perfect 50.00%).
+>
+> **The fifth is NOT the shared shape of the first four, and that is why it
+> is worth naming separately.** The first four all compared a quantity
+> summarised over one interval against a quantity summarised over a
+> different one — a mistake in the comparison. The fifth is a mistake in the
+> *data*, and it is invisible to every kind of internal check:
+>
+> > **A constant that is inherited is a constant that is never tested.**
+> > The stride was written down once, in the first reader, and every other
+> > reader copied it — and every reader's *own* check confirmed it, because
+> > each check was computed with the same wrong constant.
 
 ## The shared shape
 
@@ -72,6 +114,16 @@ Syzygy thresholds *each pixel* of a 2×4 cell, not a cell average. Measuring the
 wrong quantity made a real effect look like its absence, and would equally have
 made a real absence look like an effect.
 
+**A check derived from the assumption it tests cannot fail.** The stride
+survived because the frame count was verified against a frame count computed
+with the same wrong divisor — a check that could only ever agree. The check
+has to come from *outside* the assumption: the file size, the script on disk,
+the audio's own duration, a human eye. Three independent lines of evidence
+were needed (file size plus audio duration; the mean-|diff| collapse from
+43.560 to 0.545; a human looking at the frames and seeing a face rather
+than a tear). **Any one of them alone would have been arguable**, and the
+file-size one is the one that would have caught it in a second.
+
 ## What this says about the project
 
 Everything above is cheap to prevent and expensive to discover late. The cost
@@ -91,3 +143,23 @@ Four retractions out of roughly thirty claims is a healthy rate, and #2 is a
 genuine advance — it was found *because* somebody asked for the null condition,
 which is the behaviour that produces the other three. The failure mode to guard
 against is not making errors. It is making an error and not noticing.
+
+> ## CORRECTION (2026-10-20) — it is five, and #5 changed the standing practice
+>
+> Five retractions out of roughly thirty claims. The rate is still healthy; the
+> *cost* of #5 was not, because it was inherited rather than owned: one constant
+> in one reader, copied into every reader, and it invalidated **every camera
+> measurement the project had ever made** at once. The other four were wrong
+> claims about the world. #5 was wrong claims about the *data*, which is
+> worse, because a wrong claim about the world can be caught by a new
+> measurement and a wrong claim about the data cannot.
+>
+> So the standing practice above gains a fourth line, and it is the one #5
+> earned:
+>
+> > Every measurement names its condition, its interval, and its null.
+> > Every verdict is able to fail, and is shown failing when it is built.
+> > A number that has only ever been measured one way is reported as one
+> > measurement, not as a property.
+> > **Every constant that is inherited is re-derived from the data, by a
+> > check that comes from outside it.**

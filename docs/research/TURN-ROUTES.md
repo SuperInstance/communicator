@@ -1,5 +1,22 @@
 # Turn-end: four routes, one of them mine, and the two experiments that were rigged
 
+
+> ## CORRECTION (2026-10-20) — the captures were read at the wrong frame stride
+>
+> Every number in this file was computed on **torn frames**. The captures
+> carry **19,200 bytes per frame** (luma 160×96 + interleaved U,V chroma at
+> 80×24), not the 23,040 of a standard NV12 frame, so every "frame" was
+> rows 0..71 of one moment spliced to rows 72..95 of the next.
+>
+> The full account, with the evidence and the fix, is
+> **`docs/research/NV12-STRIDE.md`**. The reader is now `src/nv12.py`, which
+> detects the layout from the content. The corrected corpus is
+> `/mnt/c/proart_capture/corpus_v2/`.
+>
+> **The 0.455 quoted here is the cloud vision margin on torn frames.** On
+> the corrected frames it is **0.667**, with the same zero false-positive
+> rates. See `docs/research/CLOUD-TEACHER.md`.
+
 *Written after `experiments/turn_routes.py`. Every number here was measured on
 this machine against audio in this repo. Two of the four experiments as first
 written were circular and were caught by reading the output rather than the

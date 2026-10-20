@@ -209,7 +209,11 @@ def analyse(corpus: Path, k: int = 6):
 def main():
     import argparse
     ap = argparse.ArgumentParser()
-    ap.add_argument("--corpus", default="/mnt/c/proart_capture/corpus")
+    ap.add_argument("--corpus", default="/mnt/c/proart_capture/corpus_v2")
+    # CORRECTED CORPUS. The old /mnt/c/proart_capture/corpus was seeded
+# at the wrong frame stride (23,040 instead of 19,200) and every frame
+# in it is a tear between two real frames. See
+# docs/research/NV12-STRIDE.md.
     ap.add_argument("--k", type=int, default=6)
     ap.add_argument("--out", default=str(ROOT / "experiments"))
     a = ap.parse_args()

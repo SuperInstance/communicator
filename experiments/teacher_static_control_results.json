@@ -1,5 +1,5 @@
 {
-  "corpus": "/mnt/c/proart_capture/corpus",
+  "corpus": "/mnt/c/proart_capture/corpus_v2",
   "sessions": [
     {
       "name": "A",
@@ -26,7 +26,7 @@
         {
           "variant": "real",
           "held_out": "A",
-          "acc": 0.0,
+          "acc": 1.0,
           "n": 40,
           "held_out_label": 1
         },
@@ -46,19 +46,19 @@
         {
           "variant": "static",
           "held_out": "A",
-          "acc": 0.0,
-          "n": 40,
-          "held_out_label": 1
-        },
-        {
-          "variant": "static",
-          "held_out": "B",
           "acc": 1.0,
           "n": 40,
           "held_out_label": 1
         },
         {
           "variant": "static",
+          "held_out": "B",
+          "acc": 0.0,
+          "n": 40,
+          "held_out_label": 1
+        },
+        {
+          "variant": "static",
           "held_out": "C",
           "acc": null,
           "note": "degenerate fold: one class in training"
@@ -66,14 +66,14 @@
         {
           "variant": "time_shuffled",
           "held_out": "A",
-          "acc": 0.0,
+          "acc": 0.1,
           "n": 40,
           "held_out_label": 1
         },
         {
           "variant": "time_shuffled",
           "held_out": "B",
-          "acc": 0.4,
+          "acc": 0.0,
           "n": 40,
           "held_out_label": 1
         },
@@ -86,7 +86,7 @@
         {
           "variant": "unscaled",
           "held_out": "A",
-          "acc": 0.0,
+          "acc": 1.0,
           "n": 40,
           "held_out_label": 1
         },
@@ -110,14 +110,14 @@
         {
           "variant": "real",
           "held_out": "A",
-          "acc": 0.0,
+          "acc": 0.15,
           "n": 40,
           "held_out_label": 1
         },
         {
           "variant": "real",
           "held_out": "B",
-          "acc": 1.0,
+          "acc": 0.375,
           "n": 40,
           "held_out_label": 1
         },
@@ -150,14 +150,14 @@
         {
           "variant": "time_shuffled",
           "held_out": "A",
-          "acc": 0.0,
+          "acc": 0.35,
           "n": 40,
           "held_out_label": 1
         },
         {
           "variant": "time_shuffled",
           "held_out": "B",
-          "acc": 0.725,
+          "acc": 0.025,
           "n": 40,
           "held_out_label": 1
         },
@@ -170,14 +170,14 @@
         {
           "variant": "unscaled",
           "held_out": "A",
-          "acc": 0.0,
+          "acc": 0.15,
           "n": 40,
           "held_out_label": 1
         },
         {
           "variant": "unscaled",
           "held_out": "B",
-          "acc": 1.0,
+          "acc": 0.375,
           "n": 40,
           "held_out_label": 1
         },
@@ -194,14 +194,14 @@
         {
           "variant": "real",
           "held_out": "A",
-          "acc": 0.0,
+          "acc": 0.95,
           "n": 40,
           "held_out_label": 1
         },
         {
           "variant": "real",
           "held_out": "B",
-          "acc": 0.0,
+          "acc": 0.1,
           "n": 40,
           "held_out_label": 1
         },
@@ -221,7 +221,7 @@
         {
           "variant": "static",
           "held_out": "B",
-          "acc": 1.0,
+          "acc": 0.0,
           "n": 40,
           "held_out_label": 1
         },
@@ -234,14 +234,14 @@
         {
           "variant": "time_shuffled",
           "held_out": "A",
-          "acc": 0.0,
+          "acc": 0.1,
           "n": 40,
           "held_out_label": 1
         },
         {
           "variant": "time_shuffled",
           "held_out": "B",
-          "acc": 0.3,
+          "acc": 0.0,
           "n": 40,
           "held_out_label": 1
         },
@@ -254,14 +254,14 @@
         {
           "variant": "unscaled",
           "held_out": "A",
-          "acc": 0.0,
+          "acc": 0.95,
           "n": 40,
           "held_out_label": 1
         },
         {
           "variant": "unscaled",
           "held_out": "B",
-          "acc": 0.0,
+          "acc": 0.1,
           "n": 40,
           "held_out_label": 1
         },
@@ -278,7 +278,7 @@
         {
           "variant": "real",
           "held_out": "A",
-          "acc": 0.0,
+          "acc": 1.0,
           "n": 40,
           "held_out_label": 1
         },
@@ -298,7 +298,7 @@
         {
           "variant": "static",
           "held_out": "A",
-          "acc": 0.0,
+          "acc": 1.0,
           "n": 40,
           "held_out_label": 1
         },
@@ -318,7 +318,7 @@
         {
           "variant": "time_shuffled",
           "held_out": "A",
-          "acc": 0.0,
+          "acc": 1.0,
           "n": 40,
           "held_out_label": 1
         },
@@ -338,7 +338,7 @@
         {
           "variant": "unscaled",
           "held_out": "A",
-          "acc": 0.0,
+          "acc": 1.0,
           "n": 40,
           "held_out_label": 1
         },
@@ -362,58 +362,58 @@
         {
           "variant": "real",
           "held_out": "A",
-          "acc": 0.0,
+          "acc": 0.15,
           "n": 40,
           "held_out_label": 1
         },
         {
           "variant": "real",
-          "held_out": "B",
-          "acc": 0.2,
-          "n": 40,
-          "held_out_label": 1
-        },
-        {
-          "variant": "real",
-          "held_out": "C",
-          "acc": null,
-          "note": "degenerate fold: one class in training"
-        },
-        {
-          "variant": "static",
-          "held_out": "A",
-          "acc": 1.0,
-          "n": 40,
-          "held_out_label": 1
-        },
-        {
-          "variant": "static",
-          "held_out": "B",
-          "acc": 1.0,
-          "n": 40,
-          "held_out_label": 1
-        },
-        {
-          "variant": "static",
-          "held_out": "C",
-          "acc": null,
-          "note": "degenerate fold: one class in training"
-        },
-        {
-          "variant": "time_shuffled",
-          "held_out": "A",
-          "acc": 0.0,
-          "n": 40,
-          "held_out_label": 1
-        },
-        {
-          "variant": "time_shuffled",
           "held_out": "B",
           "acc": 0.275,
           "n": 40,
           "held_out_label": 1
         },
         {
+          "variant": "real",
+          "held_out": "C",
+          "acc": null,
+          "note": "degenerate fold: one class in training"
+        },
+        {
+          "variant": "static",
+          "held_out": "A",
+          "acc": 1.0,
+          "n": 40,
+          "held_out_label": 1
+        },
+        {
+          "variant": "static",
+          "held_out": "B",
+          "acc": 1.0,
+          "n": 40,
+          "held_out_label": 1
+        },
+        {
+          "variant": "static",
+          "held_out": "C",
+          "acc": null,
+          "note": "degenerate fold: one class in training"
+        },
+        {
+          "variant": "time_shuffled",
+          "held_out": "A",
+          "acc": 0.775,
+          "n": 40,
+          "held_out_label": 1
+        },
+        {
+          "variant": "time_shuffled",
+          "held_out": "B",
+          "acc": 0.0,
+          "n": 40,
+          "held_out_label": 1
+        },
+        {
           "variant": "time_shuffled",
           "held_out": "C",
           "acc": null,
@@ -422,14 +422,14 @@
         {
           "variant": "unscaled",
           "held_out": "A",
-          "acc": 0.0,
+          "acc": 0.15,
           "n": 40,
           "held_out_label": 1
         },
         {
           "variant": "unscaled",
           "held_out": "B",
-          "acc": 0.2,
+          "acc": 0.275,
           "n": 40,
           "held_out_label": 1
         },
@@ -442,21 +442,35 @@
       ]
     }
   },
+  "static_template": {
+    "mean_map_correlation_A_vs_C": 0.7046,
+    "amplitude_ratio_A_over_C_raw_motion": 1.4011,
+    "amplitude_ratio_A_over_C_stored_maps": 0.4202,
+    "note_on_amplitude": "the stored maps are quantised per session against their own 99.5th percentile, so their amplitude ratio is a property of the quantiser; the raw-motion ratio is the scene's",
+    "global_scale_fit_R2": 0.4724,
+    "effect_size_A_vs_C_total_motion_sd": -0.9986,
+    "pixelwise_temporal_std_over_mean_A": 1.156,
+    "pixelwise_temporal_std_over_mean_C": 0.957,
+    "consecutive_frame_correlation_A": 0.5987,
+    "consecutive_frame_correlation_C": 0.3973,
+    "empty_room_layout": "y_uv_halfres",
+    "empty_room_mean_map_energy_over_A": 0.000254897
+  },
   "headline": {
     "summary": {
       "real": {
-        "A": 0.0,
+        "A": 1.0,
         "B": 0.0,
         "C": null
       },
       "static": {
-        "A": 0.0,
-        "B": 1.0,
+        "A": 1.0,
+        "B": 0.0,
         "C": null
       },
       "time_shuffled": {
-        "A": 0.0,
-        "B": 0.4,
+        "A": 0.1,
+        "B": 0.0,
         "C": null
       },
       "the_teacher_reads_a_static_picture": false,
@@ -464,8 +478,8 @@
     },
     "map": {
       "real": {
-        "A": 0.0,
-        "B": 1.0,
+        "A": 0.15,
+        "B": 0.375,
         "C": null
       },
       "static": {
@@ -474,8 +488,8 @@
         "C": null
       },
       "time_shuffled": {
-        "A": 0.0,
-        "B": 0.725,
+        "A": 0.35,
+        "B": 0.025,
         "C": null
       },
       "the_teacher_reads_a_static_picture": false,
@@ -483,18 +497,18 @@
     },
     "both": {
       "real": {
-        "A": 0.0,
-        "B": 0.0,
+        "A": 0.95,
+        "B": 0.1,
         "C": null
       },
       "static": {
         "A": 1.0,
-        "B": 1.0,
+        "B": 0.0,
         "C": null
       },
       "time_shuffled": {
-        "A": 0.0,
-        "B": 0.3,
+        "A": 0.1,
+        "B": 0.0,
         "C": null
       },
       "the_teacher_reads_a_static_picture": false,
@@ -502,17 +516,17 @@
     },
     "region": {
       "real": {
-        "A": 0.0,
+        "A": 1.0,
         "B": 0.0,
         "C": null
       },
       "static": {
-        "A": 0.0,
+        "A": 1.0,
         "B": 0.0,
         "C": null
       },
       "time_shuffled": {
-        "A": 0.0,
+        "A": 1.0,
         "B": 0.0,
         "C": null
       },
@@ -521,8 +535,8 @@
     },
     "region+map": {
       "real": {
-        "A": 0.0,
-        "B": 0.2,
+        "A": 0.15,
+        "B": 0.275,
         "C": null
       },
       "static": {
@@ -531,8 +545,8 @@
         "C": null
       },
       "time_shuffled": {
-        "A": 0.0,
-        "B": 0.275,
+        "A": 0.775,
+        "B": 0.0,
         "C": null
       },
       "the_teacher_reads_a_static_picture": false,

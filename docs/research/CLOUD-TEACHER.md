@@ -5,6 +5,60 @@ Casey: *"if you use various cloud models like multimodal models and LLMs to
 analyse too. you would have a good understanding of the video before you even
 start to try to make the system work."*
 
+> ## CORRECTION (2026-10-20) - the frame stride was wrong, and the margin got STRONGER
+>
+> The captures are 19,200 bytes per frame (luma 160x96 + interleaved U,V
+> chroma at 80x24), not the 23,040 of a standard NV12 frame. The frame this
+> bench sent to the model was **a tear between two real frames** - rows
+> 0..71 of one moment and rows 72..95 of the next. See
+> `docs/research/NV12-STRIDE.md`.
+>
+> Re-measured on the corrected frames
+> (`experiments/cloud_multimodal_results.json`):
+>
+> | | before | **after** |
+> |---|---:|---:|
+> | sensitivity (says SPEAKING on speech frames) | 0.455 (5/11) | **0.667 (8/12)** |
+> | false-positive rate on the silent person | 0.000 | **0.000** |
+> | false-positive rate on blank | 0.000 | **0.000** |
+> | **margin over the silent class** | +0.455 | **+0.667 - USABLE** |
+>
+> **The defect did not manufacture this margin; it depressed it.** The
+> speaking arm now has the same denominator as the other arms, because the
+> corrected capture has 900 frames instead of 750 and the VAD selects twelve
+> speech frames rather than eleven.
+>
+> **An independent lane falsified the opposite hypothesis too.** The natural
+> guess - "the margin is a stride artefact" - is wrong, and was tested
+> directly: `docs/research/VISION-MOTION-TEACHER.md` ran the same models on
+> clean single frames and on a **torn** strip, and the clean single frame
+> scores **+0.583** against the published +0.455. The torn strip scores a
+> margin of **exactly 0.000** - a 1280x192 strip of four torn panels makes
+> llama-3.2 answer SPEAKING on the blank control 12 times out of 12.
+>
+> **So the defect was in the repo's MOTION numbers, not in the cloud
+> teacher's judgement.** A large multimodal model was reading a legible
+> photo of Casey's face all along; the repo's own measurements of that
+> photo were the thing that was broken.
+>
+> Two further defects were found in this bench while re-running it:
+>
+> * **The endpoint is not deterministic at temperature 0.0.** Five identical
+>   runs gave margins 0.583, 0.667, 0.583, 0.667, 0.583, and the *silent*
+>   arm moved too (12/12 -> 11/12). The old 0.455 and the new 0.667 are the
+>   same measurement, twice.
+> * **The answer parser could not read the probe's own vocabulary.** The
+>   question asks "SPEAKING or NOT SPEAKING" and the parser looked for
+>   "yes"/"no", so a perfectly correct "SPEAKING." was logged as
+>   `parsed=None`. Fixed, and the fix is not attributed to the stride.
+>
+> `experiments/cloud_vision_probe.py` was re-run at the same time, and the
+> result is worth having: **llama-3.2-11b-vision's swap test shows the
+> answer follows the IMAGE, not the prompt.** Asked the speaking question
+> while shown the silent frame it answers "NOT SPEAKING."; asked the silent
+> question while shown the speaking frame it answers "SPEAKING." Relabelling
+> the prompt does not move it; the picture does.
+
 ---
 
 ## 1. What was measured, and against what
@@ -30,12 +84,15 @@ each:
 
 **Llama 3.2 Vision 11B, 11 speech frames / 12 silent / 11 blank:**
 
-| | value |
-|---|---|
-| sensitivity, P(says SPEAKING \| speech frames) | **0.455** (5/11) |
-| false-positive rate, silent person present | **0.000** (0/12) |
-| false-positive rate, blank | 0.000 (0/11) |
-| **margin over the silent class** | **+0.455 — USABLE** |
+| | value (torn frames) | **value (corrected frames)** |
+|---|---:|---:|
+| sensitivity, P(says SPEAKING \| speech frames) | 0.455 (5/11) | **0.667 (8/12)** |
+| false-positive rate, silent person present | 0.000 (0/12) | **0.000** |
+| false-positive rate, blank | 0.000 (0/11) | **0.000** |
+| **margin over the silent class** | +0.455 — USABLE | **+0.667 — USABLE** |
+
+(The corrected column is from the 2026-10-20 re-run; the left column is what
+this file originally reported. See the correction block at the top.)
 
 **clef-omni on raw audio, same sessions:**
 
@@ -67,7 +124,7 @@ there is nobody in it.
 
 | model | sensitivity | FPR on silent person | FPR on blank | margin vs silent | margin vs blank |
 |---|---:|---:|---:|---:|---:|
-| llama-3.2-11b-vision | 0.455 | **0.000** | 0.000 | **+0.455** | +0.455 |
+| llama-3.2-11b-vision | 0.455 *(corrected: 0.667)* | **0.000** | 0.000 | **+0.455** *(corrected: +0.667)* | +0.455 |
 | llama-4-scout-17b | 1.000 | **0.833** | 0.000 | **+0.167** | +1.000 |
 
 **The blank is a prompt floor, not a task control.** Any model that treats a

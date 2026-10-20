@@ -43,7 +43,11 @@ from ascii_motion_render import load_session          # noqa: E402
 LOO_RESULTS = ROOT / "experiments" / "teacher_loo_control_results.json"
 STATIC_RESULTS = ROOT / "experiments" / "teacher_static_control_results.json"
 AV_RESULTS = ROOT / "experiments" / "audio_video_alignment_results.json"
-CORPUS = Path("/mnt/c/proart_capture/corpus")
+# The CORRECTED corpus. The old /mnt/c/proart_capture/corpus was seeded at a
+# 23,040-byte frame stride and every frame in it is a tear between two real
+# frames; it is left on disk so the comparison can be re-run, but no test
+# asserts against it. See docs/research/NV12-STRIDE.md.
+CORPUS = Path("/mnt/c/proart_capture/corpus_v2")
 
 
 @pytest.fixture(scope="module")
@@ -98,18 +102,29 @@ def test_the_blank_control_scores_one_on_every_fold(loo):
 
 
 def test_the_loo_fold_has_its_own_scrambled_control(loo):
-    """The LOO fold's scrambled control is 0.000 on fold B for `map`.
+    """The LOO fold's OWN scrambled control, measured on the same fold.
 
     The report used the TEMPORAL split's 0.938 to dismiss the LOO's 1.000.
-    Measured on the same fold, the control is 0.000.
+    The control has to be run on the fold it is used to judge.
+
+    ON THE CORRECTED CORPUS the LOO fold is no longer a one-bit statistic:
+    the accuracies are gradated (map: A 0.150, B 0.375), and the fold's own
+    scrambled control is 0.100 on fold B -- so the real 0.375 is well above
+    it. But the BLANK control is still 1.000 on every fold, and a constant
+    predictor still beats the real features, so the teacher's features are
+    still worse than doing nothing. That is what
+    `test_the_blank_control_scores_one_on_every_fold` pins.
     """
     rows = rows_of(loo, "map")
     row = rows[("real", "B")]
     assert row is not None, "no row for held-out B in the map feature set"
-    assert row["acc_spatially_scrambled"] == 0.0, (
-        "the LOO fold's own scrambled control is no longer 0.000: "
+    assert row["acc_spatially_scrambled"] == 0.1, (
+        "the LOO fold's own scrambled control moved: "
         "re-measure and update TEACHER-LOO-FOLDS.md")
-    assert row["acc_real"] == 1.0
+    assert row["acc_real"] == 0.375
+    assert row["acc_blank"] == 1.0, (
+        "the blank control must still beat the real features, or the "
+        "degeneracy argument in TEACHER-LOO-FOLDS.md has to be re-checked")
 
 
 def test_the_identifiability_of_each_fold_is_recorded(loo):
@@ -141,19 +156,59 @@ def test_the_identifiability_of_each_fold_is_recorded(loo):
 # --- claim 2: the map features do not need the motion ----------------------
 
 def test_the_static_variant_scores_one_on_both_folds(static):
-    """No motion, no order, no change -- and 1.000 on BOTH folds.
+    """No motion, no order, no change -- and 1.000 on fold A for EVERY set.
 
     This is the finding. The `map`, `both` and `region+map` feature sets all
     contain the 6x8 grid of the window's MEAN motion map, and that grid is
     what carries the discrimination.
+
+    ON THE CORRECTED CORPUS the static variant scores 1.000 on fold A for
+    all five feature sets, and on fold B for `map` and `region+map`. The
+    `both` feature set's fold B falls to 0.000 -- so the sharpened claim is
+    "the static variant is never worse than the real features", which the
+    next test pins.
     """
     for feature_set in ("map", "both", "region+map"):
         rows = rows_of(static, feature_set)
         for held_out in ("A", "B"):
             row = rows[("static", held_out)]
+            if feature_set == "both" and held_out == "B":
+                # The one fold where the static template is NOT 1.000.
+                assert row["acc"] == 0.0, (
+                    f"both static variant, hold-out B moved to {row['acc']} "
+                    "-- re-measure and update TEACHER-LOO-FOLDS.md")
+                continue
             assert row["acc"] == 1.0, (
                 f"{feature_set} static variant, hold-out {held_out}: "
                 f"{row['acc']} -- re-measure and update TEACHER-LOO-FOLDS.md")
+
+
+def test_the_static_variant_is_never_worse_than_the_real_features(static):
+    """Wherever the real features are below 1.000, the static template is
+    at least as good.
+
+    That is the sharpened form of "the map features need no motion". The
+    motion never helps: where the real features score less than perfect,
+    removing the motion and replacing every frame with the session's
+    temporal mean map does not make it worse.
+
+    The single exception is `both` on fold B, where the static template
+    scores 0.000 against the real 0.100. That 0.100 is worth nothing: the
+    blank control scores 1.000 on that fold.
+    """
+    exceptions = {("both", "B")}
+    for feature_set in ("summary", "region", "map", "both", "region+map"):
+        rows = rows_of(static, feature_set)
+        for held_out in ("A", "B"):
+            real = rows[("real", held_out)]["acc"]
+            stat = rows[("static", held_out)]["acc"]
+            if real >= 1.0 or (feature_set, held_out) in exceptions:
+                continue
+            assert stat >= real, (
+                f"{feature_set} hold-out {held_out}: the static template "
+                f"scored {stat} against the real {real} -- the motion may be "
+                "carrying something after all, and TEACHER-LOO-FOLDS.md has "
+                "to be re-checked")
 
 
 def test_the_feature_sets_without_the_grid_do_not_reach_one(static):
@@ -174,15 +229,19 @@ def test_the_feature_sets_without_the_grid_do_not_reach_one(static):
 
 
 def test_the_temporal_features_make_the_classifier_worse(static):
-    """Fold A: 1.000 without the motion, 0.000 with it.
+    """Fold A: 1.000 without the motion, 0.150 with it.
 
     Adding the temporal information to the static template does not merely
     fail to help -- it makes the result worse. The temporal features are
     adding noise to a discrimination that the static template already makes.
+
+    (On the torn corpus the same comparison was 1.000 against 0.000. The
+    direction is the same; the corrected corpus makes the real features
+    gradated rather than all-or-nothing.)
     """
     rows = rows_of(static, "map")
     assert rows[("static", "A")]["acc"] == 1.0
-    assert rows[("real", "A")]["acc"] == 0.0
+    assert rows[("real", "A")]["acc"] == 0.15
 
 
 def test_the_scale_control_does_not_move_the_results(static):
@@ -233,12 +292,19 @@ def test_the_time_shuffled_variant_keeps_the_frames():
 
 
 def test_the_unscaled_variant_is_a_common_factor():
-    """Every session is shrunk by the SAME factor, so the ratios are intact."""
-    from teacher_static_control import variant_unscaled, SCALE_REFERENCE
+    """Every session is shrunk by the SAME factor, so the ratios are intact.
+
+    The divisor is now PASSED IN rather than a module constant, because the
+    constant was session A's scale in the TORN corpus (143.27) and the
+    corrected corpus's scale is 8.00. A hard-coded divisor from the wrong
+    corpus is the same failure as the wrong stride, one level down.
+    """
+    from teacher_static_control import variant_unscaled
     rng = np.random.default_rng(6)
     maps = rng.random((10, 4, 5)) * 1000.0
-    out = variant_unscaled(maps)
-    assert np.allclose(out * SCALE_REFERENCE, maps)
+    for divisor in (8.0, 143.2708282470703):
+        out = variant_unscaled(maps, divisor)
+        assert np.allclose(out * divisor, maps)
 
 
 # --- claim 4: the video does not follow the audio -------------------------
@@ -295,34 +361,54 @@ def test_the_total_envelope_is_the_negative_case(av):
 
 # --- what the static template is -------------------------------------------
 
-@pytest.mark.skipif(not (CORPUS / "A_seed.npz").is_file(),
-                    reason="the seeded corpus is not on disk")
-def test_the_speaking_and_silent_average_pictures_are_almost_the_same():
-    """Correlation 0.904, amplitude differing by 4%.
+def _stored_maps(name: str) -> np.ndarray:
+    """The stored (quantised) motion maps of one session, unscaled.
 
-    This is what the static template IS: nearly the same picture, at a
-    slightly different amplitude.
+    Read from the npz directly, not through `load_session`, because
+    `load_session` multiplies by the per-session display scale and these
+    two tests are about the stored maps.
     """
-    a = load_session(CORPUS / "A_seed.npz").mean(axis=0)
-    c = load_session(CORPUS / "C_seed.npz").mean(axis=0)
+    with np.load(CORPUS / f"{name}.npz") as d:
+        return d["maps"].astype(np.float64)
+
+
+@pytest.mark.skipif(not (CORPUS / "A.npz").is_file(),
+                    reason="the corrected corpus is not on disk")
+def test_the_two_average_pictures_are_less_alike_than_they_were():
+    """Correlation 0.7046 -- NOT 0.9037.
+
+    ON THE TORN CORPUS the two takes' average motion pictures correlated at
+    0.904 and the file concluded that they were "nearly the same picture,
+    differing by about 4% in amplitude". That conclusion is WITHDRAWN: on
+    the corrected frames the pictures correlate at 0.7046, and the speaking
+    take's RAW motion is 40% larger than the silent take's (ratio 1.4011).
+
+    The stored maps' amplitude ratio reads 0.4202 rather than 1.4011
+    because each session's maps are quantised against its own 99.5th
+    percentile, which normalises the amplitude away.
+    """
+    a = _stored_maps("A").mean(axis=0)
+    c = _stored_maps("C").mean(axis=0)
     corr = float(np.corrcoef(a.ravel(), c.ravel())[0, 1])
+    assert 0.68 < corr < 0.73, f"the correlation moved to {corr:.4f}"
     ratio = float(a.sum() / c.sum())
-    assert 0.85 < corr < 0.95, f"the correlation moved to {corr:.4f}"
-    assert 0.93 < ratio < 0.99, f"the amplitude ratio moved to {ratio:.4f}"
+    assert 0.38 < ratio < 0.46, f"the stored amplitude ratio moved to {ratio:.4f}"
 
 
-@pytest.mark.skipif(not (CORPUS / "A_seed.npz").is_file(),
-                    reason="the seeded corpus is not on disk")
-def test_one_global_scale_explains_most_of_the_difference():
-    """R^2 = 0.817 for a single scale factor.
+@pytest.mark.skipif(not (CORPUS / "A.npz").is_file(),
+                    reason="the corrected corpus is not on disk")
+def test_one_global_scale_explains_less_than_half_the_difference():
+    """R^2 = 0.4724 for a single scale factor -- NOT 0.8112.
 
-    The difference between the two takes' average pictures is mostly a gain
-    difference, and the residual is the scene's fixed vertical structure at
-    a different amplitude -- not a face, and not a mouth.
+    ON THE TORN CORPUS one global scale factor explained 82% of the
+    difference between the two takes' average pictures, and the residual was
+    read as "the scene's fixed vertical structure -- not a face, and not a
+    mouth". On the corrected frames it explains 47%, so the two pictures are
+    genuinely different in more than a gain.
     """
-    a = load_session(CORPUS / "A_seed.npz").mean(axis=0).ravel()
-    c = load_session(CORPUS / "C_seed.npz").mean(axis=0).ravel()
+    a = _stored_maps("A").mean(axis=0).ravel()
+    c = _stored_maps("C").mean(axis=0).ravel()
     alpha, beta = np.polyfit(a, c, 1)
     pred = alpha * a + beta
     r2 = 1.0 - ((c - pred) ** 2).sum() / ((c - c.mean()) ** 2).sum()
-    assert 0.75 < r2 < 0.88, f"the scale fit moved to R^2 = {r2:.4f}"
+    assert 0.43 < r2 < 0.51, f"the scale fit moved to R^2 = {r2:.4f}"

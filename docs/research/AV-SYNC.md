@@ -1,5 +1,30 @@
 # A/V SYNC — the captures' audio and video do not correspond
 
+
+> ## CORRECTION (2026-10-20) — the captures were read at the wrong frame stride
+>
+> Every number in this file was computed on **torn frames**. The captures
+> carry **19,200 bytes per frame** (luma 160×96 + interleaved U,V chroma at
+> 80×24), not the 23,040 of a standard NV12 frame, so every "frame" was
+> rows 0..71 of one moment spliced to rows 72..95 of the next.
+>
+> The full account, with the evidence and the fix, is
+> **`docs/research/NV12-STRIDE.md`**. The reader is now `src/nv12.py`, which
+> detects the layout from the content. The corrected corpus is
+> `/mnt/c/proart_capture/corpus_v2/`.
+>
+> **The captures' audio and video do not correspond — and now we know why.**
+> The video is 30 s (900 frames), the audio is 29.98 s, and the two were
+> recorded as independent takes. On the corrected frames the correlation
+> between the speech envelope and the mouth motion peaks at **+0.13** over
+> a ±20 s lag search, and at **every** assumed video time base from 10 to
+> 60 Hz the wrong-session controls are as strong as or stronger than the
+> real pairing. There is no alignment to recover from this data. The
+> 4.914-vs-2.878 margin quoted here is also withdrawn: on the corrected
+> frames it is 0.2506 vs 0.2006, a factor of 1.249 against a
+> pre-registered 1.25 threshold — it misses. See
+> `docs/research/ROW-BAND-REMOVAL.md`.
+
 **Status: a retraction of an assumption the project had never tested.**
 Measured 2026-10-19. Code: `experiments/av_sync.py`.
 

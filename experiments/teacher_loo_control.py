@@ -195,7 +195,11 @@ def run(corpus: Path, task: str, feature_sets, k: int, stride: int,
 
 def main(argv=None) -> int:
     ap = argparse.ArgumentParser(description=__doc__.splitlines()[0])
-    ap.add_argument("--corpus", default="/mnt/c/proart_capture/corpus")
+    ap.add_argument("--corpus", default="/mnt/c/proart_capture/corpus_v2")
+    # CORRECTED CORPUS. The old /mnt/c/proart_capture/corpus was seeded
+# at the wrong frame stride (23,040 instead of 19,200) and every frame
+# in it is a tear between two real frames. See
+# docs/research/NV12-STRIDE.md.
     ap.add_argument("--task", default="speaking",
                     choices=("speaking", "facing"))
     ap.add_argument("--features", default="summary,map,both,region,region+map")

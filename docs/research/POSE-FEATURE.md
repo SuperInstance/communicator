@@ -68,6 +68,58 @@ the largest control, ratio 3.88×.
 That is the intuitive one. A face looking at the camera is roughly
 left-right symmetric; a head turned 90° is not.
 
+> **CORRECTION (2026-10-20) — the captures were read at the wrong frame
+> stride, and the one "signal" is WITHDRAWN.**
+>
+> The captures are 19,200 bytes per frame (luma 160×96 + interleaved U,V
+> chroma at 80×24), not the 23,040 of a standard NV12 frame. Read at
+> 23,040, every "frame" is a tear between two real frames, and the row
+> statistics that every one of these features is built from are then
+> bimodal. The full account is `docs/research/NV12-STRIDE.md`.
+>
+> Re-measured on the corrected frames
+> (`experiments/pose_feature_search_results.json`):
+>
+> | | before (torn) | **after (corrected)** |
+> |---|---:|---:|
+> | best feature | `mirror_cov` | `mirror_cov` |
+> | best margin | +0.814 | **+1.083** |
+> | verdict | "1 feature separates facing from turned beyond their controls" | **"NO feature is a clean pose signal"** |
+> | `mirror_cov`: A-vs-B / B-vs-C / A-vs-C | 1.097 / 0.851 / **0.246** | 1.097 / 0.851 / **A and C DO NOT AGREE** |
+>
+> **The margin got BIGGER and the result got WORSE, and that is the whole
+> point.** `mirror_cov` now separates facing from turned by +1.083, more
+> than before. But it also separates **A from C** — and A and C are *both
+> facing*. A feature that cannot tell two facing takes apart cannot be a
+> pose feature, whatever its margin against the controls.
+>
+> So the verdict flips from "SIGNAL" to **"NO feature is a clean pose
+> signal"**, and `mirror_cov` is listed under `confounded` in the results
+> file. The §4 argument below — *A and C agree with each other, so B's
+> difference is a manipulation and not a clock* — **does not survive**: A
+> and C do not agree any more.
+>
+> The reason is the same reason everything else moved. On torn frames every
+> take's frames carried the same seam, so the two facing takes looked alike
+> for a reason that had nothing to do with facing. On correct frames they
+> do not, and the feature that was separating B was separating the **seam**.
+>
+> **What this means for the project.** The pose channel has no validated
+> feature, and it never had one — it had a seam. The one measurement that
+> survived the correction and got *stronger* is the mouth: the mouth
+> region moves **+0.733 sd** more when Casey speaks than when he is silent,
+> against a cheek control at +0.477 sd, with a permutation z of **+10.9**
+> and the empty room 6,600× quieter. That is the camera channel's real
+> signal, and it is a **speaking** signal, not a pose signal. See
+> `docs/research/NV12-STRIDE.md` §5.
+>
+> **And condition D.** The identifiability analysis
+> (`docs/research/TEACHER-LOO-FOLDS.md`) says what would fix the pose
+> question: **D is turned AND silent**, which is the one condition whose
+> absence lets pose ≡ speaking in a training fold. D has still never been
+> recorded. It is now the highest-value missing take in the project, for
+> two independent reasons.
+
 ## 4. The argument that it is pose and not a clock
 
 This is the part that makes the result mean anything, and it is a property

@@ -21,6 +21,19 @@ one, which has real signal: facing-and-speaking differs from facing-and-silent
 by 4.914 counts against a within-condition split of **2.878**, with 79% of the
 excess localised.
 
+> **CORRECTION (2026-10-20) — this margin is WITHDRAWN.** It was measured on
+> torn frames (see `docs/research/NV12-STRIDE.md`). On the corrected frames
+> the A-vs-C difference is **0.2506** against A's own within-condition split
+> of **0.2006** — a factor of **1.249**, against the pre-registered 1.25
+> threshold. **It misses.** The separation does improve in the other
+> measure: the fraction of the difference above the null map goes from
+> 0.1206 to **0.9873**. But the claim as it was stated — a 1.71× margin on
+> the speaking contrast — does not survive.
+>
+> The *teacher bench* result below is a different measurement (a text model
+> reading ASCII motion) and is also being re-measured; do not quote this
+> section's numbers until it has been.
+
 > **CORRECTION (2026-10-19).** The split was published as **1.917**, giving
 > 2.6×. The contrast is **A-vs-C**, so the matched control is A's own
 > within-split, `within_A_facing_speaking.mean_abs_diff` = **2.878**; 1.917 is
@@ -80,6 +93,46 @@ The pipeline runs end to end and the controls are wired up:
 | summary | 1.000 | 0.792 | 0.667 | +0.208 | **A 0.000, B 0.000** |
 | map | 1.000 | 0.938 | 0.667 | +0.062 | A 0.000, B 1.000 |
 | both | 1.000 | 0.979 | 0.667 | +0.021 | A 0.000, B 0.000 |
+
+> **CORRECTION (2026-10-20) — the corpus was read at the wrong frame stride,
+> and TWO of these rows were false positives.**
+>
+> The captures are 19,200 bytes per frame (luma 160×96 + interleaved U,V
+> chroma at 80×24), not the 23,040 of a standard NV12 frame. Read at 23,040,
+> every "frame" is a tear between two real frames. The corpus was re-seeded
+> correctly into `/mnt/c/proart_capture/corpus_v2/` — **900 frames at 30 fps
+> = 30.0 s**, not 600 frames = 20.0 s — and the teacher re-run on it.
+>
+> | features | test acc | scrambled | blank | margin | LOO |
+> |---|---:|---:|---:|---:|---|
+> | summary | 0.958 | 0.958 | 0.667 | **+0.000** | A **1.000**, B 0.000 |
+> | region | 0.896 | 0.833 | 0.667 | **+0.062** | A **1.000**, B 0.000 |
+> | map | 1.000 | 0.938 | 0.667 | +0.062 | A **0.150**, B **0.375** |
+> | both | 1.000 | 0.958 | 0.667 | +0.042 | A **0.950**, B **0.100** |
+> | region+map | 1.000 | 0.938 | 0.667 | +0.062 | A **0.150**, B **0.275** |
+>
+> **`summary`'s margin of +0.208 and `region`'s of +0.312 are WITHDRAWN.**
+> They were the only two rows this file called USABLE, and on the corrected
+> corpus they are **+0.000** and **+0.062** — not usable, like every other
+> feature set. The scrambled control was *low* on the torn corpus (0.792 for
+> `summary`) because the tear gave the classifier something to latch onto;
+> on correct frames the scrambled control rises to 0.958 and the margin
+> vanishes.
+>
+> **Every feature set's margin over its own scrambled control is now ≤ 0.**
+> The teacher does not beat a spatially scrambled input on any feature set,
+> and it never did — the two rows that appeared to were measuring the defect.
+>
+> The LOO column also changes, and it changes *for the better*: the
+> accuracies are now **gradated** (0.150, 0.375, 0.950, 0.100, 0.275) where
+> they were all-or-nothing (0.000 or 1.000). That is the fix landing. It
+> does not make the teacher work, because the held-out session is still pure
+> and the blank control still scores 1.000 on every fold — see
+> `docs/research/TEACHER-LOO-FOLDS.md` for the full audit.
+>
+> The old numbers are reproducible on demand: `experiments/teacher_conventional.py
+> --corpus /mnt/c/proart_capture/corpus` returns them exactly. The full
+> account of the defect is `docs/research/NV12-STRIDE.md`.
 
 The temporal split says **1.000**. Leave-one-session-out says **0.000** on
 held-out A for every feature set, and **0.000 / 1.000 / 0.0 / 0.200** on
@@ -237,6 +290,11 @@ has to be a genuine head turn, not a glance.
 ```
 camera
   -> row-band removal           (measured: empty room 50.00% -> 0.01%)
+                                 *** WITHDRAWN 2026-10-20: the 50.00% was the
+                                 frame-stride defect. On correct frames the
+                                 empty room shows 0.00% banding with NO filter,
+                                 and the removal makes things worse. See
+                                 docs/research/NV12-STRIDE.md. ***
   -> motion maps                (measured: speech signal localised, 79% top 5%)
   -> conventional teacher       (trained on conditions, GATED by controls)
   -> soft labels on the free corpus
@@ -255,10 +313,12 @@ the one thing here that was measured and failed.
 
 - Two labelled sessions per class, one speaker, one room, one lighting state.
   Every number in §3 is a pipeline validation, not a performance claim.
-- The `scrambled` control for the `summary` features reaches 0.792, so even the
-  best margin (+0.208) comes from a feature set that is close to a global
-  statistic. The spatial features are the ones that *should* capture the
-  measured signal, and they currently do not beat their control.
+- The `scrambled` control for the `summary` features reaches 0.958 on the
+  corrected corpus (it was 0.792 on the torn one), so even the best margin
+  (+0.062) comes from a feature set that is close to a global statistic. The
+  spatial features are the ones that *should* capture the measured signal,
+  and they currently do not beat their control. **No feature set beats its
+  own scrambled control.**
 - The teacher bench's `facing` question is meaningless on this corpus: B's head
   turn never registered.
 - The student is not built. Building it before the teacher passes its gate

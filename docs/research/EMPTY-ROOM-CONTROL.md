@@ -1,5 +1,25 @@
 # Empty-room control: the character delta is the camera, not the subject
 
+
+> ## CORRECTION (2026-10-20) — the captures were read at the wrong frame stride
+>
+> Every number in this file was computed on **torn frames**. The captures
+> carry **19,200 bytes per frame** (luma 160×96 + interleaved U,V chroma at
+> 80×24), not the 23,040 of a standard NV12 frame, so every "frame" was
+> rows 0..71 of one moment spliced to rows 72..95 of the next.
+>
+> The full account, with the evidence and the fix, is
+> **`docs/research/NV12-STRIDE.md`**. The reader is now `src/nv12.py`, which
+> detects the layout from the content. The corrected corpus is
+> `/mnt/c/proart_capture/corpus_v2/`.
+>
+> **The empty room's 50.00% banded fraction was the stride defect.** With
+> the correct 19,200-byte stride the empty room shows **0.0000%** banding
+> and its mouth-region motion is **6,600× quieter** than the occupied one
+> (0.015% of it; the whole frame is 103× quieter). The
+> empty room is a good control; the mechanism it was read as supporting
+> is not there. See `docs/research/NV12-STRIDE.md` §5.
+
 **Status: decisive, and it retracts a mechanism claim in
 `ASCII-MOTION.md`.**
 

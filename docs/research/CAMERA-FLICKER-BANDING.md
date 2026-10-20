@@ -1,5 +1,26 @@
 # The camera's drift is LED flicker banding, not gain, and not noise
 
+
+> ## CORRECTION (2026-10-20) — the captures were read at the wrong frame stride
+>
+> Every number in this file was computed on **torn frames**. The captures
+> carry **19,200 bytes per frame** (luma 160×96 + interleaved U,V chroma at
+> 80×24), not the 23,040 of a standard NV12 frame, so every "frame" was
+> rows 0..71 of one moment spliced to rows 72..95 of the next.
+>
+> The full account, with the evidence and the fix, is
+> **`docs/research/NV12-STRIDE.md`**. The reader is now `src/nv12.py`, which
+> detects the layout from the content. The corrected corpus is
+> `/mnt/c/proart_capture/corpus_v2/`.
+>
+> **This document's mechanism claim is WITHDRAWN.** The horizontal bands
+> were not LED flicker in the scene: they were the tear. On the corrected
+> frames an **empty room with no filter at all shows 0.00% banding, where it
+> showed a perfect 50.00%.** There is no flicker nuisance term to find.
+> The row-removal pass proposed here is now unnecessary and actively
+> harmful: with nothing to remove, it *raises* the occupied rate from
+> 0.625% to 1.790%. See `docs/research/ROW-BAND-REMOVAL.md`.
+
 **Status: mechanism identified with a measurement. The fix I proposed in
 `EMPTY-ROOM-CONTROL.md` is wrong and is withdrawn here.**
 

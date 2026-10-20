@@ -68,11 +68,21 @@ sys.path.insert(0, str(ROOT / "experiments"))
 from teacher_conventional import build, fit_logistic, predict  # noqa: E402
 from ascii_motion_render import load_session                # noqa: E402
 
-# Session A's motion-map scale, used as a COMMON divisor so the
-# between-session ratios are untouched and only the absolute scale moves.
-SCALE_REFERENCE = 143.2708282470703
+# The motion-map scale, used as a COMMON divisor so the between-session
+# ratios are untouched and only the absolute scale moves.
+#
+# IT WAS A HARD-CODED CONSTANT AND IT WAS THE WRONG ONE. The constant
+# 143.2708282470703 was session A's scale in the TORN corpus. On the
+# corrected corpus it is 8.0, so dividing by the old constant was dividing
+# by a number that no longer meant anything -- and the "scale" control was
+# therefore testing a scale of 17.9x the one it claimed to be undoing.
+# The scale is now READ FROM THE CORPUS.
+SCALE_REFERENCE_FALLBACK = 143.2708282470703
 
-CORPUS = Path("/mnt/c/proart_capture/corpus")
+CORPUS = Path("/mnt/c/proart_capture/corpus_v2")
+# CORRECTED CORPUS. The old /mnt/c/proart_capture/corpus was seeded at the
+# wrong frame stride (23,040 instead of 19,200) and every frame in it is
+# a tear between two real frames. See docs/research/NV12-STRIDE.md.
 
 
 def load_sessions(corpus: Path):
@@ -87,11 +97,13 @@ def load_sessions(corpus: Path):
         label = 1 if meta.get("speak") else 0
         out.append({"name": meta["condition"], "maps": load_session(npz_p),
                     "label": label, "npz": str(npz_p),
-                    "pose": meta.get("pose"), "speak": meta.get("speak")})
+                    "pose": meta.get("pose"), "speak": meta.get("speak"),
+                    "source": meta.get("source"),
+                    "raw_maps": np.load(npz_p)["maps"].astype(np.float64)})
     return out
 
 
-def variant_unscaled(maps: np.ndarray) -> np.ndarray:
+def variant_unscaled(maps: np.ndarray, scale_reference: float) -> np.ndarray:
     """The SAME maps, shrunk by a common factor.
 
     `ascii_motion_render.load_session` returns `maps * scale`, where `scale`
@@ -109,7 +121,7 @@ def variant_unscaled(maps: np.ndarray) -> np.ndarray:
     result changes when a display constant is removed, the result is a
     property of the optimiser's scale and not of the signal.
     """
-    return maps / SCALE_REFERENCE
+    return maps / scale_reference
 
 
 def variant_static(maps: np.ndarray) -> np.ndarray:
@@ -133,19 +145,138 @@ def fit_and_score(X, y, tr, te):
     return float((p == y[te]).mean()), int(len(te))
 
 
+def _raw_motion(capture: Path) -> np.ndarray:
+    """The motion maps of a capture, at the layout the file actually has."""
+    from src import nv12
+    luma, _ = nv12.read_luma(capture, width=160, height=96)
+    Y = luma.astype(np.float64)
+    prof = np.median(Y, axis=2)
+    g = prof.mean(axis=1, keepdims=True)
+    Yr = Y - (prof - g)[:, :, None]
+    d = np.abs(np.diff(Yr, axis=0))
+    return d.reshape(d.shape[0], 48, 2, 80, 2).mean(axis=(2, 4))
+
+
+def static_template_stats(sessions) -> dict:
+    """WHAT THE STATIC TEMPLATE IS, MEASURED.
+
+    The `static` variant's score says the teacher can read a picture. This
+    says what the picture IS: how similar the speaking take's average motion
+    map is to the silent take's, how much of the difference is one global
+    scale factor, and how much of the empty room's motion map is in the
+    same units.
+
+    All of these were quoted in `docs/research/TEACHER-LOO-FOLDS.md` from the
+    TORN corpus, and all of them change when the frames are read correctly.
+    """
+    by_name = {s["name"]: s for s in sessions}
+    if "A" not in by_name or "C" not in by_name:
+        return {}
+    raw = {}
+    for name in ("A", "C"):
+        d = np.load(by_name[name]["npz"])
+        raw[name] = d["maps"].astype(np.float64)
+    mA, mC = raw["A"].mean(axis=0), raw["C"].mean(axis=0)
+    corr = float(np.corrcoef(mA.ravel(), mC.ravel())[0, 1])
+    # THE AMPLITUDE RATIO IS MEASURED ON THE RAW MOTION, NOT ON THE STORED
+    # MAPS. The stored maps are quantised per session against their own
+    # 99.5th percentile, so their amplitude ratio is a property of the
+    # quantiser, not of the scene. The raw motion is what "amplitude" means.
+    ratio = None
+    raw_amp = {}
+    for name in ("A", "C"):
+        src = by_name[name].get("source")
+        if src and Path(src).is_file():
+            raw_amp[name] = _raw_motion(Path(src))
+    if "A" in raw_amp and "C" in raw_amp:
+        ratio = float(raw_amp["A"].mean() / max(raw_amp["C"].mean(), 1e-12))
+    s_glob = float((mA.ravel() @ mC.ravel()) / max((mC.ravel() @ mC.ravel()), 1e-12))
+    resid = mA - s_glob * mC
+    r2 = float(1.0 - resid.var() / max((mA - mA.mean()).var(), 1e-12))
+    tot = {k: v.reshape(len(v), -1).sum(axis=1) for k, v in raw.items()}
+    sd = float(np.sqrt((tot["A"].var() + tot["C"].var()) / 2))
+    effect = float((tot["A"].mean() - tot["C"].mean()) / sd) if sd > 0 else 0.0
+
+    def temporal_stats(maps):
+        mean = np.maximum(maps.mean(axis=0), 1e-9)
+        tstd = float((maps.std(axis=0) / mean).mean())
+        # consecutive-frame correlation, over the pixels that vary at all
+        vals = []
+        for i in range(len(maps) - 1):
+            a, b = maps[i].ravel(), maps[i + 1].ravel()
+            live = a.std() > 0 and b.std() > 0
+            if live:
+                vals.append(float(np.corrcoef(a, b)[0, 1]))
+        return tstd, (float(np.mean(vals)) if vals else float("nan"))
+
+    tstd_a, ffc_a = temporal_stats(raw["A"])
+    tstd_c, ffc_c = temporal_stats(raw["C"])
+    out = {
+        "mean_map_correlation_A_vs_C": round(corr, 4),
+        "amplitude_ratio_A_over_C_raw_motion": (None if ratio is None
+                                                else round(ratio, 4)),
+        "amplitude_ratio_A_over_C_stored_maps": round(
+            float(mA.mean() / max(mC.mean(), 1e-12)), 4),
+        "note_on_amplitude": (
+            "the stored maps are quantised per session against their own "
+            "99.5th percentile, so their amplitude ratio is a property of "
+            "the quantiser; the raw-motion ratio is the scene's"),
+        "global_scale_fit_R2": round(r2, 4),
+        "effect_size_A_vs_C_total_motion_sd": round(effect, 4),
+        "pixelwise_temporal_std_over_mean_A": round(tstd_a, 3),
+        "pixelwise_temporal_std_over_mean_C": round(tstd_c, 3),
+        "consecutive_frame_correlation_A": round(ffc_a, 4),
+        "consecutive_frame_correlation_C": round(ffc_c, 4),
+    }
+    # The empty room, read at the layout the file actually has.
+    empty = Path("/mnt/c/proart_capture/empty1.nv12")
+    if empty.is_file():
+        try:
+            from src import nv12
+            luma, layout = nv12.read_luma(empty, width=160, height=96)
+            Y = luma.astype(np.float64)
+            prof = np.median(Y, axis=2)
+            g = prof.mean(axis=1, keepdims=True)
+            Yr = Y - (prof - g)[:, :, None]
+            dd = np.abs(np.diff(Yr, axis=0))
+            emaps = dd.reshape(dd.shape[0], 48, 2, 80, 2).mean(axis=(2, 4))
+            out["empty_room_layout"] = layout.name
+            out["empty_room_mean_map_energy_over_A"] = round(
+                float(emaps.mean() / max(raw["A"].mean(), 1e-12)), 9)
+        except Exception as exc:                       # pragma: no cover
+            out["empty_room_error"] = str(exc)
+    return out
+
+
 def run(corpus: Path, modes, k: int, stride: int, max_per: int) -> dict:
     sessions = load_sessions(corpus)
     names = [s["name"] for s in sessions]
     results = {"corpus": str(corpus), "sessions": [
         {"name": s["name"], "label": s["label"], "pose": s["pose"],
          "speak": s["speak"]} for s in sessions],
-        "feature_sets": {}}
+        "feature_sets": {},
+        "static_template": {}}
+
+    # The corpus's OWN motion-map scale, read from session A's npz, used as
+    # the common divisor for the `unscaled` variant. It used to be a
+    # hard-coded constant from the torn corpus (143.27); on the corrected
+    # corpus it is 8.0, and a divisor from the wrong corpus makes the
+    # control test a scale that means nothing.
+    scale_reference = SCALE_REFERENCE_FALLBACK
+    for s_ in sessions:
+        try:
+            scale_reference = float(np.load(s_["npz"])["scale"])
+            break
+        except Exception:
+            continue
+
+    results["static_template"] = static_template_stats(sessions)
 
     variants = {
         "real": lambda m: m,
         "static": variant_static,
         "time_shuffled": variant_time_shuffled,
-        "unscaled": variant_unscaled,
+        "unscaled": lambda m: variant_unscaled(m, scale_reference),
     }
 
     for mode in modes:
