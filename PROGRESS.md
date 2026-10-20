@@ -1390,3 +1390,118 @@ a zero array when a motion field was empty, so the persistence loop raised
 `TypeError` on a float — **the blank control could not be computed at all**.
 The committed teacher results do not move (verified by re-running all five
 feature sets).
+
+## 2026-10-20 (night) — the captures were being read at the wrong stride, and the mouth was open the whole time
+
+**The single biggest result of the night, and it is a defect.**
+
+Every video experiment in this repo read a capture with a hard-coded frame
+stride of `W*H*3//2` = 23,040 bytes for a 160×96 frame — the size of a
+standard NV12 frame. The captures on disk are **19,200 bytes per frame**:
+a 160×96 luma plane plus interleaved U,V chroma at 80×24 (half the vertical
+resolution of standard NV12's chroma), written by
+`C:\proart_capture\nv12small.py`. Read at 23,040, every "frame" is rows
+0..71 of one real moment spliced to rows 72..95 of the next, and only every
+sixth frame survives intact.
+
+**80% of every frame this repo had measured was a tear between two different
+moments.**
+
+Three independent lines settled it, and any one alone would have been
+arguable:
+
+* **The video's own length has to agree with the audio's.** At 19,200 the
+  captures are 900 frames = 30.00 s against A/B/C's 29.98 s of audio and
+  empty1's 4,500 frames = 150.00 s against 149.91 s. At 23,040 they are
+  25 s and 125 s. Every capture, every time.
+* **The frames stop being garbage.** Mean consecutive |diff|: A **43.560 →
+  0.545**, B 37.740 → 0.433, C 42.935 → 0.367, empty1 39.295 → 0.005.
+* **You can look at it.** The correctly-read frames render as a sharp,
+  stable photograph of Casey facing the camera, and a filmstrip of the mouth
+  region across the take shows the mouth **visibly opening and closing**.
+  The same bytes at 23,040 give alternating bands of ceiling and chroma
+  garbage.
+
+The reader is now `src/nv12.py`, which **detects** the layout from the
+content and reports the margin over the runner-up (80× on A, 117× on C,
+7,446× on the empty room). A file whose layout is ambiguous is an **error**,
+not a guess. The corrected corpus is `/mnt/c/proart_capture/corpus_v2/`
+(900 frames, 30.0 s); the old one is left on disk so every withdrawn number
+can be re-run.
+
+**What was wrong, item by item.**
+
+| claim | verdict |
+|---|---|
+| the teacher's `summary` margin of **+0.208** and `region` of **+0.312**, both USABLE | **false positives.** Now **+0.000** and **+0.062**. Every feature set's margin over its own scrambled control is ≤ 0. |
+| the LOO fold is "a one-bit statistic" (0.000 or 1.000, nothing between) | **refuted.** The accuracies are gradated: 0.150, 0.375, 0.950, 0.100, 0.275. |
+| the blank control scores 1.000 on every fold | **survives.** The degeneracy is in the LABELS being session-level, not in the metric. |
+| the `map` features need no motion | **survives**, and sharpens: the static variant still scores 1.000 on fold A for every feature set, and beats the real features wherever those are below 1.000. |
+| the two takes' average motion pictures are "nearly the same picture, differing by 4%, 82% explained by one global scale" — *not a face, not a mouth* | **withdrawn.** On correct frames they correlate 0.705 (not 0.904), only 47% is one global scale (not 82%), and the speaking take's raw motion is **40% larger**. |
+| the "LED flicker banding" (empty room 50.00% banded) | **withdrawn.** It was the tear. The empty room now shows **0.0000%** banding with no filter at all, and the row-removal filter makes the occupied rate *worse*. |
+| `mirror_cov` separates facing from turned, margin +0.814 | **withdrawn as a pose signal.** The margin rose to +1.083, but the feature also separates the two FACING conditions, so it cannot be pose. |
+| the video does not follow the audio (+0.0776) | **survives**, with a stronger control: the figures roughly double (+0.1536) and the blank room — whose control had been **silently skipped** because `empty1_seed.npz` was never built — now scores **+0.545**, the largest number in the table. |
+
+**And the payoff.** The video does carry the speaking signal, and it was in
+the mouth. The mouth region moves **+0.733 sd** more when Casey speaks than
+when he is silent, against a **cheek control at +0.477 sd**, with a
+permutation z of **+10.9** and the empty room **6,600× quieter**. At the wrong
+stride the same measurement is **−0.183 sd** — the wrong sign. A MediaPipe
+lane, independently, got 900/900 face detections and measured the mouth
+genuinely opening (aperture 0.0284 speaking vs 0.0010 silent); its
+correlation beats the scrambled null (+0.2052 vs +0.0902) but **fails its
+controls** — mouth *width* scores +0.3038 and head *height* +0.3316 — so the
+correlation is about head motion, not speech.
+
+**What does not work, and why.** The old captures' audio and video are
+**independent takes**, so there is no frame-level alignment to recover: the
+correlation peaks at +0.13 over a ±20 s lag search and at every assumed
+video time base from 10 to 60 Hz, and **at every one of those settings the
+wrong-session controls are as strong as or stronger than the real pairing**.
+The new capture tool fixes this by construction — one video frame, one audio
+block and one clock reading per iteration — so the corpus that is about to
+be recorded is what unblocks this lane.
+
+**Condition D (turned AND silent) is now the highest-value missing take**,
+for two independent reasons: it makes every pose fold identifiable, and it
+is the control that separates "the head moved" from "the mouth opened".
+
+**Three research lanes ran in parallel, and two of them falsified their own
+hypothesis.** That is the point of running them.
+
+* **Speaker embeddings vs F0.** WavLM-SV, turn-level (≥ 2.0 s). MEE071/MEE073
+  resolves at **2.6326σ** (EER 0.122) against pitch at 0.3σ. FEO070/FEO072
+  does **not** resolve — 0.1577σ (EER 0.333) against pitch at −0.0057σ — and
+  that is a **clean null**, which is a result. Turn-change EER **0.260504**
+  against F0's 0.346154 and a constant's 0.5, with a shuffled-label null that
+  permutes out **0 times in 200** (p = 0.004975).
+* **Vision teacher with motion evidence.** **Falsified.** Ordered strips do
+  not beat shuffled ones: the delta margin is positive in only 4 of 15 arms,
+  the largest arm is 2 stimuli of 12, and the pre-registered threshold was
+  0.20. The models respond to **pixels, not order** — Mistral 0.083 → 0.750
+  from a 4× upscale alone. The torn-strip control scores a margin of
+  **exactly 0.000** (a blank strip reads SPEAKING 12/12), so the strip
+  format is its own prompt floor.
+* **Local VLM determinism.** The hosted Cloudflare endpoint is not
+  deterministic at temperature 0.0 (spread **0.619**), but two local models
+  given the **byte-identical** prompt are perfectly stable (spread
+  **0.000** each, 8 runs). So the instability is **the serving stack, not
+  the task** — the hosted+sampled cell is left empty rather than guessed.
+  Both local models are nonetheless degenerate on 160×96 vision
+  (margin 0.000, i.e. exactly always-SPEAKING), which is recorded as a
+  finding and not as a clearance.
+
+**The lesson, and it is not about statistics.** A number that is derived
+from the assumption it is supposed to test is not a check. The frame count
+was "verified" against a frame count computed from the same wrong stride;
+the "20.0 s" in the corpus metadata was `600 / 30`, where 600 came from the
+same wrong read. The check has to come from outside: the file size, the
+script still sitting on disk, the audio's own duration, or a human eye.
+
+**Also fixed along the way.** `src/nv12.py` had a bug of its own: a file
+where only one candidate stride divides got a `NaN` margin and was wrongly
+refused as ambiguous. And the layout was renamed `y_u_v_planar` →
+`y_uv_halfres`, because an independent lane measured the chroma to be
+**interleaved**, not planar (even bytes average 125.05, odd bytes 135.88,
+no step at the midpoint) — a name that asserts a falsehood is a landmine
+even when no measurement depends on it.
