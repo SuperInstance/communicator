@@ -9,6 +9,162 @@
 they stood on 2026-10-19. The old scores are kept, not overwritten, in
 `the_key_change.the_before_snapshot` of the results file.
 
+> ## CORRECTION (2026-10-20, later still) — three defects in the instrument, and one false sentence in the correction block above
+>
+> Everything below this block was measured with an instrument that had three
+> defects in it, and with a **pool whose composition was being reported by a
+> second copy of the code that built it**. All three are fixed and measured
+> here.
+>
+> ### 1. THE "UNPARSEABLE" RUNS WERE ANSWERS CUT OFF, NOT ANSWERS THAT WERE NEVER GIVEN
+>
+> Three of the nine committed audit runs were recorded as `unparseable`: the
+> model's reply was not valid JSON. The record said only "unparseable", and
+> the natural reading is that the model failed to answer.
+>
+> It did not. It answered, and **the output budget ran out mid-answer**.
+> `debrief.py::_http_json` rebuilt every response as `{"text": text}` and
+> **discarded `finish_reason` and `usage`**, so a response cut off at the cap
+> was indistinguishable on the wire from a finished one. `cloud_llm` already
+> had a retry for reasoning models — it repeats the call with 4× the output
+> budget when `content` comes back **empty** — and the truncated case never
+> reached it, because a truncated answer is not empty, it is *cut*.
+>
+> **MEASURED** (`experiments/debrief_truncation_probe.py`, results in
+> `experiments/debrief_truncation_probe_results.json`), qwen3-30b, blind
+> mode, at the committed budget:
+>
+> | | n | truncated (`finish_reason="length"`) | recovered by 4× the output budget |
+> |---|---|---|---|
+> | committed probe | 8 | **1** (12.5%) | **1 of 1** (100%) |
+> | an earlier independent probe | 6 | **2** (33.3%) | **2 of 2** (100%) |
+> | pooled | 14 | **3** (21.4%) | **3 of 3** (100%) |
+>
+> Every truncation came back with `completion_tokens` **exactly 3000** — the
+> cap — while the complete answers used 1,853 to 2,518.
+>
+> **THE OBVIOUS EXPLANATION WAS TESTED AND IT IS FALSE.** The natural
+> hypothesis was that the *material* was too large for the smaller models'
+> context windows, and that the fit ladder should have shrunk it. It cannot
+> be that, and the control is structural: **in blind mode the material does
+> not enter the prompt at all.** Measured at three material budgets:
+>
+> | material budget | prompt characters | prompt tokens |
+> |---|---|---|
+> | 140,000 | 3,031 | **701** |
+> | 60,000 | 3,031 | **701** |
+> | 40,000 | 3,031 | **701** |
+>
+> The prompt is identical at every budget, and the failure rate does not
+> follow the budget — the failure happened at the **smallest** budget tested
+> and not at the largest. **The budget that ran out was the OUTPUT budget,
+> not the INPUT budget.** A fit ladder that treated "unparseable" as "does
+> not fit" would have walked *down* past budgets that worked.
+>
+> **THE FIX.** `finish_reason` and `usage` are kept and surfaced; a
+> truncated answer is retried with 4× the output budget; every run records
+> its transport facts; and the two unparseable shapes that used to share
+> one label are now told apart — `response_was_truncated` versus
+> `no_json_verdicts_object`. Pinned by `tests/test_debrief_transport.py`
+> (10 tests, including a mutation test).
+>
+> **WHAT IT COST BEFORE THE FIX, beyond the three lost runs.** A truncated
+> answer can still *parse*: the JSON object closes before the cut and the
+> model keeps writing prose after it. The old scorer had no way to know the
+> answer was short, so **the claims the model never got to answer were
+> scored as wrong** — a truncated answer was silently charged to the
+> director.
+>
+> **THE RE-RUN: all nine committed audit runs now parse.** The §4.1 table
+> below is the re-run.
+>
+> ### 2. THE LOCAL PATH OF THIS INSTRUMENT HAD NEVER WORKED
+>
+> `experiments/debrief.py` has always supported `ollama:` and `local:`
+> models. **Every such call returned `no_result` and no local model was
+> ever scored.** `_http_json` understood only Cloudflare's response shape
+> (`{"result": {"choices": [...]}}`); ollama puts the message at the top
+> level (`{"message": {"role": "assistant", "content": ...}}`), so the
+> answer was sitting in the body in plain sight behind a shape check.
+>
+> This matters because the hosted endpoint's non-determinism contaminates
+> every number in this document — a measured spread of 0.619 for the hosted
+> vision model, and gpt-oss's sensitivity ranging over 0.333 to 1.000 on
+> **identical prompts**. The one thing that could have removed that noise
+> was a local model, and the local path was broken.
+>
+> ### 3. THE CORRECTION BLOCK ABOVE IS WRONG ABOUT THE ACOUSTICS FIGURE
+>
+> The block above says: *"the acoustics figure (**"73.5"**) **now reaches the
+> prompt** — it did not before the fix — and the director accuses the claim
+> anyway"*, and uses that to argue the failure **is not a starvation
+> problem**.
+>
+> **Measured against the pool actually used, the acoustics evidence does
+> NOT reach the prompt.** The only `73.5` in the pool is
+> `AMI EN2002a **73.5%** (191 of 260 gaps)` — an unrelated number from a
+> different experiment:
+>
+> | probe | in the pool? |
+> |---|---|
+> | `73.5` (as a bare substring) | yes — but it is `73.5%`, an unrelated figure |
+> | `-73.5 dBFS` | **no** |
+> | `73.496` | **no** |
+> | `119 transients` | **no** |
+> | `RT60` | **no** |
+>
+> The three notes that hold "119 transients" all lose it to the per-note cap.
+> So the director's accusation of the one true claim is explained by the
+> **missing evidence**, exactly as §4.3 says — and the sentence above is
+> **withdrawn**, along with the conclusion drawn from it.
+>
+> ### 4. THE POOL'S OWN DIAGNOSTIC WAS A SECOND COPY OF THE POOL BUILDER
+>
+> `evidence_reachability` builds its per-note diagnostic from its own
+> hand-rolled copy of the keep-set — and that copy still carried the **old**
+> front-truncation. So it was measuring a pool that was **not** the pool the
+> runs were made against: it reported **3 of 49** notes keeping their tail
+> while the pool actually used kept **51 of 51**. A copy of a thing that
+> measures the thing is a second implementation of it, and it drifts.
+> Collector and diagnostic now call one slicer.
+>
+> ### 5. THE PROPOSAL CHANGED BETWEEN TWO IDENTICAL RUNS
+>
+> The same model, on the same corpus, given the same evidence pool, produced
+> a **different** proposal:
+>
+> | | title | Jaccard vs the previous committed proposal |
+> |---|---|---|
+> | previous committed | "Cache-Pressure Gate-Cost Test" | — |
+> | this re-run | "Held-out-device CPU-cost measurement of Silero-VAD gate" | **0.2604** |
+>
+> **0.2604 is below this repository's own ≈0.29 "same experiment" threshold.**
+> So the earlier headline — "Jaccard **1.000**, the proposal is *literally the
+> same experiment*" — was a **single-sample number**, and the second sample
+> of the same measurement is 0.2604. The echo numbers in this document are
+> single-sample statistics and are now labelled as such.
+>
+> ### 6. WHAT SURVIVED ALL OF IT
+>
+> - **The proposal still cannot fail.** The null band (a difference ≤ 0.5 %
+>   absolute) sits entirely inside the falsifier band (a reduction ≤ 5 %),
+>   so a null outcome is a rejection. That has now been measured on **two**
+>   independently generated proposals.
+> - **It still skips Condition D** — the take this repository ranks first,
+>   and the one that is actually recordable.
+> - **It still proposes plan item 11**, the item already marked as blocked
+>   on hardware. This run's `the_proposal_names_plan_item_11` is **true**;
+>   the previous run's was false. The topical overlap is stable; the wording
+>   is not.
+> - **The second defect is gone.** The previous proposal asked for two
+>   opposite things (a hypothesis of *less than* 1.5× and a margin of *at
+>   least* 1.5×). This one does not: its hypothesis and its margin agree.
+>
+> The old text below is kept visible, per the house rule that a falsified
+> claim stays in the record.
+
+---
+
 > ## CORRECTION (2026-10-20, later that night) — the evidence pool was broken, and the numbers below were measured against the broken one
 >
 > This lane measured the director's score against an evidence pool that was
@@ -188,21 +344,55 @@ that misses it loses everything.
 All four committed audit artefacts and the debrief were re-run with
 `experiments/debrief.py` itself, so they match the corrected key:
 
-| artefact | mode | model | sens | spec | headline |
-|---|---|---|---|---|---|
-| `debrief_audit_blind_cf-meta-…_cf-openai-…_cf-qwen-….json` | blind | llama-3.3-70b | 0.222 | 0.000 | **-0.778** |
-| | blind | gpt-oss-120b | 0.222 | 1.000 | +0.222 |
-| | blind | qwen3-30b | 0.111 | 1.000 | +0.111 |
-| `debrief_audit_blind_cf-openai-…_cf-meta-…_cf-qwen-….json` | blind | gpt-oss-120b | 0.222 | 1.000 | +0.222 |
-| | blind | llama-3.3-70b | 0.222 | 0.000 | **-0.778** |
-| | blind | qwen3-30b | 0.444 | 1.000 | +0.444 |
-| `debrief_audit_context_cf-openai-gpt-oss-120b.json` | context | gpt-oss-120b | 0.889 | 1.000 | **+0.889** |
-| `debrief_audit_context_cf-openai-…_cf-meta-….json` | context | gpt-oss-120b | 0.778 | 0.000 | **-0.222** |
-| | context | llama-3.3-70b | 0.556 | 0.000 | **-0.444** |
-
-Look at rows 7 and 8: **the same model, the same material budget, minutes
-apart, with opposite specificity** — one kept the single true claim, the
-other accused it. One run is a sample, not a score.
+> **CORRECTION (2026-10-20, later still) — this table is the re-run on the
+> instrument with the three defects fixed, and every run in it now parses.**
+> The previous table is kept below it.
+>
+> | artefact | mode | model | sens | spec | headline |
+> |---|---|---|---|---|---|
+> | `debrief_audit_blind_cf-meta-…_cf-openai-…_cf-qwen-….json` | blind | llama-3.3-70b | 0.222 | 0.000 | **-0.778** |
+> | | blind | gpt-oss-120b | 0.333 | 1.000 | **+0.333** |
+> | | blind | qwen3-30b | 0.111 | 1.000 | **+0.111** |
+> | `debrief_audit_blind_cf-openai-…_cf-meta-…_cf-qwen-….json` | blind | gpt-oss-120b | 0.333 | 1.000 | **+0.333** |
+> | | blind | llama-3.3-70b | 0.222 | 0.000 | **-0.778** |
+> | | blind | qwen3-30b | 0.111 | 1.000 | **+0.111** |
+> | `debrief_audit_context_cf-openai-gpt-oss-120b.json` | context | gpt-oss-120b | 0.889 | 0.000 | **-0.111** |
+> | `debrief_audit_context_cf-openai-…_cf-meta-….json` | context | gpt-oss-120b | 0.778 | 0.000 | **-0.222** |
+> | | context | llama-3.3-70b | 0.333 | 0.000 | **-0.667** |
+>
+> **The contrast the previous version was built on is sharper now, because
+> the three lost runs are back.** Read the **specificity** column against
+> the **mode** column, for the same model and the same material budget:
+>
+> | model | blind (claims only) | context (claims + evidence) |
+> |---|---|---|
+> | gpt-oss-120b | **1.000** — keeps the one true claim | **0.000** — accuses it |
+> | qwen3-30b | **1.000** — keeps it | **0.000** — accuses it |
+> | llama-3.3-70b | 0.000 — accuses it | 0.000 — accuses it |
+>
+> **Two of the three models keep the true claim when given the claim
+> alone, and accuse it once the evidence is added.** That is the failure,
+> and it is the one result in this document that did not move when the
+> instrument was fixed.
+>
+> The previous table, measured with the three runs lost to truncation and
+> the pool's second copy of itself:
+>
+> | artefact | mode | model | sens | spec | headline |
+> |---|---|---|---|---|---|
+> | `debrief_audit_blind_cf-meta-…_cf-openai-…_cf-qwen-….json` | blind | llama-3.3-70b | 0.222 | 0.000 | **-0.778** |
+> | | blind | gpt-oss-120b | 0.222 | 1.000 | +0.222 |
+> | | blind | qwen3-30b | 0.111 | 1.000 | +0.111 |
+> | `debrief_audit_blind_cf-openai-…_cf-meta-…_cf-qwen-….json` | blind | gpt-oss-120b | 0.222 | 1.000 | +0.222 |
+> | | blind | llama-3.3-70b | 0.222 | 0.000 | **-0.778** |
+> | | blind | qwen3-30b | 0.444 | 1.000 | +0.444 |
+> | `debrief_audit_context_cf-openai-gpt-oss-120b.json` | context | gpt-oss-120b | 0.889 | 1.000 | **+0.889** |
+> | `debrief_audit_context_cf-openai-…_cf-meta-….json` | context | gpt-oss-120b | 0.778 | 0.000 | **-0.222** |
+> | | context | llama-3.3-70b | 0.556 | 0.000 | **-0.444** |
+>
+> Look at rows 7 and 8 in that table: **the same model, the same material
+> budget, minutes apart, with opposite specificity** — one kept the single
+> true claim, the other accused it. One run is a sample, not a score.
 
 ### 4.2 The repeats, and the spread
 
@@ -220,6 +410,31 @@ each row is one prompt repeated.
 | context | gpt-oss-120b | 3 | **0.000** | -0.111 | 0.000 | 0.111 | 1.000 | 0.000 |
 | context | llama-3.3-70b | 3 | **-0.667** | -0.667 | -0.667 | 0.000 | 0.333 | 0.000 |
 | context | qwen3-30b | 3 | **-0.556** | -0.667 | -0.444 | 0.111 | 0.444 | 0.000 |
+
+> **CORRECTION (2026-10-20, later still) — the repeats, re-measured with the
+> fixed instrument and the fixed pool.**
+>
+> | mode | model | n | headline median | min | max | **spread** | sens (median) | spec (median) |
+> |---|---|---|---|---|---|---|---|---|
+> | blind | gpt-oss-120b | 4 | **+0.333** | +0.111 | +0.333 | 0.222 | 0.333 | 1.000 |
+> | blind | llama-3.3-70b | 4 | **-0.778** | -0.778 | -0.778 | 0.000 | 0.222 | 0.000 |
+> | blind | qwen3-30b | **4** | **+0.111** | +0.111 | +0.111 | 0.000 | 0.111 | 1.000 |
+> | context | gpt-oss-120b | 3 | **-0.333** | -0.333 | -0.222 | 0.111 | 0.667 | 0.000 |
+> | context | llama-3.3-70b | 3 | **-0.667** | -0.667 | -0.667 | 0.000 | 0.333 | 0.000 |
+> | context | qwen3-30b | 3 | **-0.778** | -0.778 | -0.667 | 0.111 | 0.222 | 0.000 |
+>
+> **Three things changed and one did not.**
+>
+> - The blind arm is **unchanged** in every cell.
+> - The **qwen3 blind arm now has n=4, not "3 + 1 unparseable"**: the lost
+>   run was a truncated answer, and with the output-budget retry it is
+>   recovered. Its headline is +0.111, the same as the other three.
+> - The **two context cells that changed got worse**, not better:
+>   gpt-oss from 0.000 to **-0.333**, qwen3 from -0.556 to **-0.778**.
+> - **What did not change: specificity.** Every context cell still scores
+>   **0.000**, and every blind cell for gpt-oss and qwen3 still scores
+>   **1.000**. The director still keeps the one true claim when given the
+>   claim alone and still accuses it once the evidence is added.
 
 **The director is worse than chance in context mode, and the reason is
 measurable.** The chance baseline on this key — a director that answers
@@ -258,6 +473,44 @@ longer than the cap loses its tail, and the tail is where this repository
 puts its retraction notices. The corpus grew tonight: **49 notes**, a
 per-note cap of **2,057 characters**, and **47 of 49 notes are truncated**.
 Only **3 of 49** keep their tail.
+
+> **CORRECTION (2026-10-20, later still) — this paragraph described the
+> BROKEN pool, and the diagnostic that measured it was measuring a second
+> copy of the pool builder.**
+>
+> **The pool, as it is now:** **51 notes**, a per-note cap of **1,976
+> characters**, **50 of 51 notes truncated** — and **51 of 51 keep their
+> tail.**
+>
+> The old numbers were not wrong about the broken pool. They were wrong
+> about **which pool**. `evidence_reachability` builds its per-note
+> diagnostic from its own hand-rolled copy of the keep-set, and that copy
+> still carried the **old front-truncation** (`text[:per]`) in it. So the
+> diagnostic was describing a pool that was **not** the pool the runs were
+> made against — and it said "3 of 49 keep their tail" about a pool that
+> kept every tail.
+>
+> **A copy of a thing that measures the thing is a second implementation of
+> it, and it drifts.** The collector and the diagnostic now call one
+> slicer, so they cannot disagree again.
+>
+> **AND THE FIGURE THAT DECIDES THE ONE TRUE CLAIM IS NOT IN THE POOL.**
+> Measured over the materials actually used:
+
+> | probe | in the pool? |
+> |---|---|
+> | `73.5` (bare substring) | yes — but only as `AMI EN2002a **73.5%** (191 of 260 gaps)`, an unrelated figure |
+> | `-73.5 dBFS` | **no** |
+> | `73.496` | **no** |
+> | `119 transients` | **no** |
+> | `RT60` | **no** |
+>
+> The three notes that hold "119 transients" — `DEBRIEF-MATERIAL-POOL.md`,
+> `EMPTY-ROOM-CONTROL.md` and `LLM-DIRECTOR.md` — all lose it to the
+> per-note cap. So the director's accusation of the one true claim is
+> explained by the **missing evidence**, and the sentence in the top
+> correction block that says the acoustics figure "now reaches the prompt"
+> is **withdrawn**.
 
 (The pool measured here is the pool the runs were made against: this
 document is excluded from it, and it has to be — it quotes the deciding
@@ -353,6 +606,238 @@ aggregate scores do leak**, and from them the class balance is recoverable
 now, so the contamination itself changed with the key. It is reported, not
 fixed, because fixing it means changing the instrument.
 
+### 4.5 Three of the nine runs were answers that were cut off
+
+This section is the evidence behind the first item of the top correction
+block, and it is the one measurement in this document that had to **change
+a hypothesis to produce a number**.
+
+**THE SYMPTOM.** Three of the nine committed audit runs were recorded as
+`unparseable`: the model's reply was not valid JSON. The record said only
+"unparseable", and the natural reading is that the model failed to answer.
+
+**THE OBVIOUS HYPOTHESIS, AND WHY IT IS FALSE.** The obvious explanation
+is that the *material* was too large for the smaller models' context
+windows, and that the fit ladder should have shrunk it. It cannot be that,
+and the reason is structural rather than statistical: **in blind mode the
+material does not enter the prompt at all.** `build_audit_prompt` returns
+the claims and nothing else for blind mode, so the prompt is identical at
+every material budget.
+
+Measured (`experiments/debrief_truncation_probe.py`, results in
+`experiments/debrief_truncation_probe_results.json`):
+
+| material budget | prompt characters | prompt tokens | parsed? |
+|---|---|---|---|
+| 140,000 | 3,031 | **701** | yes |
+| 60,000 | 3,031 | **701** | no |
+| 40,000 | 3,031 | **701** | yes |
+
+Same prompt, three different budgets, and the outcome varies. A ladder
+that treated "unparseable" as "does not fit" would have walked *down* past
+budgets that worked.
+
+**THE ACTUAL CAUSE.** `debrief.py::_http_json` rebuilt every response as
+`{"text": text}` and **discarded `finish_reason` and `usage`**. A response
+cut off at the output cap is then byte-for-byte indistinguishable from a
+finished one. `cloud_llm` already had a retry for reasoning models — it
+repeats the call with 4× the output budget when `content` comes back
+**empty** — and the truncated case never reached it, because a truncated
+answer is not empty, it is *cut*.
+
+**THE RATE, AND THE RECOVERY.**
+
+| | n | truncated (`finish_reason="length"`) | recovered by 4× the output budget |
+|---|---|---|---|
+| committed probe | 8 | **1** (12.5%) | **1 of 1** (100%) |
+| an earlier independent probe | 6 | **2** (33.3%) | **2 of 2** (100%) |
+| pooled | 14 | **3** (21.4%) | **3 of 3** (100%) |
+
+Every truncation came back with `completion_tokens` **exactly 3000** — the
+cap — while the complete answers used 1,853 to 2,518.
+
+**AND IT COST MORE THAN THREE LOST RUNS.** A truncated answer can still
+*parse*: the JSON object closes before the cut and the model keeps writing
+prose after it. The old scorer had no way to know the answer was short, so
+**the claims the model never got to answer were scored as wrong**. A
+truncated answer was silently charged to the director.
+
+**THE FIX.** `finish_reason` and `usage` are kept and surfaced; a truncated
+answer is retried with 4× the output budget; every run records its
+transport facts; and the two unparseable shapes that used to share one
+label are told apart — `response_was_truncated` versus
+`no_json_verdicts_object`. Pinned by `tests/test_debrief_transport.py`
+(10 tests, including a mutation test that fails if the truncation
+detection is removed).
+
+**THE RE-RUN: 9 of 9 committed audit runs now parse.**
+
+### 4.6 The local path had never worked, and the variance is not the model's
+
+This section is the evidence behind the second item of the top correction
+block, and it is the **new method** of the night: measure the thing where
+the measurement is variance-free.
+
+**THE PROBLEM.** Every number this repository holds about the director is
+contaminated by the serving stack. The same prompt, sent to the same
+hosted model, gives different answers: the hosted vision model's headline
+spread was measured at 0.619, and gpt-oss-120b's sensitivity was 0.889,
+0.333 and 1.000 on **three identical prompts**. A difference between two
+arms of this experiment cannot be separated from that noise, and more
+repeats do not remove it — it is the endpoint changing its mind, not
+variance around a mean.
+
+**THE OBSTRUCTION.** `experiments/debrief.py` has always accepted
+`ollama:` and `local:` models. **Every such call returned `no_result`, and
+no local model was ever scored.** `_http_json` understood only
+Cloudflare's response shape (`{"result": {"choices": [...]}}`); ollama puts
+the message at the **top level**
+(`{"message": {"role": "assistant", "content": ...}}`). The answer was in
+the body the whole time, behind a shape check. So the one thing that could
+have removed the noise from every number in this document was broken, and
+had been broken for as long as it had been offered.
+
+**THE MEASUREMENT** (`experiments/debrief_local_director.py`, results in
+`experiments/debrief_local_director_results.json`), blind mode, the same
+prompt repeated four times:
+
+| local model | parsed | headline, repeated | **spread** |
+|---|---|---|---|
+| `qwen2.5-coder:7b` | 4 / 4 | −1.000 ×4 | **0.0000** |
+| `gemma2:2b` | 4 / 4 | −0.778 ×4 | **0.0000** |
+| `llama3.2:1b` | 1 / 4 | +0.111 | — (3 runs failed to parse) |
+| `qwen3:0.6b` | 0 / 4 | — | format failure |
+| `tev1` | 0 / 4 | — | `http400`, "does not support chat" |
+
+The two local models that answered every time are **perfectly
+deterministic over four identical prompts**, while the hosted arms carry
+spreads of **0.111** and **0.222** on identical prompts.
+
+**AND THE PRE-REGISTERED RULE FIRED, AND ITS VERDICT IS WRONG.** The rule
+was written before the run: *"the variance is the serving stack if the
+local spread is 0.000 on the models that can answer, while the hosted
+spread is not."* Both halves hold, so the rule fired and the results file
+says **"THE VARIANCE IS THE SERVING STACK"**.
+
+**That verdict does not survive two checks, and both are recorded in the
+results file.**
+
+**FIRST: THE RULE CONFOUNDS LOCALITY WITH REASONING.** Every local model
+that could answer here is a **non-reasoning** model. Every hosted cell
+that varies is a cell whose model writes a **reasoning preamble** before
+its answer. So the comparison cannot separate "local" from "reasoning" —
+and this machine has no local reasoning model to break the tie. A design
+that cannot separate two explanations should not name one.
+
+**SECOND, AND THIS IS THE BETTER-CONTROLLED MEASUREMENT: A CONTROLLED
+CHANGE THAT DOES NOT MOVE THE QUANTITY.** §4.7 re-measured the hosted
+repeats after the transport fix, on the same prompts with the same key.
+**The hosted spread did not move** — median spread 0.0555 before, 0.0555
+after. If the serving stack were the cause, fixing the transport would
+have moved it. It did not.
+
+**SO THE VARIANCE IS NOT EXPLAINED BY LOCALITY.** §4.7 finds where it
+actually is, and it is not a transport property at all.
+
+**AND THE LOCAL MODELS ARE WORSE DIRECTORS, WHICH IS NOT THE POINT.** Their
+headlines are −1.000 and −0.778, against the hosted arms' best of +0.333.
+These models are 10× to 100× smaller than the hosted ones. What they are
+for is not a better score; it is a **variance-free score**, so that a
+difference between two arms can finally be attributed to the arm — which
+makes them the right instrument for the next experiment even though their
+own scores are worse.
+
+**THE LOCAL SAMPLE IS SMALL AND THAT IS STATED.** Two local models
+answered every time; one answered once in four; two never answered in the
+right shape; one does not support the chat endpoint. That is enough to
+show the local path works and to make a variance-free measurement
+possible. It is **not** enough to prove the serving stack is the whole of
+the variance, and §4.7 shows it is not.
+
+### 4.7 The variance is not the transport, and the metric cannot resolve it
+
+This section is the measurement that decides what the rest of this document
+is allowed to claim, and it **falsifies the hypothesis it was built to
+test**.
+
+**THE HYPOTHESIS.** §4.5 and §4.6 point at one mechanism: a reasoning
+model spends part of its output budget on prose, the prose length varies,
+and that decides both whether the answer is cut off and how many verdicts
+are missing. If so, fixing the transport should shrink the variance.
+
+**THE TEST.** The same repeats, the same prompts, the same key, the same
+corpus, re-measured with the fixed client — and compared against the
+measurements taken with the old one.
+
+| cell | old median | old spread | new median | new spread |
+|---|---|---|---|---|
+| blind gpt-oss-120b | +0.333 | 0.222 | +0.333 | **0.111** |
+| blind llama-3.3-70b | −0.778 | 0.000 | −0.778 | 0.000 |
+| blind qwen3-30b | +0.111 | 0.000 | +0.111 | 0.000 |
+| context gpt-oss-120b | −0.333 | 0.111 | −0.111 | 0.111 |
+| context llama-3.3-70b | −0.667 | 0.000 | −0.667 | 0.000 |
+| context qwen3-30b | −0.778 | 0.111 | −0.778 | **0.222** |
+
+**The hypothesis is false.** The median spread is **0.0555** before the fix
+and **0.0555** after it. One cell halved and one cell doubled; the
+resolution did not move. The truncation fix bought back three lost runs
+and repaired the silent corruption — and it did **not** make the director
+more repeatable.
+
+**WHERE THE VARIANCE ACTUALLY IS.** With the transport clean, every one of
+the 21 re-measured runs carries **10 of 10 verdicts** and **no truncation
+and no retry**. So the remaining spread is the model genuinely changing
+its mind — and it changes its mind in exactly one place:
+
+| cell | headlines, in order | **uncertain counts**, in order |
+|---|---|---|
+| blind gpt-oss-120b | +0.333, +0.444, +0.333, +0.333 | **0, 0, 1, 1** |
+| context qwen3-30b | −0.778, −0.556, −0.778 | **5, 3, 4** |
+| context gpt-oss-120b | −0.111, −0.111, 0.000 | 0, 0, 0 |
+| blind llama-3.3-70b | −0.778 ×4 | 0, 0, 1, 0 |
+
+**The headline moves when a claim flips to "uncertain", and nowhere else.**
+
+**AND HERE IS WHAT THAT MEANS FOR THE METRIC.** The audit set has **nine
+false claims and one true one**, so sensitivity is a count over nine, and
+the headline `sens + spec − 1` moves in steps of
+
+> **1 / 9 = 0.1111**
+
+**The observed run-to-run spreads are 0.111 and 0.222 — one and two
+quanta.** So the entire variance of this instrument is *one or two claims
+out of nine flipping to "uncertain"*, and the instrument's **resolution is
+the same size as its noise**.
+
+**THE CONSEQUENCE, AND IT IS THE ONE THAT MATTERS.** The effect claimed in
+§7 — "more evidence makes the director better" — is **+0.1111**. That is
+**exactly one quantum**. It is the smallest number this metric can
+express, and it is the same size as the spread of a single run of the same
+model on the same prompt. **The experiment cannot distinguish "more
+evidence helps" from "one claim happened to be answered differently this
+time."** The same is true of the difference between the fixed-pool and
+broken-pool medians in §4.2, and of the +0.095 and +0.111 differences in
+the committed artefacts.
+
+**WHAT TO DO ABOUT IT, WHICH IS THE NEXT EXPERIMENT.** The metric is
+quantised and the noise is the same size as the quantum, so:
+
+1. **Report in claims, not fractions.** "The director caught 3 of the 9
+   false claims" is a statement about the world. "+0.333" is a statement
+   about 3/9 with three decimal places of false precision.
+2. **Compare arms in PAIRED counts, not in medians.** The same model, the
+   same prompt, one thing changed — the number of claims caught is a
+   count, and a paired count has no quantum problem.
+3. **The audit set needs more true claims.** With **one** true claim,
+   specificity is a single bit and moves in steps of **1.000**, so
+   specificity is *coarser* than sensitivity. That is why the specificity
+   column in §4.1 is all 0.000 and all 1.000: it has two values, and the
+   entire context-vs-blind story is one bit flipping.
+
+**This is not a criticism of the models. It is a statement about the
+instrument's resolution, and it should have been made before the first
+comparison was run, not after the eleventh.**
+
 ---
 
 ## 5. The proposal audit
@@ -391,6 +876,53 @@ fail is the shape of claim this repository has had to retract four times.
 | **Does it propose the repository's own top next step?** | **No.** It does not mention **Condition D — turned AND silent**, which `PROGRESS.md`, `docs/research/POSE-FEATURE.md` and `docs/research/NV12-STRIDE.md` §8 all name as *the single most valuable missing take*. |
 | **Does it propose anything the repository has already falsified?** | **Not the experiment** (max Jaccard against the repository's own retraction list: 0.018). **But its REVIEW of the evidence does.** The debrief's list of what the evidence SUPPORTS includes: *"Composing row-band removal with a 3-frame temporal median cuts the occupied-flip rate to 0.0014 % (≈21× improvement over row-only)"* — the claim this document retracted, endorsed as supported, at a Jaccard of **0.667** against the repository's own retraction. It did correctly flag the row-band removal claim as unsafe, and it correctly caught tonight's new retraction. So it caught one of the two and endorsed the other. §4.3 says why. |
 
+> **CORRECTION (2026-10-20, later still) — a DIFFERENT proposal, and a
+> different set of defects.**
+>
+> The debrief was re-run on the fixed instrument. It proposes
+> **"Held-out-device CPU-cost measurement of Silero-VAD gate"**, not the
+> cache-pressure test above. Same experiment, different wording — and the
+> wording is not stable between runs.
+>
+> | the standard | verdict on the NEW proposal |
+> |---|---|
+> | **Has a falsifier?** | **Yes.** "If the measured reduction is ≤ 5 % or the confidence interval includes zero, the hypothesis is rejected and the gate's cost-saving claim is abandoned." |
+> | **Has a control that can come out the other way?** | **Yes.** Two controls: the ungated watcher on the same device, and a cold-start flush to isolate cache effects. |
+> | **Has a null?** | Yes: "No reduction: gated and ungated CPU usage are equal (difference ≤ 0.5 % absolute)." |
+> | **Has a margin?** | Yes: "The gated condition must beat the ungated baseline by ≥ 5 % absolute core-time … and the 95 % CI of the difference must not include zero." |
+> | **Can the proposal come out the other way at all?** | **NO — and this is still the finding.** **One** mechanical contradiction: |
+>
+> 1. **The null triggers the falsifier.** The null is a difference of
+>    ≤ 0.5 %; the falsifier fires at ≤ 5 %. Every null outcome is a
+>    falsifying outcome, so the null cannot do its job. The overlap is
+>    mechanical and is recorded in the results file.
+>
+> **The second contradiction is gone.** The previous proposal asked for two
+> opposite things — a hypothesis of *less than* 1.5× and a margin of *at
+> least* 1.5× — and one of them was written by mistake. This proposal's
+> hypothesis and margin agree. So across two independently generated
+> proposals: **the null-inside-the-falsifier defect is stable, and the
+> self-contradictory margin was not.**
+>
+> **AND THE REVIEW OF THE EVIDENCE IS CLEANER THIS TIME.** The debrief
+> supports 7 claims, endorses **0** of the repository's falsified claims,
+> and flags **0**. The previous run endorsed a withdrawn claim at a
+> Jaccard of 0.667 because the note that owned it still led with the old
+> table. That note has since been corrected, and the endorsement went
+> with it — which is the *only* evidence in this document that the pool
+> fix actually reached the model.
+>
+> **Does it duplicate what the repository already knows?** Maximum overlap
+> with a repository next step: **0.0575** (closest: `held_out_device`),
+> well under the repository's ≈0.29 threshold. And
+> `the_proposal_names_plan_item_11` is now **true** — the previous run's
+> was false. So the proposal is the plan item the repository has already
+> marked as blocked on hardware.
+>
+> **Does it propose the repository's own top next step?** **No.**
+> `mentions_condition_d` is **false** and the overlap with Condition D is
+> **0.0083**.
+
 > **CORRECTION (2026-10-20, later that night) — the echo numbers are now
 > measured against the fixed pool, and they are STRONGER, not weaker.**
 > The re-run gives a Jaccard of **1.000** against the previous committed
@@ -403,6 +935,24 @@ fail is the shape of claim this repository has had to retract four times.
 >
 > The **0.312** above is the number from the run against the broken pool
 > and is left visible, per the house rule.
+>
+> > **AND THE "1.000, VERBATIM" NUMBER IS WITHDRAWN — IT WAS A SINGLE
+> > SAMPLE.** The block above says the proposal is *literally the same
+> > experiment*, at a Jaccard of 1.000. A later run of the same model, on
+> > the same corpus, with the same evidence pool, produced a **different**
+> > proposal at a Jaccard of **0.2604** — *below* this repository's own
+> > ≈0.29 "same experiment" threshold. So the echo statistic is a
+> > single-sample number with a measured run-to-run range of
+> > **[0.2604, 1.000]**, and the honest statement is:
+> >
+> > **The proposal is topically the same experiment every time — it is
+> > always the held-out-device measurement of the Silero gate's CPU cost,
+> > which is `ADOPTION-PLAN.md` §7 item 11 — and it is never Condition D,
+> > which the repository ranks first.** The wording, the exact hypothesis
+> > and the exact set of defects move between runs. The Jaccard against the
+> > previous proposal is therefore not a measure of "how much the director
+> > echoes the repository"; it is mostly a measure of how much the hosted
+> > endpoint varies.
 
 ---
 
@@ -441,6 +991,59 @@ standard** (null and falsifier overlap; hypothesis and margin contradict),
 and the audit that catches that is cheap and mechanical. So the useful role
 for this instrument is **auditing the plan, not writing it** — and that is
 also what the audit set is for.
+
+> **CORRECTION (2026-10-20, later still) — the echo is in the CHOICE of
+> experiment, not in everything around it, and the Jaccard is mostly
+> measuring the endpoint.**
+>
+> The re-run on the fixed instrument gives a **more nuanced** answer than
+> "it echoes them", and the nuance is worth more than the verdict.
+>
+> **WHAT STAYS THE SAME — the choice of experiment.**
+>
+> - The proposal is again the **held-out-device measurement of the Silero
+>   gate's CPU cost**. That is `ADOPTION-PLAN.md` §7 item 11 — a plan item
+>   already marked **NEXT** and already marked as *not runnable on this
+>   box*, since it needs an ARM target. `the_proposal_names_plan_item_11`
+>   is **true**.
+> - It still does **not** propose **Condition D — turned AND silent**, the
+>   take the repository ranks first and the one that is actually recordable
+>   tonight with the fixed capture tool. `mentions_condition_d` is
+>   **false**; the overlap with Condition D is **0.0083**.
+>
+> **WHAT CHANGED — the parts around the choice.**
+>
+> - Its `biggest_risk` is **no longer an echo**. The previous run's risk
+>   was tonight's own headline almost verbatim ("Residual frame-stride bugs
+>   still hidden in any script that reads NV12 captures" — `NV12-STRIDE.md`
+>   §9). This run's is about the experiment itself: *"The held-out-device
+>   measurement may show that the Silero-VAD gate provides no meaningful CPU
+>   savings on target hardware, invalidating the primary performance
+>   justification for the gate."*
+> - It endorsed **0** of the repository's falsified claims, against the
+>   previous run's endorsement of a withdrawn claim at a Jaccard of 0.667.
+>
+> **AND THE JACCARD IS NOT A STABLE MEASUREMENT.** Two runs of the same
+> model, on the same corpus, with the same pool, produced proposals at a
+> Jaccard of **1.000** and **0.2604** against each other — a range of
+> **0.740** across two samples of the same measurement. The repository's
+> own "same experiment" threshold is ≈0.29, so the two runs fall on
+> **opposite sides** of it.
+>
+> **So the honest answer to the question this section asks is:**
+>
+> **The director echoes the repository's PLAN — it keeps re-proposing the
+> plan item the repository has already marked as blocked on hardware, and
+> it keeps not proposing the one that is ready to record.** It does **not**
+> echo the repository's prose: its risk statement, its hypothesis and its
+> review of the evidence all move between runs, and one of those reviews
+> was clean.
+>
+> **The useful role for this instrument is auditing the plan, not writing
+> it.** That conclusion is unchanged — and it is now better supported,
+> because the thing that makes the instrument useless for writing the plan
+> has been identified: it proposes what the notes already contain, and
+> what the notes already contain is what it should be auditing.
 
 ---
 
@@ -492,6 +1095,35 @@ the model's reasoning; it was how much of the record reached the prompt.
 **The night added a lot of evidence, and the director is only useful if it
 is given enough of it.**
 
+> **CORRECTION (2026-10-20, later still) — the two paragraphs above are
+> the record of the BROKEN pool and they are kept visible. The conclusion
+> they state does not hold.**
+>
+> The **+1.444** delta and the "**much better, monotonically**" verdict are
+> measured against the pre-fix pool, and the correction block above already
+> withdrew them: the fixed-pool sweep gives **−0.222 / 0.000 / −0.111 /
+> −0.111** across 20,000 / 60,000 / 140,000 / 240,000 characters, and the
+> effect is **+0.111**, not +1.444.
+>
+> **The shape of the fixed-pool curve is flat, and that is the honest
+> result: the director does not get better with more evidence.** Four
+> budgets, three repeats each, and the medians sit between −0.222 and
+> 0.000 with a run-to-run spread of up to **1.000** at the 60,000 budget.
+> A spread of 1.000 in a single cell is larger than every effect the sweep
+> claims to have measured.
+>
+> **And the "it keeps the one true claim at 240,000" claim is withdrawn
+> with it.** In the fixed pool it does not: the true claim is accused at
+> every budget, in every repeat — which is exactly what §4.1 shows on the
+> committed artefacts (context specificity **0.000** in all 9 context runs).
+>
+> **What the earlier run was actually measuring** — and this is the part
+> that was right — is the paragraph before the withdrawn verdict: the
+> bottleneck is how much of the record reaches the prompt, not the model's
+> reasoning. That still holds. It is the *size of the effect* that was
+> wrong, and it was wrong because the broken pool's contents were doing
+> the work.
+
 ---
 
 ## 8. What this does NOT establish
@@ -519,6 +1151,46 @@ is given enough of it.**
 - **The debrief was run once.** Its proposal is stable (Jaccard 0.312
   against the previous run's), but the review of the evidence is not
   measured across repeats.
+
+> **CORRECTION (2026-10-20, later still) — the list above is the list as it
+> stood before the instrument was fixed, and four of its items are now
+> wrong. They are kept visible. The items that still hold are marked.**
+>
+> - ~~**The director is not measured at its best.**~~ **STILL HOLDS, but
+>   for a different reason.** The committed budget is 140,000 characters
+>   and the sweep does not show a better budget: the fixed-pool curve is
+>   flat (§7). So the committed scores are not a *starved* director — they
+>   are the director.
+> - ~~**The "more evidence" result is one model at four budgets. The
+>   direction is large (+1.444) and monotone.**~~ **WITHDRAWN.** The
+>   direction is **+0.111** and the curve is flat, and the run-to-run
+>   spread at one budget is **1.000** — larger than the effect.
+> - ~~**The debrief was run once. Its proposal is stable.**~~ **WITHDRAWN,
+>   AND IT IS THE OPPOSITE.** The proposal was run twice on the same
+>   corpus with the same pool and produced a **Jaccard of 0.2604** between
+>   the two — so the *wording* is not stable. What is stable is the
+>   *choice*: both proposals are the held-out-device CPU-cost measurement,
+>   and neither is Condition D.
+> - **NEW: the truncation base rate is a small-sample estimate.** 3 in 14
+>   identical calls, pooled from two probes of 8 and 6. The 95 % interval
+>   on that is roughly 5 % to 45 %, which is wide enough that **a
+>   three-run cell can easily lose a run to it** — and did, three times
+>   over, in the committed artefacts.
+> - **NEW: the local measurement is n=2.** Two local models could answer;
+>   three could not. That is enough to show the local path works and that
+>   the two that worked were perfectly deterministic over four identical
+>   prompts, and **not** enough to prove that the serving stack is the
+>   whole of the variance. The pattern — every varying hosted cell is a
+>   cell whose model writes a reasoning preamble — is **suggestive, not
+>   proven**, and is stated as such.
+> - **NEW: the local models are not better directors.** Their headlines are
+>   **−1.000** and **−0.778**, against the hosted arms' best of **+0.333**.
+>   They are 10× to 100× smaller. They are here for a variance-free score,
+>   not a better one.
+> - **NEW: the acoustics evidence is not in the pool.** So the director's
+>   accusation of the one true claim is not evidence that it fails
+>   *despite* good evidence; it is evidence that it fails *because* the
+>   deciding number never reached the prompt.
 
 ---
 
@@ -550,6 +1222,53 @@ is given enough of it.**
    repository had already marked as blocked on hardware; the take it did
    not propose was recordable tonight. That comparison is two lines of code
    and belongs in the debrief's own output.
+
+> **CORRECTION (2026-10-20, later still) — findings 1 and 4 are now fixed,
+> and four more findings have replaced them.**
+>
+> 1. ~~**The per-note cap undoes the head-and-tail fix.**~~ **FIXED.** The
+>    budget is now spent by dropping lines from the middle of the keep-set,
+>    and if the head-and-tail slice is still too big, each end is cut to its
+>    own half. **51 of 51 notes now keep their tail.**
+> 2. **NEW — THE CLIENT THREW AWAY THE EVIDENCE OF ITS OWN FAILURES.**
+>    `_http_json` discarded `finish_reason` and `usage`, so a response cut
+>    off at the output cap was indistinguishable from a finished one, and
+>    the retry that already existed for reasoning models never fired.
+>    **Three of nine committed runs were lost this way, and a fourth kind
+>    of run was silently corrupted** — a truncated answer that still
+>    parses gets its missing claims scored as wrong. §4.5.
+> 3. **NEW — A COPY OF THE POOL BUILDER WAS STILL MEASURING THE POOL.**
+>    The per-note diagnostic was a second implementation of the keep-set,
+>    and that copy still had the old front-truncation in it, so it
+>    described a pool that was not the pool the runs used. A copy of a
+>    thing that measures the thing is a second implementation of it, and
+>    it drifts. One slicer now serves both.
+> 4. **NEW — THE LOCAL PATH HAD NEVER WORKED.** `_http_json` understood
+>    only Cloudflare's response shape; ollama puts the message at the top
+>    level. Every `ollama:` call returned `no_result` and no local model
+>    was ever scored. The one thing that could have removed the serving
+>    stack's noise from every number in this document was broken.
+> 5. **NEW — THE VARIANCE AND THE LOST RUNS HAVE ONE CAUSE.** Every hosted
+>    cell that varies is a cell whose model writes a reasoning preamble
+>    before its answer, and a reasoning preamble is spent out of the same
+>    output budget that was running out. So this is one defect wearing two
+>    faces: a truncated answer, and a truncated answer that still parses
+>    and is scored as if the model had answered wrongly.
+> 6. ~~**A stale note is a false endorsement waiting to happen.**~~ **STILL
+>    TRUE, AND NOW MEASURED BOTH WAYS.** The previous run endorsed a
+>    withdrawn claim at a Jaccard of 0.667 because the note still led with
+>    the old table. The note has since been corrected and the endorsement
+>    went with it: **0** falsified claims endorsed, **0** flagged. That is
+>    the only evidence in this document that the pool fix reached the
+>    model.
+> 7. **NEW — THE DIRECTOR'S CHOICE IS STABLE; ITS WORDING IS NOT.** Two
+>    runs on the same corpus with the same pool proposed the same
+>    experiment (the held-out-device CPU-cost measurement, `ADOPTION-PLAN.md`
+>    §7 item 11) at a Jaccard of **0.2604** with each other. So a Jaccard
+>    against the previous proposal measures **the endpoint's variation**
+>    more than it measures the director's originality. If the director is
+>    to be compared against the repository's own next steps, compare the
+>    *choice* and not the wording.
 
 ---
 

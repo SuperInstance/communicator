@@ -163,3 +163,50 @@ against is not making errors. It is making an error and not noticing.
 > > measurement, not as a property.
 > > **Every constant that is inherited is re-derived from the data, by a
 > > check that comes from outside it.**
+> ## CORRECTION (2026-10-20, later still) — it is eight now, and three of them are about the INSTRUMENT
+>
+> | # | Claim | What it actually was | Lane |
+> |---|---|---|---|
+> | 6 | Three audit runs were recorded as **`unparseable`**, i.e. the model failed to answer | **The answers were CUT OFF by the output budget.** The client discarded `finish_reason` and `usage`, so a truncated response was indistinguishable from a finished one, and the retry that already existed for reasoning models never fired. | director |
+> | 7 | The evidence pool's own diagnostic said **3 of 49** notes keep their tail | **The pool actually used kept 51 of 51.** The diagnostic was a *second copy* of the keep-set builder, and that copy still had the old front-truncation in it. | director |
+> | 8 | "More evidence makes the director **much better**, monotonically" (+1.444) | **The metric is quantised at 1/9 = 0.1111 and the run-to-run spread is one to two quanta.** The claimed effect was *exactly one quantum*. | director |
+>
+> **#6, #7 and #8 are a new shape, and the shape is the instrument.** The
+> first five were claims about the *world*. These three are claims about
+> the *measurement*, and each of them was invisible to the thing it was
+> supposed to be checked by:
+>
+> - **#6: a client that discards the evidence of its own failures cannot
+>   fail visibly.** The failure was real, but the record said only
+>   "unparseable", so the natural hypothesis was the wrong one — for most
+>   of a night it was "too much material", which was *structurally
+>   impossible* in the mode where the failures happened. The API had told
+>   us the answer the whole time; the client had thrown it away.
+> - **#7: a copy of a thing that measures the thing is a second
+>   implementation of it, and it drifts.** The diagnostic and the pool
+>   builder were written to be the same code, and they were not. The copy
+>   kept the bug that the original had been fixed for, and reported a
+>   *different pool's* behaviour while claiming to report the pool's.
+> - **#8: an effect smaller than the metric's quantum is not an effect.**
+>   Nine false claims means a sensitivity quantum of 1/9, and the
+>   headline moves in steps of that. The observed run-to-run spread was
+>   **0.111 and 0.222 — one and two quanta**. The instrument's noise was
+>   the size of its resolution, and the effect being claimed was one
+>   quantum. **No comparison in that lane could have resolved it, and
+>   none of them did.**
+>
+> **The standing practice above gains three lines, and they are the ones
+> these three earned:**
+>
+> > Every measurement names its condition, its interval, and its null.
+> > Every verdict is able to fail, and is shown failing when it is built.
+> > A number that has only ever been measured one way is reported as one
+> > measurement, not as a property.
+> > Every constant that is inherited is re-derived from the data, by a
+> > check that comes from outside it.
+> > **An instrument records the reason for its own failures, not only
+> > their occurrence.**
+> > **A copy of a thing that measures the thing is a second implementation
+> > of it, and it drifts.**
+> > **An effect smaller than the metric's quantum — or smaller than the
+> > metric's own noise — is not an effect.**
