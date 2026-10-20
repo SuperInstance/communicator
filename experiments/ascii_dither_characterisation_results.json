@@ -1,0 +1,1927 @@
+{
+  "question": "how much of the measured change in the braille representation is threshold dither, and how much is motion; and is the 'far-from-threshold floor is structured, not noise' inference supported?",
+  "pre_registered_rule": {
+    "fixed_before": [
+      "the calibration fit",
+      "the empty-room run",
+      "the extended lag sweep",
+      "the persistence test"
+    ],
+    "already_measured_when_written": [
+      "the band table on small.nv12",
+      "the bit/dot pairing defect in ascii_motion_threshold.py"
+    ],
+    "R1_calibration_applicability": "the synthetic grid must contain a (sigma, rho) whose predicted flip rates in bands 0-0, 1-2 and 3-5 are each within 0.5 pp of the observed ones; otherwise the verdict is CALIBRATION-INVALID and no dither fraction is taken from the fit",
+    "R2_structured_not_noise": "supported only if the observed far-band flip rate is strictly above the 99% upper bound of the rate the calibration predicts at the fitted (sigma, rho); at or below that bound the residual is consistent with the same dither and the claim is NOT supported",
+    "R3_is_the_excess_motion": "the excess counts as motion only if the empty room does not reproduce it; otherwise it is not motion. A lower empty-room rate establishes SCENE CHANGE, not the subject specifically",
+    "R4_temporal_split": "near band flat in lag (<1.5x) and far band growing (>1.5x) means the near band is the dither-like component and the far band the motion-like one; both growing means no uncorrelated component; neither growing means no motion",
+    "R5_recommendation": "the channel to build motion on is the one with the larger excess over the NULL SCENE as a fraction of its own observed change rate, on the same cells, frames, pairs and denominator. A raw rate comparison is not the test",
+    "R6_dither_fraction": "taken from the physical nulls (null scene, empty room), not from the fit, and reported alongside the temporally uncorrelated share"
+  },
+  "capture": {
+    "path": "/mnt/c/proart_capture/small.nv12",
+    "sha256": "e0c980ca8f1f177b7538e61d938e2c13fb0f2bfed948a9e54c6e7274c93ed591",
+    "bytes": 576000,
+    "layout": "y_uv_halfres",
+    "stride_bytes": 19200,
+    "n_frames": 30,
+    "frames_used": 30,
+    "layout_evidence": {
+      "layout": "y_uv_halfres",
+      "stride_bytes": 19200,
+      "n_frames": 30,
+      "luma_bytes": 15360,
+      "mean_consecutive_frame_diff": 1.374715,
+      "runner_up_layout": "standard_nv12",
+      "runner_up_mean_consecutive_frame_diff": 30.666062,
+      "margin_over_runner_up": 22.307,
+      "chroma": "interleaved U,V, 80x24 samples"
+    },
+    "condition": "stationary subject (Casey) speaking, live webcam",
+    "interval": "all 30 frames, 29 consecutive pairs",
+    "null": "the empty room (physical), the null scene (same content, same exposure, nothing moving), and the synthetic dither calibration (model-based)"
+  },
+  "N1_determinism": {
+    "mask_changed_pct": 0.0,
+    "tone_changed_pct": 0.0,
+    "pass": true,
+    "condition": "frame 0 rendered twice in one file"
+  },
+  "bit_dot_pairing_defect": {
+    "what": "ascii_motion_threshold.py pairs braille mask BIT b with raster DOT b. Syzygy packs the LEFT column of the 2x4 block into bits 0,1,2,6 and the RIGHT column into bits 3,4,5,7, so the bit->dot mapping is the INVERSE LIST [0,2,4,1,3,5,6,7], not the identity. Half the bits of every cell are paired with the wrong pixel's luma.",
+    "evidence": {
+      "method": "for every frame, every cell and every mask bit, the bit is compared with (Y at the mapped dot > braille_thresh). The renderer thresholds the RAW Y plane -- syz_yuv.h copies the luma verbatim and the braille packer compares each pixel against braille_thresh with no re-weighting -- so the comparison is EXACT, not approximate.",
+      "computed_by": "experiments/ascii_dither_characterisation.py pairing_mismatch_counts()",
+      "dot_decisions_checked": 460800,
+      "mismatches": {
+        "renderer_header_inverse": 0,
+        "identity": 24894,
+        "column_major_formula": 42680
+      },
+      "mismatch_pct": {
+        "renderer_header_inverse": 0.0,
+        "identity": 5.40234375,
+        "column_major_formula": 9.262152777777779
+      },
+      "mappings_used": {
+        "renderer_header_inverse": [
+          0,
+          2,
+          4,
+          1,
+          3,
+          5,
+          6,
+          7
+        ],
+        "identity": [
+          0,
+          1,
+          2,
+          3,
+          4,
+          5,
+          6,
+          7
+        ],
+        "column_major_formula": [
+          0,
+          4,
+          1,
+          5,
+          2,
+          6,
+          3,
+          7
+        ]
+      },
+      "note": "the renderer_header_inverse mapping is the one the renderer's own header implies and it agrees with the renderer's bits on every dot-decision; the identity mapping is what ascii_motion_threshold.py uses; the column_major_formula mapping is the formula this file's first version asserted in prose, kept so the error is measured rather than merely acknowledged"
+    },
+    "self_check_flips_at_zero_luma_change": 0,
+    "effect_on_the_published_table": {
+      "on_threshold_flip_pct_published": 19.183673469387756,
+      "on_threshold_flip_pct_correct": 27.925370107483268,
+      "far_threshold_flip_pct_published": 0.36446528762059033,
+      "far_threshold_flip_pct_correct": 0.08635116138965125,
+      "gradient_ratio_published": 52.635118133274815,
+      "gradient_ratio_correct": 323.3931039036376
+    },
+    "effect_on_the_inference": "the pairing defect makes the far-band floor look LARGER than it is (0.364% published against 0.086% correct), so the published 'signal floor' is overstated by about 4x"
+  },
+  "band_flip_rates_correct_pairing": [
+    {
+      "abs_dluma": "0-0",
+      "dots": 4931,
+      "flipped": 1377,
+      "flip_rate_pct": 27.925370107483268
+    },
+    {
+      "abs_dluma": "1-2",
+      "dots": 19921,
+      "flipped": 2474,
+      "flip_rate_pct": 12.419055268309824
+    },
+    {
+      "abs_dluma": "3-5",
+      "dots": 32044,
+      "flipped": 1214,
+      "flip_rate_pct": 3.788540756459868
+    },
+    {
+      "abs_dluma": "6-10",
+      "dots": 50189,
+      "flipped": 1247,
+      "flip_rate_pct": 2.4846081810755343
+    },
+    {
+      "abs_dluma": "11-20",
+      "dots": 71411,
+      "flipped": 531,
+      "flip_rate_pct": 0.7435829213986641
+    },
+    {
+      "abs_dluma": "21-40",
+      "dots": 117554,
+      "flipped": 382,
+      "flip_rate_pct": 0.3249570410194464
+    },
+    {
+      "abs_dluma": "41-200",
+      "dots": 149390,
+      "flipped": 129,
+      "flip_rate_pct": 0.08635116138965125
+    }
+  ],
+  "band_flip_rates_published_pairing": [
+    {
+      "abs_dluma": "0-0",
+      "dots": 5145,
+      "flipped": 987,
+      "flip_rate_pct": 19.183673469387756
+    },
+    {
+      "abs_dluma": "1-2",
+      "dots": 20745,
+      "flipped": 2199,
+      "flip_rate_pct": 10.600144613159797
+    },
+    {
+      "abs_dluma": "3-5",
+      "dots": 33234,
+      "flipped": 1757,
+      "flip_rate_pct": 5.286754528494915
+    },
+    {
+      "abs_dluma": "6-10",
+      "dots": 51962,
+      "flipped": 1863,
+      "flip_rate_pct": 3.5853123436357337
+    },
+    {
+      "abs_dluma": "11-20",
+      "dots": 74533,
+      "flipped": 1312,
+      "flip_rate_pct": 1.7602940979163593
+    },
+    {
+      "abs_dluma": "21-40",
+      "dots": 122080,
+      "flipped": 1284,
+      "flip_rate_pct": 1.0517693315858454
+    },
+    {
+      "abs_dluma": "41-200",
+      "dots": 153101,
+      "flipped": 558,
+      "flip_rate_pct": 0.36446528762059033
+    }
+  ],
+  "reconciliation": {
+    "published_bases": {
+      "ascii_motion_nulls.py": {
+        "statistic": "fraction of CELLS whose mask byte differs",
+        "aggregation": "MEDIAN over the 29 lag-1 pairs",
+        "wrap_pair": false,
+        "lag1_pct": 6.979166666666667
+      },
+      "ascii_motion_threshold.py": {
+        "statistic": "fraction of CELLS whose mask byte differs",
+        "aggregation": "MEAN over 30 pairs, one of them the wrap-around pair (last frame vs first frame)",
+        "wrap_pair": true,
+        "bit_dot_pairing": "per DOT: bit b paired with raster dot b (NOT Syzygy's braille layout)",
+        "lag1_pct": 9.671875,
+        "tone_pct": 5.414930555555555
+      }
+    },
+    "one_basis": {
+      "statistic": "fraction of CELLS whose mask byte differs",
+      "aggregation": "MEAN and MEDIAN over the 29 consecutive pairs",
+      "wrap_pair": false,
+      "bit_dot_pairing": "correct",
+      "mask_cell_mean_pct": 8.631465517241377,
+      "mask_cell_median_pct": 6.979166666666667,
+      "tone_cell_mean_pct": 4.382183908045977,
+      "tone_cell_median_pct": 2.7604166666666665
+    },
+    "reproduced": {
+      "threshold_script_band_table_pct": [
+        {
+          "abs_dluma": "0-0",
+          "flip_rate_pct": 19.183673469387756
+        },
+        {
+          "abs_dluma": "1-2",
+          "flip_rate_pct": 10.600144613159797
+        },
+        {
+          "abs_dluma": "3-5",
+          "flip_rate_pct": 5.286754528494915
+        },
+        {
+          "abs_dluma": "6-10",
+          "flip_rate_pct": 3.5853123436357337
+        },
+        {
+          "abs_dluma": "11-20",
+          "flip_rate_pct": 1.7602940979163593
+        },
+        {
+          "abs_dluma": "21-40",
+          "flip_rate_pct": 1.0517693315858454
+        },
+        {
+          "abs_dluma": "41-200",
+          "flip_rate_pct": 0.36446528762059033
+        }
+      ],
+      "threshold_script_mask_cell_mean_pct": 9.671875,
+      "threshold_script_tone_cell_mean_pct": 5.414930555555555,
+      "nulls_script_lag1_median_pct": 6.979166666666667
+    },
+    "difference_attribution": [
+      "the aggregate differs: the nulls file reports a MEDIAN over 29 lag-1 pairs, the threshold file reports a MEAN over 30",
+      "the threshold file's 30th pair is the wrap-around pair (last frame vs first frame), which is 29 frames apart and is not a consecutive pair; on small.nv12 that single pair changes 39.844% of cells",
+      "the band table additionally pairs each mask BIT with the wrong dot's luma"
+    ]
+  },
+  "synthetic_dither_calibration": {
+    "method": "a static scene (the per-pixel temporal median of the capture) with dither of KNOWN amplitude injected: a temporally correlated Gaussian perturbation of amplitude sigma and lag-1 autocorrelation rho, on luma and chroma, seeded. The synthetic is rendered through the same renderer and measured on the same bands.",
+    "grid": {
+      "sigma": [
+        0.25,
+        0.5,
+        1.0,
+        2.0,
+        4.0
+      ],
+      "rho": [
+        0.0,
+        0.25,
+        0.5,
+        0.75,
+        0.9,
+        0.95,
+        0.99
+      ]
+    },
+    "static_scene": "per-pixel temporal median of the capture's luma",
+    "points": [
+      {
+        "sigma": 0.25,
+        "rho": 0.0,
+        "band_flip_pct": {
+          "0-0": 22.053083528493364,
+          "1-2": 5.515692878410699,
+          "3-5": 0.0,
+          "6-10": 0.0,
+          "11-20": 0.0,
+          "21-40": 0.0,
+          "41-200": 0.0
+        },
+        "mask_cell_mean_pct": 3.5201149425287355,
+        "tone_cell_mean_pct": 1.6738505747126438
+      },
+      {
+        "sigma": 0.25,
+        "rho": 0.25,
+        "band_flip_pct": {
+          "0-0": 18.305216210975374,
+          "1-2": 4.600401311603778,
+          "3-5": 0.0,
+          "6-10": 0.0,
+          "11-20": 0.0,
+          "21-40": 0.0,
+          "41-200": 0.0
+        },
+        "mask_cell_mean_pct": 2.9956896551724137,
+        "tone_cell_mean_pct": 1.3649425287356323
+      },
+      {
+        "sigma": 0.25,
+        "rho": 0.5,
+        "band_flip_pct": {
+          "0-0": 14.506470929109524,
+          "1-2": 3.653347679366166,
+          "3-5": 0.0,
+          "6-10": 0.0,
+          "11-20": 0.0,
+          "21-40": 0.0,
+          "41-200": 0.0
+        },
+        "mask_cell_mean_pct": 2.438936781609195,
+        "tone_cell_mean_pct": 1.0901580459770115
+      },
+      {
+        "sigma": 0.25,
+        "rho": 0.75,
+        "band_flip_pct": {
+          "0-0": 10.113877629801197,
+          "1-2": 2.5614653736898814,
+          "3-5": 0.0,
+          "6-10": 0.0,
+          "11-20": 0.0,
+          "21-40": 0.0,
+          "41-200": 0.0
+        },
+        "mask_cell_mean_pct": 1.7708333333333333,
+        "tone_cell_mean_pct": 0.7686781609195402
+      },
+      {
+        "sigma": 0.25,
+        "rho": 0.9,
+        "band_flip_pct": {
+          "0-0": 6.738962044926414,
+          "1-2": 1.7314106337061017,
+          "3-5": 0.0,
+          "6-10": 0.0,
+          "11-20": 0.0,
+          "21-40": 0.0,
+          "41-200": 0.0
+        },
+        "mask_cell_mean_pct": 1.2051005747126438,
+        "tone_cell_mean_pct": 0.5010775862068965
+      },
+      {
+        "sigma": 0.25,
+        "rho": 0.95,
+        "band_flip_pct": {
+          "0-0": 5.564082885648504,
+          "1-2": 1.4554963489244128,
+          "3-5": 0.0,
+          "6-10": 0.0,
+          "11-20": 0.0,
+          "21-40": 0.0,
+          "41-200": 0.0
+        },
+        "mask_cell_mean_pct": 1.0093390804597702,
+        "tone_cell_mean_pct": 0.4454022988505747
+      },
+      {
+        "sigma": 0.25,
+        "rho": 0.99,
+        "band_flip_pct": {
+          "0-0": 4.188181296615031,
+          "1-2": 1.0836755900836261,
+          "3-5": 0.0,
+          "6-10": 0.0,
+          "11-20": 0.0,
+          "21-40": 0.0,
+          "41-200": 0.0
+        },
+        "mask_cell_mean_pct": 0.7525143678160919,
+        "tone_cell_mean_pct": 0.3430316091954023
+      },
+      {
+        "sigma": 0.5,
+        "rho": 0.0,
+        "band_flip_pct": {
+          "0-0": 24.858536585365854,
+          "1-2": 7.405054010459945,
+          "3-5": 0.009140210834196576,
+          "6-10": 0.0,
+          "11-20": 0.0,
+          "21-40": 0.0,
+          "41-200": 0.0
+        },
+        "mask_cell_mean_pct": 4.2403017241379315,
+        "tone_cell_mean_pct": 1.9288793103448276
+      },
+      {
+        "sigma": 0.5,
+        "rho": 0.25,
+        "band_flip_pct": {
+          "0-0": 22.112403100775193,
+          "1-2": 6.110348882791063,
+          "3-5": 0.0,
+          "6-10": 0.0,
+          "11-20": 0.0,
+          "21-40": 0.0,
+          "41-200": 0.0
+        },
+        "mask_cell_mean_pct": 3.7015086206896552,
+        "tone_cell_mean_pct": 1.598419540229885
+      },
+      {
+        "sigma": 0.5,
+        "rho": 0.5,
+        "band_flip_pct": {
+          "0-0": 18.360655737704917,
+          "1-2": 4.850563449289564,
+          "3-5": 0.0,
+          "6-10": 0.0,
+          "11-20": 0.0,
+          "21-40": 0.0,
+          "41-200": 0.0
+        },
+        "mask_cell_mean_pct": 3.103448275862069,
+        "tone_cell_mean_pct": 1.3362068965517242
+      },
+      {
+        "sigma": 0.5,
+        "rho": 0.75,
+        "band_flip_pct": {
+          "0-0": 13.275696445725265,
+          "1-2": 3.417796110783736,
+          "3-5": 0.0,
+          "6-10": 0.0,
+          "11-20": 0.0,
+          "21-40": 0.0,
+          "41-200": 0.0
+        },
+        "mask_cell_mean_pct": 2.3042385057471266,
+        "tone_cell_mean_pct": 0.951867816091954
+      },
+      {
+        "sigma": 0.5,
+        "rho": 0.9,
+        "band_flip_pct": {
+          "0-0": 8.624031007751938,
+          "1-2": 2.1988809266712477,
+          "3-5": 0.0,
+          "6-10": 0.0,
+          "11-20": 0.0,
+          "21-40": 0.0,
+          "41-200": 0.0
+        },
+        "mask_cell_mean_pct": 1.5229885057471264,
+        "tone_cell_mean_pct": 0.5962643678160919
+      },
+      {
+        "sigma": 0.5,
+        "rho": 0.95,
+        "band_flip_pct": {
+          "0-0": 6.546929316338354,
+          "1-2": 1.6975840181075628,
+          "3-5": 0.0,
+          "6-10": 0.0,
+          "11-20": 0.0,
+          "21-40": 0.0,
+          "41-200": 0.0
+        },
+        "mask_cell_mean_pct": 1.1727729885057472,
+        "tone_cell_mean_pct": 0.4956896551724138
+      },
+      {
+        "sigma": 0.5,
+        "rho": 0.99,
+        "band_flip_pct": {
+          "0-0": 4.196206169764323,
+          "1-2": 1.0832467725181778,
+          "3-5": 0.0,
+          "6-10": 0.0,
+          "11-20": 0.0,
+          "21-40": 0.0,
+          "41-200": 0.0
+        },
+        "mask_cell_mean_pct": 0.7525143678160919,
+        "tone_cell_mean_pct": 0.3430316091954023
+      },
+      {
+        "sigma": 1.0,
+        "rho": 0.0,
+        "band_flip_pct": {
+          "0-0": 36.7965367965368,
+          "1-2": 17.838890240934536,
+          "3-5": 0.9984074482420678,
+          "6-10": 0.0,
+          "11-20": 0.0,
+          "21-40": 0.0,
+          "41-200": 0.0
+        },
+        "mask_cell_mean_pct": 7.713721264367816,
+        "tone_cell_mean_pct": 3.5937499999999996
+      },
+      {
+        "sigma": 1.0,
+        "rho": 0.25,
+        "band_flip_pct": {
+          "0-0": 33.82639159205917,
+          "1-2": 15.202966432474629,
+          "3-5": 0.500245519273263,
+          "6-10": 0.0,
+          "11-20": 0.0,
+          "21-40": 0.0,
+          "41-200": 0.0
+        },
+        "mask_cell_mean_pct": 6.8821839080459775,
+        "tone_cell_mean_pct": 3.0028735632183907
+      },
+      {
+        "sigma": 1.0,
+        "rho": 0.5,
+        "band_flip_pct": {
+          "0-0": 32.012371931181136,
+          "1-2": 11.963805331376864,
+          "3-5": 0.1472211998527788,
+          "6-10": 0.0,
+          "11-20": 0.0,
+          "21-40": 0.0,
+          "41-200": 0.0
+        },
+        "mask_cell_mean_pct": 5.975215517241379,
+        "tone_cell_mean_pct": 2.4407327586206895
+      },
+      {
+        "sigma": 1.0,
+        "rho": 0.75,
+        "band_flip_pct": {
+          "0-0": 25.99144634525661,
+          "1-2": 7.866705755887814,
+          "3-5": 0.009159466308429762,
+          "6-10": 0.0,
+          "11-20": 0.0,
+          "21-40": 0.0,
+          "41-200": 0.0
+        },
+        "mask_cell_mean_pct": 4.482758620689655,
+        "tone_cell_mean_pct": 1.7097701149425288
+      },
+      {
+        "sigma": 1.0,
+        "rho": 0.9,
+        "band_flip_pct": {
+          "0-0": 17.17093852380035,
+          "1-2": 4.51039734452797,
+          "3-5": 0.0,
+          "6-10": 0.0,
+          "11-20": 0.0,
+          "21-40": 0.0,
+          "41-200": 0.0
+        },
+        "mask_cell_mean_pct": 2.9310344827586206,
+        "tone_cell_mean_pct": 1.0973419540229885
+      },
+      {
+        "sigma": 1.0,
+        "rho": 0.95,
+        "band_flip_pct": {
+          "0-0": 12.190914318573894,
+          "1-2": 3.1690830721003134,
+          "3-5": 0.0,
+          "6-10": 0.0,
+          "11-20": 0.0,
+          "21-40": 0.0,
+          "41-200": 0.0
+        },
+        "mask_cell_mean_pct": 2.1551724137931036,
+        "tone_cell_mean_pct": 0.8405172413793103
+      },
+      {
+        "sigma": 1.0,
+        "rho": 0.99,
+        "band_flip_pct": {
+          "0-0": 5.767731878409976,
+          "1-2": 1.4479238244821833,
+          "3-5": 0.0,
+          "6-10": 0.0,
+          "11-20": 0.0,
+          "21-40": 0.0,
+          "41-200": 0.0
+        },
+        "mask_cell_mean_pct": 1.0057471264367817,
+        "tone_cell_mean_pct": 0.44360632183908044
+      },
+      {
+        "sigma": 2.0,
+        "rho": 0.0,
+        "band_flip_pct": {
+          "0-0": 45.20628683693517,
+          "1-2": 30.318790330347685,
+          "3-5": 8.829613164150535,
+          "6-10": 0.6373298819468957,
+          "11-20": 0.0013839489599623566,
+          "21-40": 0.0,
+          "41-200": 0.0
+        },
+        "mask_cell_mean_pct": 13.773347701149424,
+        "tone_cell_mean_pct": 7.338362068965518
+      },
+      {
+        "sigma": 2.0,
+        "rho": 0.25,
+        "band_flip_pct": {
+          "0-0": 44.540345242874345,
+          "1-2": 27.834507886284097,
+          "3-5": 6.277209991663321,
+          "6-10": 0.284330450810832,
+          "11-20": 0.001383451157256893,
+          "21-40": 0.0,
+          "41-200": 0.0
+        },
+        "mask_cell_mean_pct": 12.528735632183906,
+        "tone_cell_mean_pct": 6.192528735632184
+      },
+      {
+        "sigma": 2.0,
+        "rho": 0.5,
+        "band_flip_pct": {
+          "0-0": 40.320031608060056,
+          "1-2": 24.051910598413844,
+          "3-5": 3.555198318236622,
+          "6-10": 0.04712627879121095,
+          "11-20": 0.0,
+          "21-40": 0.0,
+          "41-200": 0.0
+        },
+        "mask_cell_mean_pct": 10.905172413793103,
+        "tone_cell_mean_pct": 5.001795977011494
+      },
+      {
+        "sigma": 2.0,
+        "rho": 0.75,
+        "band_flip_pct": {
+          "0-0": 37.05684293919588,
+          "1-2": 17.336489228093903,
+          "3-5": 0.9852367944507535,
+          "6-10": 0.0,
+          "11-20": 0.0,
+          "21-40": 0.0,
+          "41-200": 0.0
+        },
+        "mask_cell_mean_pct": 8.272270114942529,
+        "tone_cell_mean_pct": 3.4788074712643677
+      },
+      {
+        "sigma": 2.0,
+        "rho": 0.9,
+        "band_flip_pct": {
+          "0-0": 30.37629167479041,
+          "1-2": 10.346320346320347,
+          "3-5": 0.05840403295217017,
+          "6-10": 0.0,
+          "11-20": 0.0,
+          "21-40": 0.0,
+          "41-200": 0.0
+        },
+        "mask_cell_mean_pct": 5.732758620689655,
+        "tone_cell_mean_pct": 2.1336206896551726
+      },
+      {
+        "sigma": 2.0,
+        "rho": 0.95,
+        "band_flip_pct": {
+          "0-0": 24.027724297266076,
+          "1-2": 6.828513395879679,
+          "3-5": 0.0,
+          "6-10": 0.0,
+          "11-20": 0.0,
+          "21-40": 0.0,
+          "41-200": 0.0
+        },
+        "mask_cell_mean_pct": 4.2403017241379315,
+        "tone_cell_mean_pct": 1.5660919540229883
+      },
+      {
+        "sigma": 2.0,
+        "rho": 0.99,
+        "band_flip_pct": {
+          "0-0": 10.829450139794968,
+          "1-2": 2.8616538385632526,
+          "3-5": 0.0,
+          "6-10": 0.0,
+          "11-20": 0.0,
+          "21-40": 0.0,
+          "41-200": 0.0
+        },
+        "mask_cell_mean_pct": 1.9612068965517242,
+        "tone_cell_mean_pct": 0.7094109195402298
+      },
+      {
+        "sigma": 4.0,
+        "rho": 0.0,
+        "band_flip_pct": {
+          "0-0": 49.52901281085155,
+          "1-2": 39.57040572792363,
+          "3-5": 24.468592126584692,
+          "6-10": 9.289202610087413,
+          "11-20": 1.0991964309710016,
+          "21-40": 0.0016865681710854753,
+          "41-200": 0.0
+        },
+        "mask_cell_mean_pct": 24.378591954022987,
+        "tone_cell_mean_pct": 14.331896551724139
+      },
+      {
+        "sigma": 4.0,
+        "rho": 0.25,
+        "band_flip_pct": {
+          "0-0": 47.3224246931945,
+          "1-2": 37.779913503123495,
+          "3-5": 21.517743979721168,
+          "6-10": 6.39472819839054,
+          "11-20": 0.45910970305536164,
+          "21-40": 0.0,
+          "41-200": 0.0
+        },
+        "mask_cell_mean_pct": 22.526939655172416,
+        "tone_cell_mean_pct": 12.451508620689655
+      },
+      {
+        "sigma": 4.0,
+        "rho": 0.5,
+        "band_flip_pct": {
+          "0-0": 47.78353483016696,
+          "1-2": 35.43162070268228,
+          "3-5": 16.54798020118154,
+          "6-10": 3.3796153450581095,
+          "11-20": 0.08320584051319216,
+          "21-40": 0.0,
+          "41-200": 0.0
+        },
+        "mask_cell_mean_pct": 20.061063218390803,
+        "tone_cell_mean_pct": 10.10955459770115
+      },
+      {
+        "sigma": 4.0,
+        "rho": 0.75,
+        "band_flip_pct": {
+          "0-0": 44.06064095183266,
+          "1-2": 30.550410789761123,
+          "3-5": 9.149705155031386,
+          "6-10": 0.6777077411115231,
+          "11-20": 0.0,
+          "21-40": 0.0,
+          "41-200": 0.0
+        },
+        "mask_cell_mean_pct": 15.806393678160918,
+        "tone_cell_mean_pct": 7.063577586206897
+      },
+      {
+        "sigma": 4.0,
+        "rho": 0.9,
+        "band_flip_pct": {
+          "0-0": 39.39109190001879,
+          "1-2": 22.322617462431044,
+          "3-5": 2.381404174573055,
+          "6-10": 0.02050104555332322,
+          "11-20": 0.0,
+          "21-40": 0.0,
+          "41-200": 0.0
+        },
+        "mask_cell_mean_pct": 11.052442528735632,
+        "tone_cell_mean_pct": 4.26903735632184
+      },
+      {
+        "sigma": 4.0,
+        "rho": 0.95,
+        "band_flip_pct": {
+          "0-0": 35.67026194144838,
+          "1-2": 15.56423897179982,
+          "3-5": 0.5060824191368308,
+          "6-10": 0.0,
+          "11-20": 0.0,
+          "21-40": 0.0,
+          "41-200": 0.0
+        },
+        "mask_cell_mean_pct": 8.101652298850574,
+        "tone_cell_mean_pct": 3.026221264367816
+      },
+      {
+        "sigma": 4.0,
+        "rho": 0.99,
+        "band_flip_pct": {
+          "0-0": 21.859767529058868,
+          "1-2": 5.976598533767054,
+          "3-5": 0.0030720078643401327,
+          "6-10": 0.0,
+          "11-20": 0.0,
+          "21-40": 0.0,
+          "41-200": 0.0
+        },
+        "mask_cell_mean_pct": 3.8793103448275863,
+        "tone_cell_mean_pct": 1.377514367816092
+      }
+    ],
+    "fit": {
+      "fitted_bands": [
+        "0-0",
+        "1-2",
+        "3-5"
+      ],
+      "observed_pct": {
+        "0-0": 27.925370107483268,
+        "1-2": 12.419055268309824,
+        "3-5": 3.788540756459868
+      },
+      "sigma": 2.0,
+      "rho": 0.9,
+      "max_band_error_pp": 3.7301367235076976,
+      "R1_calibration_valid": false,
+      "note": "R1 was pre-registered with a 0.5 pp tolerance on three bands. It FAILS for this model family, and that failure is itself the finding: the observed near-threshold curve cannot be produced by a temporally correlated Gaussian perturbation at any amplitude. See the dated correction block in docs/research/ASCII-DITHER-CHARACTERISATION.md."
+    },
+    "far_band_prediction": [
+      {
+        "abs_dluma": "11-20",
+        "dots": 71411,
+        "observed_flips": 531,
+        "observed_flip_pct": 0.7435829213986641,
+        "predicted_flip_pct_best_fit": 0.0,
+        "predicted_flip_pct_max_over_near_enough_grid": 0.0,
+        "predicted_99pct_upper_pct": 0.011926083852414757,
+        "observed_exceeds_prediction": true
+      },
+      {
+        "abs_dluma": "21-40",
+        "dots": 117554,
+        "observed_flips": 382,
+        "observed_flip_pct": 0.3249570410194464,
+        "predicted_flip_pct_best_fit": 0.0,
+        "predicted_flip_pct_max_over_near_enough_grid": 0.0,
+        "predicted_99pct_upper_pct": 0.007245053895153596,
+        "observed_exceeds_prediction": true
+      },
+      {
+        "abs_dluma": "41-200",
+        "dots": 149390,
+        "observed_flips": 129,
+        "observed_flip_pct": 0.08635116138965125,
+        "predicted_flip_pct_best_fit": 0.0,
+        "predicted_flip_pct_max_over_near_enough_grid": 0.0,
+        "predicted_99pct_upper_pct": 0.005701154375528468,
+        "observed_exceeds_prediction": true
+      }
+    ],
+    "lag_sweep_uncorrelated": {
+      "1": {
+        "mask_cell_pct": 7.713721264367816,
+        "near_flip_pct": 5.3212158628704245,
+        "far_flip_pct": 0.0,
+        "near_flipped": 5861,
+        "far_flipped": 0,
+        "n_pairs": 29
+      },
+      "2": {
+        "mask_cell_pct": 7.607886904761904,
+        "near_flip_pct": 5.2973033961412614,
+        "far_flip_pct": 0.0,
+        "near_flipped": 5634,
+        "far_flipped": 0,
+        "n_pairs": 28
+      },
+      "3": {
+        "mask_cell_pct": 7.73341049382716,
+        "near_flip_pct": 5.269366506132158,
+        "far_flip_pct": 0.0,
+        "near_flipped": 5405,
+        "far_flipped": 0,
+        "n_pairs": 27
+      },
+      "5": {
+        "mask_cell_pct": 7.6625,
+        "near_flip_pct": 5.250631844987363,
+        "far_flip_pct": 0.0,
+        "near_flipped": 4986,
+        "far_flipped": 0,
+        "n_pairs": 25
+      },
+      "7": {
+        "mask_cell_pct": 7.592844202898551,
+        "near_flip_pct": 5.275150571369684,
+        "far_flip_pct": 0.0,
+        "near_flipped": 4607,
+        "far_flipped": 0,
+        "n_pairs": 23
+      },
+      "10": {
+        "mask_cell_pct": 7.596354166666666,
+        "near_flip_pct": 5.241749707109666,
+        "far_flip_pct": 0.0,
+        "near_flipped": 3982,
+        "far_flipped": 0,
+        "n_pairs": 20
+      },
+      "15": {
+        "mask_cell_pct": 7.569444444444444,
+        "near_flip_pct": 5.215025451992276,
+        "far_flip_pct": 0.0,
+        "near_flipped": 2971,
+        "far_flipped": 0,
+        "n_pairs": 15
+      },
+      "20": {
+        "mask_cell_pct": 7.640624999999999,
+        "near_flip_pct": 5.336072482090181,
+        "far_flip_pct": 0.0,
+        "near_flipped": 2026,
+        "far_flipped": 0,
+        "n_pairs": 10
+      },
+      "25": {
+        "mask_cell_pct": 7.46875,
+        "near_flip_pct": 5.272296764009472,
+        "far_flip_pct": 0.0,
+        "near_flipped": 1002,
+        "far_flipped": 0,
+        "n_pairs": 5
+      },
+      "29": {
+        "mask_cell_pct": 7.291666666666667,
+        "near_flip_pct": 5.219925808161102,
+        "far_flip_pct": 0.0,
+        "near_flipped": 197,
+        "far_flipped": 0,
+        "n_pairs": 1
+      }
+    },
+    "lag_sweep_correlated_best_fit": {
+      "1": {
+        "mask_cell_pct": 5.732758620689655,
+        "near_flip_pct": 3.414107002216239,
+        "far_flip_pct": 0.0,
+        "near_flipped": 3728,
+        "far_flipped": 0,
+        "n_pairs": 29
+      },
+      "2": {
+        "mask_cell_pct": 7.483258928571429,
+        "near_flip_pct": 4.678340384360001,
+        "far_flip_pct": 0.0,
+        "near_flipped": 4932,
+        "far_flipped": 0,
+        "n_pairs": 28
+      },
+      "3": {
+        "mask_cell_pct": 8.63233024691358,
+        "near_flip_pct": 5.603274398103053,
+        "far_flip_pct": 0.0,
+        "near_flipped": 5695,
+        "far_flipped": 0,
+        "n_pairs": 27
+      },
+      "5": {
+        "mask_cell_pct": 10.058333333333334,
+        "near_flip_pct": 6.8066833893116785,
+        "far_flip_pct": 0.0,
+        "near_flipped": 6404,
+        "far_flipped": 0,
+        "n_pairs": 25
+      },
+      "7": {
+        "mask_cell_pct": 10.883152173913043,
+        "near_flip_pct": 7.643312101910828,
+        "far_flip_pct": 0.0,
+        "near_flipped": 6612,
+        "far_flipped": 0,
+        "n_pairs": 23
+      },
+      "10": {
+        "mask_cell_pct": 11.760416666666666,
+        "near_flip_pct": 8.511317392345134,
+        "far_flip_pct": 0.0,
+        "near_flipped": 6400,
+        "far_flipped": 0,
+        "n_pairs": 20
+      },
+      "15": {
+        "mask_cell_pct": 12.510416666666666,
+        "near_flip_pct": 9.238571479235379,
+        "far_flip_pct": 0.0,
+        "near_flipped": 5210,
+        "far_flipped": 0,
+        "n_pairs": 15
+      },
+      "20": {
+        "mask_cell_pct": 12.416666666666666,
+        "near_flip_pct": 9.513933205700914,
+        "far_flip_pct": 0.0,
+        "near_flipped": 3578,
+        "far_flipped": 0,
+        "n_pairs": 10
+      },
+      "25": {
+        "mask_cell_pct": 12.697916666666668,
+        "near_flip_pct": 9.570395576350489,
+        "far_flip_pct": 0.0,
+        "near_flipped": 1800,
+        "far_flipped": 0,
+        "n_pairs": 5
+      },
+      "29": {
+        "mask_cell_pct": 11.302083333333334,
+        "near_flip_pct": 8.605577689243027,
+        "far_flip_pct": 0.0,
+        "near_flipped": 324,
+        "far_flipped": 0,
+        "n_pairs": 1
+      }
+    },
+    "lag_sweep_note": "the UNCORRELATED synthetic (rho = 0) is the dither reference: a static scene with uncorrelated jitter has a flat lag curve by construction, so any rise in the real capture's curve is something jitter cannot produce. The correlated synthetic rises, because a correlated perturbation does produce a lag-dependent change -- which is exactly why the fit is reported as failed rather than used.",
+    "robustness": "the far-band prediction is reported for the best fit AND as the maximum over every grid point within 5 pp of the observed near bands, so the conclusion does not depend on the fit"
+  },
+  "null_scene": {
+    "what": "the capture's static content (per-pixel temporal median) plus the capture's own global luma wander, with no per-pixel jitter: the same scene, the same exposure behaviour, nothing moving",
+    "pure_static_mask_cell_mean_pct": 0.0,
+    "pure_static_tone_cell_mean_pct": 0.0,
+    "pure_static_note": "the same content frozen, with no wander and no jitter: both channels change 0% of cells, so the camera and the renderer contribute nothing on their own",
+    "lag_sweep": {
+      "1": {
+        "mask_cell_pct": 2.051005747126437,
+        "near_flip_pct": 2.3980704114291016,
+        "far_flip_pct": 0.0,
+        "near_flipped": 2585,
+        "far_flipped": 0,
+        "n_pairs": 29
+      },
+      "2": {
+        "mask_cell_pct": 4.248511904761905,
+        "near_flip_pct": 4.971536272020924,
+        "far_flip_pct": 0.0,
+        "near_flipped": 5170,
+        "far_flipped": 0,
+        "n_pairs": 28
+      },
+      "3": {
+        "mask_cell_pct": 4.577546296296296,
+        "near_flip_pct": 5.287738620408082,
+        "far_flip_pct": 0.06331550529909417,
+        "near_flipped": 5310,
+        "far_flipped": 199,
+        "n_pairs": 27
+      },
+      "5": {
+        "mask_cell_pct": 5.46875,
+        "near_flip_pct": 6.247590903250675,
+        "far_flip_pct": 0.06847806637210775,
+        "near_flipped": 5835,
+        "far_flipped": 199,
+        "n_pairs": 25
+      },
+      "7": {
+        "mask_cell_pct": 6.465126811594203,
+        "near_flip_pct": 7.262854430306469,
+        "far_flip_pct": 0.0,
+        "near_flipped": 6273,
+        "far_flipped": 0,
+        "n_pairs": 23
+      },
+      "10": {
+        "mask_cell_pct": 7.395833333333333,
+        "near_flip_pct": 7.870026525198939,
+        "far_flip_pct": 0.0,
+        "near_flipped": 5934,
+        "far_flipped": 0,
+        "n_pairs": 20
+      },
+      "15": {
+        "mask_cell_pct": 9.86111111111111,
+        "near_flip_pct": 10.493368700265252,
+        "far_flip_pct": 0.0,
+        "near_flipped": 5934,
+        "far_flipped": 0,
+        "n_pairs": 15
+      },
+      "20": {
+        "mask_cell_pct": 14.791666666666666,
+        "near_flip_pct": 15.740053050397877,
+        "far_flip_pct": 0.0,
+        "near_flipped": 5934,
+        "far_flipped": 0,
+        "n_pairs": 10
+      },
+      "25": {
+        "mask_cell_pct": 19.34375,
+        "near_flip_pct": 23.193633952254643,
+        "far_flip_pct": 0.0,
+        "near_flipped": 4372,
+        "far_flipped": 0,
+        "n_pairs": 5
+      },
+      "29": {
+        "mask_cell_pct": 30.052083333333336,
+        "near_flip_pct": 42.46684350132626,
+        "far_flip_pct": 0.0,
+        "near_flipped": 1601,
+        "far_flipped": 0,
+        "n_pairs": 1
+      }
+    },
+    "mask_cell_mean_pct": 2.051005747126437,
+    "tone_cell_mean_pct": 1.5948275862068966,
+    "band_flip_rates": [
+      {
+        "abs_dluma": "0-0",
+        "dots": 5351,
+        "flipped": 492,
+        "flip_rate_pct": 9.19454307606055
+      },
+      {
+        "abs_dluma": "1-2",
+        "dots": 19423,
+        "flipped": 492,
+        "flip_rate_pct": 2.533079338928075
+      },
+      {
+        "abs_dluma": "3-5",
+        "dots": 32613,
+        "flipped": 577,
+        "flip_rate_pct": 1.7692331278937847
+      },
+      {
+        "abs_dluma": "6-10",
+        "dots": 50408,
+        "flipped": 1024,
+        "flip_rate_pct": 2.0314235835581655
+      },
+      {
+        "abs_dluma": "11-20",
+        "dots": 71616,
+        "flipped": 0,
+        "flip_rate_pct": 0.0
+      },
+      {
+        "abs_dluma": "21-40",
+        "dots": 116800,
+        "flipped": 0,
+        "flip_rate_pct": 0.0
+      },
+      {
+        "abs_dluma": "41-200",
+        "dots": 149229,
+        "flipped": 0,
+        "flip_rate_pct": 0.0
+      }
+    ],
+    "exposure_wander_counts": {
+      "min": -8.0,
+      "max": 3.0,
+      "std": 2.3380903889000244
+    }
+  },
+  "empty_room_null": {
+    "path": "/mnt/c/proart_capture/empty1.nv12",
+    "sha256": "da348ccaf08c030dedea4b2e070ceb1149a4f11d3e9287e8212a480a58c05303",
+    "layout": "y_uv_halfres",
+    "n_frames_total": 4500,
+    "frames_used": 300,
+    "mean_consecutive_frame_diff": 0.005277098614506927,
+    "frac_pixels_41plus_from_threshold": 0.9997703993055556,
+    "band_flip_rates": [
+      {
+        "abs_dluma": "0-0",
+        "dots": 0,
+        "flipped": 0,
+        "flip_rate_pct": null
+      },
+      {
+        "abs_dluma": "1-2",
+        "dots": 62,
+        "flipped": 0,
+        "flip_rate_pct": 0.0
+      },
+      {
+        "abs_dluma": "3-5",
+        "dots": 232,
+        "flipped": 0,
+        "flip_rate_pct": 0.0
+      },
+      {
+        "abs_dluma": "6-10",
+        "dots": 5,
+        "flipped": 0,
+        "flip_rate_pct": 0.0
+      },
+      {
+        "abs_dluma": "11-20",
+        "dots": 0,
+        "flipped": 0,
+        "flip_rate_pct": null
+      },
+      {
+        "abs_dluma": "21-40",
+        "dots": 756,
+        "flipped": 0,
+        "flip_rate_pct": 0.0
+      },
+      {
+        "abs_dluma": "41-200",
+        "dots": 4591585,
+        "flipped": 0,
+        "flip_rate_pct": 0.0
+      }
+    ],
+    "mask_cell_mean_pct": 0.0,
+    "tone_cell_mean_pct": 0.0,
+    "far_band": {
+      "dots": 4592341,
+      "flipped": 0,
+      "flip_rate_pct": 0.0
+    },
+    "real_capture_far_band": {
+      "dots": 338355,
+      "flipped": 1042,
+      "flip_rate_pct": 0.30796057395339216
+    },
+    "R3_empty_room_reproduces_far_band": false,
+    "limitation": "the empty room's luma sits at about 30 counts, essentially never near the threshold, so it cannot probe threshold dither directly. It is a null for 'does anything change when nothing moves' at the frame level, and for the far band specifically (all of its pixels are 41+ counts from the threshold)."
+  },
+  "persistence": {
+    "what": "P(flip in the next frame pair | flip in this one), against the uncorrelated baseline of 1.0x. Dither is uncorrelated in time; motion is not.",
+    "real_capture": {
+      "near": {
+        "observed_cond_pct": 26.37499604264803,
+        "pair_permuted_null_cond_pct": 12.8209045643107,
+        "null_std_pct": 1.1591617366842488,
+        "excess_over_null_pp": 13.55409147833733,
+        "z_vs_null": 11.69301146629326,
+        "ratio_to_null": 2.0571868318923134,
+        "marginal_flip_pct": 1.6509518678160922,
+        "n_permutations": 200,
+        "definition": "P(flip at pair f+1 | flip at pair f) over the dots in the band, against the same statistic on the SAME data with the pair order permuted. The permutation destroys the temporal order and keeps every dot's marginal rate, so it is the null for temporal correlation."
+      },
+      "far": {
+        "observed_cond_pct": 1.3237461168918825,
+        "pair_permuted_null_cond_pct": 3.7536985228660757,
+        "null_std_pct": 2.0906664471353706,
+        "excess_over_null_pp": -2.4299524059741935,
+        "z_vs_null": -1.1622860305161122,
+        "ratio_to_null": 0.3526511542757455,
+        "marginal_flip_pct": 1.6509518678160922,
+        "n_permutations": 200,
+        "definition": "P(flip at pair f+1 | flip at pair f) over the dots in the band, against the same statistic on the SAME data with the pair order permuted. The permutation destroys the temporal order and keeps every dot's marginal rate, so it is the null for temporal correlation."
+      },
+      "all": {
+        "observed_cond_pct": 24.325182257905556,
+        "pair_permuted_null_cond_pct": 12.12978248991353,
+        "null_std_pct": 1.1091838065921953,
+        "excess_over_null_pp": 12.195399767992026,
+        "z_vs_null": 10.99493131391866,
+        "ratio_to_null": 2.0054096005540956,
+        "marginal_flip_pct": 1.6509518678160922,
+        "n_permutations": 200,
+        "definition": "P(flip at pair f+1 | flip at pair f) over the dots in the band, against the same statistic on the SAME data with the pair order permuted. The permutation destroys the temporal order and keeps every dot's marginal rate, so it is the null for temporal correlation."
+      }
+    },
+    "synthetic_best_fit": {
+      "uncorrelated_rho0": {
+        "near": {
+          "observed_cond_pct": 50.261169414634175,
+          "pair_permuted_null_cond_pct": 35.470927789739115,
+          "null_std_pct": 0.9189856410303673,
+          "excess_over_null_pp": 14.790241624895062,
+          "z_vs_null": 16.09409436290238,
+          "ratio_to_null": 1.4169679945381504,
+          "marginal_flip_pct": 1.315777658045977,
+          "n_permutations": 200,
+          "definition": "P(flip at pair f+1 | flip at pair f) over the dots in the band, against the same statistic on the SAME data with the pair order permuted. The permutation destroys the temporal order and keeps every dot's marginal rate, so it is the null for temporal correlation."
+        },
+        "far": {
+          "observed_cond_pct": 0.0,
+          "pair_permuted_null_cond_pct": 0.0,
+          "null_std_pct": 0.0,
+          "excess_over_null_pp": 0.0,
+          "z_vs_null": null,
+          "ratio_to_null": null,
+          "marginal_flip_pct": 1.315777658045977,
+          "n_permutations": 200,
+          "definition": "P(flip at pair f+1 | flip at pair f) over the dots in the band, against the same statistic on the SAME data with the pair order permuted. The permutation destroys the temporal order and keeps every dot's marginal rate, so it is the null for temporal correlation."
+        }
+      },
+      "best_fit": {
+        "near": {
+          "observed_cond_pct": 31.16803358546155,
+          "pair_permuted_null_cond_pct": 15.810076557423358,
+          "null_std_pct": 1.0781735756098505,
+          "excess_over_null_pp": 15.357957028038193,
+          "z_vs_null": 14.24441979980007,
+          "ratio_to_null": 1.9714030777938973,
+          "marginal_flip_pct": 0.8369252873563219,
+          "n_permutations": 200,
+          "definition": "P(flip at pair f+1 | flip at pair f) over the dots in the band, against the same statistic on the SAME data with the pair order permuted. The permutation destroys the temporal order and keeps every dot's marginal rate, so it is the null for temporal correlation."
+        },
+        "far": {
+          "observed_cond_pct": 0.0,
+          "pair_permuted_null_cond_pct": 0.0,
+          "null_std_pct": 0.0,
+          "excess_over_null_pp": 0.0,
+          "z_vs_null": null,
+          "ratio_to_null": null,
+          "marginal_flip_pct": 0.8369252873563219,
+          "n_permutations": 200,
+          "definition": "P(flip at pair f+1 | flip at pair f) over the dots in the band, against the same statistic on the SAME data with the pair order permuted. The permutation destroys the temporal order and keeps every dot's marginal rate, so it is the null for temporal correlation."
+        }
+      }
+    },
+    "verdict": "no temporally uncorrelated component is detectable in the real capture: the lift is far above 1.0x in every band, so the flips are not dither in the sense the mechanism claim uses"
+  },
+  "lag_sweep": {
+    "small_capture": {
+      "1": {
+        "mask_cell_pct": 8.631465517241379,
+        "near_flip_pct": 5.894382966802073,
+        "far_flip_pct": 0.30796057395339216,
+        "near_flipped": 6312,
+        "far_flipped": 1042,
+        "n_pairs": 29
+      },
+      "2": {
+        "mask_cell_pct": 11.986607142857144,
+        "near_flip_pct": 8.955933123860506,
+        "far_flip_pct": 0.819050415336245,
+        "near_flipped": 9235,
+        "far_flipped": 2678,
+        "n_pairs": 28
+      },
+      "3": {
+        "mask_cell_pct": 13.705632716049381,
+        "near_flip_pct": 10.054776621940801,
+        "far_flip_pct": 1.3171544135141566,
+        "near_flipped": 10004,
+        "far_flipped": 4152,
+        "n_pairs": 27
+      },
+      "5": {
+        "mask_cell_pct": 16.37291666666667,
+        "near_flip_pct": 11.72037422037422,
+        "far_flip_pct": 2.2558015141540486,
+        "near_flipped": 10824,
+        "far_flipped": 6579,
+        "n_pairs": 25
+      },
+      "7": {
+        "mask_cell_pct": 18.27445652173913,
+        "near_flip_pct": 13.061210139577401,
+        "far_flip_pct": 3.000548607767838,
+        "near_flipped": 11145,
+        "far_flipped": 8040,
+        "n_pairs": 23
+      },
+      "10": {
+        "mask_cell_pct": 20.111979166666664,
+        "near_flip_pct": 14.295280441420688,
+        "far_flip_pct": 3.839041508265529,
+        "near_flipped": 10674,
+        "far_flipped": 8927,
+        "n_pairs": 20
+      },
+      "15": {
+        "mask_cell_pct": 22.614583333333332,
+        "near_flip_pct": 16.608873477371745,
+        "far_flip_pct": 4.752964143197542,
+        "near_flipped": 9340,
+        "far_flipped": 8278,
+        "n_pairs": 15
+      },
+      "20": {
+        "mask_cell_pct": 25.1875,
+        "near_flip_pct": 20.30207610610023,
+        "far_flip_pct": 5.506949348121868,
+        "near_flipped": 7608,
+        "far_flipped": 6395,
+        "n_pairs": 10
+      },
+      "25": {
+        "mask_cell_pct": 29.947916666666668,
+        "near_flip_pct": 27.017225747960108,
+        "far_flip_pct": 6.971696325518097,
+        "near_flipped": 5066,
+        "far_flipped": 4047,
+        "n_pairs": 5
+      },
+      "29": {
+        "mask_cell_pct": 39.84375,
+        "near_flip_pct": 45.626666666666665,
+        "far_flip_pct": 7.708871662360035,
+        "near_flipped": 1711,
+        "far_flipped": 895,
+        "n_pairs": 1
+      }
+    },
+    "empty_room": {
+      "1": {
+        "mask_cell_pct": 0.0,
+        "near_flip_pct": 0.0,
+        "far_flip_pct": 0.0,
+        "near_flipped": 0,
+        "far_flipped": 0,
+        "n_pairs": 299
+      },
+      "2": {
+        "mask_cell_pct": 0.0,
+        "near_flip_pct": 0.0,
+        "far_flip_pct": 0.0,
+        "near_flipped": 0,
+        "far_flipped": 0,
+        "n_pairs": 298
+      },
+      "3": {
+        "mask_cell_pct": 0.0,
+        "near_flip_pct": 0.0,
+        "far_flip_pct": 0.0,
+        "near_flipped": 0,
+        "far_flipped": 0,
+        "n_pairs": 297
+      },
+      "5": {
+        "mask_cell_pct": 0.0,
+        "near_flip_pct": 0.0,
+        "far_flip_pct": 0.0,
+        "near_flipped": 0,
+        "far_flipped": 0,
+        "n_pairs": 295
+      },
+      "7": {
+        "mask_cell_pct": 0.0,
+        "near_flip_pct": 0.0,
+        "far_flip_pct": 0.0,
+        "near_flipped": 0,
+        "far_flipped": 0,
+        "n_pairs": 293
+      },
+      "10": {
+        "mask_cell_pct": 0.0,
+        "near_flip_pct": 0.0,
+        "far_flip_pct": 0.0,
+        "near_flipped": 0,
+        "far_flipped": 0,
+        "n_pairs": 290
+      },
+      "15": {
+        "mask_cell_pct": 0.0,
+        "near_flip_pct": 0.0,
+        "far_flip_pct": 0.0,
+        "near_flipped": 0,
+        "far_flipped": 0,
+        "n_pairs": 285
+      },
+      "20": {
+        "mask_cell_pct": 0.0,
+        "near_flip_pct": 0.0,
+        "far_flip_pct": 0.0,
+        "near_flipped": 0,
+        "far_flipped": 0,
+        "n_pairs": 280
+      },
+      "25": {
+        "mask_cell_pct": 0.0,
+        "near_flip_pct": 0.0,
+        "far_flip_pct": 0.0,
+        "near_flipped": 0,
+        "far_flipped": 0,
+        "n_pairs": 275
+      },
+      "29": {
+        "mask_cell_pct": 0.0,
+        "near_flip_pct": 0.0,
+        "far_flip_pct": 0.0,
+        "near_flipped": 0,
+        "far_flipped": 0,
+        "n_pairs": 271
+      }
+    },
+    "long_capture": {
+      "1": {
+        "mask_cell_pct": 3.7958124303233,
+        "near_flip_pct": 3.405883529014333,
+        "far_flip_pct": 0.09153448251342312,
+        "near_flipped": 24701,
+        "far_flipped": 3540,
+        "n_pairs": 299
+      },
+      "2": {
+        "mask_cell_pct": 6.442603467561521,
+        "near_flip_pct": 5.836152847929024,
+        "far_flip_pct": 0.22045383036909091,
+        "near_flipped": 42140,
+        "far_flipped": 8499,
+        "n_pairs": 298
+      },
+      "3": {
+        "mask_cell_pct": 7.783214085297418,
+        "near_flip_pct": 7.10514029080884,
+        "far_flip_pct": 0.34896019854919175,
+        "near_flipped": 51132,
+        "far_flipped": 13408,
+        "n_pairs": 297
+      },
+      "5": {
+        "mask_cell_pct": 9.778248587570621,
+        "near_flip_pct": 9.095371825927398,
+        "far_flip_pct": 0.6371541443974983,
+        "near_flipped": 65033,
+        "far_flipped": 24315,
+        "n_pairs": 295
+      },
+      "7": {
+        "mask_cell_pct": 11.264931740614333,
+        "near_flip_pct": 10.636036682784006,
+        "far_flip_pct": 0.9312505194501941,
+        "near_flipped": 75560,
+        "far_flipped": 35295,
+        "n_pairs": 293
+      },
+      "10": {
+        "mask_cell_pct": 12.957614942528735,
+        "near_flip_pct": 12.440345067720251,
+        "far_flip_pct": 1.3527355716292921,
+        "near_flipped": 87534,
+        "far_flipped": 50738,
+        "n_pairs": 290
+      },
+      "15": {
+        "mask_cell_pct": 14.985197368421051,
+        "near_flip_pct": 14.614896073903003,
+        "far_flip_pct": 1.983961137646548,
+        "near_flipped": 101252,
+        "far_flipped": 73105,
+        "n_pairs": 285
+      },
+      "20": {
+        "mask_cell_pct": 16.479910714285715,
+        "near_flip_pct": 16.249842518992942,
+        "far_flip_pct": 2.4942664512359536,
+        "near_flipped": 110925,
+        "far_flipped": 90247,
+        "n_pairs": 280
+      },
+      "30": {
+        "mask_cell_pct": 18.319444444444443,
+        "near_flip_pct": 18.26541363143738,
+        "far_flip_pct": 3.185810436588265,
+        "near_flipped": 121008,
+        "far_flipped": 111016,
+        "n_pairs": 270
+      },
+      "40": {
+        "mask_cell_pct": 19.678485576923077,
+        "near_flip_pct": 19.71644798346883,
+        "far_flip_pct": 3.6733593389068653,
+        "near_flipped": 126329,
+        "far_flipped": 123163,
+        "n_pairs": 260
+      }
+    },
+    "long_capture_path": "/mnt/c/proart_capture/A.nv12",
+    "long_capture_sha256": "b65cf944aa4e8a65932d4c140335a495fa6a1707f28025d40fb08d31fa33bc73",
+    "long_capture_frames_used": 300,
+    "empty_room_at_long_lags": {
+      "1": {
+        "mask_cell_pct": 0.0,
+        "near_flip_pct": 0.0,
+        "far_flip_pct": 0.0,
+        "near_flipped": 0,
+        "far_flipped": 0,
+        "n_pairs": 299
+      },
+      "2": {
+        "mask_cell_pct": 0.0,
+        "near_flip_pct": 0.0,
+        "far_flip_pct": 0.0,
+        "near_flipped": 0,
+        "far_flipped": 0,
+        "n_pairs": 298
+      },
+      "3": {
+        "mask_cell_pct": 0.0,
+        "near_flip_pct": 0.0,
+        "far_flip_pct": 0.0,
+        "near_flipped": 0,
+        "far_flipped": 0,
+        "n_pairs": 297
+      },
+      "5": {
+        "mask_cell_pct": 0.0,
+        "near_flip_pct": 0.0,
+        "far_flip_pct": 0.0,
+        "near_flipped": 0,
+        "far_flipped": 0,
+        "n_pairs": 295
+      },
+      "7": {
+        "mask_cell_pct": 0.0,
+        "near_flip_pct": 0.0,
+        "far_flip_pct": 0.0,
+        "near_flipped": 0,
+        "far_flipped": 0,
+        "n_pairs": 293
+      },
+      "10": {
+        "mask_cell_pct": 0.0,
+        "near_flip_pct": 0.0,
+        "far_flip_pct": 0.0,
+        "near_flipped": 0,
+        "far_flipped": 0,
+        "n_pairs": 290
+      },
+      "15": {
+        "mask_cell_pct": 0.0,
+        "near_flip_pct": 0.0,
+        "far_flip_pct": 0.0,
+        "near_flipped": 0,
+        "far_flipped": 0,
+        "n_pairs": 285
+      },
+      "20": {
+        "mask_cell_pct": 0.0,
+        "near_flip_pct": 0.0,
+        "far_flip_pct": 0.0,
+        "near_flipped": 0,
+        "far_flipped": 0,
+        "n_pairs": 280
+      },
+      "30": {
+        "mask_cell_pct": 0.0,
+        "near_flip_pct": 0.0,
+        "far_flip_pct": 0.0,
+        "near_flipped": 0,
+        "far_flipped": 0,
+        "n_pairs": 270
+      },
+      "40": {
+        "mask_cell_pct": 0.0,
+        "near_flip_pct": 0.0,
+        "far_flip_pct": 0.0,
+        "near_flipped": 0,
+        "far_flipped": 0,
+        "n_pairs": 260
+      }
+    },
+    "R4_small": {
+      "near_ratio_lagmax_over_lag1": 7.74070278833967,
+      "far_ratio_lagmax_over_lag1": 25.03200836197533,
+      "verdict": "BOTH GROW: no temporally uncorrelated component is visible"
+    },
+    "R4_long": {
+      "near_ratio_lagmax_over_lag1": 5.788937823477127,
+      "far_ratio_lagmax_over_lag1": 40.1308800578862,
+      "verdict": "BOTH GROW: no temporally uncorrelated component is visible"
+    }
+  },
+  "far_band_localisation": {
+    "top_cells_by_far_flips": [
+      {
+        "cell": 1862,
+        "row": 23,
+        "col": 22,
+        "far_flips": 14
+      },
+      {
+        "cell": 1861,
+        "row": 23,
+        "col": 21,
+        "far_flips": 13
+      },
+      {
+        "cell": 1315,
+        "row": 16,
+        "col": 35,
+        "far_flips": 13
+      },
+      {
+        "cell": 1860,
+        "row": 23,
+        "col": 20,
+        "far_flips": 12
+      },
+      {
+        "cell": 1874,
+        "row": 23,
+        "col": 34,
+        "far_flips": 11
+      },
+      {
+        "cell": 1241,
+        "row": 15,
+        "col": 41,
+        "far_flips": 11
+      },
+      {
+        "cell": 1314,
+        "row": 16,
+        "col": 34,
+        "far_flips": 11
+      },
+      {
+        "cell": 1866,
+        "row": 23,
+        "col": 26,
+        "far_flips": 11
+      },
+      {
+        "cell": 1064,
+        "row": 13,
+        "col": 24,
+        "far_flips": 11
+      },
+      {
+        "cell": 1875,
+        "row": 23,
+        "col": 35,
+        "far_flips": 10
+      }
+    ],
+    "far_band_flip_luma_change_counts": {
+      "n": 1042,
+      "min": 11.0,
+      "median": 34.0,
+      "max": 108.0
+    },
+    "share_of_far_flips_in_top_1pct_of_cells": 0.1928982725527831,
+    "note": "a moving edge puts its flips in a few cells; a scattered process spreads them. The share in the top 1% of cells is the clustering measure."
+  },
+  "dither_fraction": {
+    "definition": "the share of the observed per-cell change that a STATIC SCENE produces under the capture's own exposure behaviour -- i.e. the share that is not scene change",
+    "observed_mask_cell_pct": 8.631465517241377,
+    "null_scene_mask_cell_pct": 2.051005747126437,
+    "empty_room_mask_cell_pct": 0.0,
+    "dither_fraction_by_null_scene": 0.23761964211402423,
+    "dither_fraction_by_empty_room": 0.0,
+    "dot_level": {
+      "observed_dot_flips": 7354,
+      "near_band_dot_flips": 6312,
+      "near_band_share_of_dot_flips": 0.858308403589883,
+      "null_scene_dot_flips": 2544.4819000426996
+    },
+    "temporally_uncorrelated_share": {
+      "note": "dither in the sense the mechanism claim uses is a TEMPORALLY UNCORRELATED perturbation of a static scene. The reference for it is the uncorrelated synthetic, whose lag curve is flat by construction; the real capture's is not.",
+      "real_capture_conditional_pct": {
+        "near": 26.37499604264803,
+        "far": 1.3237461168918825,
+        "all": 24.325182257905556
+      },
+      "pair_permuted_null_conditional_pct": {
+        "near": 12.8209045643107,
+        "far": 3.7536985228660757,
+        "all": 12.12978248991353
+      },
+      "z_vs_pair_permutation": {
+        "near": 11.69301146629326,
+        "far": -1.1622860305161122,
+        "all": 10.99493131391866
+      },
+      "pair_permutation_caveat": "the pair-permutation null destroys more than the temporal order: consecutive pairs SHARE a frame, so even uncorrelated noise produces a dependence between them, and permuting the pairs destroys that too. The uncorrelated synthetic's own z against this null is large, which shows the null is not a clean dither null. The clean discriminator is the LAG CURVE: the uncorrelated synthetic is flat and the real capture is not.",
+      "lag_curve_ratio_lagmax_over_lag1": {
+        "real_capture_mask": 4.616104868913858,
+        "uncorrelated_synthetic_mask": 0.9452852153667055,
+        "null_scene_mask": 14.652364273204903,
+        "real_capture_far": 25.03200836197533,
+        "uncorrelated_synthetic_far": null,
+        "null_scene_far": null
+      }
+    }
+  },
+  "mask_vs_tone": {
+    "basis": "same cells, same frames, same 29 consecutive pairs, same denominator (cells), mean over pairs",
+    "comparison": [
+      {
+        "channel": "mask",
+        "observed_pct": 8.631465517241377,
+        "null_scene_pct": 2.051005747126437,
+        "empty_room_pct": 0.0,
+        "excess_pct": 6.58045977011494,
+        "excess_fraction": 0.7623803578859758
+      },
+      {
+        "channel": "tone",
+        "observed_pct": 4.382183908045977,
+        "null_scene_pct": 1.5948275862068966,
+        "empty_room_pct": 0.0,
+        "excess_pct": 2.7873563218390798,
+        "excess_fraction": 0.6360655737704917
+      }
+    ],
+    "better_channel_by_R5": "mask",
+    "recommendation": "WITHDRAWN: the mask carries the larger share of change that the null scene cannot explain, so the published 'the tone channel, not the mask' recommendation does not survive an apples-to-apples comparison",
+    "published_comparison": {
+      "tone_channel_flip_pct": 5.414930555555555,
+      "mask_cell_flip_pct": 9.671875,
+      "basis_error": "the two numbers were taken from different pair sets (30 pairs including the wrap-around pair) and the inference -- that a LOWER change rate means a BETTER channel -- does not follow. The channels have different response functions: the mask is a bare threshold on 8 pixels, the tone is a 10-level ramp of the cell luma, so a lower change rate is also a lower SENSITIVITY."
+    },
+    "sensitivity_profile": [
+      {
+        "cell_abs_change_counts": "0.0-0.5",
+        "cells": 31053,
+        "mask_reported_pct": 5.64518726049013,
+        "tone_reported_pct": 2.1608218207580587
+      },
+      {
+        "cell_abs_change_counts": "0.5-1.0",
+        "cells": 5303,
+        "mask_reported_pct": 10.333773335847633,
+        "tone_reported_pct": 5.525174429568169
+      },
+      {
+        "cell_abs_change_counts": "1.0-2.0",
+        "cells": 2600,
+        "mask_reported_pct": 15.461538461538463,
+        "tone_reported_pct": 12.0
+      },
+      {
+        "cell_abs_change_counts": "2.0-5.0",
+        "cells": 1751,
+        "mask_reported_pct": 30.154197601370647,
+        "tone_reported_pct": 19.41747572815534
+      },
+      {
+        "cell_abs_change_counts": "5.0-10.0",
+        "cells": 556,
+        "mask_reported_pct": 58.81294964028777,
+        "tone_reported_pct": 30.215827338129497
+      },
+      {
+        "cell_abs_change_counts": "10.0-1000.0",
+        "cells": 374,
+        "mask_reported_pct": 84.75935828877004,
+        "tone_reported_pct": 60.6951871657754
+      }
+    ],
+    "exposure_drift_control": {
+      "mask_pct": 8.631465517241377,
+      "tone_pct": 4.382183908045977,
+      "mask_pct_mean_removed": 8.426724137931036,
+      "tone_pct_mean_removed": 4.11278735632184,
+      "tone_share_explained_by_frame_mean": 0.06147540983606537,
+      "mask_share_explained_by_frame_mean": 0.02372034956304583
+    }
+  },
+  "verdict": "NOT DITHER. The camera contributes no dither at all: the EMPTY ROOM -- the same camera, the same renderer, nothing moving -- changes 0.0000% of cells, and the frozen static scene changes 0.0000%, while the real capture changes 8.6315%. So the dither fraction is 0.0% and the change is scene change. R1 FAILS, and that is the finding rather than an obstacle: no temporally correlated Gaussian jitter reproduces the observed near-threshold flip curve (best fit 3.73 pp off on bands ['0-0', '1-2', '3-5']), and every grid point that gets the near bands roughly right predicts 0.0000% in the 41+ band against the observed 0.0864%, so the far-from-threshold flips cannot be jitter at any amplitude. The uncorrelated synthetic is flat in lag by construction (7.714% at lag 1, 7.292% at lag 29), while the real capture rises from 8.631% to 39.844% -- and the NULL SCENE (the same content, frozen, with the capture's own global brightness wander) reproduces that rise in the near band (2.398% -> 42.467%) while producing NO far-band flips at any lag. So the measured change splits three ways: 0.0% camera dither, 23.8% the scene's global brightness change amplified by the threshold, and 76.2% local scene change. The 'far-from-threshold floor is structured, not noise' CONCLUSION survives -- but its published REASON (below the 39.98% independence baseline) does not, and the published floor (0.364%) is overstated about 4x by the bit/dot pairing defect.",
+  "consequence": "Four things follow. First, the 'below the independence baseline' argument must be withdrawn: 2p(1-p) is a chance-coincidence rate for UNCORRELATED content, and a static scene is sticky by construction, so every static scene sits below it. The empty room is the null that applies, and it produces no flips at all. Second, the mask's published per-dot table is wrong by construction (the bit/dot pairing) and its 'signal floor' is overstated by about 4x. Third, the recommendation to build motion on the tone channel is WITHDRAWN: it was made on a confounded comparison, and the apples-to-apples comparison (excess over the null scene, plus the sensitivity profile, where the mask detects the scene's change at every magnitude more often) favours the MASK. A lower change rate is not a better channel; the tone's lower rate is a lower SENSITIVITY, because its quantisation step is 28 counts of cell luma. Fourth, the practical consequence for the representation: the threshold-adjacent population carries 85.8% of the dot-level flips and the null scene reproduces most of it, so hysteresis would buy a smaller P-frame by throwing away real small motion rather than by removing noise. The fix the evidence supports is the one ASCII-MOTION.md already reached in its own conclusion: the P-frame should carry the MAGNITUDE of the change, not the per-frame sign of a threshold test.",
+  "not_established": [
+    "that the near-band (threshold-adjacent) flips are camera dither rather than small-scale scene change: the evidence points the other way, but no measurement here separates a sub-pixel scene change from a content-dependent camera artefact",
+    "that the far-band excess is the SUBJECT moving: the empty room establishes only that it is not camera noise",
+    "that this representation separates 'talking to me' from 'talking to someone else' -- no labelled data is involved"
+  ],
+  "provenance": {
+    "generated_by": "experiments/ascii_dither_characterisation.py",
+    "script_path": "/home/proart/projects/communicator/experiments/ascii_dither_characterisation.py",
+    "script_sha256": "b73280107a1b0b60f3626b2939a96847260c40abf3660a6cbb708cfb22de5cd5",
+    "python": "3.14.4 (main, Aug 20 2026, 10:41:58) [GCC 15.2.0]",
+    "python_executable": "/home/proart/projects/glasses/.venv/bin/python",
+    "command_line": "experiments/ascii_dither_characterisation.py",
+    "cli_args": [],
+    "seed": 20261020,
+    "inputs": {
+      "capture": {
+        "path": "/mnt/c/proart_capture/small.nv12",
+        "sha256": "e0c980ca8f1f177b7538e61d938e2c13fb0f2bfed948a9e54c6e7274c93ed591"
+      },
+      "long_capture": {
+        "path": "/mnt/c/proart_capture/A.nv12",
+        "sha256": "b65cf944aa4e8a65932d4c140335a495fa6a1707f28025d40fb08d31fa33bc73"
+      },
+      "empty_capture": {
+        "path": "/mnt/c/proart_capture/empty1.nv12",
+        "sha256": "da348ccaf08c030dedea4b2e070ceb1149a4f11d3e9287e8212a480a58c05303"
+      }
+    },
+    "renderer": {
+      "program": "experiments/ascii_dither_characterisation.py RENDER_C",
+      "note": "the renderer reads the STANDARD NV12 stride of 23,040 bytes/frame, so captures are re-wrapped into standard NV12 first; the re-wrap copies the luma verbatim and only duplicates chroma rows",
+      "frame_bytes": 23040,
+      "braille_thresh": 100
+    },
+    "numpy": "2.5.4"
+  },
+  "supersedes": {
+    "why": "Adds an external calibration, a physical null and a persistence test to two results that had only ever been compared with each other. The earlier numbers are recorded here rather than silently overwritten.",
+    "ascii_motion_threshold_results_json": {
+      "on_threshold_flip_pct": 19.183673469387756,
+      "far_threshold_flip_pct": 0.36446528762059033,
+      "gradient_ratio_on_to_far": 52.635118133274815,
+      "random_floor_pct": 39.98407961998457,
+      "tone_channel_flip_pct": 5.414930555555555,
+      "mask_cell_flip_pct": 9.671875,
+      "previous_verdict": "BOTH ... the far-from-threshold floor of 0.36% is BELOW the 39.98% independence baseline, so that residual is structured, not noise ... the tone channel, not the mask, is the one to build motion on.",
+      "what_is_corrected": [
+        "the bit/dot pairing: the per-dot table's far-band floor is 0.086%, not 0.364%, so the published 'signal floor' is overstated by about 4x",
+        "the inference: being below the independence baseline is not evidence of structure, because the baseline is a chance-coincidence rate and a static scene is sticky",
+        "the tone/mask comparison: a lower change rate is not a better channel; the comparison has to be made on the excess over a null scene",
+        "the wrap-around pair counted as a consecutive pair"
+      ]
+    },
+    "ascii_motion_nulls_results_json": {
+      "N2_lag_change_rate_pct": {
+        "1": 6.979166666666667,
+        "2": 9.505208333333334,
+        "3": 10.989583333333334,
+        "5": 12.760416666666666,
+        "10": 16.588541666666668,
+        "20": 22.552083333333332
+      },
+      "previous_verdict": "SEPARATED: change grows with lag; the delta carries motion.",
+      "what_is_corrected": [
+        "the aggregate differs from the threshold file's (median over 29 pairs vs mean over 30), and the two are not the same statistic",
+        "lag growth is NOT by itself evidence of motion: it is measured on a statistic that mixes the threshold-adjacent and the far populations, and only the far population needs an explanation that is not the threshold"
+      ]
+    }
+  }
+}
