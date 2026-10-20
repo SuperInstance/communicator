@@ -1,0 +1,250 @@
+{
+  "question": "the captures were read at 23,040 bytes per frame; the files are 19,200. What did that cost?",
+  "frame_width": 160,
+  "frame_height": 96,
+  "layouts": {
+    "standard_nv12": 23040,
+    "y_uv_halfres": 19200,
+    "luma_only": 15360
+  },
+  "captures": {
+    "A": {
+      "path": "/mnt/c/proart_capture/A.nv12",
+      "size_bytes": 17280000,
+      "sha256": "b65cf944aa4e8a65932d4c140335a495fa6a1707f28025d40fb08d31fa33bc73",
+      "wav_seconds": 29.981,
+      "candidates": {
+        "standard_nv12": {
+          "divides_evenly": true,
+          "stride_bytes": 23040,
+          "n_frames": 750,
+          "mean_consecutive_frame_diff": 43.5596,
+          "duration_at_30fps_s": 25.0,
+          "matches_audio_duration": false
+        },
+        "y_uv_halfres": {
+          "divides_evenly": true,
+          "stride_bytes": 19200,
+          "n_frames": 900,
+          "mean_consecutive_frame_diff": 0.5449,
+          "duration_at_30fps_s": 30.0,
+          "matches_audio_duration": true
+        },
+        "luma_only": {
+          "divides_evenly": true,
+          "stride_bytes": 15360,
+          "n_frames": 1125,
+          "mean_consecutive_frame_diff": 43.5542,
+          "duration_at_30fps_s": 37.5,
+          "matches_audio_duration": false
+        }
+      },
+      "detected": {
+        "layout": "y_uv_halfres",
+        "stride_bytes": 19200,
+        "n_frames": 900,
+        "luma_bytes": 15360,
+        "mean_consecutive_frame_diff": 0.544891,
+        "runner_up_layout": "luma_only",
+        "runner_up_mean_consecutive_frame_diff": 43.554164,
+        "margin_over_runner_up": 79.932,
+        "chroma": "interleaved U,V, 80x24 samples"
+      }
+    },
+    "B": {
+      "path": "/mnt/c/proart_capture/B.nv12",
+      "size_bytes": 17280000,
+      "sha256": "c87269568fabea99d39bc40b46e9a8d3026c72c241d8194f7d9c27181e893e04",
+      "wav_seconds": 29.981,
+      "candidates": {
+        "standard_nv12": {
+          "divides_evenly": true,
+          "stride_bytes": 23040,
+          "n_frames": 750,
+          "mean_consecutive_frame_diff": 37.7402,
+          "duration_at_30fps_s": 25.0,
+          "matches_audio_duration": false
+        },
+        "y_uv_halfres": {
+          "divides_evenly": true,
+          "stride_bytes": 19200,
+          "n_frames": 900,
+          "mean_consecutive_frame_diff": 0.4332,
+          "duration_at_30fps_s": 30.0,
+          "matches_audio_duration": true
+        },
+        "luma_only": {
+          "divides_evenly": true,
+          "stride_bytes": 15360,
+          "n_frames": 1125,
+          "mean_consecutive_frame_diff": 37.7304,
+          "duration_at_30fps_s": 37.5,
+          "matches_audio_duration": false
+        }
+      },
+      "detected": {
+        "layout": "y_uv_halfres",
+        "stride_bytes": 19200,
+        "n_frames": 900,
+        "luma_bytes": 15360,
+        "mean_consecutive_frame_diff": 0.433207,
+        "runner_up_layout": "luma_only",
+        "runner_up_mean_consecutive_frame_diff": 37.730449,
+        "margin_over_runner_up": 87.096,
+        "chroma": "interleaved U,V, 80x24 samples"
+      }
+    },
+    "C": {
+      "path": "/mnt/c/proart_capture/C.nv12",
+      "size_bytes": 17280000,
+      "sha256": "937ac321bc436ea41b50508b5431f7c6862f32641c127c7800191b9ce080e5cf",
+      "wav_seconds": 29.981,
+      "candidates": {
+        "standard_nv12": {
+          "divides_evenly": true,
+          "stride_bytes": 23040,
+          "n_frames": 750,
+          "mean_consecutive_frame_diff": 42.9348,
+          "duration_at_30fps_s": 25.0,
+          "matches_audio_duration": false
+        },
+        "y_uv_halfres": {
+          "divides_evenly": true,
+          "stride_bytes": 19200,
+          "n_frames": 900,
+          "mean_consecutive_frame_diff": 0.3667,
+          "duration_at_30fps_s": 30.0,
+          "matches_audio_duration": true
+        },
+        "luma_only": {
+          "divides_evenly": true,
+          "stride_bytes": 15360,
+          "n_frames": 1125,
+          "mean_consecutive_frame_diff": 42.9217,
+          "duration_at_30fps_s": 37.5,
+          "matches_audio_duration": false
+        }
+      },
+      "detected": {
+        "layout": "y_uv_halfres",
+        "stride_bytes": 19200,
+        "n_frames": 900,
+        "luma_bytes": 15360,
+        "mean_consecutive_frame_diff": 0.366688,
+        "runner_up_layout": "luma_only",
+        "runner_up_mean_consecutive_frame_diff": 42.921703,
+        "margin_over_runner_up": 117.052,
+        "chroma": "interleaved U,V, 80x24 samples"
+      }
+    },
+    "empty1": {
+      "path": "/mnt/c/proart_capture/empty1.nv12",
+      "size_bytes": 86400000,
+      "sha256": "da348ccaf08c030dedea4b2e070ceb1149a4f11d3e9287e8212a480a58c05303",
+      "wav_seconds": 149.906,
+      "candidates": {
+        "standard_nv12": {
+          "divides_evenly": true,
+          "stride_bytes": 23040,
+          "n_frames": 3750,
+          "mean_consecutive_frame_diff": 39.2951,
+          "duration_at_30fps_s": 125.0,
+          "matches_audio_duration": false
+        },
+        "y_uv_halfres": {
+          "divides_evenly": true,
+          "stride_bytes": 19200,
+          "n_frames": 4500,
+          "mean_consecutive_frame_diff": 0.0053,
+          "duration_at_30fps_s": 150.0,
+          "matches_audio_duration": true
+        },
+        "luma_only": {
+          "divides_evenly": true,
+          "stride_bytes": 15360,
+          "n_frames": 5625,
+          "mean_consecutive_frame_diff": 39.2938,
+          "duration_at_30fps_s": 187.5,
+          "matches_audio_duration": false
+        }
+      },
+      "detected": {
+        "layout": "y_uv_halfres",
+        "stride_bytes": 19200,
+        "n_frames": 4500,
+        "luma_bytes": 15360,
+        "mean_consecutive_frame_diff": 0.005277,
+        "runner_up_layout": "luma_only",
+        "runner_up_mean_consecutive_frame_diff": 39.293797,
+        "margin_over_runner_up": 7446.099,
+        "chroma": "interleaved U,V, 80x24 samples"
+      }
+    }
+  },
+  "payoff": {
+    "regions": {
+      "mouth": [
+        46,
+        58,
+        62,
+        86
+      ],
+      "cheek": [
+        46,
+        58,
+        92,
+        116
+      ]
+    },
+    "correct_stride": {
+      "mean_consecutive_frame_diff": {
+        "A": 0.5449,
+        "B": 0.4332,
+        "C": 0.3667
+      },
+      "mouth_A_minus_C": 0.8044,
+      "mouth_effect_size_sd": 0.7333,
+      "mouth_auc_A_gt_C": 0.6753,
+      "cheek_A_minus_C": 0.3267,
+      "cheek_effect_size_sd": 0.4771,
+      "cheek_auc_A_gt_C": 0.6736,
+      "mouth_specific_excess_sd": 0.2563,
+      "mouth_over_cheek_ratio": 1.537
+    },
+    "wrong_stride": {
+      "mean_consecutive_frame_diff": {
+        "A": 43.5596,
+        "B": 37.7402,
+        "C": 42.9348
+      },
+      "mouth_A_minus_C": -2.4699,
+      "mouth_effect_size_sd": -0.1832,
+      "mouth_auc_A_gt_C": 0.4598,
+      "cheek_A_minus_C": 0.7442,
+      "cheek_effect_size_sd": 0.0275,
+      "cheek_auc_A_gt_C": 0.5414,
+      "mouth_specific_excess_sd": -0.2107,
+      "mouth_over_cheek_ratio": -6.675
+    },
+    "permutation_null": {
+      "statistic": "effect size (A vs C) of the mouth region's motion",
+      "observed": 0.7333,
+      "null_mean": -0.0019,
+      "null_sd": 0.0673,
+      "z": 10.92
+    },
+    "empty_room": {
+      "mouth_motion": 0.000196,
+      "A_mouth_motion": 1.293648,
+      "C_mouth_motion": 0.489263,
+      "empty_over_A": 0.000152,
+      "empty_over_C": 0.000401
+    }
+  },
+  "provenance": {
+    "script": "experiments/nv12_stride_audit.py",
+    "script_sha256": "19ab515ac410bf25279e1681b7b598a08f8dc4a2cdee548df9495bd2e6e583e7",
+    "captures_dir": "/mnt/c/proart_capture",
+    "numpy": "2.5.4"
+  }
+}
