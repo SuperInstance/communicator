@@ -1552,5 +1552,37 @@ The LLM director (`experiments/debrief.py`) is audited against ten claims
 drawn from this project's own retracted history — and that audit set's
 answer key was written against the torn frames. Two of its three "still
 standing" claims are now false (both row-removal claims), so the set holds
-**9 false and 1 true** instead of 7 and 3. The re-audit is in
+**9 false and 1 true** instead of 7 and 3. Only the acoustics claim
+(−73.5 dBFS, 119 transients, zero RT60) survives, and it survives because
+the stride cannot have touched the audio.
+
+**The corrected key moved the director's score by up to 0.76, and it moved
+it the right way** — the new key penalises exactly the failure this repo
+cares about, endorsing a withdrawn number. And with the corrected key,
+**two of the three models are worse than chance in context mode** (llama
+−0.667, qwen −0.556; gpt-oss 0.000 — perfect rejection of 9/9 false
+claims *plus* perfect accusation of the one true claim, caught it by the
+neck).
+
+**And the cause was measured, not guessed.** `collect_materials` caps each
+note *after* building the keep-set, so **47 of 49 notes lose their tails**
+— and the retraction notices live in the tails. The acoustics value and
+the teacher's new LOO value never reach the prompt, so the director's
+reason for rejecting the only true claim — *"No cited evidence provides the
+−73.5 dBFS floor"* — is **correct about the prompt and wrong about the
+world**. The same failure `LLM-DIRECTOR.md` §5 recorded on 2026-10-19, and
+that night's fix does not survive the corpus growth.
+
+**More evidence does make the director better**, model held constant,
+corrected key throughout: median headline −0.444 at 20,000 chars, −0.222
+at 60,000, 0.000 at 140,000, **+1.000 at 240,000** (spread 0.111). The
+committed scores are a **starved** director — the best arm is double the
+committed budget. And the director **echoes the notes**: its proposal is
+yesterday's reworded (Jaccard 0.312 against the repo's own ≈0.29
+threshold), it skips Condition D, and it picked the plan item already
+marked as blocked on hardware. Its genuine contribution is negative and
+worth having — **the proposal it produced fails the repo's own standard**
+(its null triggers its own falsifier; its hypothesis contradicts its
+margin), and that is catchable in two lines of code. The useful role for
+the instrument is **auditing the plan, not writing it**. Full account in
 `docs/research/DEBRIEF-REAUDIT.md`.
