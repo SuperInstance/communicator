@@ -838,6 +838,115 @@ quantised and the noise is the same size as the quantum, so:
 instrument's resolution, and it should have been made before the first
 comparison was run, not after the eleventh.**
 
+### 4.8 The comparison the instrument's resolution can actually support
+
+This section is the **new method**, and it replaces §7's comparison with
+one the metric can resolve.
+
+**THE ARITHMETIC OF THE OLD DESIGN, STATED BEFORE THE NUMBERS.** The
+sweep compared medians of **three repeats per budget**. A two-sided exact
+sign test on three paired samples has a smallest attainable p-value of
+**2/8 = 0.25**. So the sweep's design **could not have produced a
+significant result at p < 0.05 at any effect size whatsoever** — not at
++1.444, not at +0.1111, not at +10. The verdict label it was given,
+*"EFFECT RESOLVED"*, was not available to that design.
+
+**AND THE CLAIM-LEVEL TEST IS ALSO SMALL.** The exact McNemar test's
+p-value depends on the **smaller arm of the split**, which makes it
+conservative. On nine claims:
+
+| split (gained : lost) | p (two-sided) | significant at 0.05? |
+|---|---|---|
+| 9 : 0 | 0.0039 | **yes** |
+| 8 : 1 | 0.0391 | **yes** |
+| 7 : 2 | 0.1797 | no |
+| 6 : 3 | 0.5078 | no |
+| 5 : 4 | 1.0000 | no |
+| 3 : 6 | 0.5078 | no |
+| 0 : 9 | 0.0039 | **yes** |
+
+**On nine claims the test rejects only when at least 8 of the 9 move in
+one direction.** A shift of 6 claims one way and none the other gives
+p = 0.031. So the *minimum detectable effect* for this instrument is
+**6 of 9 claims** — against a claimed effect of **one claim**.
+
+**THE EXPERIMENT** (`experiments/debrief_paired_analysis.py`, results in
+`experiments/debrief_paired_analysis_results.json`). Model held constant,
+budget varied, three repeats per budget, and every comparison done two
+ways: on the paired repeats, and on the **nine claims** with each claim
+aggregated across its repeats.
+
+**AND HERE IS THE TRAP, WHICH IS THE POINT OF THE WHOLE SECTION.** The
+first implementation pooled the repeats and ran McNemar on **27** pairs —
+the same nine claims measured three times, treated as 27 independent
+observations. That is anti-conservative, and it is not a small
+correction. The experiment was then **run twice**, and the two runs are
+the evidence:
+
+**The claim-level test — the pre-registered unit, nine claims:**
+
+| step | run A | run B |
+|---|---|---|
+| 20,000 → 60,000 | gained 1, lost 3, **p = 0.6250** (worse) | gained 1, lost 2, **p = 1.0000** (worse) |
+| 60,000 → 140,000 | gained 3, lost 0, **p = 0.2500** (better) | gained 2, lost 0, **p = 0.5000** (better) |
+| 140,000 → 240,000 | gained 0, lost 0, **p = 1.0000** — all nine claims agree | gained 0, lost 0, **p = 1.0000** — all nine claims agree |
+
+**NEVER SIGNIFICIFICANT, AT ANY STEP, IN EITHER RUN.** And the *direction*
+is stable across both runs: the 20,000 → 60,000 step goes the **wrong
+way** both times, and the 140,000 → 240,000 step is a **tie** both times —
+in both runs the two budgets are literally indistinguishable, with all
+nine claims agreeing.
+
+**The pooled-over-repeats test — the same nine claims counted three
+times:**
+
+| step | run A | run B |
+|---|---|---|
+| 20,000 → 60,000 | p = 0.5078 | p = 1.0000 |
+| 60,000 → 140,000 | **p = 0.0391 — "significant"** | p = 0.2188 — not significant |
+| 140,000 → 240,000 | p = 0.5078 | p = 1.0000 |
+
+**The pooled statistic crosses the 0.05 line in one run and not in the
+other.** That is the whole lesson in one line: counting the same nine
+claims three times as twenty-seven observations does not add evidence, it
+adds **variance** — enough variance to manufacture a p of 0.039 out of
+nothing on one run and not on the next. The claim-level test never
+crossed the line in either run.
+
+**The script's first implementation violated its own pre-registered rule**
+— which says *"exact McNemar on the nine false claims"* — and the fix is
+in the code now, with the pooled figure kept and labelled so the mistake
+stays visible. The committed results are run B; run A's numbers are
+above and in the run log.
+
+**THE CONTROLS, AND THEY COME OUT THE OTHER WAY.**
+
+- **The null arm** — a budget compared with **itself** — gives **0
+  discordant claims and p = 1.0000**, with all three repeats tied. The
+  machinery is sound.
+- **The reversed pairing** (240,000 → 20,000) reports the **opposite
+  direction**: gained 0, lost 1, p = 1.0000, direction
+  `more_evidence_is_worse`. The test can come out the other way.
+- The sign test on the paired repeats reports a **minimum attainable p of
+  0.25** at n = 3, in every cell, which is the arithmetic above stated
+  as a number.
+
+**THE VERDICT, AT THE CORRECT UNIT: "MORE EVIDENCE MAKES THE DIRECTOR
+BETTER" IS NOT SUPPORTED.** No step of the budget curve is significant,
+in either run, at the unit the rule names. The last step is the cleanest
+possible null: **the two arms agree on all nine claims**, twice.
+
+**AND THE DIRECTION IS NOT MONOTONE.** The step from 20,000 to 60,000
+goes the **wrong way** in both runs.
+
+**WHAT THE INSTRUMENT WOULD NEED INSTEAD.** Not a bigger effect — a
+bigger *audit set*. With nine false claims, the minimum detectable shift
+is six of them. To detect a shift of one or two claims at p < 0.05, this
+instrument needs roughly **forty** false claims, drawn from the
+repository's own settled findings. §9's finding 3 said the audit set
+needs more true items; it needs more items **on both sides**, because
+specificity is currently a **single bit** and moves in steps of 1.000.
+
 ---
 
 ## 5. The proposal audit
@@ -1123,6 +1232,17 @@ is given enough of it.**
 > reasoning. That still holds. It is the *size of the effect* that was
 > wrong, and it was wrong because the broken pool's contents were doing
 > the work.
+>
+> > **AND §4.8 RE-ANALYSES THIS SAME QUESTION IN THE UNIT THE METRIC CAN
+> > RESOLVE, AND THE ANSWER IS "NOT SUPPORTED".** The comparison above
+> > compares medians of three repeats. §4.8 pairs the arms claim by claim,
+> > and the pre-registered claim-level test gives **p = 0.2500** for the
+> > only step that looked significant under an anti-conservative pooled
+> > test, and **p = 1.0000** (the two arms agree on all nine claims) for
+> > the last step. No step of this curve is significant, the direction is
+> > not monotone, and the design's smallest attainable p at three repeats
+> > is **0.25** — so this sweep could not have answered the question at
+> > any effect size. See §4.8.
 
 ---
 
@@ -1269,6 +1389,22 @@ is given enough of it.**
 >    more than it measures the director's originality. If the director is
 >    to be compared against the repository's own next steps, compare the
 >    *choice* and not the wording.
+> 8. **NEW — THE AUDIT SET IS TOO SMALL TO MEASURE THE EFFECT, AND THE
+>    ANALYSIS HID THAT.** The headline is quantised at 1/9 and the
+>    run-to-run spread is one to two quanta. A paired claim-level test on
+>    nine claims needs **six claims** to move one way to clear p = 0.05,
+>    and the sweep's three-repeats-per-budget design has a smallest
+>    attainable p of **0.25** — so it could not have answered the
+>    question at any effect size. Worse, pooling the repeats turns the
+>    same nine claims into twenty-seven "independent" observations, and
+>    the pooled p crossed 0.05 in one run of the experiment (**0.0391**)
+>    and did not in the next (**0.2188**) — a false positive manufactured
+>    by counting the same thing three times. The claim-level test was
+>    never significant in either run. The fix is in the code and the
+>    pooled number is kept and labelled. The real fix is an audit set of
+>    roughly **forty** claims drawn from the repository's own settled
+>    findings, with more than one true item so that specificity is not a
+>    single bit.
 
 ---
 

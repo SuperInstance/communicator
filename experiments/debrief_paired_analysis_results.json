@@ -1,0 +1,984 @@
+{
+  "date": "2026-10-20",
+  "question": "Does MORE evidence make the director better? The previous sweep compared medians of three repeats and found +0.1111, which is exactly one quantum of a metric whose run-to-run spread is one to two quanta. This file asks the question in the unit the metric can resolve: claims, in pairs.",
+  "pre_registered_rules": {
+    "more_evidence_helps_if": "a paired CLAIM-level test (exact McNemar on the nine false claims, each claim aggregated across the repeats) rejects at p < 0.05 with more claims caught at the larger budget",
+    "the_unit_of_analysis_is": "THE CLAIM (nine of them), not the claim-repeat. The same nine claims are measured at every repeat, so pooling the repeats gives twenty-seven observations of nine things treated as independent. That is anti-conservative, and it is not a small correction: on the 60,000 -> 140,000 step the pooled p is 0.031 and the claim-level p is 0.500.",
+    "the_effect_is_below_the_noise_if": "the paired test does not reject at p < 0.05, OR the design cannot reach p < 0.05 at any effect size",
+    "the_claim_level_test_is_valid_if": "the NULL ARM -- a budget compared with itself -- gives zero discordant claims and p = 1.0",
+    "the_test_can_come_out_the_other_way_if": "the REVERSED pairing reports the opposite direction or an opposite sign",
+    "verdict_is_written_before_the_numbers_are_read": true
+  },
+  "model": "@cf/openai/gpt-oss-120b",
+  "repeats_per_budget": 3,
+  "budgets": [
+    20000,
+    60000,
+    140000,
+    240000
+  ],
+  "arms": [
+    {
+      "limit": 20000,
+      "runs": [
+        {
+          "repeat": 1,
+          "limit": 20000,
+          "elapsed_s": 28.87,
+          "error": null,
+          "caught_flags": [
+            true,
+            true,
+            true,
+            true,
+            true,
+            true,
+            true,
+            false,
+            true
+          ],
+          "n_false_claims": 9,
+          "n_caught": 8,
+          "n_kept_true": 0,
+          "n_uncertain": 0,
+          "headline": -0.11111111111111116
+        },
+        {
+          "repeat": 2,
+          "limit": 20000,
+          "elapsed_s": 17.15,
+          "error": null,
+          "caught_flags": [
+            true,
+            true,
+            true,
+            true,
+            true,
+            true,
+            true,
+            false,
+            true
+          ],
+          "n_false_claims": 9,
+          "n_caught": 8,
+          "n_kept_true": 0,
+          "n_uncertain": 0,
+          "headline": -0.11111111111111116
+        },
+        {
+          "repeat": 3,
+          "limit": 20000,
+          "elapsed_s": 30.88,
+          "error": null,
+          "caught_flags": [
+            true,
+            false,
+            true,
+            true,
+            true,
+            false,
+            true,
+            false,
+            false
+          ],
+          "n_false_claims": 9,
+          "n_caught": 5,
+          "n_kept_true": 0,
+          "n_uncertain": 2,
+          "headline": -0.4444444444444444
+        }
+      ]
+    },
+    {
+      "limit": 60000,
+      "runs": [
+        {
+          "repeat": 1,
+          "limit": 60000,
+          "elapsed_s": 22.86,
+          "error": null,
+          "caught_flags": [
+            true,
+            false,
+            true,
+            true,
+            true,
+            true,
+            true,
+            true,
+            false
+          ],
+          "n_false_claims": 9,
+          "n_caught": 7,
+          "n_kept_true": 0,
+          "n_uncertain": 3,
+          "headline": -0.2222222222222222
+        },
+        {
+          "repeat": 2,
+          "limit": 60000,
+          "elapsed_s": 23.55,
+          "error": null,
+          "caught_flags": [
+            true,
+            false,
+            true,
+            true,
+            true,
+            false,
+            false,
+            false,
+            true
+          ],
+          "n_false_claims": 9,
+          "n_caught": 5,
+          "n_kept_true": 0,
+          "n_uncertain": 3,
+          "headline": -0.4444444444444444
+        },
+        {
+          "repeat": 3,
+          "limit": 60000,
+          "elapsed_s": 13.43,
+          "error": null,
+          "caught_flags": [
+            true,
+            true,
+            true,
+            true,
+            true,
+            false,
+            true,
+            true,
+            true
+          ],
+          "n_false_claims": 9,
+          "n_caught": 8,
+          "n_kept_true": 0,
+          "n_uncertain": 1,
+          "headline": -0.11111111111111116
+        }
+      ]
+    },
+    {
+      "limit": 140000,
+      "runs": [
+        {
+          "repeat": 1,
+          "limit": 140000,
+          "elapsed_s": 33.67,
+          "error": null,
+          "caught_flags": [
+            true,
+            true,
+            false,
+            true,
+            true,
+            true,
+            true,
+            true,
+            true
+          ],
+          "n_false_claims": 9,
+          "n_caught": 8,
+          "n_kept_true": 0,
+          "n_uncertain": 2,
+          "headline": -0.11111111111111116
+        },
+        {
+          "repeat": 2,
+          "limit": 140000,
+          "elapsed_s": 46.14,
+          "error": null,
+          "caught_flags": [
+            true,
+            false,
+            true,
+            true,
+            true,
+            false,
+            true,
+            true,
+            true
+          ],
+          "n_false_claims": 9,
+          "n_caught": 7,
+          "n_kept_true": 0,
+          "n_uncertain": 1,
+          "headline": -0.2222222222222222
+        },
+        {
+          "repeat": 3,
+          "limit": 140000,
+          "elapsed_s": 50.87,
+          "error": null,
+          "caught_flags": [
+            true,
+            true,
+            true,
+            true,
+            true,
+            true,
+            true,
+            true,
+            true
+          ],
+          "n_false_claims": 9,
+          "n_caught": 9,
+          "n_kept_true": 0,
+          "n_uncertain": 0,
+          "headline": 0.0
+        }
+      ]
+    },
+    {
+      "limit": 240000,
+      "runs": [
+        {
+          "repeat": 1,
+          "limit": 240000,
+          "elapsed_s": 46.13,
+          "error": null,
+          "caught_flags": [
+            true,
+            true,
+            true,
+            true,
+            true,
+            true,
+            true,
+            true,
+            false
+          ],
+          "n_false_claims": 9,
+          "n_caught": 8,
+          "n_kept_true": 0,
+          "n_uncertain": 0,
+          "headline": -0.11111111111111116
+        },
+        {
+          "repeat": 2,
+          "limit": 240000,
+          "elapsed_s": 43.85,
+          "error": null,
+          "caught_flags": [
+            true,
+            true,
+            true,
+            true,
+            true,
+            true,
+            true,
+            true,
+            true
+          ],
+          "n_false_claims": 9,
+          "n_caught": 9,
+          "n_kept_true": 0,
+          "n_uncertain": 0,
+          "headline": 0.0
+        },
+        {
+          "repeat": 3,
+          "limit": 240000,
+          "elapsed_s": 42.78,
+          "error": null,
+          "caught_flags": [
+            true,
+            true,
+            true,
+            true,
+            true,
+            false,
+            true,
+            true,
+            true
+          ],
+          "n_false_claims": 9,
+          "n_caught": 8,
+          "n_kept_true": 0,
+          "n_uncertain": 0,
+          "headline": -0.11111111111111116
+        }
+      ]
+    }
+  ],
+  "comparisons": [
+    {
+      "label": "20000 -> 60000",
+      "budget_a": 20000,
+      "budget_b": 60000,
+      "n_repeats_paired": 3,
+      "median_caught_a": 8,
+      "median_caught_b": 7,
+      "sign_test_on_repeat_headlines": {
+        "n_pairs": 3,
+        "n_nonzero": 3,
+        "n_positive": 1,
+        "n_negative": 2,
+        "n_ties": 0,
+        "p_two_sided": 1.0,
+        "min_attainable_p_two_sided": 0.25,
+        "direction": "more_evidence_is_worse",
+        "note": "min_attainable_p is the smallest p this n can produce; a design whose minimum attainable p is above 0.05 CANNOT produce a significant result at any effect size"
+      },
+      "sign_test_on_repeat_claim_counts": {
+        "n_pairs": 3,
+        "n_nonzero": 3,
+        "n_positive": 1,
+        "n_negative": 2,
+        "n_ties": 0,
+        "p_two_sided": 1.0,
+        "min_attainable_p_two_sided": 0.25,
+        "direction": "more_evidence_is_worse",
+        "note": "min_attainable_p is the smallest p this n can produce; a design whose minimum attainable p is above 0.05 CANNOT produce a significant result at any effect size"
+      },
+      "mcnemar_on_claims": {
+        "n_pairs": 9,
+        "b_lost": 2,
+        "c_gained": 1,
+        "n_concordant_both": 6,
+        "n_concordant_neither": 0,
+        "p_two_sided": 1.0,
+        "min_detectable_shift_at_p05": null,
+        "direction": "more_evidence_is_worse"
+      },
+      "mcnemar_pooled_over_repeats_ANTI_CONSERVATIVE": {
+        "n_pairs": 27,
+        "b_lost": 5,
+        "c_gained": 4,
+        "n_concordant_both": 16,
+        "n_concordant_neither": 2,
+        "p_two_sided": 1.0,
+        "min_detectable_shift_at_p05": 6,
+        "direction": "more_evidence_is_worse",
+        "why_it_is_not_the_test": "this pools the same nine claims across the repeats and treats the twenty-seven observations as independent. The claims are the same nine, so the observations are correlated, and the p-value is too small. It is reported because it is the number a careless analysis produces, and it disagrees with the pre-registered one."
+      },
+      "headline_pairs": [
+        [
+          -0.11111111111111116,
+          -0.2222222222222222
+        ],
+        [
+          -0.11111111111111116,
+          -0.4444444444444444
+        ],
+        [
+          -0.4444444444444444,
+          -0.11111111111111116
+        ]
+      ],
+      "claim_count_pairs": [
+        [
+          8,
+          7
+        ],
+        [
+          8,
+          5
+        ],
+        [
+          5,
+          8
+        ]
+      ],
+      "claim_level_pairs": [
+        [
+          true,
+          true
+        ],
+        [
+          true,
+          false
+        ],
+        [
+          true,
+          true
+        ],
+        [
+          true,
+          true
+        ],
+        [
+          true,
+          true
+        ],
+        [
+          true,
+          false
+        ],
+        [
+          true,
+          true
+        ],
+        [
+          false,
+          true
+        ],
+        [
+          true,
+          true
+        ]
+      ],
+      "detectable_at_p05": false
+    },
+    {
+      "label": "60000 -> 140000",
+      "budget_a": 60000,
+      "budget_b": 140000,
+      "n_repeats_paired": 3,
+      "median_caught_a": 7,
+      "median_caught_b": 8,
+      "sign_test_on_repeat_headlines": {
+        "n_pairs": 3,
+        "n_nonzero": 3,
+        "n_positive": 3,
+        "n_negative": 0,
+        "n_ties": 0,
+        "p_two_sided": 0.25,
+        "min_attainable_p_two_sided": 0.25,
+        "direction": "more_evidence_is_better",
+        "note": "min_attainable_p is the smallest p this n can produce; a design whose minimum attainable p is above 0.05 CANNOT produce a significant result at any effect size"
+      },
+      "sign_test_on_repeat_claim_counts": {
+        "n_pairs": 3,
+        "n_nonzero": 3,
+        "n_positive": 3,
+        "n_negative": 0,
+        "n_ties": 0,
+        "p_two_sided": 0.25,
+        "min_attainable_p_two_sided": 0.25,
+        "direction": "more_evidence_is_better",
+        "note": "min_attainable_p is the smallest p this n can produce; a design whose minimum attainable p is above 0.05 CANNOT produce a significant result at any effect size"
+      },
+      "mcnemar_on_claims": {
+        "n_pairs": 9,
+        "b_lost": 0,
+        "c_gained": 2,
+        "n_concordant_both": 7,
+        "n_concordant_neither": 0,
+        "p_two_sided": 0.5,
+        "min_detectable_shift_at_p05": null,
+        "direction": "more_evidence_is_better"
+      },
+      "mcnemar_pooled_over_repeats_ANTI_CONSERVATIVE": {
+        "n_pairs": 27,
+        "b_lost": 1,
+        "c_gained": 5,
+        "n_concordant_both": 19,
+        "n_concordant_neither": 2,
+        "p_two_sided": 0.21875,
+        "min_detectable_shift_at_p05": 6,
+        "direction": "more_evidence_is_better",
+        "why_it_is_not_the_test": "this pools the same nine claims across the repeats and treats the twenty-seven observations as independent. The claims are the same nine, so the observations are correlated, and the p-value is too small. It is reported because it is the number a careless analysis produces, and it disagrees with the pre-registered one."
+      },
+      "headline_pairs": [
+        [
+          -0.2222222222222222,
+          -0.11111111111111116
+        ],
+        [
+          -0.4444444444444444,
+          -0.2222222222222222
+        ],
+        [
+          -0.11111111111111116,
+          0.0
+        ]
+      ],
+      "claim_count_pairs": [
+        [
+          7,
+          8
+        ],
+        [
+          5,
+          7
+        ],
+        [
+          8,
+          9
+        ]
+      ],
+      "claim_level_pairs": [
+        [
+          true,
+          true
+        ],
+        [
+          false,
+          true
+        ],
+        [
+          true,
+          true
+        ],
+        [
+          true,
+          true
+        ],
+        [
+          true,
+          true
+        ],
+        [
+          false,
+          true
+        ],
+        [
+          true,
+          true
+        ],
+        [
+          true,
+          true
+        ],
+        [
+          true,
+          true
+        ]
+      ],
+      "detectable_at_p05": false
+    },
+    {
+      "label": "140000 -> 240000",
+      "budget_a": 140000,
+      "budget_b": 240000,
+      "n_repeats_paired": 3,
+      "median_caught_a": 8,
+      "median_caught_b": 8,
+      "sign_test_on_repeat_headlines": {
+        "n_pairs": 3,
+        "n_nonzero": 2,
+        "n_positive": 1,
+        "n_negative": 1,
+        "n_ties": 1,
+        "p_two_sided": 1.0,
+        "min_attainable_p_two_sided": 0.5,
+        "direction": "tie",
+        "note": "min_attainable_p is the smallest p this n can produce; a design whose minimum attainable p is above 0.05 CANNOT produce a significant result at any effect size"
+      },
+      "sign_test_on_repeat_claim_counts": {
+        "n_pairs": 3,
+        "n_nonzero": 2,
+        "n_positive": 1,
+        "n_negative": 1,
+        "n_ties": 1,
+        "p_two_sided": 1.0,
+        "min_attainable_p_two_sided": 0.5,
+        "direction": "tie",
+        "note": "min_attainable_p is the smallest p this n can produce; a design whose minimum attainable p is above 0.05 CANNOT produce a significant result at any effect size"
+      },
+      "mcnemar_on_claims": {
+        "n_pairs": 9,
+        "b_lost": 0,
+        "c_gained": 0,
+        "n_concordant_both": 9,
+        "n_concordant_neither": 0,
+        "p_two_sided": 1.0,
+        "direction": "tie",
+        "min_detectable_shift_at_p05": 6,
+        "note": "no discordant claim: the two arms agree on every claim"
+      },
+      "mcnemar_pooled_over_repeats_ANTI_CONSERVATIVE": {
+        "n_pairs": 27,
+        "b_lost": 2,
+        "c_gained": 3,
+        "n_concordant_both": 22,
+        "n_concordant_neither": 0,
+        "p_two_sided": 1.0,
+        "min_detectable_shift_at_p05": null,
+        "direction": "more_evidence_is_better",
+        "why_it_is_not_the_test": "this pools the same nine claims across the repeats and treats the twenty-seven observations as independent. The claims are the same nine, so the observations are correlated, and the p-value is too small. It is reported because it is the number a careless analysis produces, and it disagrees with the pre-registered one."
+      },
+      "headline_pairs": [
+        [
+          -0.11111111111111116,
+          -0.11111111111111116
+        ],
+        [
+          -0.2222222222222222,
+          0.0
+        ],
+        [
+          0.0,
+          -0.11111111111111116
+        ]
+      ],
+      "claim_count_pairs": [
+        [
+          8,
+          8
+        ],
+        [
+          7,
+          9
+        ],
+        [
+          9,
+          8
+        ]
+      ],
+      "claim_level_pairs": [
+        [
+          true,
+          true
+        ],
+        [
+          true,
+          true
+        ],
+        [
+          true,
+          true
+        ],
+        [
+          true,
+          true
+        ],
+        [
+          true,
+          true
+        ],
+        [
+          true,
+          true
+        ],
+        [
+          true,
+          true
+        ],
+        [
+          true,
+          true
+        ],
+        [
+          true,
+          true
+        ]
+      ],
+      "detectable_at_p05": false
+    }
+  ],
+  "null_arm": {
+    "label": "null arm: same budget twice",
+    "budget_a": 240000,
+    "budget_b": 240000,
+    "n_repeats_paired": 3,
+    "median_caught_a": 8,
+    "median_caught_b": 8,
+    "sign_test_on_repeat_headlines": {
+      "n_pairs": 3,
+      "n_nonzero": 0,
+      "n_positive": 0,
+      "n_negative": 0,
+      "n_ties": 3,
+      "p_two_sided": 1.0,
+      "min_attainable_p_two_sided": 1.0,
+      "direction": "tie",
+      "note": "no discordant pair: the two arms are identical"
+    },
+    "sign_test_on_repeat_claim_counts": {
+      "n_pairs": 3,
+      "n_nonzero": 0,
+      "n_positive": 0,
+      "n_negative": 0,
+      "n_ties": 3,
+      "p_two_sided": 1.0,
+      "min_attainable_p_two_sided": 1.0,
+      "direction": "tie",
+      "note": "no discordant pair: the two arms are identical"
+    },
+    "mcnemar_on_claims": {
+      "n_pairs": 9,
+      "b_lost": 0,
+      "c_gained": 0,
+      "n_concordant_both": 9,
+      "n_concordant_neither": 0,
+      "p_two_sided": 1.0,
+      "direction": "tie",
+      "min_detectable_shift_at_p05": 6,
+      "note": "no discordant claim: the two arms agree on every claim"
+    },
+    "mcnemar_pooled_over_repeats_ANTI_CONSERVATIVE": {
+      "n_pairs": 27,
+      "b_lost": 0,
+      "c_gained": 0,
+      "n_concordant_both": 25,
+      "n_concordant_neither": 2,
+      "p_two_sided": 1.0,
+      "direction": "tie",
+      "min_detectable_shift_at_p05": 6,
+      "note": "no discordant claim: the two arms agree on every claim",
+      "why_it_is_not_the_test": "this pools the same nine claims across the repeats and treats the twenty-seven observations as independent. The claims are the same nine, so the observations are correlated, and the p-value is too small. It is reported because it is the number a careless analysis produces, and it disagrees with the pre-registered one."
+    },
+    "headline_pairs": [
+      [
+        -0.11111111111111116,
+        -0.11111111111111116
+      ],
+      [
+        0.0,
+        0.0
+      ],
+      [
+        -0.11111111111111116,
+        -0.11111111111111116
+      ]
+    ],
+    "claim_count_pairs": [
+      [
+        8,
+        8
+      ],
+      [
+        9,
+        9
+      ],
+      [
+        8,
+        8
+      ]
+    ],
+    "claim_level_pairs": [
+      [
+        true,
+        true
+      ],
+      [
+        true,
+        true
+      ],
+      [
+        true,
+        true
+      ],
+      [
+        true,
+        true
+      ],
+      [
+        true,
+        true
+      ],
+      [
+        true,
+        true
+      ],
+      [
+        true,
+        true
+      ],
+      [
+        true,
+        true
+      ],
+      [
+        true,
+        true
+      ]
+    ],
+    "detectable_at_p05": false
+  },
+  "reversed_pairing": {
+    "label": "reversed: 240000 -> 20000",
+    "budget_a": 240000,
+    "budget_b": 20000,
+    "n_repeats_paired": 3,
+    "median_caught_a": 8,
+    "median_caught_b": 8,
+    "sign_test_on_repeat_headlines": {
+      "n_pairs": 3,
+      "n_nonzero": 2,
+      "n_positive": 0,
+      "n_negative": 2,
+      "n_ties": 1,
+      "p_two_sided": 0.5,
+      "min_attainable_p_two_sided": 0.5,
+      "direction": "more_evidence_is_worse",
+      "note": "min_attainable_p is the smallest p this n can produce; a design whose minimum attainable p is above 0.05 CANNOT produce a significant result at any effect size"
+    },
+    "sign_test_on_repeat_claim_counts": {
+      "n_pairs": 3,
+      "n_nonzero": 2,
+      "n_positive": 0,
+      "n_negative": 2,
+      "n_ties": 1,
+      "p_two_sided": 0.5,
+      "min_attainable_p_two_sided": 0.5,
+      "direction": "more_evidence_is_worse",
+      "note": "min_attainable_p is the smallest p this n can produce; a design whose minimum attainable p is above 0.05 CANNOT produce a significant result at any effect size"
+    },
+    "mcnemar_on_claims": {
+      "n_pairs": 9,
+      "b_lost": 1,
+      "c_gained": 0,
+      "n_concordant_both": 8,
+      "n_concordant_neither": 0,
+      "p_two_sided": 1.0,
+      "min_detectable_shift_at_p05": null,
+      "direction": "more_evidence_is_worse"
+    },
+    "mcnemar_pooled_over_repeats_ANTI_CONSERVATIVE": {
+      "n_pairs": 27,
+      "b_lost": 5,
+      "c_gained": 1,
+      "n_concordant_both": 20,
+      "n_concordant_neither": 1,
+      "p_two_sided": 0.21875,
+      "min_detectable_shift_at_p05": 6,
+      "direction": "more_evidence_is_worse",
+      "why_it_is_not_the_test": "this pools the same nine claims across the repeats and treats the twenty-seven observations as independent. The claims are the same nine, so the observations are correlated, and the p-value is too small. It is reported because it is the number a careless analysis produces, and it disagrees with the pre-registered one."
+    },
+    "headline_pairs": [
+      [
+        -0.11111111111111116,
+        -0.11111111111111116
+      ],
+      [
+        0.0,
+        -0.11111111111111116
+      ],
+      [
+        -0.11111111111111116,
+        -0.4444444444444444
+      ]
+    ],
+    "claim_count_pairs": [
+      [
+        8,
+        8
+      ],
+      [
+        9,
+        8
+      ],
+      [
+        8,
+        5
+      ]
+    ],
+    "claim_level_pairs": [
+      [
+        true,
+        true
+      ],
+      [
+        true,
+        true
+      ],
+      [
+        true,
+        true
+      ],
+      [
+        true,
+        true
+      ],
+      [
+        true,
+        true
+      ],
+      [
+        true,
+        true
+      ],
+      [
+        true,
+        true
+      ],
+      [
+        true,
+        false
+      ],
+      [
+        true,
+        true
+      ]
+    ],
+    "detectable_at_p05": false
+  },
+  "the_design_arithmetic": {
+    "metric_quantum": 0.1111111111111111,
+    "quantum_note": "the audit set has nine false claims and one true one, so the headline moves in steps of 1/9 = 0.1111",
+    "min_attainable_p_for_n_repeats": 0.25,
+    "min_attainable_p_note": "with 3 paired repeats the smallest two-sided p any effect size can produce is 0.2500; a design whose minimum attainable p is above 0.05 CANNOT produce a significant result, whatever the effect",
+    "min_claims_that_must_move_at_p05": 6,
+    "mcnemar_p_table_for_9_claims": [
+      {
+        "gained": 9,
+        "lost": 0,
+        "p_two_sided": 0.00390625,
+        "significant_at_05": true
+      },
+      {
+        "gained": 8,
+        "lost": 1,
+        "p_two_sided": 0.0390625,
+        "significant_at_05": true
+      },
+      {
+        "gained": 7,
+        "lost": 2,
+        "p_two_sided": 0.1796875,
+        "significant_at_05": false
+      },
+      {
+        "gained": 6,
+        "lost": 3,
+        "p_two_sided": 0.5078125,
+        "significant_at_05": false
+      },
+      {
+        "gained": 5,
+        "lost": 4,
+        "p_two_sided": 1.0,
+        "significant_at_05": false
+      },
+      {
+        "gained": 4,
+        "lost": 5,
+        "p_two_sided": 1.0,
+        "significant_at_05": false
+      },
+      {
+        "gained": 3,
+        "lost": 6,
+        "p_two_sided": 0.5078125,
+        "significant_at_05": false
+      },
+      {
+        "gained": 2,
+        "lost": 7,
+        "p_two_sided": 0.1796875,
+        "significant_at_05": false
+      },
+      {
+        "gained": 1,
+        "lost": 8,
+        "p_two_sided": 0.0390625,
+        "significant_at_05": true
+      },
+      {
+        "gained": 0,
+        "lost": 9,
+        "p_two_sided": 0.00390625,
+        "significant_at_05": true
+      }
+    ],
+    "mcnemar_table_note": "the exact test's p depends on the SMALLER arm of the split, so it is conservative: on nine claims it rejects at p<0.05 only when at least 8 of the 9 move in one direction, and a shift of 6 claims one way (and none the other) gives p = 0.031"
+  },
+  "provenance": {
+    "script": "experiments/debrief_paired_analysis.py",
+    "script_sha256": "9317d892594a6bb8df56f73760029a487d307a090daf81fcf8f92536857defdc",
+    "debrief_sha256": "f2d722c47c6b7112689c9632274727a80e6616d4a8dc688a57ec8d86039f3c2a",
+    "model": "@cf/openai/gpt-oss-120b",
+    "repeats": 3,
+    "budgets": [
+      20000,
+      60000,
+      140000,
+      240000
+    ]
+  }
+}

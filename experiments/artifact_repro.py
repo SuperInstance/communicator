@@ -363,6 +363,11 @@ RECIPES: dict[str, Recipe] = {
               "the model is not on disk in the repository"),
         inputs=["/mnt/c/proart_capture/A.nv12"],
     ),
+    "debrief_paired_analysis.py": Recipe(
+        script="debrief_paired_analysis.py",
+        skip="needs the Cloudflare Workers AI API (network)",
+        inputs=["/mnt/c/proart_capture/A.nv12"],
+    ),
     "debrief_truncation_probe.py": Recipe(
         script="debrief_truncation_probe.py",
         skip="needs the Cloudflare Workers AI API (network)",
