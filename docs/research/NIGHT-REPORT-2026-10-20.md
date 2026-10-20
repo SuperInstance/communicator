@@ -443,6 +443,66 @@ whose output is buffered and then killed leaves you with nothing.** It was
 re-run detached (`setsid`) and **unbuffered** (`python -u`) so that a
 partial run is still readable.
 
+### 2.11a The gate also reported two crashes that were not code defects
+
+A later gate run reported `row_band_removal_results.json` as
+`IndexError: list index out of range` and
+`teacher_raw_representation_results.json` as `EOFError: No data left in
+file` — both of which had been **REPRODUCIBLE** in an earlier gate run.
+
+**Re-run directly, both succeed and their outputs are byte-identical to
+what is committed** (`git status` clean afterwards): the empty room still
+flips 0.00 %, the occupied 0.62 %, the composed filter still reads "NO
+REPRESENTATION BEATS THE TEACHER'S OWN CONTROLS".
+
+The most likely cause is the **`/mnt/c` Windows mount returning short
+reads after the machine had been suspended and resumed** — the gate run in
+question spanned a five-hour gap in which the box was asleep. Both
+failures are read errors on the capture mount, not arithmetic errors.
+
+**The lesson is the same one as §2.11 in the other direction: a gate
+failure is a claim, and the claim has to be checked before it is acted
+on.** Re-running the script directly is the cheapest way to tell an
+environmental failure from a real one, and it is cheaper than a
+revert.
+
+### 2.11b `zcode` could not be run, and the reason is an account entitlement
+
+The instruction to have `zcode` do the same work could not be carried
+out: `zcode` fails headlessly with
+
+```
+[project-access-token] { family: 'zai', stage: 'resolve', code: 'project_token_login_failed' }
+RuntimeHeadersRefreshError: project_token_login_failed
+  cause: CodingPlanApiKeyError
+  providerId: account:zai-individual-coding-plan   modelId: GLM-5.3
+  baseURL: https://api.z.ai/api/anthropic
+```
+
+**It is not a network problem** — `api.z.ai` and `open.bigmodel.cn` were
+both reachable (HTTP 301 and 200) from this box. The stored credentials
+in `~/.zcode/v2/credentials.json` are present, but the **coding-plan
+project token** will not mint, and the request is marked
+`retryable: false` and is not retried.
+
+**The fix is one command and it needs a browser:**
+
+```bash
+zcode login zai          # or: zcode login bigmodel
+```
+
+Headless, it prints a fallback URL and then fails with `Browser open
+failed: spawn xdg-open EACCES`. **That is physical authorisation for the
+account owner, and it was deliberately not worked around** — the
+entitlement is the account's to grant.
+
+**What was done instead:** the complete brief for the next session was
+written and committed as **`docs/research/NEXT-SESSION-BRIEF.md`**, with
+the exact command to run `zcode` on it once it is authorised. The brief
+carries the house rules, the state being inherited, the highest-value
+open item, the open items that need a human, the corrected reader, and
+the commit-and-push discipline.
+
 ### 2.12 Lane 8's remaining gap
 
 The lane's artefact stores per-condition **summaries**, not the raw
