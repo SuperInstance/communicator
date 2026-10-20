@@ -1,0 +1,2502 @@
+{
+  "schema": "silence-leading-artefact/1",
+  "note": "MEASUREMENT ONLY. src/energy.py is not modified. Two populations are produced from the same audio with the same parameters: 'current' uses the shipped _merge_short_runs, 'artefact_free' uses a local variant in which a first segment that is a silence shorter than min_silence_s is merged forward into the segment that follows it instead of being kept unconditionally.",
+  "generated_utc": "2026-10-20T06:49:38+00:00",
+  "script": {
+    "path": "/home/proart/projects/communicator/experiments/silence_leading_artefact.py",
+    "sha256": "e14bf0584d6834306165057bb89414ec3f3fb3f0c666d0d38631190a40b8f300",
+    "argv": [
+      "experiments/silence_leading_artefact.py"
+    ],
+    "elapsed_s": 186.6
+  },
+  "method": {
+    "varied_source": {
+      "file": "/home/proart/projects/communicator/src/energy.py",
+      "sha256": "ba411ab42dc7601c6be9deb395e9cd3f498b508c019e1c3e5276d1a730db9621",
+      "function": "_merge_short_runs",
+      "function_def_line": 284,
+      "function_lines": "284-306",
+      "defect_line": 290,
+      "defect_line_text": "    kept = [segs[0]]",
+      "defect_line_text_expected": "    kept = [segs[0]]",
+      "defect_line_verified": true
+    },
+    "variant_function": "_merge_short_runs_artefact_free",
+    "variant_lives_in": "/home/proart/projects/communicator/experiments/silence_leading_artefact.py",
+    "parameters": {
+      "analysis_sample_rate": 16000,
+      "frame_len_samples": 800,
+      "hop_samples": 160,
+      "hop_s": 0.01,
+      "min_silence_s": 0.15,
+      "min_speech_s": 0.06,
+      "energy_population_adaptive": false,
+      "watcher_adaptive": true,
+      "watcher_chunk_samples": 1600,
+      "pause_event_min_s": 0.15,
+      "turn_end_s": 3.0,
+      "pause_report_s": 0.25,
+      "max_pause_s": 3.0,
+      "speculation_threshold_s": 0.3
+    },
+    "statistics_helpers": {
+      "imported_from": "experiments/pause_threshold.py",
+      "functions": [
+        "p05_nearest_rank",
+        "p05_linear",
+        "median_standard",
+        "median_published",
+        "canonical_gap_bytes",
+        "sha256_bytes"
+      ]
+    },
+    "watcher_probe": {
+      "imported_from": "experiments/pause_threshold.py",
+      "classes": [
+        "_EventProbe",
+        "_runs_from_events",
+        "_resumed_flags"
+      ],
+      "note": "imported rather than copied so the watcher numbers here and the committed 673 runs / 1671 events cannot drift apart"
+    },
+    "copy_check": {
+      "source_file": "/home/proart/projects/communicator/tests/test_pause_threshold.py",
+      "source_sha256": "8d3e0e2b216ae3a78f50b79baed3e62353fce692dca5d8e47c5e129e3e05ad4b",
+      "cells_lines": "77-87",
+      "cells_identical": true,
+      "ok": true
+    },
+    "populations": {
+      "current": "src/energy.py:_merge_short_runs, unmodified",
+      "artefact_free": "local variant in this file; the first segment is no longer kept unconditionally -- a first-segment silence shorter than min_silence_s is merged forward into the segment that follows it"
+    }
+  },
+  "provenance": {
+    "cells": {
+      "narration": {
+        "path": "/home/proart/projects/communicator/examples/realaudio/alice01_excerpt.wav",
+        "sha256": "0b83c9c6038273565fc7056a62843460fa9c5d17497ff858b98081aa914f75d7",
+        "bytes": 7938044,
+        "file_sample_rate": 44100,
+        "file_samples": 3969000,
+        "file_duration_s": 90.0,
+        "file_channels": 1,
+        "file_sample_width_bytes": 2,
+        "resampled": true,
+        "analysis_sample_rate": 16000,
+        "analysis_samples": 1440000,
+        "analysis_duration_s": 90.0
+      },
+      "poetry": {
+        "path": "/home/proart/projects/communicator/examples/realaudio/corpus/poetry_weeds_by_the_wall_1702_librivox.wav",
+        "sha256": "250716341db1c3c8d0db0c1590f18d0f4a2c27729afbd0a444953c0e0e4180a4",
+        "bytes": 640400,
+        "file_sample_rate": 16000,
+        "file_samples": 320178,
+        "file_duration_s": 20.011125,
+        "file_channels": 1,
+        "file_sample_width_bytes": 2,
+        "resampled": false,
+        "analysis_sample_rate": 16000,
+        "analysis_samples": 320178,
+        "analysis_duration_s": 20.011125
+      },
+      "essay": {
+        "path": "/home/proart/projects/communicator/examples/realaudio/corpus/essay_perpetual_peace_librivox.wav",
+        "sha256": "a3b7212251fe571e8e14d96b25a42e8f46eda94160a00e7a376d06e4493746b4",
+        "bytes": 2400044,
+        "file_sample_rate": 16000,
+        "file_samples": 1200000,
+        "file_duration_s": 75.0,
+        "file_channels": 1,
+        "file_sample_width_bytes": 2,
+        "resampled": false,
+        "analysis_sample_rate": 16000,
+        "analysis_samples": 1200000,
+        "analysis_duration_s": 75.0
+      },
+      "dialogue": {
+        "path": "/home/proart/projects/communicator/examples/realaudio/corpus/shortstory_shortstory058_1405_librivox.wav",
+        "sha256": "4261c667a495ba7c107fdd5d4028946f3b6e55dce8535946dcfb0c8e75f5146e",
+        "bytes": 2400044,
+        "file_sample_rate": 16000,
+        "file_samples": 1200000,
+        "file_duration_s": 75.0,
+        "file_channels": 1,
+        "file_sample_width_bytes": 2,
+        "resampled": false,
+        "analysis_sample_rate": 16000,
+        "analysis_samples": 1200000,
+        "analysis_duration_s": 75.0
+      },
+      "shakespeare": {
+        "path": "/home/proart/projects/communicator/examples/realaudio/corpus/shakespeare_midsummernightsdream_1201_librivox.wav",
+        "sha256": "81d9184fe917994c7e6d2ab2e9a5afb0924a2aec5d89fac0d44118dc6736cbe5",
+        "bytes": 2400044,
+        "file_sample_rate": 16000,
+        "file_samples": 1200000,
+        "file_duration_s": 75.0,
+        "file_channels": 1,
+        "file_sample_width_bytes": 2,
+        "resampled": false,
+        "analysis_sample_rate": 16000,
+        "analysis_samples": 1200000,
+        "analysis_duration_s": 75.0
+      },
+      "children": {
+        "path": "/home/proart/projects/communicator/examples/realaudio/corpus/children_english_fairy_tales_joy_librivox.wav",
+        "sha256": "67dc248634d4f5e589f75bc1029b039c8be60db6d71962f07d95d26af5b7f9c0",
+        "bytes": 2400044,
+        "file_sample_rate": 16000,
+        "file_samples": 1200000,
+        "file_duration_s": 75.0,
+        "file_channels": 1,
+        "file_sample_width_bytes": 2,
+        "resampled": false,
+        "analysis_sample_rate": 16000,
+        "analysis_samples": 1200000,
+        "analysis_duration_s": 75.0
+      },
+      "oration": {
+        "path": "/home/proart/projects/communicator/examples/realaudio/corpus/oration_jfks19620912.wav",
+        "sha256": "a0e55371637efa1a2a8aec367b5e64e11910bcf5d7fdbf7f0d054fd848f4681d",
+        "bytes": 2400044,
+        "file_sample_rate": 16000,
+        "file_samples": 1200000,
+        "file_duration_s": 75.0,
+        "file_channels": 1,
+        "file_sample_width_bytes": 2,
+        "resampled": false,
+        "analysis_sample_rate": 16000,
+        "analysis_samples": 1200000,
+        "analysis_duration_s": 75.0
+      }
+    },
+    "committed_results": {
+      "path": "/home/proart/projects/communicator/experiments/pause_threshold_results.json",
+      "sha256": "168d2c48e2540f21ee73dfbe8ccf0fccfc3add6d06294bca3b1186df86568e95"
+    },
+    "method_source": {
+      "path": "/home/proart/projects/communicator/tests/test_pause_threshold.py",
+      "sha256": "8d3e0e2b216ae3a78f50b79baed3e62353fce692dca5d8e47c5e129e3e05ad4b",
+      "cells_lines": "77-87"
+    },
+    "energy_module": {
+      "path": "/home/proart/projects/communicator/src/energy.py",
+      "sha256": "ba411ab42dc7601c6be9deb395e9cd3f498b508c019e1c3e5276d1a730db9621"
+    },
+    "script": {
+      "path": "/home/proart/projects/communicator/experiments/silence_leading_artefact.py",
+      "sha256": "e14bf0584d6834306165057bb89414ec3f3fb3f0c666d0d38631190a40b8f300"
+    }
+  },
+  "cells": {
+    "narration": {
+      "input": {
+        "path": "/home/proart/projects/communicator/examples/realaudio/alice01_excerpt.wav",
+        "sha256": "0b83c9c6038273565fc7056a62843460fa9c5d17497ff858b98081aa914f75d7",
+        "bytes": 7938044,
+        "file_sample_rate": 44100,
+        "file_samples": 3969000,
+        "file_duration_s": 90.0,
+        "file_channels": 1,
+        "file_sample_width_bytes": 2,
+        "resampled": true,
+        "analysis_sample_rate": 16000,
+        "analysis_samples": 1440000,
+        "analysis_duration_s": 90.0
+      },
+      "current": {
+        "gap_block": {
+          "n": 45,
+          "shortest_s": 0.17,
+          "p05_s_nearest_rank": 0.21,
+          "p05_s_linear": 0.21,
+          "median_s_standard": 0.64,
+          "median_s_published_convention": 0.64,
+          "max_s": 1.98,
+          "durations_s": [
+            0.21,
+            0.36,
+            0.72,
+            1.98,
+            0.51,
+            1.38,
+            0.48,
+            1.08,
+            0.8,
+            0.75,
+            0.44,
+            0.17,
+            0.51,
+            1.29,
+            1.28,
+            0.5,
+            0.79,
+            0.24,
+            0.21,
+            0.73,
+            0.72,
+            0.37,
+            0.63,
+            0.66,
+            0.72,
+            0.53,
+            0.25,
+            0.96,
+            0.89,
+            0.64,
+            0.26,
+            0.23,
+            1.07,
+            1.06,
+            0.64,
+            1.07,
+            0.68,
+            0.17,
+            0.44,
+            0.68,
+            1.16,
+            0.39,
+            0.45,
+            1.17,
+            0.44
+          ],
+          "durations_sha256": "f53eb8c3ee1461c1c58833f17741e646ab7543ca6ac12609ff8431fb6cfdc21e",
+          "durations_bytes_len": 405,
+          "trigger": {
+            "at_0_150": 45,
+            "at_0_200": 43,
+            "lost": 2,
+            "lost_pct": 4.444444
+          }
+        },
+        "leading_silence": null,
+        "absorber": null
+      },
+      "artefact_free": {
+        "gap_block": {
+          "n": 45,
+          "shortest_s": 0.17,
+          "p05_s_nearest_rank": 0.21,
+          "p05_s_linear": 0.21,
+          "median_s_standard": 0.64,
+          "median_s_published_convention": 0.64,
+          "max_s": 1.98,
+          "durations_s": [
+            0.21,
+            0.36,
+            0.72,
+            1.98,
+            0.51,
+            1.38,
+            0.48,
+            1.08,
+            0.8,
+            0.75,
+            0.44,
+            0.17,
+            0.51,
+            1.29,
+            1.28,
+            0.5,
+            0.79,
+            0.24,
+            0.21,
+            0.73,
+            0.72,
+            0.37,
+            0.63,
+            0.66,
+            0.72,
+            0.53,
+            0.25,
+            0.96,
+            0.89,
+            0.64,
+            0.26,
+            0.23,
+            1.07,
+            1.06,
+            0.64,
+            1.07,
+            0.68,
+            0.17,
+            0.44,
+            0.68,
+            1.16,
+            0.39,
+            0.45,
+            1.17,
+            0.44
+          ],
+          "durations_sha256": "f53eb8c3ee1461c1c58833f17741e646ab7543ca6ac12609ff8431fb6cfdc21e",
+          "durations_bytes_len": 405,
+          "trigger": {
+            "at_0_150": 45,
+            "at_0_200": 43,
+            "lost": 2,
+            "lost_pct": 4.444444
+          }
+        },
+        "leading_silence": null,
+        "absorber": null
+      },
+      "delta": {
+        "gaps_dropped": 0,
+        "gaps_identical": true,
+        "current_durations_sha256": "f53eb8c3ee1461c1c58833f17741e646ab7543ca6ac12609ff8431fb6cfdc21e",
+        "artefact_free_durations_sha256": "f53eb8c3ee1461c1c58833f17741e646ab7543ca6ac12609ff8431fb6cfdc21e",
+        "at_0_150_delta": 0,
+        "at_0_200_delta": 0,
+        "lost_delta": 0
+      }
+    },
+    "poetry": {
+      "input": {
+        "path": "/home/proart/projects/communicator/examples/realaudio/corpus/poetry_weeds_by_the_wall_1702_librivox.wav",
+        "sha256": "250716341db1c3c8d0db0c1590f18d0f4a2c27729afbd0a444953c0e0e4180a4",
+        "bytes": 640400,
+        "file_sample_rate": 16000,
+        "file_samples": 320178,
+        "file_duration_s": 20.011125,
+        "file_channels": 1,
+        "file_sample_width_bytes": 2,
+        "resampled": false,
+        "analysis_sample_rate": 16000,
+        "analysis_samples": 320178,
+        "analysis_duration_s": 20.011125
+      },
+      "current": {
+        "gap_block": {
+          "n": 7,
+          "shortest_s": 0.15,
+          "p05_s_nearest_rank": 0.15,
+          "p05_s_linear": 0.255,
+          "median_s_standard": 0.51,
+          "median_s_published_convention": 0.51,
+          "max_s": 5.1,
+          "durations_s": [
+            0.51,
+            0.5,
+            0.15,
+            0.58,
+            1.74,
+            0.5,
+            5.1
+          ],
+          "durations_sha256": "9299acf994fb88b1934a97262bb8f840a442e543035b917b338b807fa014d519",
+          "durations_bytes_len": 63,
+          "trigger": {
+            "at_0_150": 7,
+            "at_0_200": 6,
+            "lost": 1,
+            "lost_pct": 14.285714
+          }
+        },
+        "leading_silence": null,
+        "absorber": null
+      },
+      "artefact_free": {
+        "gap_block": {
+          "n": 7,
+          "shortest_s": 0.15,
+          "p05_s_nearest_rank": 0.15,
+          "p05_s_linear": 0.255,
+          "median_s_standard": 0.51,
+          "median_s_published_convention": 0.51,
+          "max_s": 5.1,
+          "durations_s": [
+            0.51,
+            0.5,
+            0.15,
+            0.58,
+            1.74,
+            0.5,
+            5.1
+          ],
+          "durations_sha256": "9299acf994fb88b1934a97262bb8f840a442e543035b917b338b807fa014d519",
+          "durations_bytes_len": 63,
+          "trigger": {
+            "at_0_150": 7,
+            "at_0_200": 6,
+            "lost": 1,
+            "lost_pct": 14.285714
+          }
+        },
+        "leading_silence": null,
+        "absorber": null
+      },
+      "delta": {
+        "gaps_dropped": 0,
+        "gaps_identical": true,
+        "current_durations_sha256": "9299acf994fb88b1934a97262bb8f840a442e543035b917b338b807fa014d519",
+        "artefact_free_durations_sha256": "9299acf994fb88b1934a97262bb8f840a442e543035b917b338b807fa014d519",
+        "at_0_150_delta": 0,
+        "at_0_200_delta": 0,
+        "lost_delta": 0
+      }
+    },
+    "essay": {
+      "input": {
+        "path": "/home/proart/projects/communicator/examples/realaudio/corpus/essay_perpetual_peace_librivox.wav",
+        "sha256": "a3b7212251fe571e8e14d96b25a42e8f46eda94160a00e7a376d06e4493746b4",
+        "bytes": 2400044,
+        "file_sample_rate": 16000,
+        "file_samples": 1200000,
+        "file_duration_s": 75.0,
+        "file_channels": 1,
+        "file_sample_width_bytes": 2,
+        "resampled": false,
+        "analysis_sample_rate": 16000,
+        "analysis_samples": 1200000,
+        "analysis_duration_s": 75.0
+      },
+      "current": {
+        "gap_block": {
+          "n": 33,
+          "shortest_s": 0.15,
+          "p05_s_nearest_rank": 0.16,
+          "p05_s_linear": 0.166,
+          "median_s_standard": 0.76,
+          "median_s_published_convention": 0.76,
+          "max_s": 4.53,
+          "durations_s": [
+            0.76,
+            1.57,
+            1.3,
+            1.59,
+            0.15,
+            0.17,
+            0.18,
+            0.52,
+            0.17,
+            2.22,
+            0.6,
+            1.89,
+            4.53,
+            0.71,
+            0.18,
+            1.06,
+            3.48,
+            0.94,
+            0.16,
+            0.81,
+            2.16,
+            0.17,
+            0.18,
+            0.33,
+            0.94,
+            0.24,
+            1.23,
+            0.44,
+            0.18,
+            1.67,
+            1.28,
+            0.26,
+            1.32
+          ],
+          "durations_sha256": "ea47a7e25932271abaf831bc8e50077de7cacf66148e870c949a539a0576204c",
+          "durations_bytes_len": 297,
+          "trigger": {
+            "at_0_150": 33,
+            "at_0_200": 24,
+            "lost": 9,
+            "lost_pct": 27.272727
+          }
+        },
+        "leading_silence": {
+          "start_s": 0.025,
+          "end_s": 0.785,
+          "duration_s": 0.76,
+          "is_artefact": false
+        },
+        "absorber": null
+      },
+      "artefact_free": {
+        "gap_block": {
+          "n": 33,
+          "shortest_s": 0.15,
+          "p05_s_nearest_rank": 0.16,
+          "p05_s_linear": 0.166,
+          "median_s_standard": 0.76,
+          "median_s_published_convention": 0.76,
+          "max_s": 4.53,
+          "durations_s": [
+            0.76,
+            1.57,
+            1.3,
+            1.59,
+            0.15,
+            0.17,
+            0.18,
+            0.52,
+            0.17,
+            2.22,
+            0.6,
+            1.89,
+            4.53,
+            0.71,
+            0.18,
+            1.06,
+            3.48,
+            0.94,
+            0.16,
+            0.81,
+            2.16,
+            0.17,
+            0.18,
+            0.33,
+            0.94,
+            0.24,
+            1.23,
+            0.44,
+            0.18,
+            1.67,
+            1.28,
+            0.26,
+            1.32
+          ],
+          "durations_sha256": "ea47a7e25932271abaf831bc8e50077de7cacf66148e870c949a539a0576204c",
+          "durations_bytes_len": 297,
+          "trigger": {
+            "at_0_150": 33,
+            "at_0_200": 24,
+            "lost": 9,
+            "lost_pct": 27.272727
+          }
+        },
+        "leading_silence": {
+          "start_s": 0.025,
+          "end_s": 0.785,
+          "duration_s": 0.76,
+          "is_artefact": false
+        },
+        "absorber": null
+      },
+      "delta": {
+        "gaps_dropped": 0,
+        "gaps_identical": true,
+        "current_durations_sha256": "ea47a7e25932271abaf831bc8e50077de7cacf66148e870c949a539a0576204c",
+        "artefact_free_durations_sha256": "ea47a7e25932271abaf831bc8e50077de7cacf66148e870c949a539a0576204c",
+        "at_0_150_delta": 0,
+        "at_0_200_delta": 0,
+        "lost_delta": 0
+      }
+    },
+    "dialogue": {
+      "input": {
+        "path": "/home/proart/projects/communicator/examples/realaudio/corpus/shortstory_shortstory058_1405_librivox.wav",
+        "sha256": "4261c667a495ba7c107fdd5d4028946f3b6e55dce8535946dcfb0c8e75f5146e",
+        "bytes": 2400044,
+        "file_sample_rate": 16000,
+        "file_samples": 1200000,
+        "file_duration_s": 75.0,
+        "file_channels": 1,
+        "file_sample_width_bytes": 2,
+        "resampled": false,
+        "analysis_sample_rate": 16000,
+        "analysis_samples": 1200000,
+        "analysis_duration_s": 75.0
+      },
+      "current": {
+        "gap_block": {
+          "n": 35,
+          "shortest_s": 0.13,
+          "p05_s_nearest_rank": 0.16,
+          "p05_s_linear": 0.167,
+          "median_s_standard": 0.45,
+          "median_s_published_convention": 0.45,
+          "max_s": 1.13,
+          "durations_s": [
+            0.13,
+            0.42,
+            0.68,
+            0.39,
+            0.54,
+            0.35,
+            0.17,
+            0.61,
+            0.16,
+            0.51,
+            0.82,
+            0.47,
+            0.23,
+            0.73,
+            0.2,
+            0.19,
+            0.51,
+            0.33,
+            0.2,
+            0.92,
+            0.61,
+            1.13,
+            0.45,
+            0.42,
+            0.32,
+            0.47,
+            0.33,
+            0.43,
+            0.48,
+            0.75,
+            0.54,
+            0.4,
+            0.5,
+            0.47,
+            0.35
+          ],
+          "durations_sha256": "1fa2c2a5f340480bd0aff582d8eb3a699792b935bd45b8625911e09a1cfc0ab6",
+          "durations_bytes_len": 315,
+          "trigger": {
+            "at_0_150": 34,
+            "at_0_200": 30,
+            "lost": 4,
+            "lost_pct": 11.764706
+          }
+        },
+        "leading_silence": {
+          "start_s": 0.025,
+          "end_s": 0.155,
+          "duration_s": 0.13,
+          "is_artefact": true
+        },
+        "absorber": {
+          "absorber_speech": true,
+          "absorber_duration_s": 1.06,
+          "absorber_duration_after_absorption_s": 1.19,
+          "min_speech_s": 0.06,
+          "absorber_would_be_dropped_by_min_speech_s": false
+        }
+      },
+      "artefact_free": {
+        "gap_block": {
+          "n": 34,
+          "shortest_s": 0.16,
+          "p05_s_nearest_rank": 0.17,
+          "p05_s_linear": 0.183,
+          "median_s_standard": 0.46,
+          "median_s_published_convention": 0.47,
+          "max_s": 1.13,
+          "durations_s": [
+            0.42,
+            0.68,
+            0.39,
+            0.54,
+            0.35,
+            0.17,
+            0.61,
+            0.16,
+            0.51,
+            0.82,
+            0.47,
+            0.23,
+            0.73,
+            0.2,
+            0.19,
+            0.51,
+            0.33,
+            0.2,
+            0.92,
+            0.61,
+            1.13,
+            0.45,
+            0.42,
+            0.32,
+            0.47,
+            0.33,
+            0.43,
+            0.48,
+            0.75,
+            0.54,
+            0.4,
+            0.5,
+            0.47,
+            0.35
+          ],
+          "durations_sha256": "8d9c472823c7e501e98b5570aa1ff52170dca01fa167506d84919c177613ff10",
+          "durations_bytes_len": 306,
+          "trigger": {
+            "at_0_150": 34,
+            "at_0_200": 30,
+            "lost": 4,
+            "lost_pct": 11.764706
+          }
+        },
+        "leading_silence": null,
+        "absorber": null
+      },
+      "delta": {
+        "gaps_dropped": 1,
+        "gaps_identical": false,
+        "current_durations_sha256": "1fa2c2a5f340480bd0aff582d8eb3a699792b935bd45b8625911e09a1cfc0ab6",
+        "artefact_free_durations_sha256": "8d9c472823c7e501e98b5570aa1ff52170dca01fa167506d84919c177613ff10",
+        "at_0_150_delta": 0,
+        "at_0_200_delta": 0,
+        "lost_delta": 0
+      }
+    },
+    "shakespeare": {
+      "input": {
+        "path": "/home/proart/projects/communicator/examples/realaudio/corpus/shakespeare_midsummernightsdream_1201_librivox.wav",
+        "sha256": "81d9184fe917994c7e6d2ab2e9a5afb0924a2aec5d89fac0d44118dc6736cbe5",
+        "bytes": 2400044,
+        "file_sample_rate": 16000,
+        "file_samples": 1200000,
+        "file_duration_s": 75.0,
+        "file_channels": 1,
+        "file_sample_width_bytes": 2,
+        "resampled": false,
+        "analysis_sample_rate": 16000,
+        "analysis_samples": 1200000,
+        "analysis_duration_s": 75.0
+      },
+      "current": {
+        "gap_block": {
+          "n": 62,
+          "shortest_s": 0.11,
+          "p05_s_nearest_rank": 0.16,
+          "p05_s_linear": 0.16,
+          "median_s_standard": 0.375,
+          "median_s_published_convention": 0.38,
+          "max_s": 2.1,
+          "durations_s": [
+            0.11,
+            1.25,
+            0.79,
+            0.72,
+            0.89,
+            0.22,
+            0.29,
+            0.47,
+            0.99,
+            0.54,
+            0.19,
+            1.08,
+            0.81,
+            0.16,
+            0.23,
+            0.29,
+            0.2,
+            1.03,
+            0.39,
+            0.32,
+            0.96,
+            0.23,
+            0.18,
+            2.1,
+            0.16,
+            0.31,
+            0.46,
+            1.13,
+            0.2,
+            0.77,
+            0.9,
+            0.18,
+            1.44,
+            0.19,
+            0.88,
+            0.67,
+            0.21,
+            0.78,
+            0.69,
+            0.18,
+            0.2,
+            0.22,
+            0.17,
+            0.19,
+            0.47,
+            0.29,
+            0.73,
+            0.38,
+            0.32,
+            0.21,
+            0.59,
+            0.15,
+            0.2,
+            0.87,
+            0.27,
+            0.79,
+            0.2,
+            0.37,
+            0.42,
+            0.16,
+            1.26,
+            0.57
+          ],
+          "durations_sha256": "2348ca9eba2c0fc449cf33d326de780bece6059a02b0099d355bc851a42470f8",
+          "durations_bytes_len": 558,
+          "trigger": {
+            "at_0_150": 61,
+            "at_0_200": 46,
+            "lost": 15,
+            "lost_pct": 24.590164
+          }
+        },
+        "leading_silence": {
+          "start_s": 0.025,
+          "end_s": 0.135,
+          "duration_s": 0.11,
+          "is_artefact": true
+        },
+        "absorber": {
+          "absorber_speech": true,
+          "absorber_duration_s": 0.13,
+          "absorber_duration_after_absorption_s": 0.24,
+          "min_speech_s": 0.06,
+          "absorber_would_be_dropped_by_min_speech_s": false
+        }
+      },
+      "artefact_free": {
+        "gap_block": {
+          "n": 61,
+          "shortest_s": 0.15,
+          "p05_s_nearest_rank": 0.16,
+          "p05_s_linear": 0.16,
+          "median_s_standard": 0.38,
+          "median_s_published_convention": 0.38,
+          "max_s": 2.1,
+          "durations_s": [
+            1.25,
+            0.79,
+            0.72,
+            0.89,
+            0.22,
+            0.29,
+            0.47,
+            0.99,
+            0.54,
+            0.19,
+            1.08,
+            0.81,
+            0.16,
+            0.23,
+            0.29,
+            0.2,
+            1.03,
+            0.39,
+            0.32,
+            0.96,
+            0.23,
+            0.18,
+            2.1,
+            0.16,
+            0.31,
+            0.46,
+            1.13,
+            0.2,
+            0.77,
+            0.9,
+            0.18,
+            1.44,
+            0.19,
+            0.88,
+            0.67,
+            0.21,
+            0.78,
+            0.69,
+            0.18,
+            0.2,
+            0.22,
+            0.17,
+            0.19,
+            0.47,
+            0.29,
+            0.73,
+            0.38,
+            0.32,
+            0.21,
+            0.59,
+            0.15,
+            0.2,
+            0.87,
+            0.27,
+            0.79,
+            0.2,
+            0.37,
+            0.42,
+            0.16,
+            1.26,
+            0.57
+          ],
+          "durations_sha256": "b544f19fbed934f578406373d55bc4ae949adefd54d2883150c071dc455691fb",
+          "durations_bytes_len": 549,
+          "trigger": {
+            "at_0_150": 61,
+            "at_0_200": 46,
+            "lost": 15,
+            "lost_pct": 24.590164
+          }
+        },
+        "leading_silence": null,
+        "absorber": null
+      },
+      "delta": {
+        "gaps_dropped": 1,
+        "gaps_identical": false,
+        "current_durations_sha256": "2348ca9eba2c0fc449cf33d326de780bece6059a02b0099d355bc851a42470f8",
+        "artefact_free_durations_sha256": "b544f19fbed934f578406373d55bc4ae949adefd54d2883150c071dc455691fb",
+        "at_0_150_delta": 0,
+        "at_0_200_delta": 0,
+        "lost_delta": 0
+      }
+    },
+    "children": {
+      "input": {
+        "path": "/home/proart/projects/communicator/examples/realaudio/corpus/children_english_fairy_tales_joy_librivox.wav",
+        "sha256": "67dc248634d4f5e589f75bc1029b039c8be60db6d71962f07d95d26af5b7f9c0",
+        "bytes": 2400044,
+        "file_sample_rate": 16000,
+        "file_samples": 1200000,
+        "file_duration_s": 75.0,
+        "file_channels": 1,
+        "file_sample_width_bytes": 2,
+        "resampled": false,
+        "analysis_sample_rate": 16000,
+        "analysis_samples": 1200000,
+        "analysis_duration_s": 75.0
+      },
+      "current": {
+        "gap_block": {
+          "n": 78,
+          "shortest_s": 0.11,
+          "p05_s_nearest_rank": 0.16,
+          "p05_s_linear": 0.16,
+          "median_s_standard": 0.3,
+          "median_s_published_convention": 0.3,
+          "max_s": 1.96,
+          "durations_s": [
+            0.11,
+            0.24,
+            0.4,
+            0.83,
+            0.35,
+            0.22,
+            0.15,
+            0.45,
+            0.28,
+            0.5,
+            0.38,
+            0.93,
+            0.18,
+            0.2,
+            0.78,
+            0.17,
+            0.27,
+            0.18,
+            0.94,
+            0.16,
+            0.43,
+            0.2,
+            0.31,
+            1.06,
+            0.18,
+            0.18,
+            1.05,
+            0.24,
+            0.21,
+            0.87,
+            0.45,
+            0.31,
+            1.96,
+            0.24,
+            0.69,
+            0.24,
+            0.4,
+            0.48,
+            0.28,
+            0.42,
+            0.81,
+            0.19,
+            0.65,
+            0.27,
+            1.19,
+            0.24,
+            0.3,
+            0.3,
+            1.46,
+            0.36,
+            0.19,
+            0.63,
+            0.21,
+            0.21,
+            0.59,
+            0.49,
+            0.94,
+            0.18,
+            0.21,
+            0.25,
+            0.29,
+            0.64,
+            1.66,
+            0.24,
+            0.16,
+            0.35,
+            1.45,
+            0.16,
+            0.17,
+            0.16,
+            0.24,
+            1.73,
+            0.25,
+            0.2,
+            0.33,
+            0.23,
+            0.51,
+            1.59
+          ],
+          "durations_sha256": "baf74ed500894269d260fa99c75e1d24bae2f36759267e56677ea6f76e8da95f",
+          "durations_bytes_len": 702,
+          "trigger": {
+            "at_0_150": 77,
+            "at_0_200": 62,
+            "lost": 15,
+            "lost_pct": 19.480519
+          }
+        },
+        "leading_silence": {
+          "start_s": 0.025,
+          "end_s": 0.135,
+          "duration_s": 0.11,
+          "is_artefact": true
+        },
+        "absorber": {
+          "absorber_speech": true,
+          "absorber_duration_s": 1.21,
+          "absorber_duration_after_absorption_s": 1.32,
+          "min_speech_s": 0.06,
+          "absorber_would_be_dropped_by_min_speech_s": false
+        }
+      },
+      "artefact_free": {
+        "gap_block": {
+          "n": 77,
+          "shortest_s": 0.15,
+          "p05_s_nearest_rank": 0.16,
+          "p05_s_linear": 0.16,
+          "median_s_standard": 0.3,
+          "median_s_published_convention": 0.3,
+          "max_s": 1.96,
+          "durations_s": [
+            0.24,
+            0.4,
+            0.83,
+            0.35,
+            0.22,
+            0.15,
+            0.45,
+            0.28,
+            0.5,
+            0.38,
+            0.93,
+            0.18,
+            0.2,
+            0.78,
+            0.17,
+            0.27,
+            0.18,
+            0.94,
+            0.16,
+            0.43,
+            0.2,
+            0.31,
+            1.06,
+            0.18,
+            0.18,
+            1.05,
+            0.24,
+            0.21,
+            0.87,
+            0.45,
+            0.31,
+            1.96,
+            0.24,
+            0.69,
+            0.24,
+            0.4,
+            0.48,
+            0.28,
+            0.42,
+            0.81,
+            0.19,
+            0.65,
+            0.27,
+            1.19,
+            0.24,
+            0.3,
+            0.3,
+            1.46,
+            0.36,
+            0.19,
+            0.63,
+            0.21,
+            0.21,
+            0.59,
+            0.49,
+            0.94,
+            0.18,
+            0.21,
+            0.25,
+            0.29,
+            0.64,
+            1.66,
+            0.24,
+            0.16,
+            0.35,
+            1.45,
+            0.16,
+            0.17,
+            0.16,
+            0.24,
+            1.73,
+            0.25,
+            0.2,
+            0.33,
+            0.23,
+            0.51,
+            1.59
+          ],
+          "durations_sha256": "a21999dfc5ad8b676fa57bae32d30e8cab63ce5daaa1e485463e20fc74aab69f",
+          "durations_bytes_len": 693,
+          "trigger": {
+            "at_0_150": 77,
+            "at_0_200": 62,
+            "lost": 15,
+            "lost_pct": 19.480519
+          }
+        },
+        "leading_silence": null,
+        "absorber": null
+      },
+      "delta": {
+        "gaps_dropped": 1,
+        "gaps_identical": false,
+        "current_durations_sha256": "baf74ed500894269d260fa99c75e1d24bae2f36759267e56677ea6f76e8da95f",
+        "artefact_free_durations_sha256": "a21999dfc5ad8b676fa57bae32d30e8cab63ce5daaa1e485463e20fc74aab69f",
+        "at_0_150_delta": 0,
+        "at_0_200_delta": 0,
+        "lost_delta": 0
+      }
+    },
+    "oration": {
+      "input": {
+        "path": "/home/proart/projects/communicator/examples/realaudio/corpus/oration_jfks19620912.wav",
+        "sha256": "a0e55371637efa1a2a8aec367b5e64e11910bcf5d7fdbf7f0d054fd848f4681d",
+        "bytes": 2400044,
+        "file_sample_rate": 16000,
+        "file_samples": 1200000,
+        "file_duration_s": 75.0,
+        "file_channels": 1,
+        "file_sample_width_bytes": 2,
+        "resampled": false,
+        "analysis_sample_rate": 16000,
+        "analysis_samples": 1200000,
+        "analysis_duration_s": 75.0
+      },
+      "current": {
+        "gap_block": {
+          "n": 2,
+          "shortest_s": 0.31,
+          "p05_s_nearest_rank": 0.31,
+          "p05_s_linear": 0.3135,
+          "median_s_standard": 0.345,
+          "median_s_published_convention": 0.38,
+          "max_s": 0.38,
+          "durations_s": [
+            0.31,
+            0.38
+          ],
+          "durations_sha256": "3b74256884f49d6b82aacd1ad8b0d0e169c4bca1538244cbc2b14dbeafe46ee9",
+          "durations_bytes_len": 18,
+          "trigger": {
+            "at_0_150": 2,
+            "at_0_200": 2,
+            "lost": 0,
+            "lost_pct": 0.0
+          }
+        },
+        "leading_silence": null,
+        "absorber": null
+      },
+      "artefact_free": {
+        "gap_block": {
+          "n": 2,
+          "shortest_s": 0.31,
+          "p05_s_nearest_rank": 0.31,
+          "p05_s_linear": 0.3135,
+          "median_s_standard": 0.345,
+          "median_s_published_convention": 0.38,
+          "max_s": 0.38,
+          "durations_s": [
+            0.31,
+            0.38
+          ],
+          "durations_sha256": "3b74256884f49d6b82aacd1ad8b0d0e169c4bca1538244cbc2b14dbeafe46ee9",
+          "durations_bytes_len": 18,
+          "trigger": {
+            "at_0_150": 2,
+            "at_0_200": 2,
+            "lost": 0,
+            "lost_pct": 0.0
+          }
+        },
+        "leading_silence": null,
+        "absorber": null
+      },
+      "delta": {
+        "gaps_dropped": 0,
+        "gaps_identical": true,
+        "current_durations_sha256": "3b74256884f49d6b82aacd1ad8b0d0e169c4bca1538244cbc2b14dbeafe46ee9",
+        "artefact_free_durations_sha256": "3b74256884f49d6b82aacd1ad8b0d0e169c4bca1538244cbc2b14dbeafe46ee9",
+        "at_0_150_delta": 0,
+        "at_0_200_delta": 0,
+        "lost_delta": 0
+      }
+    }
+  },
+  "totals": {
+    "current": {
+      "gaps": 262,
+      "at_0_150": 259,
+      "at_0_200": 213,
+      "lost": 46,
+      "lost_pct": 17.760618,
+      "cells_with_a_leading_silence_kept": 3
+    },
+    "artefact_free": {
+      "gaps": 259,
+      "at_0_150": 259,
+      "at_0_200": 213,
+      "lost": 46,
+      "lost_pct": 17.760618,
+      "cells_with_a_leading_silence_kept": 0
+    }
+  },
+  "watcher": {
+    "current": {
+      "events_gt_0_15": 1671,
+      "pause_events_all": 1789,
+      "distinct_silence_runs": 673,
+      "event_min_s": 0.16,
+      "event_median_s": 0.38,
+      "event_max_s": 2.54,
+      "run_min_s": 0.01,
+      "run_median_s": 0.35,
+      "run_max_s": 2.54,
+      "runs_at_or_above_3s": 0,
+      "events_at_or_above_3s": 0,
+      "turn_boundaries": 0,
+      "f0_utterance_spans": 684,
+      "f0_pause_population": 398,
+      "per_cell": {
+        "narration": {
+          "pause_events_all": 321,
+          "pause_events_gt_0_15": 299,
+          "distinct_silence_runs": 126,
+          "max_run_s": 1.8301,
+          "min_run_s": 0.01,
+          "median_run_s": 0.355,
+          "event_min_s": 0.16,
+          "event_median_s": 0.39,
+          "event_max_s": 1.8301,
+          "runs_at_or_above_3s": 0,
+          "events_at_or_above_3s": 0,
+          "turn_boundaries": 0,
+          "turn_boundary_reasons": [],
+          "f0_utterance_spans": 130,
+          "f0_pause_population": 74,
+          "f0_gap_sha256": "7dc17d4e118bd3bc9b6832d7169d6def5226d011d21e9df340861fa5751a6cb1",
+          "buffers": 900,
+          "buffers_opening_with_silence": 440,
+          "buffers_opening_with_a_short_silence": 101,
+          "first_segment_digest": "98c5c9941e5ee9f73c1c2d223b4ea935a3c010a7780ed12ed37d3aad6e36ae08"
+        },
+        "poetry": {
+          "pause_events_all": 66,
+          "pause_events_gt_0_15": 59,
+          "distinct_silence_runs": 29,
+          "max_run_s": 1.2,
+          "min_run_s": 0.13,
+          "median_run_s": 0.45,
+          "event_min_s": 0.16,
+          "event_median_s": 0.4,
+          "event_max_s": 1.2,
+          "runs_at_or_above_3s": 0,
+          "events_at_or_above_3s": 0,
+          "turn_boundaries": 0,
+          "turn_boundary_reasons": [],
+          "f0_utterance_spans": 30,
+          "f0_pause_population": 18,
+          "f0_gap_sha256": "d1e6244ae0aedad4e641a4cf4a89a1df2abaf70f759af3fd76522ec448469dca",
+          "buffers": 201,
+          "buffers_opening_with_silence": 108,
+          "buffers_opening_with_a_short_silence": 23,
+          "first_segment_digest": "5c2fd63245dc2bc2171669d9e7d0cad4b33ef831c4bafe40f3d09d14b6375af2"
+        },
+        "essay": {
+          "pause_events_all": 281,
+          "pause_events_gt_0_15": 263,
+          "distinct_silence_runs": 109,
+          "max_run_s": 1.56,
+          "min_run_s": 0.08,
+          "median_run_s": 0.33,
+          "event_min_s": 0.16,
+          "event_median_s": 0.33,
+          "event_max_s": 1.56,
+          "runs_at_or_above_3s": 0,
+          "events_at_or_above_3s": 0,
+          "turn_boundaries": 0,
+          "turn_boundary_reasons": [],
+          "f0_utterance_spans": 111,
+          "f0_pause_population": 67,
+          "f0_gap_sha256": "1004180adc5294c438b43cd7ae0e94fe0ab8dd5de3a6737a0870e3c5c0acaf7c",
+          "buffers": 750,
+          "buffers_opening_with_silence": 333,
+          "buffers_opening_with_a_short_silence": 102,
+          "first_segment_digest": "41fba23807be6efbad4a3997e9431968b8b0ac71e26b1c5390e9402de3e13995"
+        },
+        "dialogue": {
+          "pause_events_all": 292,
+          "pause_events_gt_0_15": 269,
+          "distinct_silence_runs": 115,
+          "max_run_s": 1.53,
+          "min_run_s": 0.03,
+          "median_run_s": 0.33,
+          "event_min_s": 0.16,
+          "event_median_s": 0.36,
+          "event_max_s": 1.53,
+          "runs_at_or_above_3s": 0,
+          "events_at_or_above_3s": 0,
+          "turn_boundaries": 0,
+          "turn_boundary_reasons": [],
+          "f0_utterance_spans": 117,
+          "f0_pause_population": 63,
+          "f0_gap_sha256": "28e28649ccff286c245e5f94d8c9274cab7b2ba053c66f858b08ca207bcefd08",
+          "buffers": 750,
+          "buffers_opening_with_silence": 372,
+          "buffers_opening_with_a_short_silence": 107,
+          "first_segment_digest": "a1e3dc05622fea7b0266c4c70bf8d18e64f898573e514905f1f53881071aef1d"
+        },
+        "shakespeare": {
+          "pause_events_all": 311,
+          "pause_events_gt_0_15": 286,
+          "distinct_silence_runs": 124,
+          "max_run_s": 1.45,
+          "min_run_s": 0.03,
+          "median_run_s": 0.34,
+          "event_min_s": 0.16,
+          "event_median_s": 0.36,
+          "event_max_s": 1.45,
+          "runs_at_or_above_3s": 0,
+          "events_at_or_above_3s": 0,
+          "turn_boundaries": 0,
+          "turn_boundary_reasons": [],
+          "f0_utterance_spans": 125,
+          "f0_pause_population": 67,
+          "f0_gap_sha256": "cdd3480b959ddac6829e7890d4fb8030a878de125069e77e98fab8a1ce631324",
+          "buffers": 750,
+          "buffers_opening_with_silence": 401,
+          "buffers_opening_with_a_short_silence": 110,
+          "first_segment_digest": "b611f8793456b4c8d58f86af0dd8f3d20d2a17a710f6301fd7bb0f88cb19bc22"
+        },
+        "children": {
+          "pause_events_all": 229,
+          "pause_events_gt_0_15": 214,
+          "distinct_silence_runs": 89,
+          "max_run_s": 1.6,
+          "min_run_s": 0.07,
+          "median_run_s": 0.3,
+          "event_min_s": 0.16,
+          "event_median_s": 0.375,
+          "event_max_s": 1.6,
+          "runs_at_or_above_3s": 0,
+          "events_at_or_above_3s": 0,
+          "turn_boundaries": 0,
+          "turn_boundary_reasons": [],
+          "f0_utterance_spans": 91,
+          "f0_pause_population": 53,
+          "f0_gap_sha256": "1e7ed976cfd29d2df65c83d102d3e89807208e9331fe516850165987e4c43349",
+          "buffers": 750,
+          "buffers_opening_with_silence": 328,
+          "buffers_opening_with_a_short_silence": 88,
+          "first_segment_digest": "cbaff7fb7299706a37366787421bf5c0c87ea66c30944ebb3b9ffe31797468bb"
+        },
+        "oration": {
+          "pause_events_all": 289,
+          "pause_events_gt_0_15": 281,
+          "distinct_silence_runs": 81,
+          "max_run_s": 2.54,
+          "min_run_s": 0.07,
+          "median_run_s": 0.53,
+          "event_min_s": 0.16,
+          "event_median_s": 0.57,
+          "event_max_s": 2.54,
+          "runs_at_or_above_3s": 0,
+          "events_at_or_above_3s": 0,
+          "turn_boundaries": 0,
+          "turn_boundary_reasons": [],
+          "f0_utterance_spans": 80,
+          "f0_pause_population": 56,
+          "f0_gap_sha256": "1a6f2a424672fa1d4dcb39ef27c8ad812c4e486e0e399dbb42f240ff2d9a2713",
+          "buffers": 750,
+          "buffers_opening_with_silence": 493,
+          "buffers_opening_with_a_short_silence": 45,
+          "first_segment_digest": "85ff05bb329e073c47710b8d4e3fbc6cb473c6af8518f099a8a063c32d481891"
+        }
+      },
+      "addendum2_resume_table": {
+        "0.6": {
+          "silence_runs": 170,
+          "speaker_resumed": 169,
+          "at_file_end": 1,
+          "would_have_interrupted_pct": 99.4118
+        },
+        "0.9": {
+          "silence_runs": 71,
+          "speaker_resumed": 70,
+          "at_file_end": 1,
+          "would_have_interrupted_pct": 98.5915
+        },
+        "1.2": {
+          "silence_runs": 35,
+          "speaker_resumed": 35,
+          "at_file_end": 0,
+          "would_have_interrupted_pct": 100.0
+        },
+        "1.5": {
+          "silence_runs": 15,
+          "speaker_resumed": 15,
+          "at_file_end": 0,
+          "would_have_interrupted_pct": 100.0
+        },
+        "1.8": {
+          "silence_runs": 6,
+          "speaker_resumed": 6,
+          "at_file_end": 0,
+          "would_have_interrupted_pct": 100.0
+        },
+        "2.1": {
+          "silence_runs": 2,
+          "speaker_resumed": 2,
+          "at_file_end": 0,
+          "would_have_interrupted_pct": 100.0
+        }
+      },
+      "specification": {
+        "n": 1671,
+        "speculate_s": 0.3,
+        "reach": 1258,
+        "reach_rate_pct": 75.2843,
+        "below_1_20": 1578,
+        "below_1_20_pct": 94.4345
+      }
+    },
+    "artefact_free": {
+      "events_gt_0_15": 1241,
+      "pause_events_all": 1262,
+      "distinct_silence_runs": 588,
+      "event_min_s": 0.16,
+      "event_median_s": 0.38,
+      "event_max_s": 2.54,
+      "run_min_s": 0.15,
+      "run_median_s": 0.36,
+      "run_max_s": 2.54,
+      "runs_at_or_above_3s": 0,
+      "events_at_or_above_3s": 0,
+      "turn_boundaries": 0,
+      "f0_utterance_spans": 671,
+      "f0_pause_population": 353,
+      "per_cell": {
+        "narration": {
+          "pause_events_all": 227,
+          "pause_events_gt_0_15": 222,
+          "distinct_silence_runs": 113,
+          "max_run_s": 1.79,
+          "min_run_s": 0.15,
+          "median_run_s": 0.34,
+          "event_min_s": 0.16,
+          "event_median_s": 0.365,
+          "event_max_s": 1.79,
+          "runs_at_or_above_3s": 0,
+          "events_at_or_above_3s": 0,
+          "turn_boundaries": 0,
+          "turn_boundary_reasons": [],
+          "f0_utterance_spans": 127,
+          "f0_pause_population": 69,
+          "f0_gap_sha256": "6e22594afbf415b82da4da8d9d7f471a3250f9f289109970afdb4349ae0cd0de",
+          "buffers": 900,
+          "buffers_opening_with_silence": 321,
+          "buffers_opening_with_a_short_silence": 0,
+          "first_segment_digest": "0119c8249fe9aaf3eb7c949d20eb8bd871e25b6436770aa70e6c0862602a15cf"
+        },
+        "poetry": {
+          "pause_events_all": 46,
+          "pause_events_gt_0_15": 46,
+          "distinct_silence_runs": 22,
+          "max_run_s": 1.2,
+          "min_run_s": 0.17,
+          "median_run_s": 0.42,
+          "event_min_s": 0.17,
+          "event_median_s": 0.37,
+          "event_max_s": 1.2,
+          "runs_at_or_above_3s": 0,
+          "events_at_or_above_3s": 0,
+          "turn_boundaries": 0,
+          "turn_boundary_reasons": [],
+          "f0_utterance_spans": 27,
+          "f0_pause_population": 17,
+          "f0_gap_sha256": "45406a760cf09140a93f69c7f9df7da990bdac13d8e3efc13b70fff9ad3f6bd1",
+          "buffers": 201,
+          "buffers_opening_with_silence": 82,
+          "buffers_opening_with_a_short_silence": 0,
+          "first_segment_digest": "f8bf5142cb2906831d5f4014eaee5ee1e5cac45ee683f032bd57ccf3c2cde204"
+        },
+        "essay": {
+          "pause_events_all": 178,
+          "pause_events_gt_0_15": 173,
+          "distinct_silence_runs": 97,
+          "max_run_s": 1.56,
+          "min_run_s": 0.15,
+          "median_run_s": 0.32,
+          "event_min_s": 0.16,
+          "event_median_s": 0.33,
+          "event_max_s": 1.56,
+          "runs_at_or_above_3s": 0,
+          "events_at_or_above_3s": 0,
+          "turn_boundaries": 0,
+          "turn_boundary_reasons": [],
+          "f0_utterance_spans": 108,
+          "f0_pause_population": 49,
+          "f0_gap_sha256": "a37279817914df53c9ae8e4174be980cd085d18f1524b68f77bc2514bb2e617e",
+          "buffers": 750,
+          "buffers_opening_with_silence": 203,
+          "buffers_opening_with_a_short_silence": 1,
+          "first_segment_digest": "c606695a573c65a7cdc5660b4e345b49c40d69cb03a16f210c67fd2aff729eb2"
+        },
+        "dialogue": {
+          "pause_events_all": 201,
+          "pause_events_gt_0_15": 196,
+          "distinct_silence_runs": 99,
+          "max_run_s": 1.53,
+          "min_run_s": 0.15,
+          "median_run_s": 0.35,
+          "event_min_s": 0.16,
+          "event_median_s": 0.37,
+          "event_max_s": 1.53,
+          "runs_at_or_above_3s": 0,
+          "events_at_or_above_3s": 0,
+          "turn_boundaries": 0,
+          "turn_boundary_reasons": [],
+          "f0_utterance_spans": 115,
+          "f0_pause_population": 55,
+          "f0_gap_sha256": "7d61ae13078e6f409a875d66259cb0bb94cb1b2138713f11d486ad5839b36d67",
+          "buffers": 750,
+          "buffers_opening_with_silence": 254,
+          "buffers_opening_with_a_short_silence": 1,
+          "first_segment_digest": "8dd9b207c69b49e6c2658f49fbc141b5d3f41d9ca16a9ff0dcc3a6e8ba17ac6c"
+        },
+        "shakespeare": {
+          "pause_events_all": 212,
+          "pause_events_gt_0_15": 209,
+          "distinct_silence_runs": 107,
+          "max_run_s": 1.31,
+          "min_run_s": 0.15,
+          "median_run_s": 0.35,
+          "event_min_s": 0.16,
+          "event_median_s": 0.36,
+          "event_max_s": 1.31,
+          "runs_at_or_above_3s": 0,
+          "events_at_or_above_3s": 0,
+          "turn_boundaries": 0,
+          "turn_boundary_reasons": [],
+          "f0_utterance_spans": 122,
+          "f0_pause_population": 62,
+          "f0_gap_sha256": "3bdf67808476c12a7c066459170f3fd8c0d679624115135627f9264d5123a58b",
+          "buffers": 750,
+          "buffers_opening_with_silence": 277,
+          "buffers_opening_with_a_short_silence": 0,
+          "first_segment_digest": "0e4468d295ec66b6ba7b9f6d86bb7afa0152bf929db785a9d4bec74de6dd1992"
+        },
+        "children": {
+          "pause_events_all": 151,
+          "pause_events_gt_0_15": 151,
+          "distinct_silence_runs": 75,
+          "max_run_s": 1.55,
+          "min_run_s": 0.16,
+          "median_run_s": 0.36,
+          "event_min_s": 0.16,
+          "event_median_s": 0.38,
+          "event_max_s": 1.55,
+          "runs_at_or_above_3s": 0,
+          "events_at_or_above_3s": 0,
+          "turn_boundaries": 0,
+          "turn_boundary_reasons": [],
+          "f0_utterance_spans": 93,
+          "f0_pause_population": 46,
+          "f0_gap_sha256": "5e9c51e8d1e532e1ab53b017047123eb37370363ba4c2623ef66fcb6c119e526",
+          "buffers": 750,
+          "buffers_opening_with_silence": 230,
+          "buffers_opening_with_a_short_silence": 1,
+          "first_segment_digest": "265051ed1ed93964670b463e0386e92e03cc337fe9555dc24081393568bf4d59"
+        },
+        "oration": {
+          "pause_events_all": 247,
+          "pause_events_gt_0_15": 244,
+          "distinct_silence_runs": 75,
+          "max_run_s": 2.54,
+          "min_run_s": 0.15,
+          "median_run_s": 0.54,
+          "event_min_s": 0.17,
+          "event_median_s": 0.58,
+          "event_max_s": 2.54,
+          "runs_at_or_above_3s": 0,
+          "events_at_or_above_3s": 0,
+          "turn_boundaries": 0,
+          "turn_boundary_reasons": [],
+          "f0_utterance_spans": 79,
+          "f0_pause_population": 55,
+          "f0_gap_sha256": "57903443b5502b9fce743862f012ef3b79f01da9dd27deff698ea71e06d26867",
+          "buffers": 750,
+          "buffers_opening_with_silence": 445,
+          "buffers_opening_with_a_short_silence": 1,
+          "first_segment_digest": "14a83ac19a2c308ec1dc7a412f2ba19b8ca769430cfa18cbb327b1dc73b57f6d"
+        }
+      },
+      "addendum2_resume_table": {
+        "0.6": {
+          "silence_runs": 153,
+          "speaker_resumed": 152,
+          "at_file_end": 1,
+          "would_have_interrupted_pct": 99.3464
+        },
+        "0.9": {
+          "silence_runs": 72,
+          "speaker_resumed": 71,
+          "at_file_end": 1,
+          "would_have_interrupted_pct": 98.6111
+        },
+        "1.2": {
+          "silence_runs": 32,
+          "speaker_resumed": 32,
+          "at_file_end": 0,
+          "would_have_interrupted_pct": 100.0
+        },
+        "1.5": {
+          "silence_runs": 14,
+          "speaker_resumed": 14,
+          "at_file_end": 0,
+          "would_have_interrupted_pct": 100.0
+        },
+        "1.8": {
+          "silence_runs": 5,
+          "speaker_resumed": 5,
+          "at_file_end": 0,
+          "would_have_interrupted_pct": 100.0
+        },
+        "2.1": {
+          "silence_runs": 2,
+          "speaker_resumed": 2,
+          "at_file_end": 0,
+          "would_have_interrupted_pct": 100.0
+        }
+      },
+      "specification": {
+        "n": 1241,
+        "speculate_s": 0.3,
+        "reach": 935,
+        "reach_rate_pct": 75.3425,
+        "below_1_20": 1167,
+        "below_1_20_pct": 94.0371
+      }
+    }
+  },
+  "mechanism": {
+    "narration": {
+      "buffers": 900,
+      "pushes_whose_first_segment_differs": 404,
+      "current": {
+        "buffers_opening_with_silence": 440,
+        "buffers_opening_with_a_short_silence": 101
+      },
+      "artefact_free": {
+        "buffers_opening_with_silence": 321,
+        "buffers_opening_with_a_short_silence": 0
+      },
+      "note": "the watcher re-segments a MOVING buffer, so 'the first segment' is the segment at the buffer origin, not the start of the file; the defect therefore fires once per BUFFER whose origin lands in a short silence, which is why the whole-file population (3 leading silences) understates it"
+    },
+    "poetry": {
+      "buffers": 201,
+      "pushes_whose_first_segment_differs": 85,
+      "current": {
+        "buffers_opening_with_silence": 108,
+        "buffers_opening_with_a_short_silence": 23
+      },
+      "artefact_free": {
+        "buffers_opening_with_silence": 82,
+        "buffers_opening_with_a_short_silence": 0
+      },
+      "note": "the watcher re-segments a MOVING buffer, so 'the first segment' is the segment at the buffer origin, not the start of the file; the defect therefore fires once per BUFFER whose origin lands in a short silence, which is why the whole-file population (3 leading silences) understates it"
+    },
+    "essay": {
+      "buffers": 750,
+      "pushes_whose_first_segment_differs": 465,
+      "current": {
+        "buffers_opening_with_silence": 333,
+        "buffers_opening_with_a_short_silence": 102
+      },
+      "artefact_free": {
+        "buffers_opening_with_silence": 203,
+        "buffers_opening_with_a_short_silence": 1
+      },
+      "note": "the watcher re-segments a MOVING buffer, so 'the first segment' is the segment at the buffer origin, not the start of the file; the defect therefore fires once per BUFFER whose origin lands in a short silence, which is why the whole-file population (3 leading silences) understates it"
+    },
+    "dialogue": {
+      "buffers": 750,
+      "pushes_whose_first_segment_differs": 403,
+      "current": {
+        "buffers_opening_with_silence": 372,
+        "buffers_opening_with_a_short_silence": 107
+      },
+      "artefact_free": {
+        "buffers_opening_with_silence": 254,
+        "buffers_opening_with_a_short_silence": 1
+      },
+      "note": "the watcher re-segments a MOVING buffer, so 'the first segment' is the segment at the buffer origin, not the start of the file; the defect therefore fires once per BUFFER whose origin lands in a short silence, which is why the whole-file population (3 leading silences) understates it"
+    },
+    "shakespeare": {
+      "buffers": 750,
+      "pushes_whose_first_segment_differs": 418,
+      "current": {
+        "buffers_opening_with_silence": 401,
+        "buffers_opening_with_a_short_silence": 110
+      },
+      "artefact_free": {
+        "buffers_opening_with_silence": 277,
+        "buffers_opening_with_a_short_silence": 0
+      },
+      "note": "the watcher re-segments a MOVING buffer, so 'the first segment' is the segment at the buffer origin, not the start of the file; the defect therefore fires once per BUFFER whose origin lands in a short silence, which is why the whole-file population (3 leading silences) understates it"
+    },
+    "children": {
+      "buffers": 750,
+      "pushes_whose_first_segment_differs": 414,
+      "current": {
+        "buffers_opening_with_silence": 328,
+        "buffers_opening_with_a_short_silence": 88
+      },
+      "artefact_free": {
+        "buffers_opening_with_silence": 230,
+        "buffers_opening_with_a_short_silence": 1
+      },
+      "note": "the watcher re-segments a MOVING buffer, so 'the first segment' is the segment at the buffer origin, not the start of the file; the defect therefore fires once per BUFFER whose origin lands in a short silence, which is why the whole-file population (3 leading silences) understates it"
+    },
+    "oration": {
+      "buffers": 750,
+      "pushes_whose_first_segment_differs": 198,
+      "current": {
+        "buffers_opening_with_silence": 493,
+        "buffers_opening_with_a_short_silence": 45
+      },
+      "artefact_free": {
+        "buffers_opening_with_silence": 445,
+        "buffers_opening_with_a_short_silence": 1
+      },
+      "note": "the watcher re-segments a MOVING buffer, so 'the first segment' is the segment at the buffer origin, not the start of the file; the defect therefore fires once per BUFFER whose origin lands in a short silence, which is why the whole-file population (3 leading silences) understates it"
+    }
+  },
+  "f0_population": {
+    "source": "experiments/f0_speaker_change.py",
+    "population": "the gaps between consecutive utterance spans that the F0 experiment measures across (GAP_MIN, GAP_MAX) = (0.20, 4.0) s; derived from the same watcher run, so no second pass over the corpus was needed",
+    "current": {
+      "utterance_spans": 684,
+      "pause_population": 398
+    },
+    "artefact_free": {
+      "utterance_spans": 671,
+      "pause_population": 353
+    },
+    "population_identical": false
+  },
+  "committed_comparison": {
+    "committed_file_present": true,
+    "committed_file_path": "/home/proart/projects/communicator/experiments/pause_threshold_results.json",
+    "committed_file_sha256": "168d2c48e2540f21ee73dfbe8ccf0fccfc3add6d06294bca3b1186df86568e95",
+    "per_cell": {
+      "narration": {
+        "committed_gaps_block_matches_current": true,
+        "committed_corrected_block_matches_artefact_free": true,
+        "keys_not_reproduced": [],
+        "committed_gaps": {
+          "n": 45,
+          "shortest_s": 0.17,
+          "p05_s_nearest_rank": 0.21,
+          "median_s_standard": 0.64,
+          "median_s_published_convention": 0.64,
+          "max_s": 1.98
+        },
+        "committed_corrected": {
+          "n": 45,
+          "shortest_s": 0.17,
+          "p05_s_nearest_rank": 0.21,
+          "median_s_standard": 0.64,
+          "at_0_150": 45,
+          "at_0_200": 43,
+          "lost": 2,
+          "lost_pct": 4.444444
+        },
+        "artefact_free_corrected_block": {
+          "n": 45,
+          "shortest_s": 0.17,
+          "p05_s_nearest_rank": 0.21,
+          "median_s_standard": 0.64,
+          "at_0_150": 45,
+          "at_0_200": 43,
+          "lost": 2,
+          "lost_pct": 4.444444
+        },
+        "current_gaps": {
+          "n": 45,
+          "shortest_s": 0.17,
+          "p05_s_nearest_rank": 0.21,
+          "median_s_standard": 0.64,
+          "median_s_published_convention": 0.64,
+          "max_s": 1.98
+        },
+        "artefact_free_gaps": {
+          "n": 45,
+          "shortest_s": 0.17,
+          "p05_s_nearest_rank": 0.21,
+          "median_s_standard": 0.64,
+          "median_s_published_convention": 0.64,
+          "max_s": 1.98
+        },
+        "trigger_committed": {
+          "at_0_150": 45,
+          "at_0_200": 43,
+          "lost": 2,
+          "lost_pct": 4.444444
+        },
+        "trigger_current": {
+          "at_0_150": 45,
+          "at_0_200": 43,
+          "lost": 2,
+          "lost_pct": 4.444444
+        },
+        "trigger_artefact_free": {
+          "at_0_150": 45,
+          "at_0_200": 43,
+          "lost": 2,
+          "lost_pct": 4.444444
+        }
+      },
+      "poetry": {
+        "committed_gaps_block_matches_current": true,
+        "committed_corrected_block_matches_artefact_free": true,
+        "keys_not_reproduced": [],
+        "committed_gaps": {
+          "n": 7,
+          "shortest_s": 0.15,
+          "p05_s_nearest_rank": 0.15,
+          "median_s_standard": 0.51,
+          "median_s_published_convention": 0.51,
+          "max_s": 5.1
+        },
+        "committed_corrected": {
+          "n": 7,
+          "shortest_s": 0.15,
+          "p05_s_nearest_rank": 0.15,
+          "median_s_standard": 0.51,
+          "at_0_150": 7,
+          "at_0_200": 6,
+          "lost": 1,
+          "lost_pct": 14.285714
+        },
+        "artefact_free_corrected_block": {
+          "n": 7,
+          "shortest_s": 0.15,
+          "p05_s_nearest_rank": 0.15,
+          "median_s_standard": 0.51,
+          "at_0_150": 7,
+          "at_0_200": 6,
+          "lost": 1,
+          "lost_pct": 14.285714
+        },
+        "current_gaps": {
+          "n": 7,
+          "shortest_s": 0.15,
+          "p05_s_nearest_rank": 0.15,
+          "median_s_standard": 0.51,
+          "median_s_published_convention": 0.51,
+          "max_s": 5.1
+        },
+        "artefact_free_gaps": {
+          "n": 7,
+          "shortest_s": 0.15,
+          "p05_s_nearest_rank": 0.15,
+          "median_s_standard": 0.51,
+          "median_s_published_convention": 0.51,
+          "max_s": 5.1
+        },
+        "trigger_committed": {
+          "at_0_150": 7,
+          "at_0_200": 6,
+          "lost": 1,
+          "lost_pct": 14.285714
+        },
+        "trigger_current": {
+          "at_0_150": 7,
+          "at_0_200": 6,
+          "lost": 1,
+          "lost_pct": 14.285714
+        },
+        "trigger_artefact_free": {
+          "at_0_150": 7,
+          "at_0_200": 6,
+          "lost": 1,
+          "lost_pct": 14.285714
+        }
+      },
+      "essay": {
+        "committed_gaps_block_matches_current": true,
+        "committed_corrected_block_matches_artefact_free": true,
+        "keys_not_reproduced": [],
+        "committed_gaps": {
+          "n": 33,
+          "shortest_s": 0.15,
+          "p05_s_nearest_rank": 0.16,
+          "median_s_standard": 0.76,
+          "median_s_published_convention": 0.76,
+          "max_s": 4.53
+        },
+        "committed_corrected": {
+          "n": 33,
+          "shortest_s": 0.15,
+          "p05_s_nearest_rank": 0.16,
+          "median_s_standard": 0.76,
+          "at_0_150": 33,
+          "at_0_200": 24,
+          "lost": 9,
+          "lost_pct": 27.272727
+        },
+        "artefact_free_corrected_block": {
+          "n": 33,
+          "shortest_s": 0.15,
+          "p05_s_nearest_rank": 0.16,
+          "median_s_standard": 0.76,
+          "at_0_150": 33,
+          "at_0_200": 24,
+          "lost": 9,
+          "lost_pct": 27.272727
+        },
+        "current_gaps": {
+          "n": 33,
+          "shortest_s": 0.15,
+          "p05_s_nearest_rank": 0.16,
+          "median_s_standard": 0.76,
+          "median_s_published_convention": 0.76,
+          "max_s": 4.53
+        },
+        "artefact_free_gaps": {
+          "n": 33,
+          "shortest_s": 0.15,
+          "p05_s_nearest_rank": 0.16,
+          "median_s_standard": 0.76,
+          "median_s_published_convention": 0.76,
+          "max_s": 4.53
+        },
+        "trigger_committed": {
+          "at_0_150": 33,
+          "at_0_200": 24,
+          "lost": 9,
+          "lost_pct": 27.272727
+        },
+        "trigger_current": {
+          "at_0_150": 33,
+          "at_0_200": 24,
+          "lost": 9,
+          "lost_pct": 27.272727
+        },
+        "trigger_artefact_free": {
+          "at_0_150": 33,
+          "at_0_200": 24,
+          "lost": 9,
+          "lost_pct": 27.272727
+        }
+      },
+      "dialogue": {
+        "committed_gaps_block_matches_current": true,
+        "committed_corrected_block_matches_artefact_free": true,
+        "keys_not_reproduced": [],
+        "committed_gaps": {
+          "n": 35,
+          "shortest_s": 0.13,
+          "p05_s_nearest_rank": 0.16,
+          "median_s_standard": 0.45,
+          "median_s_published_convention": 0.45,
+          "max_s": 1.13
+        },
+        "committed_corrected": {
+          "n": 34,
+          "shortest_s": 0.16,
+          "p05_s_nearest_rank": 0.17,
+          "median_s_standard": 0.46,
+          "at_0_150": 34,
+          "at_0_200": 30,
+          "lost": 4,
+          "lost_pct": 11.764706
+        },
+        "artefact_free_corrected_block": {
+          "n": 34,
+          "shortest_s": 0.16,
+          "p05_s_nearest_rank": 0.17,
+          "median_s_standard": 0.46,
+          "at_0_150": 34,
+          "at_0_200": 30,
+          "lost": 4,
+          "lost_pct": 11.764706
+        },
+        "current_gaps": {
+          "n": 35,
+          "shortest_s": 0.13,
+          "p05_s_nearest_rank": 0.16,
+          "median_s_standard": 0.45,
+          "median_s_published_convention": 0.45,
+          "max_s": 1.13
+        },
+        "artefact_free_gaps": {
+          "n": 34,
+          "shortest_s": 0.16,
+          "p05_s_nearest_rank": 0.17,
+          "median_s_standard": 0.46,
+          "median_s_published_convention": 0.47,
+          "max_s": 1.13
+        },
+        "trigger_committed": {
+          "at_0_150": 34,
+          "at_0_200": 30,
+          "lost": 4,
+          "lost_pct": 11.764706
+        },
+        "trigger_current": {
+          "at_0_150": 34,
+          "at_0_200": 30,
+          "lost": 4,
+          "lost_pct": 11.764706
+        },
+        "trigger_artefact_free": {
+          "at_0_150": 34,
+          "at_0_200": 30,
+          "lost": 4,
+          "lost_pct": 11.764706
+        }
+      },
+      "shakespeare": {
+        "committed_gaps_block_matches_current": true,
+        "committed_corrected_block_matches_artefact_free": true,
+        "keys_not_reproduced": [],
+        "committed_gaps": {
+          "n": 62,
+          "shortest_s": 0.11,
+          "p05_s_nearest_rank": 0.16,
+          "median_s_standard": 0.375,
+          "median_s_published_convention": 0.38,
+          "max_s": 2.1
+        },
+        "committed_corrected": {
+          "n": 61,
+          "shortest_s": 0.15,
+          "p05_s_nearest_rank": 0.16,
+          "median_s_standard": 0.38,
+          "at_0_150": 61,
+          "at_0_200": 46,
+          "lost": 15,
+          "lost_pct": 24.590164
+        },
+        "artefact_free_corrected_block": {
+          "n": 61,
+          "shortest_s": 0.15,
+          "p05_s_nearest_rank": 0.16,
+          "median_s_standard": 0.38,
+          "at_0_150": 61,
+          "at_0_200": 46,
+          "lost": 15,
+          "lost_pct": 24.590164
+        },
+        "current_gaps": {
+          "n": 62,
+          "shortest_s": 0.11,
+          "p05_s_nearest_rank": 0.16,
+          "median_s_standard": 0.375,
+          "median_s_published_convention": 0.38,
+          "max_s": 2.1
+        },
+        "artefact_free_gaps": {
+          "n": 61,
+          "shortest_s": 0.15,
+          "p05_s_nearest_rank": 0.16,
+          "median_s_standard": 0.38,
+          "median_s_published_convention": 0.38,
+          "max_s": 2.1
+        },
+        "trigger_committed": {
+          "at_0_150": 61,
+          "at_0_200": 46,
+          "lost": 15,
+          "lost_pct": 24.590164
+        },
+        "trigger_current": {
+          "at_0_150": 61,
+          "at_0_200": 46,
+          "lost": 15,
+          "lost_pct": 24.590164
+        },
+        "trigger_artefact_free": {
+          "at_0_150": 61,
+          "at_0_200": 46,
+          "lost": 15,
+          "lost_pct": 24.590164
+        }
+      },
+      "children": {
+        "committed_gaps_block_matches_current": true,
+        "committed_corrected_block_matches_artefact_free": true,
+        "keys_not_reproduced": [],
+        "committed_gaps": {
+          "n": 78,
+          "shortest_s": 0.11,
+          "p05_s_nearest_rank": 0.16,
+          "median_s_standard": 0.3,
+          "median_s_published_convention": 0.3,
+          "max_s": 1.96
+        },
+        "committed_corrected": {
+          "n": 77,
+          "shortest_s": 0.15,
+          "p05_s_nearest_rank": 0.16,
+          "median_s_standard": 0.3,
+          "at_0_150": 77,
+          "at_0_200": 62,
+          "lost": 15,
+          "lost_pct": 19.480519
+        },
+        "artefact_free_corrected_block": {
+          "n": 77,
+          "shortest_s": 0.15,
+          "p05_s_nearest_rank": 0.16,
+          "median_s_standard": 0.3,
+          "at_0_150": 77,
+          "at_0_200": 62,
+          "lost": 15,
+          "lost_pct": 19.480519
+        },
+        "current_gaps": {
+          "n": 78,
+          "shortest_s": 0.11,
+          "p05_s_nearest_rank": 0.16,
+          "median_s_standard": 0.3,
+          "median_s_published_convention": 0.3,
+          "max_s": 1.96
+        },
+        "artefact_free_gaps": {
+          "n": 77,
+          "shortest_s": 0.15,
+          "p05_s_nearest_rank": 0.16,
+          "median_s_standard": 0.3,
+          "median_s_published_convention": 0.3,
+          "max_s": 1.96
+        },
+        "trigger_committed": {
+          "at_0_150": 77,
+          "at_0_200": 62,
+          "lost": 15,
+          "lost_pct": 19.480519
+        },
+        "trigger_current": {
+          "at_0_150": 77,
+          "at_0_200": 62,
+          "lost": 15,
+          "lost_pct": 19.480519
+        },
+        "trigger_artefact_free": {
+          "at_0_150": 77,
+          "at_0_200": 62,
+          "lost": 15,
+          "lost_pct": 19.480519
+        }
+      },
+      "oration": {
+        "committed_gaps_block_matches_current": true,
+        "committed_corrected_block_matches_artefact_free": true,
+        "keys_not_reproduced": [],
+        "committed_gaps": {
+          "n": 2,
+          "shortest_s": 0.31,
+          "p05_s_nearest_rank": 0.31,
+          "median_s_standard": 0.345,
+          "median_s_published_convention": 0.38,
+          "max_s": 0.38
+        },
+        "committed_corrected": {
+          "n": 2,
+          "shortest_s": 0.31,
+          "p05_s_nearest_rank": 0.31,
+          "median_s_standard": 0.345,
+          "at_0_150": 2,
+          "at_0_200": 2,
+          "lost": 0,
+          "lost_pct": 0.0
+        },
+        "artefact_free_corrected_block": {
+          "n": 2,
+          "shortest_s": 0.31,
+          "p05_s_nearest_rank": 0.31,
+          "median_s_standard": 0.345,
+          "at_0_150": 2,
+          "at_0_200": 2,
+          "lost": 0,
+          "lost_pct": 0.0
+        },
+        "current_gaps": {
+          "n": 2,
+          "shortest_s": 0.31,
+          "p05_s_nearest_rank": 0.31,
+          "median_s_standard": 0.345,
+          "median_s_published_convention": 0.38,
+          "max_s": 0.38
+        },
+        "artefact_free_gaps": {
+          "n": 2,
+          "shortest_s": 0.31,
+          "p05_s_nearest_rank": 0.31,
+          "median_s_standard": 0.345,
+          "median_s_published_convention": 0.38,
+          "max_s": 0.38
+        },
+        "trigger_committed": {
+          "at_0_150": 2,
+          "at_0_200": 2,
+          "lost": 0,
+          "lost_pct": 0.0
+        },
+        "trigger_current": {
+          "at_0_150": 2,
+          "at_0_200": 2,
+          "lost": 0,
+          "lost_pct": 0.0
+        },
+        "trigger_artefact_free": {
+          "at_0_150": 2,
+          "at_0_200": 2,
+          "lost": 0,
+          "lost_pct": 0.0
+        }
+      }
+    },
+    "watcher_per_cell": {
+      "narration": {
+        "committed": {
+          "pause_events_gt_0_15": 299,
+          "pause_events_all": 321,
+          "distinct_silence_runs": 126,
+          "max_run_s": 1.8301,
+          "min_run_s": 0.01,
+          "median_run_s": 0.355
+        },
+        "current": {
+          "pause_events_gt_0_15": 299,
+          "pause_events_all": 321,
+          "distinct_silence_runs": 126,
+          "max_run_s": 1.8301,
+          "min_run_s": 0.01,
+          "median_run_s": 0.355
+        },
+        "matches": true,
+        "artefact_free": {
+          "pause_events_gt_0_15": 222,
+          "pause_events_all": 227,
+          "distinct_silence_runs": 113,
+          "max_run_s": 1.79,
+          "min_run_s": 0.15,
+          "median_run_s": 0.34
+        }
+      },
+      "poetry": {
+        "committed": {
+          "pause_events_gt_0_15": 59,
+          "pause_events_all": 66,
+          "distinct_silence_runs": 29,
+          "max_run_s": 1.2,
+          "min_run_s": 0.13,
+          "median_run_s": 0.45
+        },
+        "current": {
+          "pause_events_gt_0_15": 59,
+          "pause_events_all": 66,
+          "distinct_silence_runs": 29,
+          "max_run_s": 1.2,
+          "min_run_s": 0.13,
+          "median_run_s": 0.45
+        },
+        "matches": true,
+        "artefact_free": {
+          "pause_events_gt_0_15": 46,
+          "pause_events_all": 46,
+          "distinct_silence_runs": 22,
+          "max_run_s": 1.2,
+          "min_run_s": 0.17,
+          "median_run_s": 0.42
+        }
+      },
+      "essay": {
+        "committed": {
+          "pause_events_gt_0_15": 263,
+          "pause_events_all": 281,
+          "distinct_silence_runs": 109,
+          "max_run_s": 1.56,
+          "min_run_s": 0.08,
+          "median_run_s": 0.33
+        },
+        "current": {
+          "pause_events_gt_0_15": 263,
+          "pause_events_all": 281,
+          "distinct_silence_runs": 109,
+          "max_run_s": 1.56,
+          "min_run_s": 0.08,
+          "median_run_s": 0.33
+        },
+        "matches": true,
+        "artefact_free": {
+          "pause_events_gt_0_15": 173,
+          "pause_events_all": 178,
+          "distinct_silence_runs": 97,
+          "max_run_s": 1.56,
+          "min_run_s": 0.15,
+          "median_run_s": 0.32
+        }
+      },
+      "dialogue": {
+        "committed": {
+          "pause_events_gt_0_15": 269,
+          "pause_events_all": 292,
+          "distinct_silence_runs": 115,
+          "max_run_s": 1.53,
+          "min_run_s": 0.03,
+          "median_run_s": 0.33
+        },
+        "current": {
+          "pause_events_gt_0_15": 269,
+          "pause_events_all": 292,
+          "distinct_silence_runs": 115,
+          "max_run_s": 1.53,
+          "min_run_s": 0.03,
+          "median_run_s": 0.33
+        },
+        "matches": true,
+        "artefact_free": {
+          "pause_events_gt_0_15": 196,
+          "pause_events_all": 201,
+          "distinct_silence_runs": 99,
+          "max_run_s": 1.53,
+          "min_run_s": 0.15,
+          "median_run_s": 0.35
+        }
+      },
+      "shakespeare": {
+        "committed": {
+          "pause_events_gt_0_15": 286,
+          "pause_events_all": 311,
+          "distinct_silence_runs": 124,
+          "max_run_s": 1.45,
+          "min_run_s": 0.03,
+          "median_run_s": 0.34
+        },
+        "current": {
+          "pause_events_gt_0_15": 286,
+          "pause_events_all": 311,
+          "distinct_silence_runs": 124,
+          "max_run_s": 1.45,
+          "min_run_s": 0.03,
+          "median_run_s": 0.34
+        },
+        "matches": true,
+        "artefact_free": {
+          "pause_events_gt_0_15": 209,
+          "pause_events_all": 212,
+          "distinct_silence_runs": 107,
+          "max_run_s": 1.31,
+          "min_run_s": 0.15,
+          "median_run_s": 0.35
+        }
+      },
+      "children": {
+        "committed": {
+          "pause_events_gt_0_15": 214,
+          "pause_events_all": 229,
+          "distinct_silence_runs": 89,
+          "max_run_s": 1.6,
+          "min_run_s": 0.07,
+          "median_run_s": 0.3
+        },
+        "current": {
+          "pause_events_gt_0_15": 214,
+          "pause_events_all": 229,
+          "distinct_silence_runs": 89,
+          "max_run_s": 1.6,
+          "min_run_s": 0.07,
+          "median_run_s": 0.3
+        },
+        "matches": true,
+        "artefact_free": {
+          "pause_events_gt_0_15": 151,
+          "pause_events_all": 151,
+          "distinct_silence_runs": 75,
+          "max_run_s": 1.55,
+          "min_run_s": 0.16,
+          "median_run_s": 0.36
+        }
+      },
+      "oration": {
+        "committed": {
+          "pause_events_gt_0_15": 281,
+          "pause_events_all": 289,
+          "distinct_silence_runs": 81,
+          "max_run_s": 2.54,
+          "min_run_s": 0.07,
+          "median_run_s": 0.53
+        },
+        "current": {
+          "pause_events_gt_0_15": 281,
+          "pause_events_all": 289,
+          "distinct_silence_runs": 81,
+          "max_run_s": 2.54,
+          "min_run_s": 0.07,
+          "median_run_s": 0.53
+        },
+        "matches": true,
+        "artefact_free": {
+          "pause_events_gt_0_15": 244,
+          "pause_events_all": 247,
+          "distinct_silence_runs": 75,
+          "max_run_s": 2.54,
+          "min_run_s": 0.15,
+          "median_run_s": 0.54
+        }
+      }
+    },
+    "committed_totals": {
+      "gaps": 262,
+      "at_0_150": 259,
+      "at_0_200": 213,
+      "lost": 46,
+      "lost_pct": 17.7606,
+      "corrected_without_leading_artefact": {
+        "gaps": 259,
+        "at_0_150": 259,
+        "at_0_200": 213,
+        "lost": 46,
+        "lost_pct": 17.7606
+      }
+    },
+    "disagreements": [],
+    "all_agree": true
+  }
+}

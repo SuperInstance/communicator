@@ -1184,3 +1184,38 @@ independent sessions per class**, the corpus needs **condition D** (turned
 need a real 90° turn with the glasses off if they restrict it. The pose
 signal is in the capture and measurable; the control that attributes it to
 the head has not been recorded.
+
+**And the other end of the file matters too.** The published gap list is
+every **silence run**, which includes the silence after the last word. Poetry
+is the cell where that bites: its longest silence is **5.100 s** — longer
+than the essay's 4.530 s — but it runs from 14.895 s to 19.995 s of a
+20.011 s file, so it is the recording stopping, not a speaker pausing.
+Poetry's longest **inter-utterance** gap is **1.740 s**, so it produces no
+turn boundary at 3 s like the other five cells, and `src/turn.py`'s table —
+which was right, and left "-" for poetry — now says so. The full accounting
+closes exactly: **262 published gaps = 257 inter-utterance + 1 real leading
+silence (essay 0.760 s) + 3 leading artefacts (dialogue 0.130, shakespeare
+0.110, children 0.110) + 1 trailing silence (poetry 5.100).** Two tables in
+this repo count gaps on different populations and always have; that had
+never been written down until now.
+
+**And the director's PROPOSAL is a different story from its verdicts.**
+`experiments/director_proposal_stability.py` asks the production debrief the
+same question six times, with the material snapshotted once so the prompt is
+byte-identical. The proposal is **as unstable in wording as the verdicts** —
+5 distinct titles out of 6 runs, every field varies, one proposal
+incomplete, 37 unsafe claims with 34 literally distinct — but it is
+**stable in substance**. All five titles propose the same measurement (the
+gate's advantage under cache pressure on the target device), and the
+unsafe-claim set is the same every time, reworded. Measured, not eyeballed:
+the pairwise content-token Jaccard between titles is **0.402** median, and
+between the unsafe-claim sets **0.302**, while a title for a *different*
+experiment scores **0.000** against all five.
+
+So the working rule is asymmetric and worth having in this form: **trust the
+director's CHOICE of experiment; do not trust its VERDICT on a claim.** One
+caveat that has to travel with it: the experiment it keeps proposing is
+already item 11 of the written adoption plan, so the proposal is stable
+because the *material* says so. The director is faithfully echoing the
+plan, not independently choosing — which is what this project already
+believed, now measured.

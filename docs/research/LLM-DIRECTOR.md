@@ -351,6 +351,74 @@ wrong"*, that is a reason to look. If it says *"this claim looks right"*,
 that is **not** a reason to stop looking — because on the claims that are
 actually false, it says "right" half the time.
 
+### AND THE PROPOSAL IS A DIFFERENT STORY: UNSTABLE IN WORDING, STABLE IN SUBSTANCE
+
+The audit verdicts are the wrong thing to measure for planning. What the
+plan actually wants from an LLM is the *proposal*: **what experiment to run
+next.** `director_proposal_stability.py` asks the production debrief the
+same question six times, with the material snapshotted ONCE so the prompt
+is byte-identical (143,852 chars, SHA-256 `9ccc4179ea39bdfb`), and compares
+the answers.
+
+**Literally, it is as unstable as the verdicts:**
+
+| | value |
+|---|---|
+| distinct titles | **5 of 6 runs** (agreement 0.167) |
+| distinct `hypothesis` / `method` / `controls` / `null` / `falsifier` | **5 each** — every field varies |
+| runs producing all six required fields | **5 of 6** — one proposal was incomplete |
+| unsafe claims | 37 raised, **34 literally distinct**, top agreement 0.054 |
+
+**But the proposals are the same experiment.** The five titles are:
+
+> Cache-Pressure Gate Advantage Test · Gate-CPU-scaling-on-target-hardware ·
+> Gate-advantage under cache-pressure on target hardware · Gate-advantage
+> under target-device cache constraints · Gate advantage under cache
+> pressure on low-memory targets
+
+Every one of them is the same measurement: *the gate's advantage under cache
+pressure on the target device.* And the unsafe claims the director raises are
+the same claims every time, reworded — the recurring ones are the ASCII
+labeling claim, the ASCII-motion claim and the fifty-fold gain claim.
+
+That difference is measured, not eyeballed. Exact string equality cannot
+see it, so the comparer also scores pairs by **content-token Jaccard**:
+
+| comparison | median | min | max |
+|---|---:|---:|---:|
+| the **titles** against each other | **0.402** | 0.091 | 0.667 |
+| the **whole proposal** (hypothesis+method+controls+null+falsifier) | **0.292** | 0.000 | 0.375 |
+| the **unsafe-claim sets** against each other | **0.302** | 0.215 | 0.491 |
+
+For contrast: a title for a *different* experiment scores **0.000** against
+all five of these. (The absolute overlap is modest — 0.4, not 0.9 — because
+"cache-pressure", "low-cache" and "cache-constrained" share only the word
+"cache". The separation is what is measured, not the magnitude.)
+
+**So the working rule this establishes is asymmetric, and it is worth having
+in exactly this form:**
+
+  - **Trust the director's CHOICE of experiment. Do not trust its VERDICT on
+    a claim.** The choice is stable in substance; the verdict is not stable
+    in either wording or substance, and on known-false claims it flips to
+    endorsement half the time.
+  - **Read the proposal, not the wording.** Five different titles for one
+    experiment is not five experiments.
+
+**One caveat that has to go with it, because it changes what the stability
+means.** The experiment it keeps proposing — the gate's advantage under
+cache pressure on the target device — is *already item 11 of the written
+adoption plan*, marked "the measurement most likely to change what we
+think", and `DEVICE-GENERALISATION.md` already exists. So the proposal is
+stable because the **material** says so, and the director is faithfully
+echoing the plan rather than independently choosing. That is consistent with
+what this project already knows: **the director follows the written plan; it
+does not re-rank it.**
+
+That is not nothing — a plan is only useful if something checks it, and this
+checks that the plan's NEXT item is the thing the evidence actually points
+at. But it is not a second opinion, and it must not be presented as one.
+
 ## 5. The result that mattered most was not in the model's answer
 
 The first context audit scored gpt-oss-120b at **+0.500** with 2 false

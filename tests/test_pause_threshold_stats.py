@@ -128,6 +128,22 @@ def verify(result: dict) -> None:
                 == fresh["input"]["analysis_duration_s"]), (
             f"{name}: persisted duration differs from the file on disk")
 
+        # The edge-silence block, re-derived from the corpus. This is what
+        # makes a tampered leading/trailing silence detectable rather than
+        # merely asserted somewhere in prose.
+        for key in ("leading_silence_s", "trailing_silence_s", "n_gaps",
+                    "n_inter_utterance_gaps", "max_gap_all_s",
+                    "max_inter_utterance_gap_s", "n_gaps_ge_3s_all",
+                    "n_gaps_ge_3s_inter_utterance"):
+            assert cell["edge_silences"][key] == fresh["edge_silences"][key], (
+                f"{name}: persisted edge_silences[{key}]="
+                f"{cell['edge_silences'][key]!r} != measured "
+                f"{fresh['edge_silences'][key]!r}")
+        assert (cell["edge_silences"]["inter_utterance_durations_s"]
+                == fresh["edge_silences"]["inter_utterance_durations_s"]), (
+            f"{name}: persisted inter-utterance gap list differs from the "
+            f"measured one")
+
     total = sum(c["gaps"]["n"] for c in result["cells"].values())
     assert result["totals"]["gaps"] == total, (
         f"persisted total {result['totals']['gaps']} != the sum of the cells "
@@ -543,5 +559,98 @@ class TestTheCheckerCanFail:
     def test_a_perturbed_headline_percentage_is_rejected(self):
         result = load_result()
         result["totals"]["lost_pct"] = 3.5
+        with pytest.raises(AssertionError):
+            verify(result)
+
+
+class TestEdgeSilences:
+    """The published gap list is every SILENCE RUN, including the edges.
+
+    Neither the silence BEFORE the first word nor the silence AFTER the last
+    one is a pause between two utterances. Poetry is the case that makes the
+    trailing one matter: its longest silence (5.100 s) is longer than the
+    essay's, and it is the recording stopping, not a speaker pausing.
+    """
+
+    def test_every_cell_records_its_edge_silences(self):
+        result = load_result()
+        for name, cell in result["cells"].items():
+            assert "edge_silences" in cell, f"{name} has no edge_silences block"
+            e = cell["edge_silences"]
+            assert e["n_gaps"] == cell["gaps"]["n"]
+            assert e["n_inter_utterance_gaps"] <= e["n_gaps"]
+
+    def test_the_gap_count_accounts_for_the_edges(self):
+        """Every published gap is an inter-utterance gap or an edge silence.
+
+        262 published gaps = 257 inter-utterance + 1 real leading (essay
+        0.760 s) + 3 leading artefacts (dialogue 0.130, shakespeare 0.110,
+        children 0.110) + 1 trailing (poetry 5.100). If this stops adding
+        up, one of the populations has moved.
+        """
+        result = load_result()
+        total_gaps = result["totals"]["gaps"]
+        inter = sum(c["edge_silences"]["n_inter_utterance_gaps"]
+                    for c in result["cells"].values())
+        edges = 0
+        for c in result["cells"].values():
+            e = c["edge_silences"]
+            if e["leading_silence_s"] is not None:
+                edges += 1
+            if e["trailing_silence_s"] is not None:
+                edges += 1
+        assert inter + edges == total_gaps
+
+    def test_poetrys_longest_silence_is_trailing_not_a_pause(self):
+        """The correction to `src/turn.py`'s poetry row.
+
+        Poetry's longest silence is 5.100 s -- longer than the essay's
+        4.530 s -- but it is the 5.100 s AFTER THE LAST WORD. Its longest
+        INTER-UTTERANCE gap is 1.740 s, so it produces no turn boundary at
+        3 s, like the other five cells.
+        """
+        result = load_result()
+        poetry = result["cells"]["poetry"]["edge_silences"]
+        assert poetry["trailing_silence_s"] == pytest.approx(5.100)
+        assert poetry["leading_silence_s"] is None
+        assert poetry["max_gap_all_s"] == pytest.approx(5.100)
+        assert poetry["max_inter_utterance_gap_s"] == pytest.approx(1.740)
+        # And the count of long gaps changes with the definition.
+        assert poetry["n_gaps_ge_3s_all"] == 1
+        assert poetry["n_gaps_ge_3s_inter_utterance"] == 0
+
+    def test_only_the_essay_has_a_long_leading_silence(self):
+        """The other three leading silences are the SUB-THRESHOLD artefact.
+
+        essay 0.760, dialogue 0.130, shakespeare 0.110, children 0.110.
+        The last three are below `MIN_SILENCE_S` and survive only because
+        `energy.py` lets the first segment escape the filter.
+        """
+        result = load_result()
+        leads = {n: c["edge_silences"]["leading_silence_s"]
+                 for n, c in result["cells"].items()
+                 if c["edge_silences"]["leading_silence_s"] is not None}
+        assert leads == {"essay": pytest.approx(0.760),
+                          "dialogue": pytest.approx(0.130),
+                          "shakespeare": pytest.approx(0.110),
+                          "children": pytest.approx(0.110)}
+
+    def test_the_turn_table_and_the_pause_table_are_different_populations(self):
+        """The turn count uses inter-utterance gaps; the pause count does not.
+
+        This is the reason the two tables disagree and always have: essay has
+        2 gaps >= 3 s either way, poetry has 1 in the pause table and 0 in the
+        turn table.
+        """
+        result = load_result()
+        cells = result["cells"]
+        assert cells["essay"]["edge_silences"]["n_gaps_ge_3s_all"] == 2
+        assert cells["essay"]["edge_silences"]["n_gaps_ge_3s_inter_utterance"] == 2
+        assert cells["poetry"]["edge_silences"]["n_gaps_ge_3s_all"] == 1
+        assert cells["poetry"]["edge_silences"]["n_gaps_ge_3s_inter_utterance"] == 0
+
+    def test_a_perturbed_edge_silence_is_rejected(self):
+        result = load_result()
+        result["cells"]["poetry"]["edge_silences"]["trailing_silence_s"] = 0.1
         with pytest.raises(AssertionError):
             verify(result)

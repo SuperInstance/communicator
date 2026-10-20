@@ -382,6 +382,43 @@ def measure_cell(name: str, path: Path) -> dict:
 
     gap_bytes = canonical_gap_bytes(gaps)
     header = wav_header(path)
+
+    # WHAT A GAP IS, made explicit. The published gap list is the list of
+    # SILENCE RUNS in the file, which includes the silence BEFORE the first
+    # word and the silence AFTER the last one. Neither is a pause between two
+    # utterances, and they are the reason the gap counts, the turn counts and
+    # the watcher run counts in this repository do not agree with each other.
+    #
+    # Poetry is the case that makes this matter: its longest silence is
+    # 5.100 s, which is LONGER than the essay's 4.530 s -- but that silence
+    # runs from 14.895 s to 19.995 s of a 20.011 s file, i.e. it is the
+    # recording stopping, not a speaker pausing. Poetry's longest
+    # INTER-UTTERANCE gap is 1.740 s, so it produces no turn boundary at 3 s,
+    # like the other five cells.
+    file_s = len(audio.samples) / SR
+    edge_s = 800 / SR               # ONE analysis frame, as used above
+    first_silence = next((s for s in silences if s[1].start <= edge_s), None)
+    last_silence = next((s for s in reversed(silences)
+                         if s[1].end >= file_s - edge_s), None)
+    inter = [s.duration() for _, s in silences
+             if s.start > edge_s and s.end < file_s - edge_s]
+    edge_block = {
+        "what": ("the published gap list is every SILENCE RUN in the file, "
+                 "including the leading and trailing ones; a pause between "
+                 "utterances is a silence run with speech on both sides"),
+        "leading_silence_s": (round(first_silence[1].duration(), 6)
+                              if first_silence else None),
+        "trailing_silence_s": (round(last_silence[1].duration(), 6)
+                               if last_silence else None),
+        "n_gaps": n,
+        "n_inter_utterance_gaps": len(inter),
+        "max_gap_all_s": round(max(gaps), 6) if gaps else None,
+        "max_inter_utterance_gap_s": round(max(inter), 6) if inter else None,
+        "n_gaps_ge_3s_all": sum(1 for g in gaps if g >= 3.0),
+        "n_gaps_ge_3s_inter_utterance": sum(1 for g in inter if g >= 3.0),
+        "inter_utterance_durations_s": [round(g, 6) for g in inter],
+    }
+
     return {
         "cell": name,
         "input": {
@@ -423,6 +460,7 @@ def measure_cell(name: str, path: Path) -> dict:
             "lost_pct": _r(100.0 * lost / at_150) if at_150 else None,
         },
         "leading_silence_artefact": leading,
+        "edge_silences": edge_block,
         "sub_threshold_gaps_s": [round(g, 6) for g in sub],
         "unexpected_sub_threshold_gaps_s": [round(g, 6) for g in unexpected_sub],
         "resume_table": addendum,

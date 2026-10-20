@@ -34,16 +34,31 @@ Over the whole corpus, pauses long enough to end a turn at 3 s:
 
     cell          audio_s   max_gap   gaps >= 3 s
     narration        90.0     1.980              0
-    poetry           20.0       -                -
+    poetry           20.011    1.740              0
     essay            75.0     4.530              2
     dialogue         75.0     1.130              0
     shakespeare       75.0     2.100              0
     children          75.0     1.960              0
     oration           75.0     0.380              0
 
-**Five of six cells produce ZERO turn boundaries at 3 s.** People recorded
+**Six of seven cells produce ZERO turn boundaries at 3 s.** People recorded
 monologue simply do not pause for three seconds; the longest gap anywhere in
 the corpus outside the essay is 2.1 s.
+
+The poetry row was a "-" until this was measured. The published pause table
+records poetry's longest silence as 5.100 s, which is LONGER than the
+essay's -- but that silence is the 5.100 s AFTER THE LAST WORD (14.895 s to
+19.995 s of a 20.011 s file), not a pause between two utterances. Poetry's
+longest INTER-UTTERANCE gap is 1.740 s, so it produces no turn boundary at
+3 s like the others. `docs/research/PAUSE-THRESHOLD.md` §"what a gap is".
+
+The same distinction applies at the other end of the file: the published gap
+counts include the silence BEFORE the first word, which is 0.760 s in the
+essay and 0.110-0.130 s in dialogue, shakespeare and children. Neither
+leading nor trailing silence is a pause between utterances, and the two are
+counted differently in different tables -- which is why the gap counts, the
+turn counts and the watcher run counts in this repository do not agree with
+each other and never did.
 
 That is not a defect in the constant. A 3 s give-up is an INTERACTIVE rule --
 "nobody has spoken for three seconds, I may speak now" -- and it is correct

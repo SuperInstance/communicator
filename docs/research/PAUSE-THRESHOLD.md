@@ -209,6 +209,45 @@ utterances. On the artefact-free population the shortest inter-utterance
 pause in the corpus is **150 ms** — in poetry, essay, shakespeare and
 children — which is *at* the shipped trigger, not below it.
 
+### The other end of the file: trailing silence
+
+The leading artefact is only half the edge problem, and the other half was
+found later, while checking a claim about poetry. **The published gap list
+is every SILENCE RUN in the file, which includes the silence after the last
+word.** Poetry is the cell where it matters:
+
+| cell | published gaps | inter-utterance gaps | leading silence | trailing silence | max gap (all) | max gap (inter-utterance) | gaps ≥ 3 s (all) | gaps ≥ 3 s (inter-utterance) |
+|---|---:|---:|---:|---:|---:|---:|---:|---:|
+| narration | 45 | 45 | — | — | 1.980 | 1.980 | 0 | 0 |
+| poetry | 7 | **6** | — | **5.100** | **5.100** | **1.740** | **1** | **0** |
+| essay | 33 | 32 | 0.760 | — | 4.530 | 4.530 | 2 | 2 |
+| dialogue | 35 | 34 | 0.130 | — | 1.130 | 1.130 | 0 | 0 |
+| shakespeare | 62 | 61 | 0.110 | — | 2.100 | 2.100 | 0 | 0 |
+| children | 78 | 77 | 0.110 | — | 1.960 | 1.960 | 0 | 0 |
+| oration | 2 | 2 | — | — | 0.380 | 0.380 | 0 | 0 |
+
+Poetry's 5.100 s silence runs from **14.895 s to 19.995 s of a 20.011 s
+file** — it is the recording stopping. Poetry's longest *inter-utterance*
+gap is **1.740 s**, so poetry produces no turn boundary at 3 s, like the
+other five cells.
+
+The full accounting closes exactly: **262 published gaps = 257
+inter-utterance + 1 real leading silence (essay 0.760 s) + 3 leading
+artefacts (dialogue 0.130, shakespeare 0.110, children 0.110) + 1 trailing
+silence (poetry 5.100).**
+
+**Why this is worth stating rather than fixing silently.** Two tables in
+this repository count gaps and they use different populations, and always
+have: the *pause* table counts silence runs, and the *turn* table
+(`src/turn.py`) counts gaps with speech on both sides. Poetry has **1** gap
+≥ 3 s in the pause table and **0** in the turn table. That is not a
+contradiction — it is two questions, and the reason the numbers disagree
+was never written down anywhere until now.
+
+The measurement is in `experiments/pause_threshold_results.json` under
+`cells.<name>.edge_silences`, and the edge window is one analysis frame
+(0.05 s), so a silence has to actually touch the file edge to count as one.
+
 ---
 
 ## 5. The "680 vs 1671" pause-run question (`NOTES-AUDIT.md` F8)
