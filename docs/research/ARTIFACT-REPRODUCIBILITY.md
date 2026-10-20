@@ -4,13 +4,13 @@
 that sits next to them?*
 
 **Tool:** `experiments/artifact_repro.py` · **Tests:** `tests/test_artifact_repro.py`
-**Audited commit:** `c71a6c5` (`c71a6c55abd0eb2a844d2a79f073b48e106ccabf`, 2026-10-19)
+**Audited commit:** `9c77f77` (`9c77f777b41bbf00467beb957b114b11de98542f`, 2026-10-20)
 
 ---
 
 ## 1. The question this answers
 
-`experiments/` holds 57 committed result files at `c71a6c5`: the
+`experiments/` holds 60 committed result files at `9c77f77`: the
 `*_results.json` family and the `teacher_conventional_*.json` family. Each was
 written by a script that sits next to it — but *the script that sits next to it*
 is not *the script that wrote it*. Scripts get edited. Corpora get re-captured.
@@ -85,7 +85,7 @@ including them would make every artefact look irreproducible.
 
 1. **Discover.** `experiments/*_results.json` and
    `experiments/teacher_conventional_*.json`, as tracked at the audited commit.
-   (57 at `c71a6c5`.)
+   (60 at `9c77f77`.)
 2. **Map to a script by name convention.** `foo_results.json` → `foo.py`;
    `teacher_conventional_{task}_{features}.json` → `teacher_conventional.py`.
    For the teacher family, the task **and** the feature set must both match:
@@ -164,25 +164,25 @@ real defect.
 
 ---
 
-## 5. Results at `c71a6c5`
+## 5. Results at `9c77f77`
 
-**57 committed artefacts at `c71a6c5`.** Every headline number in every
+**60 committed artefacts at `9c77f77`.** Every headline number in every
 artefact that could be re-run was reproduced.
 
 | verdict | count |
 |---|---:|
-| `REPRODUCIBLE` | **35** |
+| `REPRODUCIBLE` | **38** |
 | `NOT_REPRODUCIBLE` | **0** |
 | `NO_SCRIPT` | 4 |
 | `NOT_RE_RUN` | 17 |
 | `LEGACY_NO_SCRIPT` | 1 |
-| **total** | **57** |
+| **total** | **60** |
 
 The gate's exit code at this commit is **0**: nothing in the current tree is
 falsified. That is a statement about *this* commit, not a licence — §7 is
 about the commit that was.
 
-Run: `python experiments/artifact_repro.py --ref c71a6c5 --timeout 900`
+Run: `python experiments/artifact_repro.py --ref 9c77f77 --timeout 900`
 (interpreter `/home/proart/projects/glasses/.venv/bin/python`, numpy 2.5.4).
 
 The timeout is 900 s rather than the 120 s default because four of the scripts
@@ -190,12 +190,9 @@ are slow on this machine, and the 120 s default turned them into `NOT_RE_RUN`
 for a reason that had nothing to do with their numbers:
 `speculation_payoff.py` takes 389 s, `f0_speaker_change.py` 350 s,
 `inthewild_probe.py` 225 s, and `notch_ab.py` did not finish at 900 s at all
-(§12, item 2). At the 120 s default the same audit reports 31 `REPRODUCIBLE` and 21
-`NOT_RE_RUN`; raising the timeout converts **three** of those into real
-measurements and changes **no** verdict. The fourth difference is
-`pause_threshold_results.json`, which the 120 s run could not attempt at all,
-because the runner table had no entry for it and the scratch tree did not yet
-mirror `tests/`.
+(§12, item 2). At the 120 s default the same audit reports four fewer
+`REPRODUCIBLE` and four more `NOT_RE_RUN`; raising the timeout converts
+**three** of those into real measurements and changes **no** verdict.
 
 ### 5.1 The full table
 
@@ -209,6 +206,7 @@ mirror `tests/`.
 | `av_sync_results.json` | `av_sync.py` | **REPRODUCIBLE** | — |
 | `combined_filter_results.json` | `combined_filter.py` | **REPRODUCIBLE** | — |
 | `crossmodal_probe_results.json` | `crossmodal_probe.py` | **REPRODUCIBLE** | — |
+| `dialogue_intake_selftest_results.json` | `dialogue_intake_selftest.py` | **REPRODUCIBLE** | — |
 | `drift_structure_results.json` | `drift_structure.py` | **REPRODUCIBLE** | — |
 | `emptyroom_null_results.json` | `emptyroom_null.py` | **REPRODUCIBLE** | — |
 | `f0_speaker_change_results.json` | `f0_speaker_change.py` | **REPRODUCIBLE** | — |
@@ -219,8 +217,10 @@ mirror `tests/`.
 | `mic_filter_sim_results.json` | `mic_filter_sim.py` | **REPRODUCIBLE** | — |
 | `pause_threshold_results.json` | `pause_threshold.py` | **REPRODUCIBLE** | — |
 | `pose_test_results.json` | `pose_test.py` | **REPRODUCIBLE** | — |
+| `retraction_sweep_results.json` | `retraction_sweep.py` | **REPRODUCIBLE** | — |
 | `room_map_results.json` | `room_map.py` | **REPRODUCIBLE** | — |
 | `row_band_removal_results.json` | `row_band_removal.py` | **REPRODUCIBLE** | — |
+| `silence_leading_artefact_results.json` | `silence_leading_artefact.py` | **REPRODUCIBLE** | — |
 | `speculation_payoff_results.json` | `speculation_payoff.py` | **REPRODUCIBLE** | — |
 | `teacher_conventional_facing_both.json` | `teacher_conventional.py` | **REPRODUCIBLE** | — |
 | `teacher_conventional_facing_map.json` | `teacher_conventional.py` | **REPRODUCIBLE** | — |
@@ -266,8 +266,7 @@ mirror `tests/`.
 Nothing in this list is a falsified number. Each is a case where **no
 measurement was taken**, and the reason is stated so that a reader can tell
 "we did not check this" from "we checked and it did not hold". The tool
-records the same reasons in the manifest under
-`results[].reason`.
+records the same reasons in the manifest under `results[].reason`.
 
 **7** — calls the live jev model over the network
 
@@ -313,6 +312,7 @@ records the same reasons in the manifest under
 
 - `notch_ab_results.json`
 
+
 ### 6.1 Artefacts with no companion script at all
 
 - `real_interrupt_rate_results.json`
@@ -351,7 +351,7 @@ teacher on the 'both' feature set: margin over the best control is now 0.0"*,
 
 It exists in exactly one commit. The commit before it (`415ecb2`) had **0.65**
 in that cell; the commit after it (`d6baa6d`) regenerated the file with
-**0.000** in that cell, and `c71a6c5` (the current tree) holds **0.000**.
+**0.000** in that cell, and the current tree (`9c77f77`) holds **0.000**.
 
 ### 7.2 How this was established
 
@@ -410,19 +410,57 @@ give different control values. The number that is *not* reproducible is
 The current tree's script is not the script that wrote the number (it gained
 the provenance API in `d6baa6d`: blob `459e23c0…` at `7a4dff5`, `f8f89c96…`
 at `d6baa6d` and after), so the finding was checked against **both**:
-the `7a4dff5` script and the `c71a6c5` script, against both corpora. All
+the `7a4dff5` script and the current script (blob `f8f89c96…`, unchanged
+since `d6baa6d`), against both corpora. All
 four combinations return LOO B = 0.0. The conclusion does not depend on which
 script version is used.
 
-> A correction to `NOTES-AUDIT.md:93-94`, which says *"the script at `7a4dff5`
+> A correction to `NOTES-AUDIT.md:93-94`, which said *"the script at `7a4dff5`
 > and at `HEAD` are identical"*. That was true when it was written — `HEAD`
 > was then `7a4dff5`'s neighbour — and it is **no longer true**: the script
 > gained the provenance API in `d6baa6d` and its blob changed from
 > `459e23c0…` to `f8f89c96…`. The substantive claim survives, because both
 > versions return LOO B = 0.000. It is a good illustration of why a claim
 > about "the script" needs the script's hash next to it.
+>
+> **This correction has landed.** `9c77f77` rewrote that bullet of
+> `NOTES-AUDIT.md` to say the two scripts *"are **not** the same file"* and
+> that *"both* versions return 0.000" — the wording this report proposed. The
+> outstanding item is closed; it is recorded here because this report was
+> written against `c71a6c5` and the reader needs to know the correction is in
+> the tree, not just in this file.
 
-### 7.3 What this means for quoting documents
+### 7.3 The sweep is committed, and the gate can check it too
+
+The docs' claim that *"a sweep of 352 configurations over the parameters the
+artefact never recorded never produces 0.675 together with the artefact's
+other columns"* used to rest on an uncommitted script. **That script is now
+committed**: `experiments/retraction_sweep.py`, with its result in
+`experiments/retraction_sweep_results.json` (`9c77f77`).
+
+What the committed sweep says, read from the artefact:
+
+| | |
+|---|---|
+| question | is the withdrawn leave-one-session-out accuracy of 0.675 reachable in a sweep over the parameters the artefact never recorded? |
+| answer | **NO** |
+| configurations planned / run | 1280 / 1280 |
+| the grid | 4 filter variants × 4 frame counts × 8 strides × 5 max-pers × 2 tasks, features `both` |
+| reproductions | **0** |
+| distinct LOO-B values seen | 53 (none of them 0.675) |
+| corpus rebuild check | **3 of 3 session files byte-identical** (`A_rm3`, `B_rm3`, `C_rm3`) |
+| elapsed | 186.6 s |
+
+The earlier "352 configurations" figure was an earlier, smaller sweep; the
+committed one is 1280, and it is the one to quote.
+
+**And the sweep is itself checkable.** `retraction_sweep_results.json` is an
+artefact in the gate's scope, and the gate re-ran it at `9c77f77`:
+**`REPRODUCIBLE`**. So the claim "0.675 is unreachable" is no longer an
+assertion in a note — it is a committed script, a committed result file, and a
+verdict that a third party can re-derive with one command.
+
+### 7.4 What this means for quoting documents
 
 1. **`0.675` must not be quoted as a measurement.** It is not a number the
    committed code and the committed inputs can produce. It is now quoted in
@@ -435,7 +473,7 @@ script version is used.
    this tool, "is that number still reachable?" was answered by whoever
    happened to remember. Now it is a command with an exit code.
 
-### 7.4 What this does NOT mean
+### 7.5 What this does NOT mean
 
 - **It does not mean the teacher pipeline is broken.** Four of the five
   feature sets in the same family reproduce bit-exactly, at the same commit,
@@ -588,7 +626,7 @@ What that bought, measured:
 3. **The script is pinned by hash.** `script_sha256` ties the file to the
    code that wrote it.
 
-The expected verdicts hold. At `c71a6c5` all ten
+The expected verdicts hold. At `9c77f77` all ten
 `teacher_conventional_{speaking,facing}_{summary,region,map,region+map,both}.json`
 artefacts are **`REPRODUCIBLE`**, including `speaking_both.json` — the file
 that now holds 0.000, with the corpus and the arguments recorded next to it.
@@ -600,7 +638,7 @@ the *next* one checkable.
 
 ## 11. Documents that quote a number from a `NOT_REPRODUCIBLE` artefact
 
-At `c71a6c5` there is **no** `NOT_REPRODUCIBLE` artefact, so no document
+At `9c77f77` there is **no** `NOT_REPRODUCIBLE` artefact, so no document
 quotes a number from one. The list below is the historical one: the artefacts
 that are `NOT_REPRODUCIBLE` when the audit is pinned to the commit that wrote
 them, and every `docs/research/` line that quotes a number from them.
@@ -668,12 +706,37 @@ Stated plainly, so that the table above is not read as more than it is.
    `corpus_fingerprint` is for, and only artefacts that carry one get that
    answer for free.
 6. **The audit is pinned to a commit.** The working tree of this repo moves
-   while people work in it — another agent committed twice while this audit
-   was running, and the first of those two commits added three artefacts and
-   changed a fourth. The tool audited the **committed** code and the
-   **committed** artefacts at the named revision, which is why the verdict is
-   the same for everybody who checks that commit out, and why the earlier
-   `c71a6c5` results and the current ones can be compared like for like.
+   while people work in it — another agent committed repeatedly while this
+   audit was running, and the tree has since moved on again. The tool audited
+   the **committed** code and the **committed** artefacts at the named
+   revision, which is why the verdict is the same for everybody who checks
+   that commit out, and why the earlier `c71a6c5` results and the current
+   ones can be compared like for like.
+
+   > **CORRECTION (2026-10-20).** An earlier draft of this item read
+   > *"another agent has uncommitted changes to `experiments/pause_threshold.py`
+   > and `experiments/pause_threshold_results.json` right now"*, and a still
+   > earlier draft of this report was audited at `c71a6c5`.
+   >
+   > **What is true now:** both files are committed and the working tree is
+   > clean. `experiments/pause_threshold.py` and
+   > `experiments/pause_threshold_results.json` were changed in `d4a49c1`
+   > (*"The director's PROPOSAL is stable in substance even though its
+   > verdicts are not"*) and have been unchanged since, and `9c77f77` carries
+   > them forward. The results file was **regenerated** with a new
+   > `edge_silences` block per cell, and its committed SHA-256 changed with
+   > it:
+   >
+   > | revision | SHA-256 of `experiments/pause_threshold_results.json` | `edge_silences` per cell |
+   > |---|---|---|
+   > | `c71a6c5` | `4fc69b5ac12d99c1e3846a9a50228a26605243798b5c2714717d0bf74abbbe3c` | absent |
+   > | `d4a49c1` … `9c77f77` | `168d2c48e2540f21ee73dfbe8ccf0fccfc3add6d06294bca3b1186df86568e95` | present (7 cells) |
+   >
+   > The file is still `REPRODUCIBLE`: the audit re-ran the committed
+   > `pause_threshold.py` and reproduced every headline number of the
+   > regenerated file. **The point of the change is that a result file now
+   > carries its own hash history** — which is the same discipline this whole
+   > report is about, applied to the artefact rather than to the note.
 7. **The `hum_sweep_results.json` parse error is not diagnosed here.** The
    tool reports that the committed file is two JSON documents; which of them
    is authoritative is a question for whoever owns `hum_sweep.py`.
@@ -689,14 +752,68 @@ Stated plainly, so that the table above is not read as more than it is.
 
 ---
 
-## 13. Running it
+## 13. What the gate says about the new artefacts
+
+This report was first audited against `c71a6c5`; the tree has since moved to
+`9c77f77`. Stated plainly, so that "the gate says nothing about it" is not
+left ambiguous:
+
+### 13.1 New artefacts the gate **does** pick up
+
+Three result files have entered the discovery scope since `c71a6c5`, because
+they follow the `*_results.json` convention:
+
+| artefact | companion script | verdict at `9c77f77` |
+|---|---|---|
+| `dialogue_intake_selftest_results.json` | `dialogue_intake_selftest.py` | **REPRODUCIBLE** |
+| `silence_leading_artefact_results.json` | `silence_leading_artefact.py` | **REPRODUCIBLE** |
+| `retraction_sweep_results.json` | `retraction_sweep.py` | **REPRODUCIBLE** |
+
+A fourth, `pause_threshold_results.json`, was **regenerated** with a new
+`edge_silences` block per cell and is still **REPRODUCIBLE** (§12, item 6).
+
+The retraction sweep is the interesting one: §7.3 is the claim that 0.675 is
+unreachable, and the claim is now an artefact the gate re-derives.
+
+### 13.2 New artefacts the gate does **not** pick up
+
+These are committed result files that the discovery rule does not name,
+because they do not end in `_results.json` and are not in the teacher family:
+
+| artefact | why it is outside the scope |
+|---|---|
+| `director_majority_analysis.json` | name does not end in `_results.json` |
+| `director_proposal_stability.json` | name does not end in `_results.json` |
+| `director_repeatability_blind.json` | name does not end in `_results.json` |
+| `director_repeatability_context_140000.json` | name does not end in `_results.json` |
+| `director_repeatability_context_60000.json` | name does not end in `_results.json` |
+| `debrief_audit_blind_cf-meta-llama-3-3-70b-instruct-fp8-fast_cf-openai-gpt-oss-120b_cf-qwen-qwen3-30b-a3b-fp8.json` | name does not end in `_results.json`; see §9 |
+| `debrief_audit_blind_cf-openai-gpt-oss-120b_cf-meta-llama-3-3-70b-instruct-fp8-fast_cf-qwen-qwen3-30b-a3b-fp8.json` | name does not end in `_results.json`; see §9 |
+| `debrief_audit_context_cf-openai-gpt-oss-120b.json` | name does not end in `_results.json` |
+| `debrief_audit_context_cf-openai-gpt-oss-120b_cf-meta-llama-3-3-70b-instruct-fp8-fast.json` | name does not end in `_results.json` |
+| `debrief_cf-openai-gpt-oss-120b.json` | name does not end in `_results.json` |
+
+**The gate says nothing about these ten files.** That is a limitation of the
+naming convention the gate reads, not a statement that they are in order. Two
+of them (`debrief_audit_blind_*`) are the order-dependent-filename pair of §9,
+and one of them (`director_proposal_stability.json`) would need a cloud model
+to re-run in any case.
+
+**The fix is a convention, not a code change:** either rename these files to
+end in `_results.json`, or extend the discovery rule to name the families
+explicitly. Either way it is a decision for whoever owns the naming, and it
+is recorded here rather than acted on.
+
+---
+
+## 14. Running it
 
 ```bash
 # the whole tree, at the current commit
 python experiments/artifact_repro.py
 
 # a machine-readable manifest, and a pinned commit
-python experiments/artifact_repro.py --ref c71a6c5 --json /tmp/manifest.json
+python experiments/artifact_repro.py --ref 9c77f77 --json /tmp/manifest.json
 
 # the plan, without running anything
 python experiments/artifact_repro.py --list

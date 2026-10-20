@@ -455,6 +455,12 @@ RECIPES: dict[str, Recipe] = {
         script="question_rewrite.py",
         skip="calls the live jev model over the network",
     ),
+    "retraction_sweep.py": Recipe(
+        script="retraction_sweep.py",
+        runs=[Run(argv=[], expect="retraction_sweep_results.json",
+                  out_kind=OUT_DIR)],
+        inputs=["/mnt/c/proart_capture"],
+    ),
     "room_map.py": Recipe(
         script="room_map.py",
         runs=[Run(argv=[], expect="room_map_results.json")],
