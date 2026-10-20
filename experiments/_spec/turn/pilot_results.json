@@ -1,0 +1,415 @@
+{
+  "question": "Can jev classify SAME vs CHANGE speaker at a turn boundary from a spectrogram image?",
+  "model": "jev-1.14.0",
+  "image": {
+    "size": [
+      640,
+      480
+    ],
+    "window_s": 4.0,
+    "fmax_hz": 4000.0,
+    "centre_marker_px": 2,
+    "per_window_db_norm": true,
+    "phase": "discarded by construction (magnitude spectrogram)"
+  },
+  "population_check": {
+    "pooled_pairs": 1396,
+    "pooled_base_rate_change": 0.6225,
+    "turn_eval_reference": {
+      "n": 1396,
+      "base_rate_change": 0.6225
+    }
+  },
+  "sample": {
+    "n": 6,
+    "n_change": 3,
+    "n_same": 3,
+    "seed": 11,
+    "balanced": true,
+    "min_window_separation_s": 2.0,
+    "group_rel_counts": {
+      "cross": 2,
+      "within": 1
+    }
+  },
+  "preflight": {
+    "input_tokens_with_image": 326,
+    "input_tokens_without": 296,
+    "image_on_the_wire": true
+  },
+  "positive_control_pitch_bands": {
+    "rows": [
+      {
+        "case": "low_150hz",
+        "truth": "low",
+        "picked": "low",
+        "row": {
+          "choice": "low",
+          "confidence": 0.43,
+          "probabilities": {
+            "low": 0.62,
+            "mid": 0.34,
+            "high": 0.04
+          },
+          "input_tokens": 439,
+          "latency_s": 0.13,
+          "error": null,
+          "cached": true
+        }
+      },
+      {
+        "case": "mid_300hz",
+        "truth": "mid",
+        "picked": "low",
+        "row": {
+          "choice": "low",
+          "confidence": 0.48,
+          "probabilities": {
+            "low": 0.65,
+            "mid": 0.31,
+            "high": 0.04
+          },
+          "input_tokens": 438,
+          "latency_s": 0.19,
+          "error": null,
+          "cached": true
+        }
+      },
+      {
+        "case": "high_450hz",
+        "truth": "high",
+        "picked": "low",
+        "row": {
+          "choice": "low",
+          "confidence": 0.46,
+          "probabilities": {
+            "low": 0.64,
+            "mid": 0.32,
+            "high": 0.04
+          },
+          "input_tokens": 438,
+          "latency_s": 0.11,
+          "error": null,
+          "cached": true
+        }
+      }
+    ],
+    "accuracy": "1/3",
+    "random_floor": "1/3"
+  },
+  "main": {
+    "tag": "main",
+    "n": 6,
+    "n_scored": 6,
+    "n_api_error": 0,
+    "accuracy_balanced_sample": 0.5,
+    "on_sample_always_change_baseline": 0.5,
+    "pooled_corpus_baseline_1396": 0.6225,
+    "accuracy_reweighted_to_pooled_base_rate": 0.6225,
+    "tpr_change": 1.0,
+    "tnr_same": 0.0,
+    "auc_p_different": 0.5,
+    "auc_bootstrap95": [
+      0.0,
+      1.0
+    ],
+    "distinct_choices": [
+      "different"
+    ],
+    "constant_answer": true,
+    "p_diff_mean": 0.6067,
+    "p_diff_std": 0.017,
+    "beats_pooled_baseline": false,
+    "rows": [
+      {
+        "meeting": "ami_sdm_EN2002a_turns",
+        "idx": 680,
+        "label": "CHANGE",
+        "from": "MEE073",
+        "to": "FEO072",
+        "group_rel": "cross",
+        "gap_s": 0.05,
+        "mid_s": 412.8,
+        "img_mean_brightness": 41.22,
+        "resp": {
+          "choice": "different",
+          "confidence": 0.22,
+          "probabilities": {
+            "same": 0.39,
+            "different": 0.61
+          },
+          "input_tokens": 506,
+          "latency_s": 0.12,
+          "error": null,
+          "cached": true
+        }
+      },
+      {
+        "meeting": "ami_sdm_EN2002b_turns",
+        "idx": 646,
+        "label": "CHANGE",
+        "from": "MEE073",
+        "to": "FEO072",
+        "group_rel": "cross",
+        "gap_s": 0.06,
+        "mid_s": 380.195,
+        "img_mean_brightness": 54.76,
+        "resp": {
+          "choice": "different",
+          "confidence": 0.26,
+          "probabilities": {
+            "same": 0.37,
+            "different": 0.63
+          },
+          "input_tokens": 502,
+          "latency_s": 0.1,
+          "error": null,
+          "cached": true
+        }
+      },
+      {
+        "meeting": "ami_sdm_EN2002a_turns",
+        "idx": 276,
+        "label": "CHANGE",
+        "from": "FEO072",
+        "to": "FEO070",
+        "group_rel": "within",
+        "gap_s": 0.56,
+        "mid_s": 164.445,
+        "img_mean_brightness": 54.81,
+        "resp": {
+          "choice": "different",
+          "confidence": 0.16,
+          "probabilities": {
+            "same": 0.42,
+            "different": 0.58
+          },
+          "input_tokens": 500,
+          "latency_s": 0.12,
+          "error": null,
+          "cached": true
+        }
+      },
+      {
+        "meeting": "ami_sdm_EN2002a_turns",
+        "idx": 563,
+        "label": "SAME",
+        "from": "MEE071",
+        "to": "MEE071",
+        "group_rel": "within",
+        "gap_s": 0.02,
+        "mid_s": 338.255,
+        "img_mean_brightness": 43.41,
+        "resp": {
+          "choice": "different",
+          "confidence": 0.22,
+          "probabilities": {
+            "same": 0.39,
+            "different": 0.61
+          },
+          "input_tokens": 501,
+          "latency_s": 0.11,
+          "error": null,
+          "cached": true
+        }
+      },
+      {
+        "meeting": "ami_sdm_EN2002b_turns",
+        "idx": 377,
+        "label": "SAME",
+        "from": "MEE073",
+        "to": "MEE073",
+        "group_rel": "within",
+        "gap_s": 0.06,
+        "mid_s": 215.145,
+        "img_mean_brightness": 56.29,
+        "resp": {
+          "choice": "different",
+          "confidence": 0.18,
+          "probabilities": {
+            "same": 0.41,
+            "different": 0.59
+          },
+          "input_tokens": 503,
+          "latency_s": 0.19,
+          "error": null,
+          "cached": true
+        }
+      },
+      {
+        "meeting": "ami_sdm_EN2002b_turns",
+        "idx": 660,
+        "label": "SAME",
+        "from": "MEE073",
+        "to": "MEE073",
+        "group_rel": "within",
+        "gap_s": 0.11,
+        "mid_s": 387.27,
+        "img_mean_brightness": 42.27,
+        "resp": {
+          "choice": "different",
+          "confidence": 0.24,
+          "probabilities": {
+            "same": 0.38,
+            "different": 0.62
+          },
+          "input_tokens": 502,
+          "latency_s": 0.18,
+          "error": null,
+          "cached": true
+        }
+      }
+    ]
+  },
+  "no_information_control": {
+    "tag": "blank_control",
+    "n": 6,
+    "n_scored": 6,
+    "n_api_error": 0,
+    "accuracy_balanced_sample": 0.5,
+    "on_sample_always_change_baseline": 0.5,
+    "pooled_corpus_baseline_1396": 0.6225,
+    "accuracy_reweighted_to_pooled_base_rate": 0.6225,
+    "tpr_change": 1.0,
+    "tnr_same": 0.0,
+    "auc_p_different": 0.5,
+    "auc_bootstrap95": [
+      0.5,
+      0.5
+    ],
+    "distinct_choices": [
+      "different"
+    ],
+    "constant_answer": true,
+    "p_diff_mean": 0.62,
+    "p_diff_std": 0.0,
+    "beats_pooled_baseline": false,
+    "rows": [
+      {
+        "meeting": "ami_sdm_EN2002a_turns",
+        "idx": 680,
+        "label": "CHANGE",
+        "resp": {
+          "choice": "different",
+          "confidence": 0.24,
+          "probabilities": {
+            "same": 0.38,
+            "different": 0.62
+          },
+          "input_tokens": 503,
+          "latency_s": 0.13,
+          "error": null,
+          "cached": true
+        }
+      },
+      {
+        "meeting": "ami_sdm_EN2002b_turns",
+        "idx": 646,
+        "label": "CHANGE",
+        "resp": {
+          "choice": "different",
+          "confidence": 0.24,
+          "probabilities": {
+            "same": 0.38,
+            "different": 0.62
+          },
+          "input_tokens": 503,
+          "latency_s": 0.13,
+          "error": null,
+          "cached": true
+        }
+      },
+      {
+        "meeting": "ami_sdm_EN2002a_turns",
+        "idx": 276,
+        "label": "CHANGE",
+        "resp": {
+          "choice": "different",
+          "confidence": 0.24,
+          "probabilities": {
+            "same": 0.38,
+            "different": 0.62
+          },
+          "input_tokens": 503,
+          "latency_s": 0.13,
+          "error": null,
+          "cached": true
+        }
+      },
+      {
+        "meeting": "ami_sdm_EN2002a_turns",
+        "idx": 563,
+        "label": "SAME",
+        "resp": {
+          "choice": "different",
+          "confidence": 0.24,
+          "probabilities": {
+            "same": 0.38,
+            "different": 0.62
+          },
+          "input_tokens": 503,
+          "latency_s": 0.13,
+          "error": null,
+          "cached": true
+        }
+      },
+      {
+        "meeting": "ami_sdm_EN2002b_turns",
+        "idx": 377,
+        "label": "SAME",
+        "resp": {
+          "choice": "different",
+          "confidence": 0.24,
+          "probabilities": {
+            "same": 0.38,
+            "different": 0.62
+          },
+          "input_tokens": 503,
+          "latency_s": 0.13,
+          "error": null,
+          "cached": true
+        }
+      },
+      {
+        "meeting": "ami_sdm_EN2002b_turns",
+        "idx": 660,
+        "label": "SAME",
+        "resp": {
+          "choice": "different",
+          "confidence": 0.24,
+          "probabilities": {
+            "same": 0.38,
+            "different": 0.62
+          },
+          "input_tokens": 503,
+          "latency_s": 0.13,
+          "error": null,
+          "cached": true
+        }
+      }
+    ]
+  },
+  "change_split_by_f0_group": {
+    "cross": {
+      "n_change": 2,
+      "mean_p_different": 0.62,
+      "frac_predicted_different": 1.0
+    },
+    "within": {
+      "n_change": 1,
+      "mean_p_different": 0.58,
+      "frac_predicted_different": 1.0
+    },
+    "same_class": {
+      "n_same": 3,
+      "mean_p_different": 0.6067
+    }
+  },
+  "sanity": {
+    "auc_mean_brightness": 0.4444,
+    "auc_gap_seconds_on_sample": 0.6111,
+    "pooled_gap_auc_reference": 0.529,
+    "image_dropped_calls": []
+  },
+  "reproduce": "set -a && . /home/proart/projects/glasses/.env && set +a && /home/proart/projects/glasses/.venv/bin/python experiments/spectrogram_turn_eval.py --n-per-class 3 --seed 11 --model jev-1.14.0"
+}
