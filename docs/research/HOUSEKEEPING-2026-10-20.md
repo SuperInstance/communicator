@@ -93,3 +93,14 @@ HuggingFace models cleared (re-fetch by name if a lane needs them):
   no longer exist in exactly one place.
 - Anything about the science. This pass changed where files live,
   not what any number in this repo says.
+
+> ## CORRECTION (2026-10-20, same pass, found by the final sweep)
+>
+> The `__pycache__` sweep above was not garbage-only in one repo:
+> `slackwater-tools` had six `.pyc` files **tracked** in git, and the
+> sweep deleted them (six `D` entries at final check). They were
+> restored with `git checkout -- .` in the same pass; the repo is
+> clean and in sync, and nothing was lost — the files were in git,
+> which is the only reason the mistake was free. Lesson recorded:
+> a cache sweep must check `git ls-files` before deleting, because
+> one repo on this drive tracks its bytecode.
