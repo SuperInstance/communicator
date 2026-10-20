@@ -1562,27 +1562,60 @@ cares about, endorsing a withdrawn number. And with the corrected key,
 **two of the three models are worse than chance in context mode** (llama
 −0.667, qwen −0.556; gpt-oss 0.000 — perfect rejection of 9/9 false
 claims *plus* perfect accusation of the one true claim, caught it by the
-neck).
+neck). **The director echoes the notes**: its proposal is yesterday's
+reworded (Jaccard 0.312 against the repo's own ≈0.29 threshold), it skips
+Condition D, and it picked the plan item already marked as blocked on
+hardware. Its genuine contribution is negative and worth having — **the
+proposal it produced fails the repo's own standard** (its null triggers its
+own falsifier; its hypothesis contradicts its margin), and that is
+catchable in two lines of code. The useful role for the instrument is
+**auditing the plan, not writing it**.
 
-**And the cause was measured, not guessed.** `collect_materials` caps each
-note *after* building the keep-set, so **47 of 49 notes lose their tails**
-— and the retraction notices live in the tails. The acoustics value and
-the teacher's new LOO value never reach the prompt, so the director's
-reason for rejecting the only true claim — *"No cited evidence provides the
-−73.5 dBFS floor"* — is **correct about the prompt and wrong about the
-world**. The same failure `LLM-DIRECTOR.md` §5 recorded on 2026-10-19, and
-that night's fix does not survive the corpus growth.
+**And the auditor's own evidence pool was dropping the retractions.** The
+pool is built to keep each note's head *and* tail — the dated correction
+blocks live at both ends — and then the assembled text was cut **from the
+front**, so every over-long note lost its tail: **2 of 50 notes kept
+their tail**. Now **50 of 50** keep both ends, measured by
+`collect_materials_stats()` and pinned by 8 tests, one of which
+reproduces the old front-truncation and asserts that it loses the tails.
 
-**More evidence does make the director better**, model held constant,
-corrected key throughout: median headline −0.444 at 20,000 chars, −0.222
-at 60,000, 0.000 at 140,000, **+1.000 at 240,000** (spread 0.111). The
-committed scores are a **starved** director — the best arm is double the
-committed budget. And the director **echoes the notes**: its proposal is
-yesterday's reworded (Jaccard 0.312 against the repo's own ≈0.29
-threshold), it skips Condition D, and it picked the plan item already
-marked as blocked on hardware. Its genuine contribution is negative and
-worth having — **the proposal it produced fails the repo's own standard**
-(its null triggers its own falsifier; its hypothesis contradicts its
-margin), and that is catchable in two lines of code. The useful role for
-the instrument is **auditing the plan, not writing it**. Full account in
-`docs/research/DEBRIEF-REAUDIT.md`.
+**But fixing it did not make the director better, and that is the finding
+that matters.** Both pools, one corpus, 3 repeats per model per pool:
+
+| | old pool | new pool |
+|---|---|---|
+| **specificity** | **0.000 in 7 of 7** | **0.000 in 8 of 8** |
+| sensitivity spread | 1.000 | 0.556 |
+| headline median | −0.778 | −0.611 |
+| llama's evidence | 140,000 chars | **40,000 chars** |
+
+**The director accuses the one TRUE claim in 15 of 15 successful runs**, in
+both pools, at every budget. Its sensitivity moves around; its specificity
+never leaves zero. A director that always accuses the true claim has a
+floor of −1.000 on the headline no matter how much evidence it is given.
+And the pool effect cannot be separated from the endpoint's variance:
+gpt-oss-120b's sensitivity on the *old* pool was 0.889, 0.333 and 1.000 on
+three identical prompts.
+
+**The consequence with teeth: the fix changes how much evidence a model
+gets.** The tails are dense tables of numbers and tokenise more densely
+than the head slices, so the same *character* budget costs more *tokens*
+and the fit ladder shrinks further — llama went from 140,000 characters of
+evidence to 40,000. **A comparison of "the same evidence" has to be made
+on tokens, not characters.**
+
+Two claims are withdrawn in dated blocks, with the old text left visible:
+`LLM-DIRECTOR.md` §5's "28/28 notes, every key figure present, and the
+score moved from +0.500 to +0.833" (the first half was never true; the
+second is not attributable to the pool), and the **"+1.000 at 240,000
+characters"** arm of the materials sweep — re-run against the current
+corpus it gives −0.111 three times out of three, so that arm is a
+property of a particular corpus, not a capability of the director.
+
+**The artifact gate can now check the night's new scripts.** Five new
+recipes, all verified to reproduce: `mouth_detector`, `nv12_stride_audit`,
+`pose_feature_search`, `ascii_dither_characterisation` and
+`teacher_raw_representation`. Two needed the right `out_kind` (these
+scripts write next to themselves, and one has no `--out` at all), and the
+two that need MediaPipe and WavLM are skipped with a stated reason rather
+than silently.
