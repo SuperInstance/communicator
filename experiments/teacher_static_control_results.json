@@ -1,0 +1,542 @@
+{
+  "corpus": "/mnt/c/proart_capture/corpus",
+  "sessions": [
+    {
+      "name": "A",
+      "label": 1,
+      "pose": "facing",
+      "speak": true
+    },
+    {
+      "name": "B",
+      "label": 1,
+      "pose": "turned",
+      "speak": true
+    },
+    {
+      "name": "C",
+      "label": 0,
+      "pose": "facing",
+      "speak": false
+    }
+  ],
+  "feature_sets": {
+    "summary": {
+      "rows": [
+        {
+          "variant": "real",
+          "held_out": "A",
+          "acc": 0.0,
+          "n": 40,
+          "held_out_label": 1
+        },
+        {
+          "variant": "real",
+          "held_out": "B",
+          "acc": 0.0,
+          "n": 40,
+          "held_out_label": 1
+        },
+        {
+          "variant": "real",
+          "held_out": "C",
+          "acc": null,
+          "note": "degenerate fold: one class in training"
+        },
+        {
+          "variant": "static",
+          "held_out": "A",
+          "acc": 0.0,
+          "n": 40,
+          "held_out_label": 1
+        },
+        {
+          "variant": "static",
+          "held_out": "B",
+          "acc": 1.0,
+          "n": 40,
+          "held_out_label": 1
+        },
+        {
+          "variant": "static",
+          "held_out": "C",
+          "acc": null,
+          "note": "degenerate fold: one class in training"
+        },
+        {
+          "variant": "time_shuffled",
+          "held_out": "A",
+          "acc": 0.0,
+          "n": 40,
+          "held_out_label": 1
+        },
+        {
+          "variant": "time_shuffled",
+          "held_out": "B",
+          "acc": 0.4,
+          "n": 40,
+          "held_out_label": 1
+        },
+        {
+          "variant": "time_shuffled",
+          "held_out": "C",
+          "acc": null,
+          "note": "degenerate fold: one class in training"
+        },
+        {
+          "variant": "unscaled",
+          "held_out": "A",
+          "acc": 0.0,
+          "n": 40,
+          "held_out_label": 1
+        },
+        {
+          "variant": "unscaled",
+          "held_out": "B",
+          "acc": 0.0,
+          "n": 40,
+          "held_out_label": 1
+        },
+        {
+          "variant": "unscaled",
+          "held_out": "C",
+          "acc": null,
+          "note": "degenerate fold: one class in training"
+        }
+      ]
+    },
+    "map": {
+      "rows": [
+        {
+          "variant": "real",
+          "held_out": "A",
+          "acc": 0.0,
+          "n": 40,
+          "held_out_label": 1
+        },
+        {
+          "variant": "real",
+          "held_out": "B",
+          "acc": 1.0,
+          "n": 40,
+          "held_out_label": 1
+        },
+        {
+          "variant": "real",
+          "held_out": "C",
+          "acc": null,
+          "note": "degenerate fold: one class in training"
+        },
+        {
+          "variant": "static",
+          "held_out": "A",
+          "acc": 1.0,
+          "n": 40,
+          "held_out_label": 1
+        },
+        {
+          "variant": "static",
+          "held_out": "B",
+          "acc": 1.0,
+          "n": 40,
+          "held_out_label": 1
+        },
+        {
+          "variant": "static",
+          "held_out": "C",
+          "acc": null,
+          "note": "degenerate fold: one class in training"
+        },
+        {
+          "variant": "time_shuffled",
+          "held_out": "A",
+          "acc": 0.0,
+          "n": 40,
+          "held_out_label": 1
+        },
+        {
+          "variant": "time_shuffled",
+          "held_out": "B",
+          "acc": 0.725,
+          "n": 40,
+          "held_out_label": 1
+        },
+        {
+          "variant": "time_shuffled",
+          "held_out": "C",
+          "acc": null,
+          "note": "degenerate fold: one class in training"
+        },
+        {
+          "variant": "unscaled",
+          "held_out": "A",
+          "acc": 0.0,
+          "n": 40,
+          "held_out_label": 1
+        },
+        {
+          "variant": "unscaled",
+          "held_out": "B",
+          "acc": 1.0,
+          "n": 40,
+          "held_out_label": 1
+        },
+        {
+          "variant": "unscaled",
+          "held_out": "C",
+          "acc": null,
+          "note": "degenerate fold: one class in training"
+        }
+      ]
+    },
+    "both": {
+      "rows": [
+        {
+          "variant": "real",
+          "held_out": "A",
+          "acc": 0.0,
+          "n": 40,
+          "held_out_label": 1
+        },
+        {
+          "variant": "real",
+          "held_out": "B",
+          "acc": 0.0,
+          "n": 40,
+          "held_out_label": 1
+        },
+        {
+          "variant": "real",
+          "held_out": "C",
+          "acc": null,
+          "note": "degenerate fold: one class in training"
+        },
+        {
+          "variant": "static",
+          "held_out": "A",
+          "acc": 1.0,
+          "n": 40,
+          "held_out_label": 1
+        },
+        {
+          "variant": "static",
+          "held_out": "B",
+          "acc": 1.0,
+          "n": 40,
+          "held_out_label": 1
+        },
+        {
+          "variant": "static",
+          "held_out": "C",
+          "acc": null,
+          "note": "degenerate fold: one class in training"
+        },
+        {
+          "variant": "time_shuffled",
+          "held_out": "A",
+          "acc": 0.0,
+          "n": 40,
+          "held_out_label": 1
+        },
+        {
+          "variant": "time_shuffled",
+          "held_out": "B",
+          "acc": 0.3,
+          "n": 40,
+          "held_out_label": 1
+        },
+        {
+          "variant": "time_shuffled",
+          "held_out": "C",
+          "acc": null,
+          "note": "degenerate fold: one class in training"
+        },
+        {
+          "variant": "unscaled",
+          "held_out": "A",
+          "acc": 0.0,
+          "n": 40,
+          "held_out_label": 1
+        },
+        {
+          "variant": "unscaled",
+          "held_out": "B",
+          "acc": 0.0,
+          "n": 40,
+          "held_out_label": 1
+        },
+        {
+          "variant": "unscaled",
+          "held_out": "C",
+          "acc": null,
+          "note": "degenerate fold: one class in training"
+        }
+      ]
+    },
+    "region": {
+      "rows": [
+        {
+          "variant": "real",
+          "held_out": "A",
+          "acc": 0.0,
+          "n": 40,
+          "held_out_label": 1
+        },
+        {
+          "variant": "real",
+          "held_out": "B",
+          "acc": 0.0,
+          "n": 40,
+          "held_out_label": 1
+        },
+        {
+          "variant": "real",
+          "held_out": "C",
+          "acc": null,
+          "note": "degenerate fold: one class in training"
+        },
+        {
+          "variant": "static",
+          "held_out": "A",
+          "acc": 0.0,
+          "n": 40,
+          "held_out_label": 1
+        },
+        {
+          "variant": "static",
+          "held_out": "B",
+          "acc": 0.0,
+          "n": 40,
+          "held_out_label": 1
+        },
+        {
+          "variant": "static",
+          "held_out": "C",
+          "acc": null,
+          "note": "degenerate fold: one class in training"
+        },
+        {
+          "variant": "time_shuffled",
+          "held_out": "A",
+          "acc": 0.0,
+          "n": 40,
+          "held_out_label": 1
+        },
+        {
+          "variant": "time_shuffled",
+          "held_out": "B",
+          "acc": 0.0,
+          "n": 40,
+          "held_out_label": 1
+        },
+        {
+          "variant": "time_shuffled",
+          "held_out": "C",
+          "acc": null,
+          "note": "degenerate fold: one class in training"
+        },
+        {
+          "variant": "unscaled",
+          "held_out": "A",
+          "acc": 0.0,
+          "n": 40,
+          "held_out_label": 1
+        },
+        {
+          "variant": "unscaled",
+          "held_out": "B",
+          "acc": 0.0,
+          "n": 40,
+          "held_out_label": 1
+        },
+        {
+          "variant": "unscaled",
+          "held_out": "C",
+          "acc": null,
+          "note": "degenerate fold: one class in training"
+        }
+      ]
+    },
+    "region+map": {
+      "rows": [
+        {
+          "variant": "real",
+          "held_out": "A",
+          "acc": 0.0,
+          "n": 40,
+          "held_out_label": 1
+        },
+        {
+          "variant": "real",
+          "held_out": "B",
+          "acc": 0.2,
+          "n": 40,
+          "held_out_label": 1
+        },
+        {
+          "variant": "real",
+          "held_out": "C",
+          "acc": null,
+          "note": "degenerate fold: one class in training"
+        },
+        {
+          "variant": "static",
+          "held_out": "A",
+          "acc": 1.0,
+          "n": 40,
+          "held_out_label": 1
+        },
+        {
+          "variant": "static",
+          "held_out": "B",
+          "acc": 1.0,
+          "n": 40,
+          "held_out_label": 1
+        },
+        {
+          "variant": "static",
+          "held_out": "C",
+          "acc": null,
+          "note": "degenerate fold: one class in training"
+        },
+        {
+          "variant": "time_shuffled",
+          "held_out": "A",
+          "acc": 0.0,
+          "n": 40,
+          "held_out_label": 1
+        },
+        {
+          "variant": "time_shuffled",
+          "held_out": "B",
+          "acc": 0.275,
+          "n": 40,
+          "held_out_label": 1
+        },
+        {
+          "variant": "time_shuffled",
+          "held_out": "C",
+          "acc": null,
+          "note": "degenerate fold: one class in training"
+        },
+        {
+          "variant": "unscaled",
+          "held_out": "A",
+          "acc": 0.0,
+          "n": 40,
+          "held_out_label": 1
+        },
+        {
+          "variant": "unscaled",
+          "held_out": "B",
+          "acc": 0.2,
+          "n": 40,
+          "held_out_label": 1
+        },
+        {
+          "variant": "unscaled",
+          "held_out": "C",
+          "acc": null,
+          "note": "degenerate fold: one class in training"
+        }
+      ]
+    }
+  },
+  "headline": {
+    "summary": {
+      "real": {
+        "A": 0.0,
+        "B": 0.0,
+        "C": null
+      },
+      "static": {
+        "A": 0.0,
+        "B": 1.0,
+        "C": null
+      },
+      "time_shuffled": {
+        "A": 0.0,
+        "B": 0.4,
+        "C": null
+      },
+      "the_teacher_reads_a_static_picture": false,
+      "reading": "if `static` scores the same as `real` on every fold, the temporal information contributes nothing and the feature set is reading a PICTURE of the camera"
+    },
+    "map": {
+      "real": {
+        "A": 0.0,
+        "B": 1.0,
+        "C": null
+      },
+      "static": {
+        "A": 1.0,
+        "B": 1.0,
+        "C": null
+      },
+      "time_shuffled": {
+        "A": 0.0,
+        "B": 0.725,
+        "C": null
+      },
+      "the_teacher_reads_a_static_picture": false,
+      "reading": "if `static` scores the same as `real` on every fold, the temporal information contributes nothing and the feature set is reading a PICTURE of the camera"
+    },
+    "both": {
+      "real": {
+        "A": 0.0,
+        "B": 0.0,
+        "C": null
+      },
+      "static": {
+        "A": 1.0,
+        "B": 1.0,
+        "C": null
+      },
+      "time_shuffled": {
+        "A": 0.0,
+        "B": 0.3,
+        "C": null
+      },
+      "the_teacher_reads_a_static_picture": false,
+      "reading": "if `static` scores the same as `real` on every fold, the temporal information contributes nothing and the feature set is reading a PICTURE of the camera"
+    },
+    "region": {
+      "real": {
+        "A": 0.0,
+        "B": 0.0,
+        "C": null
+      },
+      "static": {
+        "A": 0.0,
+        "B": 0.0,
+        "C": null
+      },
+      "time_shuffled": {
+        "A": 0.0,
+        "B": 0.0,
+        "C": null
+      },
+      "the_teacher_reads_a_static_picture": false,
+      "reading": "if `static` scores the same as `real` on every fold, the temporal information contributes nothing and the feature set is reading a PICTURE of the camera"
+    },
+    "region+map": {
+      "real": {
+        "A": 0.0,
+        "B": 0.2,
+        "C": null
+      },
+      "static": {
+        "A": 1.0,
+        "B": 1.0,
+        "C": null
+      },
+      "time_shuffled": {
+        "A": 0.0,
+        "B": 0.275,
+        "C": null
+      },
+      "the_teacher_reads_a_static_picture": false,
+      "reading": "if `static` scores the same as `real` on every fold, the temporal information contributes nothing and the feature set is reading a PICTURE of the camera"
+    }
+  }
+}

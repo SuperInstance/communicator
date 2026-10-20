@@ -130,6 +130,41 @@ held-out B for summary / map / both / region+map.
 > corpus they were measured on, so a number that cannot be traced cannot be
 > quoted again. See `COMBINED-FILTER.md`, `ARTIFACT-REPRODUCIBILITY.md`.
 
+> **CORRECTION (2026-10-19, `TEACHER-LOO-FOLDS.md`).** The paragraph below
+> is right about the temporal split and **wrong about the leave-one-session-out
+> split**, in a way that matters.
+>
+> 1. **"its scrambled control is 0.938" is the TEMPORAL split's control, not
+>    the LOO fold's own.** Measured on the same fold, the LOO's scrambled
+>    control is **0.000**, so the margin there is +1.000 — the two numbers
+>    were being compared across two different splits.
+> 2. **But the LOO fold cannot carry the claim either, and the reason is
+>    worse than a wrong control.** Every window of a held-out session carries
+>    the same label, so the fold is a one-bit statistic, and the **blank
+>    control — a constant predictor — scores 1.000 on every fold of every
+>    feature set**. The `map` feature set's 1.000 on held-out B is worth
+>    exactly what a constant predictor's 1.000 is worth. The LOO rows have no
+>    control beside them, and the metric has no room to measure anything.
+> 3. **And the `map` features turn out not to need the motion at all.**
+>    Replacing every motion frame with the session's temporal mean map — no
+>    motion, no order, no change — scores **1.000 on BOTH folds** for `map`,
+>    `both` and `region+map`. The discriminative feature is a *static spatial
+>    template of the session*, and adding the temporal information makes it
+>    worse (fold A goes 1.000 → 0.000).
+> 4. **The video does not follow the audio.** Cross-correlating the repo's
+>    own VAD speech envelope against the video's motion envelope over a ±15 s
+>    offset search gives +0.078 (A) and +0.025 (B) against a scrambled-audio
+>    null of +0.061. So frame-level labels cannot be recovered from these
+>    captures either.
+>
+> **The consequence for the recording plan: the 63-sessions-per-class figure
+> is not the blocker.** That number is a precision requirement on an estimate;
+> recording it does not make the fold gradated, does not give the fold a
+> control, and does not make the motion follow the speech. The blocker is that
+> **the task as constructed cannot be measured**, and the fix is a change of
+> task, not a change of sample size. The full argument, with every control,
+> is in `TEACHER-LOO-FOLDS.md`.
+
 That contradiction is the finding. The temporal split puts train and test in
 the same twenty-second window, minutes apart, and a model can score 1.000 by
 learning *what this room looks like at 19:52*. The leave-one-session-out is

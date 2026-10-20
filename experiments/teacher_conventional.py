@@ -234,7 +234,14 @@ def region_feats(maps: np.ndarray, top_frac: float = 0.05) -> np.ndarray:
         tot = float(m.sum())
         if tot <= 0:
             conc.append(0.0)
-            pers.append(0.0)
+            # A zeros ARRAY, not the scalar 0.0. The scalar used to be
+            # appended here, and the persistence loop below does
+            # `pers[i] & pers[i+1]` -- which raises TypeError on a float.
+            # So the BLANK control (zero motion everywhere) could not be
+            # computed at all: the feature extractor crashed on it. The
+            # committed results are unaffected, because no committed run
+            # passes an all-zero motion field through this function.
+            pers.append(np.zeros(m.shape, bool))
             continue
         k = max(1, int(m.size * top_frac))
         idx = np.argpartition(m.ravel(), -k)[-k:]

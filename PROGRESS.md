@@ -1334,3 +1334,59 @@ The intake **has still never seen a real file**. Everything above is
 synthetic with known truth, exercising the gates. What it means is that the
 recording is no longer at risk of being thrown away by a tool that could not
 see what it contained.
+
+## 2026-10-20 (early) — the teacher's evaluation cannot tell a detector from a constant, and the map features do not use the motion
+
+`docs/research/TEACHER-LOO-FOLDS.md`, with `experiments/teacher_loo_control.py`,
+`experiments/teacher_static_control.py` and `experiments/audio_video_alignment.py`.
+
+**The leave-one-session-out metric is degenerate.** The teacher labels whole
+SESSIONS, so every window of a held-out session carries the same label and
+the fold's accuracy can only be near 0.000 or near 1.000. Measured with the
+controls on the same fold: **the blank control — a constant predictor —
+scores 1.000 on every fold of every feature set.** So the `map` feature set's
+1.000 on held-out B is worth exactly what a constant predictor's 1.000 is
+worth. The LOO rows also have **no control of their own**: the report used
+the TEMPORAL split's scrambled control (0.938) to dismiss the LOO's 1.000,
+while the LOO fold's own scrambled control, measured on the same fold, is
+**0.000**. Both readings were wrong, in opposite directions.
+
+**The `map` features do not need the motion.** Replacing every motion frame
+with the session's temporal mean map — no motion, no order, no change —
+scores **1.000 on BOTH folds** for `map`, `both` and `region+map`. The
+feature sets that do NOT contain the 6×8 grid (`summary`, `region`) do not
+reach 1.000 on both folds. And the static variant is *better* than the real
+maps on fold A (1.000 against 0.000): **adding the temporal information to
+the static template makes the classifier worse.** What the grid is reading
+is a static spatial template of the session — and the two takes' average
+pictures correlate at **0.904** and differ by **4% in amplitude**, with
+**82%** of the difference explained by one global scale factor.
+
+**The video does not follow the audio.** The captures' audio and video are
+SEPARATE recordings, so the offset is unknown and has to be searched. The
+repo's own VAD finds 70.6% speech in A and 0.0% in C, so the speech envelope
+is real. Cross-correlating it against the video's motion envelope over a
+±15 s search: **A +0.0776, B +0.0247, against a scrambled-audio null of
++0.0608 and a wrong-session control of +0.0677.** No alignment above the
+nulls — so frame-level labels cannot be recovered from these captures
+either. (The first version of that script did not detrend, and produced a
++0.26 correlation for a *wrong-session control*, the largest number in the
+run: two drifting signals correlate whether or not they have anything to do
+with each other.)
+
+**The consequence for the recording plan, which is the part that costs
+money.** The 63-sessions-per-class figure is a PRECISION requirement on an
+estimate — and it is not the blocker. Recording it would not make the fold
+gradated, would not give the fold a control, and would not make the motion
+follow the speech. The blocker is that **the task as constructed cannot be
+measured**, and the fix is a change of task, not a change of sample size:
+a task with within-session label variation, and a stimulus that contains the
+motion. Condition D (turned AND silent) is still the right take for the
+POSE question — it makes the pose fold identifiable — but it adds no
+within-session variation and does not make the motion follow the speech.
+
+Also fixed along the way: `region_feats` appended the scalar `0.0` instead of
+a zero array when a motion field was empty, so the persistence loop raised
+`TypeError` on a float — **the blank control could not be computed at all**.
+The committed teacher results do not move (verified by re-running all five
+feature sets).

@@ -1,0 +1,161 @@
+{
+  "video_fps": 30.0,
+  "hop_samples": 512,
+  "hop_ms": 32,
+  "offset_search_s": 15.0,
+  "envelopes": [
+    "total",
+    "active",
+    "area"
+  ],
+  "sessions": {
+    "A": {
+      "total": {
+        "raw_best_r": 0.0829,
+        "raw_best_lag_s": 5.024,
+        "detrended_best_r": 0.0656,
+        "detrended_best_lag_s": 2.336
+      },
+      "active": {
+        "raw_best_r": 0.0956,
+        "raw_best_lag_s": 4.64,
+        "detrended_best_r": 0.0776,
+        "detrended_best_lag_s": 9.472
+      },
+      "area": {
+        "raw_best_r": 0.1055,
+        "raw_best_lag_s": 5.504,
+        "detrended_best_r": 0.0673,
+        "detrended_best_lag_s": 2.304
+      },
+      "speech_mean": 0.6946,
+      "n_speech_hops": 936
+    },
+    "B": {
+      "total": {
+        "raw_best_r": 0.0823,
+        "raw_best_lag_s": 7.936,
+        "detrended_best_r": 0.0299,
+        "detrended_best_lag_s": 1.44
+      },
+      "active": {
+        "raw_best_r": 0.0637,
+        "raw_best_lag_s": 7.936,
+        "detrended_best_r": 0.0247,
+        "detrended_best_lag_s": 3.456
+      },
+      "area": {
+        "raw_best_r": 0.0604,
+        "raw_best_lag_s": 7.776,
+        "detrended_best_r": 0.0245,
+        "detrended_best_lag_s": 4.8
+      },
+      "speech_mean": 0.6567,
+      "n_speech_hops": 936
+    },
+    "C": {
+      "total": {
+        "raw_best_r": 0.1896,
+        "raw_best_lag_s": -0.064,
+        "detrended_best_r": 0.1032,
+        "detrended_best_lag_s": -0.064
+      },
+      "active": {
+        "raw_best_r": 0.222,
+        "raw_best_lag_s": -0.096,
+        "detrended_best_r": 0.113,
+        "detrended_best_lag_s": -0.096
+      },
+      "area": {
+        "raw_best_r": 0.1555,
+        "raw_best_lag_s": -0.096,
+        "detrended_best_r": 0.0784,
+        "detrended_best_lag_s": -0.096
+      },
+      "speech_mean": 0.0019,
+      "n_speech_hops": 936
+    }
+  },
+  "controls": {
+    "scrambled_audio_A": {
+      "total": {
+        "raw_best_r": 0.0495,
+        "raw_best_lag_s": 5.984,
+        "detrended_best_r": 0.0554,
+        "detrended_best_lag_s": -1.184
+      },
+      "active": {
+        "raw_best_r": 0.0458,
+        "raw_best_lag_s": -11.872,
+        "detrended_best_r": 0.0608,
+        "detrended_best_lag_s": -7.2
+      },
+      "area": {
+        "raw_best_r": 0.0495,
+        "raw_best_lag_s": 0.64,
+        "detrended_best_r": 0.0558,
+        "detrended_best_lag_s": -8.352
+      }
+    },
+    "wrong_session_A_audio_C_video": {
+      "total": {
+        "raw_best_r": 0.0835,
+        "raw_best_lag_s": 4.672,
+        "detrended_best_r": 0.0547,
+        "detrended_best_lag_s": 2.336
+      },
+      "active": {
+        "raw_best_r": 0.0931,
+        "raw_best_lag_s": 4.64,
+        "detrended_best_r": 0.0677,
+        "detrended_best_lag_s": 2.272
+      },
+      "area": {
+        "raw_best_r": 0.0789,
+        "raw_best_lag_s": 4.64,
+        "detrended_best_r": 0.0566,
+        "detrended_best_lag_s": 2.304
+      }
+    },
+    "wrong_session_C_audio_A_video": {
+      "total": {
+        "raw_best_r": 0.2634,
+        "raw_best_lag_s": -0.064,
+        "detrended_best_r": 0.1128,
+        "detrended_best_lag_s": -0.064
+      },
+      "active": {
+        "raw_best_r": 0.2159,
+        "raw_best_lag_s": -0.096,
+        "detrended_best_r": 0.1017,
+        "detrended_best_lag_s": -0.096
+      },
+      "area": {
+        "raw_best_r": 0.3029,
+        "raw_best_lag_s": -0.096,
+        "detrended_best_r": 0.1267,
+        "detrended_best_lag_s": -0.096
+      }
+    }
+  },
+  "headline": {
+    "active_real_sessions": [
+      0.0776,
+      0.0247,
+      0.113
+    ],
+    "active_controls": [
+      0.0608,
+      0.0677,
+      0.1017
+    ],
+    "total_real_sessions": [
+      0.0656,
+      0.0299,
+      0.1032
+    ],
+    "margin_over_the_worst_control": -0.077,
+    "the_video_carries_a_time_aligned_speaking_signal": false,
+    "reading": "the ACTIVE envelope is the candidate: the top 5% of pixels, where ROW-BAND-REMOVAL.md measured 79% of the speaking/silent difference. The TOTAL envelope is the negative case: total change does not distinguish speaking from silent, so a correlation there would be about drift."
+  }
+}
