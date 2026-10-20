@@ -357,6 +357,17 @@ RECIPES: dict[str, Recipe] = {
         skip="needs the Cloudflare Workers AI API (network) and a TYPESAFE_API_KEY",
         inputs=["/mnt/c/proart_capture/A.nv12"],
     ),
+    "debrief_local_director.py": Recipe(
+        script="debrief_local_director.py",
+        skip=("needs a local ollama server with the model already pulled; "
+              "the model is not on disk in the repository"),
+        inputs=["/mnt/c/proart_capture/A.nv12"],
+    ),
+    "debrief_truncation_probe.py": Recipe(
+        script="debrief_truncation_probe.py",
+        skip="needs the Cloudflare Workers AI API (network)",
+        inputs=["/mnt/c/proart_capture/A.nv12"],
+    ),
     "combined_filter.py": Recipe(
         script="combined_filter.py",
         runs=[Run(argv=[], expect="combined_filter_results.json")],

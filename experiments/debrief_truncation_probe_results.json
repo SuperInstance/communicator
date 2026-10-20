@@ -1,0 +1,246 @@
+{
+  "date": "2026-10-20",
+  "question": "Three committed audit runs were recorded as 'unparseable'. Did the model fail to answer, or was the answer cut off by the output budget -- and is the material budget implicated?",
+  "pre_registered_rules": {
+    "a_truncation_is": "finish_reason == 'length' on the API response",
+    "a_recovery_is": "the SAME prompt, same model, same mode, with 4x the output token budget, returns a parseable JSON object",
+    "the_material_hypothesis_is_refuted_if": "in blind mode the input-token count is IDENTICAL at every material budget, because the material is not in the blind prompt at all",
+    "verdict": "the unparseable runs are an OUTPUT-budget failure if the truncation rate is non-zero and the 4x retry recovers them"
+  },
+  "the_defect": {
+    "what": "debrief._http_json rebuilt every response as {'text': text} and discarded finish_reason and usage, so a response cut off at the output cap was indistinguishable from a finished one. cloud_llm's retry only fired on EMPTY content, which a truncated answer never has.",
+    "fix": "finish_reason and usage are kept and surfaced as truncated/usage; cloud_llm retries a truncated answer with 4x the output budget; run_audit records the transport facts on every run and distinguishes 'response_was_truncated' from 'no_json_verdicts_object'."
+  },
+  "runs": [
+    {
+      "trial": 1,
+      "model": "@cf/qwen/qwen3-30b-a3b-fp8",
+      "mode": "blind",
+      "materials_limit": 140000,
+      "max_tokens": 3000,
+      "first_attempt": {
+        "finish_reason": "length",
+        "truncated": true,
+        "text_len": 12352,
+        "parsed": false,
+        "n_verdicts": 0,
+        "prompt_tokens": 701,
+        "completion_tokens": 3000,
+        "total_tokens": 3701,
+        "error": null
+      },
+      "retry_4x_output_budget": {
+        "finish_reason": "stop",
+        "truncated": false,
+        "text_len": 1283,
+        "parsed": true,
+        "n_verdicts": 10,
+        "prompt_tokens": 701,
+        "completion_tokens": 3477,
+        "total_tokens": 4178,
+        "error": null
+      },
+      "recovered": true
+    },
+    {
+      "trial": 2,
+      "model": "@cf/qwen/qwen3-30b-a3b-fp8",
+      "mode": "blind",
+      "materials_limit": 140000,
+      "max_tokens": 3000,
+      "first_attempt": {
+        "finish_reason": "stop",
+        "truncated": false,
+        "text_len": 1187,
+        "parsed": true,
+        "n_verdicts": 10,
+        "prompt_tokens": 701,
+        "completion_tokens": 2174,
+        "total_tokens": 2875,
+        "error": null
+      }
+    },
+    {
+      "trial": 3,
+      "model": "@cf/qwen/qwen3-30b-a3b-fp8",
+      "mode": "blind",
+      "materials_limit": 140000,
+      "max_tokens": 3000,
+      "first_attempt": {
+        "finish_reason": "stop",
+        "truncated": false,
+        "text_len": 1087,
+        "parsed": true,
+        "n_verdicts": 10,
+        "prompt_tokens": 701,
+        "completion_tokens": 2115,
+        "total_tokens": 2816,
+        "error": null
+      }
+    },
+    {
+      "trial": 4,
+      "model": "@cf/qwen/qwen3-30b-a3b-fp8",
+      "mode": "blind",
+      "materials_limit": 140000,
+      "max_tokens": 3000,
+      "first_attempt": {
+        "finish_reason": "stop",
+        "truncated": false,
+        "text_len": 1167,
+        "parsed": true,
+        "n_verdicts": 10,
+        "prompt_tokens": 701,
+        "completion_tokens": 2236,
+        "total_tokens": 2937,
+        "error": null
+      }
+    },
+    {
+      "trial": 5,
+      "model": "@cf/qwen/qwen3-30b-a3b-fp8",
+      "mode": "blind",
+      "materials_limit": 140000,
+      "max_tokens": 3000,
+      "first_attempt": {
+        "finish_reason": "stop",
+        "truncated": false,
+        "text_len": 1167,
+        "parsed": true,
+        "n_verdicts": 10,
+        "prompt_tokens": 701,
+        "completion_tokens": 2018,
+        "total_tokens": 2719,
+        "error": null
+      }
+    },
+    {
+      "trial": 6,
+      "model": "@cf/qwen/qwen3-30b-a3b-fp8",
+      "mode": "blind",
+      "materials_limit": 140000,
+      "max_tokens": 3000,
+      "first_attempt": {
+        "finish_reason": "stop",
+        "truncated": false,
+        "text_len": 1111,
+        "parsed": true,
+        "n_verdicts": 10,
+        "prompt_tokens": 701,
+        "completion_tokens": 1958,
+        "total_tokens": 2659,
+        "error": null
+      }
+    },
+    {
+      "trial": 7,
+      "model": "@cf/qwen/qwen3-30b-a3b-fp8",
+      "mode": "blind",
+      "materials_limit": 140000,
+      "max_tokens": 3000,
+      "first_attempt": {
+        "finish_reason": "stop",
+        "truncated": false,
+        "text_len": 1452,
+        "parsed": true,
+        "n_verdicts": 10,
+        "prompt_tokens": 701,
+        "completion_tokens": 2530,
+        "total_tokens": 3231,
+        "error": null
+      }
+    },
+    {
+      "trial": 8,
+      "model": "@cf/qwen/qwen3-30b-a3b-fp8",
+      "mode": "blind",
+      "materials_limit": 140000,
+      "max_tokens": 3000,
+      "first_attempt": {
+        "finish_reason": "stop",
+        "truncated": false,
+        "text_len": 1084,
+        "parsed": true,
+        "n_verdicts": 10,
+        "prompt_tokens": 701,
+        "completion_tokens": 2518,
+        "total_tokens": 3219,
+        "error": null
+      }
+    }
+  ],
+  "summary": {
+    "n_trials": 8,
+    "n_truncated": 1,
+    "truncation_base_rate": 0.125,
+    "n_retried": 1,
+    "n_recovered_by_4x_output_budget": 1,
+    "recovery_rate": 1.0,
+    "n_truncated_but_parsed": 0,
+    "n_truncated_and_missing_verdicts": 0,
+    "verdicts_in_truncated_but_parsed": [],
+    "n_claims_in_the_audit_set": 10,
+    "completion_tokens_when_truncated": [
+      3000
+    ],
+    "completion_tokens_when_complete": [
+      1958,
+      2018,
+      2115,
+      2174,
+      2236,
+      2518,
+      2530
+    ],
+    "completion_tokens_median_complete": 2174
+  },
+  "the_material_control": {
+    "budgets": [
+      140000,
+      60000,
+      40000
+    ],
+    "rows": [
+      {
+        "materials_limit": 140000,
+        "prompt_chars": 3031,
+        "prompt_tokens": 701,
+        "completion_tokens": 3000,
+        "finish_reason": "length",
+        "parsed": true
+      },
+      {
+        "materials_limit": 60000,
+        "prompt_chars": 3031,
+        "prompt_tokens": 701,
+        "completion_tokens": 3000,
+        "finish_reason": "length",
+        "parsed": false
+      },
+      {
+        "materials_limit": 40000,
+        "prompt_chars": 3031,
+        "prompt_tokens": 701,
+        "completion_tokens": 2887,
+        "finish_reason": "stop",
+        "parsed": true
+      }
+    ],
+    "prompt_tokens_are_identical_across_budgets": true,
+    "prompt_tokens_values": [
+      701
+    ]
+  },
+  "provenance": {
+    "script": "experiments/debrief_truncation_probe.py",
+    "script_sha256": "93602cc529baff8f9c192a9b27e1856704a08b3ecadf586a8173b831ea3dd3ac",
+    "debrief_sha256": "17ddd27e99471223e0a6c3565d0e6d6b2eb297353a31f0882400c5e9f3c7bbee",
+    "model": "@cf/qwen/qwen3-30b-a3b-fp8",
+    "mode": "blind",
+    "materials_limit": 140000,
+    "max_tokens": 3000,
+    "retry_max_tokens": 12000,
+    "trials": 8,
+    "git_head": null
+  }
+}
