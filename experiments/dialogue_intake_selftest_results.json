@@ -1,0 +1,3935 @@
+{
+  "script": "experiments/dialogue_intake_selftest.py",
+  "generated_at": "2026-10-19T22:59:16-0800",
+  "python": "/home/proart/projects/glasses/.venv/bin/python",
+  "numpy": "2.5.4",
+  "analysis_rate_hz": 16000,
+  "intake_floor_rms": 0.0001,
+  "matrix_seconds_per_scene": 12.0,
+  "note": "All corpora are synthetic and were written to a temp directory. The real recording directory was never touched.",
+  "baseline_good_corpus": {
+    "exit_code": 0,
+    "status": "NOT YET USABLE",
+    "unmet": [
+      "only 96s of audio; the protocol asks for ~25 min"
+    ],
+    "matched_pairs": 8,
+    "total_audio_s": 96.0,
+    "silences_seen": 38,
+    "hand_offs_seen": 1,
+    "unmatched_files": [],
+    "pairs": [
+      {
+        "scene": "scene01_free",
+        "problem": null,
+        "A_silent": false,
+        "B_silent": false,
+        "A_peak": 0.79996,
+        "B_peak": 0.79996,
+        "A_rms": 0.013517,
+        "B_rms": 0.013214,
+        "A_signal_frac": 0.3375,
+        "B_signal_frac": 0.3042,
+        "A_raw_rate_hz": 16000,
+        "B_raw_rate_hz": 16000,
+        "A_duration_s": 12.0,
+        "B_duration_s": 12.0,
+        "crosstalk": {
+          "windows": 1,
+          "corr": null,
+          "note": "too few simultaneous-loud windows to judge"
+        },
+        "levels": {
+          "frames": 239,
+          "both_loud_frac": 0.0042,
+          "either_loud_frac": 0.6402
+        }
+      },
+      {
+        "scene": "scene02_qa",
+        "problem": null,
+        "A_silent": false,
+        "B_silent": false,
+        "A_peak": 0.79996,
+        "B_peak": 0.79996,
+        "A_rms": 0.013222,
+        "B_rms": 0.01218,
+        "A_signal_frac": 0.3042,
+        "B_signal_frac": 0.2708,
+        "A_raw_rate_hz": 16000,
+        "B_raw_rate_hz": 16000,
+        "A_duration_s": 12.0,
+        "B_duration_s": 12.0,
+        "crosstalk": {
+          "windows": 1,
+          "corr": null,
+          "note": "too few simultaneous-loud windows to judge"
+        },
+        "levels": {
+          "frames": 239,
+          "both_loud_frac": 0.0042,
+          "either_loud_frac": 0.5732
+        }
+      },
+      {
+        "scene": "scene03_think",
+        "problem": null,
+        "A_silent": false,
+        "B_silent": false,
+        "A_peak": 0.79996,
+        "B_peak": 0.79999,
+        "A_rms": 0.010292,
+        "B_rms": 0.01153,
+        "A_signal_frac": 0.1542,
+        "B_signal_frac": 0.2042,
+        "A_raw_rate_hz": 16000,
+        "B_raw_rate_hz": 16000,
+        "A_duration_s": 12.0,
+        "B_duration_s": 12.0,
+        "crosstalk": {
+          "windows": 1,
+          "corr": null,
+          "note": "too few simultaneous-loud windows to judge"
+        },
+        "levels": {
+          "frames": 239,
+          "both_loud_frac": 0.0042,
+          "either_loud_frac": 0.3556
+        }
+      },
+      {
+        "scene": "scene04_fillers",
+        "problem": null,
+        "A_silent": false,
+        "B_silent": false,
+        "A_peak": 0.79996,
+        "B_peak": 0.79999,
+        "A_rms": 0.024904,
+        "B_rms": 0.006365,
+        "A_signal_frac": 0.9042,
+        "B_signal_frac": 0.0042,
+        "A_raw_rate_hz": 16000,
+        "B_raw_rate_hz": 16000,
+        "A_duration_s": 12.0,
+        "B_duration_s": 12.0,
+        "crosstalk": {
+          "windows": 1,
+          "corr": null,
+          "note": "too few simultaneous-loud windows to judge"
+        },
+        "levels": {
+          "frames": 239,
+          "both_loud_frac": 0.0042,
+          "either_loud_frac": 0.9079
+        }
+      },
+      {
+        "scene": "scene05_backchannel",
+        "problem": null,
+        "A_silent": false,
+        "B_silent": false,
+        "A_peak": 0.79996,
+        "B_peak": 0.79996,
+        "A_rms": 0.024106,
+        "B_rms": 0.008222,
+        "A_signal_frac": 0.8542,
+        "B_signal_frac": 0.0646,
+        "A_raw_rate_hz": 16000,
+        "B_raw_rate_hz": 16000,
+        "A_duration_s": 12.0,
+        "B_duration_s": 12.0,
+        "crosstalk": {
+          "windows": 10,
+          "corr": 0.983
+        },
+        "levels": {
+          "frames": 239,
+          "both_loud_frac": 0.0669,
+          "either_loud_frac": 0.8577
+        }
+      },
+      {
+        "scene": "scene06_interrupt",
+        "problem": null,
+        "A_silent": false,
+        "B_silent": false,
+        "A_peak": 0.79996,
+        "B_peak": 0.79996,
+        "A_rms": 0.014884,
+        "B_rms": 0.013525,
+        "A_signal_frac": 0.4042,
+        "B_signal_frac": 0.3396,
+        "A_raw_rate_hz": 16000,
+        "B_raw_rate_hz": 16000,
+        "A_duration_s": 12.0,
+        "B_duration_s": 12.0,
+        "crosstalk": {
+          "windows": 16,
+          "corr": 0.9738
+        },
+        "levels": {
+          "frames": 239,
+          "both_loud_frac": 0.1255,
+          "either_loud_frac": 0.6234
+        }
+      },
+      {
+        "scene": "scene07_alone",
+        "problem": null,
+        "A_silent": false,
+        "B_silent": false,
+        "A_peak": 0.79996,
+        "B_peak": 0.79996,
+        "A_rms": 0.014161,
+        "B_rms": 0.006365,
+        "A_signal_frac": 0.3708,
+        "B_signal_frac": 0.0042,
+        "A_raw_rate_hz": 16000,
+        "B_raw_rate_hz": 16000,
+        "A_duration_s": 12.0,
+        "B_duration_s": 12.0,
+        "crosstalk": {
+          "windows": 1,
+          "corr": null,
+          "note": "too few simultaneous-loud windows to judge"
+        },
+        "levels": {
+          "frames": 239,
+          "both_loud_frac": 0.0042,
+          "either_loud_frac": 0.3724
+        }
+      },
+      {
+        "scene": "scene08_roomtone",
+        "problem": null,
+        "A_silent": false,
+        "B_silent": false,
+        "A_peak": 3e-05,
+        "B_peak": 3e-05,
+        "A_rms": 1e-06,
+        "B_rms": 1e-06,
+        "A_signal_frac": 0.0,
+        "B_signal_frac": 0.0,
+        "A_raw_rate_hz": 16000,
+        "B_raw_rate_hz": 16000,
+        "A_duration_s": 12.0,
+        "B_duration_s": 12.0,
+        "crosstalk": {
+          "windows": 0,
+          "corr": null,
+          "note": "too few simultaneous-loud windows to judge"
+        },
+        "levels": {
+          "frames": 239,
+          "both_loud_frac": 0.0,
+          "either_loud_frac": 0.0
+        }
+      }
+    ],
+    "wall_s": 9.24
+  },
+  "baseline_handoff_breakdown": [
+    {
+      "scene": "scene01_free",
+      "closed_pauses": 5,
+      "hand_offs": 0,
+      "handoff_pause_durations_s": [],
+      "short_pauses_under_150ms": 0
+    },
+    {
+      "scene": "scene02_qa",
+      "closed_pauses": 7,
+      "hand_offs": 0,
+      "handoff_pause_durations_s": [],
+      "short_pauses_under_150ms": 3
+    },
+    {
+      "scene": "scene03_think",
+      "closed_pauses": 3,
+      "hand_offs": 0,
+      "handoff_pause_durations_s": [],
+      "short_pauses_under_150ms": 0
+    },
+    {
+      "scene": "scene04_fillers",
+      "closed_pauses": 3,
+      "hand_offs": 0,
+      "handoff_pause_durations_s": [],
+      "short_pauses_under_150ms": 0
+    },
+    {
+      "scene": "scene05_backchannel",
+      "closed_pauses": 5,
+      "hand_offs": 0,
+      "handoff_pause_durations_s": [],
+      "short_pauses_under_150ms": 0
+    },
+    {
+      "scene": "scene06_interrupt",
+      "closed_pauses": 8,
+      "hand_offs": 1,
+      "handoff_pause_durations_s": [
+        1.54
+      ],
+      "short_pauses_under_150ms": 0
+    },
+    {
+      "scene": "scene07_alone",
+      "closed_pauses": 7,
+      "hand_offs": 0,
+      "handoff_pause_durations_s": [],
+      "short_pauses_under_150ms": 0
+    },
+    {
+      "scene": "scene08_roomtone",
+      "closed_pauses": 0,
+      "hand_offs": 0,
+      "handoff_pause_durations_s": [],
+      "short_pauses_under_150ms": 0
+    }
+  ],
+  "perturbations": [
+    {
+      "perturbation": "missing_channel_B",
+      "description": "one channel of a pair is missing (unmatched pair)",
+      "status": "NOT YET USABLE",
+      "perturbed_status": "NOT YET USABLE",
+      "unmet_added": [],
+      "exit_code": 0,
+      "evidence": {
+        "pair_problem": "unmatched pair",
+        "has_B": true
+      },
+      "reported": true,
+      "gated": false,
+      "verdict": "REPORTED, NOT GATED",
+      "intake_report": {
+        "exit_code": 0,
+        "status": "NOT YET USABLE",
+        "unmet": [
+          "only 84s of audio; the protocol asks for ~25 min"
+        ],
+        "matched_pairs": 8,
+        "total_audio_s": 84.0,
+        "silences_seen": 31,
+        "hand_offs_seen": 1,
+        "unmatched_files": [],
+        "pairs": [
+          {
+            "scene": "scene01_free",
+            "problem": null,
+            "A_silent": false,
+            "B_silent": false,
+            "A_peak": 0.79996,
+            "B_peak": 0.79996,
+            "A_rms": 0.013517,
+            "B_rms": 0.013214,
+            "A_signal_frac": 0.3375,
+            "B_signal_frac": 0.3042,
+            "A_raw_rate_hz": 16000,
+            "B_raw_rate_hz": 16000,
+            "A_duration_s": 12.0,
+            "B_duration_s": 12.0,
+            "crosstalk": {
+              "windows": 1,
+              "corr": null,
+              "note": "too few simultaneous-loud windows to judge"
+            },
+            "levels": {
+              "frames": 239,
+              "both_loud_frac": 0.0042,
+              "either_loud_frac": 0.6402
+            }
+          },
+          {
+            "scene": "scene02_qa",
+            "problem": "unmatched pair",
+            "A_silent": null,
+            "B_silent": null,
+            "A_peak": null,
+            "B_peak": null,
+            "A_rms": null,
+            "B_rms": null,
+            "A_signal_frac": null,
+            "B_signal_frac": null,
+            "A_raw_rate_hz": null,
+            "B_raw_rate_hz": null,
+            "A_duration_s": null,
+            "B_duration_s": null,
+            "crosstalk": null,
+            "levels": null
+          },
+          {
+            "scene": "scene03_think",
+            "problem": null,
+            "A_silent": false,
+            "B_silent": false,
+            "A_peak": 0.79996,
+            "B_peak": 0.79999,
+            "A_rms": 0.010292,
+            "B_rms": 0.01153,
+            "A_signal_frac": 0.1542,
+            "B_signal_frac": 0.2042,
+            "A_raw_rate_hz": 16000,
+            "B_raw_rate_hz": 16000,
+            "A_duration_s": 12.0,
+            "B_duration_s": 12.0,
+            "crosstalk": {
+              "windows": 1,
+              "corr": null,
+              "note": "too few simultaneous-loud windows to judge"
+            },
+            "levels": {
+              "frames": 239,
+              "both_loud_frac": 0.0042,
+              "either_loud_frac": 0.3556
+            }
+          },
+          {
+            "scene": "scene04_fillers",
+            "problem": null,
+            "A_silent": false,
+            "B_silent": false,
+            "A_peak": 0.79996,
+            "B_peak": 0.79999,
+            "A_rms": 0.024904,
+            "B_rms": 0.006365,
+            "A_signal_frac": 0.9042,
+            "B_signal_frac": 0.0042,
+            "A_raw_rate_hz": 16000,
+            "B_raw_rate_hz": 16000,
+            "A_duration_s": 12.0,
+            "B_duration_s": 12.0,
+            "crosstalk": {
+              "windows": 1,
+              "corr": null,
+              "note": "too few simultaneous-loud windows to judge"
+            },
+            "levels": {
+              "frames": 239,
+              "both_loud_frac": 0.0042,
+              "either_loud_frac": 0.9079
+            }
+          },
+          {
+            "scene": "scene05_backchannel",
+            "problem": null,
+            "A_silent": false,
+            "B_silent": false,
+            "A_peak": 0.79996,
+            "B_peak": 0.79996,
+            "A_rms": 0.024106,
+            "B_rms": 0.008222,
+            "A_signal_frac": 0.8542,
+            "B_signal_frac": 0.0646,
+            "A_raw_rate_hz": 16000,
+            "B_raw_rate_hz": 16000,
+            "A_duration_s": 12.0,
+            "B_duration_s": 12.0,
+            "crosstalk": {
+              "windows": 10,
+              "corr": 0.983
+            },
+            "levels": {
+              "frames": 239,
+              "both_loud_frac": 0.0669,
+              "either_loud_frac": 0.8577
+            }
+          },
+          {
+            "scene": "scene06_interrupt",
+            "problem": null,
+            "A_silent": false,
+            "B_silent": false,
+            "A_peak": 0.79996,
+            "B_peak": 0.79996,
+            "A_rms": 0.014884,
+            "B_rms": 0.013525,
+            "A_signal_frac": 0.4042,
+            "B_signal_frac": 0.3396,
+            "A_raw_rate_hz": 16000,
+            "B_raw_rate_hz": 16000,
+            "A_duration_s": 12.0,
+            "B_duration_s": 12.0,
+            "crosstalk": {
+              "windows": 16,
+              "corr": 0.9738
+            },
+            "levels": {
+              "frames": 239,
+              "both_loud_frac": 0.1255,
+              "either_loud_frac": 0.6234
+            }
+          },
+          {
+            "scene": "scene07_alone",
+            "problem": null,
+            "A_silent": false,
+            "B_silent": false,
+            "A_peak": 0.79996,
+            "B_peak": 0.79996,
+            "A_rms": 0.014161,
+            "B_rms": 0.006365,
+            "A_signal_frac": 0.3708,
+            "B_signal_frac": 0.0042,
+            "A_raw_rate_hz": 16000,
+            "B_raw_rate_hz": 16000,
+            "A_duration_s": 12.0,
+            "B_duration_s": 12.0,
+            "crosstalk": {
+              "windows": 1,
+              "corr": null,
+              "note": "too few simultaneous-loud windows to judge"
+            },
+            "levels": {
+              "frames": 239,
+              "both_loud_frac": 0.0042,
+              "either_loud_frac": 0.3724
+            }
+          },
+          {
+            "scene": "scene08_roomtone",
+            "problem": null,
+            "A_silent": false,
+            "B_silent": false,
+            "A_peak": 3e-05,
+            "B_peak": 3e-05,
+            "A_rms": 1e-06,
+            "B_rms": 1e-06,
+            "A_signal_frac": 0.0,
+            "B_signal_frac": 0.0,
+            "A_raw_rate_hz": 16000,
+            "B_raw_rate_hz": 16000,
+            "A_duration_s": 12.0,
+            "B_duration_s": 12.0,
+            "crosstalk": {
+              "windows": 0,
+              "corr": null,
+              "note": "too few simultaneous-loud windows to judge"
+            },
+            "levels": {
+              "frames": 239,
+              "both_loud_frac": 0.0,
+              "either_loud_frac": 0.0
+            }
+          }
+        ]
+      }
+    },
+    {
+      "perturbation": "digital_silence_A",
+      "description": "channel A of one scene is digital silence",
+      "status": "NOT YET USABLE",
+      "perturbed_status": "NOT YET USABLE",
+      "unmet_added": [
+        "digitally silent channel(s): ['scene04_fillers']"
+      ],
+      "exit_code": 0,
+      "evidence": {
+        "silent_flag": true,
+        "other_silent": false,
+        "peak": 0.0,
+        "unmet_added": [
+          "digitally silent channel(s): ['scene04_fillers']"
+        ]
+      },
+      "reported": true,
+      "gated": true,
+      "verdict": "DETECTED (gated)",
+      "intake_report": {
+        "exit_code": 0,
+        "status": "NOT YET USABLE",
+        "unmet": [
+          "only 90s of audio; the protocol asks for ~25 min",
+          "digitally silent channel(s): ['scene04_fillers']"
+        ],
+        "matched_pairs": 8,
+        "total_audio_s": 90.0,
+        "silences_seen": 35,
+        "hand_offs_seen": 1,
+        "unmatched_files": [],
+        "pairs": [
+          {
+            "scene": "scene01_free",
+            "problem": null,
+            "A_silent": false,
+            "B_silent": false,
+            "A_peak": 0.79996,
+            "B_peak": 0.79996,
+            "A_rms": 0.013517,
+            "B_rms": 0.013214,
+            "A_signal_frac": 0.3375,
+            "B_signal_frac": 0.3042,
+            "A_raw_rate_hz": 16000,
+            "B_raw_rate_hz": 16000,
+            "A_duration_s": 12.0,
+            "B_duration_s": 12.0,
+            "crosstalk": {
+              "windows": 1,
+              "corr": null,
+              "note": "too few simultaneous-loud windows to judge"
+            },
+            "levels": {
+              "frames": 239,
+              "both_loud_frac": 0.0042,
+              "either_loud_frac": 0.6402
+            }
+          },
+          {
+            "scene": "scene02_qa",
+            "problem": null,
+            "A_silent": false,
+            "B_silent": false,
+            "A_peak": 0.79996,
+            "B_peak": 0.79996,
+            "A_rms": 0.013222,
+            "B_rms": 0.01218,
+            "A_signal_frac": 0.3042,
+            "B_signal_frac": 0.2708,
+            "A_raw_rate_hz": 16000,
+            "B_raw_rate_hz": 16000,
+            "A_duration_s": 12.0,
+            "B_duration_s": 12.0,
+            "crosstalk": {
+              "windows": 1,
+              "corr": null,
+              "note": "too few simultaneous-loud windows to judge"
+            },
+            "levels": {
+              "frames": 239,
+              "both_loud_frac": 0.0042,
+              "either_loud_frac": 0.5732
+            }
+          },
+          {
+            "scene": "scene03_think",
+            "problem": null,
+            "A_silent": false,
+            "B_silent": false,
+            "A_peak": 0.79996,
+            "B_peak": 0.79999,
+            "A_rms": 0.010292,
+            "B_rms": 0.01153,
+            "A_signal_frac": 0.1542,
+            "B_signal_frac": 0.2042,
+            "A_raw_rate_hz": 16000,
+            "B_raw_rate_hz": 16000,
+            "A_duration_s": 12.0,
+            "B_duration_s": 12.0,
+            "crosstalk": {
+              "windows": 1,
+              "corr": null,
+              "note": "too few simultaneous-loud windows to judge"
+            },
+            "levels": {
+              "frames": 239,
+              "both_loud_frac": 0.0042,
+              "either_loud_frac": 0.3556
+            }
+          },
+          {
+            "scene": "scene04_fillers",
+            "problem": null,
+            "A_silent": true,
+            "B_silent": false,
+            "A_peak": 0.0,
+            "B_peak": 0.79999,
+            "A_rms": 0.0,
+            "B_rms": 0.006365,
+            "A_signal_frac": 0.0,
+            "B_signal_frac": 0.0042,
+            "A_raw_rate_hz": 16000,
+            "B_raw_rate_hz": 16000,
+            "A_duration_s": 6.0,
+            "B_duration_s": 12.0,
+            "crosstalk": {
+              "windows": 0,
+              "corr": null,
+              "note": "too few simultaneous-loud windows to judge"
+            },
+            "levels": {
+              "frames": 119,
+              "both_loud_frac": 0.0,
+              "either_loud_frac": 0.0084
+            }
+          },
+          {
+            "scene": "scene05_backchannel",
+            "problem": null,
+            "A_silent": false,
+            "B_silent": false,
+            "A_peak": 0.79996,
+            "B_peak": 0.79996,
+            "A_rms": 0.024106,
+            "B_rms": 0.008222,
+            "A_signal_frac": 0.8542,
+            "B_signal_frac": 0.0646,
+            "A_raw_rate_hz": 16000,
+            "B_raw_rate_hz": 16000,
+            "A_duration_s": 12.0,
+            "B_duration_s": 12.0,
+            "crosstalk": {
+              "windows": 10,
+              "corr": 0.983
+            },
+            "levels": {
+              "frames": 239,
+              "both_loud_frac": 0.0669,
+              "either_loud_frac": 0.8577
+            }
+          },
+          {
+            "scene": "scene06_interrupt",
+            "problem": null,
+            "A_silent": false,
+            "B_silent": false,
+            "A_peak": 0.79996,
+            "B_peak": 0.79996,
+            "A_rms": 0.014884,
+            "B_rms": 0.013525,
+            "A_signal_frac": 0.4042,
+            "B_signal_frac": 0.3396,
+            "A_raw_rate_hz": 16000,
+            "B_raw_rate_hz": 16000,
+            "A_duration_s": 12.0,
+            "B_duration_s": 12.0,
+            "crosstalk": {
+              "windows": 16,
+              "corr": 0.9738
+            },
+            "levels": {
+              "frames": 239,
+              "both_loud_frac": 0.1255,
+              "either_loud_frac": 0.6234
+            }
+          },
+          {
+            "scene": "scene07_alone",
+            "problem": null,
+            "A_silent": false,
+            "B_silent": false,
+            "A_peak": 0.79996,
+            "B_peak": 0.79996,
+            "A_rms": 0.014161,
+            "B_rms": 0.006365,
+            "A_signal_frac": 0.3708,
+            "B_signal_frac": 0.0042,
+            "A_raw_rate_hz": 16000,
+            "B_raw_rate_hz": 16000,
+            "A_duration_s": 12.0,
+            "B_duration_s": 12.0,
+            "crosstalk": {
+              "windows": 1,
+              "corr": null,
+              "note": "too few simultaneous-loud windows to judge"
+            },
+            "levels": {
+              "frames": 239,
+              "both_loud_frac": 0.0042,
+              "either_loud_frac": 0.3724
+            }
+          },
+          {
+            "scene": "scene08_roomtone",
+            "problem": null,
+            "A_silent": false,
+            "B_silent": false,
+            "A_peak": 3e-05,
+            "B_peak": 3e-05,
+            "A_rms": 1e-06,
+            "B_rms": 1e-06,
+            "A_signal_frac": 0.0,
+            "B_signal_frac": 0.0,
+            "A_raw_rate_hz": 16000,
+            "B_raw_rate_hz": 16000,
+            "A_duration_s": 12.0,
+            "B_duration_s": 12.0,
+            "crosstalk": {
+              "windows": 0,
+              "corr": null,
+              "note": "too few simultaneous-loud windows to judge"
+            },
+            "levels": {
+              "frames": 239,
+              "both_loud_frac": 0.0,
+              "either_loud_frac": 0.0
+            }
+          }
+        ]
+      }
+    },
+    {
+      "perturbation": "digital_silence_B",
+      "description": "channel B of one scene is digital silence",
+      "status": "NOT YET USABLE",
+      "perturbed_status": "NOT YET USABLE",
+      "unmet_added": [],
+      "exit_code": 0,
+      "evidence": {
+        "silent_flag": true,
+        "other_silent": false,
+        "peak": 0.0,
+        "unmet_added": []
+      },
+      "reported": true,
+      "gated": false,
+      "verdict": "REPORTED, NOT GATED",
+      "intake_report": {
+        "exit_code": 0,
+        "status": "NOT YET USABLE",
+        "unmet": [
+          "only 90s of audio; the protocol asks for ~25 min"
+        ],
+        "matched_pairs": 8,
+        "total_audio_s": 90.0,
+        "silences_seen": 37,
+        "hand_offs_seen": 1,
+        "unmatched_files": [],
+        "pairs": [
+          {
+            "scene": "scene01_free",
+            "problem": null,
+            "A_silent": false,
+            "B_silent": false,
+            "A_peak": 0.79996,
+            "B_peak": 0.79996,
+            "A_rms": 0.013517,
+            "B_rms": 0.013214,
+            "A_signal_frac": 0.3375,
+            "B_signal_frac": 0.3042,
+            "A_raw_rate_hz": 16000,
+            "B_raw_rate_hz": 16000,
+            "A_duration_s": 12.0,
+            "B_duration_s": 12.0,
+            "crosstalk": {
+              "windows": 1,
+              "corr": null,
+              "note": "too few simultaneous-loud windows to judge"
+            },
+            "levels": {
+              "frames": 239,
+              "both_loud_frac": 0.0042,
+              "either_loud_frac": 0.6402
+            }
+          },
+          {
+            "scene": "scene02_qa",
+            "problem": null,
+            "A_silent": false,
+            "B_silent": false,
+            "A_peak": 0.79996,
+            "B_peak": 0.79996,
+            "A_rms": 0.013222,
+            "B_rms": 0.01218,
+            "A_signal_frac": 0.3042,
+            "B_signal_frac": 0.2708,
+            "A_raw_rate_hz": 16000,
+            "B_raw_rate_hz": 16000,
+            "A_duration_s": 12.0,
+            "B_duration_s": 12.0,
+            "crosstalk": {
+              "windows": 1,
+              "corr": null,
+              "note": "too few simultaneous-loud windows to judge"
+            },
+            "levels": {
+              "frames": 239,
+              "both_loud_frac": 0.0042,
+              "either_loud_frac": 0.5732
+            }
+          },
+          {
+            "scene": "scene03_think",
+            "problem": null,
+            "A_silent": false,
+            "B_silent": false,
+            "A_peak": 0.79996,
+            "B_peak": 0.79999,
+            "A_rms": 0.010292,
+            "B_rms": 0.01153,
+            "A_signal_frac": 0.1542,
+            "B_signal_frac": 0.2042,
+            "A_raw_rate_hz": 16000,
+            "B_raw_rate_hz": 16000,
+            "A_duration_s": 12.0,
+            "B_duration_s": 12.0,
+            "crosstalk": {
+              "windows": 1,
+              "corr": null,
+              "note": "too few simultaneous-loud windows to judge"
+            },
+            "levels": {
+              "frames": 239,
+              "both_loud_frac": 0.0042,
+              "either_loud_frac": 0.3556
+            }
+          },
+          {
+            "scene": "scene04_fillers",
+            "problem": null,
+            "A_silent": false,
+            "B_silent": true,
+            "A_peak": 0.79996,
+            "B_peak": 0.0,
+            "A_rms": 0.024904,
+            "B_rms": 0.0,
+            "A_signal_frac": 0.9042,
+            "B_signal_frac": 0.0,
+            "A_raw_rate_hz": 16000,
+            "B_raw_rate_hz": 16000,
+            "A_duration_s": 12.0,
+            "B_duration_s": 6.0,
+            "crosstalk": {
+              "windows": 0,
+              "corr": null,
+              "note": "too few simultaneous-loud windows to judge"
+            },
+            "levels": {
+              "frames": 119,
+              "both_loud_frac": 0.0,
+              "either_loud_frac": 0.9076
+            }
+          },
+          {
+            "scene": "scene05_backchannel",
+            "problem": null,
+            "A_silent": false,
+            "B_silent": false,
+            "A_peak": 0.79996,
+            "B_peak": 0.79996,
+            "A_rms": 0.024106,
+            "B_rms": 0.008222,
+            "A_signal_frac": 0.8542,
+            "B_signal_frac": 0.0646,
+            "A_raw_rate_hz": 16000,
+            "B_raw_rate_hz": 16000,
+            "A_duration_s": 12.0,
+            "B_duration_s": 12.0,
+            "crosstalk": {
+              "windows": 10,
+              "corr": 0.983
+            },
+            "levels": {
+              "frames": 239,
+              "both_loud_frac": 0.0669,
+              "either_loud_frac": 0.8577
+            }
+          },
+          {
+            "scene": "scene06_interrupt",
+            "problem": null,
+            "A_silent": false,
+            "B_silent": false,
+            "A_peak": 0.79996,
+            "B_peak": 0.79996,
+            "A_rms": 0.014884,
+            "B_rms": 0.013525,
+            "A_signal_frac": 0.4042,
+            "B_signal_frac": 0.3396,
+            "A_raw_rate_hz": 16000,
+            "B_raw_rate_hz": 16000,
+            "A_duration_s": 12.0,
+            "B_duration_s": 12.0,
+            "crosstalk": {
+              "windows": 16,
+              "corr": 0.9738
+            },
+            "levels": {
+              "frames": 239,
+              "both_loud_frac": 0.1255,
+              "either_loud_frac": 0.6234
+            }
+          },
+          {
+            "scene": "scene07_alone",
+            "problem": null,
+            "A_silent": false,
+            "B_silent": false,
+            "A_peak": 0.79996,
+            "B_peak": 0.79996,
+            "A_rms": 0.014161,
+            "B_rms": 0.006365,
+            "A_signal_frac": 0.3708,
+            "B_signal_frac": 0.0042,
+            "A_raw_rate_hz": 16000,
+            "B_raw_rate_hz": 16000,
+            "A_duration_s": 12.0,
+            "B_duration_s": 12.0,
+            "crosstalk": {
+              "windows": 1,
+              "corr": null,
+              "note": "too few simultaneous-loud windows to judge"
+            },
+            "levels": {
+              "frames": 239,
+              "both_loud_frac": 0.0042,
+              "either_loud_frac": 0.3724
+            }
+          },
+          {
+            "scene": "scene08_roomtone",
+            "problem": null,
+            "A_silent": false,
+            "B_silent": false,
+            "A_peak": 3e-05,
+            "B_peak": 3e-05,
+            "A_rms": 1e-06,
+            "B_rms": 1e-06,
+            "A_signal_frac": 0.0,
+            "B_signal_frac": 0.0,
+            "A_raw_rate_hz": 16000,
+            "B_raw_rate_hz": 16000,
+            "A_duration_s": 12.0,
+            "B_duration_s": 12.0,
+            "crosstalk": {
+              "windows": 0,
+              "corr": null,
+              "note": "too few simultaneous-loud windows to judge"
+            },
+            "levels": {
+              "frames": 239,
+              "both_loud_frac": 0.0,
+              "either_loud_frac": 0.0
+            }
+          }
+        ]
+      }
+    },
+    {
+      "perturbation": "low_level_B",
+      "description": "channel B of one scene is very low but NOT zero",
+      "status": "NOT YET USABLE",
+      "perturbed_status": "NOT YET USABLE",
+      "unmet_added": [],
+      "exit_code": 0,
+      "evidence": {
+        "peak": 0.02512,
+        "rms": 0.0002,
+        "signal_frame_frac": 0.0042,
+        "silent_flag": false,
+        "unmet_added": []
+      },
+      "reported": true,
+      "gated": false,
+      "verdict": "REPORTED, NOT GATED",
+      "intake_report": {
+        "exit_code": 0,
+        "status": "NOT YET USABLE",
+        "unmet": [
+          "only 96s of audio; the protocol asks for ~25 min"
+        ],
+        "matched_pairs": 8,
+        "total_audio_s": 96.0,
+        "silences_seen": 38,
+        "hand_offs_seen": 1,
+        "unmatched_files": [],
+        "pairs": [
+          {
+            "scene": "scene01_free",
+            "problem": null,
+            "A_silent": false,
+            "B_silent": false,
+            "A_peak": 0.79996,
+            "B_peak": 0.79996,
+            "A_rms": 0.013517,
+            "B_rms": 0.013214,
+            "A_signal_frac": 0.3375,
+            "B_signal_frac": 0.3042,
+            "A_raw_rate_hz": 16000,
+            "B_raw_rate_hz": 16000,
+            "A_duration_s": 12.0,
+            "B_duration_s": 12.0,
+            "crosstalk": {
+              "windows": 1,
+              "corr": null,
+              "note": "too few simultaneous-loud windows to judge"
+            },
+            "levels": {
+              "frames": 239,
+              "both_loud_frac": 0.0042,
+              "either_loud_frac": 0.6402
+            }
+          },
+          {
+            "scene": "scene02_qa",
+            "problem": null,
+            "A_silent": false,
+            "B_silent": false,
+            "A_peak": 0.79996,
+            "B_peak": 0.79996,
+            "A_rms": 0.013222,
+            "B_rms": 0.01218,
+            "A_signal_frac": 0.3042,
+            "B_signal_frac": 0.2708,
+            "A_raw_rate_hz": 16000,
+            "B_raw_rate_hz": 16000,
+            "A_duration_s": 12.0,
+            "B_duration_s": 12.0,
+            "crosstalk": {
+              "windows": 1,
+              "corr": null,
+              "note": "too few simultaneous-loud windows to judge"
+            },
+            "levels": {
+              "frames": 239,
+              "both_loud_frac": 0.0042,
+              "either_loud_frac": 0.5732
+            }
+          },
+          {
+            "scene": "scene03_think",
+            "problem": null,
+            "A_silent": false,
+            "B_silent": false,
+            "A_peak": 0.79996,
+            "B_peak": 0.79999,
+            "A_rms": 0.010292,
+            "B_rms": 0.01153,
+            "A_signal_frac": 0.1542,
+            "B_signal_frac": 0.2042,
+            "A_raw_rate_hz": 16000,
+            "B_raw_rate_hz": 16000,
+            "A_duration_s": 12.0,
+            "B_duration_s": 12.0,
+            "crosstalk": {
+              "windows": 1,
+              "corr": null,
+              "note": "too few simultaneous-loud windows to judge"
+            },
+            "levels": {
+              "frames": 239,
+              "both_loud_frac": 0.0042,
+              "either_loud_frac": 0.3556
+            }
+          },
+          {
+            "scene": "scene04_fillers",
+            "problem": null,
+            "A_silent": false,
+            "B_silent": false,
+            "A_peak": 0.79996,
+            "B_peak": 0.02512,
+            "A_rms": 0.024904,
+            "B_rms": 0.0002,
+            "A_signal_frac": 0.9042,
+            "B_signal_frac": 0.0042,
+            "A_raw_rate_hz": 16000,
+            "B_raw_rate_hz": 16000,
+            "A_duration_s": 12.0,
+            "B_duration_s": 12.0,
+            "crosstalk": {
+              "windows": 1,
+              "corr": null,
+              "note": "too few simultaneous-loud windows to judge"
+            },
+            "levels": {
+              "frames": 239,
+              "both_loud_frac": 0.0042,
+              "either_loud_frac": 0.9079
+            }
+          },
+          {
+            "scene": "scene05_backchannel",
+            "problem": null,
+            "A_silent": false,
+            "B_silent": false,
+            "A_peak": 0.79996,
+            "B_peak": 0.79996,
+            "A_rms": 0.024106,
+            "B_rms": 0.008222,
+            "A_signal_frac": 0.8542,
+            "B_signal_frac": 0.0646,
+            "A_raw_rate_hz": 16000,
+            "B_raw_rate_hz": 16000,
+            "A_duration_s": 12.0,
+            "B_duration_s": 12.0,
+            "crosstalk": {
+              "windows": 10,
+              "corr": 0.983
+            },
+            "levels": {
+              "frames": 239,
+              "both_loud_frac": 0.0669,
+              "either_loud_frac": 0.8577
+            }
+          },
+          {
+            "scene": "scene06_interrupt",
+            "problem": null,
+            "A_silent": false,
+            "B_silent": false,
+            "A_peak": 0.79996,
+            "B_peak": 0.79996,
+            "A_rms": 0.014884,
+            "B_rms": 0.013525,
+            "A_signal_frac": 0.4042,
+            "B_signal_frac": 0.3396,
+            "A_raw_rate_hz": 16000,
+            "B_raw_rate_hz": 16000,
+            "A_duration_s": 12.0,
+            "B_duration_s": 12.0,
+            "crosstalk": {
+              "windows": 16,
+              "corr": 0.9738
+            },
+            "levels": {
+              "frames": 239,
+              "both_loud_frac": 0.1255,
+              "either_loud_frac": 0.6234
+            }
+          },
+          {
+            "scene": "scene07_alone",
+            "problem": null,
+            "A_silent": false,
+            "B_silent": false,
+            "A_peak": 0.79996,
+            "B_peak": 0.79996,
+            "A_rms": 0.014161,
+            "B_rms": 0.006365,
+            "A_signal_frac": 0.3708,
+            "B_signal_frac": 0.0042,
+            "A_raw_rate_hz": 16000,
+            "B_raw_rate_hz": 16000,
+            "A_duration_s": 12.0,
+            "B_duration_s": 12.0,
+            "crosstalk": {
+              "windows": 1,
+              "corr": null,
+              "note": "too few simultaneous-loud windows to judge"
+            },
+            "levels": {
+              "frames": 239,
+              "both_loud_frac": 0.0042,
+              "either_loud_frac": 0.3724
+            }
+          },
+          {
+            "scene": "scene08_roomtone",
+            "problem": null,
+            "A_silent": false,
+            "B_silent": false,
+            "A_peak": 3e-05,
+            "B_peak": 3e-05,
+            "A_rms": 1e-06,
+            "B_rms": 1e-06,
+            "A_signal_frac": 0.0,
+            "B_signal_frac": 0.0,
+            "A_raw_rate_hz": 16000,
+            "B_raw_rate_hz": 16000,
+            "A_duration_s": 12.0,
+            "B_duration_s": 12.0,
+            "crosstalk": {
+              "windows": 0,
+              "corr": null,
+              "note": "too few simultaneous-loud windows to judge"
+            },
+            "levels": {
+              "frames": 239,
+              "both_loud_frac": 0.0,
+              "either_loud_frac": 0.0
+            }
+          }
+        ]
+      }
+    },
+    {
+      "perturbation": "very_low_level_B",
+      "description": "channel B of one scene is very low (below the floor)",
+      "status": "NOT YET USABLE",
+      "perturbed_status": "NOT YET USABLE",
+      "unmet_added": [],
+      "exit_code": 0,
+      "evidence": {
+        "peak": 0.00626,
+        "rms": 5e-05,
+        "signal_frame_frac": 0.0021,
+        "silent_flag": false,
+        "unmet_added": []
+      },
+      "reported": true,
+      "gated": false,
+      "verdict": "REPORTED, NOT GATED",
+      "intake_report": {
+        "exit_code": 0,
+        "status": "NOT YET USABLE",
+        "unmet": [
+          "only 96s of audio; the protocol asks for ~25 min"
+        ],
+        "matched_pairs": 8,
+        "total_audio_s": 96.0,
+        "silences_seen": 38,
+        "hand_offs_seen": 1,
+        "unmatched_files": [],
+        "pairs": [
+          {
+            "scene": "scene01_free",
+            "problem": null,
+            "A_silent": false,
+            "B_silent": false,
+            "A_peak": 0.79996,
+            "B_peak": 0.79996,
+            "A_rms": 0.013517,
+            "B_rms": 0.013214,
+            "A_signal_frac": 0.3375,
+            "B_signal_frac": 0.3042,
+            "A_raw_rate_hz": 16000,
+            "B_raw_rate_hz": 16000,
+            "A_duration_s": 12.0,
+            "B_duration_s": 12.0,
+            "crosstalk": {
+              "windows": 1,
+              "corr": null,
+              "note": "too few simultaneous-loud windows to judge"
+            },
+            "levels": {
+              "frames": 239,
+              "both_loud_frac": 0.0042,
+              "either_loud_frac": 0.6402
+            }
+          },
+          {
+            "scene": "scene02_qa",
+            "problem": null,
+            "A_silent": false,
+            "B_silent": false,
+            "A_peak": 0.79996,
+            "B_peak": 0.79996,
+            "A_rms": 0.013222,
+            "B_rms": 0.01218,
+            "A_signal_frac": 0.3042,
+            "B_signal_frac": 0.2708,
+            "A_raw_rate_hz": 16000,
+            "B_raw_rate_hz": 16000,
+            "A_duration_s": 12.0,
+            "B_duration_s": 12.0,
+            "crosstalk": {
+              "windows": 1,
+              "corr": null,
+              "note": "too few simultaneous-loud windows to judge"
+            },
+            "levels": {
+              "frames": 239,
+              "both_loud_frac": 0.0042,
+              "either_loud_frac": 0.5732
+            }
+          },
+          {
+            "scene": "scene03_think",
+            "problem": null,
+            "A_silent": false,
+            "B_silent": false,
+            "A_peak": 0.79996,
+            "B_peak": 0.79999,
+            "A_rms": 0.010292,
+            "B_rms": 0.01153,
+            "A_signal_frac": 0.1542,
+            "B_signal_frac": 0.2042,
+            "A_raw_rate_hz": 16000,
+            "B_raw_rate_hz": 16000,
+            "A_duration_s": 12.0,
+            "B_duration_s": 12.0,
+            "crosstalk": {
+              "windows": 1,
+              "corr": null,
+              "note": "too few simultaneous-loud windows to judge"
+            },
+            "levels": {
+              "frames": 239,
+              "both_loud_frac": 0.0042,
+              "either_loud_frac": 0.3556
+            }
+          },
+          {
+            "scene": "scene04_fillers",
+            "problem": null,
+            "A_silent": false,
+            "B_silent": false,
+            "A_peak": 0.79996,
+            "B_peak": 0.00626,
+            "A_rms": 0.024904,
+            "B_rms": 5e-05,
+            "A_signal_frac": 0.9042,
+            "B_signal_frac": 0.0021,
+            "A_raw_rate_hz": 16000,
+            "B_raw_rate_hz": 16000,
+            "A_duration_s": 12.0,
+            "B_duration_s": 12.0,
+            "crosstalk": {
+              "windows": 1,
+              "corr": null,
+              "note": "too few simultaneous-loud windows to judge"
+            },
+            "levels": {
+              "frames": 239,
+              "both_loud_frac": 0.0042,
+              "either_loud_frac": 0.9079
+            }
+          },
+          {
+            "scene": "scene05_backchannel",
+            "problem": null,
+            "A_silent": false,
+            "B_silent": false,
+            "A_peak": 0.79996,
+            "B_peak": 0.79996,
+            "A_rms": 0.024106,
+            "B_rms": 0.008222,
+            "A_signal_frac": 0.8542,
+            "B_signal_frac": 0.0646,
+            "A_raw_rate_hz": 16000,
+            "B_raw_rate_hz": 16000,
+            "A_duration_s": 12.0,
+            "B_duration_s": 12.0,
+            "crosstalk": {
+              "windows": 10,
+              "corr": 0.983
+            },
+            "levels": {
+              "frames": 239,
+              "both_loud_frac": 0.0669,
+              "either_loud_frac": 0.8577
+            }
+          },
+          {
+            "scene": "scene06_interrupt",
+            "problem": null,
+            "A_silent": false,
+            "B_silent": false,
+            "A_peak": 0.79996,
+            "B_peak": 0.79996,
+            "A_rms": 0.014884,
+            "B_rms": 0.013525,
+            "A_signal_frac": 0.4042,
+            "B_signal_frac": 0.3396,
+            "A_raw_rate_hz": 16000,
+            "B_raw_rate_hz": 16000,
+            "A_duration_s": 12.0,
+            "B_duration_s": 12.0,
+            "crosstalk": {
+              "windows": 16,
+              "corr": 0.9738
+            },
+            "levels": {
+              "frames": 239,
+              "both_loud_frac": 0.1255,
+              "either_loud_frac": 0.6234
+            }
+          },
+          {
+            "scene": "scene07_alone",
+            "problem": null,
+            "A_silent": false,
+            "B_silent": false,
+            "A_peak": 0.79996,
+            "B_peak": 0.79996,
+            "A_rms": 0.014161,
+            "B_rms": 0.006365,
+            "A_signal_frac": 0.3708,
+            "B_signal_frac": 0.0042,
+            "A_raw_rate_hz": 16000,
+            "B_raw_rate_hz": 16000,
+            "A_duration_s": 12.0,
+            "B_duration_s": 12.0,
+            "crosstalk": {
+              "windows": 1,
+              "corr": null,
+              "note": "too few simultaneous-loud windows to judge"
+            },
+            "levels": {
+              "frames": 239,
+              "both_loud_frac": 0.0042,
+              "either_loud_frac": 0.3724
+            }
+          },
+          {
+            "scene": "scene08_roomtone",
+            "problem": null,
+            "A_silent": false,
+            "B_silent": false,
+            "A_peak": 3e-05,
+            "B_peak": 3e-05,
+            "A_rms": 1e-06,
+            "B_rms": 1e-06,
+            "A_signal_frac": 0.0,
+            "B_signal_frac": 0.0,
+            "A_raw_rate_hz": 16000,
+            "B_raw_rate_hz": 16000,
+            "A_duration_s": 12.0,
+            "B_duration_s": 12.0,
+            "crosstalk": {
+              "windows": 0,
+              "corr": null,
+              "note": "too few simultaneous-loud windows to judge"
+            },
+            "levels": {
+              "frames": 239,
+              "both_loud_frac": 0.0,
+              "either_loud_frac": 0.0
+            }
+          }
+        ]
+      }
+    },
+    {
+      "perturbation": "crosstalk",
+      "description": "channel B clearly hears channel A",
+      "status": "NOT YET USABLE",
+      "perturbed_status": "NOT YET USABLE",
+      "unmet_added": [],
+      "exit_code": 0,
+      "evidence": {
+        "baseline_corr_max": 0.983,
+        "baseline_corr_median": 0.983,
+        "baseline_scenes_with_a_computable_corr": 2,
+        "baseline_scenes_total": 8,
+        "perturbed_corr_min": 0.9897,
+        "perturbed_corr_mean": 0.9934,
+        "perturbed_scenes_with_a_computable_corr": 7,
+        "separation": 0.0067,
+        "proposed_b_loud_when_a_loud_clean": 0.3125,
+        "proposed_b_loud_when_a_loud_crosstalk": 1.0,
+        "proposed_separation": 0.6875,
+        "unmet_added": []
+      },
+      "reported": false,
+      "gated": false,
+      "verdict": "NOT DETECTED",
+      "intake_report": {
+        "exit_code": 0,
+        "status": "NOT YET USABLE",
+        "unmet": [
+          "only 96s of audio; the protocol asks for ~25 min"
+        ],
+        "matched_pairs": 8,
+        "total_audio_s": 96.0,
+        "silences_seen": 38,
+        "hand_offs_seen": 13,
+        "unmatched_files": [],
+        "pairs": [
+          {
+            "scene": "scene01_free",
+            "problem": null,
+            "A_silent": false,
+            "B_silent": false,
+            "A_peak": 0.79996,
+            "B_peak": 0.99997,
+            "A_rms": 0.013517,
+            "B_rms": 0.01688,
+            "A_signal_frac": 0.3375,
+            "B_signal_frac": 0.6375,
+            "A_raw_rate_hz": 16000,
+            "B_raw_rate_hz": 16000,
+            "A_duration_s": 12.0,
+            "B_duration_s": 12.0,
+            "crosstalk": {
+              "windows": 41,
+              "corr": 0.9932
+            },
+            "levels": {
+              "frames": 239,
+              "both_loud_frac": 0.3389,
+              "either_loud_frac": 0.6402
+            }
+          },
+          {
+            "scene": "scene02_qa",
+            "problem": null,
+            "A_silent": false,
+            "B_silent": false,
+            "A_peak": 0.79996,
+            "B_peak": 0.99997,
+            "A_rms": 0.013222,
+            "B_rms": 0.015996,
+            "A_signal_frac": 0.3042,
+            "B_signal_frac": 0.5708,
+            "A_raw_rate_hz": 16000,
+            "B_raw_rate_hz": 16000,
+            "A_duration_s": 12.0,
+            "B_duration_s": 12.0,
+            "crosstalk": {
+              "windows": 37,
+              "corr": 0.9897
+            },
+            "levels": {
+              "frames": 239,
+              "both_loud_frac": 0.3054,
+              "either_loud_frac": 0.5732
+            }
+          },
+          {
+            "scene": "scene03_think",
+            "problem": null,
+            "A_silent": false,
+            "B_silent": false,
+            "A_peak": 0.79996,
+            "B_peak": 0.99997,
+            "A_rms": 0.010292,
+            "B_rms": 0.014689,
+            "A_signal_frac": 0.1542,
+            "B_signal_frac": 0.3542,
+            "A_raw_rate_hz": 16000,
+            "B_raw_rate_hz": 16000,
+            "A_duration_s": 12.0,
+            "B_duration_s": 12.0,
+            "crosstalk": {
+              "windows": 19,
+              "corr": 0.9951
+            },
+            "levels": {
+              "frames": 239,
+              "both_loud_frac": 0.1548,
+              "either_loud_frac": 0.3556
+            }
+          },
+          {
+            "scene": "scene04_fillers",
+            "problem": null,
+            "A_silent": false,
+            "B_silent": false,
+            "A_peak": 0.79996,
+            "B_peak": 0.99997,
+            "A_rms": 0.024904,
+            "B_rms": 0.017559,
+            "A_signal_frac": 0.9042,
+            "B_signal_frac": 0.9042,
+            "A_raw_rate_hz": 16000,
+            "B_raw_rate_hz": 16000,
+            "A_duration_s": 12.0,
+            "B_duration_s": 12.0,
+            "crosstalk": {
+              "windows": 109,
+              "corr": 0.9984
+            },
+            "levels": {
+              "frames": 239,
+              "both_loud_frac": 0.9079,
+              "either_loud_frac": 0.9079
+            }
+          },
+          {
+            "scene": "scene05_backchannel",
+            "problem": null,
+            "A_silent": false,
+            "B_silent": false,
+            "A_peak": 0.79996,
+            "B_peak": 0.99997,
+            "A_rms": 0.024106,
+            "B_rms": 0.017934,
+            "A_signal_frac": 0.8542,
+            "B_signal_frac": 0.8542,
+            "A_raw_rate_hz": 16000,
+            "B_raw_rate_hz": 16000,
+            "A_duration_s": 12.0,
+            "B_duration_s": 12.0,
+            "crosstalk": {
+              "windows": 103,
+              "corr": 0.9934
+            },
+            "levels": {
+              "frames": 239,
+              "both_loud_frac": 0.8577,
+              "either_loud_frac": 0.8577
+            }
+          },
+          {
+            "scene": "scene06_interrupt",
+            "problem": null,
+            "A_silent": false,
+            "B_silent": false,
+            "A_peak": 0.79996,
+            "B_peak": 0.99997,
+            "A_rms": 0.014884,
+            "B_rms": 0.01748,
+            "A_signal_frac": 0.4042,
+            "B_signal_frac": 0.6208,
+            "A_raw_rate_hz": 16000,
+            "B_raw_rate_hz": 16000,
+            "A_duration_s": 12.0,
+            "B_duration_s": 12.0,
+            "crosstalk": {
+              "windows": 49,
+              "corr": 0.9908
+            },
+            "levels": {
+              "frames": 239,
+              "both_loud_frac": 0.4059,
+              "either_loud_frac": 0.6234
+            }
+          },
+          {
+            "scene": "scene07_alone",
+            "problem": null,
+            "A_silent": false,
+            "B_silent": false,
+            "A_peak": 0.79996,
+            "B_peak": 0.99997,
+            "A_rms": 0.014161,
+            "B_rms": 0.012551,
+            "A_signal_frac": 0.3708,
+            "B_signal_frac": 0.3708,
+            "A_raw_rate_hz": 16000,
+            "B_raw_rate_hz": 16000,
+            "A_duration_s": 12.0,
+            "B_duration_s": 12.0,
+            "crosstalk": {
+              "windows": 45,
+              "corr": 0.9933
+            },
+            "levels": {
+              "frames": 239,
+              "both_loud_frac": 0.3724,
+              "either_loud_frac": 0.3724
+            }
+          },
+          {
+            "scene": "scene08_roomtone",
+            "problem": null,
+            "A_silent": false,
+            "B_silent": false,
+            "A_peak": 3e-05,
+            "B_peak": 3e-05,
+            "A_rms": 1e-06,
+            "B_rms": 0.0,
+            "A_signal_frac": 0.0,
+            "B_signal_frac": 0.0,
+            "A_raw_rate_hz": 16000,
+            "B_raw_rate_hz": 16000,
+            "A_duration_s": 12.0,
+            "B_duration_s": 12.0,
+            "crosstalk": {
+              "windows": 0,
+              "corr": null,
+              "note": "too few simultaneous-loud windows to judge"
+            },
+            "levels": {
+              "frames": 239,
+              "both_loud_frac": 0.0,
+              "either_loud_frac": 0.0
+            }
+          }
+        ]
+      }
+    },
+    {
+      "perturbation": "no_overlap",
+      "description": "the two speakers never overlap at all",
+      "status": "NOT YET USABLE",
+      "perturbed_status": "NOT YET USABLE",
+      "unmet_added": [],
+      "exit_code": 0,
+      "evidence": {
+        "baseline_scenes_with_overlap": 2,
+        "perturbed_scenes_with_overlap": 1,
+        "perturbed_scenes_still_overlapping": [
+          "scene06_interrupt"
+        ],
+        "baseline_hand_offs": 1,
+        "perturbed_hand_offs": 1,
+        "unmet_added": []
+      },
+      "reported": true,
+      "gated": false,
+      "verdict": "REPORTED, NOT GATED",
+      "intake_report": {
+        "exit_code": 0,
+        "status": "NOT YET USABLE",
+        "unmet": [
+          "only 96s of audio; the protocol asks for ~25 min"
+        ],
+        "matched_pairs": 8,
+        "total_audio_s": 96.0,
+        "silences_seen": 34,
+        "hand_offs_seen": 1,
+        "unmatched_files": [],
+        "pairs": [
+          {
+            "scene": "scene01_free",
+            "problem": null,
+            "A_silent": false,
+            "B_silent": false,
+            "A_peak": 0.79996,
+            "B_peak": 0.79996,
+            "A_rms": 0.013517,
+            "B_rms": 0.013214,
+            "A_signal_frac": 0.3375,
+            "B_signal_frac": 0.3042,
+            "A_raw_rate_hz": 16000,
+            "B_raw_rate_hz": 16000,
+            "A_duration_s": 12.0,
+            "B_duration_s": 12.0,
+            "crosstalk": {
+              "windows": 1,
+              "corr": null,
+              "note": "too few simultaneous-loud windows to judge"
+            },
+            "levels": {
+              "frames": 239,
+              "both_loud_frac": 0.0042,
+              "either_loud_frac": 0.6402
+            }
+          },
+          {
+            "scene": "scene02_qa",
+            "problem": null,
+            "A_silent": false,
+            "B_silent": false,
+            "A_peak": 0.79996,
+            "B_peak": 0.79996,
+            "A_rms": 0.013222,
+            "B_rms": 0.01218,
+            "A_signal_frac": 0.3042,
+            "B_signal_frac": 0.2708,
+            "A_raw_rate_hz": 16000,
+            "B_raw_rate_hz": 16000,
+            "A_duration_s": 12.0,
+            "B_duration_s": 12.0,
+            "crosstalk": {
+              "windows": 1,
+              "corr": null,
+              "note": "too few simultaneous-loud windows to judge"
+            },
+            "levels": {
+              "frames": 239,
+              "both_loud_frac": 0.0042,
+              "either_loud_frac": 0.5732
+            }
+          },
+          {
+            "scene": "scene03_think",
+            "problem": null,
+            "A_silent": false,
+            "B_silent": false,
+            "A_peak": 0.79996,
+            "B_peak": 0.79999,
+            "A_rms": 0.010292,
+            "B_rms": 0.01153,
+            "A_signal_frac": 0.1542,
+            "B_signal_frac": 0.2042,
+            "A_raw_rate_hz": 16000,
+            "B_raw_rate_hz": 16000,
+            "A_duration_s": 12.0,
+            "B_duration_s": 12.0,
+            "crosstalk": {
+              "windows": 1,
+              "corr": null,
+              "note": "too few simultaneous-loud windows to judge"
+            },
+            "levels": {
+              "frames": 239,
+              "both_loud_frac": 0.0042,
+              "either_loud_frac": 0.3556
+            }
+          },
+          {
+            "scene": "scene04_fillers",
+            "problem": null,
+            "A_silent": false,
+            "B_silent": false,
+            "A_peak": 0.79996,
+            "B_peak": 0.79999,
+            "A_rms": 0.024904,
+            "B_rms": 0.006365,
+            "A_signal_frac": 0.9042,
+            "B_signal_frac": 0.0042,
+            "A_raw_rate_hz": 16000,
+            "B_raw_rate_hz": 16000,
+            "A_duration_s": 12.0,
+            "B_duration_s": 12.0,
+            "crosstalk": {
+              "windows": 1,
+              "corr": null,
+              "note": "too few simultaneous-loud windows to judge"
+            },
+            "levels": {
+              "frames": 239,
+              "both_loud_frac": 0.0042,
+              "either_loud_frac": 0.9079
+            }
+          },
+          {
+            "scene": "scene05_backchannel",
+            "problem": null,
+            "A_silent": false,
+            "B_silent": false,
+            "A_peak": 0.79996,
+            "B_peak": 0.79996,
+            "A_rms": 0.024106,
+            "B_rms": 0.007597,
+            "A_signal_frac": 0.8542,
+            "B_signal_frac": 0.0417,
+            "A_raw_rate_hz": 16000,
+            "B_raw_rate_hz": 16000,
+            "A_duration_s": 12.0,
+            "B_duration_s": 12.0,
+            "crosstalk": {
+              "windows": 1,
+              "corr": null,
+              "note": "too few simultaneous-loud windows to judge"
+            },
+            "levels": {
+              "frames": 239,
+              "both_loud_frac": 0.0042,
+              "either_loud_frac": 0.8912
+            }
+          },
+          {
+            "scene": "scene06_interrupt",
+            "problem": null,
+            "A_silent": false,
+            "B_silent": false,
+            "A_peak": 0.79996,
+            "B_peak": 0.79996,
+            "A_rms": 0.014884,
+            "B_rms": 0.013525,
+            "A_signal_frac": 0.4042,
+            "B_signal_frac": 0.3396,
+            "A_raw_rate_hz": 16000,
+            "B_raw_rate_hz": 16000,
+            "A_duration_s": 12.0,
+            "B_duration_s": 12.0,
+            "crosstalk": {
+              "windows": 16,
+              "corr": 0.9738
+            },
+            "levels": {
+              "frames": 239,
+              "both_loud_frac": 0.1255,
+              "either_loud_frac": 0.6234
+            }
+          },
+          {
+            "scene": "scene07_alone",
+            "problem": null,
+            "A_silent": false,
+            "B_silent": false,
+            "A_peak": 0.79996,
+            "B_peak": 0.79996,
+            "A_rms": 0.014161,
+            "B_rms": 0.006365,
+            "A_signal_frac": 0.3729,
+            "B_signal_frac": 0.0042,
+            "A_raw_rate_hz": 16000,
+            "B_raw_rate_hz": 16000,
+            "A_duration_s": 12.0,
+            "B_duration_s": 12.0,
+            "crosstalk": {
+              "windows": 1,
+              "corr": null,
+              "note": "too few simultaneous-loud windows to judge"
+            },
+            "levels": {
+              "frames": 239,
+              "both_loud_frac": 0.0042,
+              "either_loud_frac": 0.3766
+            }
+          },
+          {
+            "scene": "scene08_roomtone",
+            "problem": null,
+            "A_silent": false,
+            "B_silent": false,
+            "A_peak": 3e-05,
+            "B_peak": 3e-05,
+            "A_rms": 1e-06,
+            "B_rms": 1e-06,
+            "A_signal_frac": 0.0,
+            "B_signal_frac": 0.0,
+            "A_raw_rate_hz": 16000,
+            "B_raw_rate_hz": 16000,
+            "A_duration_s": 12.0,
+            "B_duration_s": 12.0,
+            "crosstalk": {
+              "windows": 0,
+              "corr": null,
+              "note": "too few simultaneous-loud windows to judge"
+            },
+            "levels": {
+              "frames": 239,
+              "both_loud_frac": 0.0,
+              "either_loud_frac": 0.0
+            }
+          }
+        ]
+      }
+    },
+    {
+      "perturbation": "no_handoff",
+      "description": "only one speaker exists; there is no hand-off at all",
+      "status": "NOT YET USABLE",
+      "perturbed_status": "NOT YET USABLE",
+      "unmet_added": [
+        "zero hand-offs: no silence is followed by the other speaker, so the positive class is still absent"
+      ],
+      "exit_code": 0,
+      "evidence": {
+        "baseline_hand_offs": 1,
+        "perturbed_hand_offs": 0,
+        "unmet_added": [
+          "zero hand-offs: no silence is followed by the other speaker, so the positive class is still absent"
+        ]
+      },
+      "reported": true,
+      "gated": true,
+      "verdict": "DETECTED (gated)",
+      "intake_report": {
+        "exit_code": 0,
+        "status": "NOT YET USABLE",
+        "unmet": [
+          "only 96s of audio; the protocol asks for ~25 min",
+          "zero hand-offs: no silence is followed by the other speaker, so the positive class is still absent"
+        ],
+        "matched_pairs": 8,
+        "total_audio_s": 96.0,
+        "silences_seen": 38,
+        "hand_offs_seen": 0,
+        "unmatched_files": [],
+        "pairs": [
+          {
+            "scene": "scene01_free",
+            "problem": null,
+            "A_silent": false,
+            "B_silent": true,
+            "A_peak": 0.79996,
+            "B_peak": 0.0,
+            "A_rms": 0.013517,
+            "B_rms": 0.0,
+            "A_signal_frac": 0.3375,
+            "B_signal_frac": 0.0,
+            "A_raw_rate_hz": 16000,
+            "B_raw_rate_hz": 16000,
+            "A_duration_s": 12.0,
+            "B_duration_s": 12.0,
+            "crosstalk": {
+              "windows": 0,
+              "corr": null,
+              "note": "too few simultaneous-loud windows to judge"
+            },
+            "levels": {
+              "frames": 239,
+              "both_loud_frac": 0.0,
+              "either_loud_frac": 0.3389
+            }
+          },
+          {
+            "scene": "scene02_qa",
+            "problem": null,
+            "A_silent": false,
+            "B_silent": true,
+            "A_peak": 0.79996,
+            "B_peak": 0.0,
+            "A_rms": 0.013222,
+            "B_rms": 0.0,
+            "A_signal_frac": 0.3042,
+            "B_signal_frac": 0.0,
+            "A_raw_rate_hz": 16000,
+            "B_raw_rate_hz": 16000,
+            "A_duration_s": 12.0,
+            "B_duration_s": 12.0,
+            "crosstalk": {
+              "windows": 0,
+              "corr": null,
+              "note": "too few simultaneous-loud windows to judge"
+            },
+            "levels": {
+              "frames": 239,
+              "both_loud_frac": 0.0,
+              "either_loud_frac": 0.3054
+            }
+          },
+          {
+            "scene": "scene03_think",
+            "problem": null,
+            "A_silent": false,
+            "B_silent": true,
+            "A_peak": 0.79996,
+            "B_peak": 0.0,
+            "A_rms": 0.010292,
+            "B_rms": 0.0,
+            "A_signal_frac": 0.1542,
+            "B_signal_frac": 0.0,
+            "A_raw_rate_hz": 16000,
+            "B_raw_rate_hz": 16000,
+            "A_duration_s": 12.0,
+            "B_duration_s": 12.0,
+            "crosstalk": {
+              "windows": 0,
+              "corr": null,
+              "note": "too few simultaneous-loud windows to judge"
+            },
+            "levels": {
+              "frames": 239,
+              "both_loud_frac": 0.0,
+              "either_loud_frac": 0.1548
+            }
+          },
+          {
+            "scene": "scene04_fillers",
+            "problem": null,
+            "A_silent": false,
+            "B_silent": true,
+            "A_peak": 0.79996,
+            "B_peak": 0.0,
+            "A_rms": 0.024904,
+            "B_rms": 0.0,
+            "A_signal_frac": 0.9042,
+            "B_signal_frac": 0.0,
+            "A_raw_rate_hz": 16000,
+            "B_raw_rate_hz": 16000,
+            "A_duration_s": 12.0,
+            "B_duration_s": 12.0,
+            "crosstalk": {
+              "windows": 0,
+              "corr": null,
+              "note": "too few simultaneous-loud windows to judge"
+            },
+            "levels": {
+              "frames": 239,
+              "both_loud_frac": 0.0,
+              "either_loud_frac": 0.9079
+            }
+          },
+          {
+            "scene": "scene05_backchannel",
+            "problem": null,
+            "A_silent": false,
+            "B_silent": true,
+            "A_peak": 0.79996,
+            "B_peak": 0.0,
+            "A_rms": 0.024106,
+            "B_rms": 0.0,
+            "A_signal_frac": 0.8542,
+            "B_signal_frac": 0.0,
+            "A_raw_rate_hz": 16000,
+            "B_raw_rate_hz": 16000,
+            "A_duration_s": 12.0,
+            "B_duration_s": 12.0,
+            "crosstalk": {
+              "windows": 0,
+              "corr": null,
+              "note": "too few simultaneous-loud windows to judge"
+            },
+            "levels": {
+              "frames": 239,
+              "both_loud_frac": 0.0,
+              "either_loud_frac": 0.8577
+            }
+          },
+          {
+            "scene": "scene06_interrupt",
+            "problem": null,
+            "A_silent": false,
+            "B_silent": true,
+            "A_peak": 0.79996,
+            "B_peak": 0.0,
+            "A_rms": 0.014884,
+            "B_rms": 0.0,
+            "A_signal_frac": 0.4042,
+            "B_signal_frac": 0.0,
+            "A_raw_rate_hz": 16000,
+            "B_raw_rate_hz": 16000,
+            "A_duration_s": 12.0,
+            "B_duration_s": 12.0,
+            "crosstalk": {
+              "windows": 0,
+              "corr": null,
+              "note": "too few simultaneous-loud windows to judge"
+            },
+            "levels": {
+              "frames": 239,
+              "both_loud_frac": 0.0,
+              "either_loud_frac": 0.4059
+            }
+          },
+          {
+            "scene": "scene07_alone",
+            "problem": null,
+            "A_silent": false,
+            "B_silent": true,
+            "A_peak": 0.79996,
+            "B_peak": 0.0,
+            "A_rms": 0.014161,
+            "B_rms": 0.0,
+            "A_signal_frac": 0.3708,
+            "B_signal_frac": 0.0,
+            "A_raw_rate_hz": 16000,
+            "B_raw_rate_hz": 16000,
+            "A_duration_s": 12.0,
+            "B_duration_s": 12.0,
+            "crosstalk": {
+              "windows": 0,
+              "corr": null,
+              "note": "too few simultaneous-loud windows to judge"
+            },
+            "levels": {
+              "frames": 239,
+              "both_loud_frac": 0.0,
+              "either_loud_frac": 0.3724
+            }
+          },
+          {
+            "scene": "scene08_roomtone",
+            "problem": null,
+            "A_silent": false,
+            "B_silent": false,
+            "A_peak": 3e-05,
+            "B_peak": 3e-05,
+            "A_rms": 1e-06,
+            "B_rms": 1e-06,
+            "A_signal_frac": 0.0,
+            "B_signal_frac": 0.0,
+            "A_raw_rate_hz": 16000,
+            "B_raw_rate_hz": 16000,
+            "A_duration_s": 12.0,
+            "B_duration_s": 12.0,
+            "crosstalk": {
+              "windows": 0,
+              "corr": null,
+              "note": "too few simultaneous-loud windows to judge"
+            },
+            "levels": {
+              "frames": 239,
+              "both_loud_frac": 0.0,
+              "either_loud_frac": 0.0
+            }
+          }
+        ]
+      }
+    },
+    {
+      "perturbation": "sample_rate_mismatch",
+      "description": "the two channels of one scene have different sample rates",
+      "status": "NOT YET USABLE",
+      "perturbed_status": "NOT YET USABLE",
+      "unmet_added": [],
+      "exit_code": 0,
+      "evidence": {
+        "header_rate_hz": 22050,
+        "intake_reported_A_rate": 16000,
+        "intake_reported_B_rate": 16000,
+        "unmet_added": []
+      },
+      "reported": false,
+      "gated": false,
+      "verdict": "NOT DETECTED",
+      "intake_report": {
+        "exit_code": 0,
+        "status": "NOT YET USABLE",
+        "unmet": [
+          "only 93s of audio; the protocol asks for ~25 min"
+        ],
+        "matched_pairs": 8,
+        "total_audio_s": 92.7,
+        "silences_seen": 37,
+        "hand_offs_seen": 2,
+        "unmatched_files": [],
+        "pairs": [
+          {
+            "scene": "scene01_free",
+            "problem": null,
+            "A_silent": false,
+            "B_silent": false,
+            "A_peak": 0.79996,
+            "B_peak": 0.79996,
+            "A_rms": 0.013517,
+            "B_rms": 0.013214,
+            "A_signal_frac": 0.3375,
+            "B_signal_frac": 0.3042,
+            "A_raw_rate_hz": 16000,
+            "B_raw_rate_hz": 16000,
+            "A_duration_s": 12.0,
+            "B_duration_s": 12.0,
+            "crosstalk": {
+              "windows": 1,
+              "corr": null,
+              "note": "too few simultaneous-loud windows to judge"
+            },
+            "levels": {
+              "frames": 239,
+              "both_loud_frac": 0.0042,
+              "either_loud_frac": 0.6402
+            }
+          },
+          {
+            "scene": "scene02_qa",
+            "problem": null,
+            "A_silent": false,
+            "B_silent": false,
+            "A_peak": 0.79996,
+            "B_peak": 0.79996,
+            "A_rms": 0.013222,
+            "B_rms": 0.01218,
+            "A_signal_frac": 0.3042,
+            "B_signal_frac": 0.2708,
+            "A_raw_rate_hz": 16000,
+            "B_raw_rate_hz": 16000,
+            "A_duration_s": 12.0,
+            "B_duration_s": 12.0,
+            "crosstalk": {
+              "windows": 1,
+              "corr": null,
+              "note": "too few simultaneous-loud windows to judge"
+            },
+            "levels": {
+              "frames": 239,
+              "both_loud_frac": 0.0042,
+              "either_loud_frac": 0.5732
+            }
+          },
+          {
+            "scene": "scene03_think",
+            "problem": null,
+            "A_silent": false,
+            "B_silent": false,
+            "A_peak": 0.79996,
+            "B_peak": 0.79999,
+            "A_rms": 0.010292,
+            "B_rms": 0.01153,
+            "A_signal_frac": 0.1542,
+            "B_signal_frac": 0.2042,
+            "A_raw_rate_hz": 16000,
+            "B_raw_rate_hz": 16000,
+            "A_duration_s": 12.0,
+            "B_duration_s": 12.0,
+            "crosstalk": {
+              "windows": 1,
+              "corr": null,
+              "note": "too few simultaneous-loud windows to judge"
+            },
+            "levels": {
+              "frames": 239,
+              "both_loud_frac": 0.0042,
+              "either_loud_frac": 0.3556
+            }
+          },
+          {
+            "scene": "scene04_fillers",
+            "problem": null,
+            "A_silent": false,
+            "B_silent": false,
+            "A_peak": 0.79996,
+            "B_peak": 0.79999,
+            "A_rms": 0.024904,
+            "B_rms": 0.006365,
+            "A_signal_frac": 0.9042,
+            "B_signal_frac": 0.0042,
+            "A_raw_rate_hz": 16000,
+            "B_raw_rate_hz": 16000,
+            "A_duration_s": 12.0,
+            "B_duration_s": 12.0,
+            "crosstalk": {
+              "windows": 1,
+              "corr": null,
+              "note": "too few simultaneous-loud windows to judge"
+            },
+            "levels": {
+              "frames": 239,
+              "both_loud_frac": 0.0042,
+              "either_loud_frac": 0.9079
+            }
+          },
+          {
+            "scene": "scene05_backchannel",
+            "problem": null,
+            "A_silent": false,
+            "B_silent": false,
+            "A_peak": 0.79996,
+            "B_peak": 0.67785,
+            "A_rms": 0.024106,
+            "B_rms": 0.007338,
+            "A_signal_frac": 0.8542,
+            "B_signal_frac": 0.069,
+            "A_raw_rate_hz": 16000,
+            "B_raw_rate_hz": 16000,
+            "A_duration_s": 12.0,
+            "B_duration_s": 8.71,
+            "crosstalk": {
+              "windows": 5,
+              "corr": 0.5721
+            },
+            "levels": {
+              "frames": 174,
+              "both_loud_frac": 0.0402,
+              "either_loud_frac": 0.8966
+            }
+          },
+          {
+            "scene": "scene06_interrupt",
+            "problem": null,
+            "A_silent": false,
+            "B_silent": false,
+            "A_peak": 0.79996,
+            "B_peak": 0.79996,
+            "A_rms": 0.014884,
+            "B_rms": 0.013525,
+            "A_signal_frac": 0.4042,
+            "B_signal_frac": 0.3396,
+            "A_raw_rate_hz": 16000,
+            "B_raw_rate_hz": 16000,
+            "A_duration_s": 12.0,
+            "B_duration_s": 12.0,
+            "crosstalk": {
+              "windows": 16,
+              "corr": 0.9738
+            },
+            "levels": {
+              "frames": 239,
+              "both_loud_frac": 0.1255,
+              "either_loud_frac": 0.6234
+            }
+          },
+          {
+            "scene": "scene07_alone",
+            "problem": null,
+            "A_silent": false,
+            "B_silent": false,
+            "A_peak": 0.79996,
+            "B_peak": 0.79996,
+            "A_rms": 0.014161,
+            "B_rms": 0.006365,
+            "A_signal_frac": 0.3708,
+            "B_signal_frac": 0.0042,
+            "A_raw_rate_hz": 16000,
+            "B_raw_rate_hz": 16000,
+            "A_duration_s": 12.0,
+            "B_duration_s": 12.0,
+            "crosstalk": {
+              "windows": 1,
+              "corr": null,
+              "note": "too few simultaneous-loud windows to judge"
+            },
+            "levels": {
+              "frames": 239,
+              "both_loud_frac": 0.0042,
+              "either_loud_frac": 0.3724
+            }
+          },
+          {
+            "scene": "scene08_roomtone",
+            "problem": null,
+            "A_silent": false,
+            "B_silent": false,
+            "A_peak": 3e-05,
+            "B_peak": 3e-05,
+            "A_rms": 1e-06,
+            "B_rms": 1e-06,
+            "A_signal_frac": 0.0,
+            "B_signal_frac": 0.0,
+            "A_raw_rate_hz": 16000,
+            "B_raw_rate_hz": 16000,
+            "A_duration_s": 12.0,
+            "B_duration_s": 12.0,
+            "crosstalk": {
+              "windows": 0,
+              "corr": null,
+              "note": "too few simultaneous-loud windows to judge"
+            },
+            "levels": {
+              "frames": 239,
+              "both_loud_frac": 0.0,
+              "either_loud_frac": 0.0
+            }
+          }
+        ]
+      }
+    },
+    {
+      "perturbation": "unreadable",
+      "description": "one channel is not a readable WAV",
+      "status": "NOT YET USABLE",
+      "perturbed_status": "NOT YET USABLE",
+      "unmet_added": [
+        "zero hand-offs: no silence is followed by the other speaker, so the positive class is still absent"
+      ],
+      "exit_code": 0,
+      "evidence": {
+        "pair_problem": "unreadable",
+        "unmet_added": [
+          "zero hand-offs: no silence is followed by the other speaker, so the positive class is still absent"
+        ]
+      },
+      "reported": true,
+      "gated": false,
+      "verdict": "REPORTED, NOT GATED",
+      "intake_report": {
+        "exit_code": 0,
+        "status": "NOT YET USABLE",
+        "unmet": [
+          "only 84s of audio; the protocol asks for ~25 min",
+          "zero hand-offs: no silence is followed by the other speaker, so the positive class is still absent"
+        ],
+        "matched_pairs": 8,
+        "total_audio_s": 84.0,
+        "silences_seen": 30,
+        "hand_offs_seen": 0,
+        "unmatched_files": [],
+        "pairs": [
+          {
+            "scene": "scene01_free",
+            "problem": null,
+            "A_silent": false,
+            "B_silent": false,
+            "A_peak": 0.79996,
+            "B_peak": 0.79996,
+            "A_rms": 0.013517,
+            "B_rms": 0.013214,
+            "A_signal_frac": 0.3375,
+            "B_signal_frac": 0.3042,
+            "A_raw_rate_hz": 16000,
+            "B_raw_rate_hz": 16000,
+            "A_duration_s": 12.0,
+            "B_duration_s": 12.0,
+            "crosstalk": {
+              "windows": 1,
+              "corr": null,
+              "note": "too few simultaneous-loud windows to judge"
+            },
+            "levels": {
+              "frames": 239,
+              "both_loud_frac": 0.0042,
+              "either_loud_frac": 0.6402
+            }
+          },
+          {
+            "scene": "scene02_qa",
+            "problem": null,
+            "A_silent": false,
+            "B_silent": false,
+            "A_peak": 0.79996,
+            "B_peak": 0.79996,
+            "A_rms": 0.013222,
+            "B_rms": 0.01218,
+            "A_signal_frac": 0.3042,
+            "B_signal_frac": 0.2708,
+            "A_raw_rate_hz": 16000,
+            "B_raw_rate_hz": 16000,
+            "A_duration_s": 12.0,
+            "B_duration_s": 12.0,
+            "crosstalk": {
+              "windows": 1,
+              "corr": null,
+              "note": "too few simultaneous-loud windows to judge"
+            },
+            "levels": {
+              "frames": 239,
+              "both_loud_frac": 0.0042,
+              "either_loud_frac": 0.5732
+            }
+          },
+          {
+            "scene": "scene03_think",
+            "problem": null,
+            "A_silent": false,
+            "B_silent": false,
+            "A_peak": 0.79996,
+            "B_peak": 0.79999,
+            "A_rms": 0.010292,
+            "B_rms": 0.01153,
+            "A_signal_frac": 0.1542,
+            "B_signal_frac": 0.2042,
+            "A_raw_rate_hz": 16000,
+            "B_raw_rate_hz": 16000,
+            "A_duration_s": 12.0,
+            "B_duration_s": 12.0,
+            "crosstalk": {
+              "windows": 1,
+              "corr": null,
+              "note": "too few simultaneous-loud windows to judge"
+            },
+            "levels": {
+              "frames": 239,
+              "both_loud_frac": 0.0042,
+              "either_loud_frac": 0.3556
+            }
+          },
+          {
+            "scene": "scene04_fillers",
+            "problem": null,
+            "A_silent": false,
+            "B_silent": false,
+            "A_peak": 0.79996,
+            "B_peak": 0.79999,
+            "A_rms": 0.024904,
+            "B_rms": 0.006365,
+            "A_signal_frac": 0.9042,
+            "B_signal_frac": 0.0042,
+            "A_raw_rate_hz": 16000,
+            "B_raw_rate_hz": 16000,
+            "A_duration_s": 12.0,
+            "B_duration_s": 12.0,
+            "crosstalk": {
+              "windows": 1,
+              "corr": null,
+              "note": "too few simultaneous-loud windows to judge"
+            },
+            "levels": {
+              "frames": 239,
+              "both_loud_frac": 0.0042,
+              "either_loud_frac": 0.9079
+            }
+          },
+          {
+            "scene": "scene05_backchannel",
+            "problem": null,
+            "A_silent": false,
+            "B_silent": false,
+            "A_peak": 0.79996,
+            "B_peak": 0.79996,
+            "A_rms": 0.024106,
+            "B_rms": 0.008222,
+            "A_signal_frac": 0.8542,
+            "B_signal_frac": 0.0646,
+            "A_raw_rate_hz": 16000,
+            "B_raw_rate_hz": 16000,
+            "A_duration_s": 12.0,
+            "B_duration_s": 12.0,
+            "crosstalk": {
+              "windows": 10,
+              "corr": 0.983
+            },
+            "levels": {
+              "frames": 239,
+              "both_loud_frac": 0.0669,
+              "either_loud_frac": 0.8577
+            }
+          },
+          {
+            "scene": "scene06_interrupt",
+            "problem": "unreadable",
+            "A_silent": false,
+            "B_silent": null,
+            "A_peak": 0.79996,
+            "B_peak": null,
+            "A_rms": 0.014884,
+            "B_rms": null,
+            "A_signal_frac": 0.4042,
+            "B_signal_frac": null,
+            "A_raw_rate_hz": 16000,
+            "B_raw_rate_hz": null,
+            "A_duration_s": 12.0,
+            "B_duration_s": null,
+            "crosstalk": null,
+            "levels": null
+          },
+          {
+            "scene": "scene07_alone",
+            "problem": null,
+            "A_silent": false,
+            "B_silent": false,
+            "A_peak": 0.79996,
+            "B_peak": 0.79996,
+            "A_rms": 0.014161,
+            "B_rms": 0.006365,
+            "A_signal_frac": 0.3708,
+            "B_signal_frac": 0.0042,
+            "A_raw_rate_hz": 16000,
+            "B_raw_rate_hz": 16000,
+            "A_duration_s": 12.0,
+            "B_duration_s": 12.0,
+            "crosstalk": {
+              "windows": 1,
+              "corr": null,
+              "note": "too few simultaneous-loud windows to judge"
+            },
+            "levels": {
+              "frames": 239,
+              "both_loud_frac": 0.0042,
+              "either_loud_frac": 0.3724
+            }
+          },
+          {
+            "scene": "scene08_roomtone",
+            "problem": null,
+            "A_silent": false,
+            "B_silent": false,
+            "A_peak": 3e-05,
+            "B_peak": 3e-05,
+            "A_rms": 1e-06,
+            "B_rms": 1e-06,
+            "A_signal_frac": 0.0,
+            "B_signal_frac": 0.0,
+            "A_raw_rate_hz": 16000,
+            "B_raw_rate_hz": 16000,
+            "A_duration_s": 12.0,
+            "B_duration_s": 12.0,
+            "crosstalk": {
+              "windows": 0,
+              "corr": null,
+              "note": "too few simultaneous-loud windows to judge"
+            },
+            "levels": {
+              "frames": 239,
+              "both_loud_frac": 0.0,
+              "either_loud_frac": 0.0
+            }
+          }
+        ]
+      }
+    }
+  ],
+  "alignment": {
+    "probe": "A speaks 0.60-2.00 s, B speaks 2.95-3.60 s, A resumes at 3.20 s. Channel B is delayed by a KNOWN offset and the intake's own rule is applied to the shifted pair.",
+    "true_gap_s": 0.95,
+    "offsets": [
+      {
+        "offset_ms": 0,
+        "true_gap_s": 0.95,
+        "measured_gap_s": 0.9,
+        "measured_gap_sample_resolution_s": 0.95,
+        "gap_error_vs_truth_s": -0.05,
+        "gap_error_vs_truth_sample_resolution_s": 0.0,
+        "gap_error_vs_zero_offset_s": 0.0,
+        "gap_error_vs_zero_offset_sample_resolution_s": 0.0,
+        "overlap_boundary_measured_s": 3.2,
+        "intake_hand_offs": 1,
+        "intake_silences": 4,
+        "intake_both_loud_frac": 0.0566,
+        "intake_status": "NOT YET USABLE",
+        "clap_offset_detected_ms": 0,
+        "clap_peak_r": 0.7587
+      },
+      {
+        "offset_ms": 40,
+        "true_gap_s": 0.95,
+        "measured_gap_s": 0.9,
+        "measured_gap_sample_resolution_s": 0.99,
+        "gap_error_vs_truth_s": -0.05,
+        "gap_error_vs_truth_sample_resolution_s": 0.04,
+        "gap_error_vs_zero_offset_s": 0.0,
+        "gap_error_vs_zero_offset_sample_resolution_s": 0.04,
+        "overlap_boundary_measured_s": 3.2,
+        "intake_hand_offs": 1,
+        "intake_silences": 4,
+        "intake_both_loud_frac": 0.0629,
+        "intake_status": "NOT YET USABLE",
+        "clap_offset_detected_ms": -40,
+        "clap_peak_r": 0.7587
+      },
+      {
+        "offset_ms": 120,
+        "true_gap_s": 0.95,
+        "measured_gap_s": 1.0,
+        "measured_gap_sample_resolution_s": 1.07,
+        "gap_error_vs_truth_s": 0.05,
+        "gap_error_vs_truth_sample_resolution_s": 0.12,
+        "gap_error_vs_zero_offset_s": 0.1,
+        "gap_error_vs_zero_offset_sample_resolution_s": 0.12,
+        "overlap_boundary_measured_s": 3.2,
+        "intake_hand_offs": 1,
+        "intake_silences": 4,
+        "intake_both_loud_frac": 0.0692,
+        "intake_status": "NOT YET USABLE",
+        "clap_offset_detected_ms": -120,
+        "clap_peak_r": 0.7587
+      },
+      {
+        "offset_ms": 300,
+        "true_gap_s": 0.95,
+        "measured_gap_s": 1.2,
+        "measured_gap_sample_resolution_s": 1.25,
+        "gap_error_vs_truth_s": 0.25,
+        "gap_error_vs_truth_sample_resolution_s": 0.3,
+        "gap_error_vs_zero_offset_s": 0.3,
+        "gap_error_vs_zero_offset_sample_resolution_s": 0.3,
+        "overlap_boundary_measured_s": 0.6,
+        "intake_hand_offs": 0,
+        "intake_silences": 4,
+        "intake_both_loud_frac": 0.0881,
+        "intake_status": "NOT YET USABLE",
+        "clap_offset_detected_ms": -300,
+        "clap_peak_r": 0.7587
+      },
+      {
+        "offset_ms": 600,
+        "true_gap_s": 0.95,
+        "measured_gap_s": 1.5,
+        "measured_gap_sample_resolution_s": 1.55,
+        "gap_error_vs_truth_s": 0.55,
+        "gap_error_vs_truth_sample_resolution_s": 0.6,
+        "gap_error_vs_zero_offset_s": 0.6,
+        "gap_error_vs_zero_offset_sample_resolution_s": 0.6,
+        "overlap_boundary_measured_s": 0.9,
+        "intake_hand_offs": 0,
+        "intake_silences": 4,
+        "intake_both_loud_frac": 0.0881,
+        "intake_status": "NOT YET USABLE",
+        "clap_offset_detected_ms": -600,
+        "clap_peak_r": 0.7587
+      }
+    ],
+    "after_clap_alignment": [
+      {
+        "offset_ms": 40,
+        "clap_detected_ms": -40,
+        "clap_peak_r": 0.7587,
+        "residual_gap_error_s": 0.0,
+        "aligned_hand_offs": 1
+      },
+      {
+        "offset_ms": 120,
+        "clap_detected_ms": -120,
+        "clap_peak_r": 0.7587,
+        "residual_gap_error_s": 0.0,
+        "aligned_hand_offs": 1
+      },
+      {
+        "offset_ms": 300,
+        "clap_detected_ms": -300,
+        "clap_peak_r": 0.7587,
+        "residual_gap_error_s": 0.0,
+        "aligned_hand_offs": 1
+      },
+      {
+        "offset_ms": 600,
+        "clap_detected_ms": -600,
+        "clap_peak_r": 0.7587,
+        "residual_gap_error_s": 0.0,
+        "aligned_hand_offs": 1
+      }
+    ],
+    "finding": "no code in this repo aligns the two channels; the clap the README calls the alignment point is never read"
+  },
+  "crosstalk_metric_comparison": {
+    "scenes": [
+      {
+        "scene": "scene01_free",
+        "clean": {
+          "intake_corr": null,
+          "intake_simultaneous_loud_windows": 0,
+          "zero_mean_waveform_corr": null,
+          "zero_mean_waveform_windows": 0,
+          "b_loud_when_a_loud_frac": 0.0,
+          "a_loud_windows": 40
+        },
+        "crosstalk": {
+          "intake_corr": 0.9932,
+          "intake_simultaneous_loud_windows": 41,
+          "zero_mean_waveform_corr": 1.0,
+          "zero_mean_waveform_windows": 40,
+          "b_loud_when_a_loud_frac": 1.0,
+          "a_loud_windows": 40
+        }
+      },
+      {
+        "scene": "scene02_qa",
+        "clean": {
+          "intake_corr": null,
+          "intake_simultaneous_loud_windows": 0,
+          "zero_mean_waveform_corr": null,
+          "zero_mean_waveform_windows": 0,
+          "b_loud_when_a_loud_frac": 0.0,
+          "a_loud_windows": 36
+        },
+        "crosstalk": {
+          "intake_corr": 0.9897,
+          "intake_simultaneous_loud_windows": 37,
+          "zero_mean_waveform_corr": 1.0,
+          "zero_mean_waveform_windows": 36,
+          "b_loud_when_a_loud_frac": 1.0,
+          "a_loud_windows": 36
+        }
+      },
+      {
+        "scene": "scene03_think",
+        "clean": {
+          "intake_corr": null,
+          "intake_simultaneous_loud_windows": 0,
+          "zero_mean_waveform_corr": null,
+          "zero_mean_waveform_windows": 0,
+          "b_loud_when_a_loud_frac": 0.0,
+          "a_loud_windows": 18
+        },
+        "crosstalk": {
+          "intake_corr": 0.9951,
+          "intake_simultaneous_loud_windows": 19,
+          "zero_mean_waveform_corr": 1.0,
+          "zero_mean_waveform_windows": 18,
+          "b_loud_when_a_loud_frac": 1.0,
+          "a_loud_windows": 18
+        }
+      },
+      {
+        "scene": "scene04_fillers",
+        "clean": {
+          "intake_corr": null,
+          "intake_simultaneous_loud_windows": 0,
+          "zero_mean_waveform_corr": null,
+          "zero_mean_waveform_windows": 0,
+          "b_loud_when_a_loud_frac": 0.0,
+          "a_loud_windows": 108
+        },
+        "crosstalk": {
+          "intake_corr": 0.9984,
+          "intake_simultaneous_loud_windows": 109,
+          "zero_mean_waveform_corr": 1.0,
+          "zero_mean_waveform_windows": 108,
+          "b_loud_when_a_loud_frac": 1.0,
+          "a_loud_windows": 108
+        }
+      },
+      {
+        "scene": "scene05_backchannel",
+        "clean": {
+          "intake_corr": 0.983,
+          "intake_simultaneous_loud_windows": 10,
+          "zero_mean_waveform_corr": 0.0063,
+          "zero_mean_waveform_windows": 9,
+          "b_loud_when_a_loud_frac": 0.0882,
+          "a_loud_windows": 102
+        },
+        "crosstalk": {
+          "intake_corr": 0.9934,
+          "intake_simultaneous_loud_windows": 103,
+          "zero_mean_waveform_corr": 0.9369,
+          "zero_mean_waveform_windows": 102,
+          "b_loud_when_a_loud_frac": 1.0,
+          "a_loud_windows": 102
+        }
+      },
+      {
+        "scene": "scene06_interrupt",
+        "clean": {
+          "intake_corr": 0.9738,
+          "intake_simultaneous_loud_windows": 16,
+          "zero_mean_waveform_corr": -0.0267,
+          "zero_mean_waveform_windows": 15,
+          "b_loud_when_a_loud_frac": 0.3125,
+          "a_loud_windows": 48
+        },
+        "crosstalk": {
+          "intake_corr": 0.9908,
+          "intake_simultaneous_loud_windows": 49,
+          "zero_mean_waveform_corr": 0.7515,
+          "zero_mean_waveform_windows": 48,
+          "b_loud_when_a_loud_frac": 1.0,
+          "a_loud_windows": 48
+        }
+      },
+      {
+        "scene": "scene07_alone",
+        "clean": {
+          "intake_corr": null,
+          "intake_simultaneous_loud_windows": 0,
+          "zero_mean_waveform_corr": null,
+          "zero_mean_waveform_windows": 0,
+          "b_loud_when_a_loud_frac": 0.0,
+          "a_loud_windows": 44
+        },
+        "crosstalk": {
+          "intake_corr": 0.9933,
+          "intake_simultaneous_loud_windows": 45,
+          "zero_mean_waveform_corr": 1.0,
+          "zero_mean_waveform_windows": 44,
+          "b_loud_when_a_loud_frac": 1.0,
+          "a_loud_windows": 44
+        }
+      },
+      {
+        "scene": "scene08_roomtone",
+        "clean": {
+          "intake_corr": null,
+          "intake_simultaneous_loud_windows": 0,
+          "zero_mean_waveform_corr": null,
+          "zero_mean_waveform_windows": 0,
+          "b_loud_when_a_loud_frac": null,
+          "a_loud_windows": 0
+        },
+        "crosstalk": {
+          "intake_corr": null,
+          "intake_simultaneous_loud_windows": 0,
+          "zero_mean_waveform_corr": null,
+          "zero_mean_waveform_windows": 0,
+          "b_loud_when_a_loud_frac": null,
+          "a_loud_windows": 0
+        }
+      }
+    ],
+    "intake_metric": {
+      "clean_max": 0.983,
+      "clean_min": 0.9738,
+      "crosstalk_min": 0.9897,
+      "crosstalk_max": 0.9984,
+      "separation": 0.0067,
+      "scenes_with_a_computable_value_clean": 2,
+      "scenes_total": 8
+    },
+    "proposed_metric": {
+      "clean_max": 0.0063,
+      "clean_min": -0.0267,
+      "crosstalk_min": 0.7515,
+      "crosstalk_max": 1.0,
+      "separation": 0.7452
+    },
+    "proposed_metric_b_loud_when_a_loud": {
+      "clean_max": 0.3125,
+      "clean_min": 0.0,
+      "crosstalk_min": 1.0,
+      "crosstalk_max": 1.0,
+      "separation": 0.6875
+    }
+  },
+  "drift": {
+    "drift_eps": 0.0125,
+    "drift_ms_total": 250.0,
+    "drift_ms_at_the_gap": 187.5,
+    "scene_s": 20.0,
+    "intake_report": {
+      "exit_code": 0,
+      "status": "NOT YET USABLE",
+      "unmet": [
+        "only 20s of audio; the protocol asks for ~25 min"
+      ],
+      "matched_pairs": 1,
+      "total_audio_s": 20.0,
+      "silences_seen": 6,
+      "hand_offs_seen": 1,
+      "unmatched_files": [],
+      "pairs": [
+        {
+          "scene": "probe",
+          "problem": null,
+          "A_silent": false,
+          "B_silent": false,
+          "A_peak": 0.79996,
+          "B_peak": 0.54071,
+          "A_rms": 0.009844,
+          "B_rms": 0.006247,
+          "A_signal_frac": 0.1725,
+          "B_signal_frac": 0.055,
+          "A_raw_rate_hz": 16000,
+          "B_raw_rate_hz": 16000,
+          "A_duration_s": 20.0,
+          "B_duration_s": 20.0,
+          "crosstalk": {
+            "windows": 1,
+            "corr": null,
+            "note": "too few simultaneous-loud windows to judge"
+          },
+          "levels": {
+            "frames": 399,
+            "both_loud_frac": 0.0025,
+            "either_loud_frac": 0.2281
+          }
+        }
+      ]
+    },
+    "drift_reported_by_intake": false,
+    "drift_fields_in_report": [],
+    "clap_offset_detected_ms": 4,
+    "true_gap_s": 0.4,
+    "measured_gap_no_drift_s": 0.4,
+    "measured_gap_with_drift_s": 0.21,
+    "gap_error_from_drift_s": -0.19,
+    "note": "a single clap offset would correct the offset AT THE CLAP only; the residual error at the gap is the whole drift"
+  },
+  "handoff_semantics": {
+    "rule": "a CLOSED pause on channel A whose END coincides with channel B being loud; an A-silence that never closes (A stays quiet to the end of the file) is not counted",
+    "cases": [
+      {
+        "case": "canonical_A_stops_B_takes_floor_A_stays_quiet",
+        "events": [
+          [
+            "A",
+            1.0,
+            2.0,
+            101
+          ],
+          [
+            "B",
+            2.5,
+            3.5,
+            102
+          ]
+        ],
+        "intake_hand_offs": 0,
+        "intake_silences": 2,
+        "closed_pauses": [
+          [
+            0.025,
+            0.285,
+            0.26,
+            false
+          ],
+          [
+            0.385,
+            0.985,
+            0.6,
+            false
+          ]
+        ],
+        "measured_gaps_s": [
+          0.5
+        ]
+      },
+      {
+        "case": "A_stops_B_takes_floor_A_resumes_LATER_while_B_quiet",
+        "events": [
+          [
+            "A",
+            1.0,
+            2.0,
+            101
+          ],
+          [
+            "B",
+            2.5,
+            3.5,
+            102
+          ],
+          [
+            "A",
+            5.0,
+            6.0,
+            103
+          ]
+        ],
+        "intake_hand_offs": 0,
+        "intake_silences": 3,
+        "closed_pauses": [
+          [
+            0.025,
+            0.285,
+            0.26,
+            false
+          ],
+          [
+            0.385,
+            0.985,
+            0.6,
+            false
+          ],
+          [
+            2.045,
+            4.985,
+            2.94,
+            false
+          ]
+        ],
+        "measured_gaps_s": [
+          0.5
+        ]
+      },
+      {
+        "case": "A_resumes_WHILE_B_still_talking",
+        "events": [
+          [
+            "A",
+            1.0,
+            2.0,
+            101
+          ],
+          [
+            "B",
+            2.2,
+            4.0,
+            102
+          ],
+          [
+            "A",
+            3.0,
+            4.2,
+            103
+          ]
+        ],
+        "intake_hand_offs": 2,
+        "intake_silences": 4,
+        "closed_pauses": [
+          [
+            0.025,
+            0.285,
+            0.26,
+            false
+          ],
+          [
+            0.385,
+            0.985,
+            0.6,
+            false
+          ],
+          [
+            2.045,
+            2.985,
+            0.94,
+            true
+          ],
+          [
+            3.005,
+            3.025,
+            0.02,
+            true
+          ]
+        ],
+        "measured_gaps_s": [
+          0.2
+        ]
+      }
+    ]
+  },
+  "protocol_strict_corpus": {
+    "canonical_handoffs_in_corpus": 8,
+    "intake_hand_offs_seen": 0,
+    "proposed_rule_hand_offs": 7,
+    "proposed_rule_hand_offs_including_the_clap": 14,
+    "per_scene": [
+      {
+        "scene": "scene01_free",
+        "proposed_hand_offs": 3,
+        "proposed_hand_offs_including_the_clap": 4,
+        "intake_hand_offs": 0
+      },
+      {
+        "scene": "scene02_qa",
+        "proposed_hand_offs": 1,
+        "proposed_hand_offs_including_the_clap": 2,
+        "intake_hand_offs": 0
+      },
+      {
+        "scene": "scene03_think",
+        "proposed_hand_offs": 1,
+        "proposed_hand_offs_including_the_clap": 2,
+        "intake_hand_offs": 0
+      },
+      {
+        "scene": "scene04_fillers",
+        "proposed_hand_offs": 0,
+        "proposed_hand_offs_including_the_clap": 1,
+        "intake_hand_offs": 0
+      },
+      {
+        "scene": "scene05_backchannel",
+        "proposed_hand_offs": 1,
+        "proposed_hand_offs_including_the_clap": 2,
+        "intake_hand_offs": 0
+      },
+      {
+        "scene": "scene06_interrupt",
+        "proposed_hand_offs": 1,
+        "proposed_hand_offs_including_the_clap": 2,
+        "intake_hand_offs": 0
+      },
+      {
+        "scene": "scene07_alone",
+        "proposed_hand_offs": 0,
+        "proposed_hand_offs_including_the_clap": 1,
+        "intake_hand_offs": 0
+      },
+      {
+        "scene": "scene08_roomtone",
+        "proposed_hand_offs": 0,
+        "proposed_hand_offs_including_the_clap": 0,
+        "intake_hand_offs": 0
+      }
+    ],
+    "intake_status": "NOT YET USABLE",
+    "unmet": [
+      "only 96s of audio; the protocol asks for ~25 min",
+      "zero hand-offs: no silence is followed by the other speaker, so the positive class is still absent"
+    ],
+    "intake_report": {
+      "exit_code": 0,
+      "status": "NOT YET USABLE",
+      "unmet": [
+        "only 96s of audio; the protocol asks for ~25 min",
+        "zero hand-offs: no silence is followed by the other speaker, so the positive class is still absent"
+      ],
+      "matched_pairs": 8,
+      "total_audio_s": 96.0,
+      "silences_seen": 37,
+      "hand_offs_seen": 0,
+      "unmatched_files": [],
+      "pairs": [
+        {
+          "scene": "scene01_free",
+          "problem": null,
+          "A_silent": false,
+          "B_silent": false,
+          "A_peak": 0.79996,
+          "B_peak": 0.79996,
+          "A_rms": 0.013517,
+          "B_rms": 0.013214,
+          "A_signal_frac": 0.3375,
+          "B_signal_frac": 0.3042,
+          "A_raw_rate_hz": 16000,
+          "B_raw_rate_hz": 16000,
+          "A_duration_s": 12.0,
+          "B_duration_s": 12.0,
+          "crosstalk": {
+            "windows": 1,
+            "corr": null,
+            "note": "too few simultaneous-loud windows to judge"
+          },
+          "levels": {
+            "frames": 239,
+            "both_loud_frac": 0.0042,
+            "either_loud_frac": 0.6402
+          }
+        },
+        {
+          "scene": "scene02_qa",
+          "problem": null,
+          "A_silent": false,
+          "B_silent": false,
+          "A_peak": 0.79996,
+          "B_peak": 0.79996,
+          "A_rms": 0.013222,
+          "B_rms": 0.01218,
+          "A_signal_frac": 0.3042,
+          "B_signal_frac": 0.2708,
+          "A_raw_rate_hz": 16000,
+          "B_raw_rate_hz": 16000,
+          "A_duration_s": 12.0,
+          "B_duration_s": 12.0,
+          "crosstalk": {
+            "windows": 1,
+            "corr": null,
+            "note": "too few simultaneous-loud windows to judge"
+          },
+          "levels": {
+            "frames": 239,
+            "both_loud_frac": 0.0042,
+            "either_loud_frac": 0.5732
+          }
+        },
+        {
+          "scene": "scene03_think",
+          "problem": null,
+          "A_silent": false,
+          "B_silent": false,
+          "A_peak": 0.79996,
+          "B_peak": 0.79999,
+          "A_rms": 0.010292,
+          "B_rms": 0.01153,
+          "A_signal_frac": 0.1542,
+          "B_signal_frac": 0.2042,
+          "A_raw_rate_hz": 16000,
+          "B_raw_rate_hz": 16000,
+          "A_duration_s": 12.0,
+          "B_duration_s": 12.0,
+          "crosstalk": {
+            "windows": 1,
+            "corr": null,
+            "note": "too few simultaneous-loud windows to judge"
+          },
+          "levels": {
+            "frames": 239,
+            "both_loud_frac": 0.0042,
+            "either_loud_frac": 0.3556
+          }
+        },
+        {
+          "scene": "scene04_fillers",
+          "problem": null,
+          "A_silent": false,
+          "B_silent": false,
+          "A_peak": 0.79996,
+          "B_peak": 0.79999,
+          "A_rms": 0.024904,
+          "B_rms": 0.006365,
+          "A_signal_frac": 0.9042,
+          "B_signal_frac": 0.0042,
+          "A_raw_rate_hz": 16000,
+          "B_raw_rate_hz": 16000,
+          "A_duration_s": 12.0,
+          "B_duration_s": 12.0,
+          "crosstalk": {
+            "windows": 1,
+            "corr": null,
+            "note": "too few simultaneous-loud windows to judge"
+          },
+          "levels": {
+            "frames": 239,
+            "both_loud_frac": 0.0042,
+            "either_loud_frac": 0.9079
+          }
+        },
+        {
+          "scene": "scene05_backchannel",
+          "problem": null,
+          "A_silent": false,
+          "B_silent": false,
+          "A_peak": 0.79996,
+          "B_peak": 0.79996,
+          "A_rms": 0.024106,
+          "B_rms": 0.008222,
+          "A_signal_frac": 0.8542,
+          "B_signal_frac": 0.0646,
+          "A_raw_rate_hz": 16000,
+          "B_raw_rate_hz": 16000,
+          "A_duration_s": 12.0,
+          "B_duration_s": 12.0,
+          "crosstalk": {
+            "windows": 10,
+            "corr": 0.983
+          },
+          "levels": {
+            "frames": 239,
+            "both_loud_frac": 0.0669,
+            "either_loud_frac": 0.8577
+          }
+        },
+        {
+          "scene": "scene06_interrupt",
+          "problem": null,
+          "A_silent": false,
+          "B_silent": false,
+          "A_peak": 0.79996,
+          "B_peak": 0.79996,
+          "A_rms": 0.014145,
+          "B_rms": 0.011938,
+          "A_signal_frac": 0.3542,
+          "B_signal_frac": 0.2396,
+          "A_raw_rate_hz": 16000,
+          "B_raw_rate_hz": 16000,
+          "A_duration_s": 12.0,
+          "B_duration_s": 12.0,
+          "crosstalk": {
+            "windows": 10,
+            "corr": 0.9745
+          },
+          "levels": {
+            "frames": 239,
+            "both_loud_frac": 0.0753,
+            "either_loud_frac": 0.523
+          }
+        },
+        {
+          "scene": "scene07_alone",
+          "problem": null,
+          "A_silent": false,
+          "B_silent": false,
+          "A_peak": 0.79996,
+          "B_peak": 0.79996,
+          "A_rms": 0.014161,
+          "B_rms": 0.006365,
+          "A_signal_frac": 0.3708,
+          "B_signal_frac": 0.0042,
+          "A_raw_rate_hz": 16000,
+          "B_raw_rate_hz": 16000,
+          "A_duration_s": 12.0,
+          "B_duration_s": 12.0,
+          "crosstalk": {
+            "windows": 1,
+            "corr": null,
+            "note": "too few simultaneous-loud windows to judge"
+          },
+          "levels": {
+            "frames": 239,
+            "both_loud_frac": 0.0042,
+            "either_loud_frac": 0.3724
+          }
+        },
+        {
+          "scene": "scene08_roomtone",
+          "problem": null,
+          "A_silent": false,
+          "B_silent": false,
+          "A_peak": 3e-05,
+          "B_peak": 3e-05,
+          "A_rms": 1e-06,
+          "B_rms": 1e-06,
+          "A_signal_frac": 0.0,
+          "B_signal_frac": 0.0,
+          "A_raw_rate_hz": 16000,
+          "B_raw_rate_hz": 16000,
+          "A_duration_s": 12.0,
+          "B_duration_s": 12.0,
+          "crosstalk": {
+            "windows": 0,
+            "corr": null,
+            "note": "too few simultaneous-loud windows to judge"
+          },
+          "levels": {
+            "frames": 239,
+            "both_loud_frac": 0.0,
+            "either_loud_frac": 0.0
+          }
+        }
+      ]
+    },
+    "note": "the corpus contains canonical hand-offs and the intake counts none of them, because it counts a hand-off only when A comes back while B is still talking"
+  },
+  "realistic_room": {
+    "room_tone_rms": 0.0015,
+    "intake_floor_rms": 0.0001,
+    "floor_below_room_tone_db": 23.5,
+    "intake_report": {
+      "exit_code": 0,
+      "status": "NOT YET USABLE",
+      "unmet": [
+        "only 96s of audio; the protocol asks for ~25 min"
+      ],
+      "matched_pairs": 8,
+      "total_audio_s": 96.0,
+      "silences_seen": 38,
+      "hand_offs_seen": 38,
+      "unmatched_files": [],
+      "pairs": [
+        {
+          "scene": "scene01_free",
+          "problem": null,
+          "A_silent": false,
+          "B_silent": false,
+          "A_peak": 0.79938,
+          "B_peak": 0.80139,
+          "A_rms": 0.013592,
+          "B_rms": 0.013299,
+          "A_signal_frac": 1.0,
+          "B_signal_frac": 1.0,
+          "A_raw_rate_hz": 16000,
+          "B_raw_rate_hz": 16000,
+          "A_duration_s": 12.0,
+          "B_duration_s": 12.0,
+          "crosstalk": {
+            "windows": 119,
+            "corr": 0.9857
+          },
+          "levels": {
+            "frames": 239,
+            "both_loud_frac": 1.0,
+            "either_loud_frac": 1.0
+          }
+        },
+        {
+          "scene": "scene02_qa",
+          "problem": null,
+          "A_silent": false,
+          "B_silent": false,
+          "A_peak": 0.79831,
+          "B_peak": 0.80164,
+          "A_rms": 0.013303,
+          "B_rms": 0.012277,
+          "A_signal_frac": 1.0,
+          "B_signal_frac": 1.0,
+          "A_raw_rate_hz": 16000,
+          "B_raw_rate_hz": 16000,
+          "A_duration_s": 12.0,
+          "B_duration_s": 12.0,
+          "crosstalk": {
+            "windows": 119,
+            "corr": 0.9679
+          },
+          "levels": {
+            "frames": 239,
+            "both_loud_frac": 1.0,
+            "either_loud_frac": 1.0
+          }
+        },
+        {
+          "scene": "scene03_think",
+          "problem": null,
+          "A_silent": false,
+          "B_silent": false,
+          "A_peak": 0.7999,
+          "B_peak": 0.80212,
+          "A_rms": 0.010398,
+          "B_rms": 0.011623,
+          "A_signal_frac": 1.0,
+          "B_signal_frac": 1.0,
+          "A_raw_rate_hz": 16000,
+          "B_raw_rate_hz": 16000,
+          "A_duration_s": 12.0,
+          "B_duration_s": 12.0,
+          "crosstalk": {
+            "windows": 119,
+            "corr": 0.9954
+          },
+          "levels": {
+            "frames": 239,
+            "both_loud_frac": 1.0,
+            "either_loud_frac": 1.0
+          }
+        },
+        {
+          "scene": "scene04_fillers",
+          "problem": null,
+          "A_silent": false,
+          "B_silent": false,
+          "A_peak": 0.79938,
+          "B_peak": 0.80301,
+          "A_rms": 0.024954,
+          "B_rms": 0.006541,
+          "A_signal_frac": 1.0,
+          "B_signal_frac": 1.0,
+          "A_raw_rate_hz": 16000,
+          "B_raw_rate_hz": 16000,
+          "A_duration_s": 12.0,
+          "B_duration_s": 12.0,
+          "crosstalk": {
+            "windows": 119,
+            "corr": 0.9965
+          },
+          "levels": {
+            "frames": 239,
+            "both_loud_frac": 1.0,
+            "either_loud_frac": 1.0
+          }
+        },
+        {
+          "scene": "scene05_backchannel",
+          "problem": null,
+          "A_silent": false,
+          "B_silent": false,
+          "A_peak": 0.79889,
+          "B_peak": 0.80032,
+          "A_rms": 0.024151,
+          "B_rms": 0.008351,
+          "A_signal_frac": 1.0,
+          "B_signal_frac": 1.0,
+          "A_raw_rate_hz": 16000,
+          "B_raw_rate_hz": 16000,
+          "A_duration_s": 12.0,
+          "B_duration_s": 12.0,
+          "crosstalk": {
+            "windows": 119,
+            "corr": 0.9811
+          },
+          "levels": {
+            "frames": 239,
+            "both_loud_frac": 1.0,
+            "either_loud_frac": 1.0
+          }
+        },
+        {
+          "scene": "scene06_interrupt",
+          "problem": null,
+          "A_silent": false,
+          "B_silent": false,
+          "A_peak": 0.80032,
+          "B_peak": 0.80014,
+          "A_rms": 0.014959,
+          "B_rms": 0.013609,
+          "A_signal_frac": 1.0,
+          "B_signal_frac": 1.0,
+          "A_raw_rate_hz": 16000,
+          "B_raw_rate_hz": 16000,
+          "A_duration_s": 12.0,
+          "B_duration_s": 12.0,
+          "crosstalk": {
+            "windows": 119,
+            "corr": 0.9701
+          },
+          "levels": {
+            "frames": 239,
+            "both_loud_frac": 1.0,
+            "either_loud_frac": 1.0
+          }
+        },
+        {
+          "scene": "scene07_alone",
+          "problem": null,
+          "A_silent": false,
+          "B_silent": false,
+          "A_peak": 0.79776,
+          "B_peak": 0.8002,
+          "A_rms": 0.014236,
+          "B_rms": 0.006537,
+          "A_signal_frac": 1.0,
+          "B_signal_frac": 1.0,
+          "A_raw_rate_hz": 16000,
+          "B_raw_rate_hz": 16000,
+          "A_duration_s": 12.0,
+          "B_duration_s": 12.0,
+          "crosstalk": {
+            "windows": 119,
+            "corr": 0.9789
+          },
+          "levels": {
+            "frames": 239,
+            "both_loud_frac": 1.0,
+            "either_loud_frac": 1.0
+          }
+        },
+        {
+          "scene": "scene08_roomtone",
+          "problem": null,
+          "A_silent": false,
+          "B_silent": false,
+          "A_peak": 0.00659,
+          "B_peak": 0.00708,
+          "A_rms": 0.001485,
+          "B_rms": 0.001487,
+          "A_signal_frac": 1.0,
+          "B_signal_frac": 1.0,
+          "A_raw_rate_hz": 16000,
+          "B_raw_rate_hz": 16000,
+          "A_duration_s": 12.0,
+          "B_duration_s": 12.0,
+          "crosstalk": {
+            "windows": 119,
+            "corr": 0.413
+          },
+          "levels": {
+            "frames": 239,
+            "both_loud_frac": 1.0,
+            "either_loud_frac": 1.0
+          }
+        }
+      ]
+    },
+    "scene08_signal_frac": [
+      1.0
+    ],
+    "scene08_both_loud_frac": [
+      1.0
+    ]
+  },
+  "protocol_length_corpus": {
+    "exit_code": 0,
+    "status": "USABLE",
+    "unmet": [],
+    "matched_pairs": 8,
+    "total_audio_s": 615.0,
+    "silences_seen": 221,
+    "hand_offs_seen": 5,
+    "unmatched_files": [],
+    "pairs": [
+      {
+        "scene": "scene01_free",
+        "problem": null,
+        "A_silent": false,
+        "B_silent": false,
+        "A_peak": 0.79996,
+        "B_peak": 0.79996,
+        "A_rms": 0.012316,
+        "B_rms": 0.011712,
+        "A_signal_frac": 0.335,
+        "B_signal_frac": 0.301,
+        "A_raw_rate_hz": 16000,
+        "B_raw_rate_hz": 16000,
+        "A_duration_s": 150.0,
+        "B_duration_s": 150.0,
+        "crosstalk": {
+          "windows": 1,
+          "corr": null,
+          "note": "too few simultaneous-loud windows to judge"
+        },
+        "levels": {
+          "frames": 2999,
+          "both_loud_frac": 0.0003,
+          "either_loud_frac": 0.6362
+        }
+      },
+      {
+        "scene": "scene02_qa",
+        "problem": null,
+        "A_silent": false,
+        "B_silent": false,
+        "A_peak": 0.79996,
+        "B_peak": 0.79996,
+        "A_rms": 0.011769,
+        "B_rms": 0.010977,
+        "A_signal_frac": 0.3058,
+        "B_signal_frac": 0.2675,
+        "A_raw_rate_hz": 16000,
+        "B_raw_rate_hz": 16000,
+        "A_duration_s": 90.0,
+        "B_duration_s": 90.0,
+        "crosstalk": {
+          "windows": 1,
+          "corr": null,
+          "note": "too few simultaneous-loud windows to judge"
+        },
+        "levels": {
+          "frames": 1799,
+          "both_loud_frac": 0.0006,
+          "either_loud_frac": 0.5737
+        }
+      },
+      {
+        "scene": "scene03_think",
+        "problem": null,
+        "A_silent": false,
+        "B_silent": false,
+        "A_peak": 0.79996,
+        "B_peak": 0.79999,
+        "A_rms": 0.008567,
+        "B_rms": 0.009706,
+        "A_signal_frac": 0.1517,
+        "B_signal_frac": 0.1983,
+        "A_raw_rate_hz": 16000,
+        "B_raw_rate_hz": 16000,
+        "A_duration_s": 90.0,
+        "B_duration_s": 90.0,
+        "crosstalk": {
+          "windows": 1,
+          "corr": null,
+          "note": "too few simultaneous-loud windows to judge"
+        },
+        "levels": {
+          "frames": 1799,
+          "both_loud_frac": 0.0006,
+          "either_loud_frac": 0.3491
+        }
+      },
+      {
+        "scene": "scene04_fillers",
+        "problem": null,
+        "A_silent": false,
+        "B_silent": false,
+        "A_peak": 0.79996,
+        "B_peak": 0.79999,
+        "A_rms": 0.023785,
+        "B_rms": 0.002847,
+        "A_signal_frac": 0.9008,
+        "B_signal_frac": 0.0008,
+        "A_raw_rate_hz": 16000,
+        "B_raw_rate_hz": 16000,
+        "A_duration_s": 60.0,
+        "B_duration_s": 60.0,
+        "crosstalk": {
+          "windows": 1,
+          "corr": null,
+          "note": "too few simultaneous-loud windows to judge"
+        },
+        "levels": {
+          "frames": 1199,
+          "both_loud_frac": 0.0008,
+          "either_loud_frac": 0.9016
+        }
+      },
+      {
+        "scene": "scene05_backchannel",
+        "problem": null,
+        "A_silent": false,
+        "B_silent": false,
+        "A_peak": 0.79996,
+        "B_peak": 0.79996,
+        "A_rms": 0.023443,
+        "B_rms": 0.005843,
+        "A_signal_frac": 0.8542,
+        "B_signal_frac": 0.0606,
+        "A_raw_rate_hz": 16000,
+        "B_raw_rate_hz": 16000,
+        "A_duration_s": 90.0,
+        "B_duration_s": 90.0,
+        "crosstalk": {
+          "windows": 64,
+          "corr": 0.9815
+        },
+        "levels": {
+          "frames": 1799,
+          "both_loud_frac": 0.0611,
+          "either_loud_frac": 0.8544
+        }
+      },
+      {
+        "scene": "scene06_interrupt",
+        "problem": null,
+        "A_silent": false,
+        "B_silent": false,
+        "A_peak": 0.79996,
+        "B_peak": 0.79996,
+        "A_rms": 0.013529,
+        "B_rms": 0.012382,
+        "A_signal_frac": 0.4008,
+        "B_signal_frac": 0.3346,
+        "A_raw_rate_hz": 16000,
+        "B_raw_rate_hz": 16000,
+        "A_duration_s": 60.0,
+        "B_duration_s": 60.0,
+        "crosstalk": {
+          "windows": 72,
+          "corr": 0.9719
+        },
+        "levels": {
+          "frames": 1199,
+          "both_loud_frac": 0.1184,
+          "either_loud_frac": 0.618
+        }
+      },
+      {
+        "scene": "scene07_alone",
+        "problem": null,
+        "A_silent": false,
+        "B_silent": false,
+        "A_peak": 0.79996,
+        "B_peak": 0.79996,
+        "A_rms": 0.012887,
+        "B_rms": 0.002846,
+        "A_signal_frac": 0.3675,
+        "B_signal_frac": 0.0008,
+        "A_raw_rate_hz": 16000,
+        "B_raw_rate_hz": 16000,
+        "A_duration_s": 60.0,
+        "B_duration_s": 60.0,
+        "crosstalk": {
+          "windows": 1,
+          "corr": null,
+          "note": "too few simultaneous-loud windows to judge"
+        },
+        "levels": {
+          "frames": 1199,
+          "both_loud_frac": 0.0008,
+          "either_loud_frac": 0.3678
+        }
+      },
+      {
+        "scene": "scene08_roomtone",
+        "problem": null,
+        "A_silent": false,
+        "B_silent": false,
+        "A_peak": 3e-05,
+        "B_peak": 3e-05,
+        "A_rms": 1e-06,
+        "B_rms": 1e-06,
+        "A_signal_frac": 0.0,
+        "B_signal_frac": 0.0,
+        "A_raw_rate_hz": 16000,
+        "B_raw_rate_hz": 16000,
+        "A_duration_s": 15.0,
+        "B_duration_s": 15.0,
+        "crosstalk": {
+          "windows": 0,
+          "corr": null,
+          "note": "too few simultaneous-loud windows to judge"
+        },
+        "levels": {
+          "frames": 299,
+          "both_loud_frac": 0.0,
+          "either_loud_frac": 0.0
+        }
+      }
+    ],
+    "wall_s": 69.46
+  },
+  "latent_defects": [
+    {
+      "defect": "the `src` import resolves to the wrong path and the exception is swallowed (the corpus capture's defect 3)",
+      "check": "run the intake from / and from the repo root",
+      "exit_codes": [
+        0,
+        0
+      ],
+      "stdout_parses_as_json": [
+        true,
+        true
+      ],
+      "import_path_source": "sys.path.insert(0, str(Path(__file__).resolve().parents[1])) -- built from __file__, not from the current directory",
+      "swallowed_exceptions": "channel_stats() catches Exception and returns an error dict, so an unreadable file is reported, not swallowed; no other try/except exists in the file",
+      "verdict": "PASS -- the import is file-relative and an unreadable file is reported, not silently skipped"
+    },
+    {
+      "defect": "the sample rate is assumed rather than read from the header (the corpus capture's defect 2, in rate form)",
+      "check": "write a 16 kHz A and a 22050 Hz B; read both headers and read the intake's reported `raw_rate_hz`",
+      "header_A_hz": 16000,
+      "header_B_hz": 22050,
+      "intake_raw_rate_hz": [
+        16000
+      ],
+      "intake_duration_s": [
+        1.0
+      ],
+      "verdict": "FAIL -- `src.wavio.read_wav` RESAMPLES to 16 kHz and returns an Audio whose sample_rate is 16000, so `raw_rate_hz` is always 16000 and the file's real rate is never reported. The duration survives (it is post-resample); the rate does not."
+    },
+    {
+      "defect": "the check never runs / cannot fail the pipeline (the corpus capture's defect 3, the exit-code half)",
+      "check": "run the intake on an empty directory and on a missing one",
+      "empty_dir_exit_code": 0,
+      "missing_dir_exit_code": 0,
+      "empty_dir_status": "NOT YET USABLE",
+      "missing_dir_status": "NOTHING RECORDED YET",
+      "verdict": "FAIL -- `main()` returns None and never calls sys.exit(1); the tool exits 0 while reporting NOT YET USABLE, so a pipeline that runs it cannot tell a rejected corpus from an accepted one"
+    }
+  ],
+  "wall_s": 263.2
+}
