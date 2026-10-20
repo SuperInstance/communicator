@@ -3,10 +3,10 @@
 **Repository:** `SuperInstance/communicator`
 **Author:** Casey Digennaro, with an AI agent (MiniMax Code)
 **Window:** 2026-10-19 night → 2026-10-20 08:50 local
-**Status at hand-over:** 24 commits of the night's work pushed (138 in the
-repository), `master` in sync with `origin/master`, full suite green
-(**1002 passed, 5 skipped**), artifact gate green
-(**REPRODUCIBLE=37, NOT_REPRODUCIBLE=0**).
+**Status at hand-over:** the night's work is the 27 commits `2b59268`…
+`59fe609` (138 in the repository before them), `master` in sync with
+`origin/master`, full suite green (**1002 passed, 5 skipped**), artifact
+gate green (**REPRODUCIBLE=37, NOT_REPRODUCIBLE=0**).
 
 This document is the wrap-up of one night of work on **Communicator**, the
 local-first voice/peripheral system. It is written to be read by whoever

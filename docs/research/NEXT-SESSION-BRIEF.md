@@ -313,7 +313,7 @@ stay on disk so every withdrawn number can be re-run.
   the number was, what was falsified, and what was wrong on the way**.
   The repo's commits are read as the research log; a commit message that
   only says "fixed stuff" is a wasted commit.
-* Push often. The night was 24 commits.
+* Push often. The night was 27 commits (`2b59268`…`59fe609`).
 * After pushing, `git rev-list --left-right --count origin/master...HEAD`
   must print `0	0`.
 * Run the suite before you push: **1002 passed, 5 skipped** is the

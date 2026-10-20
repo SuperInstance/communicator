@@ -1724,3 +1724,56 @@ item** so that specificity is not a single bit.
 silent)** above all — it is the highest-value take for two independent
 reasons — and the two-microphone dialogue. The capture tool is fixed and
 synced to `/mnt/c/proart_capture/corpus_capture_win.py`.
+
+## 2026-10-20 (night, last) — the gate is clean, and the two crashes were the mount, not the code
+
+**THE GATE.** A fourth run of `experiments/artifact_repro.py --source
+worktree`, detached with `setsid` and unbuffered with `python -u`
+(`/tmp/gate4.log`, kept at `.scratch/fitladder/gate4.log`), against the
+worktree at `96090ec`:
+
+```
+REPRODUCIBLE=37  NOT_REPRODUCIBLE=0  NO_SCRIPT=4  NOT_RE_RUN=37  LEGACY_NO_SCRIPT=1
+```
+
+**Every committed artefact reproduces from the committed code.** The
+worktree was clean before and after. The suite is green at **1002
+passed, 5 skipped** (358.76 s).
+
+**THE TWO CRASHES ARE RESOLVED AS ENVIRONMENTAL.** An earlier run had
+reported `row_band_removal_results.json` as `IndexError` and
+`teacher_raw_representation_results.json` as `EOFError`, both of which
+had been REPRODUCIBLE before. Both scripts succeed in isolation and
+write byte-identical output. The attribution offered in the night
+report — **the `/mnt/c` Windows mount returning short reads after the
+machine was suspended** — was a **hypothesis** at the time, supported
+by the fact that both failures are read errors on the capture mount and
+not arithmetic errors. It is now **measured**: the same worktree, the
+same scripts and the same command give 37/0 when the machine has not
+been suspended underneath them, and **no code was changed to make them
+go away**.
+
+**What this does not establish:** which read went short, and that
+suspend/resume is the mechanism. What it establishes at the level that
+matters for the repository is that the code is not at fault, and the
+committed numbers still reproduce.
+
+`NOT_RE_RUN` rose from 35 to 37 because `debrief_truncation_probe.py`
+and `debrief_paired_analysis.py` now have artefact files. Both are
+skipped **for a stated reason** (they need the Cloudflare API over the
+network), not for a failure. The other late scripts carry stated skip
+reasons too: `debrief_local_director.py` needs a local ollama server
+with the model already pulled, and `vlm_image_retention.py` needs the
+GPU and the Qwen2.5-VL-3B weights, which are not in the repository.
+
+**THE RECORD.** The night's work is the 27 commits `2b59268`…`59fe609`.
+`docs/research/NIGHT-REPORT-2026-10-20.md` carries the full account —
+achievements, thirteen struggles including both of my own refuted
+hypotheses, and what is still open. `docs/research/NEXT-SESSION-BRIEF.md`
+is the hand-over, runnable by an agent with none of the context.
+
+**STILL NEEDS A HUMAN:** `zcode` cannot run —
+`project_token_login_failed` on the `zai` provider — which needs
+**Casey's browser re-authorisation** (`zcode login zai`). The handoff is
+one command, recorded in the brief. It was not worked around, because an
+account entitlement is not a bug to be engineered past.
