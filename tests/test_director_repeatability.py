@@ -266,3 +266,138 @@ def test_context_prompt_contains_material_and_is_repeatable():
     assert p1 == p2
     assert lim1 == lim2 == 2000
     assert "RESEARCH NOTES AND RESULTS" in p1
+
+
+# ------------------------------------------------------- the majority vote
+
+def _scored(pairs, spec_list):
+    """A list of scored runs, one per verdict list."""
+    return [debrief.score_audit(pairs, _verdicts(spec)) for spec in spec_list]
+
+
+def test_majority_picks_the_verdict_the_runs_agree_on():
+    pairs = _pairs()
+    # 4 runs say "unsupported" on claim 0, 1 says "supported" -> unsupported.
+    runs = _scored(pairs, [["unsupported"] * 5, ["unsupported"] * 5,
+                           ["unsupported"] * 5, ["supported"] + ["unsupported"] * 4])
+    _, summ = dr.majority_verdicts(runs, pairs)
+    assert summ["per_claim"][0]["verdict"] == "unsupported"
+    assert summ["per_claim"][0]["stable"] is False
+    assert summ["per_claim"][0]["tie"] is False
+
+
+def test_majority_tie_breaks_to_uncertain_not_to_supported():
+    """A tie must not be broken towards "supported".
+
+    Breaking a 2-2 tie towards "supported" would push the headline UP on
+    exactly the claims where the model is least sure -- which is the
+    direction that endorses false claims. It breaks to "uncertain", the
+    safe answer for a reviewer: it neither endorses nor accuses.
+    """
+    pairs = _pairs()
+    runs = _scored(pairs, [["supported"] * 5, ["supported"] * 5,
+                           ["unsupported"] * 5, ["unsupported"] * 5])
+    _, summ = dr.majority_verdicts(runs, pairs)
+    assert summ["per_claim"][0]["verdict"] == "uncertain"
+    assert summ["per_claim"][0]["tie"] is True
+    assert summ["n_tied_claims"] == 5
+
+
+def test_majority_of_identical_runs_reproduces_that_run():
+    pairs = _pairs()
+    spec = ["unsupported", "unsupported", "supported", "supported", "supported"]
+    runs = _scored(pairs, [spec] * 5)
+    _, summ = dr.majority_verdicts(runs, pairs)
+    single = debrief.score_audit(pairs, _verdicts(spec))
+    assert summ["headline"] == pytest.approx(
+        single["headline_sens_plus_spec_minus_1"])
+
+
+def test_bootstrap_is_deterministic_for_a_fixed_seed():
+    pairs = _pairs()
+    runs = _scored(pairs, [["supported"] * 5, ["unsupported"] * 5,
+                           ["supported"] * 5, ["unsupported"] * 5,
+                           ["supported"] * 5])
+    a = dr.bootstrap_majority(runs, pairs, 3, n_groups=200, seed=7)
+    b = dr.bootstrap_majority(runs, pairs, 3, n_groups=200, seed=7)
+    assert a["distinct_headlines"] == b["distinct_headlines"]
+    assert a["counts"] == b["counts"]
+    c = dr.bootstrap_majority(runs, pairs, 3, n_groups=200, seed=8)
+    assert c["n_sampled"] == a["n_sampled"]
+
+
+def test_voting_does_NOT_fix_the_instability():
+    """THE RESULT, pinned.
+
+    When the model splits on a claim, running it five times and taking the
+    majority does not converge on an answer -- and the headline does not
+    narrow at all. This is the measurement that says "run it more times" is
+    not a fix, and it is falsifiable: if the majority vote DID narrow the
+    distribution, this test would fail.
+
+    The fixture is deliberately NOT the degenerate one. An always-accept and
+    an always-reject director both score 0.0 -- that is what the metric is
+    for -- so a fixture built from those two would show a spread of zero and
+    prove nothing. Here the two run types are a strong director (1.000) and
+    a mediocre one (0.167), and the majority vote over 3 or 5 runs still
+    spans the whole range.
+    """
+    pairs = _pairs()
+    strong = ["unsupported"] * 3 + ["supported"] * 2
+    weak = ["unsupported", "unsupported", "supported", "supported", "unsupported"]
+    runs = _scored(pairs, [strong] * 3 + [weak] * 3)
+    single = dr.summarise_runs(runs)
+    assert single["headline_spread"] > 0.8
+    for gs in (3, 5):
+        boot = dr.bootstrap_majority(runs, pairs, gs, n_groups=500, seed=11)
+        # Voting does NOT narrow the range the single runs span.
+        assert boot["spread"] >= single["headline_spread"] - 1e-9
+        # And it does not settle on one answer either.
+        assert boot["probability_of_the_mode"] < 0.75
+
+
+def test_degenerate_directors_score_the_same_so_they_cannot_stand_in_for_a_fixture():
+    """The reason the fixture above is not built from the degenerate pair.
+
+    An always-accept and an always-reject director BOTH score 0.0, so a
+    fixture made of them has a single-run spread of zero and would make any
+    claim about stability vacuously true.
+    """
+    pairs = _pairs()
+    accept = debrief.score_audit(pairs, _verdicts(["supported"] * 5))
+    reject = debrief.score_audit(pairs, _verdicts(["unsupported"] * 5))
+    assert accept["headline_sens_plus_spec_minus_1"] == pytest.approx(0.0)
+    assert reject["headline_sens_plus_spec_minus_1"] == pytest.approx(0.0)
+    runs = _scored(pairs, [["supported"] * 5] * 3 + [["unsupported"] * 5] * 3)
+    assert dr.summarise_runs(runs)["headline_spread"] == pytest.approx(0.0)
+
+
+def test_bootstrap_refuses_to_bootstrap_with_too_few_runs():
+    pairs = _pairs()
+    runs = _scored(pairs, [["supported"] * 5, ["unsupported"] * 5])
+    out = dr.bootstrap_majority(runs, pairs, 5)
+    assert "error" in out
+    assert "need at least 5 runs" in out["error"]
+
+
+# ------------------------------------------------------- rebuilding a file
+
+def test_rebuild_from_persisted_runs_reproduces_the_headlines():
+    """The persisted file stores verdicts, not rows; the rebuild is exact.
+
+    If this drifts, every analysis run with --from-files is measuring
+    something other than what the file says.
+    """
+    pairs = _pairs()
+    specs = [["unsupported"] * 5, ["supported"] * 5, ["unsupported"] * 5]
+    runs = _scored(pairs, specs)
+    persisted = [{"headline": r["headline_sens_plus_spec_minus_1"],
+                  "sensitivity": r["sensitivity_rejected_false_claims"],
+                  "specificity": r["specificity_kept_true_claims"],
+                  "verdicts": [row["verdict"] for row in r["rows"]]}
+                 for r in runs]
+    rebuilt = dr.rebuild_scored(persisted, pairs)
+    assert len(rebuilt) == len(runs)
+    for a, b in zip(runs, rebuilt):
+        assert a["headline_sens_plus_spec_minus_1"] == pytest.approx(
+            b["headline_sens_plus_spec_minus_1"])

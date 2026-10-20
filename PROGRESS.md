@@ -1129,6 +1129,18 @@ per-claim stability, not the aggregate.** A score that can be +1.000 or
 matters for the plan that put an LLM between experiments: the director can
 be asked what to check next, and its answer must be checked.
 
+**And the obvious remedy does not work either.** Run it N times and take the
+majority verdict per claim — the natural fix — and the headline does not
+narrow **at all**: a bootstrap over the recorded runs gives the same spread
+(0.619) at 3 runs and at 5, with the modal majority-vote headline still a
+coin flip (P ≈ 0.49). The unstable claims are unstable *3-3*, so five runs
+often contain no majority on the claim that matters. **The model does not
+need more samples; it is genuinely undecided.** So the director's output is
+a *prompt for a human check* — if it says "this looks wrong", that is a
+reason to look; if it says "this looks right", that is not a reason to stop
+looking, because on the claims that are actually false it says "right" half
+the time.
+
 **The pause table survives; one of its numbers does not.** `experiments/pause_threshold.py`
 copies the gap-detection method **byte-for-byte** from
 `tests/test_pause_threshold.py` and verifies the copy at run time. Every cell

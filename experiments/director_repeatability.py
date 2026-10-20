@@ -107,6 +107,112 @@ def degenerate_baselines(pairs) -> dict:
 
 # ---------------------------------------------------------------- the analysis
 
+# The three verdicts a director may return. "uncertain" is a real answer,
+# not a missing one: a reviewer that declines to endorse a true claim has
+# not accused it, and a reviewer that declines to reject a false claim has
+# not caught it.
+VERDICTS = ("supported", "unsupported", "uncertain")
+
+
+def majority_verdicts(scored: list[dict], pairs=None) -> dict:
+    """The per-claim verdict a majority of runs gives, and its headline.
+
+    The point of voting: one run is a draw from a wide distribution, but if
+    the model is RIGHT ABOUT MOST CLAIMS then a majority over several runs
+    should be stable, and the headline that comes out of it should be too.
+
+    THE TIE. An even number of runs can tie 2-2 on a claim. The tie is
+    broken to `uncertain`, which is the safe answer for a reviewer: it
+    neither endorses a false claim nor accuses a true one. It is NOT broken
+    towards "supported", which would bias the headline upwards.
+
+    Returns (verdict_object, summary_dict).
+    """
+    if not scored:
+        return {"verdicts": []}, {}
+    n_claims = len(scored[0].get("rows") or [])
+    verdicts = []
+    detail = []
+    for i in range(n_claims):
+        counts = {}
+        for r in scored:
+            row = next((x for x in (r.get("rows") or []) if x["index"] == i), None)
+            if row is None:
+                continue
+            counts[row["verdict"]] = counts.get(row["verdict"], 0) + 1
+        if not counts:
+            continue
+        best = max(counts.values())
+        winners = [v for v, c in counts.items() if c == best]
+        if len(winners) == 1:
+            chosen = winners[0]
+        else:
+            chosen = "uncertain"          # the tie, broken safely
+        verdicts.append({"index": i, "verdict": chosen,
+                          "reason": f"majority of {best} of {sum(counts.values())}"})
+        detail.append({"index": i, "verdict": chosen, "counts": counts,
+                       "tie": len(winners) > 1,
+                       "stable": len(counts) == 1})
+    obj = {"verdicts": verdicts}
+    summary = {}
+    if pairs is not None:
+        res = debrief.score_audit(pairs, obj)
+        summary = {
+            "headline": res["headline_sens_plus_spec_minus_1"],
+            "sensitivity": res["sensitivity_rejected_false_claims"],
+            "specificity": res["specificity_kept_true_claims"],
+            "lenient": res["headline_lenient"],
+            "per_claim": detail,
+            "n_tied_claims": sum(1 for d in detail if d["tie"]),
+        }
+    return obj, summary
+
+
+def bootstrap_majority(scored: list[dict], pairs, group_size: int,
+                       n_groups: int = 2000, seed: int = 20261019) -> dict:
+    """How stable is the MAJORITY-VOTE headline, given the runs we have?
+
+    Resample groups of `group_size` runs from the observed runs (with
+    replacement) and compute the majority-vote headline for each group. This
+    answers the question that actually matters for using the tool: if we run
+    the director N times and take the majority, how much does the headline
+    still move?
+
+    Pure function of the observed runs -- no network, no new calls.
+    """
+    import random
+    if len(scored) < group_size:
+        return {"group_size": group_size, "n_groups": n_groups,
+                "error": f"need at least {group_size} runs, have {len(scored)}"}
+    rng = random.Random(seed)
+    headlines = []
+    for _ in range(n_groups):
+        group = [scored[rng.randrange(len(scored))] for _ in range(group_size)]
+        _, summ = majority_verdicts(group, pairs)
+        if summ.get("headline") is not None:
+            headlines.append(summ["headline"])
+    if not headlines:
+        return {"group_size": group_size, "n_groups": n_groups,
+                "error": "no group produced a scorable headline"}
+    from collections import Counter
+    c = Counter(headlines)
+    return {
+        "group_size": group_size,
+        "n_groups": n_groups,
+        "n_sampled": len(headlines),
+        "distinct_headlines": sorted(c),
+        "counts": {str(k): v for k, v in sorted(c.items())},
+        "n_distinct_headlines": len(c),
+        "min": min(headlines),
+        "max": max(headlines),
+        "median": statistics.median(headlines),
+        "mean": statistics.fmean(headlines),
+        "spread": max(headlines) - min(headlines),
+        "most_common": c.most_common(1)[0],
+        "probability_of_the_mode": c.most_common(1)[0][1] / len(headlines),
+    }
+
+
 def summarise_runs(scored: list[dict]) -> dict:
     """The distribution of a set of scored runs.
 
@@ -218,6 +324,7 @@ def run_repeatability(model: str, mode: str, n: int, seed: int = 20261019,
         "degenerate_baselines": degenerate_baselines(pairs),
         "result": summarise_runs(scored),
         "errors": errors,
+        "majority": _majority_block(scored, pairs),
         "runs": [{"headline": r.get("headline_sens_plus_spec_minus_1"),
                   "sensitivity": r.get("sensitivity_rejected_false_claims"),
                   "specificity": r.get("specificity_kept_true_claims"),
@@ -230,6 +337,83 @@ def run_repeatability(model: str, mode: str, n: int, seed: int = 20261019,
     }
 
 
+def _majority_block(scored, pairs) -> dict:
+    """The majority-vote verdict, and how stable the majority-vote headline is."""
+    ok = [r for r in scored if r.get("rows")]
+    if not ok:
+        return {"error": "no scored runs"}
+    _, summ = majority_verdicts(ok, pairs)
+    boot = {}
+    for gs in (2, 3, 5):
+        if len(ok) >= gs:
+            boot[str(gs)] = bootstrap_majority(ok, pairs, gs)
+    return {"majority": summ, "bootstrap": boot}
+
+
+def rebuild_scored(runs: list[dict], pairs) -> list[dict]:
+    """Rebuild scorable runs from a persisted result file.
+
+    The file stores each run's verdicts (one string per claim, in index
+    order) rather than the full rows, because the rows are what the scorer
+    derives. The label of each claim -- known-true or known-false -- comes
+    from the audit set, so the rebuild is exact.
+    """
+    scored = []
+    for run in runs or []:
+        if run.get("error") or not run.get("verdicts"):
+            scored.append({"error": run.get("error") or "missing"})
+            continue
+        rows = []
+        for i, v in enumerate(run["verdicts"]):
+            if i >= len(pairs):
+                break
+            claim, is_false = pairs[i]
+            verdict = v if v in VERDICTS else "unparseable"
+            rejected = verdict == "unsupported"
+            rows.append({
+                "index": i, "claim": claim, "is_false_claim": is_false,
+                "verdict": verdict, "rejected": rejected,
+                "correct": (rejected == is_false) if verdict != "unparseable"
+                           else False,
+                "reason": "",
+            })
+        res = debrief.score_audit(pairs, {"verdicts": []})
+        scored.append({"rows": rows,
+                       "headline_sens_plus_spec_minus_1":
+                           run.get("headline"),
+                       "sensitivity_rejected_false_claims": run.get("sensitivity"),
+                       "specificity_kept_true_claims": run.get("specificity"),
+                       "_rebuild_note": "rebuilt from the persisted verdicts"})
+        del res
+    return scored
+
+def analyse_file(path, seed: int = 20261019) -> dict:
+    """Analyse a persisted repeatability result file. No network."""
+    data = json.loads(Path(path).read_text())
+    pairs = debrief.audit_pairs(seed)
+    out = []
+    for entry in data.get("results") or []:
+        scored = rebuild_scored(entry.get("runs") or [], pairs)
+        ok = [r for r in scored if r.get("rows")]
+        summary = summarise_runs(scored)
+        _, summ = majority_verdicts(ok, pairs) if ok else ({}, {})
+        boot = {}
+        for gs in (2, 3, 5):
+            if len(ok) >= gs:
+                boot[str(gs)] = bootstrap_majority(ok, pairs, gs)
+        out.append({
+            "model": entry.get("model"),
+            "mode": entry.get("mode"),
+            "n_runs": entry.get("n_requested"),
+            "prompt_sha256": entry.get("prompt_sha256"),
+            "prompt_chars": entry.get("prompt_chars"),
+            "single_run": summary,
+            "majority": summ,
+            "bootstrap": boot,
+        })
+    return {"source": str(path), "analysis": out}
+
+
 def main(argv=None):
     ap = argparse.ArgumentParser()
     ap.add_argument("--model", default="@cf/openai/gpt-oss-120b")
@@ -239,7 +423,51 @@ def main(argv=None):
     ap.add_argument("--runs", type=int, default=8)
     ap.add_argument("--materials-limit", type=int, default=0)
     ap.add_argument("--out", default=str(ROOT / "experiments"))
+    ap.add_argument("--from-files", action="store_true",
+                    help="analyse persisted repeatability result files instead "
+                         "of calling a model: the majority-vote verdict and a "
+                         "bootstrap of how stable that majority is")
+    ap.add_argument("--files", default=None,
+                    help="comma-separated result files for --from-files")
     a = ap.parse_args(argv)
+
+    if a.from_files:
+        files = ([f.strip() for f in a.files.split(",") if f.strip()]
+                 if a.files else
+                 sorted(str(p) for p in Path(a.out).glob(
+                     "director_repeatability_*.json")))
+        allout = []
+        for f in files:
+            if "analysis" in f or not Path(f).is_file():
+                continue
+            res = analyse_file(f)
+            allout.append(res)
+            for e in res["analysis"]:
+                m = e.get("majority") or {}
+                print(f"\n=== {Path(f).name} :: {e.get('model')} "
+                      f"[{e.get('mode')}] ===")
+                print(f"  single-run headlines: "
+                      f"{['%+.3f' % h for h in e['single_run']['headlines']]}")
+                print(f"  single-run spread   : "
+                      f"{e['single_run']['headline_spread']:.3f} over "
+                      f"{e['single_run']['n_distinct_headlines']} distinct")
+                if m:
+                    print(f"  MAJORITY verdict     : headline "
+                          f"{m.get('headline'):+.3f}  sens "
+                          f"{m.get('sensitivity'):.3f}  spec "
+                          f"{m.get('specificity'):.3f}  tied claims "
+                          f"{m.get('n_tied_claims')}")
+                for gs, b in sorted((e.get("bootstrap") or {}).items()):
+                    if "error" in b:
+                        continue
+                    print(f"  bootstrap over {gs} run(s): {b['n_distinct_headlines']} "
+                          f"distinct headlines, spread {b['spread']:.3f}, "
+                          f"mode {b['most_common'][0]:+.3f} with probability "
+                          f"{b['probability_of_the_mode']:.3f}")
+        p = Path(a.out) / "director_majority_analysis.json"
+        p.write_text(json.dumps({"results": allout}, indent=2))
+        print(f"\nwrote {p}")
+        return
 
     models = ([m.strip() for m in a.models.split(",") if m.strip()]
               if a.models else [a.model])

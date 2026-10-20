@@ -310,6 +310,47 @@ sample from its own distribution, and the samples are wide.
   - **Do not use the aggregate as a gate.** A score that can be +1.000 or
     +0.381 for the same input cannot be a pass/fail criterion for anything.
 
+### CAN THE MAJORITY VOTE FIX IT? NO.
+
+The obvious remedy is to run the director N times and take the majority
+verdict per claim. It does not work, and the result is worth having.
+
+`director_repeatability.py --from-files` re-derives the per-claim majority
+from the runs already recorded and **bootstraps** it — resampling groups of
+N runs from the observed runs and recomputing the majority-vote headline:
+
+| condition | single-run spread | majority over 3 runs | majority over 5 runs | P(mode) at 5 runs |
+|---|---:|---:|---:|---:|
+| blind | 0.619 | 0.619 | **0.619** | **0.485** |
+| context, 140,000 chars | 0.619 | 0.619 | **0.619** | **0.507** |
+| context, 60,000 chars | 0.333 | 0.333 | **0.333** | **0.470** |
+
+**The majority vote does not narrow the range at all**, and it does not settle
+on one answer either: with five runs, the modal majority-vote headline is
+still a coin flip (probability 0.485–0.507 of being the mode).
+
+Why: the unstable claims are unstable *3-3*, so five runs frequently contain
+no majority at all on the claim that matters, and the tie is broken to
+`uncertain`. **The model does not need more samples — it is genuinely
+undecided**, and no sampling budget converges a model that answers the same
+question differently half the time.
+
+(The tie-break matters, so it is worth stating: breaking a tie towards
+`supported` would push the headline **up** on exactly the claims where the
+model is least sure, which is the direction that endorses false claims. It
+breaks to `uncertain`, which neither endorses nor accuses.)
+
+**So the advice "run it more than once" is wrong as a remedy, and this
+measurement retracts it.** Repeating the director does not make it reliable;
+it only makes the disagreement visible — which is still worth something, but
+it is not a fix.
+
+The practical consequence: the director's output is a **prompt for a human
+check**, not a measurement and not a gate. If it says *"this claim looks
+wrong"*, that is a reason to look. If it says *"this claim looks right"*,
+that is **not** a reason to stop looking — because on the claims that are
+actually false, it says "right" half the time.
+
 ## 5. The result that mattered most was not in the model's answer
 
 The first context audit scored gpt-oss-120b at **+0.500** with 2 false
@@ -401,13 +442,19 @@ record and a follower of the priority order, not a source of it.**
   - **The audit must be re-run whenever the tool or the material changes.**
     The score moved from +0.500 to +0.833 with a materials change alone. A
     director that has never been audited is an opinion with good typography.
-  - **Run it more than once, and read the per-claim stability rather than the
-    aggregate.** At the full material budget the same prompt produced
-    headlines from +0.381 to +1.000, and three known-false claims drew
-    different verdicts on different runs — including one the director
-    **endorsed on three runs out of six**. A single verdict, in either
-    direction, is not worth acting on without a second opinion from the same
-    model with the same prompt.
+  - **Run it more than once — but know that voting does not fix it.** At the
+    full material budget the same prompt produced headlines from +0.381 to
+    +1.000, and three known-false claims drew different verdicts on
+    different runs — including one the director **endorsed on three runs out
+    of six**. A second opinion from the same model with the same prompt tells
+    you **that the model is undecided**, not which way it should go: a
+    majority vote over 3 or 5 runs does not narrow the headline's range at
+    all, and its modal value is still a coin flip. See "CAN THE MAJORITY VOTE
+    FIX IT? NO." above.
+  - **Treat its output as a prompt for a human check, never as a gate.** A
+    score that can be +1.000 or +0.381 for the same input cannot be a
+    pass/fail criterion, and on the claims that are actually false it says
+    "right" half the time.
 
 ## 8. Limits of this measurement
 
