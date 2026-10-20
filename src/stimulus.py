@@ -37,7 +37,8 @@ WHAT THE POEM HAS TO DO, because most poems will not do it.
 
 THE POEM: "INVICTUS", WILLIAM ERNEST HENLEY, 1875. Public domain.
 
-Sixteen short lines in four stanzas, about forty seconds at a natural pace.
+Fourteen short lines in four stanzas -- four, four, four, and the closing
+two-line couplet -- about forty seconds at a natural pace.
 Strong iambic rhythm, clean line endings, real melodic movement (the fall of
 "pole to pole" against the rise of "I thank whatever gods may be"), and the
 last two lines are the most quoted couplet in English, which is the other

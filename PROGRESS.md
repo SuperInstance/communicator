@@ -972,7 +972,8 @@ at 25 fps = 30 s, matching the 29.98 s of audio, and 3 750 frames at 25 fps =
 150 s, matching empty1's 149.91 s — both match exactly under 25 fps and
 neither under 30 fps. The script asked for 30 fps; the camera delivered 25.
 Nothing recorded a timestamp, so the video's time base was never known. The
-video-only results (A-vs-C 4.914 vs within-split 1.917; row-band removal
+video-only results (A-vs-C 4.914 against A's own within-split 2.878 — 1.71×,
+not the 2.6× that ROW-BAND-REMOVAL.md prints; row-band removal
 50.00 % → 0.01 %; the drift and flicker work; the teacher's region features)
 are unaffected — they never needed the audio. What is affected is any claim
 tying a sound to a moment in a frame.
@@ -1014,7 +1015,7 @@ alone. **Scores are per-run, not per-model**: llama scored +0.583 and +0.250
 on two runs with different material sizes.
 
 **The stimulus is now one fixed poem.** `src/stimulus.py`: *Invictus* (Henley,
-1875, public domain) — sixteen lines, four stanzas, ~40 s, sayable from
+1875, public domain) — fourteen lines in stanzas of 4/4/4/2, ~40 s, sayable from
 memory. "The standard paragraph" is a *different* stimulus every take, so a
 teacher trained on it separates speech from not-speech using variation that
 is not the thing being detected. Three alternatives ship with it and

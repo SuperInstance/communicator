@@ -34,10 +34,21 @@ Six claims this project has **retracted or falsified**, and four that are
 | 4 | gain normalisation cut drift from 43.3 to 0.81 counts (~50×) | FALSE |
 | 5 | a local LLM can label speech from an ASCII rendering | FALSE |
 | 6 | 31.8 % of frames are never measured | FALSE |
-| 7 | row-median removal takes the empty room 50.00 % → 0.01 %, leaving the subject alone | TRUE |
-| 8 | the teacher scored 1.000 temporal / 0.000 leave-one-out, so it learned the recording | TRUE |
+| 7 | the teacher scored 0.000 leave-one-out for **every** feature set | FALSE |
+| 8 | row-median removal takes the empty room 50.00 % → 0.01 %, leaving the subject alone | TRUE |
 | 9 | the room is silent at −73.5 dBFS, 119 transients, zero valid RT60 | TRUE |
-| 10 | composed filters give a 21× cleaner field at a flat SNR of ~1.85 | TRUE |
+| 10 | composed filters cut the occupied flip rate 0.0299 → 0.0014 at a flat SNR of ~1.83 | TRUE |
+
+**The set was audited too, and two items were wrong.** A separate audit of
+`docs/research/` against the result files (`NOTES-AUDIT.md`) found that the
+old item 8 — "the teacher scored 1.000 temporal / 0.000 leave-one-out" — is
+**false for the motion-map feature set**, which scores **1.000** on held-out
+B, and 0.675 and 0.200 for two others. It had been marked TRUE. And the old
+item 10 — "21× cleaner over **either** filter" — used the better of the two
+singles and called a flip rate a saturation. Both were corrected, the set
+now holds **seven false claims and three true ones**, and every audit was
+re-run on the corrected set. **An audit set that has not been audited is a
+quiz with the answers written on it.**
 
 The claims are **paraphrased** away from the sentences in the research notes,
 and presented in a **fixed shuffled order**, so the model cannot string-match
@@ -81,9 +92,9 @@ reviewer, "I would not sign that off" is a good enough outcome.
 
 | model | caught false claims | kept true claims | false accusations | **headline** | lenient |
 |---|---:|---:|---:|---:|---:|
-| llama-3.3-70b-instruct-fp8-fast | 0.333 | 0.750 | 1/4 | **+0.083** | +0.083 |
-| gpt-oss-120b | 0.167 | 0.500 | 2/4 | **−0.333** | 0.000 |
-| qwen3-30b-a3b-fp8 | 0.167 | 0.750 | 1/4 | **−0.083** | −0.083 |
+| gpt-oss-120b | 0.429 | 0.667 | 1/3 | **+0.095** | +0.095 |
+| qwen3-30b-a3b-fp8 | 0.143 | 1.000 | 0/3 | **+0.143** | +0.143 |
+| llama-3.3-70b-instruct-fp8-fast | 0.286 | 0.667 | 1/3 | **−0.048** | +0.095 |
 
 **Near zero, or worse than nothing.** And the *reason* is legible in the
 model's own words. llama-3.3-70b on the 14.5× claim:
@@ -109,9 +120,14 @@ opposite of what the blind test was hoping to find.
 
 | model | caught false claims | kept true claims | false accusations | uncertain | **headline** | lenient |
 |---|---:|---:|---:|---:|---:|---:|
-| gpt-oss-120b | 0.833 | **1.000** | **0/4** | 1 | **+0.833** | **+1.000** |
-| llama-3.3-70b-instruct-fp8-fast | 0.500 | 0.750 | 1/4 | 1 | +0.250 | +0.417 |
-| qwen3-30b-a3b-fp8 | 0.667 | 0.250 | **0/4** | 5 | −0.083 | +0.083 |
+| gpt-oss-120b | 0.857 | **1.000** | **0/3** | 0 | **+0.857** | +0.857 |
+| llama-3.3-70b-instruct-fp8-fast | 0.429 | 0.667 | 1/3 | 1 | +0.095 | +0.238 |
+
+(On the earlier, easier set, before the two corrections: gpt-oss-120b +0.833
+strict / +1.000 lenient, llama-3.3-70b +0.250 / +0.417, qwen3-30b-a3b-fp8
+−0.083 / +0.083 with 5 hedges and 0 false accusations. The corrected set is
+harder — two more false claims and one fewer true one — and gpt-oss-120b
+still catches six of the seven and accuses none of the three.)
 
 **gpt-oss-120b, with the evidence in front of it, catches 5 of the 6 false
 claims and accuses none of the 4 true ones.** Its reasons are specific and
@@ -150,9 +166,22 @@ accusations, and the reasons were *specific and entirely reasonable*:
 
 Both claims are **true**. The notes say −73.5 dBFS (`EMPTY-ROOM-CONTROL.md`)
 and 0.01 % (`ROW-BAND-REMOVAL.md`). The model's 2.99 % is the row-only
-figure from `COMBINED-FILTER.md` — a **different metric** (saturation, not
-flip rate) — in a note that was included, while the note that defines 0.01 %
-was **cut off**.
+figure from `COMBINED-FILTER.md`, and the note that defines 0.01 % was
+**cut off**.
+
+**And the first version of this document's explanation of that was itself
+wrong, which the notes audit caught.** It said the 2.99 % was "a different
+metric (saturation, not flip rate)". It is not: `0.0299` is `A_flip`, the
+**occupied** flip rate, and `COMBINED-FILTER.md`'s table header labels that
+column "empty saturation" when the script prints `empty flip | empty sat |
+occ flip | occ sat | A-vs-C gap | loc`. **The model was reading a mislabelled
+column**, and the first explanation defended the mislabelling instead of
+noticing it. The real empty-room saturation for row removal is **0.48839
+(48.8 %)**, and for row+median3 it is **0.034787 (3.48 %)**, not 0.0014.
+
+Which is the same shape as the failure this document is about, one level down:
+a number carried forward from a run whose label had changed, and a
+defence of it that was more confident than the evidence.
 
 The harness was filling a 24 000-character budget with notes in alphabetical
 order and stopping. With 30 notes totalling 372 kB, that meant **six notes

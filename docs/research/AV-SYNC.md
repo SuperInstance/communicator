@@ -149,8 +149,11 @@ could be read as "everything is wrong".
 
 **Not touched — every video-only result stands:**
 
-  - A-vs-C differing by 4.914 counts against a within-split of 1.917, with
-    79 % of the excess in the top 5 % of pixels. Video only.
+  - A-vs-C differing by 4.914 counts against a within-split of 2.878, with
+    79 % of the excess in the top 5 % of pixels. Video only. (The factor is
+    **1.71×**, not the 2.6× that `ROW-BAND-REMOVAL.md` prints — that one
+    divides by the within-split of condition **B**, 1.917, rather than of the
+    condition in the contrast. See `NOTES-AUDIT.md` F1.)
   - Row-band removal: empty 50.00 % → 0.01 %, occupied 48.19 % → 48.57 %.
     Video only.
   - The drift characterisation, the gain-invariance result, the flicker

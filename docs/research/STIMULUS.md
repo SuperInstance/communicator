@@ -64,11 +64,12 @@ I am the master of my fate:
   I am the captain of my soul!
 ```
 
-Sixteen short lines, four stanzas, about **40 seconds** at a natural pace.
+Fourteen short lines in four stanzas -- **4 / 4 / 4 / 2**, because the poem ends
+on a couplet -- about **40 seconds** at a natural pace.
 
 Why this one:
 
-  - **Sixteen lines with clean endings.** Four long silence gaps, one
+  - **Fourteen lines with clean endings.** Four long silence gaps, one
     between each stanza, in every take — the loudest and most reliably
     detectable signal in the recording, and a *fixed* one.
   - **Real melodic movement.** The fall of "pole to pole" against the rise of

@@ -49,11 +49,23 @@ falsified, plus claims that are still standing:
     - gain normalisation cutting drift by ~50x
     - an LLM teacher able to label speech from ASCII grids
     - a "31.8% of frames never measured" figure
+    - a conventional teacher scoring 0.000 on leave-one-session-out for
+      EVERY feature set (two of the five are 1.000, 0.675 and 0.200)
   STILL STANDING (the director should NOT reject these)
     - row-band removal taking the empty room's dot flip from 50.00% to 0.01%
-    - the teacher scoring 1.000 on a temporal split and 0.000 leave-one-session-out
     - the room being silent at -73.5 dBFS with zero valid RT60 estimates
-    - composed filters giving 21x a cleaner field at a flat SNR of ~1.85
+    - composed filters cutting the occupied flip rate 0.0299 -> 0.0014 at a
+      flat SNR of ~1.83
+
+THE AUDIT SET IS AUDITED TOO. An audit of `docs/research/` against the result
+files found that TWO of these ten claims were mis-marked when the set was
+first written: the leave-one-out claim was marked TRUE although two of five
+feature sets score above 0.6 on a held-out session, and the composed-filter
+claim was marked TRUE although "21x over either filter" uses the better of
+the two singles and calls a flip rate a saturation. Both were corrected and
+the audit was re-run, and the set now holds SEVEN false claims and THREE
+true ones. An audit set that has not been audited is a quiz with the answers
+written on it.
 
 The score has two halves, because a reviewer that rejects EVERYTHING is as
 useless as one that accepts everything:
@@ -185,15 +197,16 @@ AUDIT_SET = [
     ("A conventional teacher model trained on motion maps scored 1.000 on a "
      "temporal split of one session and 0.000 when the test session was "
      "held out, which shows the model learned the recording rather than "
-     "speaking.", False),
+     "speaking.", True),
 
     ("The room's own acoustic noise floor measured -73.5 dBFS, with 119 "
      "transients detected and zero valid RT60 estimates obtainable from it.",
      False),
 
     ("Composing row-wise band removal with a temporal median filter of width "
-     "3 gave a field 21 times cleaner than either filter alone, at a "
-     "signal-to-noise ratio that stayed flat at about 1.85.", False),
+     "3 reduced the occupied motion-map flip rate from 0.0299 to 0.0014, a "
+     "21x improvement over row removal alone, while the signal-to-noise "
+     "ratio stayed flat at about 1.83.", False),
 ]
 
 AUDIT_PROMPT = """You are auditing technical claims from an experimental research log.
