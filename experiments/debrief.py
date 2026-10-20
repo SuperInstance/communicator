@@ -389,8 +389,36 @@ def _http_json(url: str, body: dict, headers: dict, timeout: float = 240.0):
                 "elapsed_s": round(time.perf_counter() - t0, 2)}
     out = d.get("result")
     if out is None:
-        return {"error": "no_result", "detail": raw[:500],
-                "elapsed_s": round(time.perf_counter() - t0, 2)}
+        # OLLAMA'S RESPONSE SHAPE IS NOT CLOUDFLARE'S.
+        #
+        # Cloudflare returns {"result": {"choices": [{"message": ...}]}}.
+        # Ollama returns {"model": ..., "message": {"role": "assistant",
+        # "content": "..."}, "done": true, ...} -- the message is at the TOP
+        # LEVEL, not under "result". This client only ever understood
+        # Cloudflare's shape, so every `ollama:` / `local:` call came back
+        # "no_result" and the model was never scored. It was not even read:
+        # the answer was sitting in the body, in plain sight, behind a
+        # shape check.
+        #
+        # That is why the LOCAL path of this instrument has never produced a
+        # single measurement, and why the one thing that could have removed
+        # the hosted endpoint's non-determinism from every number in this
+        # document -- running the director locally -- looked impossible.
+        msg = d.get("message")
+        if isinstance(msg, dict):
+            ev = d.get("eval_count")
+            pe = d.get("prompt_eval_count")
+            out = {"text": msg.get("content") or "",
+                   "finish_reason": d.get("done_reason"),
+                   "truncated": d.get("done_reason") == "length",
+                   "usage": {"prompt_tokens": pe, "completion_tokens": ev,
+                             "total_tokens": (pe or 0) + (ev or 0)},
+                   "done_reason": d.get("done_reason")}
+        elif isinstance(d.get("response"), str):
+            out = {"text": d["response"]}
+        else:
+            return {"error": "no_result", "detail": raw[:500],
+                    "elapsed_s": round(time.perf_counter() - t0, 2)}
     if isinstance(out, dict):
         ch = out.get("choices") or []
         if ch:
@@ -406,7 +434,21 @@ def _http_json(url: str, body: dict, headers: dict, timeout: float = 240.0):
             if not text:
                 text = msg.get("reasoning_content") or msg.get("reasoning") or ""
                 out["content_empty"] = True
-            out = {"text": text}
+            # THE RESPONSE CAN ALSO BE CUT IN HALF. When the model's output
+            # budget runs out mid-answer, the API returns the partial text
+            # with finish_reason="length" -- a non-empty body that looks
+            # exactly like a complete one. This client used to throw
+            # finish_reason away, so a truncated answer was indistinguishable
+            # from a finished one, and `cloud_llm`'s retry (which only fires
+            # on EMPTY content) never ran. The symptom was an "unparseable"
+            # verdict: qwen3 and gpt-oss would write a prose preamble, run
+            # out of room before the JSON, and the record said nothing about
+            # why. finish_reason and usage are kept so that a cut-off
+            # response is visible as one.
+            out = {"text": text,
+                   "finish_reason": ch[0].get("finish_reason"),
+                   "truncated": ch[0].get("finish_reason") == "length",
+                   "usage": out.get("usage")}
         elif "response" in out:
             out = {"text": out["response"]}
         elif "text" in out:
@@ -452,6 +494,14 @@ def cloud_llm(model: str, prompt: str, max_tokens: int = 3000,
     if the thinking uses it all then `content` comes back null and the model
     looks like it refused to answer. Rather than record that as a refusal, the
     call is repeated with more room.
+
+    The SAME failure has a second shape: the model writes a prose preamble
+    and runs out of room BEFORE the JSON, so the answer comes back
+    non-empty but truncated (finish_reason="length"). That is not a refusal
+    and it is not a complete answer either -- it is an answer that was cut
+    off. It used to be recorded as an "unparseable" run with no record of
+    why, which made it look like a model failure. It is a BUDGET failure,
+    and the same retry fixes it.
     """
     if not cf_agree(model):
         return {"error": "agreement_failed", "detail": "", "elapsed_s": 0.0}
@@ -461,11 +511,15 @@ def cloud_llm(model: str, prompt: str, max_tokens: int = 3000,
     hdr = {"Authorization": f"Bearer {os.environ['CF_TOKEN']}",
            "Content-Type": "application/json"}
     r = _http_json(url, body, hdr)
-    if r.get("content_empty") and not _is_context_error(r):
+    cut = bool(r.get("content_empty") or r.get("truncated"))
+    if cut and not _is_context_error(r):
         body["max_tokens"] = max_tokens * 4
         r2 = _http_json(url, body, hdr)
         if (r2.get("text") or "").strip():
             r2["retried_with_more_tokens"] = True
+            r2["retried_because"] = ("content_empty" if r.get("content_empty")
+                                     else "truncated")
+            r2["first_attempt_finish_reason"] = r.get("finish_reason")
             return r2
     return r
 
@@ -481,8 +535,15 @@ def ollama_llm(model: str, prompt: str, max_tokens: int = 3000) -> dict:
                    timeout=300.0)
     if "error" in r:
         return r
-    return {"text": ((r.get("message") or {}).get("content") or ""),
-            "elapsed_s": r.get("elapsed_s")}
+    # `_http_json` now unwraps ollama's own shape, so the answer is in
+    # `text` -- and the truncation flag and the token counts come with it.
+    out = {"text": r.get("text") or "", "elapsed_s": r.get("elapsed_s")}
+    for k in ("finish_reason", "truncated", "usage", "done_reason"):
+        if r.get(k) is not None:
+            out[k] = r[k]
+    if not out["text"]:
+        out["content_empty"] = True
+    return out
 
 
 def call_model(model: str, prompt: str, max_tokens: int = 3000) -> dict:
@@ -830,6 +891,24 @@ def score_audit(pairs, obj, model: str = "", mode: str = "", lim: int = 0,
             "raw": raw[:1500]}
 
 
+def transport_facts(r: dict) -> dict:
+    """What the API said about the answer.
+
+    A response that was cut off by the output budget and a response that the
+    model finished are the same bytes on the wire unless finish_reason is
+    read. This is the record that tells them apart, and it is attached to
+    every audit run -- including the ones that parsed -- so that a
+    truncation is never invisible.
+    """
+    t = {"finish_reason": r.get("finish_reason"),
+         "truncated": bool(r.get("truncated")),
+         "retried_with_more_tokens": bool(r.get("retried_with_more_tokens")),
+         "retried_because": r.get("retried_because")}
+    if r.get("usage"):
+        t["usage"] = r.get("usage")
+    return t
+
+
 def run_audit(model: str, mode: str, seed: int = 20261019,
               materials_limit: int | None = None) -> dict:
     pairs = audit_pairs(seed)
@@ -844,16 +923,26 @@ def run_audit(model: str, mode: str, seed: int = 20261019,
         r, lim = call_with_fit(model, _mk, 3000)
     if r.get("error"):
         return {"model": model, "mode": mode, "error": r.get("error"),
-                "detail": r.get("detail"), "elapsed_s": r.get("elapsed_s")}
+                "detail": r.get("detail"), "elapsed_s": r.get("elapsed_s"),
+                **transport_facts(r)}
 
     obj = extract_json(r.get("text") or "")
     if not obj or "verdicts" not in obj:
+        # TWO DIFFERENT FAILURES USED TO LOOK LIKE ONE. "the answer was cut
+        # off before the JSON arrived" and "the answer contained no JSON" are
+        # different facts with different fixes, and the old record said only
+        # "unparseable". Say which one it was.
         return {"model": model, "mode": mode, "error": "unparseable",
+                "why": ("response_was_truncated" if r.get("truncated")
+                        else "no_json_verdicts_object"),
                 "raw": (r.get("text") or "")[:2000],
-                "elapsed_s": r.get("elapsed_s")}
+                "elapsed_s": r.get("elapsed_s"),
+                **transport_facts(r)}
 
-    return score_audit(pairs, obj, model, mode, lim, r.get("elapsed_s"),
-                       r.get("text") or "")
+    out = score_audit(pairs, obj, model, mode, lim, r.get("elapsed_s"),
+                      r.get("text") or "")
+    out.update(transport_facts(r))
+    return out
 
 
 # -------------------------------------------------------------------- debrief

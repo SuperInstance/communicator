@@ -1231,6 +1231,86 @@ CLAIM_PROBES = {
 RETRACTION_PROBES = ("WITHDRAWN", "premise is withdrawn", "PREMISE IS WITHDRAWN")
 
 
+def _slice_note(p: Path, per: int) -> tuple[str, dict]:
+    """Slice ONE note to its share of the budget, and describe what survived.
+
+    ONE implementation, used by BOTH the collector and the per-note
+    diagnostic, because the diagnostic used to be a SECOND copy of the
+    keep-set -- and that copy still carried the old front-truncation
+    (`text[:per]`). So the diagnostic was measuring a pool that was NOT the
+    pool the runs were made against, and it reported 3 of 50 notes keeping
+    their tail while the pool actually used kept 50 of 50. A copy of a
+    thing that measures the thing is a second implementation of it, and it
+    will drift.
+
+    The slice keeps the head, the tail and every line with a digit in it.
+    If the assembled keep-set is too big, the budget is spent by dropping
+    lines from the MIDDLE. If even the head-and-tail slice is too big,
+    each end is cut to its own half so that BOTH survive.
+    """
+    try:
+        body = p.read_text()
+    except Exception:  # noqa: BLE001
+        return "", {}
+    lines = body.splitlines()
+    row = {"note": p.name, "bytes": len(body), "n_lines": len(lines),
+           "per_note_cap": per}
+    if len(body) <= per:
+        row.update({"n_lines_kept": len(lines), "kept_chars": len(body),
+                    "truncated": False, "frac_of_kept_text_surviving": 1.0,
+                    "tail_survives": True})
+        return body, row
+
+    head_lines = max(3, int(len(lines) * 0.18))
+    keep = set(range(head_lines))
+    keep |= set(range(len(lines) - head_lines, len(lines)))
+    for i, ln in enumerate(lines):
+        if any(ch.isdigit() for ch in ln):
+            keep.add(i)
+    keep = sorted(keep)
+
+    def assemble(ks: list[int]) -> str:
+        out, prev = [], -2
+        for i in ks:
+            if i != prev + 1:
+                out.append(f"[... {i - prev - 1} lines elided ...]")
+            out.append(lines[i])
+            prev = i
+        return "\n".join(out)
+
+    n_head = max(3, len(keep) // 4)
+    n_tail = max(3, len(keep) // 4)
+    kept_text = assemble(keep)
+    text = kept_text
+    if len(text) > per:
+        # The budget is spent by dropping lines from the MIDDLE of the
+        # keep-set. The head and the tail are what carry the retraction
+        # notices, and the old front-truncation threw the tail away.
+        ks = list(keep)
+        while len(ks) > n_head + n_tail and len(assemble(ks)) > per:
+            del ks[len(ks) // 2]
+        keep = ks
+        text = assemble(ks)
+    if len(text) > per:
+        # Even the head-and-tail slice is too big. Cut each end to its
+        # own half of the budget so that BOTH survive.
+        head_text = "\n".join(lines[i] for i in keep[:n_head])
+        tail_text = "\n".join(lines[i] for i in keep[-n_tail:])
+        half = per // 2
+        text = (head_text[:half] + "\n[... truncated ...]\n"
+                + "[... middle elided ...]\n" + tail_text[-half:])
+    row.update({
+        "n_lines_kept": len(keep),
+        "kept_chars": len(kept_text),
+        "truncated": True,
+        "frac_of_kept_text_surviving": round(
+            len(text) / max(1, len(kept_text)), 4),
+        "tail_survives": bool([ln for ln in lines[-3:]
+                               if ln.strip() and ln[:30] in text]),
+    })
+    return text, row
+
+
 def collect_materials_with(limit: int, notes: list, res: list) -> str:
     """`debrief.collect_materials`, with the note and result lists supplied.
 
@@ -1257,51 +1337,9 @@ def collect_materials_with(limit: int, notes: list, res: list) -> str:
     note_pool = int(limit * 0.72)
     per = max(600, note_pool // max(1, len(notes)))
     for p in notes:
-        try:
-            body = p.read_text()
-        except Exception:  # noqa: BLE001
+        text, _row = _slice_note(p, per)
+        if not text and not _row:
             continue
-        lines = body.splitlines()
-        if len(body) <= per:
-            parts.append(f"--- NOTE: {p.name} ---\n{body}")
-            continue
-        head_lines = max(3, int(len(lines) * 0.18))
-        keep = set(range(head_lines))
-        keep |= set(range(len(lines) - head_lines, len(lines)))
-        for i, ln in enumerate(lines):
-            if any(ch.isdigit() for ch in ln):
-                keep.add(i)
-        keep = sorted(keep)
-
-        def assemble(ks: list[int]) -> str:
-            out, prev = [], -2
-            for i in ks:
-                if i != prev + 1:
-                    out.append(f"[... {i - prev - 1} lines elided ...]")
-                out.append(lines[i])
-                prev = i
-            return "\n".join(out)
-
-        n_head = max(3, len(keep) // 4)
-        n_tail = max(3, len(keep) // 4)
-        text = assemble(keep)
-        if len(text) > per:
-            # The budget is spent by dropping lines from the MIDDLE of the
-            # keep-set. The head and the tail are what carry the retraction
-            # notices, and the old front-truncation threw the tail away.
-            ks = list(keep)
-            while len(ks) > n_head + n_tail and len(assemble(ks)) > per:
-                del ks[len(ks) // 2]
-            keep = ks
-            text = assemble(keep)
-        if len(text) > per:
-            # Even the head-and-tail slice is too big. Cut each end to its
-            # own half of the budget so that BOTH survive.
-            head_text = "\n".join(lines[i] for i in keep[:n_head])
-            tail_text = "\n".join(lines[i] for i in keep[-n_tail:])
-            half = per // 2
-            text = (head_text[:half] + "\n[... truncated ...]\n"
-                    + "[... middle elided ...]\n" + tail_text[-half:])
         parts.append(f"--- NOTE: {p.name} ---\n{text}")
     res_pool = int(limit * 0.24)
     per_res = max(300, res_pool // max(1, len(res)))
@@ -1367,37 +1405,17 @@ def evidence_reachability(mode: str = "context", limit: int = 140000,
 
 
     # The note-level diagnostic: how much of each note survives the cap.
+    # It calls the SAME slicer the collector calls. It used to carry its
+    # own copy of the keep-set, and that copy still had the old
+    # front-truncation in it, so it was describing a pool that was not the
+    # pool the runs were made against.
     note_pool = int(limit * 0.72)
     per = max(600, note_pool // max(1, len(notes)))
     rows = []
     for p in notes:
-        try:
-            body = p.read_text()
-        except Exception:  # noqa: BLE001
-            continue
-        lines = body.splitlines()
-        head_lines = max(3, int(len(lines) * 0.18))
-        keep = set(range(head_lines))
-        keep |= set(range(len(lines) - head_lines, len(lines)))
-        for i, ln in enumerate(lines):
-            if any(ch.isdigit() for ch in ln):
-                keep.add(i)
-        keep = sorted(keep)
-        out_lines, prev = [], -2
-        for i in keep:
-            if i != prev + 1:
-                out_lines.append(f"[... {i - prev - 1} lines elided ...]")
-            out_lines.append(lines[i])
-            prev = i
-        text = "\n".join(out_lines)
-        final = text[:per] + "\n[... truncated ...]" if len(text) > per else text
-        rows.append({
-            "note": p.name, "bytes": len(body), "n_lines": len(lines),
-            "n_lines_kept": len(keep), "kept_chars": len(text),
-            "per_note_cap": per, "truncated": len(text) > per,
-            "frac_of_kept_text_surviving": round(len(final) / max(1, len(text)), 4),
-            "tail_survives": bool([l for l in lines[-3:] if l.strip() and l[:30] in final]),
-        })
+        _text, row = _slice_note(p, per)
+        if row:
+            rows.append(row)
     out["per_note"] = rows
     out["n_notes"] = len(notes)
     out["per_note_cap"] = per
