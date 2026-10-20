@@ -1,0 +1,227 @@
+{
+  "question": "is the withdrawn leave-one-session-out accuracy of 0.675 reachable in a sweep over the parameters the artefact never recorded?",
+  "answer": "NO",
+  "withdrawn_value": 0.675,
+  "withdrawn_control_columns": {
+    "acc_test": 1.0,
+    "acc_test_spatially_scrambled": 1.0,
+    "acc_test_blank": 0.6666666666666666,
+    "margin_over_best_control": 0.0
+  },
+  "sweep": {
+    "filters": [
+      "none",
+      "row",
+      "row+median3",
+      "row+median5"
+    ],
+    "max_frames": [
+      206,
+      300,
+      450,
+      600
+    ],
+    "strides": [
+      1,
+      2,
+      3,
+      4,
+      5,
+      6,
+      8,
+      10
+    ],
+    "max_pers": [
+      20,
+      30,
+      40,
+      50,
+      60
+    ],
+    "tasks": [
+      "speaking",
+      "facing"
+    ],
+    "features": "both",
+    "n_configurations_planned": 1280,
+    "n_configurations_run": 1280
+  },
+  "reproductions": [],
+  "loo_b_value_histogram": {
+    "0.0": 406,
+    "0.016667": 1,
+    "0.025": 2,
+    "0.033333": 3,
+    "0.05": 10,
+    "0.06": 1,
+    "0.066667": 4,
+    "0.075": 2,
+    "0.083333": 2,
+    "0.1": 21,
+    "0.107143": 1,
+    "0.116667": 2,
+    "0.12": 3,
+    "0.133333": 9,
+    "0.14": 2,
+    "0.15": 8,
+    "0.16": 1,
+    "0.166667": 7,
+    "0.169492": 1,
+    "0.175": 5,
+    "0.18": 2,
+    "0.2": 18,
+    "0.216667": 1,
+    "0.22": 4,
+    "0.225": 1,
+    "0.233333": 5,
+    "0.24": 1,
+    "0.243243": 3,
+    "0.25": 4,
+    "0.26": 2,
+    "0.266667": 4,
+    "0.275": 2,
+    "0.28": 5,
+    "0.283333": 1,
+    "0.3": 9,
+    "0.306122": 2,
+    "0.316667": 2,
+    "0.32": 1,
+    "0.323529": 3,
+    "0.325": 1,
+    "0.34": 1,
+    "0.35": 2,
+    "0.366667": 1,
+    "0.375": 1,
+    "0.38": 1,
+    "0.4": 2,
+    "0.45": 1,
+    "0.5": 2,
+    "0.516667": 1,
+    "0.6": 2,
+    "0.65": 1,
+    "0.8": 1,
+    "1.0": 62
+  },
+  "n_distinct_loo_b_values": 53,
+  "corpus_identity": {
+    "corpus_on_disk": {
+      "path": "/mnt/c/proart_capture/corpus",
+      "sessions": {
+        "A_seed.npz": "24e6aede96b851f4a23664b7287135013c65c73dc146e7cc726414042d119c0f",
+        "B_seed.npz": "0a9e1014b6d6705686e2bb18fee97703026436675cd1450d1c8587712bfa5a6a",
+        "C_seed.npz": "8c807237e26184d5ed45e1bc30a175d3173fb770c539c4235faab46a15e92247"
+      },
+      "present": true,
+      "fingerprint": "5f6327786ad0713f6ebb02de80ee9562f725ede492f036e9788b92481c2e5121",
+      "session_fingerprints": [
+        {
+          "npz_path": "/mnt/c/proart_capture/corpus/A_seed.npz",
+          "npz_sha256": "24e6aede96b851f4a23664b7287135013c65c73dc146e7cc726414042d119c0f",
+          "n_frames": 599,
+          "map_shape": [
+            48,
+            80
+          ],
+          "scale": 143.2708282470703
+        },
+        {
+          "npz_path": "/mnt/c/proart_capture/corpus/B_seed.npz",
+          "npz_sha256": "0a9e1014b6d6705686e2bb18fee97703026436675cd1450d1c8587712bfa5a6a",
+          "n_frames": 599,
+          "map_shape": [
+            48,
+            80
+          ],
+          "scale": 131.3177032470703
+        },
+        {
+          "npz_path": "/mnt/c/proart_capture/corpus/C_seed.npz",
+          "npz_sha256": "8c807237e26184d5ed45e1bc30a175d3173fb770c539c4235faab46a15e92247",
+          "n_frames": 599,
+          "map_shape": [
+            48,
+            80
+          ],
+          "scale": 140.046875
+        }
+      ]
+    },
+    "corpus_rm3_on_disk": {
+      "path": "/mnt/c/proart_capture/corpus_rm3",
+      "sessions": {
+        "A_rm3.npz": "b3fc2e4f469e2151af582ca362e610e073b785bab132328e962240385e2c3d7a",
+        "B_rm3.npz": "01fe34cd1dd226bbc4dedfbf0cc331e277d2c93092fe81d3306e2c986c77594c",
+        "C_rm3.npz": "dd38dae2b160bc8f03f1f5fe211143a398211919d2e576cd4228b0024750699c"
+      },
+      "present": true,
+      "fingerprint": "5b05a8f255f7f003ec84cfac05bad648bf7ee0c2aad04c69daee3db5c45b00f2",
+      "session_fingerprints": [
+        {
+          "npz_path": "/mnt/c/proart_capture/corpus_rm3/A_rm3.npz",
+          "npz_sha256": "b3fc2e4f469e2151af582ca362e610e073b785bab132328e962240385e2c3d7a",
+          "n_frames": 599,
+          "map_shape": [
+            48,
+            80
+          ],
+          "scale": 52.3046875
+        },
+        {
+          "npz_path": "/mnt/c/proart_capture/corpus_rm3/B_rm3.npz",
+          "npz_sha256": "01fe34cd1dd226bbc4dedfbf0cc331e277d2c93092fe81d3306e2c986c77594c",
+          "n_frames": 599,
+          "map_shape": [
+            48,
+            80
+          ],
+          "scale": 100.85416412353516
+        },
+        {
+          "npz_path": "/mnt/c/proart_capture/corpus_rm3/C_rm3.npz",
+          "npz_sha256": "dd38dae2b160bc8f03f1f5fe211143a398211919d2e576cd4228b0024750699c",
+          "n_frames": 599,
+          "map_shape": [
+            48,
+            80
+          ],
+          "scale": 69.72188568115234
+        }
+      ]
+    }
+  },
+  "corpus_rebuild_check": {
+    "A_rm3": {
+      "seeded_file": "A_sw600.npz",
+      "on_disk_file": "A_rm3.npz",
+      "seeded_sha256": "b3fc2e4f469e2151af582ca362e610e073b785bab132328e962240385e2c3d7a",
+      "on_disk_sha256": "b3fc2e4f469e2151af582ca362e610e073b785bab132328e962240385e2c3d7a",
+      "identical": true
+    },
+    "B_rm3": {
+      "seeded_file": "B_sw600.npz",
+      "on_disk_file": "B_rm3.npz",
+      "seeded_sha256": "01fe34cd1dd226bbc4dedfbf0cc331e277d2c93092fe81d3306e2c986c77594c",
+      "on_disk_sha256": "01fe34cd1dd226bbc4dedfbf0cc331e277d2c93092fe81d3306e2c986c77594c",
+      "identical": true
+    },
+    "C_rm3": {
+      "seeded_file": "C_sw600.npz",
+      "on_disk_file": "C_rm3.npz",
+      "seeded_sha256": "dd38dae2b160bc8f03f1f5fe211143a398211919d2e576cd4228b0024750699c",
+      "on_disk_sha256": "dd38dae2b160bc8f03f1f5fe211143a398211919d2e576cd4228b0024750699c",
+      "identical": true
+    }
+  },
+  "corpus_rebuild_byte_identical": true,
+  "provenance": {
+    "generated_by": "experiments/retraction_sweep.py",
+    "script_sha256": "4050595d8459ed800fdede7da12409ec00cbdee8e926d02064aa04886983347a",
+    "script_path": "/home/proart/projects/communicator/experiments/retraction_sweep.py",
+    "teacher_conventional_sha256": "69e11ea247c3fb1ab617c4ea94b028c2ec8ff38a6e6325c2ba5ffa23f370a974",
+    "seeder_sha256": "c0b2474539d1a95c03dc2f922fcda427e37fc974c593a5e87a458a3008f6c659",
+    "python": "/home/proart/projects/glasses/.venv/bin/python",
+    "work_dir": "/tmp/retraction_sweep",
+    "command_line": "experiments/retraction_sweep.py"
+  },
+  "elapsed_s": 186.6
+}

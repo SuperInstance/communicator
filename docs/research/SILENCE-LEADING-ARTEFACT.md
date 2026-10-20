@@ -519,15 +519,28 @@ logic are unaffected.
 | `src/watcher.py` | the corpus-length and longest-pause figures quoted in its docstring (:660-665) |
 | `docs/research/ADOPTION-PLAN.md` §3 | the published pause table |
 
-**One stale number found on the way, outside this lane and NOT changed:** the
-`src/turn.py:37` docstring row for poetry reads `max_gap "-"` and `gaps >= 3 s
-"-"`, but the whole-file energy population has a **5.100 s** gap in poetry
+**One stale number found on the way, outside this lane and NOT changed by it:**
+the `src/turn.py:37` docstring row for poetry read `max_gap "-"` and `gaps >= 3 s
+"-"`, and the whole-file energy population has a **5.100 s** gap in poetry
 (1 gap ≥ 3 s), which is what `experiments/pause_threshold_results.json`
-records (`max_s: 5.1`). The row appears to predate the poetry cell being
-measured. It is not affected by this fix — the energy population is
-unchanged for poetry — but it is wrong today, and it is in a shipped file's
-docstring, which is where this repository says wrong numbers should not
-stay.
+records (`max_s: 5.1`). The row appeared to predate the poetry cell being
+measured.
+
+> **CORRECTION (2026-10-19, `NOTES-AUDIT-3.md` F10).** This was true when it
+> was written and it was **fixed in the same commit that added this file**
+> (`d4a49c1`), so the "it is wrong today" is no longer true. The row now reads
+> `20.011 / 1.740 / 0`.
+>
+> The fix turned out to be a **population** question rather than a number
+> question, and this note got the first half of it wrong. The 5.100 s silence
+> in poetry runs from **14.895 s to 19.995 s of a 20.011 s file** — it is the
+> recording stopping, not a speaker pausing. Poetry's longest
+> **inter-utterance** gap is **1.740 s**, so poetry produces no turn boundary
+> at 3 s, like the other five cells, and the "-" was right for the
+> inter-utterance population the turn table counts. `src/turn.py` also now
+> says "six of seven cells", because poetry is no longer an unmeasured cell.
+> `docs/research/PAUSE-THRESHOLD.md` §4, "The other end of the file:
+> trailing silence".
 
 ## 8. Provenance
 

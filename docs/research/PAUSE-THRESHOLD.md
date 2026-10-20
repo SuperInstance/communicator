@@ -282,16 +282,25 @@ The 680 is not exactly reproducible under any method tried:
 | watcher **distinct runs**, adaptive | **673** |
 | watcher pause events, `run_s > 0.15`, energy-only (adaptive off) | 647 |
 | watcher pause events, no filter, energy-only | 664 |
-| watcher distinct runs, energy-only | 215 |
+| watcher distinct runs, energy-only | 216 |
 | the energy method's silence runs @0.150 (the pause table's population) | 262 |
 | the energy method's silence runs with no filter | 622 |
-| the same, on a hypothetical 465 s corpus (poetry truncated to 15 s) | 1656 events / **665** runs |
+| the same, on a hypothetical **480 s** corpus (poetry truncated to 15 s) | 1656 events / **665** runs |
+| the same, on a true **465 s** corpus (poetry removed entirely) | 1612 events / **644** runs |
+
+> **CORRECTION (2026-10-19, `NOTES-AUDIT-3.md` F1, F2).** The energy-only
+> distinct-run count is **216**, not 215. And the "465 s corpus" row was
+> really the **480 s** corpus: 465 − 90 (narration) − 375 (five 75 s cells) =
+> **0 s of poetry, not 15 s**. The 665 figure belongs to the 480 s corpus,
+> where poetry is truncated to 15 s; a true 465 s corpus has no poetry at all
+> and gives **1612 events / 644 runs**.
 
 The reading that fits all the evidence: **680 was a run count, 1671 is an
 event count, and the 1.03% difference between 680 and today's 673 is watcher
 drift, not corpus drift** — truncating the poetry cell to the 15 s the
-465 s figure implies moves the run count *down* to 665, further from 680,
-not up towards it. The population behind 680 no longer exists in this
+480 s figure implies moves the run count *down* to 665, further from 680,
+not up towards it. Removing poetry altogether moves it further still, to
+644. The population behind 680 no longer exists in this
 repository, so the figure is reported as *not exactly reproducible* — and
 every rate computed on it is on a population that cannot be re-derived.
 
@@ -409,9 +418,17 @@ change between runs.
 
 ## 7. Stale numbers — what has to be corrected, and where
 
-**These files were not edited.** The corrections below are for the parent
-agent to apply; a note cannot fix a docstring, and `docs/research/ADOPTION-PLAN.md`
-and `docs/research/TURN-ROUTES.md` are outside this lane.
+> **CORRECTION (2026-10-19, `NOTES-AUDIT-3.md` F11).** This section opened
+> with *"These files were not edited."* They have since been: all **six**
+> `ADOPTION-PLAN.md` items in the table below and the `TURN-ROUTES.md` items
+> were applied by a corrections lane (`c71a6c5`), and the table is kept as
+> the record of what was changed. The line numbers below refer to the
+> pre-correction text and are now stale — which is itself the point: a
+> correction table with line numbers is only true until the next edit.
+
+**These files were not edited** *by the lane that measured them* — the
+corrections below were for the parent agent to apply, since a note cannot
+fix a docstring.
 
 ### `docs/research/ADOPTION-PLAN.md`
 

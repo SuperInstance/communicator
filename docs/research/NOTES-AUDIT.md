@@ -90,15 +90,22 @@ neither candidate source (B 0.675 or B 0.200).
 >
 > It is not a code problem and it is not a data problem:
 >
-> - The **script** at `7a4dff5` and at `HEAD` are identical, and both return
->   0.000.
+> - The **script** at `7a4dff5` and at `HEAD` are **not** the same file — it
+>   gained the provenance API in `d6baa6d` (blob `459e23c0…` → `f8f89c96…`) —
+>   and **both** versions return 0.000, so the conclusion does not depend on
+>   which one is run. (`NOTES-AUDIT-3.md` F6; this sentence was true when
+>   written, because `HEAD` was then `7a4dff5`'s neighbour, and it stopped
+>   being true when the provenance API landed. A claim about "the script"
+>   needs the script's hash next to it.)
 > - The **corpus** rebuilds byte for byte from the captures
 >   (`seed_corpus_from_captures.py --filter row+median3` produces three
 >   SHA-256-identical `.npz` files), so the input is not the variable either.
 > - The artefact **never recorded** which corpus produced it, nor its stride,
 >   max-per, frame count or task — so the run cannot even be *specified* from
->   what was committed. A sweep of 352 configurations over those unrecorded
->   parameters never produces 0.675 together with the artefact's other columns.
+>   what was committed. A sweep of 1280 configurations over those unrecorded
+>   parameters -- committed as `experiments/retraction_sweep.py` and
+>   `experiments/retraction_sweep_results.json` -- never produces 0.675
+>   together with the artefact's other columns.
 >
 > The other four feature sets' artefacts reproduce bit-exactly from
 > `/mnt/c/proart_capture/corpus`, so the **verdict** ("0.000 for every feature

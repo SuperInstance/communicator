@@ -163,9 +163,17 @@ opposite of what the blind test was hoping to find.
 
 (On the earlier, easier set, before the two corrections: gpt-oss-120b +0.833
 strict / +1.000 lenient, llama-3.3-70b +0.250 / +0.417, qwen3-30b-a3b-fp8
-−0.083 / +0.083 with 5 hedges and 0 false accusations. The corrected set is
+−0.083 / −0.083, with **1** false accusation and **0** "uncertain" verdicts.
+The corrected set is
 harder — two more false claims and one fewer true one — and gpt-oss-120b
 still catches six of the seven and accuses none of the three.)
+
+> **CORRECTION (2026-10-19, `NOTES-AUDIT-3.md` F8).** This read "−0.083 /
+> **+0.083** with **5 hedges** and **0 false accusations**". The committed
+> record of that run — `debrief_audit_blind_cf-meta-llama-…json` at
+> `6d1456b` — holds `headline_lenient` **−0.0833**, `uncertain` **0** and
+> `false_positives` **1**. The lenient score was **not** higher than the
+> strict one; that model made one false accusation and no hedges.
 
 **gpt-oss-120b, with the evidence in front of it, catches 6 of the 7 false
 claims and accuses none of the 3 true ones.** Its reasons are specific and
@@ -175,9 +183,16 @@ correct:
 > *"The control experiment shows empty-room flips equal the theoretical maximum, indicating the metric does not reliably measure motion."*
 > *"The notes contain no data on a 0.30 threshold or a 14.5× reduction in drift."*
 
-qwen3-30b's low specificity is **hedging, not accusation**: 0 false
-accusations and 5 "uncertain" verdicts. That is the lenient headline's whole
+qwen3-30b's low specificity in the current blind run is **hedging, not
+accusation**: 0 false accusations and **1** "uncertain" verdict. That is the
+lenient headline's whole
 reason for existing.
+
+> **CORRECTION (2026-10-19, `NOTES-AUDIT-3.md` F9).** This read "5
+> 'uncertain' verdicts". No committed debrief row in the repository's whole
+> history carries more than **2** uncertain verdicts, and the current qwen rows
+> carry **1** and **0**. The hedging claim is right for the current run and
+> the count was not.
 
 **And the score is not stable.** llama-3.3-70b scored **+0.583** on one run
 and **+0.250** on another — same model, same ten claims, same shuffled
@@ -364,7 +379,7 @@ the answers.
 
 | | value |
 |---|---|
-| distinct titles | **5 of 6 runs** (agreement 0.167) |
+| distinct titles | **5**, from 6 runs — one run produced no title at all (agreement 0.167, i.e. 1 in 6) |
 | distinct `hypothesis` / `method` / `controls` / `null` / `falsifier` | **5 each** — every field varies |
 | runs producing all six required fields | **5 of 6** — one proposal was incomplete |
 | unsafe claims | 37 raised, **34 literally distinct**, top agreement 0.054 |

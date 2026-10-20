@@ -1074,14 +1074,20 @@ other column of that artefact comes back **exactly** — test 1.000, scrambled
 1.000, blank 0.667, margin +0.000 — and the held-out session comes back
 **0.000**.
 
-Neither the code nor the data is the variable. The script at `7a4dff5` and at
-`HEAD` are byte-identical and both return 0.000. The corpus rebuilds **byte
-for byte** from the captures (`seed_corpus_from_captures.py --filter
+Neither the code nor the data is the variable. The script at `7a4dff5` and the
+script at `HEAD` are **not** the same file — `HEAD`'s gained the provenance
+API in `d6baa6d` — but **both return 0.000**, and the run that produced the
+artefact is pinned by the artefact's own other columns. The corpus rebuilds
+**byte for byte** from the captures (`seed_corpus_from_captures.py --filter
 row+median3` produces three SHA-256-identical `.npz` files). And the artefact
 never recorded which corpus produced it, nor its stride, max-per, frame
 count or task — so the run cannot even be *specified* from what was
-committed. A sweep of **352 configurations** over those unrecorded parameters
-never produces 0.675 together with the artefact's other columns.
+committed. A sweep of **1280 configurations** over those unrecorded parameters
+(4 filter variants x 4 frame counts x 8 strides x 5 max-pers x 2 tasks),
+committed as `experiments/retraction_sweep.py` and
+`experiments/retraction_sweep_results.json`, never produces 0.675 together
+with the artefact's other columns — and it also checks the byte-for-byte
+corpus rebuild, which comes out **3 of 3 session files identical**.
 
 The other four feature sets' artefacts reproduce bit-exactly, so the verdict
 they support — *"leave-one-out is 0.000 for every feature set" is **false*** —
@@ -1103,8 +1109,14 @@ holds the prompt **byte-identical** (SHA-256 recorded) and sends it again:
 | mode | material | runs | distinct headlines | min | median | max | spread |
 |---|---|---:|---:|---:|---:|---:|---:|
 | blind | none (3,031 chars) | 8 | **4** | −0.190 | +0.357 | +0.429 | **0.619** |
-| context | 60,000 chars | 6 | **3** | −0.143 | +0.262 | +0.333 | **0.476** |
+| context | 60,000 chars | 6 | **4** | +0.000 | +0.119 | +0.333 | **0.333** |
 | context | 140,000 chars | 6 | **3** | +0.381 | +0.619 | **+1.000** | **0.619** |
+
+(The 60,000-char row is the run whose prompt SHA-256 is `72547b3d7a477718`.
+An earlier run at the same budget, with 715 fewer characters of material —
+`6a2b547b7becf0f9` — gave −0.143 / +0.262 / +0.333, spread 0.476. Same
+story, and the fact that the material changed under the measurement is
+itself the point: the material moves the score, and so does the model.)
 
 The control that makes this a measurement rather than an anecdote: a
 deterministic stub director, scored the same number of times with the same
@@ -1160,7 +1172,7 @@ changes every watcher-based number in the repo and is its own piece of work.
 and it reproduces exactly. The distinct **run** count is **673**, 1.03% from
 the 680, and the population behind the 680 no longer exists: the count is 673
 adaptive, 647 energy-only, 262 on the energy population, and **665** on a
-hypothetical 465 s corpus. **The 465 s misstatement moves the count away from
+hypothetical **480 s** corpus. **The 465 s misstatement moves the count away from
 680, not towards it.**
 
 **The notes get audited twice more.** Round one found 14 findings (10
@@ -1170,8 +1182,16 @@ per-axis spread table in `voiceloop/` that is contradicted by the file it
 claims to come from, a "6/9 first option" count where the file's own field
 says **3/9**, and two source-vs-prose comparisons in `alwayson/PYANNOTE.md`
 that divide a whole-tree byte count by a package-only count. The four
-corrections from round one are in the tree; the sixteen from round two are
-written up and pending.
+corrections from round one and the ten confirmed ones from round two are
+**in the tree** (`c71a6c5`), and applying them exposed five more places
+repeating the same defects, which are fixed too.
+
+A third audit round then audited the notes this session wrote — nine
+documents, ~1,300 numeric claims traced — and found **18 issues, 12
+confirmed**, including four in this arc: the claim that the two scripts were
+byte-identical, a superseded director row quoted as current, the round-two
+corrections described as pending, and the "465 s" corpus figure below.
+`docs/research/NOTES-AUDIT-3.md`.
 
 **The Windows bundle is re-synced and verified**: `corpus_capture_win.py` and
 `src/` on `C:\proart_capture` match the repo byte-for-byte, and the bundled

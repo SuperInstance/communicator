@@ -117,9 +117,11 @@ held-out B for summary / map / both / region+map.
 > other column of that artefact exactly — test 1.000, scrambled 1.000, blank
 > 0.667, margin +0.000 — and returns LOO **A 0.000, B 0.000**. Neither the code
 > nor the data is the variable: the corpus rebuilds byte for byte from the
-> captures, and a sweep of 352 configurations over the parameters the artefact
-> never recorded (filter variant × stride × max-per × frame count × task)
-> never produces 0.675 *together with* the artefact's other columns.
+> captures, and a sweep of 1280 configurations over the parameters the artefact
+> never recorded (4 filter variants × 4 frame counts × 8 strides × 5
+> max-pers × 2 tasks), committed as `experiments/retraction_sweep.py` and
+> `experiments/retraction_sweep_results.json`, never produces 0.675
+> *together with* the artefact's other columns.
 >
 > The other four feature sets' artefacts reproduce bit-exactly, so the
 > two-of-five verdict above stands on numbers that do reproduce — **map** B

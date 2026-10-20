@@ -55,13 +55,15 @@ population is corrected below) it fires on **zero**:
 > because the count moves with the population: 673 distinct runs (adaptive),
 > 1671 events (adaptive), 647 events (energy-only, adaptive off), 262 silence
 > runs from the energy method at 0.150 s, and **665** runs (1656 events) on
-> the hypothetical 465 s corpus that the misstated length implies.
-> Truncating the poetry cell to the 15 s that 465 s implies moves the run
+> the hypothetical **480 s** corpus that truncating poetry to 15 s implies.
+> A *true* 465 s corpus has **no poetry at all** (465 − 90 − 375 = 0) and
+> gives **644 runs / 1612 events** — further from 680 still. Truncating the
+> poetry cell moves the run
 > count **down** to 665 — *away* from 680, not up towards it — so the 465 s
 > misstatement does not explain the 680. Every rate computed on the 680
 > population is a rate on a population that cannot be re-derived. The table
 > above is now on the 673-run population. `docs/research/PAUSE-THRESHOLD.md` §5;
-> `NOTES-AUDIT.md` F8.
+> `NOTES-AUDIT.md` F8; `NOTES-AUDIT-3.md` F2.
 
 > **STILL TO FIX (2026-10-19) — outside this file's write lane.** None of these
 > were edited; a note cannot fix a docstring.

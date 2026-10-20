@@ -104,10 +104,12 @@ Regenerated the corpus with `row+median3` and re-ran the teacher:
 > returns LOO **A 0.000, B 0.000**. Neither the code nor the data is the
 > variable: the corpus rebuilds **byte for byte** from the captures
 > (`seed_corpus_from_captures.py --filter row+median3` yields three
-> SHA-256-identical `.npz` files), and a sweep of **352 configurations** over
-> the parameters the artefact never recorded (filter variant × stride ×
-> max-per × frame count × task) never produces 0.675 *together with* the
-> artefact's other columns. The cell is now **A 0.000, B 0.000**, and **0.675 is
+> SHA-256-identical `.npz` files), and a sweep of **1280 configurations** over
+> the parameters the artefact never recorded (4 filter variants × 4 frame
+> counts × 8 strides × 5 max-pers × 2 tasks), committed as
+> `experiments/retraction_sweep.py` and
+> `experiments/retraction_sweep_results.json`, never produces 0.675
+> *together with* the artefact's other columns. The cell is now **A 0.000, B 0.000**, and **0.675 is
 > withdrawn as a measurement of this corpus.** `NOTES-AUDIT.md` F3,
 > `ARTIFACT-REPRODUCIBILITY.md`.
 >
