@@ -746,3 +746,25 @@ status shape, the measured-audio contract — 800 samples of value 1
 measure as peak 1 / nonzero 800 — the inbox round-trip, the forced
 silent WAV raising its own SILENT_AUDIO alert, and the ship-refusal
 honesty).
+
+## Design-law compliance note (docs/research/BRIEF-TIERS-AND-DECOMPOSITION.md)
+
+The tiers/decomposition law applies to all liaison work; v1 complies by
+construction, and the compliance is load-bearing, not decorative:
+
+- **Local-first, fleet as upgrade**: the outbox is durable locally
+  BEFORE any ship; the Oracle ship is a best-effort upgrade whose
+  failure changes nothing functional and is self-reported. On the boat
+  tier (offline Thor) the liaison runs whole: API, sessions, measured
+  health, self-alerts — only the rendezvous ship waits for a link.
+- **Visible seams, no monolith**: every stage is a small inspectable
+  piece — energy VAD, luma frames, the timestamps spine, per-file
+  artifacts — connected by files, replaceable one at a time. No stage
+  hears sentiment end-to-end.
+- **Capture is destiny-safe TODAY**: the session bundles save the full
+  raw fidelity (WAV, luma, timestamps spine), and the score is DERIVED
+  from raw — transcript from the WAV, melody from pitch tracking,
+  face/motion from the luma — so a conversation captured tonight can
+  become a score later even before the scorer (MiniMax, build-order
+  item 3) lands. The conversation page (item 4) therefore waits on the
+  scorer per the brief's own order, without losing anything.
