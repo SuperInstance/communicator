@@ -819,3 +819,38 @@ The Jetson seat's replies ride the existing `verdict.json` contract.
 
 Verify suite: **169 passed, 0 failed** (two new checks: the /luma POST
 and the /luma-latest round-trip — same offsets, same bytes).
+
+## SICK LANE CLOSED ON EVIDENCE (Muse verification, 2026-10-21)
+
+Muse verified from the artifacts, independently of this seat: the
+newest saved session (1792560597) **measures speech — 422,585 nonzero
+samples of 1,312,128, peak 3006, RMS 0.00394** — and the live heartbeat
+reads `deaf: false` with the silence counter at 0. This seat re-measured
+the same file and got the same numbers to the sample. The session was a
+MANUAL take (trigger manual, close manual_stop) on the same Realtek
+array that delivered zeros the night before — the device hears, the
+pipeline carries it, the file holds it. Sick lane stood down.
+
+**The mechanism, for the next seat, in one breath**: nothing diverged
+inside the code — the meter and the WAV (and the WebM's audio track)
+all consumed the SAME stream, and on the bad night that stream was the
+input device delivering literal zeros while MOTION kept opening
+segments; 82.4M samples of silence accrued across 34 folders with no
+signal anywhere in the UI that the mic was dead. What changed:
+
+1. the held mic and camera are NAMED on the face and switchable in one
+   click (a mic switch re-taps the worklet and re-measures floors);
+2. a 60-second deafness GATE stops motion-only accrual and says so on
+   the indicator (DEAF — MIC SILENT), resuming the moment audio lives;
+3. every session's meta carries measured-not-asserted `peak_rms` /
+   `audio_silent`, `/api/sessions` recomputes them from the WAV itself,
+   and a save-time peak of 0 files a SILENT_AUDIO alert in the liaison
+   outbox — the failure class became a self-report.
+
+**Where the truth lives now, for whoever inherits this**: audio health
+is read from `/api/sessions` (measured) or the outbox (alerted), never
+from the page's own claims; the heartbeat's `deaf` / `audio_silent_s` /
+`speech_level` fields are the live instruments; and the reproducible
+proof method is the headless file-backed fake-mic run documented above
+(speech-shaped WAV in → measured nonzero WAV and WebM out; exact-zero
+WAV in → gate, no accrual, honest stamp).
