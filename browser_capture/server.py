@@ -374,7 +374,8 @@ def _last_page_heartbeat() -> dict:
 # SEGMENT_SAVED is superseded by the server's measured session_saved)
 LIAISON_FORWARD_KINDS = {"BOOT", "DEAF_ON", "DEAF_OFF", "DEVICE_FAILURE",
                          "SEGMENT_CLOSE", "MIC_SWITCH", "CAM_SWITCH",
-                         "GC_DRY_RUN", "PIN_SET", "PIN_CLEARED"}
+                         "GC_DRY_RUN", "PIN_SET", "PIN_CLEARED",
+                         "LENS_UPDATED"}
 
 
 # -- the NPY format, by hand (numpy is not stdlib) --------------------------
@@ -1314,6 +1315,77 @@ class Handler(BaseHTTPRequestHandler):
             self._json(200, {"ok": True, "stamp": req.get("stamp"),
                              "cleared": cleared})
 
+    LENS_NAME_RE = re.compile(r"^[a-z][a-z0-9_-]{0,31}$")
+
+    def _api_lenses_get(self):
+        """The normals registry / LENS FILES: each sensor's living
+        self-model (delays, drifts, deadbands, failure signatures).
+        Perception reads the world THROUGH them, never raw
+        (ADDENDUM-PERCEPTION-ADAPTATION.md)."""
+        d = Path(__file__).resolve().parent / "lenses"
+        out = {}
+        if d.is_dir():
+            for f in sorted(d.glob("*.json")):
+                try:
+                    out[f.stem] = json.loads(f.read_text())
+                except json.JSONDecodeError:
+                    out[f.stem] = {"error": "not JSON"}
+        self._json(200, {"ok": True, "lenses": out})
+
+    def _api_lens_post(self):
+        """POST /api/lens {sensor, updates, verified_by?} -- merge into
+        the sensor's lens file, stamp updated_at, and (when
+        verified_by is given) stamp the verification the normals-verify
+        loop closes on."""
+        try:
+            n = int(self.headers.get("Content-Length", "0"))
+        except ValueError:
+            n = -1
+        if n <= 0 or n > 262144:
+            self._json(400, {"ok": False, "error": "bad Content-Length"})
+            return
+        try:
+            req = json.loads(self.rfile.read(n).decode("utf-8"))
+        except (UnicodeDecodeError, json.JSONDecodeError) as exc:
+            self._json(400, {"ok": False, "error": f"not JSON: {exc}"})
+            return
+        if not isinstance(req, dict) or \
+                not isinstance(req.get("sensor"), str) or \
+                not self.LENS_NAME_RE.match(req["sensor"]):
+            self._json(400, {"ok": False,
+                             "error": "sensor must be a simple name"})
+            return
+        updates = req.get("updates")
+        if not isinstance(updates, dict) or not updates:
+            self._json(400, {"ok": False,
+                             "error": "expected {sensor, updates: {...}}"})
+            return
+        d = Path(__file__).resolve().parent / "lenses"
+        d.mkdir(exist_ok=True)
+        f = d / f"{req['sensor']}.json"
+        lens = {}
+        try:
+            lens = json.loads(f.read_text())
+        except (OSError, json.JSONDecodeError):
+            lens = {"sensor": req["sensor"]}
+        for k, v in updates.items():
+            if k in ("sensor", "updated_at", "verified"):
+                continue   # provenance fields are the registry's to stamp
+            lens[k] = v
+        lens["updated_at"] = time.strftime("%Y-%m-%dT%H:%M:%SZ",
+                                           time.gmtime())
+        if req.get("verified_by"):
+            lens["verified"] = {
+                "at": lens["updated_at"],
+                "by": str(req["verified_by"])[:64]}
+        f.write_text(json.dumps(lens, indent=2))
+        liaison_event({"class": "lens_updated",
+                       "sensor": req["sensor"],
+                       "fields": sorted(updates.keys()),
+                       "verified": bool(req.get("verified_by"))})
+        self._json(200, {"ok": True, "sensor": req["sensor"],
+                         "lens": lens})
+
     def _api_gc_report(self):
         """The latest dry-run GC report (nightly timer or manual run)."""
         rp = Path(__file__).resolve().parent / "gc-report-latest.json"
@@ -1521,6 +1593,8 @@ class Handler(BaseHTTPRequestHandler):
             self._api_inbox_get()
         elif route == "/api/gc-report":
             self._api_gc_report()
+        elif route == "/api/lenses":
+            self._api_lenses_get()
         else:
             self._json(404, {"ok": False, "error": f"no {self.path!r}"})
 
@@ -1551,6 +1625,9 @@ class Handler(BaseHTTPRequestHandler):
             return
         if route == "/api/unpin":
             self._handle_pin(False)
+            return
+        if route == "/api/lens":
+            self._api_lens_post()
             return
         if route != "/take":
             self._json(404, {"ok": False, "error": f"no {self.path!r}"})

@@ -998,3 +998,28 @@ near zero and Casey rules on it (the report says so in every run).
   quiet speech-band stimulus and measures the return against the baked
   per-context normal, reporting DRIFT, so adaptation cannot bake in a
   limp unnoticed. Queued as the next self-check build.
+
+## Patch 2026-10-21: the normals registry -- LENS FILES (ADDENDUM-PERCEPTION-ADAPTATION closing section)
+
+Perception reads the world through each sensor's living self-model,
+never raw -- so the self-models are first-class: **one lens file per
+sensor under `browser_capture/lenses/`** (`mic.json`, `camera.json`,
+`speakers.json`, seeded from what this lane has MEASURED, not
+believed): the speech rule and its frozen floor, the healthy-room luma
+normal, the speaker rails, and the FAILURE SIGNATURES with their
+detectors -- SILENT_AUDIO (floor ~7e-10, zero-peak WAVs everywhere),
+EXPOSURE_STARVED (dark era: pinned constraints vs the ~110 healthy
+normal), SINGLE_CONSUMER_BUSY (NotReadableError), and the speakers'
+measured ULTRASONIC_DEADBAND (return 12-29 dB under the room floor,
+ROOM-SONAR-REPORT). Every lens carries a `verified` stamp with
+provenance -- unverified normalisation is the silent-audio failure in
+perception's clothes, and the stamp is what the queued normals-verify
+probe closes when it touches the shirt on purpose.
+
+Registry API: `GET /api/lenses` reads all; `POST /api/lens
+{sensor, updates, verified_by?}` merges (provenance fields are the
+registry's to stamp), stamps updated_at, optionally stamps the
+verification, and rides a `lens_updated` event to the outbox/digest.
+Verify suite: **182 passed, 0 failed** (three new: seeded lenses
+served with the SILENT_AUDIO signature; merge + verification stamp;
+persistence).

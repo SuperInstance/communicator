@@ -1,0 +1,11 @@
+{
+  "sensor": "verify-probe",
+  "normals": {
+    "test": true
+  },
+  "updated_at": "2026-10-21T16:59:05Z",
+  "verified": {
+    "at": "2026-10-21T16:59:05Z",
+    "by": "verify.py"
+  }
+}

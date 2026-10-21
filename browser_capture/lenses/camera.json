@@ -1,0 +1,19 @@
+{
+  "sensor": "camera",
+  "what": "the cameras the page holds",
+  "updated_at": "2026-10-21T16:58:50Z",
+  "normals": {
+    "geometry": "160x96 luma, BT.601 full-range",
+    "healthy_room_luma": "~110 (mean of the Windows-stack captures)",
+    "motion_rule": "mean |dLuma| >= 5x its 20th-percentile floor; floor frozen while a segment is open"
+  },
+  "failure_signatures": [
+    {"class": "EXPOSURE_STARVED", "seen": "2026-10-20",
+     "signature": "picture near-black while the same room measured ~110 on the Windows stack; pinned 640x480@30fps constraints were the cause",
+     "detector": "the live mean-luma readout vs the healthy-room normal"},
+    {"class": "SINGLE_CONSUMER_BUSY", "seen": "2026-10-21",
+     "signature": "getUserMedia NotReadableError while another tab holds the device",
+     "detector": "CAMERA BUSY failure face + RETRY DEVICES"}
+  ],
+  "verified": {"at": null, "by": null}
+}

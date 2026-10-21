@@ -1,0 +1,19 @@
+{
+  "sensor": "mic",
+  "what": "the microphones the page holds, read through this lens -- perception never reads raw",
+  "updated_at": "2026-10-21T16:58:50Z",
+  "normals": {
+    "speech_rule": "rms >= 10x the 20th-percentile floor of a ~5.5s rolling ring; floor frozen while a segment is open",
+    "floor_warmup_s": 2.0,
+    "deaf_gate_s": 60,
+    "deaf_line": "flat silence >20s turns the device line red; >60s stops motion-only accrual",
+    "rates_seen_hz": [48000]
+  },
+  "failure_signatures": [
+    {"class": "SILENT_AUDIO", "seen": "2026-10-20/21",
+     "signature": "worklet floor ~7e-10; saved WAVs peak 0 across every consumer (worklet, WAV, WebM audio)",
+     "detector": "measured peak at save time -> SILENT_AUDIO outbox alert; audio-health probe patrols the archive"}
+  ],
+  "verified": {"at": null, "by": null,
+               "note": "stamped by the normals-verify probe when it plays a known stimulus and measures the return"}
+}

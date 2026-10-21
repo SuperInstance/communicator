@@ -881,6 +881,27 @@ def main() -> int:
         check("GET /api/gc-report serves a dry-run report",
               status == 200 and json.loads(body).get("dry_run") is True)
 
+        print("\n== the normals registry (lens files) ==")
+        status, body = http("GET", "/api/lenses")
+        j = json.loads(body)
+        check("GET /api/lenses serves the seeded lenses",
+              status == 200 and {"mic", "camera", "speakers"} <=
+              set(j.get("lenses", {})) and
+              j["lenses"]["mic"]["failure_signatures"][0]["class"] ==
+              "SILENT_AUDIO")
+        status, body = http("POST", "/api/lens", json.dumps(
+            {"sensor": "verify-probe",
+             "updates": {"normals": {"test": True}},
+             "verified_by": "verify.py"}).encode())
+        jl = json.loads(body)
+        check("POST /api/lens merges + stamps verification",
+              status == 200 and jl.get("ok") and
+              jl["lens"]["verified"]["by"] == "verify.py" and
+              jl["lens"]["normals"]["test"] is True)
+        status, body = http("GET", "/api/lenses")
+        check("the merged lens persists in the registry",
+              "verify-probe" in json.loads(body).get("lenses", {}))
+
         failures = sum(1 for _, ok, _ in RESULTS if ok is False)
         skipped = sum(1 for _, ok, _ in RESULTS if ok is None)
         print(f"\n==== {len(RESULTS) - failures - skipped} passed, "

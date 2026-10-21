@@ -1,0 +1,16 @@
+{
+  "sensor": "speakers",
+  "what": "the laptop speakers as an actuator (railed)",
+  "updated_at": "2026-10-21T16:58:50Z",
+  "normals": {
+    "gain_ceiling": 0.3,
+    "duty_ceiling": "5s per 60s per probe",
+    "night_rule": "audible-flagged probes refused 22:00-07:00 local"
+  },
+  "failure_signatures": [
+    {"class": "ULTRASONIC_DEADBAND", "seen": "2026-10-21",
+     "signature": "return 12-29 dB under the room floor in every excited band 16-22kHz at rail levels (ROOM-SONAR-REPORT.md)",
+     "detector": "the sonar-band probe itself"}
+  ],
+  "verified": {"at": null, "by": null}
+}
