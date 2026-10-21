@@ -53,6 +53,8 @@
     #2e7d6e, #4db6ac 70%, #e0a458 90%, #e06c75); }
   #detRead { font-size:12px; color:var(--dim); width:100%;
     font-variant-numeric:tabular-nums; }
+  #devLine { font-size:12.5px; color:var(--dim); width:100%; }
+  #devLine.deaf { color:var(--rec); font-weight:700; font-size:13.5px; }
 
   .controls { margin-top:14px; display:flex; gap:10px; align-items:center;
     flex-wrap:wrap; }
@@ -99,6 +101,7 @@
   <div id="elapsed">0:00</div>
   <div id="meter"><div id="meterFill"></div></div>
   <div id="detRead">speech &mdash; / presence &mdash;</div>
+  <div id="devLine">mic: &mdash; &middot; cam: &mdash;</div>
 </div>
 
 <div class="controls">
@@ -179,6 +182,7 @@ const MAX_SEG_MS = Math.max(5,
 
 let stream = null, audioCtx = null, realRate = 0, micName = "", camName = "";
 let level = 0;                 // rms of the newest audio block
+let nAudioBlocks = 0, lastSoundAt = 0;   // the deafness watchdog's inputs
 let paused = false;
 let openSeg = null;            // the live segment (auto or manual)
 let savedCount = 0;
@@ -288,6 +292,10 @@ function diagSend(kind, fields) {
     motion_thr: Math.round(motionThr() * 100) / 100,
     motion_now: motionNow,
     floors_ready: floorsReady,
+    mic: micName, cam: camName,
+    audio_blocks: nAudioBlocks,
+    audio_silent_s: audioCtx && nAudioBlocks ?
+      Math.round((performance.now() - lastSoundAt) / 100) / 10 : null,
     saved: savedCount, pending_uploads: pendingSaves.length,
     visibility: document.visibilityState,
   }, fields || {}));
@@ -302,7 +310,38 @@ function diagSend(kind, fields) {
 setInterval(() => {
   diagSend("heartbeat");
   postThumb();
+  deafCheck();
 }, 1000);
+
+/* -- the deafness watchdog --------------------------------------------------
+   Live telemetry caught a sitting where speech level sat at exactly 0
+   for minutes while segments still saved -- a mic delivering digital
+   silence (wrong device, or hardware mute). A deaf page must be obvious
+   AT A GLANCE: the device line names the mic and camera the page
+   actually holds, and turns red with the reason when the audio is
+   silent or dead.                                                            */
+function deafCheck() {
+  if (!audioCtx) return;
+  const el = $("devLine");
+  if (nAudioBlocks === 0) {
+    el.className = "deaf";
+    el.textContent = "AUDIO DEAD -- no samples have reached the page " +
+      "(the audio tap failed). Reload the page.";
+  } else if (audioCtx.state === "running" &&
+             performance.now() - lastSoundAt > 20000) {
+    el.className = "deaf";
+    el.textContent = "AUDIO SILENT for " +
+      Math.round((performance.now() - lastSoundAt) / 1000) +
+      " s -- mic \"" + micName + "\" is delivering silence. A healthy " +
+      "room is never this quiet: check the Windows input device and the " +
+      "mic mute, or the browser took the wrong mic (address-bar camera " +
+      "icon).";
+  } else {
+    el.className = "";
+    el.textContent = "mic: " + micName + " @ " + realRate + " Hz" +
+      "   \u00b7   cam: " + camName;
+  }
+}
 
 /* the LIVE MONITOR's window: one small JPEG of the 160x96 luma canvas
    per second -- what the pipeline sees, not the pretty preview. Latest
@@ -715,7 +754,8 @@ function tick() {
     Math.max(0, Math.min(100, (db + 60) / 60 * 100)).toFixed(1) + "%";
   $("detRead").textContent = "speech " + (speechNow ? "YES" : "no") +
     " (level " + level.toExponential(1) + " / thr " +
-    speechThr().toExponential(1) + ")   presence " +
+    speechThr().toExponential(1) + ", mic " + db.toFixed(0) + " dB)" +
+    "   presence " +
     (motionNow ? "YES" : "no") + " (motion " +
     (Math.round(lastMotion * 100) / 100) + " / thr " +
     (Math.round(motionThr() * 100) / 100) + ")";
@@ -834,6 +874,8 @@ async function tryBoot() {
   node.port.onmessage = (ev) => {
     const blk = ev.data;
     level = rms(blk);
+    nAudioBlocks++;
+    if (level > 1e-5) lastSoundAt = performance.now();
     speechStep(level);
     if (openSeg) {
       openSeg.audioChunks.push(blk);
@@ -844,8 +886,10 @@ async function tryBoot() {
   };
   src.connect(node);
   armedAt = performance.now();
+  lastSoundAt = armedAt;   // the deafness clock starts with the stream
   floorsReady = false;   // a retry re-arms: floors re-measure on the new
                          // stream before any auto decision
+  deafCheck();
   paint();
   diagSend("BOOT", { cam: camName, mic: micName, rate: realRate,
     auto: true });

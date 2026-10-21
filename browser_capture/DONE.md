@@ -606,3 +606,25 @@ restart ships the query-string routing fix from the previous section.
 The capture pages already open in a browser are unaffected (they
 POST bare paths); the restart's ~2 s gap is absorbed by the pages'
 30 s save-retry by design.
+
+## Patch 2026-10-21 (AUTO polish 3): a deaf page is obvious at a glance
+
+Live telemetry caught a sitting where the speech level sat at exactly 0
+for minutes while motion kept firing and segments kept saving — the
+page was holding a mic that delivered digital silence, and nothing on
+the AUTO face said so. Now:
+
+- **The active devices are named, always**: a device line under the
+  meters — `mic: <label> @ <rate> Hz · cam: <label>` — is part of the
+  face, not a debug event.
+- **The meter carries a number**: the det line shows the live mic dB.
+- **The deafness watchdog**: samples arriving but flat-silent for >20 s
+  turns the device line RED — "AUDIO SILENT for Ns — mic '<label>' is
+  delivering silence; a healthy room is never this quiet; check the
+  Windows input device / mic mute, or the browser took the wrong mic".
+  No samples at all is distinguished: "AUDIO DEAD — the audio tap
+  failed; reload". The heartbeat now carries `mic`, `cam`,
+  `audio_blocks`, and `audio_silent_s` so telemetry sees deafness the
+  same second the page does.
+
+Page-only — a reload picks it up; the server is unchanged.
