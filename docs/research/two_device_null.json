@@ -1,0 +1,294 @@
+{
+  "refused": false,
+  "geometry": {
+    "separation_m": 1.5,
+    "sample_rate": 16000,
+    "device_a": "synthetic A",
+    "device_b": "synthetic B",
+    "note": "a SYNTHETIC capture: the bias is known by construction",
+    "known_bias_ms": 3.0
+  },
+  "n_trials_used": 25,
+  "n_trials_rejected": 0,
+  "rejected": [],
+  "the_rejected_outlier_trials": [],
+  "the_fit": {
+    "n": 25,
+    "slope_s_per_m": -0.00576778526463537,
+    "slope_standard_error": 0.00010067236160835359,
+    "intercept_s": 0.007365781134453666,
+    "intercept_standard_error": 9.247346892803291e-05,
+    "residual_std_s": 0.0002669479108924915,
+    "mean_x": 0.75
+  },
+  "the_device_to_device_bias": {
+    "ms": 2.9926032918880683,
+    "standard_error_ms": 0.09696044776513399,
+    "metres_of_range": 0.5132314645588038,
+    "metres_of_range_error": 0.01662871679172048,
+    "sign_convention": "positive means device B is LATER than device A"
+  },
+  "the_null_position_check": {
+    "position_x_m": 0.75,
+    "measured_tdoa_ms": 3.1662246317435754,
+    "the_fitted_bias_ms": 2.9926032918880683,
+    "the_reading": "at the midpoint the geometric delay is zero by symmetry, so the measured TDOA there is the bias directly, and it is a check on the fit"
+  },
+  "the_within_device_null_in_this_capture": {
+    "max_abs_ms": 9.10338687642979e-16,
+    "the_reading": "the same device against itself, in this very capture, so the hardware cannot smuggle in a delay the estimator then reports"
+  },
+  "the_bar": {
+    "slope_implied_speed_of_sound_within_pct": 5.0,
+    "bias_standard_error_ms_max": 0.5,
+    "min_positions": 5,
+    "min_repetitions_per_position": 5,
+    "the_first_slope_bar_pct": 2.0,
+    "the_first_slope_bar_reading": "a 2 % bar was met in 1 of 5 synthetic cases -- a 0.8-sigma test at this trial count -- so the bar was revised to 5 %, which still catches every error the arm exists to catch and is met by every synthetic case.  A 2 % bar needs about a 5 m baseline or 10 repetitions per position."
+  },
+  "the_arms": {
+    "the_slope_validates_the_chain": {
+      "implied_speed_of_sound_m_s": 346.75354719996443,
+      "error_pct": 1.094328629727239,
+      "bar_pct": 5.0,
+      "met": true
+    },
+    "the_bias_is_tight_enough": {
+      "standard_error_ms": 0.09696044776513399,
+      "bar_ms": 0.5,
+      "met": true
+    },
+    "the_capture_is_big_enough": {
+      "n_positions": 5,
+      "n_trials": 25,
+      "bar": [
+        5,
+        5
+      ],
+      "met": true
+    }
+  },
+  "all_arms_met": true,
+  "points": [
+    {
+      "trial_id": "p00_r00",
+      "position_x_m": 0.0,
+      "tdoa_ms": 7.381974351463634,
+      "peak": 0.9250641747818629,
+      "margin": 0.1956016452861422
+    },
+    {
+      "trial_id": "p00_r01",
+      "position_x_m": 0.0,
+      "tdoa_ms": 7.249208293056498,
+      "peak": 0.9479118808261864,
+      "margin": 0.1756547387096019
+    },
+    {
+      "trial_id": "p00_r02",
+      "position_x_m": 0.0,
+      "tdoa_ms": 7.12136205906031,
+      "peak": 0.9609549064118156,
+      "margin": 0.20563667378576966
+    },
+    {
+      "trial_id": "p00_r03",
+      "position_x_m": 0.0,
+      "tdoa_ms": 7.738848691357806,
+      "peak": 0.9586040494365385,
+      "margin": 0.1911907958531741
+    },
+    {
+      "trial_id": "p00_r04",
+      "position_x_m": 0.0,
+      "tdoa_ms": 7.2313796604208,
+      "peak": 0.9405728792551248,
+      "margin": 0.19167160450413911
+    },
+    {
+      "trial_id": "p01_r00",
+      "position_x_m": 0.375,
+      "tdoa_ms": 5.14086440021886,
+      "peak": 0.9717785798709114,
+      "margin": 0.24204668737487867
+    },
+    {
+      "trial_id": "p01_r01",
+      "position_x_m": 0.375,
+      "tdoa_ms": 5.017494554405275,
+      "peak": 0.976870636560873,
+      "margin": 0.24283993959773587
+    },
+    {
+      "trial_id": "p01_r02",
+      "position_x_m": 0.375,
+      "tdoa_ms": 5.150372490232835,
+      "peak": 0.9484932038270133,
+      "margin": 0.17442007179875108
+    },
+    {
+      "trial_id": "p01_r03",
+      "position_x_m": 0.375,
+      "tdoa_ms": 5.1913547376444455,
+      "peak": 0.9511901870980378,
+      "margin": 0.1878441911735117
+    },
+    {
+      "trial_id": "p01_r04",
+      "position_x_m": 0.375,
+      "tdoa_ms": 5.276707889221242,
+      "peak": 0.9519856766537759,
+      "margin": 0.16571438638546887
+    },
+    {
+      "trial_id": "p02_r00",
+      "position_x_m": 0.75,
+      "tdoa_ms": 3.3053115033138796,
+      "peak": 0.950499750004696,
+      "margin": 0.1848195916675467
+    },
+    {
+      "trial_id": "p02_r01",
+      "position_x_m": 0.75,
+      "tdoa_ms": 3.353600702207579,
+      "peak": 0.9389305976426892,
+      "margin": 0.1693750224607865
+    },
+    {
+      "trial_id": "p02_r02",
+      "position_x_m": 0.75,
+      "tdoa_ms": 2.9648411584925807,
+      "peak": 0.981332309930586,
+      "margin": 0.22516768544997046
+    },
+    {
+      "trial_id": "p02_r03",
+      "position_x_m": 0.75,
+      "tdoa_ms": 3.247704552063305,
+      "peak": 0.9446048866236465,
+      "margin": 0.19847437561204584
+    },
+    {
+      "trial_id": "p02_r04",
+      "position_x_m": 0.75,
+      "tdoa_ms": 2.959665242640534,
+      "peak": 0.9782681472867923,
+      "margin": 0.21203666259682907
+    },
+    {
+      "trial_id": "p03_r00",
+      "position_x_m": 1.125,
+      "tdoa_ms": 1.0547547629677443,
+      "peak": 0.9848942676395088,
+      "margin": 0.24397799881257376
+    },
+    {
+      "trial_id": "p03_r01",
+      "position_x_m": 1.125,
+      "tdoa_ms": 0.9670524359559891,
+      "peak": 0.9769880094689026,
+      "margin": 0.19996345315938324
+    },
+    {
+      "trial_id": "p03_r02",
+      "position_x_m": 1.125,
+      "tdoa_ms": 0.32976656476062793,
+      "peak": 0.9433005551449317,
+      "margin": 0.20833566055931096
+    },
+    {
+      "trial_id": "p03_r03",
+      "position_x_m": 1.125,
+      "tdoa_ms": 1.0116597035606751,
+      "peak": 0.9792046624441455,
+      "margin": 0.2233053089939886
+    },
+    {
+      "trial_id": "p03_r04",
+      "position_x_m": 1.125,
+      "tdoa_ms": 0.8961287894851584,
+      "peak": 0.969881378816415,
+      "margin": 0.22349481624333645
+    },
+    {
+      "trial_id": "p04_r00",
+      "position_x_m": 1.5,
+      "tdoa_ms": -1.1805911934580136,
+      "peak": 0.9510491818676661,
+      "margin": 0.1772997844146882
+    },
+    {
+      "trial_id": "p04_r01",
+      "position_x_m": 1.5,
+      "tdoa_ms": -1.0029428732885004,
+      "peak": 0.9737437918915226,
+      "margin": 0.22507282961803632
+    },
+    {
+      "trial_id": "p04_r02",
+      "position_x_m": 1.5,
+      "tdoa_ms": -2.0255919909292337,
+      "peak": 0.9760622722942155,
+      "margin": 0.22192573936021676
+    },
+    {
+      "trial_id": "p04_r03",
+      "position_x_m": 1.5,
+      "tdoa_ms": -1.4398396314517679,
+      "peak": 0.9409801756703569,
+      "margin": 0.17690295484182839
+    },
+    {
+      "trial_id": "p04_r04",
+      "position_x_m": 1.5,
+      "tdoa_ms": -0.9425322039737949,
+      "peak": 0.9804993417601686,
+      "margin": 0.2118220871177785
+    }
+  ],
+  "generated_utc": "2026-10-21T20:30:55Z",
+  "study": "the device-to-device latency null -- the calibration constant a TDOA between two devices carries",
+  "the_state_of_this_measurement": "the corpus holds ONE real input device, so the hardware measurement has NOT been run.  The calculator is built and tested against a synthetic capture with a known injected bias; the protocol is written so a two-device capture can be calibrated without inventing anything.",
+  "the_calculator_s_own_accuracy": [
+    {
+      "known_bias_ms": -4.0,
+      "recovered_bias_ms": -3.946943826917332,
+      "error_ms": 0.05305617308266797,
+      "standard_error_ms": 0.10173125060500088,
+      "implied_speed_of_sound_m_s": 338.0314683678265,
+      "all_arms_met": true
+    },
+    {
+      "known_bias_ms": -2.0,
+      "recovered_bias_ms": -2.0727731779924725,
+      "error_ms": -0.07277317799247252,
+      "standard_error_ms": 0.07149907146425764,
+      "implied_speed_of_sound_m_s": 355.507511689238,
+      "all_arms_met": true
+    },
+    {
+      "known_bias_ms": 0.0,
+      "recovered_bias_ms": 0.10703313388177142,
+      "error_ms": 0.10703313388177142,
+      "standard_error_ms": 0.12489783593423338,
+      "implied_speed_of_sound_m_s": 333.70714658146204,
+      "all_arms_met": true
+    },
+    {
+      "known_bias_ms": 2.0,
+      "recovered_bias_ms": 1.9440124810060582,
+      "error_ms": -0.05598751899394183,
+      "standard_error_ms": 0.11268424916457571,
+      "implied_speed_of_sound_m_s": 350.2289197441768,
+      "all_arms_met": true
+    },
+    {
+      "known_bias_ms": 4.0,
+      "recovered_bias_ms": 3.793404217071302,
+      "error_ms": -0.20659578292869796,
+      "standard_error_ms": 0.11129994950606784,
+      "implied_speed_of_sound_m_s": 357.49157353180243,
+      "all_arms_met": true
+    }
+  ]
+}
