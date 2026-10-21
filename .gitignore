@@ -14,3 +14,5 @@ models/
 .pytest_cache/
 browser_capture/liaison_inbox.jsonl
 browser_capture/liaison_outbox*.jsonl
+browser_capture/gc-report-latest.json
+browser_capture/gc.log

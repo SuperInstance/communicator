@@ -1,0 +1,18 @@
+# browser-capture-gc.service -- the nightly DRY-RUN retention report.
+# Read-only by construction (gc.py contains no deletion code); the
+# report lands at browser_capture/gc-report-latest.json and rides the
+# liaison outbox to the digest. Install with the .timer beside it:
+#   cp browser_capture/browser-capture-gc.* ~/.config/systemd/user/
+#   systemctl --user daemon-reload
+#   systemctl --user enable --now browser-capture-gc.timer
+
+[Unit]
+Description=communicator retention GC (dry-run report only)
+Documentation=file:///home/proart/projects/communicator/docs/research/BRIEF-RETENTION-GC.md
+
+[Service]
+Type=oneshot
+WorkingDirectory=/home/proart/projects/communicator
+ExecStart=/usr/bin/python3 /home/proart/projects/communicator/browser_capture/gc.py
+StandardOutput=append:/home/proart/projects/communicator/browser_capture/gc.log
+StandardError=append:/home/proart/projects/communicator/browser_capture/gc.log

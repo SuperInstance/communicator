@@ -925,3 +925,76 @@ every calibration (the `b` loop index vs the `b` parameter); identical
 synthetic calibrations produced a degenerate 0.02 threshold (floor 0.25
 from the measured separation). audio-health v2 now skips probe
 artifacts (sonar returns are often honestly silent).
+
+## Patch 2026-10-21: the retention ladder, plumbed and DRY (BRIEF-RETENTION-GC.md + addendum)
+
+The GC is a curation system; deletion is the side effect; collection is
+the one sanctioned deletion in a never-delete house -- so it runs DRY
+FIRST and **gc.py contains no deletion code, by construction**. Live
+collection stays blocked until the quintessential miss rate is measured
+near zero and Casey rules on it (the report says so in every run).
+
+- **Per-session tier state**: `retention.json` inside each session
+  folder (gate-invisible) carries pins and graduated annotations; tier
+  verdicts are COMPUTED from files, never asserted -- age from the
+  session's wall clock, derivation completeness by file presence
+  (`score.mid`/`score.json`, `transcript.json` -- the analysis tier's
+  contract), quintessence by `quintessential.json`.
+- **The ladder (v1 constants, stated because they are per-person)**:
+  audio HOT < 48 h; audio dry-collectible only when derivation is
+  complete, unpinned, non-quintessential, and older than 72 h; MIDI
+  collectible after 14 days AND ONLY when its tone essentials have
+  graduated into transcript annotations (the addendum's rule -- the
+  sarcasm and the question-rise become marks on the words before the
+  score is let go); transcript kept forever.
+- **Error-driven PINS**: `POST /api/pin {stamp, reason, source}` makes
+  a session exempt at EVERY layer; `POST /api/unpin` is refused without
+  the lesson -- the debt clears when the lesson exists, not when time
+  passes. Both ride the outbox to the digest.
+- **The nightly dry run**: `browser-capture-gc.timer` (04:30,
+  persistent) runs gc.py; the report lands at
+  `gc-report-latest.json`, is served at `GET /api/gc-report`, and a
+  `GC_DRY_RUN` event rides the outbox with the headline counts. First
+  real-corpus run: **97 sessions, would collect 0 audio / 0 MIDI** --
+  every session honestly blocked by derivation-incomplete (the scorer
+  does not exist yet; the ladder is telling the truth about the
+  pipeline). The audit section reserves the miss-rate field and states
+  it is unmeasurable until MiniMax's selection study exists.
+- Verify suite: **179 passed, 0 failed** (six new: an old
+  derivation-complete session IS dry-collectible; a pinned session is
+  exempt at every layer; unpin without a lesson refused; with a lesson
+  clears; the report serves).
+
+## Scope notes: the four conversation-surface addenda (read, folded into the lane's queue)
+
+- **ADDENDUM-MODES** (modal agnosticism + mode-aware digestion): the
+  digestion-policy hook in the conversation surface takes `mode` from
+  the shading layer (ramble -> key points; deep thought -> point by
+  point); gestures/posture/phone as first-class channels arrive as
+  more session-clock tracks -- the bundle already carries arbitrary
+  per-clock files, so the hook is a policy table keyed on mode, not
+  new plumbing. Blocked on the scorer like the rest of that surface.
+- **ADDENDUM-AWARENESS-CALCULATORS** (double-hearing delay as
+  geometry, output routing by located context, calculators not
+  answers): SCREEN AS A MODE (co-reading) is mine -- the liaison
+  surfaces own a screen-mode hook, scoped as: the live monitor's
+  family gains a co-reading view whose content is chosen by the same
+  mode/digestion policy; build when the conversation surface builds.
+- **ADDENDUM-ASCII-PHONE** (phone video as an ASCII score stream,
+  motion-indexed adaptive fidelity -- still = high-res deltas-only,
+  moving = low-res fast; tilt/GPS/video pose for walked maps): the
+  evolve page hosts the first ASCII phone probe; the fidelity rule is
+  a per-frame function of the measured motion index (the corpus's own
+  change-maps define it), so the probe composes PROVEN pieces (luma,
+  motion, braille conversion from the seed proofs). Scoped next after
+  the scorer lands; needs a phone-side capture page (BRIEF-PHONE-NODE
+  lineage).
+- **ADDENDUM-PERCEPTION-ADAPTATION** (normals are verified by
+  self-checks forever): the liaison owns normals, and most of the
+  verification skeleton already runs -- the deafness watchdog (channel
+  death), audio-health (archive truth), sonar (a deliberate railed
+  stimulus + measured return: touching the shirt on purpose). The
+  named gap: a scheduled `normals-verify` probe that plays a known
+  quiet speech-band stimulus and measures the return against the baked
+  per-context normal, reporting DRIFT, so adaptation cannot bake in a
+  limp unnoticed. Queued as the next self-check build.

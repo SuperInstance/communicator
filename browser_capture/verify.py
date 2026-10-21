@@ -833,6 +833,54 @@ def main() -> int:
               any(a.get("stamp") == j.get("stamp") for a in alerts),
               str(alerts[-1] if alerts else "no alerts"))
 
+        print("\n== the retention ladder (dry-run GC) ==")
+        # import the gc module in-process; exercise the ladder directly
+        import importlib.util as _ilu
+        _spec = _ilu.spec_from_file_location(
+            "retention_gc", HERE / "gc.py")
+        _gc = _ilu.module_from_spec(_spec)
+        _spec.loader.exec_module(_gc)
+        # a fake COMPLETE, OLD session: derivations present, aged clock
+        old_dir = out_dir / "free_sessions" / "900000000001"
+        old_dir.mkdir(parents=True)
+        (old_dir / "meta.json").write_text(json.dumps({
+            "mode": "auto", "trigger": "speech", "close_reason": "quiet",
+            "wall_clock_end": "2026-10-01T00:00:00Z",
+            "audio": {"sample_rate": 16000, "samples": 800,
+                      "audio_silent": False}}))
+        (old_dir / "score.json").write_text("{}")
+        (old_dir / "transcript.json").write_text("{}")
+        (old_dir / "audio.wav").write_bytes(b"\x00" * 1644)
+        rep = _gc.dry_run(out_dir)
+        check("an old derivation-complete session IS dry-collectible",
+              any(w["stamp"] == "900000000001"
+                  for w in rep["would_collect"]["audio"]),
+              str(rep["blocked"]["audio"]))
+        # pin it: exempt at every layer, with the reason
+        status, body = http("POST", "/api/pin", json.dumps(
+            {"stamp": "900000000001", "reason": "verify pin",
+             "source": "verify.py"}).encode())
+        check("POST /api/pin accepted", status == 200 and
+              json.loads(body).get("ok"))
+        rep = _gc.dry_run(out_dir)
+        entry = [w for w in rep["pinned"]
+                 if w["stamp"] == "900000000001"]
+        check("a pinned session is exempt at every layer",
+              bool(entry) and not any(
+                  w["stamp"] == "900000000001"
+                  for w in rep["would_collect"]["audio"]))
+        status, body = http("POST", "/api/unpin", json.dumps(
+            {"stamp": "900000000001"}).encode())
+        check("unpin WITHOUT a lesson is refused", status == 400)
+        status, body = http("POST", "/api/unpin", json.dumps(
+            {"stamp": "900000000001",
+             "lesson": "the lesson learned"}).encode())
+        check("unpin WITH the lesson clears the debt",
+              status == 200 and json.loads(body).get("cleared") == 1)
+        status, body = http("GET", "/api/gc-report")
+        check("GET /api/gc-report serves a dry-run report",
+              status == 200 and json.loads(body).get("dry_run") is True)
+
         failures = sum(1 for _, ok, _ in RESULTS if ok is False)
         skipped = sum(1 for _, ok, _ in RESULTS if ok is None)
         print(f"\n==== {len(RESULTS) - failures - skipped} passed, "

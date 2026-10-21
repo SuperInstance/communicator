@@ -373,7 +373,8 @@ def _last_page_heartbeat() -> dict:
 # page diag events the liaison forwards to its outbox (the page's own
 # SEGMENT_SAVED is superseded by the server's measured session_saved)
 LIAISON_FORWARD_KINDS = {"BOOT", "DEAF_ON", "DEAF_OFF", "DEVICE_FAILURE",
-                         "SEGMENT_CLOSE", "MIC_SWITCH", "CAM_SWITCH"}
+                         "SEGMENT_CLOSE", "MIC_SWITCH", "CAM_SWITCH",
+                         "GC_DRY_RUN", "PIN_SET", "PIN_CLEARED"}
 
 
 # -- the NPY format, by hand (numpy is not stdlib) --------------------------
@@ -1235,6 +1236,94 @@ class Handler(BaseHTTPRequestHandler):
 
     # -- the agent API: the liaison in the room -------------------------
 
+    def _sess_dir(self, stamp) -> Path:
+        """A session folder by stamp, or None. Stamps are digits only --
+        the path never escapes free_sessions."""
+        if not isinstance(stamp, str) or not stamp.isdigit() \
+                or len(stamp) > 12:
+            return None
+        d = self.out_dir / "free_sessions" / stamp
+        return d if (d / "meta.json").is_file() else None
+
+    def _handle_pin(self, pin: bool):
+        """POST /api/pin {stamp, reason, source} -- error-driven
+        retention: a session beneath a conversation the system got
+        wrong is exempt from collection at every layer until shadow
+        work clears it. POST /api/unpin {stamp, lesson} clears a pin
+        WITH the lesson -- the debt clears when the lesson exists."""
+        try:
+            n = int(self.headers.get("Content-Length", "0"))
+        except ValueError:
+            n = -1
+        if n <= 0 or n > 65536:
+            self._json(400, {"ok": False, "error": "bad Content-Length"})
+            return
+        try:
+            req = json.loads(self.rfile.read(n).decode("utf-8"))
+        except (UnicodeDecodeError, json.JSONDecodeError) as exc:
+            self._json(400, {"ok": False, "error": f"not JSON: {exc}"})
+            return
+        if not isinstance(req, dict):
+            self._json(400, {"ok": False, "error": "expected an object"})
+            return
+        d = self._sess_dir(req.get("stamp"))
+        if not d:
+            self._json(404, {"ok": False,
+                             "error": "no such session (stamp = digits "
+                                      "of an existing free session)"})
+            return
+        rp = d / "retention.json"
+        try:
+            r = json.loads(rp.read_text())
+        except (OSError, json.JSONDecodeError):
+            r = {}
+        if pin:
+            reason = str(req.get("reason") or "unspecified")[:400]
+            pinrec = {"at": time.strftime("%Y-%m-%dT%H:%M:%SZ",
+                                          time.gmtime()),
+                      "reason": reason,
+                      "source": str(req.get("source") or "agent")[:64],
+                      "cleared": None}
+            r.setdefault("pins", []).append(pinrec)
+            rp.write_text(json.dumps(r, indent=2))
+            liaison_event({"class": "pin_set", "stamp": req.get("stamp"),
+                           "reason": reason})
+            self._json(200, {"ok": True, "stamp": req.get("stamp"),
+                             "pins": len([p for p in r["pins"]
+                                          if not p.get("cleared")])})
+        else:
+            lesson = str(req.get("lesson") or "").strip()
+            if not lesson:
+                self._json(400, {"ok": False,
+                                 "error": "unpin requires the lesson -- "
+                                          "the debt clears when the "
+                                          "lesson exists"})
+                return
+            cleared = 0
+            for prec in r.get("pins", []):
+                if not prec.get("cleared"):
+                    prec["cleared"] = {
+                        "at": time.strftime("%Y-%m-%dT%H:%M:%SZ",
+                                            time.gmtime()),
+                        "lesson": lesson[:4000]}
+                    cleared += 1
+            rp.write_text(json.dumps(r, indent=2))
+            liaison_event({"class": "pin_cleared",
+                           "stamp": req.get("stamp"),
+                           "lessons": cleared})
+            self._json(200, {"ok": True, "stamp": req.get("stamp"),
+                             "cleared": cleared})
+
+    def _api_gc_report(self):
+        """The latest dry-run GC report (nightly timer or manual run)."""
+        rp = Path(__file__).resolve().parent / "gc-report-latest.json"
+        try:
+            self._json(200, json.loads(rp.read_text()))
+        except (OSError, json.JSONDecodeError):
+            self._json(200, {"ok": False,
+                             "error": "no report yet -- run "
+                                      "python3 browser_capture/gc.py"})
+
     def _api_status(self):
         hb = _last_page_heartbeat()
         page = None
@@ -1430,6 +1519,8 @@ class Handler(BaseHTTPRequestHandler):
             self._api_sessions()
         elif route == "/api/inbox":
             self._api_inbox_get()
+        elif route == "/api/gc-report":
+            self._api_gc_report()
         else:
             self._json(404, {"ok": False, "error": f"no {self.path!r}"})
 
@@ -1454,6 +1545,12 @@ class Handler(BaseHTTPRequestHandler):
             return
         if route == "/api/inbox":
             self._api_inbox_post()
+            return
+        if route == "/api/pin":
+            self._handle_pin(True)
+            return
+        if route == "/api/unpin":
+            self._handle_pin(False)
             return
         if route != "/take":
             self._json(404, {"ok": False, "error": f"no {self.path!r}"})
