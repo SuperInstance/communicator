@@ -58,6 +58,17 @@
     border-radius: 6px; padding: 6px 12px; font-size: 13px; color: var(--dim); }
   #liveChip.speaking { color: var(--ok); font-weight: 700; }
 
+  .camRow { display: flex; align-items: center; gap: 10px; margin-top: 10px;
+    flex-wrap: wrap; }
+  .camRow .cap { font-size: 11px; color: var(--dim); letter-spacing: 1px;
+    text-transform: uppercase; }
+  #camSelect { background: var(--panel2); color: var(--fg);
+    border: 1px solid var(--line); border-radius: 6px; padding: 6px 8px;
+    font-size: 13px; max-width: 300px; }
+  #lumaChip { margin-left: auto; font-size: 13px; color: var(--dim); }
+  #lumaChip b { color: var(--fg); font-variant-numeric: tabular-nums; }
+  #lumaChip.low b { color: var(--warn); }
+
   .under { display: flex; gap: 14px; margin-top: 12px; align-items: stretch; }
   #dataViewCol { text-align: center; }
   #captureCanvas { width: 232px; height: 139px; image-rendering: pixelated;
@@ -144,6 +155,8 @@
   <span id="srvState"><span class="dot"></span><span id="srvText">connecting&hellip;</span></span>
   <button id="mirrorBtn" title="Mirror the preview only. The recorded data is never mirrored.">
     Mirror preview: ON</button>
+  <button id="brightBtn" title="Brighten the preview only. The recorded frames, the data view, and the WebM all stay raw.">
+    Boost preview: OFF</button>
 </header>
 
 <div id="banners">
@@ -159,6 +172,11 @@
         <video id="video" autoplay playsinline muted></video>
         <div id="recBadge"><span class="blink"></span><span id="recBadgeText">REC</span></div>
         <div id="liveChip">SILENT</div>
+      </div>
+      <div class="camRow">
+        <span class="cap">camera</span>
+        <select id="camSelect"></select>
+        <span id="lumaChip" title="Mean luma of the 160x96 data frame, computed the same BT.601 way the takes record it. The existing captures on this camera and in this room sat around 110; the empty room read 50.">data luma <b id="lumaVal">&mdash;</b> (old captures ~110, empty room 50)</span>
       </div>
       <div class="under">
         <div id="dataViewCol">
@@ -562,9 +580,83 @@ cctx.imageSmoothingEnabled = true;
 cctx.imageSmoothingQuality = "high";
 
 let stream = null, audioCtx = null, realRate = RATE, micName = "", camName = "";
+let camDeviceId = localStorage.bcCam || null;  // the remembered camera, if any
 let queue = [], qTotal = 0, qHeadPos = 0;   // the mic sample queue
 let meterLevel = 0;                          // rms of the newest block, for the meter
 let devicesOk = false;
+
+/* -- the camera picker -------------------------------------------------
+   Why: Windows face-auth sensors enumerate as ordinary videoinputs
+   ("IR camera", "Virtual...") and deliver a near-black picture, while the
+   reference numbers say this camera and room produce mean luma ~110. When
+   several cameras exist, prefer the first label that is none of those. */
+const BAD_CAM_RE = /(^|[^a-z])(ir|infrared|virtual)([^a-z]|$)/i;
+
+function pickDefaultCam(devs) {
+  if (devs.length < 2) return devs.length ? devs[0].deviceId : null;
+  const good = devs.find(d => d.label && !BAD_CAM_RE.test(d.label));
+  return good ? good.deviceId : devs[0].deviceId;
+}
+
+function camConstraints(devId) {
+  const c = { width: { ideal: 640 }, height: { ideal: 480 },
+              frameRate: { ideal: FPS } };
+  if (devId) c.deviceId = { exact: devId };
+  return c;
+}
+
+async function switchCamera(devId) {
+  // Open the new camera FIRST, so a failure leaves the live preview
+  // untouched; then swap the video track on the existing stream -- the
+  // mic track and its worklet are never re-opened, so the audio path
+  // (and its rate) cannot change under a take.
+  const s = await navigator.mediaDevices.getUserMedia(
+    { video: camConstraints(devId) });
+  const nt = s.getVideoTracks()[0];
+  if (!nt) { s.getTracks().forEach(t => t.stop());
+    throw new Error("that camera gave no video track"); }
+  const old = stream.getVideoTracks()[0];
+  if (old) { stream.removeTrack(old); old.stop(); }
+  stream.addTrack(nt);
+  camDeviceId = devId;
+  try { localStorage.bcCam = devId; } catch (e) {}
+  camName = nt.label || "browser camera";
+}
+
+async function refreshCamPicker() {
+  // Fill the dropdown (labels exist once permission has been granted) and
+  // enforce the choice: the remembered camera if still attached, else the
+  // no-IR/Virtual default -- switching right away if the browser's own
+  // pick was one of those.
+  if (!navigator.mediaDevices || !navigator.mediaDevices.enumerateDevices)
+    return;
+  let devs = [];
+  try {
+    devs = (await navigator.mediaDevices.enumerateDevices())
+      .filter(d => d.kind === "videoinput");
+  } catch (err) {}
+  const sel = $("camSelect");
+  sel.innerHTML = "";
+  for (let i = 0; i < devs.length; i++) {
+    const o = document.createElement("option");
+    o.value = devs[i].deviceId;
+    o.textContent = devs[i].label || ("camera " + (i + 1));
+    sel.appendChild(o);
+  }
+  if (!devs.length) return;
+  const curTrack = stream.getVideoTracks()[0] || null;
+  const cur = curTrack && curTrack.getSettings().deviceId || null;
+  let want = camDeviceId && devs.some(d => d.deviceId === camDeviceId)
+    ? camDeviceId : pickDefaultCam(devs);
+  if (want && want !== cur) {
+    try { await switchCamera(want); }
+    catch (err) { camDeviceId = cur; }   // keep showing the working camera
+  } else if (want) {
+    camDeviceId = want;
+    try { localStorage.bcCam = want; } catch (e) {}
+  }
+  if (camDeviceId) sel.value = camDeviceId;
+}
 
 function flushAudio() { queue = []; qTotal = 0; qHeadPos = 0; }
 
@@ -584,17 +676,30 @@ function popAudio(blk, dest, off) {
 async function startDevices() {
   if (devicesOk) return true;
   hideBanner("err");
+  const open = (camId) => navigator.mediaDevices.getUserMedia({
+    video: camConstraints(camId),
+    audio: { channelCount: 1, echoCancellation: false,
+             noiseSuppression: false, autoGainControl: false },
+  });
   try {
-    stream = await navigator.mediaDevices.getUserMedia({
-      video: { width: { ideal: 640 }, height: { ideal: 480 },
-               frameRate: { ideal: FPS } },
-      audio: { channelCount: 1, echoCancellation: false,
-               noiseSuppression: false, autoGainControl: false },
-    });
+    stream = await open(camDeviceId);
   } catch (err) {
-    showBanner("err", "Camera/microphone permission was refused (" + err.name +
-      "). Allow both, then click RETRY DEVICES.");
-    return false;
+    if (!camDeviceId) {
+      showBanner("err", "Camera/microphone permission was refused (" + err.name +
+        "). Allow both, then click RETRY DEVICES.");
+      return false;
+    }
+    // a remembered camera that is no longer attached -- forget it and let
+    // the browser pick, as if it had never been remembered
+    camDeviceId = null;
+    try { localStorage.bcCam = ""; } catch (e) {}
+    try {
+      stream = await open(null);
+    } catch (err2) {
+      showBanner("err", "Camera/microphone permission was refused (" + err2.name +
+        "). Allow both, then click RETRY DEVICES.");
+      return false;
+    }
   }
   videoEl.srcObject = stream;
   await videoEl.play();
@@ -654,6 +759,8 @@ async function startDevices() {
   document.getElementById("micLabel").textContent =
     "mic: " + micName + " @ " + realRate + " Hz";
   devicesOk = true;
+  refreshCamPicker();   // not awaited: never delays a take; fills the
+                        // dropdown and applies the no-IR/Virtual default
   return true;
 }
 
@@ -667,6 +774,7 @@ function rmsOf(a) {
    the SPEAKING threshold -- the same rule speechStats applies at take end,
    so what you see while recording is what the take is judged by. */
 const meterRing = [];
+let lastLumaAt = 0;
 function meterFrame() {
   const fill = document.getElementById("meterFill");
   const db = 20 * Math.log10(Math.max(meterLevel, 1e-7));
@@ -681,6 +789,21 @@ function meterFrame() {
     chip.textContent = speaking ? "SPEAKING" : "SILENT";
     chip.className = speaking ? "speaking" : "";
     if (!capturing) cctx.drawImage(videoEl, 0, 0, capCanvas.width, capCanvas.height);
+    if (performance.now() - lastLumaAt > 500) {
+      lastLumaAt = performance.now();
+      // mean of the current 160x96 DATA frame, computed with the same
+      // BT.601 luma the takes record -- "the picture looks dark" becomes
+      // a number to compare against the old captures (~110). During a
+      // take the canvas holds the last captured frame, so this reads the
+      // actual data, not a styled preview.
+      const d = cctx.getImageData(0, 0, capCanvas.width, capCanvas.height).data;
+      let sum = 0;
+      for (let i = 0; i < d.length; i += 4)
+        sum += 0.299 * d[i] + 0.587 * d[i + 1] + 0.114 * d[i + 2];
+      const mean = sum / (d.length / 4);
+      document.getElementById("lumaVal").textContent = mean.toFixed(0);
+      document.getElementById("lumaChip").className = mean < 80 ? "low" : "";
+    }
   }
   requestAnimationFrame(meterFrame);
 }
@@ -1282,6 +1405,7 @@ function updateControls() {
   $("redoBtn").disabled = busy;
   $("abortBtn").disabled = !(busy && uiPhase !== "uploading" &&
     uiPhase !== "processing");
+  $("camSelect").disabled = busy;   // a camera swap mid-take would stall it
 }
 
 async function refreshTakes() {
@@ -1334,6 +1458,37 @@ $("notesBtn").onclick = saveNotes;
 $("stimText").value = DEFAULT_STIM_TEXT;
 $("stimName").addEventListener("input", updatePoemTitle);
 $("stimText").addEventListener("input", updatePoemTitle);
+$("camSelect").onchange = async () => {
+  const sel = $("camSelect");
+  if (uiPhase !== "idle" || (driver.running && !driver.paused)) {
+    setStateLine("pause the plan first -- a camera swap mid-take would " +
+      "stall the recorder");
+    if (camDeviceId) sel.value = camDeviceId;
+    return;
+  }
+  try {
+    await switchCamera(sel.value);
+    setStateLine("camera: " + camName);
+  } catch (err) {
+    showBanner("err", "That camera would not open (" + err.name +
+      "); the previous one is still live.");
+  }
+  if (camDeviceId) sel.value = camDeviceId;
+};
+// Preview-only brightness: a CSS filter styles the preview element's box
+// and is invisible to drawImage (the data canvas) and to MediaRecorder
+// (the WebM), so the boost cannot touch a take by construction.
+let boosted = localStorage.bcBright === "1";
+if (boosted) {
+  videoEl.style.filter = "brightness(1.6)";
+  $("brightBtn").textContent = "Boost preview: ON";
+}
+$("brightBtn").onclick = () => {
+  boosted = !boosted;
+  videoEl.style.filter = boosted ? "brightness(1.6)" : "";
+  $("brightBtn").textContent = "Boost preview: " + (boosted ? "ON" : "OFF");
+  try { localStorage.bcBright = boosted ? "1" : "0"; } catch (e) {}
+};
 $("mirrorBtn").onclick = () => {
   videoEl.classList.toggle("mirrored");
   const on = videoEl.classList.contains("mirrored");

@@ -150,3 +150,38 @@ Nothing else about the take changed.
 server reads `index.html` from disk on every GET (served `no-store`), and
 this patch changes nothing server-side. Verify suite after the patch:
 145 passed, 0 failed.
+
+## Patch 2026-10-20 (same session): the dark camera, made diagnosable
+
+The page's picture was REALLY dark while the same camera and room produce
+mean luma 111–114 in the existing captures (empty room: 50) — the hardware
+can do it, so something in the page's device choice or rendering was off.
+Three additions, all client-side; the recorded data path is untouched:
+
+1. **Camera picker.** The camera card now has a dropdown of the system's
+   videoinputs (labels appear once permission is granted). The choice is
+   remembered in `localStorage`; when several cameras exist, the page
+   defaults to the first whose label does NOT read IR / Infrared / Virtual
+   (the Windows face-auth sensor is the classic dark-picture impostor) and
+   switches to it right after the first frames if the browser's own pick
+   was one of those. Switching opens the new camera first, then swaps the
+   video track on the live stream — the mic track and its worklet are
+   never re-opened, so the audio path and its rate cannot change under a
+   take. Pause the plan before switching (the picker is disabled mid-take
+   anyway); a remembered camera that has been unplugged is forgotten
+   automatically.
+2. **Live mean-luma readout.** Next to the picker: the mean luma of the
+   current 160×96 data frame, computed with the same BT.601 luma the takes
+   record, updated twice a second, shown with the reference numbers —
+   *old captures ~110, empty room 50* — and amber below ~80. During a take
+   it reads the last captured frame, so it is the data, not a styled
+   preview.
+3. **Boost preview toggle.** A header button applying
+   `filter: brightness(1.6)` to the preview element ONLY. Preview-only by
+   construction: CSS filters style the element's rendered box and are
+   invisible to `drawImage` (the data canvas) and to `MediaRecorder` (the
+   WebM). Both stay raw; the small data view next to the preview keeps
+   showing the honest darkness. Remembered in `localStorage`, like mirror.
+
+Also picked up by a browser reload — no server restart, nothing
+server-side. Verify suite after this patch too: 145 passed, 0 failed.
