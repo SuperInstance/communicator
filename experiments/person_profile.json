@@ -1,0 +1,352 @@
+{
+  "tool": "experiments/person_profile.py",
+  "created_at": "2026-10-21T05:11:56Z",
+  "updated_at": "2026-10-21T05:11:56Z",
+  "n_sessions": 4,
+  "sessions": [
+    {
+      "label": "/tmp/harvest_dry3/free_sessions/1758000001",
+      "at": "2026-10-21T05:11:56Z",
+      "n_bundles": 4,
+      "duration_s": 13.9,
+      "n_words": 41,
+      "n_syllables": 48,
+      "n_notes": 53,
+      "stats": {
+        "centre_midi": 45.625,
+        "range_semitones": 8.0,
+        "slope_semitones_per_s": -1.2183,
+        "notes_per_second": 3.9688,
+        "median_note_s": 0.1475,
+        "note_duration_std": 0.1036,
+        "step_abs_mean": 2.4112,
+        "step_std": 2.8695,
+        "jitter_semitones": 1.908,
+        "voiced_fraction": 0.567
+      },
+      "motifs": {
+        "arched": 2,
+        "falling": 2
+      },
+      "intents": [],
+      "new_words": [
+        "a",
+        "across",
+        "and",
+        "away",
+        "bar",
+        "bus",
+        "came",
+        "coffee",
+        "cup",
+        "did",
+        "east",
+        "from",
+        "he",
+        "in",
+        "light",
+        "long",
+        "near",
+        "not",
+        "of",
+        "pulled",
+        "sat",
+        "the",
+        "then",
+        "through",
+        "turned",
+        "window",
+        "with"
+      ],
+      "drift": {}
+    },
+    {
+      "label": "/tmp/harvest_dry3/free_sessions/1758000002",
+      "at": "2026-10-21T05:11:56Z",
+      "n_bundles": 4,
+      "duration_s": 9.733,
+      "n_words": 24,
+      "n_syllables": 29,
+      "n_notes": 42,
+      "stats": {
+        "centre_midi": 46.625,
+        "range_semitones": 11.0,
+        "slope_semitones_per_s": -1.3063,
+        "notes_per_second": 4.8057,
+        "median_note_s": 0.1512,
+        "note_duration_std": 0.0956,
+        "step_abs_mean": 2.767,
+        "step_std": 3.8457,
+        "jitter_semitones": 2.7512,
+        "voiced_fraction": 0.7083
+      },
+      "motifs": {
+        "rising": 2,
+        "falling": 2
+      },
+      "intents": [],
+      "new_words": [
+        "at",
+        "coat",
+        "great",
+        "here",
+        "library",
+        "look",
+        "opened",
+        "set"
+      ],
+      "drift": {
+        "centre_midi": {
+          "value": 46.625,
+          "baseline_mean": 45.625,
+          "delta": 1.0,
+          "sd_from_baseline": null
+        },
+        "range_semitones": {
+          "value": 11.0,
+          "baseline_mean": 8.0,
+          "delta": 3.0,
+          "sd_from_baseline": null
+        },
+        "slope_semitones_per_s": {
+          "value": -1.3063,
+          "baseline_mean": -1.2183,
+          "delta": -0.088,
+          "sd_from_baseline": null
+        },
+        "notes_per_second": {
+          "value": 4.8057,
+          "baseline_mean": 3.9688,
+          "delta": 0.8369,
+          "sd_from_baseline": null
+        },
+        "median_note_s": {
+          "value": 0.1512,
+          "baseline_mean": 0.1475,
+          "delta": 0.0037,
+          "sd_from_baseline": null
+        },
+        "note_duration_std": {
+          "value": 0.0956,
+          "baseline_mean": 0.1036,
+          "delta": -0.008,
+          "sd_from_baseline": null
+        },
+        "step_abs_mean": {
+          "value": 2.767,
+          "baseline_mean": 2.4112,
+          "delta": 0.3558,
+          "sd_from_baseline": null
+        },
+        "step_std": {
+          "value": 3.8457,
+          "baseline_mean": 2.8695,
+          "delta": 0.9762,
+          "sd_from_baseline": null
+        },
+        "jitter_semitones": {
+          "value": 2.7512,
+          "baseline_mean": 1.908,
+          "delta": 0.8432,
+          "sd_from_baseline": null
+        },
+        "voiced_fraction": {
+          "value": 0.7083,
+          "baseline_mean": 0.567,
+          "delta": 0.1413,
+          "sd_from_baseline": null
+        }
+      }
+    },
+    {
+      "label": "/tmp/harvest_dry3/free_sessions/1758000003",
+      "at": "2026-10-21T05:11:56Z",
+      "n_bundles": 2,
+      "duration_s": 29.981,
+      "n_words": 0,
+      "n_syllables": 0,
+      "n_notes": 0,
+      "stats": {
+        "centre_midi": null,
+        "range_semitones": null,
+        "slope_semitones_per_s": null,
+        "notes_per_second": null,
+        "median_note_s": null,
+        "note_duration_std": null,
+        "step_abs_mean": null,
+        "step_std": null,
+        "jitter_semitones": null,
+        "voiced_fraction": 0.0
+      },
+      "motifs": {
+        "level": 2
+      },
+      "intents": [],
+      "new_words": [],
+      "drift": {
+        "voiced_fraction": {
+          "value": 0.0,
+          "baseline_mean": 0.6377,
+          "delta": -0.6377,
+          "sd_from_baseline": -9.02
+        }
+      }
+    },
+    {
+      "label": "/tmp/harvest_dry3/free_sessions/1758000004",
+      "at": "2026-10-21T05:11:56Z",
+      "n_bundles": 4,
+      "duration_s": 148.306,
+      "n_words": 0,
+      "n_syllables": 0,
+      "n_notes": 0,
+      "stats": {
+        "centre_midi": null,
+        "range_semitones": null,
+        "slope_semitones_per_s": null,
+        "notes_per_second": null,
+        "median_note_s": null,
+        "note_duration_std": null,
+        "step_abs_mean": null,
+        "step_std": null,
+        "jitter_semitones": null,
+        "voiced_fraction": 0.0
+      },
+      "motifs": {
+        "level": 4
+      },
+      "intents": [],
+      "new_words": [],
+      "drift": {
+        "voiced_fraction": {
+          "value": 0.0,
+          "baseline_mean": 0.4251,
+          "delta": -0.4251,
+          "sd_from_baseline": -1.389
+        }
+      }
+    }
+  ],
+  "vocabulary": {
+    "size": 35,
+    "words": [
+      "a",
+      "across",
+      "and",
+      "at",
+      "away",
+      "bar",
+      "bus",
+      "came",
+      "coat",
+      "coffee",
+      "cup",
+      "did",
+      "east",
+      "from",
+      "great",
+      "he",
+      "here",
+      "in",
+      "library",
+      "light",
+      "long",
+      "look",
+      "near",
+      "not",
+      "of",
+      "opened",
+      "pulled",
+      "sat",
+      "set",
+      "the",
+      "then",
+      "through",
+      "turned",
+      "window",
+      "with"
+    ]
+  },
+  "motif_vocabulary": {
+    "rising": 2,
+    "falling": 4,
+    "level": 6,
+    "arched": 2,
+    "dipped": 0,
+    "mixed": 0
+  },
+  "intent_vocabulary": {},
+  "baseline": {
+    "centre_midi": {
+      "mean": 46.125,
+      "sd": 0.5,
+      "n": 2,
+      "min": 45.625,
+      "max": 46.625
+    },
+    "range_semitones": {
+      "mean": 9.5,
+      "sd": 1.5,
+      "n": 2,
+      "min": 8.0,
+      "max": 11.0
+    },
+    "slope_semitones_per_s": {
+      "mean": -1.2623,
+      "sd": 0.044,
+      "n": 2,
+      "min": -1.3063,
+      "max": -1.2183
+    },
+    "notes_per_second": {
+      "mean": 4.3872,
+      "sd": 0.4184,
+      "n": 2,
+      "min": 3.9688,
+      "max": 4.8057
+    },
+    "median_note_s": {
+      "mean": 0.1493,
+      "sd": 0.0019,
+      "n": 2,
+      "min": 0.1475,
+      "max": 0.1512
+    },
+    "note_duration_std": {
+      "mean": 0.0996,
+      "sd": 0.004,
+      "n": 2,
+      "min": 0.0956,
+      "max": 0.1036
+    },
+    "step_abs_mean": {
+      "mean": 2.5891,
+      "sd": 0.1779,
+      "n": 2,
+      "min": 2.4112,
+      "max": 2.767
+    },
+    "step_std": {
+      "mean": 3.3576,
+      "sd": 0.4881,
+      "n": 2,
+      "min": 2.8695,
+      "max": 3.8457
+    },
+    "jitter_semitones": {
+      "mean": 2.3296,
+      "sd": 0.4216,
+      "n": 2,
+      "min": 1.908,
+      "max": 2.7512
+    },
+    "voiced_fraction": {
+      "mean": 0.3188,
+      "sd": 0.3227,
+      "n": 4,
+      "min": 0.0,
+      "max": 0.7083
+    }
+  },
+  "note": "descriptive only. These are measurements of how the voice moved, and a drift says a thing moved; it does not say what the speaker was doing. The interpretation is earned slowly or not at all."
+}
