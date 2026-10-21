@@ -2,6 +2,24 @@
  "sensor": "microphone",
  "device": "Microphone Array (Realtek(R) Audio)",
  "capture_rate_hz": 48000,
+ "devices_seen": {
+  "Microphone Array (Realtek(R) Audio)": {
+   "n_sessions": 53,
+   "n_silent": 47,
+   "peak_max": 3064
+  },
+  "?": {
+   "n_sessions": 17,
+   "n_silent": 9,
+   "peak_max": 18064
+  },
+  "Fake Default Audio Input": {
+   "n_sessions": 27,
+   "n_silent": 0,
+   "peak_max": 18064
+  }
+ },
+ "device_note": "the corpus holds MORE THAN ONE input device, and one of them is synthetic: the newest sessions were recorded against Chrome's 'Fake Default Audio Input' and a static .y4m test pattern as the camera.  Those are an end-to-end test rig, not a room capture, and the level statistics below are computed over the real microphone only.",
  "behaviours": [
   {
    "id": "SILENT_AUDIO",
@@ -16,20 +34,55 @@
      "min": 54,
      "max": 18064,
      "median": 13399
-    }
+    },
+    "n_sessions_on_a_synthetic_device": 44,
+    "n_silent_on_the_real_microphone": 47,
+    "n_on_the_real_microphone": 53
    },
    "provenance": "measured over the corpus's free sessions; the class was 34 folders and 82.4M samples on the night it happened (browser_capture/DONE.md)"
   },
   {
    "id": "GAIN_CHANGE",
    "class": "level",
-   "statement": "the same microphone produced peaks of about 3000 and about 18000 within one day: the level is not a property of the device alone",
+   "statement": "the level is not a property of the device alone: on the REAL microphone the loud sessions' peaks run from about 140 to about 3064, a 21.9x spread, in one room.  The much larger spread that the whole corpus shows is an artefact of the synthetic input device, and it is filed separately.",
    "measurement": {
-    "loud_peak_min": 54,
-    "loud_peak_max": 18064,
-    "ratio": 334.52
+    "loud_peak_min": 140,
+    "loud_peak_max": 3064,
+    "ratio": 21.89,
+    "population": "the real microphone only",
+    "whole_corpus_including_synthetic": {
+     "loud_peak_min": 54,
+     "loud_peak_max": 18064,
+     "ratio": 334.52
+    },
+    "why_it_is_separated": "the 18000-class peaks are Chrome's synthetic test tone on the 'Fake Default Audio Input', not a room"
    },
-   "provenance": "measured over the corpus's free sessions on 2026-10-21; the older sessions peak near 3000 and the newer ones near 18000"
+   "provenance": "measured over the corpus's free sessions on 2026-10-21, split by the device label in each session's meta.json"
+  },
+  {
+   "id": "SYNTHETIC_INPUT_DEVICE",
+   "class": "failure_signature",
+   "statement": "the corpus holds an end-to-end TEST rig alongside the room captures: Chrome's 'Fake Default Audio Input' with a static .y4m test pattern standing in for the camera.  A session from this rig is not evidence about the room, and a statistic that mixes the two is wrong by the synthetic fraction.",
+   "measurement": {
+    "n_sessions_on_a_synthetic_device": 44,
+    "n_sessions_total": 97,
+    "fraction_synthetic": 0.4536,
+    "devices": {
+     "Microphone Array (Realtek(R) Audio)": {
+      "n_sessions": 53,
+      "peak_max": 3064
+     },
+     "?": {
+      "n_sessions": 17,
+      "peak_max": 18064
+     },
+     "Fake Default Audio Input": {
+      "n_sessions": 27,
+      "peak_max": 18064
+     }
+    }
+   },
+   "provenance": "each session's meta.json names its camera and mic; the synthetic rig is identifiable by the label rather than guessed at"
   },
   {
    "id": "RESAMPLE_FOLD",
@@ -112,18 +165,18 @@
      "mean": 4.2383549749158
     },
     "envelope_direction_counts": {
-     "AWAY": 40,
+     "PASS": 483,
      "TOWARD": 51,
-     "PASS": 483
+     "AWAY": 40
     },
     "video_frame_direction_counts": {
      "RIGHT": 271,
      "LEFT": 303
     },
     "video_radial_label_counts": {
-     "AWAY": 196,
+     "PASS": 125,
      "TOWARD": 253,
-     "PASS": 125
+     "AWAY": 196
     },
     "n_graded": 574,
     "n_agreeing_with_the_video_radial_label": 142,
@@ -155,7 +208,10 @@
      "auc_envelope_slope_toward_vs_away": 0.5064,
      "n_envelope_peak_on_a_speech_segment": 70,
      "envelope_peak_on_speech_rate": 0.7447,
-     "note": "the other crossings sit in sessions whose audio is digital silence, so their envelopes are flat and their direction is the direction of a constant"
+     "population": "the crossings on the REAL microphone, with a live envelope",
+     "n_sessions_on_a_synthetic_device": 27,
+     "n_sessions_on_the_real_microphone": 53,
+     "note": "the other crossings sit in sessions whose audio is digital silence, or on Chrome's synthetic test input, so their envelopes are flat or synthetic and their direction is the direction of a constant"
     }
    },
    "provenance": "experiments/lens.py:walk_by_study, over the corpus's sessions with a live video layer; the radial label is the blob's apparent-size growth, and the room map's own words are that an image plane measures no distance"
@@ -293,5 +349,5 @@
   }
  ],
  "lens_version": 1,
- "generated_utc": "2026-10-21T17:30:50Z"
+ "generated_utc": "2026-10-21T17:50:16Z"
 }

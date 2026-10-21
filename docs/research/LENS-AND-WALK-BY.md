@@ -68,19 +68,32 @@ That is 57.7 % of the corpus with a dead audio channel. The eight
 `peak_abs: 0` and exactly eight `SILENT_AUDIO` alerts, so the linker
 knew and said so; the failure is upstream of the linker.
 
-The peak is not a continuous quantity across the corpus. Among the
-sessions that are not silent, the peak runs from **54** to **18,064**
-in the WAV's own units — a **334× spread**. The microphone's own gain
-varies by two and a half orders of magnitude between sessions recorded
-on the same day in the same room.
+**44 of the 97 bundles are not a room at all.** They are an end-to-end
+test rig: Chrome's "Fake Default Audio Input" and a static `.y4m` test
+pattern standing in for the camera. Each session's `meta.json` names its
+own devices, so the split is read rather than guessed — and it has to be
+read, because the first cut of this study mixed the two populations and
+produced a false claim (below).
+
+On the **real** microphone (53 sessions), **47 are silent** — 88.7 %.
+The loud ones peak between **140** and **3,064**, a **21.9×** spread in
+the microphone's own gain across one room on one day.
 
 ### 2.2 GAIN_CHANGE — the level
 
-The same 334× ratio, filed as a level rather than a fault, because the
+The same 21.9× ratio, filed as a level rather than a fault, because the
 two readings of it are different: a silent session is a dead channel, a
 loud one is a gain change, and only the second is informative. Any
 absolute threshold set from one session's loudness is wrong for the
-next one by up to 334×.
+next one by up to 22×.
+
+**The population matters, and getting it wrong is what this section's
+first draft did.** Mixing the synthetic sessions in gives a spread of
+**54 to 18,064 — 334×** — because the fake input's synthetic test tone
+peaks at 18,064 while the real microphone peaks at 3,064. That 334× was
+a test tone counted against a room. The lens file now reports the real
+microphone's 21.9× as the headline and keeps the whole-corpus figure
+under a separate key, with the reason attached.
 
 ### 2.3 RESAMPLE_FOLD — the deadband
 
@@ -237,8 +250,9 @@ Size growth across the 574 crossings: p10 **0.25**, median **1.12**, p90
 
 ### 3.7 The result: the envelope carries the event and not the direction
 
-On the **audio-bearing** crossings — the 94 whose envelope is live rather
-than digital silence:
+On the **audio-bearing** crossings — the 94 on the **real microphone**
+whose envelope is live rather than digital silence (the synthetic rig's
+27 sessions are excluded: their envelopes are a test tone, not a room):
 
 | | |
 |---|---|
@@ -383,8 +397,15 @@ thing independently — a sine sweep produced 14 hallucinated words.
   voice and there are no labelled crossings.
 - **It does not say the crossings are wrong.** 574 crossings were found
   by a detector whose every threshold is measured, and their centroids
-  sit inside the person zone at 76–100 %. They are Casey moving. They
+  sit inside the person zone at **90 %**. They are Casey moving. They
   are not a person walking past the microphone.
+- **It does not treat the synthetic rig as a room.** 44 of the 97
+  bundles are an end-to-end test rig — Chrome's fake audio input and a
+  static `.y4m` test pattern. The device label is read from each
+  session's `meta.json` and the acoustic population is the real
+  microphone's. This is not a formality: the first draft of this study
+  mixed the two and produced a 334× "gain spread" that was a test tone
+  counted against a room.
 - **It does not generalise past one room.** The room map's own verdict:
   one space, one device, one camera position. The 46 of 50 sessions that
   map to the composite viewpoint do so with shifts in (−1..4, −2..1)

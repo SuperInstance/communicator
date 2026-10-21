@@ -1,6 +1,6 @@
 {
  "study": "walk-by envelope",
- "generated_utc": "2026-10-21T17:30:50Z",
+ "generated_utc": "2026-10-21T17:50:16Z",
  "method": {
   "crossing": "a BURST of change events whose change-map centroid drifts consistently across the frame; the video has no consecutive changed frames, because the recorder repeats a picture until it changes",
   "direction": "the drift of the change map's horizontal centroid",
@@ -14,6 +14,7 @@
   {
    "session": "1792553040",
    "change_threshold": 3.0,
+   "input_device": "REAL",
    "n_frames": 15513,
    "session_noise_floor_db": -180.0,
    "speech_s": 0,
@@ -2236,6 +2237,7 @@
   {
    "session": "1792553042",
    "change_threshold": 3.0,
+   "input_device": "REAL",
    "n_frames": 137,
    "session_noise_floor_db": -180.0,
    "speech_s": 0,
@@ -2274,6 +2276,7 @@
   {
    "session": "1792553152",
    "change_threshold": 3.0,
+   "input_device": "REAL",
    "n_frames": 6592,
    "session_noise_floor_db": -180.0,
    "speech_s": 0,
@@ -2900,6 +2903,7 @@
   {
    "session": "1792553234",
    "change_threshold": 3.0,
+   "input_device": "REAL",
    "n_frames": 562,
    "session_noise_floor_db": -180.0,
    "speech_s": 0,
@@ -2909,6 +2913,7 @@
   {
    "session": "1792553329",
    "change_threshold": 3.0,
+   "input_device": "REAL",
    "n_frames": 1025,
    "session_noise_floor_db": -180.0,
    "speech_s": 0,
@@ -2918,6 +2923,7 @@
   {
    "session": "1792553518",
    "change_threshold": 3.0,
+   "input_device": "REAL",
    "n_frames": 10597,
    "session_noise_floor_db": -180.0,
    "speech_s": 0,
@@ -4300,6 +4306,7 @@
   {
    "session": "1792553766",
    "change_threshold": 3.0,
+   "input_device": "REAL",
    "n_frames": 14603,
    "session_noise_floor_db": -180.0,
    "speech_s": 0,
@@ -6382,6 +6389,7 @@
   {
    "session": "1792553784",
    "change_threshold": 3.0,
+   "input_device": "REAL",
    "n_frames": 830,
    "session_noise_floor_db": -180.0,
    "speech_s": 0,
@@ -6420,6 +6428,7 @@
   {
    "session": "1792553803",
    "change_threshold": 3.0,
+   "input_device": "REAL",
    "n_frames": 847,
    "session_noise_floor_db": -180.0,
    "speech_s": 0,
@@ -6458,6 +6467,7 @@
   {
    "session": "1792553812",
    "change_threshold": 3.0,
+   "input_device": "REAL",
    "n_frames": 501,
    "session_noise_floor_db": -180.0,
    "speech_s": 0,
@@ -6467,6 +6477,7 @@
   {
    "session": "1792553852",
    "change_threshold": 3.0,
+   "input_device": "REAL",
    "n_frames": 1874,
    "session_noise_floor_db": -180.0,
    "speech_s": 0,
@@ -6589,6 +6600,7 @@
   {
    "session": "1792553885",
    "change_threshold": 3.0,
+   "input_device": "REAL",
    "n_frames": 1314,
    "session_noise_floor_db": -180.0,
    "speech_s": 0,
@@ -6655,6 +6667,7 @@
   {
    "session": "1792553925",
    "change_threshold": 3.0,
+   "input_device": "REAL",
    "n_frames": 2239,
    "session_noise_floor_db": -180.0,
    "speech_s": 0,
@@ -6861,6 +6874,7 @@
   {
    "session": "1792553975",
    "change_threshold": 3.0,
+   "input_device": "REAL",
    "n_frames": 2032,
    "session_noise_floor_db": -180.0,
    "speech_s": 0,
@@ -6983,6 +6997,7 @@
   {
    "session": "1792554004",
    "change_threshold": 3.0,
+   "input_device": "REAL",
    "n_frames": 1540,
    "session_noise_floor_db": -180.0,
    "speech_s": 0,
@@ -7105,6 +7120,7 @@
   {
    "session": "1792554034",
    "change_threshold": 3.0,
+   "input_device": "REAL",
    "n_frames": 926,
    "session_noise_floor_db": -180.0,
    "speech_s": 0,
@@ -7143,6 +7159,7 @@
   {
    "session": "1792554067",
    "change_threshold": 3.0,
+   "input_device": "REAL",
    "n_frames": 1734,
    "session_noise_floor_db": -180.0,
    "speech_s": 0,
@@ -7237,6 +7254,7 @@
   {
    "session": "1792554097",
    "change_threshold": 3.0,
+   "input_device": "REAL",
    "n_frames": 1792,
    "session_noise_floor_db": -180.0,
    "speech_s": 0,
@@ -7246,6 +7264,7 @@
   {
    "session": "1792554308",
    "change_threshold": 3.0,
+   "input_device": "REAL",
    "n_frames": 30,
    "session_noise_floor_db": -180.0,
    "speech_s": 0,
@@ -7255,6 +7274,7 @@
   {
    "session": "1792554309",
    "change_threshold": 3.0,
+   "input_device": "REAL",
    "n_frames": 12262,
    "session_noise_floor_db": -180.0,
    "speech_s": 0,
@@ -8693,6 +8713,7 @@
   {
    "session": "1792554532",
    "change_threshold": 3.0,
+   "input_device": "REAL",
    "n_frames": 12703,
    "session_noise_floor_db": -180.0,
    "speech_s": 0,
@@ -10635,6 +10656,7 @@
   {
    "session": "1792554540",
    "change_threshold": 3.0,
+   "input_device": "REAL",
    "n_frames": 425,
    "session_noise_floor_db": -180.0,
    "speech_s": 0,
@@ -10701,6 +10723,7 @@
   {
    "session": "1792554549",
    "change_threshold": 3.0,
+   "input_device": "REAL",
    "n_frames": 519,
    "session_noise_floor_db": -180.0,
    "speech_s": 0,
@@ -10739,6 +10762,7 @@
   {
    "session": "1792554557",
    "change_threshold": 3.0,
+   "input_device": "REAL",
    "n_frames": 175,
    "session_noise_floor_db": -180.0,
    "speech_s": 0,
@@ -10748,6 +10772,7 @@
   {
    "session": "1792554571",
    "change_threshold": 3.0,
+   "input_device": "REAL",
    "n_frames": 843,
    "session_noise_floor_db": -180.0,
    "speech_s": 0,
@@ -10786,6 +10811,7 @@
   {
    "session": "1792554659",
    "change_threshold": 3.0,
+   "input_device": "REAL",
    "n_frames": 4666,
    "session_noise_floor_db": -180.0,
    "speech_s": 0,
@@ -11300,6 +11326,7 @@
   {
    "session": "1792554677",
    "change_threshold": 3.0,
+   "input_device": "REAL",
    "n_frames": 917,
    "session_noise_floor_db": -180.0,
    "speech_s": 0,
@@ -11366,6 +11393,7 @@
   {
    "session": "1792554689",
    "change_threshold": 3.0,
+   "input_device": "REAL",
    "n_frames": 578,
    "session_noise_floor_db": -180.0,
    "speech_s": 0,
@@ -11375,6 +11403,7 @@
   {
    "session": "1792554738",
    "change_threshold": 3.0,
+   "input_device": "REAL",
    "n_frames": 978,
    "session_noise_floor_db": -180.0,
    "speech_s": 0,
@@ -11413,6 +11442,7 @@
   {
    "session": "1792554762",
    "change_threshold": 3.0,
+   "input_device": "REAL",
    "n_frames": 1182,
    "session_noise_floor_db": -180.0,
    "speech_s": 0,
@@ -11451,6 +11481,7 @@
   {
    "session": "1792554791",
    "change_threshold": 3.0,
+   "input_device": "REAL",
    "n_frames": 901,
    "session_noise_floor_db": -180.0,
    "speech_s": 0,
@@ -11545,6 +11576,7 @@
   {
    "session": "1792554809",
    "change_threshold": 3.0,
+   "input_device": "REAL",
    "n_frames": 560,
    "session_noise_floor_db": -180.0,
    "speech_s": 0,
@@ -11554,6 +11586,7 @@
   {
    "session": "1792554841",
    "change_threshold": 3.0,
+   "input_device": "REAL",
    "n_frames": 570,
    "session_noise_floor_db": -180.0,
    "speech_s": 0,
@@ -11563,6 +11596,7 @@
   {
    "session": "1792554906",
    "change_threshold": 3.0,
+   "input_device": "REAL",
    "n_frames": 549,
    "session_noise_floor_db": -180.0,
    "speech_s": 0,
@@ -11572,6 +11606,7 @@
   {
    "session": "1792555007",
    "change_threshold": 3.0,
+   "input_device": "REAL",
    "n_frames": 2169,
    "session_noise_floor_db": -180.0,
    "speech_s": 0,
@@ -11806,6 +11841,7 @@
   {
    "session": "1792555048",
    "change_threshold": 3.0,
+   "input_device": "REAL",
    "n_frames": 1563,
    "session_noise_floor_db": -180.0,
    "speech_s": 0,
@@ -11815,6 +11851,7 @@
   {
    "session": "1792555105",
    "change_threshold": 3.0,
+   "input_device": "REAL",
    "n_frames": 626,
    "session_noise_floor_db": -180.0,
    "speech_s": 0,
@@ -11824,6 +11861,7 @@
   {
    "session": "1792555166",
    "change_threshold": 3.0,
+   "input_device": "REAL",
    "n_frames": 1043,
    "session_noise_floor_db": -180.0,
    "speech_s": 0,
@@ -11833,6 +11871,7 @@
   {
    "session": "1792555182",
    "change_threshold": 3.0,
+   "input_device": "REAL",
    "n_frames": 895,
    "session_noise_floor_db": -180.0,
    "speech_s": 0,
@@ -11842,6 +11881,7 @@
   {
    "session": "1792555203",
    "change_threshold": 3.0,
+   "input_device": "REAL",
    "n_frames": 1067,
    "session_noise_floor_db": -180.0,
    "speech_s": 0,
@@ -11851,6 +11891,7 @@
   {
    "session": "1792555235",
    "change_threshold": 3.0,
+   "input_device": "REAL",
    "n_frames": 1116,
    "session_noise_floor_db": -180.0,
    "speech_s": 0,
@@ -11860,6 +11901,7 @@
   {
    "session": "1792555374",
    "change_threshold": 3.0,
+   "input_device": "REAL",
    "n_frames": 1262,
    "session_noise_floor_db": -180.0,
    "speech_s": 0,
@@ -11926,6 +11968,7 @@
   {
    "session": "1792555390",
    "change_threshold": 3.0,
+   "input_device": "REAL",
    "n_frames": 874,
    "session_noise_floor_db": -180.0,
    "speech_s": 0,
@@ -11935,6 +11978,7 @@
   {
    "session": "1792555570",
    "change_threshold": 3.0,
+   "input_device": "REAL",
    "n_frames": 882,
    "session_noise_floor_db": -180.0,
    "speech_s": 0,
@@ -11973,6 +12017,7 @@
   {
    "session": "1792555610",
    "change_threshold": 3.0,
+   "input_device": "REAL",
    "n_frames": 797,
    "session_noise_floor_db": -180.0,
    "speech_s": 0,
@@ -12011,6 +12056,7 @@
   {
    "session": "1792555864",
    "change_threshold": 3.0,
+   "input_device": "REAL",
    "n_frames": 12671,
    "session_noise_floor_db": -180.0,
    "speech_s": 0,
@@ -13841,6 +13887,7 @@
   {
    "session": "1792560124",
    "change_threshold": 3.0,
+   "input_device": "REAL",
    "n_frames": 121,
    "session_noise_floor_db": -180.0,
    "speech_s": 0,
@@ -13850,6 +13897,7 @@
   {
    "session": "1792560597",
    "change_threshold": 3.0,
+   "input_device": "REAL",
    "n_frames": 1625,
    "session_noise_floor_db": -180.0,
    "speech_s": 4.17,
@@ -14036,6 +14084,7 @@
   {
    "session": "1792560758",
    "change_threshold": 3.0,
+   "input_device": "REAL",
    "n_frames": 9259,
    "session_noise_floor_db": -72.79,
    "speech_s": 53.99,
@@ -15026,6 +15075,7 @@
   {
    "session": "1792560773",
    "change_threshold": 3.0,
+   "input_device": "REAL",
    "n_frames": 933,
    "session_noise_floor_db": -71.5,
    "speech_s": 16.02,
@@ -15064,6 +15114,7 @@
   {
    "session": "1792596296",
    "change_threshold": 3.0,
+   "input_device": "REAL",
    "n_frames": 4411,
    "session_noise_floor_db": -72.35,
    "speech_s": 23.59,
@@ -15810,6 +15861,7 @@
   {
    "session": "1792596354",
    "change_threshold": 3.0,
+   "input_device": "REAL",
    "n_frames": 3524,
    "session_noise_floor_db": -73.65,
    "speech_s": 24.82,
@@ -16620,6 +16672,7 @@
   {
    "session": "1792596369",
    "change_threshold": 3.0,
+   "input_device": "REAL",
    "n_frames": 806,
    "session_noise_floor_db": -69.69,
    "speech_s": 2.35,
@@ -16822,6 +16875,7 @@
   {
    "session": "1792600782",
    "change_threshold": 3.0,
+   "input_device": "SYNTHETIC",
    "n_frames": 860,
    "session_noise_floor_db": -180.0,
    "speech_s": 2.04,
@@ -16831,6 +16885,7 @@
   {
    "session": "1792600836",
    "change_threshold": 3.0,
+   "input_device": "SYNTHETIC",
    "n_frames": 1266,
    "session_noise_floor_db": -180.0,
    "speech_s": 1.7,
@@ -16840,6 +16895,7 @@
   {
    "session": "1792600866",
    "change_threshold": 3.0,
+   "input_device": "SYNTHETIC",
    "n_frames": 1292,
    "session_noise_floor_db": -180.0,
    "speech_s": 1.7,
@@ -16849,6 +16905,7 @@
   {
    "session": "1792600896",
    "change_threshold": 3.0,
+   "input_device": "SYNTHETIC",
    "n_frames": 1289,
    "session_noise_floor_db": -180.0,
    "speech_s": 1.7,
@@ -16858,6 +16915,7 @@
   {
    "session": "1792600915",
    "change_threshold": 3.0,
+   "input_device": "SYNTHETIC",
    "n_frames": 792,
    "session_noise_floor_db": -180.0,
    "speech_s": 0.9,
@@ -16867,6 +16925,7 @@
   {
    "session": "1792600927",
    "change_threshold": 3.0,
+   "input_device": "SYNTHETIC",
    "n_frames": 558,
    "session_noise_floor_db": -180.0,
    "speech_s": 0.48,
@@ -16876,6 +16935,7 @@
   {
    "session": "1792600945",
    "change_threshold": 3.0,
+   "input_device": "SYNTHETIC",
    "n_frames": 808,
    "session_noise_floor_db": -180.0,
    "speech_s": 0.9,
@@ -16885,6 +16945,7 @@
   {
    "session": "1792600957",
    "change_threshold": 3.0,
+   "input_device": "SYNTHETIC",
    "n_frames": 570,
    "session_noise_floor_db": -180.0,
    "speech_s": 0.48,
@@ -16894,6 +16955,7 @@
   {
    "session": "1792600975",
    "change_threshold": 3.0,
+   "input_device": "SYNTHETIC",
    "n_frames": 810,
    "session_noise_floor_db": -180.0,
    "speech_s": 0.9,
@@ -16903,6 +16965,7 @@
   {
    "session": "1792601183",
    "change_threshold": 3.0,
+   "input_device": "SYNTHETIC",
    "n_frames": 860,
    "session_noise_floor_db": -180.0,
    "speech_s": 2.03,
@@ -16912,6 +16975,7 @@
   {
    "session": "1792601235",
    "change_threshold": 3.0,
+   "input_device": "SYNTHETIC",
    "n_frames": 1268,
    "session_noise_floor_db": -180.0,
    "speech_s": 1.7,
@@ -16921,6 +16985,7 @@
   {
    "session": "1792601265",
    "change_threshold": 3.0,
+   "input_device": "SYNTHETIC",
    "n_frames": 1284,
    "session_noise_floor_db": -180.0,
    "speech_s": 1.7,
@@ -16930,6 +16995,7 @@
   {
    "session": "1792601295",
    "change_threshold": 3.0,
+   "input_device": "SYNTHETIC",
    "n_frames": 1260,
    "session_noise_floor_db": -180.0,
    "speech_s": 1.7,
@@ -16939,6 +17005,7 @@
   {
    "session": "1792601314",
    "change_threshold": 3.0,
+   "input_device": "SYNTHETIC",
    "n_frames": 793,
    "session_noise_floor_db": -180.0,
    "speech_s": 0.9,
@@ -16948,6 +17015,7 @@
   {
    "session": "1792601327",
    "change_threshold": 3.0,
+   "input_device": "SYNTHETIC",
    "n_frames": 557,
    "session_noise_floor_db": -180.0,
    "speech_s": 0.48,
@@ -16957,6 +17025,7 @@
   {
    "session": "1792601344",
    "change_threshold": 3.0,
+   "input_device": "SYNTHETIC",
    "n_frames": 812,
    "session_noise_floor_db": -180.0,
    "speech_s": 0.9,
@@ -16966,6 +17035,7 @@
   {
    "session": "1792601356",
    "change_threshold": 3.0,
+   "input_device": "SYNTHETIC",
    "n_frames": 577,
    "session_noise_floor_db": -180.0,
    "speech_s": 0.48,
@@ -16975,6 +17045,7 @@
   {
    "session": "1792601374",
    "change_threshold": 3.0,
+   "input_device": "SYNTHETIC",
    "n_frames": 794,
    "session_noise_floor_db": -180.0,
    "speech_s": 0.9,
@@ -16984,6 +17055,7 @@
   {
    "session": "1792601451",
    "change_threshold": 3.0,
+   "input_device": "SYNTHETIC",
    "n_frames": 858,
    "session_noise_floor_db": -180.0,
    "speech_s": 2.04,
@@ -16993,6 +17065,7 @@
   {
    "session": "1792601504",
    "change_threshold": 3.0,
+   "input_device": "SYNTHETIC",
    "n_frames": 1262,
    "session_noise_floor_db": -180.0,
    "speech_s": 1.7,
@@ -17002,6 +17075,7 @@
   {
    "session": "1792601534",
    "change_threshold": 3.0,
+   "input_device": "SYNTHETIC",
    "n_frames": 1289,
    "session_noise_floor_db": -180.0,
    "speech_s": 1.7,
@@ -17011,6 +17085,7 @@
   {
    "session": "1792601564",
    "change_threshold": 3.0,
+   "input_device": "SYNTHETIC",
    "n_frames": 1270,
    "session_noise_floor_db": -180.0,
    "speech_s": 1.7,
@@ -17020,6 +17095,7 @@
   {
    "session": "1792601583",
    "change_threshold": 3.0,
+   "input_device": "SYNTHETIC",
    "n_frames": 791,
    "session_noise_floor_db": -180.0,
    "speech_s": 0.9,
@@ -17029,6 +17105,7 @@
   {
    "session": "1792601595",
    "change_threshold": 3.0,
+   "input_device": "SYNTHETIC",
    "n_frames": 562,
    "session_noise_floor_db": -180.0,
    "speech_s": 0.48,
@@ -17038,6 +17115,7 @@
   {
    "session": "1792601613",
    "change_threshold": 3.0,
+   "input_device": "SYNTHETIC",
    "n_frames": 808,
    "session_noise_floor_db": -180.0,
    "speech_s": 0.9,
@@ -17047,6 +17125,7 @@
   {
    "session": "1792601625",
    "change_threshold": 3.0,
+   "input_device": "SYNTHETIC",
    "n_frames": 575,
    "session_noise_floor_db": -180.0,
    "speech_s": 0.48,
@@ -17056,6 +17135,7 @@
   {
    "session": "1792601643",
    "change_threshold": 3.0,
+   "input_device": "SYNTHETIC",
    "n_frames": 795,
    "session_noise_floor_db": -180.0,
    "speech_s": 0.9,

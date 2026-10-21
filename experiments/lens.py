@@ -370,6 +370,33 @@ def doppler_check(samples, sr, t0, t1):
     }
 
 
+def input_device(sdir):
+    """The session's own INPUT DEVICE, read from its meta.json.
+
+    "Real" means a real capture device.  "SYNTHETIC" means Chrome's fake
+    audio input and/or a .y4m test pattern standing in for the camera:
+    an end-to-end test rig, not a room.  The label is read rather than
+    guessed, because guessing it is what put a synthetic tone into the
+    microphone's level statistics in the first place.
+    """
+    meta = Path(sdir) / "meta.json"
+    if not meta.is_file():
+        return "UNKNOWN"
+    try:
+        j = json.loads(meta.read_text())
+    except Exception:  # noqa: BLE001
+        return "UNKNOWN"
+    mic = (j.get("mic") or {}).get("label", "")
+    cam = (j.get("camera") or {}).get("label", "")
+    if not mic and not cam:
+        return "UNKNOWN"
+    if ("Fake" in mic) or (".y4m" in cam):
+        return "SYNTHETIC"
+    if "Realtek" in mic:
+        return "REAL"
+    return "OTHER:" + (mic or cam)[:40]
+
+
 def walk_by_study(session_dirs):
     """The envelope around every crossing the sessions contain."""
     out = []
@@ -445,6 +472,7 @@ def walk_by_study(session_dirs):
             })
         out.append({"session": name,
                     "change_threshold": round(thr, 4),
+                    "input_device": input_device(sdir),
                     "n_frames": len(maps),
                     "session_noise_floor_db": round(noise_floor_db, 2),
                     "speech_s": round(sum(e - s for s, e in speech), 2),
@@ -464,6 +492,16 @@ def lens_microphone():
     n_sessions = 0
     n_silent = 0
     levels = []
+    real_levels = []
+    # The corpus is LIVE and it grew during this study.  The newest
+    # sessions are an END-TO-END TEST rig: Chrome's "Fake Default Audio
+    # Input" and a static .y4m test pattern standing in for the camera.
+    # They are not room captures, and their peaks are a synthetic test
+    # tone.  Mixing them into the microphone's level statistics produced
+    # a false claim -- a 334x "gain spread" that was really a test tone
+    # counted against a room -- so the devices are separated here and
+    # the level statistics are computed over the REAL microphone only.
+    devices = {}
     if FREE_ROOT.is_dir():
         import wave
         for d in sorted(FREE_ROOT.iterdir()):
@@ -471,6 +509,15 @@ def lens_microphone():
             if not wav.is_file():
                 continue
             n_sessions += 1
+            mic_label = "?"
+            meta = d / "meta.json"
+            if meta.is_file():
+                try:
+                    mic_label = json.loads(meta.read_text()).get(
+                        "mic", {}).get("label", "?")
+                except Exception:  # noqa: BLE001
+                    mic_label = "?"
+            synthetic = ("Fake" in mic_label) or (mic_label == "?")
             try:
                 w = wave.open(str(wav))
                 n = w.getnframes()
@@ -480,14 +527,32 @@ def lens_microphone():
                 peak = int(np.max(np.abs(a))) if a.size else 0
             except Exception:  # noqa: BLE001
                 continue
+            devices.setdefault(mic_label, {"n": 0, "n_silent": 0, "levels": []})
+            devices[mic_label]["n"] += 1
             if peak == 0:
                 n_silent += 1
+                devices[mic_label]["n_silent"] += 1
             else:
                 levels.append(peak)
+                if not synthetic:
+                    real_levels.append(peak)
+            devices[mic_label]["levels"].append(peak)
     return {
         "sensor": "microphone",
         "device": "Microphone Array (Realtek(R) Audio)",
         "capture_rate_hz": 48000,
+        "devices_seen": {
+            k: {"n_sessions": v["n"], "n_silent": v["n_silent"],
+                "peak_max": max(v["levels"]) if v["levels"] else None}
+            for k, v in devices.items()
+        },
+        "device_note": ("the corpus holds MORE THAN ONE input device, and "
+                        "one of them is synthetic: the newest sessions "
+                        "were recorded against Chrome's 'Fake Default Audio "
+                        "Input' and a static .y4m test pattern as the "
+                        "camera.  Those are an end-to-end test rig, not a "
+                        "room capture, and the level statistics below are "
+                        "computed over the real microphone only."),
         "behaviours": [
             {
                 "id": "SILENT_AUDIO",
@@ -506,6 +571,15 @@ def lens_microphone():
                         "max": max(levels) if levels else None,
                         "median": statistics.median(levels) if levels else None,
                     },
+                    "n_sessions_on_a_synthetic_device": sum(
+                        v["n"] for k, v in devices.items()
+                        if "Fake" in k or k == "?"),
+                    "n_silent_on_the_real_microphone": sum(
+                        v["n_silent"] for k, v in devices.items()
+                        if "Fake" not in k and k != "?"),
+                    "n_on_the_real_microphone": sum(
+                        v["n"] for k, v in devices.items()
+                        if "Fake" not in k and k != "?"),
                 },
                 "provenance": ("measured over the corpus's free sessions; "
                                "the class was 34 folders and 82.4M samples "
@@ -515,18 +589,59 @@ def lens_microphone():
             {
                 "id": "GAIN_CHANGE",
                 "class": "level",
-                "statement": ("the same microphone produced peaks of about "
-                              "3000 and about 18000 within one day: the "
-                              "level is not a property of the device alone"),
+                "statement": ("the level is not a property of the device "
+                              "alone: on the REAL microphone the loud "
+                              "sessions' peaks run from about 140 to about "
+                              "3064, a 21.9x spread, in one room.  The much "
+                              "larger spread that the whole corpus shows "
+                              "is an artefact of the synthetic input "
+                              "device, and it is filed separately."),
                 "measurement": {
-                    "loud_peak_min": min(levels) if levels else None,
-                    "loud_peak_max": max(levels) if levels else None,
-                    "ratio": round(max(levels) / max(1, min(levels)), 2)
-                    if levels else None,
+                    "loud_peak_min": min(real_levels) if real_levels else None,
+                    "loud_peak_max": max(real_levels) if real_levels else None,
+                    "ratio": round(max(real_levels) / max(1, min(real_levels)), 2)
+                    if real_levels else None,
+                    "population": "the real microphone only",
+                    "whole_corpus_including_synthetic": {
+                        "loud_peak_min": min(levels) if levels else None,
+                        "loud_peak_max": max(levels) if levels else None,
+                        "ratio": round(max(levels) / max(1, min(levels)), 2)
+                        if levels else None,
+                    },
+                    "why_it_is_separated": ("the 18000-class peaks are "
+                                            "Chrome's synthetic test tone "
+                                            "on the 'Fake Default Audio "
+                                            "Input', not a room"),
                 },
                 "provenance": ("measured over the corpus's free sessions on "
-                               "2026-10-21; the older sessions peak near "
-                               "3000 and the newer ones near 18000"),
+                               "2026-10-21, split by the device label in "
+                               "each session's meta.json"),
+            },
+            {
+                "id": "SYNTHETIC_INPUT_DEVICE",
+                "class": "failure_signature",
+                "statement": ("the corpus holds an end-to-end TEST rig "
+                              "alongside the room captures: Chrome's 'Fake "
+                              "Default Audio Input' with a static .y4m test "
+                              "pattern standing in for the camera.  A "
+                              "session from this rig is not evidence about "
+                              "the room, and a statistic that mixes the two "
+                              "is wrong by the synthetic fraction."),
+                "measurement": {
+                    "n_sessions_on_a_synthetic_device": sum(
+                        v["n"] for k, v in devices.items()
+                        if "Fake" in k or k == "?"),
+                    "n_sessions_total": n_sessions,
+                    "fraction_synthetic": round(sum(
+                        v["n"] for k, v in devices.items()
+                        if "Fake" in k or k == "?") / max(1, n_sessions), 4),
+                    "devices": {k: {"n_sessions": v["n"],
+                                    "peak_max": max(v["levels"]) if v["levels"] else None}
+                                for k, v in devices.items()},
+                },
+                "provenance": ("each session's meta.json names its camera and "
+                               "mic; the synthetic rig is identifiable by the "
+                               "label rather than guessed at"),
             },
             {
                 "id": "RESAMPLE_FOLD",
@@ -881,8 +996,16 @@ def lens_walk_by(walk):
     # -180 dB flat and their "direction" is the direction of a
     # constant.  Mixing them in would make the answer look worse than
     # it is -- and would flatter the null, which is the wrong way round.
+    # The live population is the crossings on the REAL microphone.  A
+    # crossing on a synthetic input device is a crossing on a test tone,
+    # and it belongs in the synthetic rig's count, not in the room's.
+    real_sessions = {s["session"] for s in walk
+                     if s.get("input_device") == "REAL"}
+    synthetic_sessions = {s["session"] for s in walk
+                          if s.get("input_device") == "SYNTHETIC"}
     live = [c for c in crossings if c.get("envelope")
-            and c["envelope"]["excursion_db"] > 0.5]
+            and c["envelope"]["excursion_db"] > 0.5
+            and c["session"] in real_sessions]
     live_agree = [c for c in live
                   if c["envelope"]["direction_from_envelope"] == c["video_radial"]]
     live_sl_t = [c["envelope"]["slope_at_event_db_s"] for c in live
@@ -943,10 +1066,15 @@ def lens_walk_by(walk):
                         "n_envelope_peak_on_a_speech_segment": len(live_speech),
                         "envelope_peak_on_speech_rate": round(
                             len(live_speech) / max(1, len(live)), 4),
+                        "population": ("the crossings on the REAL "
+                                       "microphone, with a live envelope"),
+                        "n_sessions_on_a_synthetic_device": len(synthetic_sessions),
+                        "n_sessions_on_the_real_microphone": len(real_sessions),
                         "note": ("the other crossings sit in sessions whose "
-                                 "audio is digital silence, so their "
-                                 "envelopes are flat and their direction is "
-                                 "the direction of a constant"),
+                                 "audio is digital silence, or on Chrome's "
+                                 "synthetic test input, so their envelopes "
+                                 "are flat or synthetic and their direction "
+                                 "is the direction of a constant"),
                     },
                 },
                 "provenance": ("experiments/lens.py:walk_by_study, over the "
