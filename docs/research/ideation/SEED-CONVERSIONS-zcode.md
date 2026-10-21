@@ -4,11 +4,12 @@
 conversation: open-source real-time vision identity → conversion
 technologies → acoustics → crossovers with our ASCII designs. The full
 text is to land at `SEED-EMAIL.md` beside this file; **it had not landed
-when this first edition was written** (waited ~3.5 h past 2026-10-21
-00:00 AKDT). A watcher is running: when it lands, this document gets
-re-read against it and re-aimed (second edition, changes marked). What
-stands regardless of the aim — because it is measured, tonight, on this
-hardware — is §2; the catalog classes in §3 are the aimable part.
+when this first edition was written** (watched from ~23:00 to ~03:30
+AKDT, 2026-10-20/21; every watcher expired quiet). When it lands, this
+document gets re-read against it and re-aimed (second edition, changes
+marked). What stands regardless of the aim — because it is measured,
+tonight, on this hardware — is §2; the catalog classes in §3 are the
+aimable part.
 
 The lens I was given: **CONVERSIONS — what conversions between these
 technologies the page tier can actually perform.**
