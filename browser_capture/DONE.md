@@ -5,14 +5,26 @@ Built 2026-10-20, per `docs/research/BRIEF-BROWSER-CAPTURE.md` and its
 
 ## Start command and URL
 
+The server is a **systemd USER service** (`browser-capture.service`):
+it starts with WSL (linger is on), restarts itself on failure, and logs
+to `browser_capture/server.log`. The bench command is a VIEW, never the
+server:
+
 ```
-python3 browser_capture/server.py        # from the repo root, inside WSL
+python3 browser_capture/bench.py    # status + /info + live log tail
 ```
 
-Open **http://localhost:8765** in the Windows browser. Stdlib-only server,
-binds 127.0.0.1:8765, default out dir `/mnt/c/proart_capture/corpus`
-(`--out` / `--port` to change). Click **START PLAN**; the page drives the
-rest. README.md has the plain-language walkthrough.
+The one status command: **`systemctl --user status browser-capture`**.
+
+Open **http://localhost:8765** in the Windows browser — the FREE RECORD
+AUTO front door. Stdlib-only server, binds 127.0.0.1:8765, default out
+dir `/mnt/c/proart_capture/corpus` (`--out` / `--port` to change).
+README.md has the plain-language walkthrough.
+
+(For a scratch run outside the service, `python3
+browser_capture/server.py --out /tmp/x --port 8799` still works — the
+service and a scratch server can share the machine on different ports,
+but only one thing may own 8765.)
 
 ## What was verified, and how
 
@@ -494,3 +506,29 @@ sizes exactly, and `duration_s` equals the WAV-derived duration to the
 millisecond (19.267 s vs 19.267 s; 19.256 s vs 19.256 s). The verify
 suite stays at 154 passed, 0 failed. Still just a page reload — the
 server has not changed since the FREE RECORD pivot.
+
+## Patch 2026-10-21: the server outlives the terminal (systemd user service)
+
+The live incident: the bench terminal hosting `python3
+browser_capture/server.py` got Ctrl-C'd by accident and localhost:8765
+died silently mid-session. Fix — the server is now **`browser-capture.service`,
+a systemd USER service** (linger is on, so it starts with WSL):
+
+- `Restart=on-failure`, `RestartSec=2`, logs appended to
+  `browser_capture/server.log` (`*.log` is gitignored).
+- The unit's source of truth lives in the repo
+  (`browser_capture/browser-capture.service`); install = copy to
+  `~/.config/systemd/user/`, `daemon-reload`, `enable --now`.
+- **The bench start command became a view**: `python3
+  browser_capture/bench.py` shows the service status, the live `/info`
+  answer, and follows the log — Ctrl-C there exits the VIEW, nothing else.
+- **The one status command: `systemctl --user status browser-capture`.**
+- Cutover from Muse's plain server was a single swap (stop PID, start
+  service): exactly one listener on 8765 at every moment, verified.
+- Crash-tested live: `kill -9` on the service's python → back up under a
+  new PID in ~2 s, one listener, `/info` answering. The incident is
+  structurally impossible now — there is no controlling terminal to
+  Ctrl-C.
+
+Deploying future server.py changes means `systemctl --user restart
+browser-capture` (a ~2 s gap; the pages' saves retry by design).

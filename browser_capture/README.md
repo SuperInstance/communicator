@@ -5,8 +5,19 @@ script writes, but driven from a page you can see yourself in.
 
 ## Start it (one command, from the repo root, inside WSL)
 
+The server runs as a **systemd user service** — it starts with WSL and
+restarts itself if it dies, so there is no terminal to accidentally
+Ctrl-C (that happened once; never again). The bench command is now a
+VIEW of the running server, never the server itself:
+
 ```
-python3 browser_capture/server.py
+python3 browser_capture/bench.py        # status + live log tail
+```
+
+The one status command, if that is all you need:
+
+```
+systemctl --user status browser-capture
 ```
 
 Then open **http://localhost:8765** in your Windows browser.

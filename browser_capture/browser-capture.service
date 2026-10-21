@@ -1,0 +1,33 @@
+# browser-capture.service -- the capture server as a systemd USER service.
+#
+# WHY (live incident, 2026-10-21): the bench terminal hosting
+# `python3 browser_capture/server.py` got Ctrl-C'd by accident and
+# localhost:8765 died silently mid-session. Under this unit the server
+# has no controlling terminal to Ctrl-C: it starts with WSL (linger is
+# on), restarts itself on failure, and the bench becomes a VIEW
+# (browser_capture/bench.py), never the process itself.
+#
+# INSTALL (from the repo root, one time):
+#   cp browser_capture/browser-capture.service ~/.config/systemd/user/
+#   systemctl --user daemon-reload
+#   systemctl --user enable --now browser-capture.service
+#
+# The one status command:
+#   systemctl --user status browser-capture
+
+[Unit]
+Description=communicator browser_capture server (corpus capture, port 8765)
+Documentation=file:///home/proart/projects/communicator/browser_capture/DONE.md
+
+[Service]
+Type=simple
+WorkingDirectory=/home/proart/projects/communicator
+ExecStart=/usr/bin/python3 /home/proart/projects/communicator/browser_capture/server.py
+Restart=on-failure
+RestartSec=2
+# the take/save/console lines land here; *.log is gitignored
+StandardOutput=append:/home/proart/projects/communicator/browser_capture/server.log
+StandardError=append:/home/proart/projects/communicator/browser_capture/server.log
+
+[Install]
+WantedBy=default.target
