@@ -185,3 +185,47 @@ Three additions, all client-side; the recorded data path is untouched:
 
 Also picked up by a browser reload — no server restart, nothing
 server-side. Verify suite after this patch too: 145 passed, 0 failed.
+
+## Patch 2026-10-20 (same session, third): the exposure-starved stream
+
+Casey at the page confirmed it IS the front camera and it responds to
+light (a lamp brought into frame registers) — but the stream is
+exposure-starved in the browser, while the old Windows-stack captures in
+the same room averaged luma ~111. The camera is fine; OUR `getUserMedia`
+constraints were the difference: the page asked for 640x480 at 30 fps,
+driving the camera the way the terminal script did, and the browser
+answered with a fast, dark exposure. Changes, all client-side:
+
+1. **Near-default video.** No pinned `frameRate` ideal, no 640x480 ideal
+   — the only constraint left is the `deviceId` when the picker chose a
+   camera, so the camera's own auto-exposure runs the show, as it does in
+   every normal app. A floating camera rate is safe by construction: the
+   take loop paces on the audio clock (one frame drawn per audio block;
+   slower camera frames are simply drawn twice) and `timing.json` keeps
+   recording the achieved rate, exactly as before.
+2. **`exposureMode: "continuous"`** is applied to the track where the
+   track supports it (capability-checked via `getCapabilities()`, errors
+   swallowed) — a nudge for stacks where it is not already the default, a
+   silent no-op everywhere else.
+3. **Visible track state.** Next to the luma readout: the active track's
+   `getSettings()`, updated twice a second — the frameRate the camera
+   actually delivers, and exposureTime in ms when the driver exposes it
+   (`n/a` when it does not; the spec unit is 100 µs, converted here).
+   State visible, not guessed.
+
+**Server vs reload, confirmed:** the server reads `index.html` from disk
+on **every request** and serves it with `Cache-Control: no-store`
+(`server.py`, `do_GET` → `self.index_path.read_bytes()`). Casey reloads
+the page; nobody restarts the server for any of these page patches. A
+restart would only ever be needed for a `server.py` change, and none of
+these patches touched it.
+
+**Race note:** MiniMax is running a parallel empirical lane on this same
+problem — a probe page measuring luma per constraint preset on the real
+camera. This patch is the product fix shipped ahead of those numbers;
+its expectation (near-default constraints → auto-exposure → luma back
+toward ~110) is UNVERIFIED on real hardware until that lane reports.
+Evidence wins: when the measured numbers land, the brighter verified
+approach is what the page keeps.
+
+Verify suite after this patch: 145 passed, 0 failed.

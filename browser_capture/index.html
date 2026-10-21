@@ -68,6 +68,8 @@
   #lumaChip { margin-left: auto; font-size: 13px; color: var(--dim); }
   #lumaChip b { color: var(--fg); font-variant-numeric: tabular-nums; }
   #lumaChip.low b { color: var(--warn); }
+  #camState { font-size: 13px; color: var(--dim); }
+  #camState b { color: var(--fg); font-variant-numeric: tabular-nums; }
 
   .under { display: flex; gap: 14px; margin-top: 12px; align-items: stretch; }
   #dataViewCol { text-align: center; }
@@ -177,6 +179,7 @@
         <span class="cap">camera</span>
         <select id="camSelect"></select>
         <span id="lumaChip" title="Mean luma of the 160x96 data frame, computed the same BT.601 way the takes record it. The existing captures on this camera and in this room sat around 110; the empty room read 50.">data luma <b id="lumaVal">&mdash;</b> (old captures ~110, empty room 50)</span>
+        <span id="camState" title="getSettings() of the active video track, updated twice a second. frameRate is what the camera actually delivers -- the take paces on the audio clock and records achieved fps, so a slower camera costs nothing but repeated frames. exposureTime, when the driver exposes it, is spec'd in 100 microsecond units and shown here in ms; n/a means the browser does not report it.">cam <b id="camFps">&mdash;</b> fps &middot; exposure <b id="camExp">&mdash;</b></span>
       </div>
       <div class="under">
         <div id="dataViewCol">
@@ -599,10 +602,31 @@ function pickDefaultCam(devs) {
 }
 
 function camConstraints(devId) {
-  const c = { width: { ideal: 640 }, height: { ideal: 480 },
-              frameRate: { ideal: FPS } };
-  if (devId) c.deviceId = { exact: devId };
-  return c;
+  // Near-default video, ON PURPOSE. The old pins (640x480, frameRate 30)
+  // drove the camera the way the terminal script did, and this front
+  // camera answered with a fast, dark exposure -- shapes barely visible,
+  // a lamp brought into frame registers, luma near the empty-room 50
+  // while the Windows stack's captures read ~111 in the same room. With
+  // no pins the camera's own auto-exposure runs the show, as it does in
+  // every normal app. A floating camera rate is safe by construction:
+  // the take loop paces on the audio clock and records achieved fps, so
+  // slower camera frames are simply drawn twice.
+  return devId ? { deviceId: { exact: devId } } : {};
+}
+
+async function relaxExposure(track) {
+  // Ask for continuous auto-exposure where the track supports it. It is
+  // the default in most stacks; this is a nudge for the ones where it is
+  // not, and a silent no-op everywhere else. Fire-and-forget: every path
+  // out of here is non-fatal by design.
+  try {
+    const caps = track && track.getCapabilities ? track.getCapabilities()
+      : null;
+    if (caps && Array.isArray(caps.exposureMode) &&
+        caps.exposureMode.includes("continuous"))
+      await track.applyConstraints(
+        { advanced: [{ exposureMode: "continuous" }] });
+  } catch (err) { /* best effort -- the settings readout shows the truth */ }
 }
 
 async function switchCamera(devId) {
@@ -621,6 +645,7 @@ async function switchCamera(devId) {
   camDeviceId = devId;
   try { localStorage.bcCam = devId; } catch (e) {}
   camName = nt.label || "browser camera";
+  relaxExposure(nt);
 }
 
 async function refreshCamPicker() {
@@ -703,6 +728,7 @@ async function startDevices() {
   }
   videoEl.srcObject = stream;
   await videoEl.play();
+  relaxExposure(stream.getVideoTracks()[0]);
 
   // 16 kHz is the requested rate, exactly like the script. If the browser
   // hands us a different context rate we record it and flag every take --
@@ -803,6 +829,17 @@ function meterFrame() {
       const mean = sum / (d.length / 4);
       document.getElementById("lumaVal").textContent = mean.toFixed(0);
       document.getElementById("lumaChip").className = mean < 80 ? "low" : "";
+      // the track's own settings, same cadence: what the camera really
+      // delivers, and its exposure when the driver reports one
+      const vt = stream ? stream.getVideoTracks()[0] : null;
+      if (vt && vt.getSettings) {
+        const st = vt.getSettings() || {};
+        document.getElementById("camFps").textContent =
+          st.frameRate ? st.frameRate.toFixed(1) : "--";
+        document.getElementById("camExp").textContent =
+          st.exposureTime != null ?
+          (st.exposureTime / 10).toFixed(1) + " ms" : "n/a";
+      }
     }
   }
   requestAnimationFrame(meterFrame);
