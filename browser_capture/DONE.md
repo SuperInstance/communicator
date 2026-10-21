@@ -229,3 +229,30 @@ Evidence wins: when the measured numbers land, the brighter verified
 approach is what the page keeps.
 
 Verify suite after this patch: 145 passed, 0 failed.
+
+## Patch 2026-10-20 (same session, fourth): every camera parameter on screen
+
+The fallback for "automatic does not fix the exposure": a CAMERA CONTROLS
+panel under the camera picker (collapsed `<details>`, so it costs nothing
+when unused), built from the **live track's `getCapabilities()`**:
+
+- For every supported key among `exposureTime, exposureCompensation, gain,
+  iso, brightness, contrast, saturation, frameRate, colorTemperature`: a
+  slider ranged to the track's **real** min/max/step, current value shown
+  (exposureTime in ms, frameRate in fps, colorTemperature in K; "auto"
+  when the driver reports no current value), applied live via
+  `applyConstraints({advanced: {...}})` on input — bursts coalesced into
+  one driver round-trip per 150 ms. Unsupported keys are simply absent.
+- An **exposureMode AUTO/MANUAL toggle** where the driver offers the
+  choice — MANUAL is what makes the exposureTime slider actually take
+  (while exposure is auto the driver owns that value, so it is not sent).
+- Choices **persist** in `localStorage` (`bcCamCtl`) and re-apply on
+  reload and camera switch; a driver rejection is shown in the panel and
+  applies nothing.
+
+These sliders drive the **REAL stream — the recorded data included**;
+that is their purpose (a manual exposure that brightens the data is a
+property of the takes, and the metadata records the world the camera
+saw). Boost preview remains the separate cosmetic control it already
+was. Still a browser reload, never a server restart. Verify suite after
+this patch: 145 passed, 0 failed.

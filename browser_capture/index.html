@@ -71,6 +71,25 @@
   #camState { font-size: 13px; color: var(--dim); }
   #camState b { color: var(--fg); font-variant-numeric: tabular-nums; }
 
+  #camControls { margin-top: 10px; border: 1px solid var(--line);
+    border-radius: 8px; background: var(--panel2); padding: 8px 12px; }
+  #camControls summary { cursor: pointer; font-size: 12px;
+    letter-spacing: 1.5px; color: var(--dim); text-transform: uppercase;
+    font-weight: 600; }
+  #camControls .ctlHead { color: var(--dim); font-size: 12px;
+    margin: 8px 0 4px; line-height: 1.5; }
+  .ctlRow { display: grid; grid-template-columns: 150px 1fr 90px;
+    gap: 10px; align-items: center; margin: 4px 0; font-size: 13px; }
+  .ctlRow label { color: var(--dim); }
+  .ctlRow input[type=range] { width: 100%; }
+  .ctlRow .val, .ctlMode .val { text-align: right;
+    font-variant-numeric: tabular-nums; }
+  .ctlMode { display: grid; grid-template-columns: 150px 1fr 90px;
+    gap: 10px; align-items: center; margin: 4px 0; font-size: 13px; }
+  .ctlMode label { color: var(--dim); }
+  #camCtlMsg { color: var(--warn); font-size: 12px; min-height: 14px;
+    margin-top: 4px; }
+
   .under { display: flex; gap: 14px; margin-top: 12px; align-items: stretch; }
   #dataViewCol { text-align: center; }
   #captureCanvas { width: 232px; height: 139px; image-rendering: pixelated;
@@ -181,6 +200,17 @@
         <span id="lumaChip" title="Mean luma of the 160x96 data frame, computed the same BT.601 way the takes record it. The existing captures on this camera and in this room sat around 110; the empty room read 50.">data luma <b id="lumaVal">&mdash;</b> (old captures ~110, empty room 50)</span>
         <span id="camState" title="getSettings() of the active video track, updated twice a second. frameRate is what the camera actually delivers -- the take paces on the audio clock and records achieved fps, so a slower camera costs nothing but repeated frames. exposureTime, when the driver exposes it, is spec'd in 100 microsecond units and shown here in ms; n/a means the browser does not report it.">cam <b id="camFps">&mdash;</b> fps &middot; exposure <b id="camExp">&mdash;</b></span>
       </div>
+      <details id="camControls">
+        <summary>camera controls &mdash; drive the real stream, takes included</summary>
+        <div class="ctlHead">Built from this camera's own capabilities, so
+          only what the driver supports appears, each ranged to its real
+          min/max/step. Sliders apply live and are remembered across
+          reloads. AUTO lets the camera own the exposure; MANUAL hands
+          exposureTime to its slider. These change the RECORDED data &mdash;
+          that is their purpose. Boost preview stays the cosmetic control.</div>
+        <div id="camCtlRows"></div>
+        <div id="camCtlMsg"></div>
+      </details>
       <div class="under">
         <div id="dataViewCol">
           <canvas id="captureCanvas" width="160" height="96"></canvas>
@@ -646,6 +676,7 @@ async function switchCamera(devId) {
   try { localStorage.bcCam = devId; } catch (e) {}
   camName = nt.label || "browser camera";
   relaxExposure(nt);
+  buildCamControls();
 }
 
 async function refreshCamPicker() {
@@ -681,6 +712,140 @@ async function refreshCamPicker() {
     try { localStorage.bcCam = want; } catch (e) {}
   }
   if (camDeviceId) sel.value = camDeviceId;
+}
+
+/* -- the camera controls panel ------------------------------------------
+   Built from the LIVE track's getCapabilities(): every supported key
+   among the list below becomes a slider ranged to the track's real
+   min/max/step, applied live via applyConstraints({advanced}) -- driving
+   the REAL stream, recorded data included; that is the panel's purpose.
+   The Boost preview toggle stays the separate cosmetic control it is.
+   Choices persist in localStorage and re-apply on reload and camera
+   switch. Unsupported keys are simply absent. */
+const CAM_CTL_KEYS = ["exposureTime", "exposureCompensation", "gain",
+  "iso", "brightness", "contrast", "saturation", "frameRate",
+  "colorTemperature"];
+
+function camCtlFormat(key, v) {
+  if (v == null) return "--";
+  if (key === "exposureTime") return (v / 10).toFixed(1) + " ms";
+  if (key === "frameRate") return Number(v).toFixed(1) + " fps";
+  if (key === "colorTemperature") return v + " K";
+  return String(v);
+}
+
+function loadCamCtl() {
+  try {
+    const o = JSON.parse(localStorage.bcCamCtl || "{}");
+    return o && typeof o === "object" ? o : {};
+  } catch (err) { return {}; }
+}
+function saveCamCtl(obj) {
+  try { localStorage.bcCamCtl = JSON.stringify(obj); } catch (e) {}
+}
+
+let camCtlTimer = 0;
+function queueCamApply() {
+  // coalesce a burst of slider moves into one driver round-trip
+  if (camCtlTimer) return;
+  camCtlTimer = setTimeout(async () => {
+    camCtlTimer = 0;
+    const track = stream && stream.getVideoTracks()[0];
+    if (!track) return;
+    const want = loadCamCtl();
+    const adv = {};
+    if (want.exposureMode) adv.exposureMode = want.exposureMode;
+    for (const k of CAM_CTL_KEYS) {
+      // while exposure is auto the driver owns exposureTime; sending it
+      // anyway only earns a confusing rejection
+      if (k === "exposureTime" && want.exposureMode !== "manual") continue;
+      if (want[k] != null) adv[k] = want[k];
+    }
+    if (!Object.keys(adv).length) return;
+    try {
+      await track.applyConstraints({ advanced: [adv] });
+      $("camCtlMsg").textContent = "";
+    } catch (err) {
+      $("camCtlMsg").textContent = "the driver rejected " +
+        JSON.stringify(adv) + " (" + err.name + ") -- nothing was applied";
+    }
+  }, 150);
+}
+
+function buildCamControls() {
+  const rows = $("camCtlRows");
+  rows.innerHTML = "";
+  $("camCtlMsg").textContent = "";
+  const track = stream && stream.getVideoTracks()[0];
+  if (!track || !track.getCapabilities) return;
+  let caps = {};
+  try { caps = track.getCapabilities() || {}; } catch (err) { return; }
+  let st = {};
+  try { st = track.getSettings() || {}; } catch (err) {}
+  const saved = loadCamCtl();
+
+  // the auto/manual exposure toggle, where the driver offers the choice;
+  // MANUAL is what makes the exposureTime slider actually take
+  const modes = Array.isArray(caps.exposureMode) ? caps.exposureMode : [];
+  if (modes.includes("manual") && modes.length > 1) {
+    const div = document.createElement("div");
+    div.className = "ctlMode";
+    const lab = document.createElement("label");
+    lab.textContent = "exposureMode";
+    lab.title = "AUTO (continuous) lets the camera own the exposure; " +
+      "MANUAL hands it to the exposureTime slider below";
+    const b = document.createElement("button");
+    const paint = () => {
+      const manual = saved.exposureMode === "manual";
+      b.textContent = manual ? "MANUAL" : "AUTO";
+      b.className = manual ? "danger" : "";
+    };
+    b.onclick = () => {
+      saved.exposureMode = saved.exposureMode === "manual" ?
+        "continuous" : "manual";
+      saveCamCtl(saved);
+      paint();
+      queueCamApply();
+    };
+    paint();
+    div.appendChild(lab);
+    div.appendChild(b);
+    rows.appendChild(div);
+  }
+
+  for (const key of CAM_CTL_KEYS) {
+    const c = caps[key];
+    if (!c || typeof c !== "object" || c.max == null || c.min == null)
+      continue;   // unsupported on this camera: simply absent
+    const row = document.createElement("div");
+    row.className = "ctlRow";
+    const lab = document.createElement("label");
+    lab.textContent = key;
+    lab.title = "this camera's range: " + c.min + " ... " + c.max +
+      (c.step ? ", step " + c.step : "");
+    const sl = document.createElement("input");
+    sl.type = "range";
+    sl.min = c.min; sl.max = c.max;
+    sl.step = c.step ? c.step : 1;
+    const val = document.createElement("span");
+    val.className = "val";
+    const init = saved[key] != null ? saved[key] : st[key];
+    if (init != null && init >= c.min && init <= c.max) sl.value = init;
+    val.textContent = init != null ? camCtlFormat(key, init) : "auto";
+    sl.oninput = () => {
+      const v = Number(sl.value);
+      val.textContent = camCtlFormat(key, v);
+      saved[key] = v;
+      saveCamCtl(saved);
+      queueCamApply();
+    };
+    row.appendChild(lab);
+    row.appendChild(sl);
+    row.appendChild(val);
+    rows.appendChild(row);
+  }
+
+  queueCamApply();   // re-apply whatever was remembered for this camera
 }
 
 function flushAudio() { queue = []; qTotal = 0; qHeadPos = 0; }
@@ -729,6 +894,7 @@ async function startDevices() {
   videoEl.srcObject = stream;
   await videoEl.play();
   relaxExposure(stream.getVideoTracks()[0]);
+  buildCamControls();
 
   // 16 kHz is the requested rate, exactly like the script. If the browser
   // hands us a different context rate we record it and flag every take --
