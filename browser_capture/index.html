@@ -1,0 +1,1326 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Corpus Capture</title>
+<style>
+  :root {
+    --bg: #101418; --panel: #1a2027; --panel2: #212a33; --line: #2d3945;
+    --fg: #e8edf2; --dim: #8fa1b3; --accent: #4db6ac; --warn: #e0a458;
+    --bad: #e06c75; --ok: #7ec97e; --rec: #e05252;
+  }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; padding: 0; background: var(--bg); color: var(--fg);
+    font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif; }
+  body { padding: 14px 18px 30px; max-width: 1500px; margin: 0 auto; }
+
+  header { display: flex; align-items: baseline; gap: 16px; flex-wrap: wrap;
+    border-bottom: 1px solid var(--line); padding-bottom: 10px; margin-bottom: 14px; }
+  header h1 { font-size: 22px; margin: 0; letter-spacing: 2px; }
+  header .sub { color: var(--dim); font-size: 13px; }
+  header .spacer { flex: 1; }
+  #srvState { font-size: 13px; color: var(--dim); }
+  #srvState .dot { display: inline-block; width: 9px; height: 9px; border-radius: 50%;
+    background: var(--bad); margin-right: 6px; vertical-align: middle; }
+  #srvState.up .dot { background: var(--ok); }
+  #mirrorBtn, button { background: var(--panel2); color: var(--fg); border: 1px solid var(--line);
+    border-radius: 6px; padding: 8px 14px; font-size: 14px; cursor: pointer; }
+  button:hover:not(:disabled) { border-color: var(--accent); }
+  button:disabled { opacity: 0.4; cursor: default; }
+  button.primary { background: var(--accent); color: #08302c; font-weight: 700;
+    border: none; font-size: 16px; padding: 10px 22px; }
+  button.danger { border-color: var(--rec); color: var(--rec); }
+
+  #banners .banner { border-radius: 6px; padding: 10px 14px; margin-bottom: 10px;
+    font-size: 14px; display: none; }
+  .banner.error { background: #3a1f24; border: 1px solid var(--bad); color: #f3c6cb; }
+  .banner.warn { background: #38301f; border: 1px solid var(--warn); color: #f0dcb4; }
+
+  .grid { display: grid; grid-template-columns: minmax(430px, 1.05fr) minmax(430px, 0.95fr);
+    gap: 16px; align-items: start; }
+  @media (max-width: 980px) { .grid { grid-template-columns: 1fr; } }
+  .card { background: var(--panel); border: 1px solid var(--line); border-radius: 10px;
+    padding: 14px; margin-bottom: 16px; }
+  .card h2 { margin: 0 0 10px; font-size: 12px; letter-spacing: 1.5px;
+    color: var(--dim); text-transform: uppercase; font-weight: 600; }
+
+  #videoWrap { position: relative; background: #000; border-radius: 8px; overflow: hidden; }
+  #video { width: 100%; display: block; transform: scaleX(1); }
+  #video.mirrored { transform: scaleX(-1); }
+  #recBadge { position: absolute; top: 10px; left: 10px; background: rgba(0,0,0,0.65);
+    border-radius: 6px; padding: 6px 12px; font-size: 15px; font-weight: 700;
+    color: var(--rec); display: none; align-items: center; gap: 8px; }
+  #recBadge .blink { width: 12px; height: 12px; border-radius: 50%; background: var(--rec);
+    animation: blink 1s infinite; }
+  @keyframes blink { 50% { opacity: 0.15; } }
+  #liveChip { position: absolute; top: 10px; right: 10px; background: rgba(0,0,0,0.65);
+    border-radius: 6px; padding: 6px 12px; font-size: 13px; color: var(--dim); }
+  #liveChip.speaking { color: var(--ok); font-weight: 700; }
+
+  .under { display: flex; gap: 14px; margin-top: 12px; align-items: stretch; }
+  #dataViewCol { text-align: center; }
+  #captureCanvas { width: 232px; height: 139px; image-rendering: pixelated;
+    border: 1px solid var(--line); border-radius: 6px; background: #000; display: block; }
+  #dataViewCol .cap { font-size: 11px; color: var(--dim); margin-top: 4px; }
+  #meterCol { flex: 1; display: flex; flex-direction: column; gap: 8px; justify-content: center; }
+  #meterBar { height: 18px; background: #0b0e11; border: 1px solid var(--line);
+    border-radius: 4px; overflow: hidden; }
+  #meterFill { height: 100%; width: 0%; background: linear-gradient(90deg,
+    #2e7d6e, #4db6ac 70%, #e0a458 90%, #e06c75); }
+  #meterLabels { display: flex; justify-content: space-between; font-size: 12px;
+    color: var(--dim); }
+
+  #conditionCard { min-height: 320px; }
+  #condName { font-size: 15px; color: var(--dim); letter-spacing: 3px; }
+  #condText { font-size: clamp(26px, 3.2vw, 46px); font-weight: 800; line-height: 1.15;
+    margin: 6px 0 4px; }
+  #condNote { color: var(--dim); font-size: 14px; margin-bottom: 8px; }
+  #bigNumber { font-size: clamp(70px, 9vw, 120px); font-weight: 800; text-align: center;
+    line-height: 1; margin: 10px 0; color: var(--accent); display: none; }
+  #timerRow { display: none; justify-content: center; gap: 26px; margin: 8px 0; }
+  #timerRow .t { text-align: center; }
+  #timerRow .v { font-size: 40px; font-weight: 800; font-variant-numeric: tabular-nums; }
+  #timerRow .l { font-size: 11px; color: var(--dim); letter-spacing: 2px; }
+  #stateLine { text-align: center; color: var(--dim); font-size: 14px; min-height: 20px; }
+
+  #poemCard { display: none; background: var(--panel2); border: 1px solid var(--line);
+    border-radius: 8px; padding: 12px 16px; margin-top: 10px; max-height: 300px;
+    overflow: auto; }
+  #poemCard .t { color: var(--accent); font-size: 14px; margin-bottom: 8px; }
+  #poemCard pre { margin: 0; font-family: Georgia, serif; font-size: 17px;
+    line-height: 1.55; white-space: pre-wrap; }
+  #poemCard .rem { color: var(--warn); font-size: 13px; margin-top: 10px;
+    font-family: system-ui, sans-serif; }
+
+  #progressWrap { display: flex; gap: 3px; margin: 4px 0 10px; }
+  #progressWrap .seg { flex: 1; height: 10px; border-radius: 2px; background: #2a333c; }
+  .seg.done { background: var(--ok); } .seg.flagged { background: var(--warn); }
+  .seg.skipped { background: #46525e; } .seg.current { background: var(--accent);
+    animation: blink 1.2s infinite; }
+
+  #controls { display: flex; gap: 10px; flex-wrap: wrap; margin-top: 4px; }
+  #planLabel { font-size: 13px; color: var(--dim); margin-left: auto; align-self: center; }
+
+  #takesTable { width: 100%; border-collapse: collapse; font-size: 14px; }
+  #takesTable th { text-align: left; color: var(--dim); font-size: 11px;
+    letter-spacing: 1px; text-transform: uppercase; padding: 4px 8px;
+    border-bottom: 1px solid var(--line); }
+  #takesTable td { padding: 6px 8px; border-bottom: 1px solid #232d37; }
+  #takesTable tr.rowclick { cursor: pointer; }
+  #takesTable tr.rowclick:hover td { background: var(--panel2); }
+  #takesTable tr.current td { background: #1d2b30; }
+  .st { font-weight: 700; font-size: 12px; letter-spacing: 1px; padding: 2px 8px;
+    border-radius: 4px; display: inline-block; }
+  .st.pending { color: var(--dim); border: 1px solid var(--line); }
+  .st.done { color: var(--ok); border: 1px solid var(--ok); }
+  .st.flagged { color: var(--warn); border: 1px solid var(--warn); }
+  .st.skipped { color: #5d6b78; border: 1px dashed #5d6b78; }
+  .st.recording { color: var(--rec); border: 1px solid var(--rec); }
+  .st.working { color: var(--accent); border: 1px solid var(--accent); }
+  .flags { color: var(--warn); font-size: 12px; }
+  .dstar { color: var(--accent); font-size: 11px; }
+
+  #resultCard pre { margin: 0; font-size: 13px; line-height: 1.6; color: #c7d3dd;
+    white-space: pre-wrap; font-family: ui-monospace, Menlo, Consolas, monospace; }
+  #resultCard .warnline { color: var(--warn); }
+  #resultCard .okline { color: var(--ok); }
+  #retryBtn { display: none; margin-top: 10px; }
+  .hint { color: var(--dim); font-size: 12px; margin-top: 8px; }
+</style>
+</head>
+<body>
+<header>
+  <h1>CORPUS CAPTURE</h1>
+  <span class="sub">browser edition &mdash; same takes, same files, same pipeline</span>
+  <span class="spacer"></span>
+  <span id="srvState"><span class="dot"></span><span id="srvText">connecting&hellip;</span></span>
+  <button id="mirrorBtn" title="Mirror the preview only. The recorded data is never mirrored.">
+    Mirror preview: ON</button>
+</header>
+
+<div id="banners">
+  <div class="banner error" id="errBanner"></div>
+  <div class="banner warn" id="warnBanner"></div>
+</div>
+
+<div class="grid">
+  <div>
+    <div class="card">
+      <h2>Camera</h2>
+      <div id="videoWrap">
+        <video id="video" autoplay playsinline muted></video>
+        <div id="recBadge"><span class="blink"></span><span id="recBadgeText">REC</span></div>
+        <div id="liveChip">SILENT</div>
+      </div>
+      <div class="under">
+        <div id="dataViewCol">
+          <canvas id="captureCanvas" width="160" height="96"></canvas>
+          <div class="cap">what the pipeline sees &mdash; 160&times;96 luma, unmirrored</div>
+        </div>
+        <div id="meterCol">
+          <div id="meterBar"><div id="meterFill"></div></div>
+          <div id="meterLabels"><span id="micLabel">mic: &mdash;</span>
+            <span id="meterDb">&minus;60 dB</span></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="card" id="resultCard">
+      <h2>Last take</h2>
+      <pre id="resultPre">nothing recorded yet</pre>
+      <button id="retryBtn" class="danger">Retry upload</button>
+      <div id="notesWrap" style="display:none; margin-top:12px;">
+        <div class="hint" style="margin:0 0 4px;">WHAT I ACTUALLY DID -- a
+          free-text note kept in this take's rich sidecar (leave empty if
+          everything went to plan)</div>
+        <textarea id="notesBox" rows="2"
+          style="width:100%; background:var(--panel2); color:var(--fg);
+            border:1px solid var(--line); border-radius:6px; padding:8px;
+            font-size:14px; font-family:inherit;"></textarea>
+        <button id="notesBtn" style="margin-top:6px;">Save note</button>
+      </div>
+    </div>
+  </div>
+
+  <div>
+    <div class="card" id="conditionCard">
+      <h2>Condition</h2>
+      <div id="condName">READY</div>
+      <div id="condText">PRESS START PLAN</div>
+      <div id="condNote">16 takes, about 16 minutes. The camera and microphone
+        stay on the whole time; each take uploads the moment it ends.</div>
+      <div id="bigNumber">5</div>
+      <div id="timerRow">
+        <div class="t"><div class="v" id="tRemaining">0:00</div><div class="l">REMAINING</div></div>
+        <div class="t"><div class="v" id="tElapsed">0:00</div><div class="l">ELAPSED</div></div>
+        <div class="t"><div class="v" id="tFrames">0</div><div class="l">FRAMES</div></div>
+      </div>
+      <div id="stateLine">click START PLAN when you are ready</div>
+      <div id="poemCard">
+        <div class="t" id="poemTitle"></div>
+        <pre id="poemBody"></pre>
+        <div class="rem">RECITE FROM MEMORY. The same words every time &mdash; that is
+          the point. The poem is on screen to check yourself, not to read.</div>
+      </div>
+    </div>
+
+    <div class="card">
+      <h2>Plan</h2>
+      <div id="progressWrap"></div>
+      <div id="controls">
+        <button id="startBtn" class="primary">START PLAN</button>
+        <button id="pauseBtn" disabled>PAUSE</button>
+        <button id="skipBtn" disabled>SKIP TAKE</button>
+        <button id="redoBtn" disabled>REDO THIS TAKE</button>
+        <button id="abortBtn" class="danger" disabled>ABORT TAKE</button>
+        <span id="planLabel"></span>
+      </div>
+      <table id="takesTable">
+        <thead><tr><th>take</th><th>what to do</th><th>len</th><th>status</th>
+          <th>flags / files</th></tr></thead>
+        <tbody id="takesBody"></tbody>
+      </table>
+      <div class="hint">Click any take to record it out of order (when idle).
+        D takes are marked because they are the control the whole corpus is
+        waiting on. Keep this tab in the foreground while recording &mdash;
+        background tabs throttle timers.</div>
+    </div>
+  </div>
+</div>
+
+<script>
+"use strict";
+
+/* ============================================================================
+   The plan, exactly as corpus_capture_win.py --plan drives it:
+   REPEATS=3 over A,B,C,D,F, then one long FREE. 16 takes, ~16 minutes.
+   The seconds and notes are the script's own; the display text is ours.
+   ========================================================================== */
+const REPEATS = 3;
+const COND_DEFS = [
+  { base: "A", kind: "condition", speak: true,  pose: "facing", seconds: 50,
+    note: "facing the camera, reciting the poem from memory",
+    display: "FACE THE CAMERA - RECITE THE POEM" },
+  { base: "B", kind: "condition", speak: true,  pose: "turned", seconds: 50,
+    note: "head turned fully away (90 deg, at the wall), SAME poem",
+    display: "TURN 90 DEGREES - RECITE THE POEM" },
+  { base: "C", kind: "condition", speak: false, pose: "facing", seconds: 30,
+    note: "facing the camera, completely silent",
+    display: "FACE THE CAMERA - STAY SILENT" },
+  { base: "D", kind: "condition", speak: false, pose: "turned", seconds: 30,
+    note: "head turned fully away, completely silent",
+    display: "TURN 90 DEGREES - STAY SILENT" },
+  { base: "F", kind: "free", speak: null, pose: "any", seconds: 60,
+    note: "free session: just be in the room, talk, read, move",
+    display: "FREE SESSION - TALK, READ, MOVE" },
+];
+const PLAN = [];
+for (let rep = 1; rep <= REPEATS; rep++)
+  for (const c of COND_DEFS)
+    PLAN.push(Object.assign({ name: c.base + rep, rep }, c));
+PLAN.push(Object.assign({}, COND_DEFS[4],
+  { name: "FREE", rep: 1, seconds: 300, long: true,
+    display: "FREE SESSION - LONG - 5 MINUTES" }));
+
+/* Invictus, William Ernest Henley, 1875 (public domain) -- verbatim from
+   src/stimulus.py, so browser takes and script takes record the same
+   stimulus and can be pooled. */
+const POEM_STANZAS = [
+  ["Out of the night that covers me,",
+   "Black as the pit from pole to pole,",
+   "I thank whatever gods may be",
+   "For my unconquerable soul."],
+  ["Under the bludgeon of the world,",
+   "My head is bloody, but unbowed.",
+   "Beyond this place of wrath and tears",
+   "Looms but the Horror of the shade."],
+  ["And yet of fortune's merriest lot,",
+   "My name is written on the page...",
+   "And all the while I have remained",
+   "The master of my fate."],
+  ["I am the master of my fate:",
+   "I am the captain of my soul!"],
+];
+const POEM_TITLE = "Invictus -- William Ernest Henley, 1875 (public domain)";
+
+const FPS = 30, RATE = 16000, COUNTDOWN_S = 5;
+const SPEAK_MIN = 0.15, SPEAK_MAX = 0.05, DRIFT_MAX = 5.0;
+
+// === MATH-BEGIN ===
+/* The take math, ported line-for-line from corpus_capture_win.py so the
+   browser produces byte-identical arrays. Pure functions over typed arrays;
+   no DOM, no globals beyond the constants -- verify.py extracts this block
+   and runs it under node against a numpy reference.
+
+   Pipeline per take (the script's, unchanged):
+     rowMeds[t][y] = median over the 160 columns of row y of frame t
+     g[t]          = mean of frame t's 96 row medians
+     Yr            = Y - (rowMeds - g)          (row-band removal)
+     maps          = |Yr[t+1] - Yr[t]| downsampled 2x2, quantised to uint8
+                     at the 99.5th percentile (scale stored alongside)
+     maps_raw      = same, no row removal
+     drift         = mean |frame-to-frame diff|, raw and row-removed
+
+   The quantisation scale needs the 99.5th percentile of ~5-35M values, so
+   it is found exactly in three passes: histogram (0.25-wide bins; raw maps
+   are exact multiples of 0.25 so their percentile comes straight from the
+   histogram), collect-everything-above-the-98th-percentile for the filtered
+   maps, then the interpolated order statistic on that small sorted set --
+   the same linear interpolation np.percentile performs. */
+const MW = 160, MH = 96, MMW = 80, MMH = 48;
+const MLB = MW * MH;               // 15,360 luma bytes per frame
+const MMAXSUM = 3061;              // max 2x2 block sum: 4 * (255 + 2*255)
+
+function computeRowMeds(luma, n) {
+  const rowMeds = new Float64Array(n * MH);
+  const gs = new Float64Array(n);
+  const row = new Array(MW);
+  for (let t = 0; t < n; t++) {
+    const off = t * MLB;
+    let g = 0;
+    for (let y = 0; y < MH; y++) {
+      const p = off + y * MW;
+      for (let x = 0; x < MW; x++) row[x] = luma[p + x];
+      row.sort(function (a, b) { return a - b; });
+      const m = (row[79] + row[80]) * 0.5;   // median of 160 = mean of [79],[80]
+      rowMeds[t * MH + y] = m;
+      g += m;
+    }
+    gs[t] = g / MH;
+  }
+  return { rowMeds: rowMeds, gs: gs };
+}
+
+/* Pass A: histogram both map variants (bin = floor(blockValue / 0.25)) and
+   accumulate the drift sums. The raw diffs are integers, so rawSum is exact
+   regardless of summation order. */
+function scanPairs(luma, n, rowMeds, gs) {
+  const pairs = n - 1;
+  const hist = new Uint32Array(MMAXSUM);
+  const histRaw = new Uint32Array(MMAXSUM);
+  let rawSum = 0, rowSum = 0;
+  for (let t = 0; t < pairs; t++) {
+    const o1 = t * MLB, o2 = o1 + MLB, m1 = t * MH, m2 = m1 + MH;
+    const g1 = gs[t], g2 = gs[t + 1];
+    for (let y = 0; y < MH; y += 2) {
+      const c1a = rowMeds[m1 + y] - g1,     c2a = rowMeds[m2 + y] - g2;
+      const c1b = rowMeds[m1 + y + 1] - g1, c2b = rowMeds[m2 + y + 1] - g2;
+      const ra1 = o1 + y * MW, ra2 = o2 + y * MW;
+      const rb1 = ra1 + MW,    rb2 = ra2 + MW;
+      for (let x = 0; x < MW; x += 2) {
+        let sRaw = 0, sRow = 0;
+        let v1 = luma[ra1 + x], v2 = luma[ra2 + x];
+        let d = v2 - v1; if (d < 0) d = -d; sRaw += d; rawSum += d;
+        let e = (v2 - c2a) - (v1 - c1a); if (e < 0) e = -e; sRow += e; rowSum += e;
+        v1 = luma[ra1 + x + 1]; v2 = luma[ra2 + x + 1];
+        d = v2 - v1; if (d < 0) d = -d; sRaw += d; rawSum += d;
+        e = (v2 - c2a) - (v1 - c1a); if (e < 0) e = -e; sRow += e; rowSum += e;
+        v1 = luma[rb1 + x]; v2 = luma[rb2 + x];
+        d = v2 - v1; if (d < 0) d = -d; sRaw += d; rawSum += d;
+        e = (v2 - c2b) - (v1 - c1b); if (e < 0) e = -e; sRow += e; rowSum += e;
+        v1 = luma[rb1 + x + 1]; v2 = luma[rb2 + x + 1];
+        d = v2 - v1; if (d < 0) d = -d; sRaw += d; rawSum += d;
+        e = (v2 - c2b) - (v1 - c1b); if (e < 0) e = -e; sRow += e; rowSum += e;
+        histRaw[sRaw]++;
+        hist[sRow < MMAXSUM - 1 ? sRow | 0 : MMAXSUM - 1]++;
+      }
+    }
+  }
+  return { hist: hist, histRaw: histRaw, rawSum: rawSum, rowSum: rowSum };
+}
+
+/* np.percentile(v, p) semantics: linear interpolation between the floor and
+   ceil order statistics at index k = (len-1)*p. Exact when every value sits
+   at a bin centre (true for maps_raw: values are multiples of 0.25). */
+function percentileFromHist(hist, total, p) {
+  if (total <= 0) return 1.0;
+  const k = (total - 1) * p;
+  const lo = Math.floor(k), hi = Math.min(lo + 1, total - 1);
+  const frac = k - lo;
+  let cum = 0, a = 0, b = 0, gotA = false, gotB = false;
+  for (let bin = 0; bin < hist.length; bin++) {
+    cum += hist[bin];
+    if (!gotA && cum > lo) { a = bin * 0.25; gotA = true; }
+    if (!gotB && cum > hi) { b = bin * 0.25; gotB = true; }
+    if (gotA && gotB) break;
+  }
+  return a + (b - a) * frac;
+}
+
+/* Lower edge of the bin where the cumulative count crosses q*total -- the
+   collection threshold for the exact pass. */
+function histThreshold(hist, total, q) {
+  const target = q * total;
+  let cum = 0;
+  for (let bin = 0; bin < hist.length; bin++) {
+    if (cum + hist[bin] >= target && hist[bin] > 0) return bin * 0.25;
+    cum += hist[bin];
+  }
+  return 0;
+}
+
+/* Pass A': every row-removed map value >= thresh (about 2% of them). */
+function collectAbove(luma, n, rowMeds, gs, thresh) {
+  const pairs = n - 1;
+  const out = [];
+  for (let t = 0; t < pairs; t++) {
+    const o1 = t * MLB, o2 = o1 + MLB, m1 = t * MH, m2 = m1 + MH;
+    const g1 = gs[t], g2 = gs[t + 1];
+    for (let y = 0; y < MH; y += 2) {
+      const c1a = rowMeds[m1 + y] - g1,     c2a = rowMeds[m2 + y] - g2;
+      const c1b = rowMeds[m1 + y + 1] - g1, c2b = rowMeds[m2 + y + 1] - g2;
+      const ra1 = o1 + y * MW, ra2 = o2 + y * MW;
+      const rb1 = ra1 + MW,    rb2 = ra2 + MW;
+      for (let x = 0; x < MW; x += 2) {
+        let sRow = 0;
+        let v1 = luma[ra1 + x], v2 = luma[ra2 + x];
+        let e = (v2 - c2a) - (v1 - c1a); if (e < 0) e = -e; sRow += e;
+        v1 = luma[ra1 + x + 1]; v2 = luma[ra2 + x + 1];
+        e = (v2 - c2a) - (v1 - c1a); if (e < 0) e = -e; sRow += e;
+        v1 = luma[rb1 + x]; v2 = luma[rb2 + x];
+        e = (v2 - c2b) - (v1 - c1b); if (e < 0) e = -e; sRow += e;
+        v1 = luma[rb1 + x + 1]; v2 = luma[rb2 + x + 1];
+        e = (v2 - c2b) - (v1 - c1b); if (e < 0) e = -e; sRow += e;
+        if (sRow * 0.25 >= thresh) out.push(sRow * 0.25);
+      }
+    }
+  }
+  return out;
+}
+
+/* Exact interpolated order statistic, given every value >= thresh sorted and
+   how many values sit below thresh. countBelow <= k by construction. */
+function exactPercentile(sorted, countBelow, total, p) {
+  const k = (total - 1) * p;
+  let lo = Math.floor(k) - countBelow;
+  if (lo < 0) lo = 0;
+  let hi = Math.min(lo + 1, sorted.length - 1);
+  const a = sorted[lo], b = sorted[hi];
+  return a + (b - a) * (k - Math.floor(k));
+}
+
+/* Pass B: quantise both variants, uint8 with the scale recorded alongside,
+   exactly the script's quantise(): clip(maps/hi*255, 0, 255) truncated. */
+function quantiseMaps(luma, n, rowMeds, gs, hi, hiRaw) {
+  const pairs = n - 1;
+  const maps = new Uint8Array(pairs * MMH * MMW);
+  const mapsRaw = new Uint8Array(pairs * MMH * MMW);
+  for (let t = 0; t < pairs; t++) {
+    const o1 = t * MLB, o2 = o1 + MLB, m1 = t * MH, m2 = m1 + MH;
+    const g1 = gs[t], g2 = gs[t + 1];
+    const rowIdx = t * MMH;
+    for (let y = 0; y < MH; y += 2) {
+      const c1a = rowMeds[m1 + y] - g1,     c2a = rowMeds[m2 + y] - g2;
+      const c1b = rowMeds[m1 + y + 1] - g1, c2b = rowMeds[m2 + y + 1] - g2;
+      const ra1 = o1 + y * MW, ra2 = o2 + y * MW;
+      const rb1 = ra1 + MW,    rb2 = ra2 + MW;
+      const outRow = (rowIdx + y / 2) * MMW;
+      for (let x = 0; x < MW; x += 2) {
+        let sRaw = 0, sRow = 0;
+        let v1 = luma[ra1 + x], v2 = luma[ra2 + x];
+        let d = v2 - v1; if (d < 0) d = -d; sRaw += d;
+        let e = (v2 - c2a) - (v1 - c1a); if (e < 0) e = -e; sRow += e;
+        v1 = luma[ra1 + x + 1]; v2 = luma[ra2 + x + 1];
+        d = v2 - v1; if (d < 0) d = -d; sRaw += d;
+        e = (v2 - c2a) - (v1 - c1a); if (e < 0) e = -e; sRow += e;
+        v1 = luma[rb1 + x]; v2 = luma[rb2 + x];
+        d = v2 - v1; if (d < 0) d = -d; sRaw += d;
+        e = (v2 - c2b) - (v1 - c1b); if (e < 0) e = -e; sRow += e;
+        v1 = luma[rb1 + x + 1]; v2 = luma[rb2 + x + 1];
+        d = v2 - v1; if (d < 0) d = -d; sRaw += d;
+        e = (v2 - c2b) - (v1 - c1b); if (e < 0) e = -e; sRow += e;
+        let q = sRaw * 0.25 / hiRaw * 255;
+        mapsRaw[outRow + x / 2] = q > 255 ? 255 : q | 0;
+        q = sRow * 0.25 / hi * 255;
+        maps[outRow + x / 2] = q > 255 ? 255 : q | 0;
+      }
+    }
+  }
+  return { maps: maps, mapsRaw: mapsRaw };
+}
+
+function computeTake(luma, n) {
+  const m = computeRowMeds(luma, n);
+  const a = scanPairs(luma, n, m.rowMeds, m.gs);
+  const cells = (n - 1) * MLB;
+  const totalMaps = (n - 1) * MMH * MMW;
+  const driftRaw = a.rawSum / cells;
+  const driftRow = a.rowSum / cells;
+  // maps_raw values are exact multiples of 0.25 -> the histogram IS exact.
+  const scaleRaw = Math.max(percentileFromHist(a.histRaw, totalMaps, 0.995), 1e-6);
+  // maps needs the exact pass: collect above the 98th percentile, sort.
+  const thresh = histThreshold(a.hist, totalMaps, 0.98);
+  const collected = collectAbove(luma, n, m.rowMeds, m.gs, thresh);
+  collected.sort(function (p, q) { return p - q; });
+  const countBelow = totalMaps - collected.length;
+  const scale = Math.max(exactPercentile(collected, countBelow, totalMaps, 0.995), 1e-6);
+  const q = quantiseMaps(luma, n, m.rowMeds, m.gs, scale, scaleRaw);
+  return { maps: q.maps, mapsRaw: q.mapsRaw, scale: scale, scaleRaw: scaleRaw,
+           driftRaw: driftRaw, driftRow: driftRow };
+}
+// === MATH-END ===
+
+/* ============================================================================
+   Devices: camera preview + AudioWorklet PCM tap.
+   Processing is OFF (echo cancellation, noise suppression, auto gain) so the
+   microphone data is as raw as sounddevice's -- a silent condition must not
+   be cleaned into digital silence by the browser.
+   ========================================================================== */
+const videoEl = document.getElementById("video");
+const capCanvas = document.getElementById("captureCanvas");
+const cctx = capCanvas.getContext("2d", { willReadFrequently: true });
+cctx.imageSmoothingEnabled = true;
+cctx.imageSmoothingQuality = "high";
+
+let stream = null, audioCtx = null, realRate = RATE, micName = "", camName = "";
+let queue = [], qTotal = 0, qHeadPos = 0;   // the mic sample queue
+let meterLevel = 0;                          // rms of the newest block, for the meter
+let devicesOk = false;
+
+function flushAudio() { queue = []; qTotal = 0; qHeadPos = 0; }
+
+function popAudio(blk, dest, off) {
+  let got = 0;
+  while (got < blk && queue.length) {
+    const head = queue[0];
+    const take = Math.min(blk - got, head.length - qHeadPos);
+    dest.set(head.subarray(qHeadPos, qHeadPos + take), off + got);
+    got += take; qHeadPos += take;
+    if (qHeadPos >= head.length) { queue.shift(); qHeadPos = 0; }
+  }
+  qTotal -= got;
+  return got;
+}
+
+async function startDevices() {
+  if (devicesOk) return true;
+  hideBanner("err");
+  try {
+    stream = await navigator.mediaDevices.getUserMedia({
+      video: { width: { ideal: 640 }, height: { ideal: 480 },
+               frameRate: { ideal: FPS } },
+      audio: { channelCount: 1, echoCancellation: false,
+               noiseSuppression: false, autoGainControl: false },
+    });
+  } catch (err) {
+    showBanner("err", "Camera/microphone permission was refused (" + err.name +
+      "). Allow both, then click RETRY DEVICES.");
+    return false;
+  }
+  videoEl.srcObject = stream;
+  await videoEl.play();
+
+  // 16 kHz is the requested rate, exactly like the script. If the browser
+  // hands us a different context rate we record it and flag every take --
+  // an honest header on a flagged take, never a false header.
+  try {
+    audioCtx = new AudioContext({ sampleRate: RATE });
+  } catch (err) {
+    audioCtx = new AudioContext();
+  }
+  await audioCtx.resume();
+  realRate = audioCtx.sampleRate;
+  if (realRate !== RATE)
+    showBanner("warn", "The browser is running the mic at " + realRate +
+      " Hz, not the requested " + RATE + " Hz. Takes will be saved with the " +
+      "honest rate and flagged MIC_RATE, exactly as the script flags it.");
+
+  const workletSrc =
+    "class PColl extends AudioWorkletProcessor {" +
+    "  process(inputs) {" +
+    "    const ins = inputs[0];" +
+    "    if (ins && ins.length) {" +
+    "      let ch = ins[0];" +
+    "      if (ins.length > 1) {  // average down to mono, as wavio does" +
+    "        const m = new Float32Array(ch.length);" +
+    "        for (let i = 0; i < ch.length; i++)" +
+    "          m[i] = (ins[0][i] + ins[1][i]) * 0.5;" +
+    "        ch = m;" +
+    "      }" +
+    "      const c = new Float32Array(ch.length);" +
+    "      c.set(ch);" +
+    "      this.port.postMessage(c, [c.buffer]);" +
+    "    }" +
+    "    return true;" +
+    "  }" +
+    "}" +
+    "registerProcessor('pcoll', PColl);";
+  const workletURL = URL.createObjectURL(
+    new Blob([workletSrc], { type: "application/javascript" }));
+  await audioCtx.audioWorklet.addModule(workletURL);   // blob: -- no network
+  const src = audioCtx.createMediaStreamSource(stream);
+  const node = new AudioWorkletNode(audioCtx, "pcoll");
+  node.port.onmessage = (ev) => {
+    const blk = ev.data;
+    meterLevel = rmsOf(blk);
+    meterRing.push(meterLevel); if (meterRing.length > 150) meterRing.shift();
+    if (capturing) { queue.push(blk); qTotal += blk.length; }
+    // outside a take the samples are dropped -- the script closes its
+    // InputStream between conditions; same semantics.
+  };
+  src.connect(node);
+
+  micName = (stream.getAudioTracks()[0] || {}).label || "browser mic";
+  camName = (stream.getVideoTracks()[0] || {}).label || "browser camera";
+  document.getElementById("micLabel").textContent =
+    "mic: " + micName + " @ " + realRate + " Hz";
+  devicesOk = true;
+  return true;
+}
+
+function rmsOf(a) {
+  let s = 0;
+  for (let i = 0; i < a.length; i++) s += a[i] * a[i];
+  return Math.sqrt(s / a.length);
+}
+
+/* The live meter: rms ring -> 20th percentile noise floor -> 10x floor as
+   the SPEAKING threshold -- the same rule speechStats applies at take end,
+   so what you see while recording is what the take is judged by. */
+const meterRing = [];
+function meterFrame() {
+  const fill = document.getElementById("meterFill");
+  const db = 20 * Math.log10(Math.max(meterLevel, 1e-7));
+  const pct = Math.max(0, Math.min(100, (db + 60) / 60 * 100));
+  fill.style.width = pct.toFixed(1) + "%";
+  document.getElementById("meterDb").textContent = db.toFixed(0) + " dB";
+  const chip = document.getElementById("liveChip");
+  if (devicesOk) {
+    const sorted = meterRing.slice().sort(function (a, b) { return a - b; });
+    const floor = sorted.length ? sorted[Math.floor(sorted.length * 0.2)] : 0;
+    const speaking = meterLevel >= Math.max(floor * 10, 1e-4);
+    chip.textContent = speaking ? "SPEAKING" : "SILENT";
+    chip.className = speaking ? "speaking" : "";
+    if (!capturing) cctx.drawImage(videoEl, 0, 0, capCanvas.width, capCanvas.height);
+  }
+  requestAnimationFrame(meterFrame);
+}
+requestAnimationFrame(meterFrame);
+
+/* ============================================================================
+   The speech check (browser stand-in for the script's Silero gate).
+   Energy-adaptive: threshold at 10x the 20th-percentile noise floor, so mic
+   gain cannot turn room tone into speech or vice versa. Recorded in the
+   metadata as speech_frac with speech_gate: "browser_rms_adaptive" -- an
+   honest provenance, because it is not Silero.
+   ========================================================================== */
+function speechStats(samples, n, rate) {
+  if (!n) return { frac: null, floor: 0, thr: 0 };
+  const win = Math.max(1, Math.round(rate * 0.03));
+  const nWin = Math.floor(n / win);
+  if (nWin < 2) return { frac: null, floor: 0, thr: 0 };
+  const rms = new Float64Array(nWin);
+  for (let w = 0; w < nWin; w++) {
+    let s = 0;
+    const base = w * win;
+    for (let i = 0; i < win; i++) { const v = samples[base + i]; s += v * v; }
+    rms[w] = Math.sqrt(s / win);
+  }
+  const sorted = Array.from(rms).sort(function (a, b) { return a - b; });
+  const floor = sorted[Math.floor(sorted.length * 0.2)];
+  const thr = Math.max(floor * 10, 1e-4);
+  let cnt = 0;
+  for (let w = 0; w < nWin; w++) if (rms[w] >= thr) cnt++;
+  return { frac: cnt / nWin, floor: floor, thr: thr };
+}
+
+/* A 16-bit PCM mono WAV with an honest rate header -- the same file the
+   script's wave.open(...) writes. */
+function buildWav(samples, n, rate) {
+  const buf = new ArrayBuffer(44 + n * 2);
+  const dv = new DataView(buf);
+  const ws = (off, s) => { for (let i = 0; i < s.length; i++)
+    dv.setUint8(off + i, s.charCodeAt(i)); };
+  ws(0, "RIFF"); dv.setUint32(4, 36 + n * 2, true); ws(8, "WAVE");
+  ws(12, "fmt "); dv.setUint32(16, 16, true); dv.setUint16(20, 1, true);
+  dv.setUint16(22, 1, true); dv.setUint32(24, rate, true);
+  dv.setUint32(28, rate * 2, true); dv.setUint16(32, 2, true);
+  dv.setUint16(34, 16, true); ws(36, "data"); dv.setUint32(40, n * 2, true);
+  const pcm = new Int16Array(buf, 44, n);
+  for (let i = 0; i < n; i++) {
+    let v = Math.round(samples[i] * 32767);
+    pcm[i] = v > 32767 ? 32767 : v < -32768 ? -32768 : v;
+  }
+  return new Uint8Array(buf);
+}
+
+/* ============================================================================
+   The recorder. The loop is the script's loop: ONE video frame, ONE audio
+   block of floor(rate/30) samples, ONE clock reading per iteration, paced by
+   the audio clock (each tick waits for the next block to exist). That is
+   what makes n_samples/rate land on n_frames/30 and the spans agree, and it
+   is why the timestamps in timing.json are the truth.
+   ========================================================================== */
+let capturing = false, abortFlag = false;
+const LB = 160 * 96;
+
+/* The addendum's parallel full-fidelity artifact: a native-res WebM with the
+   mic audio muxed, recorded straight off the getUserMedia stream while the
+   canvas capture runs. It is EXTRA preservation for external analysis --
+   never a substitute for the raw frames, which are recorded independently
+   above. */
+function pickMime() {
+  if (typeof MediaRecorder === "undefined") return null;
+  for (const c of ["video/webm;codecs=vp9,opus", "video/webm;codecs=vp8,opus",
+                   "video/webm"])
+    if (MediaRecorder.isTypeSupported(c)) return c;
+  return null;
+}
+
+function lumaFromImage(d, out, off) {
+  // BT.601 full-range luma, the coefficients of the script's
+  // cv2.COLOR_BGR2YUV_I420 luma plane: Y = 0.299 R + 0.587 G + 0.114 B.
+  for (let i = 0, j = off; i < d.length; i += 4, j++) {
+    let y = 0.299 * d[i] + 0.587 * d[i + 1] + 0.114 * d[i + 2];
+    out[j] = y > 255 ? 255 : y < 0 ? 0 : Math.round(y);
+  }
+}
+
+async function recordSpec(spec) {
+  const n = Math.round(spec.seconds * FPS);
+  const blk = Math.floor(realRate / FPS);      // int(rate/fps), like the script
+  const luma = new Uint8Array(n * LB);
+  const stamps = new Float64Array(n);
+  const samples = new Float32Array(n * blk);
+  let captured = 0, nSamples = 0;
+
+  capturing = true; abortFlag = false;
+  flushAudio();
+
+  const wallStart = new Date().toISOString();
+  const webmChunks = [];
+  let recorder = null;
+  const mime = pickMime();
+  if (mime) {
+    try {
+      recorder = new MediaRecorder(stream,
+        { mimeType: mime, videoBitsPerSecond: 4000000 });
+      recorder.ondataavailable = (e) => {
+        if (e.data && e.data.size) webmChunks.push(e.data);
+      };
+      recorder.start(1000);
+    } catch (err) { recorder = null; }
+  }
+
+  const t0 = performance.now();
+  const lastCamSec = (spec.seconds * 1000) + 15000;  // stall watchdog
+  const result = await new Promise((resolve) => {
+    const tick = () => {
+      if (abortFlag) { resolve("aborted"); return; }
+      if (captured >= n) { resolve("done"); return; }
+      if (performance.now() - t0 > lastCamSec) {
+        resolve("stalled"); return;
+      }
+      if (captured === 0 && performance.now() - t0 > 2500 && qTotal === 0) {
+        resolve("noaudio"); return;
+      }
+      if (qTotal >= blk) {
+        cctx.drawImage(videoEl, 0, 0, capCanvas.width, capCanvas.height);
+        lumaFromImage(cctx.getImageData(0, 0, 160, 96).data, luma,
+                      captured * LB);
+        stamps[captured] = performance.now();
+        const got = popAudio(blk, samples, captured * blk);
+        nSamples += got;
+        captured++;
+        uiRecordingProgress(spec, captured, n, stamps[0]);
+      }
+      setTimeout(tick, 3);
+    };
+    tick();
+  });
+  const wallEnd = new Date().toISOString();
+  capturing = false;
+
+  let webm = null;
+  if (recorder && recorder.state !== "inactive") {
+    await new Promise((res) => { recorder.onstop = res; recorder.stop(); })
+      .catch(() => {});
+  }
+  if (result === "done" && webmChunks.length) {
+    try { webm = new Uint8Array(await new Blob(webmChunks).arrayBuffer()); }
+    catch (err) { webm = null; }
+  }
+  return { result, spec, n, captured, luma, stamps, samples, nSamples, blk,
+           wallStart, wallEnd, webm };
+}
+
+/* ============================================================================
+   Finalise + upload. Everything is built in the tab, then POSTed as one
+   length-prefixed body; the server stamps and writes the four files. The
+   payload is kept until the server acks, with a RETRY button, so no take is
+   ever "held only in the tab".
+   ========================================================================== */
+function section(blobParts, bytes) {
+  const len = new ArrayBuffer(8);
+  new DataView(len).setBigUint64(0, BigInt(bytes.length), true);
+  blobParts.push(new Uint8Array(len), bytes);
+}
+
+async function finalizeTake(rec) {
+  const spec = rec.spec;
+  const proc0 = performance.now();
+  setStateLine("processing take " + spec.name + " ...");
+  await twoFrames();  // let the "processing" state paint before the math
+  const m = computeTake(rec.luma, rec.n);
+  const speech = speechStats(rec.samples, rec.nSamples, realRate);
+  const wav = buildWav(rec.samples, rec.nSamples, realRate);
+
+  const n = rec.n;
+  const elapsed = rec.stamps[n - 1] - rec.stamps[0];
+  const achieved = elapsed > 0 ? (n - 1) / (elapsed / 1000) : 0;
+  const videoSeconds = n / FPS;
+  const audioSeconds = rec.nSamples / realRate;
+  const offsets = new Array(n);
+  for (let i = 0; i < n; i++)
+    offsets[i] = Math.round((rec.stamps[i] - rec.stamps[0]) / 1000 * 1e6) / 1e6;
+
+  const timing = {
+    condition: spec.name,
+    n_frames: n,
+    frame_offsets_s: offsets,
+    assumed_fps: FPS,
+    achieved_fps: Math.round(achieved * 10000) / 10000,
+    video_span_s: Math.round(videoSeconds * 1000) / 1000,
+    audio_span_s: Math.round(audioSeconds * 1000) / 1000,
+    audio_sample_rate: realRate,
+    requested_sample_rate: RATE,
+    mic: micName,
+    capture_wallclock_s: Math.round((performance.now() - proc0) / 10) / 100,
+  };
+  const meta = {
+    condition: spec.name,
+    kind: spec.kind,
+    note: spec.note,
+    pose: spec.pose,
+    speak: spec.speak,
+    stimulus: "invictus",
+    stimulus_title: "Invictus",
+    stimulus_estimated_s: 40.0,
+    speech_frac: speech.frac,
+    n_frames: n,
+    seconds: videoSeconds,
+    achieved_fps: timing.achieved_fps,
+    audio_sample_rate: realRate,
+    audio_seconds: timing.audio_span_s,
+    map_shape: [48, 80],
+    map_scale: m.scale,
+    map_scale_raw: m.scaleRaw,
+    drift_raw: m.driftRaw,
+    drift_after_row_removal: m.driftRow,
+    rep: spec.rep,
+    filter: "row",
+    filters: { maps: "row", maps_raw: "none", luma: "none" },
+    arrays: ["maps", "maps_raw", "luma"],
+    capture_tool: "browser_capture",
+    speech_gate: speech.frac == null ? "unavailable" : "browser_rms_adaptive",
+  };
+
+  const parts = [];
+  section(parts, new TextEncoder().encode(JSON.stringify(meta)));
+  section(parts, new TextEncoder().encode(JSON.stringify(timing)));
+  section(parts, wav);
+  section(parts, rec.luma);
+  section(parts, m.maps);
+  section(parts, m.mapsRaw);
+  // the addendum's rich copy: the sidecar body, then the native-res WebM
+  // (empty section if the browser could not produce one)
+  const rich = {
+    condition: spec.name,
+    kind: spec.kind,
+    pose: spec.pose,
+    speak: spec.speak,
+    instruction_text: spec.display,
+    instruction_note: spec.note,
+    stimulus: "invictus",
+    stimulus_title: "Invictus",
+    wall_clock_start: rec.wallStart,
+    wall_clock_end: rec.wallEnd,
+    achieved_fps: timing.achieved_fps,
+    audio_sample_rate: realRate,
+    requested_sample_rate: RATE,
+    mic_device: micName,
+    camera_device: camName,
+    browser: navigator.userAgent,
+    frame_count: n,
+    video_span_s: timing.video_span_s,
+    audio_span_s: timing.audio_span_s,
+    full_video_recorded: !!rec.webm,
+    notes: "",
+  };
+  section(parts, new TextEncoder().encode(JSON.stringify(rich)));
+  section(parts, rec.webm || new Uint8Array(0));
+  const blob = new Blob(parts, { type: "application/octet-stream" });
+
+  const local = evaluateLocal(meta, timing);
+  showResult(meta, timing, speech, local, null);
+  setStateLine("uploading take " + spec.name + " ...");
+  return { blob, meta, timing, speech, local };
+}
+
+function evaluateLocal(meta, timing) {
+  const flags = [];
+  if (meta.speak === true && (meta.speech_frac == null ||
+      meta.speech_frac < SPEAK_MIN)) flags.push("VOICE_MISSING");
+  if (meta.speak === false && meta.speech_frac != null &&
+      meta.speech_frac > SPEAK_MAX) flags.push("NOT_SILENT");
+  if (meta.speech_frac == null) flags.push("SPEECH_UNMEASURED");
+  const relFps = Math.abs(timing.achieved_fps - FPS) / FPS;
+  if (relFps > 0.05) flags.push("FPS_OFF");
+  if (timing.audio_sample_rate !== timing.requested_sample_rate)
+    flags.push("MIC_RATE");
+  const relSpan = Math.abs(timing.audio_span_s - timing.video_span_s) /
+      timing.video_span_s;
+  if (relSpan > 0.02) flags.push("SPAN_MISMATCH");
+  if (meta.drift_after_row_removal >= DRIFT_MAX) flags.push("DRIFT_HIGH");
+  return flags;
+}
+
+function showResult(meta, timing, speech, flags, files) {
+  const pre = document.getElementById("resultPre");
+  const L = [];
+  const hard = flags.filter(f => f !== "SPEECH_UNMEASURED");
+  L.push("take " + meta.condition +
+    (files && files.length ? "  ->  " + files[0] : "  (not yet saved)"));
+  L.push("frames " + meta.n_frames + "   video span " +
+    timing.video_span_s.toFixed(2) + "s (assumed " + FPS + " fps)");
+  L.push("ACHIEVED camera rate " + timing.achieved_fps.toFixed(2) +
+    " fps   mic rate " + timing.audio_sample_rate + " Hz (requested " +
+    timing.requested_sample_rate + ")   audio span " +
+    timing.audio_span_s.toFixed(2) + "s");
+  L.push("drift raw " + meta.drift_raw.toFixed(2) +
+    "   after row-band removal " + meta.drift_after_row_removal.toFixed(2) +
+    "   " + (meta.drift_after_row_removal < DRIFT_MAX ? "OK" :
+    "TOO HIGH -- change the lighting"));
+  if (meta.speech_frac == null)
+    L.push("speech check unavailable (no audio reached the analyser)");
+  else if (meta.speak === true)
+    L.push("speech " + (meta.speech_frac * 100).toFixed(1) + "% of frames");
+  else if (meta.speak === false)
+    L.push("silent condition, measured speech " +
+      (meta.speech_frac * 100).toFixed(1) + "%");
+  else
+    L.push("free session, measured speech " +
+      (meta.speech_frac * 100).toFixed(1) + "% (no label asserted)");
+  for (const f of flags)
+    L.push((f === "SPEECH_UNMEASURED" ? "note: " : "warn: ") + f);
+  if (!hard.length) L.push("ALL CHECKS OK");
+  pre.innerHTML = L.map(line => {
+    const cls = line.startsWith("warn") ? "warnline" :
+      line.startsWith("ALL") ? "okline" : "";
+    return '<span class="' + cls + '">' + esc(line) + "</span>";
+  }).join("\n");
+}
+
+function esc(s) {
+  return s.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+}
+
+let lastUpload = null, lastSaved = null;
+async function uploadTake(finalized) {
+  lastUpload = finalized;
+  document.getElementById("retryBtn").style.display = "none";
+  try {
+    const resp = await fetch("/take", { method: "POST", body: finalized.blob });
+    const j = await resp.json().catch(() => ({ ok: false, error: "bad reply" }));
+    if (!resp.ok || !j.ok) throw new Error(j.error || ("HTTP " + resp.status));
+    lastUpload = null;
+    lastSaved = { condition: j.condition, stamp: j.stamp };
+    showResult(finalized.meta, finalized.timing, finalized.speech,
+               finalized.local, j.files);
+    document.getElementById("notesWrap").style.display = "block";
+    document.getElementById("notesBox").value = "";
+    document.getElementById("notesBtn").disabled = false;
+    setStateLine("take " + j.condition + " saved (" + j.files.length +
+      " files). Type a note below while you remember it, then the plan " +
+      "continues.");
+    await refreshTakes();
+    return true;
+  } catch (err) {
+    document.getElementById("retryBtn").style.display = "";
+    setStateLine("UPLOAD FAILED for " + finalized.meta.condition +
+      " -- the take is kept in memory; click Retry upload (" + err.message + ")");
+    return false;
+  }
+}
+
+async function saveNotes() {
+  if (!lastSaved) return;
+  const btn = document.getElementById("notesBtn");
+  const box = document.getElementById("notesBox");
+  btn.disabled = true;
+  try {
+    const resp = await fetch("/notes", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ condition: lastSaved.condition,
+                             stamp: lastSaved.stamp, notes: box.value }),
+    });
+    const j = await resp.json().catch(() => ({ ok: false }));
+    if (!resp.ok || !j.ok) throw new Error(j.error || resp.status);
+    btn.textContent = "Note saved";
+    setTimeout(() => { btn.textContent = "Save note"; btn.disabled = false; },
+               1500);
+  } catch (err) {
+    setStateLine("saving the note failed: " + err.message);
+    btn.disabled = false;
+  }
+}
+
+/* ============================================================================
+   The plan driver: countdown -> record -> finalise -> upload, one take at a
+   time, skippable, redoable, clickable out of order.
+   ========================================================================== */
+const driver = { running: false, paused: false, idx: 0 };
+const sessionMarks = {};   // name -> "skipped" (session-only)
+let serverTakes = [];
+
+function isDone(name) {
+  return serverTakes.some(t => t.condition === name && t.has_npz) ||
+         sessionMarks[name] === "skipped";
+}
+
+function sleep(ms) { return new Promise(r => setTimeout(r, ms)); }
+async function twoFrames() {
+  await new Promise(r => requestAnimationFrame(() => requestAnimationFrame(r)));
+}
+
+async function doTake(idx) {
+  const spec = PLAN[idx];
+  if (!(await startDevices())) return false;
+
+  // countdown
+  setPhase("countdown", idx);
+  abortFlag = false;
+  for (let t = COUNTDOWN_S; t >= 1; t--) {
+    document.getElementById("bigNumber").textContent = t;
+    document.getElementById("stateLine").textContent =
+      "starting " + spec.name + " in " + t + "...";
+    await sleep(1000);
+    if (abortFlag) { setPhase("idle", driver.idx); return false; }
+  }
+
+  // record
+  setPhase("recording", idx);
+  const rec = await recordSpec(spec);
+  if (rec.result !== "done") {
+    setPhase("idle", driver.idx);
+    if (rec.result === "aborted")
+      setStateLine("take " + spec.name + " aborted -- nothing was saved");
+    else if (rec.result === "noaudio")
+      showBanner("err", "The microphone delivered no audio. Recording needs " +
+        "the mic for the A/V correspondence check; fix the mic and retry.");
+    else
+      showBanner("err", "Recording stalled (audio clock stopped delivering). " +
+        "Take discarded.");
+    return false;
+  }
+
+  // finalise + upload
+  setPhase("processing", idx);
+  const finalized = await finalizeTake(rec);
+  setPhase("uploading", idx);
+  const ok = await uploadTake(finalized);
+  setPhase("idle", driver.idx);
+  return ok;
+}
+
+async function runPlan() {
+  driver.running = true; driver.paused = false;
+  updateControls();
+  for (; driver.idx < PLAN.length; driver.idx++) {
+    if (driver.paused) break;
+    if (isDone(PLAN[driver.idx].name)) continue;
+    const ok = await doTake(driver.idx);
+    if (!ok && !driver.paused) break;
+  }
+  driver.running = false;
+  updateControls();
+  if (!driver.paused) {
+    const left = PLAN.filter(p => !isDone(p.name)).length;
+    setStateLine(left === 0 ? "PLAN COMPLETE -- every take is on disk" :
+      "plan stopped with " + left + " take(s) left -- START resumes where it stopped");
+  }
+}
+
+/* ============================================================================
+   UI wiring
+   ========================================================================== */
+const $ = (id) => document.getElementById(id);
+
+function setPhase(phase, idx) {
+  uiPhase = phase;
+  const spec = idx != null ? PLAN[idx] : null;
+  const showTimer = phase === "recording";
+  $("timerRow").style.display = showTimer ? "flex" : "none";
+  $("bigNumber").style.display = phase === "countdown" ? "block" : "none";
+  $("recBadge").style.display = phase === "recording" ? "flex" : "none";
+  if (spec) {
+    $("condName").textContent = phase === "idle" ? "READY" :
+      "TAKE " + spec.name + "  (" + (idx + 1) + " of " + PLAN.length + ")";
+    $("condText").textContent = spec.display;
+    $("condNote").textContent = spec.note + " -- " + spec.seconds + " s";
+    const poem = spec.speak === true;
+    $("poemCard").style.display = poem ? "block" : "none";
+    if (poem) {
+      $("poemTitle").textContent = "STIMULUS: " + POEM_TITLE;
+      $("poemBody").textContent =
+        POEM_STANZAS.map(s => s.join("\n")).join("\n\n");
+    }
+  }
+  if (phase === "idle" && !driver.running) {
+    const nxt = PLAN.findIndex(p => !isDone(p.name));
+    if (nxt >= 0) {
+      $("condName").textContent = "NEXT UP";
+      $("condText").textContent = PLAN[nxt].display;
+      $("condNote").textContent = PLAN[nxt].name + ": " + PLAN[nxt].note +
+        " -- " + PLAN[nxt].seconds + " s";
+      $("poemCard").style.display = PLAN[nxt].speak === true ? "block" : "none";
+    }
+  }
+  renderTakes();
+  updateControls();
+}
+let uiPhase = "idle";
+
+function uiRecordingProgress(spec, captured, n, t0ms) {
+  const remain = Math.max(0, spec.seconds - captured / FPS);
+  const elap = (performance.now() - t0ms) / 1000;
+  $("tRemaining").textContent = fmtT(remain);
+  $("tElapsed").textContent = fmtT(elap);
+  $("tFrames").textContent = captured + " / " + n;
+}
+function fmtT(s) {
+  const m = Math.floor(s / 60), r = Math.floor(s % 60);
+  return m + ":" + String(r).padStart(2, "0");
+}
+
+function setStateLine(t) { $("stateLine").textContent = t; }
+
+function evaluateTakeEntry(t) {
+  // the gate's per-take checks, mirrored for display
+  const flags = [];
+  if (!t.has_npz || !t.has_wav) flags.push("FILES_MISSING");
+  if (!t.has_timing) flags.push("NO_TIMING");
+  if (t.speak === true || t.speak === false) {
+    if (t.speech_frac == null) flags.push("SPEECH_UNMEASURED");
+    else if (t.speak === true && t.speech_frac < SPEAK_MIN)
+      flags.push("VOICE_MISSING");
+    else if (t.speak === false && t.speech_frac > SPEAK_MAX)
+      flags.push("NOT_SILENT");
+  }
+  if (t.achieved_fps && t.assumed_fps &&
+      Math.abs(t.achieved_fps - t.assumed_fps) / t.assumed_fps > 0.05)
+    flags.push("FPS_OFF");
+  if (t.audio_sample_rate && t.requested_sample_rate &&
+      t.audio_sample_rate !== t.requested_sample_rate) flags.push("MIC_RATE");
+  if (t.video_span_s && t.audio_span_s && t.video_span_s > 0 &&
+      Math.abs(t.audio_span_s - t.video_span_s) / t.video_span_s > 0.02)
+    flags.push("SPAN_MISMATCH");
+  if (t.drift_after_row_removal != null &&
+      t.drift_after_row_removal >= DRIFT_MAX) flags.push("DRIFT_HIGH");
+  return flags;
+}
+
+function planStatus(name) {
+  // precedence: what the driver is doing now > session marks > disk
+  if (uiPhase !== "idle" && PLAN[driver.idx] && PLAN[driver.idx].name === name) {
+    if (uiPhase === "recording") return { cls: "recording", text: "RECORDING" };
+    if (uiPhase === "processing") return { cls: "working", text: "PROCESSING" };
+    if (uiPhase === "uploading") return { cls: "working", text: "UPLOADING" };
+    if (uiPhase === "countdown") return { cls: "working", text: "STARTING" };
+  }
+  if (sessionMarks[name] === "skipped")
+    return { cls: "skipped", text: "SKIPPED" };
+  const mine = serverTakes.filter(t => t.condition === name && t.has_npz);
+  if (!mine.length) return { cls: "pending", text: "PENDING" };
+  const flags = evaluateTakeEntry(mine[0]);   // newest first from the server
+  const hard = flags.filter(f => f !== "SPEECH_UNMEASURED" && f !== "NO_TIMING");
+  return hard.length ? { cls: "flagged", text: "FLAGGED", flags: flags } :
+    { cls: "done", text: flags.includes("SPEECH_UNMEASURED") ? "DONE*" : "DONE",
+      flags: flags };
+}
+
+function renderTakes() {
+  const tbody = $("takesBody");
+  tbody.innerHTML = "";
+  PLAN.forEach((spec, idx) => {
+    const st = planStatus(spec.name);
+    const tr = document.createElement("tr");
+    tr.className = "rowclick" + (driver.idx === idx && uiPhase !== "idle" ?
+      " current" : "");
+    const dstar = spec.base === "D" ? ' <span class="dstar">&#9733;</span>' : "";
+    tr.innerHTML =
+      "<td><b>" + spec.name + "</b>" + dstar + "</td>" +
+      "<td>" + esc(spec.display) + "</td>" +
+      "<td>" + spec.seconds + "s</td>" +
+      '<td><span class="st ' + st.cls + '">' + st.text + "</span></td>" +
+      "<td class='flags'>" + esc((st.flags || []).join(" ") || "") + "</td>";
+    tr.title = "click to record " + spec.name + " now";
+    tr.onclick = () => {
+      if (uiPhase !== "idle" || driver.running) {
+        setStateLine("stop or finish the current take first (ABORT TAKE), " +
+          "then click " + spec.name);
+        return;
+      }
+      driver.idx = idx;
+      runPlan();
+    };
+    tbody.appendChild(tr);
+  });
+  // progress bar
+  const wrap = $("progressWrap");
+  wrap.innerHTML = "";
+  PLAN.forEach((spec, idx) => {
+    const st = planStatus(spec.name);
+    const seg = document.createElement("div");
+    seg.className = "seg " + (driver.idx === idx && uiPhase !== "idle" ?
+      "current" : st.cls === "recording" || st.cls === "working" ?
+      "done" : st.cls);
+    seg.title = spec.name + " -- " + st.text;
+    wrap.appendChild(seg);
+  });
+  const done = PLAN.filter(p => isDone(p.name)).length;
+  $("planLabel").textContent = done + " / " + PLAN.length + " takes on disk";
+}
+
+function updateControls() {
+  const busy = uiPhase !== "idle";
+  $("startBtn").disabled = driver.running || busy;
+  $("startBtn").textContent = driver.running ? "RUNNING..." :
+    PLAN.some(p => isDone(p.name)) ? "RESUME PLAN" : "START PLAN";
+  $("pauseBtn").disabled = !driver.running || driver.paused;
+  $("pauseBtn").textContent = driver.paused ? "PAUSED" : "PAUSE";
+  $("skipBtn").disabled = busy;
+  $("redoBtn").disabled = busy;
+  $("abortBtn").disabled = !(busy && uiPhase !== "uploading" &&
+    uiPhase !== "processing");
+}
+
+async function refreshTakes() {
+  try {
+    const r = await fetch("/takes");
+    const j = await r.json();
+    serverTakes = j.takes || [];
+  } catch (err) {
+    serverTakes = [];
+  }
+  renderTakes();
+}
+
+function showBanner(kind, msg) {
+  const el = $(kind === "err" ? "errBanner" : "warnBanner");
+  el.textContent = msg;
+  el.style.display = "block";
+}
+function hideBanner(kind) {
+  $(kind === "err" ? "errBanner" : "warnBanner").style.display = "none";
+}
+
+$("startBtn").onclick = async () => {
+  if (driver.running) return;
+  driver.idx = PLAN.findIndex(p => !isDone(p.name));
+  if (driver.idx < 0) driver.idx = 0;
+  await runPlan();
+};
+$("pauseBtn").onclick = () => {
+  driver.paused = true;
+  setStateLine("paused -- the plan stops after the current take finishes");
+  updateControls();
+};
+$("skipBtn").onclick = () => {
+  const name = PLAN[driver.idx] ? PLAN[driver.idx].name : null;
+  if (!name) return;
+  sessionMarks[name] = "skipped";
+  setStateLine(name + " marked skipped (nothing is written for it)");
+  renderTakes();
+};
+$("redoBtn").onclick = async () => {
+  if (uiPhase !== "idle" || driver.running) return;
+  await doTake(driver.idx);
+};
+$("abortBtn").onclick = () => { abortFlag = true; };
+$("retryBtn").onclick = async () => {
+  if (lastUpload) await uploadTake(lastUpload);
+};
+$("notesBtn").onclick = saveNotes;
+$("mirrorBtn").onclick = () => {
+  videoEl.classList.toggle("mirrored");
+  const on = videoEl.classList.contains("mirrored");
+  $("mirrorBtn").textContent = "Mirror preview: " + (on ? "ON" : "OFF");
+  try { localStorage.bcMirror = on ? "1" : "0"; } catch (e) {}
+};
+if (localStorage.bcMirror === "0") {
+  videoEl.classList.remove("mirrored");
+  $("mirrorBtn").textContent = "Mirror preview: OFF";
+} else {
+  videoEl.classList.add("mirrored");
+}
+
+window.addEventListener("beforeunload", (ev) => {
+  if (uiPhase === "recording" || uiPhase === "processing" ||
+      uiPhase === "uploading" || lastUpload) {
+    ev.preventDefault();
+    ev.returnValue = "";
+  }
+});
+
+(async function boot() {
+  try {
+    const r = await fetch("/info");
+    const j = await r.json();
+    $("srvState").classList.add("up");
+    $("srvText").textContent = "server up -- takes go to " + j.out;
+  } catch (err) {
+    $("srvText").textContent = "server DOWN -- run: python3 browser_capture/server.py";
+  }
+  await refreshTakes();
+  setPhase("idle", driver.idx);
+  setStateLine(PLAN.some(p => p.base === "D" && !isDone(p.name)) ?
+    "click START PLAN when you are ready. The D takes are the ones the corpus is waiting on." :
+    "click START PLAN when you are ready");
+  startDevices();   // ask for camera+mic up front so the preview is live
+})();
+</script>
+</body>
+</html>
