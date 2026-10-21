@@ -1,0 +1,343 @@
+{
+  "tool": "experiments/motion_as_text.py",
+  "generated_at": "2026-10-21T05:21:42Z",
+  "session": "/mnt/c/proart_capture/corpus/free_sessions/1792553040",
+  "n_frames": 15514,
+  "width": 160,
+  "height": 96,
+  "clock": {
+    "source": "/mnt/c/proart_capture/corpus/free_sessions/1792553040/timestamps.json",
+    "has_frames": true,
+    "n_frames": 15514,
+    "wall_clock_start": "2026-10-21T03:19:40.683Z",
+    "first_frame_s": 6.8347,
+    "last_frame_s": 265.7362,
+    "median_fps": 59.88023952100847
+  },
+  "references": {
+    "interval_s": 1.0,
+    "scene_threshold": 25.0,
+    "n_references": 262,
+    "n_from_scene_change": 13,
+    "n_from_interval": 249
+  },
+  "grid": {
+    "gw": 20,
+    "gh": 12,
+    "cell_px": [
+      8,
+      8
+    ]
+  },
+  "scale_luma_per_unit": 39.2828,
+  "ramp": "-=+*#%@0123456789",
+  "bytes": {
+    "raw_luma": 238295040,
+    "reference_frames": 2196034,
+    "delta_stream_text": 3909528,
+    "motion_stream_text": 976141,
+    "total": 7081703
+  },
+  "bytes_per_second": {
+    "raw_luma": 920408.1,
+    "reference_frames": 8482.1,
+    "delta_stream_text": 15100.4,
+    "motion_stream_text": 3770.3,
+    "total": 27352.9
+  },
+  "span_s": 258.901,
+  "reconstruction": {
+    "what": "the reference's cells plus the stream's signed delta, against the truth's cells on the same grid",
+    "error_mean_abs": 12.2039,
+    "error_p95": 13.2865,
+    "error_max": 14.2847,
+    "reference_only_error_mean_abs": 14.241,
+    "improvement_over_reference_only": 0.143,
+    "error_vs_reference_error_correlation": 0.0119,
+    "error_vs_texture_correlation": -0.1505,
+    "error_vs_motion_correlation": -0.1616,
+    "n_sampled_frames": 2217
+  },
+  "grid_sweep": [
+    {
+      "grid": "8x6",
+      "cell_px": [
+        20,
+        16
+      ],
+      "bytes_per_frame": 53,
+      "bytes_per_second_at_60fps": 3.18,
+      "error_mean_abs": 18.2496,
+      "reference_only_error_mean_abs": 20.2646,
+      "improvement": 0.0994,
+      "n_sampled": 240
+    },
+    {
+      "grid": "10x6",
+      "cell_px": [
+        16,
+        16
+      ],
+      "bytes_per_frame": 65,
+      "bytes_per_second_at_60fps": 3.9,
+      "error_mean_abs": 16.6973,
+      "reference_only_error_mean_abs": 19.0195,
+      "improvement": 0.1221,
+      "n_sampled": 240
+    },
+    {
+      "grid": "16x10",
+      "cell_px": [
+        10,
+        9
+      ],
+      "bytes_per_frame": 169,
+      "bytes_per_second_at_60fps": 10.14,
+      "error_mean_abs": 14.0127,
+      "reference_only_error_mean_abs": 17.2457,
+      "improvement": 0.1875,
+      "n_sampled": 240
+    },
+    {
+      "grid": "20x12",
+      "cell_px": [
+        8,
+        8
+      ],
+      "bytes_per_frame": 251,
+      "bytes_per_second_at_60fps": 15.06,
+      "error_mean_abs": 12.2159,
+      "reference_only_error_mean_abs": 15.9268,
+      "improvement": 0.233,
+      "n_sampled": 240
+    },
+    {
+      "grid": "40x24",
+      "cell_px": [
+        4,
+        4
+      ],
+      "bytes_per_frame": 983,
+      "bytes_per_second_at_60fps": 58.98,
+      "error_mean_abs": 8.3472,
+      "reference_only_error_mean_abs": 13.4659,
+      "improvement": 0.3801,
+      "n_sampled": 240
+    },
+    {
+      "grid": "80x48",
+      "cell_px": [
+        2,
+        2
+      ],
+      "bytes_per_frame": 3887,
+      "bytes_per_second_at_60fps": 233.22,
+      "error_mean_abs": 5.046,
+      "reference_only_error_mean_abs": 11.3753,
+      "improvement": 0.5564,
+      "n_sampled": 240
+    }
+  ],
+  "where_it_breaks": [
+    {
+      "frame": 10983,
+      "error": 14.2847,
+      "baseline_error": 14.285,
+      "motion_mean": 1.112,
+      "texture_within_blocks": 1338.082,
+      "t_s": 190.153
+    },
+    {
+      "frame": 10990,
+      "error": 14.2422,
+      "baseline_error": 14.7464,
+      "motion_mean": 0.0,
+      "texture_within_blocks": 1337.759,
+      "t_s": 190.269
+    },
+    {
+      "frame": 10976,
+      "error": 14.1304,
+      "baseline_error": 14.1304,
+      "motion_mean": 0.951,
+      "texture_within_blocks": 1336.856,
+      "t_s": 190.036
+    },
+    {
+      "frame": 10829,
+      "error": 14.027,
+      "baseline_error": 16.32,
+      "motion_mean": 0.0,
+      "texture_within_blocks": 1353.031,
+      "t_s": 187.586
+    },
+    {
+      "frame": 10794,
+      "error": 13.9894,
+      "baseline_error": 13.9894,
+      "motion_mean": 0.0,
+      "texture_within_blocks": 1327.418,
+      "t_s": 187.003
+    },
+    {
+      "frame": 10836,
+      "error": 13.987,
+      "baseline_error": 16.6222,
+      "motion_mean": 0.0,
+      "texture_within_blocks": 1355.274,
+      "t_s": 187.703
+    },
+    {
+      "frame": 10969,
+      "error": 13.9798,
+      "baseline_error": 15.2651,
+      "motion_mean": 0.0,
+      "texture_within_blocks": 1339.529,
+      "t_s": 189.92
+    },
+    {
+      "frame": 10801,
+      "error": 13.9778,
+      "baseline_error": 14.666,
+      "motion_mean": 0.0,
+      "texture_within_blocks": 1322.247,
+      "t_s": 187.119
+    },
+    {
+      "frame": 10843,
+      "error": 13.9458,
+      "baseline_error": 16.8565,
+      "motion_mean": 0.0,
+      "texture_within_blocks": 1360.999,
+      "t_s": 187.819
+    },
+    {
+      "frame": 10997,
+      "error": 13.8932,
+      "baseline_error": 14.9032,
+      "motion_mean": 0.995,
+      "texture_within_blocks": 1323.742,
+      "t_s": 190.386
+    },
+    {
+      "frame": 10780,
+      "error": 13.882,
+      "baseline_error": 16.8733,
+      "motion_mean": 0.0,
+      "texture_within_blocks": 1313.962,
+      "t_s": 186.769
+    },
+    {
+      "frame": 10906,
+      "error": 13.8572,
+      "baseline_error": 15.5644,
+      "motion_mean": 0.0,
+      "texture_within_blocks": 1368.046,
+      "t_s": 188.869
+    },
+    {
+      "frame": 10962,
+      "error": 13.8435,
+      "baseline_error": 15.2378,
+      "motion_mean": 0.0,
+      "texture_within_blocks": 1341.624,
+      "t_s": 189.803
+    },
+    {
+      "frame": 10850,
+      "error": 13.8241,
+      "baseline_error": 17.0092,
+      "motion_mean": 0.0,
+      "texture_within_blocks": 1364.749,
+      "t_s": 187.936
+    },
+    {
+      "frame": 10857,
+      "error": 13.808,
+      "baseline_error": 13.8221,
+      "motion_mean": 0.0,
+      "texture_within_blocks": 1365.687,
+      "t_s": 188.053
+    },
+    {
+      "frame": 11788,
+      "error": 13.801,
+      "baseline_error": 15.4715,
+      "motion_mean": 0.0,
+      "texture_within_blocks": 1166.149,
+      "t_s": 203.569
+    },
+    {
+      "frame": 10864,
+      "error": 13.7843,
+      "baseline_error": 13.9001,
+      "motion_mean": 0.0,
+      "texture_within_blocks": 1363.735,
+      "t_s": 188.169
+    },
+    {
+      "frame": 11046,
+      "error": 13.7595,
+      "baseline_error": 13.7474,
+      "motion_mean": 0.8,
+      "texture_within_blocks": 1315.203,
+      "t_s": 191.203
+    },
+    {
+      "frame": 10948,
+      "error": 13.7535,
+      "baseline_error": 14.9929,
+      "motion_mean": 0.0,
+      "texture_within_blocks": 1357.319,
+      "t_s": 189.57
+    },
+    {
+      "frame": 11004,
+      "error": 13.7459,
+      "baseline_error": 14.9451,
+      "motion_mean": 0.707,
+      "texture_within_blocks": 1317.981,
+      "t_s": 190.503
+    }
+  ],
+  "ascii_renders": [
+    {
+      "frame": 10518,
+      "t_s": 182.403,
+      "wall_time": "2026-10-21T03:22:43.086Z",
+      "file": "ascii_010518.txt",
+      "stream_file": "stream_010518.txt",
+      "stream_text": "00000000@@0000000000/00000000000000000000/00000000000000000000/00000000000@00000000/00000000000000000000/00000000000000@@0000/000000000000000@0000/0000000000000000@000/00000000000000000@00/00000000000000000000/00000000000000%1000@/00000000000000@0000@",
+      "motion_mean": 0.0
+    },
+    {
+      "frame": 10519,
+      "t_s": 182.419,
+      "wall_time": "2026-10-21T03:22:43.102Z",
+      "file": "ascii_010519.txt",
+      "stream_file": "stream_010519.txt",
+      "stream_text": "00000000@@0000000000/00000000000000000000/00000000000000000000/00000000000@00000000/00000000000000000000/00000000000000@@0000/000000000000000@0000/0000000000000000@000/00000000000000000@00/00000000000000000000/00000000000000%1000@/00000000000000@0000@",
+      "motion_mean": 5.141
+    },
+    {
+      "frame": 10520,
+      "t_s": 182.436,
+      "wall_time": "2026-10-21T03:22:43.118Z",
+      "file": "ascii_010520.txt",
+      "stream_file": "stream_010520.txt",
+      "stream_text": "000000000@00@0000000/00000000000000000000/00000000000000000000/00000000000@00000000/00000000001000000000/000000000000000@0000/000000000000000@0000/0000000000000000@000/01000000000000000@00/00000000000000000000/00000000000000%1000%/00000000000000@0000@",
+      "motion_mean": 0.0
+    },
+    {
+      "frame": 10521,
+      "t_s": 182.453,
+      "wall_time": "2026-10-21T03:22:43.136Z",
+      "file": "ascii_010521.txt",
+      "stream_file": "stream_010521.txt",
+      "stream_text": "000000000@00@0000000/00000000000000000000/00000000000000000000/00000000000@00000000/00000000001000000000/000000000000000@0000/000000000000000@0000/0000000000000000@000/01000000000000000@00/00000000000000000000/00000000000000%1000%/00000000000000@0000@",
+      "motion_mean": 0.0
+    }
+  ],
+  "elapsed_s": 5.87,
+  "note": "the renders and the reference PNGs are large and live in the run's --out directory; the numbers and the encoding are here"
+}
