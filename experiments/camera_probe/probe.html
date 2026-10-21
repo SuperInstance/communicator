@@ -1,0 +1,693 @@
+<!DOCTYPE html>
+<!--
+probe.html -- the camera-exposure probe.
+
+WHY THIS PAGE EXISTS.
+
+Casey's front camera comes up REALLY dark in Chrome on this machine. The
+capture page shows it live, and its own luma chip reads it, but the page
+cannot answer the question that matters: WHICH CONSTRAINT SET should the
+product ship? Two plausible fixes predict opposite outcomes -- pin the
+frame rate harder (so the driver stops hunting and keeps exposure open), or
+stop pinning it (so the driver's own auto-exposure behaves as it does under
+the Windows capture stack). Reasoning picks one. Measuring picks the winner.
+
+So: one camera, a row of preset buttons, a live luma readout, and a manual
+slider panel over every capability the track exposes.
+
+THE LUMA IS THE SAME NUMBER THE TAKES CARRY.
+
+The mean is computed on a 160x96 canvas -- the capture page's own data
+canvas, the same size the pipeline records -- with the same BT.601 luma the
+capture script's cv2.COLOR_BGR2YUV_I420 luma plane uses. That is what makes
+the number comparable to the old captures on disk.
+
+THE REFERENCE NUMBERS ON THIS PAGE ARE THE CORRECTED ONES.
+
+The old captures, read at the CORRECT 19,200-byte stride:
+    A.nv12 (occupied, facing)   mean luma 105.9
+    B.nv12 (occupied, turned)   mean luma 110.2
+    empty1.nv12 (empty room)    mean luma  30.1
+
+The figures that circulated as 110.7 / 114.2 / 49.7 were read at the WRONG
+23,040-byte stride, on torn frames, and they are the numbers this repo spent
+a night correcting everywhere else. The empty room is 30, not 50. A browser
+path reading near 30 with Casey in frame is the starved case; reading near
+106 means the camera is behaving exactly as it does under the Windows stack.
+
+NO NETWORK, NO CDN, NO EXTERNAL FONTS. One file, and it talks only to the
+local probe server.
+-->
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>camera exposure probe</title>
+<style>
+  :root {
+    --bg: #0e1116; --panel: #161b22; --line: #2a313c; --ink: #e6edf3;
+    --dim: #8b949e; --good: #3fb950; --warn: #d29922; --bad: #f85149;
+    --accent: #58a6ff;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0; background: var(--bg); color: var(--ink);
+    font: 14px/1.5 ui-monospace, "Cascadia Mono", Menlo, Consolas, monospace;
+  }
+  header { padding: 14px 18px; border-bottom: 1px solid var(--line); }
+  h1 { margin: 0 0 4px; font-size: 17px; letter-spacing: .02em; }
+  .sub { color: var(--dim); font-size: 12.5px; }
+  .wrap { display: grid; grid-template-columns: minmax(430px, 560px) 1fr; gap: 16px; padding: 16px; align-items: start; }
+  @media (max-width: 1000px) { .wrap { grid-template-columns: 1fr; } }
+  .panel { background: var(--panel); border: 1px solid var(--line); border-radius: 8px; padding: 12px; margin-bottom: 14px; }
+  .panel h2 { margin: 0 0 9px; font-size: 13px; text-transform: uppercase; letter-spacing: .09em; color: var(--dim); }
+  video { width: 100%; background: #000; border-radius: 6px; display: block; }
+  .row { display: flex; gap: 8px; flex-wrap: wrap; }
+  button {
+    background: #21262d; color: var(--ink); border: 1px solid var(--line);
+    border-radius: 6px; padding: 8px 11px; font: inherit; font-size: 13px; cursor: pointer;
+  }
+  button:hover { border-color: var(--accent); }
+  button.on { background: var(--accent); color: #06121f; border-color: var(--accent); font-weight: 700; }
+  button.primary { background: #238636; border-color: #2ea043; font-weight: 700; }
+  button.primary:hover { background: #2ea043; }
+  button:disabled { opacity: .45; cursor: not-allowed; }
+  .big { font-size: 15px; padding: 10px 15px; }
+  .luma { display: flex; align-items: baseline; gap: 10px; margin: 10px 0 4px; }
+  .luma .n { font-size: 40px; font-weight: 700; letter-spacing: -.02em; }
+  .luma .u { color: var(--dim); font-size: 12.5px; }
+  .luma.low .n { color: var(--bad); }
+  .luma.ok .n { color: var(--good); }
+  .luma.mid .n { color: var(--warn); }
+  .band { height: 8px; border-radius: 4px; background: #21262d; position: relative; overflow: hidden; margin: 8px 0 3px; }
+  .band i { position: absolute; top: 0; bottom: 0; background: var(--accent); }
+  .band .mark { position: absolute; top: -3px; bottom: -3px; width: 2px; background: var(--warn); }
+  .scale { display: flex; justify-content: space-between; color: var(--dim); font-size: 11px; }
+  pre { margin: 0; font-size: 12px; line-height: 1.45; white-space: pre-wrap; word-break: break-word;
+        max-height: 320px; overflow: auto; color: #b9c4d0; }
+  table { width: 100%; border-collapse: collapse; font-size: 12.5px; }
+  th, td { text-align: left; padding: 5px 6px; border-bottom: 1px solid var(--line); vertical-align: top; }
+  th { color: var(--dim); font-weight: 600; width: 190px; }
+  .slider { margin: 9px 0 13px; }
+  .slider .lab { display: flex; justify-content: space-between; font-size: 12.5px; margin-bottom: 3px; }
+  .slider .lab b { color: var(--accent); font-weight: 700; }
+  .slider .val { color: var(--ink); }
+  input[type=range] { width: 100%; accent-color: var(--accent); }
+  select { width: 100%; background: #0d1117; color: var(--ink); border: 1px solid var(--line);
+           border-radius: 5px; padding: 5px; font: inherit; font-size: 12.5px; }
+  .note { color: var(--dim); font-size: 12px; margin: 6px 0 0; }
+  .status { padding: 8px 10px; border-radius: 6px; font-size: 12.5px; margin: 8px 0 0; display: none; }
+  .status.err { display: block; background: rgba(248,81,73,.12); border: 1px solid var(--bad); color: #ffb3ae; }
+  .status.ok { display: block; background: rgba(63,185,80,.1); border: 1px solid var(--good); color: #a5e5ac; }
+  .status.busy { display: block; background: rgba(210,153,34,.12); border: 1px solid var(--warn); color: #e8c07d; }
+  .tiny { font-size: 11.5px; color: var(--dim); }
+  code { background: #0d1117; padding: 1px 4px; border-radius: 3px; }
+</style>
+</head>
+<body>
+<header>
+  <h1>camera exposure probe &mdash; one camera, five constraint sets, numbers</h1>
+  <div class="sub">
+    Presets P0&ndash;P4 apply a constraint set to the <b>same</b> camera.
+    The luma is the mean of the 160&times;96 data frame, computed exactly as the takes compute it.
+    Sliders are built from <code>getCapabilities()</code> and applied live.
+    <b>LOG PRESET</b> samples 3&nbsp;s and writes a line to <code>results.jsonl</code>.
+  </div>
+</header>
+
+<div class="wrap">
+  <div>
+    <div class="panel">
+      <h2>live picture</h2>
+      <video id="video" playsinline muted autoplay></video>
+      <div class="luma" id="lumaBox">
+        <span class="n" id="lumaVal">&mdash;</span>
+        <span class="u" id="lumaNote">mean luma of the 160&times;96 data frame</span>
+      </div>
+      <div class="band"><i id="bandFill"></i><span class="mark" id="markOcc" style="left:41.4%"></span><span class="mark" id="markEmpty" style="left:11.8%"></span></div>
+      <div class="scale"><span>0</span><span>empty room 30</span><span>occupied 106&ndash;110</span><span>255</span></div>
+      <p class="note">
+        The two marks are the <b>corrected</b> reference luma of the old captures
+        (A 105.9, B 110.2, empty room 30.1, read at the correct 19,200-byte stride).
+        The widely-quoted 110.7 / 114.2 / 49.7 were read at the wrong stride, on torn frames.
+      </p>
+      <canvas id="dataCanvas" width="160" height="96" style="width:160px;height:96px;border:1px solid var(--line);border-radius:4px;margin-top:8px"></canvas>
+      <div class="tiny" style="margin-top:4px">the data canvas &mdash; 160&times;96, what the pipeline sees</div>
+    </div>
+
+    <div class="panel">
+      <h2>presets</h2>
+      <div class="row" id="presetRow"></div>
+      <p class="note" id="presetNote">Pick a preset. The first request asks for camera permission; after that the device is pinned so every preset measures the SAME camera.</p>
+      <div class="status" id="status"></div>
+    </div>
+
+    <div class="panel">
+      <h2>log a measurement</h2>
+      <div class="row">
+        <button class="primary big" id="logBtn">LOG PRESET</button>
+        <button class="big" id="stopBtn" disabled>stop camera</button>
+      </div>
+      <p class="note">
+        Samples the luma for 3&nbsp;s, then POSTs the preset, the track's
+        <code>getSettings()</code>, a capabilities summary and the luma
+        mean/min/max to the probe server, which appends to
+        <code>experiments/camera_probe/results.jsonl</code>.
+        If any slider has been moved, the record is logged as <b>P-manual</b>
+        and carries the slider values as numbers.
+      </p>
+      <div class="status" id="logStatus"></div>
+    </div>
+  </div>
+
+  <div>
+    <div class="panel">
+      <h2>manual panel &mdash; every capability this track exposes</h2>
+      <div id="sliders"><p class="note">Start a camera to see the capabilities dump.</p></div>
+      <div class="row" style="margin-top:8px">
+        <button id="resetSliders">reset sliders</button>
+        <button id="applySliders">apply slider values now</button>
+      </div>
+      <p class="note">Sliders apply live. <b>exposureTime</b> is in seconds (the range is what the driver reports); the number in brackets is milliseconds.</p>
+    </div>
+
+    <div class="panel">
+      <h2>track &mdash; getSettings()</h2>
+      <pre id="settingsDump">{}</pre>
+    </div>
+
+    <div class="panel">
+      <h2>capabilities &mdash; getCapabilities()</h2>
+      <pre id="capsDump">{}</pre>
+    </div>
+
+    <div class="panel">
+      <h2>the constraint set in force</h2>
+      <pre id="constraintsDump">{}</pre>
+      <h2 style="margin-top:14px">last log record</h2>
+      <pre id="lastLog">{}</pre>
+    </div>
+  </div>
+</div>
+
+<script>
+"use strict";
+
+const FPS_REF = 30;
+const DATA_W = 160, DATA_H = 96;
+const SAMPLE_MS = 3000;
+
+const videoEl = document.getElementById("video");
+const capCanvas = document.getElementById("dataCanvas");
+const cctx = capCanvas.getContext("2d", { willReadFrequently: true });
+
+let stream = null;
+let track = null;
+let deviceId = null;          // pinned after the first successful request
+let currentPreset = null;
+let baseConstraints = { video: true };
+let sliderState = {};         // capability -> value the user dialled in
+let sliderTouched = false;
+let capsCache = null;
+let logging = false;
+let logSamples = null;
+let logTimer = null;
+
+/* -- the presets ---------------------------------------------------------
+   Each entry either carries a getUserMedia constraint set, or an
+   `apply` step that constrains the EXISTING track in place. The brief asks
+   for constraint sets applied to the SAME camera, so the device is pinned
+   after the first request and every later request asks for that device. */
+const PRESETS = {
+  P0: {
+    label: "P0 shipped",
+    hint: "{width: ideal 640, height: ideal 480, frameRate: ideal 30} &mdash; what the product page asks for today",
+    build: () => ({ video: { width: { ideal: 640 }, height: { ideal: 480 }, frameRate: { ideal: 30 } } })
+  },
+  P1: {
+    label: "P1 bare",
+    hint: "{video: true} semantics &mdash; no constraints beyond the device",
+    build: () => ({ video: deviceId ? { deviceId: { exact: deviceId } } : true })
+  },
+  P2: {
+    label: "P2 continuous",
+    hint: "defaults + exposureMode: continuous via applyConstraints (caught if unsupported)",
+    build: () => ({ video: deviceId ? { deviceId: { exact: deviceId } } : true }),
+    apply: async () => {
+      await track.applyConstraints({ advanced: [{ exposureMode: "continuous" }] });
+      return "exposureMode=continuous applied";
+    }
+  },
+  P3: {
+    label: "P3 720p no fps pin",
+    hint: "{width: ideal 1280, height: ideal 720} &mdash; no frameRate constraint at all",
+    build: () => ({ video: { width: { ideal: 1280 }, height: { ideal: 720 } } })
+  },
+  P4: {
+    label: "P4 max exposure",
+    hint: "adaptive, from this camera's own capabilities: unpinned fps, and the longest exposure the driver will give",
+    build: () => ({ video: deviceId ? { deviceId: { exact: deviceId } } : true }),
+    apply: async () => {
+      // The best idea the capabilities dump supports, decided AT CLICK TIME
+      // from what this camera actually exposes.
+      const caps = capsCache || (track.getCapabilities ? track.getCapabilities() : {});
+      const notes = [];
+      const c = { advanced: [{}] };
+      if (caps.exposureTime && typeof caps.exposureTime === "object" &&
+          typeof caps.exposureTime.max === "number") {
+        // Longest exposure the driver allows: the sensor open as far as it
+        // will go, which is the way to prove whether it CAN be bright.
+        const t = caps.exposureTime.max;
+        c.advanced[0].exposureTime = t;
+        notes.push("exposureTime=max (" + t.toFixed(4) + "s)");
+      }
+      if (caps.exposureMode && Array.isArray(caps.exposureMode) &&
+          caps.exposureMode.includes("manual")) {
+        c.advanced[0].exposureMode = "manual";
+        notes.push("exposureMode=manual");
+      } else {
+        notes.push("exposureMode=manual NOT exposed by this camera");
+      }
+      if (caps.exposureCompensation && typeof caps.exposureCompensation === "object" &&
+          typeof caps.exposureCompensation.max === "number") {
+        c.advanced[0].exposureCompensation = caps.exposureCompensation.max;
+        notes.push("exposureCompensation=max (" + caps.exposureCompensation.max + ")");
+      }
+      if (caps.frameRate && typeof caps.frameRate === "object" &&
+          typeof caps.frameRate.max === "number") {
+        c.frameRate = { ideal: caps.frameRate.max };
+        notes.push("frameRate=ideal " + caps.frameRate.max);
+      }
+      await track.applyConstraints(c);
+      return notes.join("; ");
+    }
+  }
+};
+
+/* -- helpers ------------------------------------------------------------ */
+function status(el, kind, msg) {
+  el.className = "status" + (kind ? " " + kind : "");
+  el.innerHTML = msg;
+}
+function dump(el, obj) { el.textContent = JSON.stringify(obj, null, 2); }
+
+function stopStream() {
+  if (stream) { stream.getTracks().forEach(t => t.stop()); }
+  stream = null; track = null;
+}
+
+/* -- the luma, computed exactly as the capture page computes it ---------- */
+function readLuma() {
+  if (!track || videoEl.readyState < 2) return null;
+  cctx.drawImage(videoEl, 0, 0, DATA_W, DATA_H);
+  const d = cctx.getImageData(0, 0, DATA_W, DATA_H).data;
+  let sum = 0, mn = 255, mx = 0, black = 0, nonBlack = 0;
+  for (let i = 0; i < d.length; i += 4) {
+    // the capture page's lumaFromImage: BT.601, clamped, rounded
+    let y = 0.299 * d[i] + 0.587 * d[i + 1] + 0.114 * d[i + 2];
+    y = y > 255 ? 255 : y < 0 ? 0 : Math.round(y);
+    sum += y; if (y < mn) mn = y; if (y > mx) mx = y;
+    // "black" in the digital sense: every channel under 4
+    if (d[i] < 4 && d[i + 1] < 4 && d[i + 2] < 4) black++;
+    else nonBlack++;
+  }
+  const n = d.length / 4;
+  return { mean: sum / n, min: mn, max: mx,
+           black_fraction: black / n, nonblack: nonBlack };
+}
+
+/* -- the live loop ------------------------------------------------------ */
+function tick() {
+  const L = readLuma();
+  if (L) {
+    const box = document.getElementById("lumaBox");
+    const val = document.getElementById("lumaVal");
+    val.textContent = L.mean.toFixed(1);
+    box.className = "luma " + (L.mean < 45 ? "low" : L.mean < 85 ? "mid" : "ok");
+    document.getElementById("bandFill").style.left = "0%";
+    document.getElementById("bandFill").style.width = (L.mean / 255 * 100) + "%";
+    // A stream that is digitally BLACK is not a dark room: it is a camera
+    // that is not delivering an image. Say so, loudly, because the fix for
+    // that is nothing to do with constraint sets.
+    const note = document.getElementById("lumaNote");
+    if (L.black_fraction > 0.98) {
+      note.innerHTML = "<b style='color:#f85149'>the stream is digitally BLACK " +
+        "(" + (100 * L.black_fraction).toFixed(1) + "% of pixels at zero) " +
+        "&mdash; the camera is not delivering an image. Close every other tab " +
+        "or app that may hold it, and check the lens is not covered.</b>";
+    } else if (L.mean < 45) {
+      note.innerHTML = "mean luma of the 160&times;96 data frame &mdash; " +
+        "this is a real but dark image (" +
+        (100 * L.black_fraction).toFixed(1) + "% pure black)";
+    } else {
+      note.innerHTML = "mean luma of the 160&times;96 data frame";
+    }
+    if (logging && logSamples) {
+      logSamples.frames.push(L.mean);
+      logSamples.pmin = Math.min(logSamples.pmin, L.min);
+      logSamples.pmax = Math.max(logSamples.pmax, L.max);
+      logSamples.sum += L.mean;
+      logSamples.n++;
+      logSamples.black += L.black_fraction;
+    }
+  }
+  if (track && track.getSettings) {
+    dump(document.getElementById("settingsDump"), track.getSettings());
+  }
+  requestAnimationFrame(tick);
+}
+requestAnimationFrame(tick);
+
+/* -- capabilities -> sliders ------------------------------------------- */
+function isRange(v) {
+  return v && typeof v === "object" && !Array.isArray(v) &&
+         typeof v.min === "number" && typeof v.max === "number" && v.max > v.min;
+}
+function fmtVal(key, v) {
+  if (key === "exposureTime" && typeof v === "number") {
+    // The WebRTC spec says exposureTime is in SECONDS. Some devices report
+    // MILLISECONDS instead (Chrome's fake device reports 10..100, which can
+    // only be ms). Say which one this looks like, rather than printing
+    // "50.0000 s" for a device that means 50 ms.
+    if (v >= 1) return v.toFixed(1) + " ms  [reported in ms]";
+    return v.toFixed(4) + " s  [" + Math.round(v * 1000) + " ms]";
+  }
+  if (typeof v === "number") return String(v);
+  return String(v);
+}
+
+function buildSliders(caps) {
+  const host = document.getElementById("sliders");
+  host.innerHTML = "";
+  const settings = (track && track.getSettings) ? track.getSettings() : {};
+  let any = false;
+
+  for (const key of Object.keys(caps)) {
+    const cap = caps[key];
+    const label = document.createElement("div");
+    label.className = "slider";
+    const lab = document.createElement("div");
+    lab.className = "lab";
+    const name = document.createElement("span");
+    name.textContent = key;
+    const val = document.createElement("span");
+    val.className = "val";
+    lab.appendChild(name); lab.appendChild(val);
+    label.appendChild(lab);
+
+    if (isRange(cap)) {
+      any = true;
+      const input = document.createElement("input");
+      input.type = "range";
+      const step = (typeof cap.step === "number" && cap.step > 0) ? cap.step
+                                                            : (cap.max - cap.min) / 400;
+      input.min = cap.min; input.max = cap.max; input.step = step;
+      const cur = (key in sliderState) ? sliderState[key]
+                  : (typeof settings[key] === "number" ? settings[key]
+                     : (cap.min + cap.max) / 2);
+      input.value = cur;
+      val.textContent = fmtVal(key, cur);
+      input.addEventListener("input", () => {
+        const v = parseFloat(input.value);
+        sliderState[key] = v;
+        sliderTouched = true;
+        val.textContent = fmtVal(key, v);
+      });
+      input.addEventListener("change", () => {
+        applySliders().catch(e => status(document.getElementById("status"),
+          "err", "applyConstraints failed: " + e));
+      });
+      label.appendChild(input);
+      const rng = document.createElement("div");
+      rng.className = "scale";
+      rng.innerHTML = "<span>min " + cap.min + "</span><span>max " + cap.max +
+                      "</span>";
+      label.appendChild(rng);
+      host.appendChild(label);
+    } else if (Array.isArray(cap)) {
+      any = true;
+      const sel = document.createElement("select");
+      for (const opt of cap) {
+        const o = document.createElement("option");
+        o.value = opt; o.textContent = opt;
+        if (settings[key] === opt) o.selected = true;
+        sel.appendChild(o);
+      }
+      sel.addEventListener("change", () => {
+        sliderState[key] = sel.value;
+        sliderTouched = true;
+        applySliders().catch(e => status(document.getElementById("status"),
+          "err", "applyConstraints failed: " + e));
+      });
+      label.appendChild(sel);
+      host.appendChild(label);
+    } else if (typeof cap === "boolean") {
+      any = true;
+      const cb = document.createElement("input");
+      cb.type = "checkbox";
+      cb.checked = !!settings[key];
+      cb.addEventListener("change", () => {
+        sliderState[key] = cb.checked;
+        sliderTouched = true;
+        applySliders().catch(e => status(document.getElementById("status"),
+          "err", "applyConstraints failed: " + e));
+      });
+      label.appendChild(cb);
+      host.appendChild(label);
+    }
+  }
+  if (!any) {
+    host.innerHTML = '<p class="note">This track exposes no ranged capabilities. ' +
+      'The full dump is on the right.</p>';
+  }
+  return any;
+}
+
+async function applySliders() {
+  if (!track) throw new Error("no camera track");
+  const keys = Object.keys(sliderState);
+  if (!keys.length) return "nothing to apply";
+  const base = (baseConstraints && typeof baseConstraints.video === "object")
+                 ? Object.assign({}, baseConstraints.video) : {};
+  const c = Object.assign({}, base);
+  const advanced = [];
+  for (const k of keys) {
+    c[k] = sliderState[k];
+    advanced.push({ [k]: sliderState[k] });
+  }
+  c.advanced = advanced;
+  await track.applyConstraints(c);
+  dump(document.getElementById("constraintsDump"),
+       { applied: c, resulting: track.getSettings() });
+  return "applied " + keys.join(", ");
+}
+
+/* -- capabilities summary ------------------------------------------------ */
+function capsSummary(caps) {
+  const out = {};
+  const want = ["width", "height", "frameRate", "exposureTime",
+                "exposureCompensation", "exposureMode", "gain", "iso",
+                "brightness", "colorTemperature", "whiteBalanceMode",
+                "focusMode", "pan", "tilt", "zoom"];
+  for (const k of want) {
+    if (!(k in caps)) continue;
+    const v = caps[k];
+    if (isRange(v)) out[k] = { min: v.min, max: v.max, step: v.step || null };
+    else if (Array.isArray(v)) out[k] = v;
+    else out[k] = v;
+  }
+  return out;
+}
+
+/* -- starting the camera ------------------------------------------------ */
+async function openCamera(constraints) {
+  status(document.getElementById("status"), "busy", "requesting the camera&hellip;");
+  stopStream();
+  stream = await navigator.mediaDevices.getUserMedia(constraints);
+  videoEl.srcObject = stream;
+  await videoEl.play();
+  track = stream.getVideoTracks()[0];
+  const st = track.getSettings ? track.getSettings() : {};
+  if (!deviceId && st.deviceId) deviceId = st.deviceId;
+  capsCache = track.getCapabilities ? track.getCapabilities() : {};
+  dump(document.getElementById("settingsDump"), st);
+  dump(document.getElementById("capsDump"), capsCache);
+  dump(document.getElementById("constraintsDump"),
+       { requested: constraints, resulting: st });
+  buildSliders(capsCache);
+  document.getElementById("stopBtn").disabled = false;
+  status(document.getElementById("status"), "ok",
+    "camera live &mdash; device " + (st.deviceId || "(id not reported)") +
+    " &mdash; " + (track.label || ""));
+}
+
+async function applyPreset(name) {
+  const p = PRESETS[name];
+  currentPreset = name;
+  for (const b of document.querySelectorAll("#presetRow button")) {
+    b.classList.toggle("on", b.dataset.p === name);
+  }
+  document.getElementById("presetNote").innerHTML =
+    "<b>" + p.label + "</b> &mdash; " + p.hint;
+  sliderTouched = false;
+  sliderState = {};
+  try {
+    if (p.apply) {
+      // a constraint set on the EXISTING track
+      if (!track) await openCamera(p.build());
+      baseConstraints = p.build();
+      const what = await p.apply();
+      dump(document.getElementById("constraintsDump"),
+           { requested: baseConstraints, applied_by: "applyConstraints",
+             result: track.getSettings(), note: what });
+      status(document.getElementById("status"), "ok",
+             p.label + " applied to the live track: " + what);
+    } else {
+      baseConstraints = p.build();
+      await openCamera(baseConstraints);
+      status(document.getElementById("status"), "ok", p.label + " requested.");
+    }
+  } catch (e) {
+    status(document.getElementById("status"), "err",
+      p.label + " FAILED: " + (e && e.name ? e.name + ": " : "") + e);
+  }
+}
+
+/* -- logging ------------------------------------------------------------ */
+function startLog() {
+  if (!track) { status(document.getElementById("logStatus"), "err", "no camera"); return; }
+  logging = true;
+  logSamples = { frames: [], sum: 0, n: 0, pmin: 255, pmax: 0, black: 0 };
+  document.getElementById("logBtn").disabled = true;
+  status(document.getElementById("logStatus"), "busy", "sampling 3 s&hellip;");
+  logTimer = setTimeout(finishLog, SAMPLE_MS);
+}
+
+async function finishLog() {
+  logging = false;
+  clearTimeout(logTimer);
+  const s = logSamples;
+  document.getElementById("logBtn").disabled = false;
+  if (!s || !s.n) {
+    status(document.getElementById("logStatus"), "err", "no frames sampled");
+    return;
+  }
+  const mean = s.sum / s.n;
+  const fmin = Math.min.apply(null, s.frames);
+  const fmax = Math.max.apply(null, s.frames);
+  const settings = track.getSettings ? track.getSettings() : {};
+  const caps = capsCache || {};
+
+  const record = {
+    preset: sliderTouched ? "P-manual" : (currentPreset || "unknown"),
+    preset_requested: currentPreset,
+    manual: sliderTouched ? Object.assign({}, sliderState) : null,
+    constraints: baseConstraints,
+    settings: settings,
+    capabilities_summary: capsSummary(caps),
+    capabilities_full: caps,
+    luma_mean: mean,
+    luma_min: fmin,
+    luma_max: fmax,
+    luma_pixel_min: s.pmin,
+    luma_pixel_max: s.pmax,
+    luma_black_fraction: s.n ? s.black / s.n : null,
+    stream_is_black: s.n ? (s.black / s.n) > 0.98 : null,
+    luma_frames_sampled: s.n,
+    luma_frame_means: s.frames.map(v => Math.round(v * 1000) / 1000),
+    device_id: settings.deviceId || null,
+    device_label: track.label || null,
+    user_agent: navigator.userAgent,
+    ts: new Date().toISOString()
+  };
+
+  status(document.getElementById("logStatus"), "busy", "posting&hellip;");
+  try {
+    const res = await fetch("/log", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(record)
+    });
+    const j = await res.json();
+    dump(document.getElementById("lastLog"), record);
+    status(document.getElementById("logStatus"), "ok",
+      "logged <b>" + record.preset + "</b> &mdash; luma mean " + mean.toFixed(1) +
+      " (frames " + fmin.toFixed(1) + "&ndash;" + fmax.toFixed(1) + "), " +
+      (j.records || "?") + " records in results.jsonl");
+  } catch (e) {
+    status(document.getElementById("logStatus"), "err", "post failed: " + e);
+  }
+}
+
+/* -- wiring ------------------------------------------------------------- */
+const row = document.getElementById("presetRow");
+for (const name of Object.keys(PRESETS)) {
+  const b = document.createElement("button");
+  b.textContent = name;
+  b.dataset.p = name;
+  b.title = PRESETS[name].hint;
+  b.addEventListener("click", () => applyPreset(name));
+  row.appendChild(b);
+}
+document.getElementById("logBtn").addEventListener("click", startLog);
+document.getElementById("stopBtn").addEventListener("click", () => {
+  stopStream();
+  document.getElementById("stopBtn").disabled = true;
+  status(document.getElementById("status"), "", "");
+});
+document.getElementById("resetSliders").addEventListener("click", () => {
+  sliderState = {}; sliderTouched = false;
+  buildSliders(capsCache || {});
+});
+document.getElementById("applySliders").addEventListener("click", () => {
+  applySliders().then(w => status(document.getElementById("status"), "ok", w))
+    .catch(e => status(document.getElementById("status"), "err", String(e)));
+});
+
+// The first click asks for permission and pins the device.
+row.querySelector('button[data-p="P0"]').classList.add("on");
+
+/* -- automation hooks -----------------------------------------------------
+   ?preset=P0..P4   apply that preset on load
+   ?log=1            after the preset settles, log a measurement
+   ?selftest=1      P0 + move the first slider + apply it + log
+
+   These exist so the probe can be driven from a command line -- which is how
+   it gets VERIFIED without a camera: headless Chrome with
+   --use-fake-device-for-media-stream exercises the whole chain (getUserMedia,
+   getCapabilities, the slider panel, applyConstraints, the POST) against a
+   synthetic device. The fake device's numbers are NOT a measurement of the
+   camera; they are a measurement of the probe. */
+const params = new URLSearchParams(location.search);
+
+async function autoRun() {
+  const selftest = params.get("selftest") === "1";
+  const wantLog = selftest || params.get("log") === "1";
+  const name = params.get("preset");
+  await applyPreset(PRESETS[name] ? name : "P0");
+  await new Promise(r => setTimeout(r, 1200));
+
+  if (selftest) {
+    // exercise the slider path: move the first ranged capability and apply
+    const inputs = document.querySelectorAll('#sliders input[type=range]');
+    if (inputs.length) {
+      const el = inputs[0];
+      const min = parseFloat(el.min), max = parseFloat(el.max);
+      const v = min + (max - min) * 0.5;
+      el.value = v;
+      el.dispatchEvent(new Event("input"));
+      await applySliders().catch(e => status(document.getElementById("status"),
+        "err", "selftest applyConstraints failed: " + e));
+      document.getElementById("presetNote").innerHTML +=
+        " <b>[selftest]</b> moved " + Object.keys(sliderState).join(",");
+    }
+    await new Promise(r => setTimeout(r, 400));
+  }
+  if (wantLog) startLog();
+}
+if (params.get("preset") || params.get("log") || params.get("selftest")) {
+  setTimeout(autoRun, 400);
+}
+</script>
+</body>
+</html>
