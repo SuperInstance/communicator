@@ -300,12 +300,25 @@ def _read_luma_stream(session_dir: Path, meta: dict | None = None):
 
     # 2. the declared raw-luma geometry
     lmeta = meta.get("luma")
+    declared_n = meta.get("n_frames")
     force = str(meta.get("luma_layout", "")).lower()
-    if isinstance(lmeta, dict) and force != "nv12":
-        w = int(lmeta.get("width", FRAME_W) or FRAME_W)
-        h = int(lmeta.get("height", FRAME_H) or FRAME_H)
-        fb = int(lmeta.get("frame_bytes", w * h) or w * h)
-        if fb == w * h and fb > 0:
+    if force != "nv12":
+        w, h = FRAME_W, FRAME_H
+        fb = FRAME_W * FRAME_H
+        declared_geom = isinstance(lmeta, dict)
+        if declared_geom:
+            w = int(lmeta.get("width", FRAME_W) or FRAME_W)
+            h = int(lmeta.get("height", FRAME_H) or FRAME_H)
+            fb = int(lmeta.get("frame_bytes", w * h) or w * h)
+        # The metadata's own frame count gives the file's expected size
+        # EXACTLY, which is a content check that needs no filename: n frames
+        # of raw luma are n x 15,360 bytes and nothing else. A session whose
+        # metadata omits the luma block is still readable this way.
+        expected = None
+        if (isinstance(declared_n, int) and not isinstance(declared_n, bool)
+                and declared_n > 0 and fb > 0):
+            expected = declared_n * fb
+        if declared_geom or expected is not None:
             # a file whose NAME says luma first, then the rest
             cands = [c for c in sorted(session_dir.iterdir())
                      if c.is_file() and "luma" in c.name.lower()]
@@ -318,8 +331,16 @@ def _read_luma_stream(session_dir: Path, meta: dict | None = None):
                     size = cand.stat().st_size
                 except OSError:
                     continue
-                if size < fb * 2 or size % fb:
-                    continue
+                if expected is not None:
+                    if size != expected:
+                        # it may still be the luma stream, TRUNCATED against
+                        # the metadata -- read it, and let the frame-count
+                        # check say so, rather than reporting nothing found
+                        if size < fb or size % fb:
+                            continue
+                else:
+                    if size < fb * 2 or size % fb:
+                        continue
                 data = np.frombuffer(cand.read_bytes(), dtype=np.uint8)
                 n = len(data) // fb
                 arr = data[: n * fb].reshape(n, h, w)
@@ -1609,6 +1630,114 @@ def selftest() -> int:
         check("and a wrong sample rate is reported too",
               any("48000" in w and "44100" in w for w in sess4.warnings), True)
 
+    # 10. the HARVESTER: a batch pass over a corpus's free sessions
+    with tempfile.TemporaryDirectory() as td:
+        corpus = Path(td) / "corpus"
+        sessions = corpus / "free_sessions"
+        sessions.mkdir(parents=True)
+        report_path = Path(td) / "HARVEST-REPORT.md"
+
+        def make_session(name: str, n: int, frames: int = 60):
+            d = sessions / name
+            d.mkdir(parents=True)
+            luma = np.full((frames, FRAME_H, FRAME_W), 80, dtype=np.uint8)
+            luma[:, 30:60, 40:100] = 180
+            luma[frames // 2:, 30:60, 40:100] = 190
+            (d / "luma.raw").write_bytes(luma.tobytes())
+            (d / "timestamps.json").write_text(json.dumps({
+                "frame_offsets_ms": [round(i * 1000.0 / 30.0, 1)
+                                     for i in range(frames)]}))
+            (d / "meta.json").write_text(json.dumps({
+                "tool": "browser_free_record", "n_frames": frames,
+                "luma": {"width": FRAME_W, "height": FRAME_H,
+                         "frame_bytes": FRAME_W * FRAME_H},
+                "audio": {"sample_rate": 48000, "samples": int(n * 1600)}}))
+            wavio.write_wav(d / "audio.wav", [0.0] * int(n * 1600), 48000)
+            return d
+
+        make_session("1758000001", 2 * 16000)
+        # A session built from the REAL capture, when it is on this machine.
+        # The synthetic luma has no face in it -- MediaPipe finds no face in
+        # a rectangle -- so only a real frame can prove that the harvester
+        # writes TAKES and not merely sessions. Where the capture is not
+        # present, the take-writing checks are skipped rather than faked.
+        real_capture = Path("/mnt/c/proart_capture/A.nv12")
+        have_real = real_capture.is_file()
+        if have_real:
+            d = sessions / "1758000002"
+            d.mkdir(parents=True)
+            luma, _ = nv12.read_luma(real_capture, width=FRAME_W, height=FRAME_H)
+            frames = len(luma)
+            (d / "luma.raw").write_bytes(luma.astype(np.uint8).tobytes())
+            (d / "timestamps.json").write_text(json.dumps({
+                "frame_offsets_ms": [round(i * 1000.0 / 20.0, 1)
+                                     for i in range(frames)]}))
+            (d / "meta.json").write_text(json.dumps({
+                "tool": "browser_free_record", "n_frames": frames,
+                "luma": {"width": FRAME_W, "height": FRAME_H,
+                         "frame_bytes": FRAME_W * FRAME_H},
+                "audio": {"sample_rate": 48000, "samples": 480000}}))
+            wavio.write_wav(d / "audio.wav", [0.0] * 480000, 48000)
+        else:
+            make_session("1758000002", 2 * 16000)
+        # and one that is being written right now: its metadata promises more
+        # frames than its luma holds
+        broken = sessions / "1758000003"
+        broken.mkdir()
+        (broken / "luma.raw").write_bytes(
+            np.full((10, FRAME_H, FRAME_W), 80, dtype=np.uint8).tobytes())
+        (broken / "timestamps.json").write_text(json.dumps({
+            "frame_offsets_ms": [round(i * 1000.0 / 30.0, 1)
+                                 for i in range(10)]}))
+        (broken / "meta.json").write_text(json.dumps({
+            "tool": "browser_free_record", "n_frames": 900,
+            "luma": {"width": FRAME_W, "height": FRAME_H,
+                     "frame_bytes": FRAME_W * FRAME_H},
+            "audio": {"sample_rate": 48000, "samples": 1000}}))
+        wavio.write_wav(broken / "audio.wav", [0.0] * 1000, 48000)
+
+        run1 = harvest(corpus, report_path=report_path, min_segment_s=1.0)
+        check("three sessions are found", run1["sessions_found"], 3)
+        check("two are harvested", run1["sessions_new"], 2)
+        check("one is left for the next pass", run1["sessions_failed"], 1)
+        check("the report is written", report_path.is_file(), True)
+        check("and it has a run section",
+              report_path.read_text().count("## Run "), 1)
+
+        # the second pass must not re-harvest what is already done
+        run2 = harvest(corpus, report_path=report_path, min_segment_s=1.0)
+        check("the second pass harvests nothing new",
+              run2["sessions_new"], 0)
+        check("and skips the ones already done",
+              run2["sessions_skipped"], 2)
+        check("and still retries the broken one",
+              run2["sessions_failed"], 1)
+
+        # the derived takes are in their own corpus root, with the SESSION's
+        # stamp on every one of them
+        derived = corpus / DERIVED_DIR
+        check("the derived corpus root exists", derived.is_dir(), True)
+        stems = sorted(p.name for p in derived.glob("*.json")
+                       if not p.name.endswith("_timing.json"))
+        if have_real:
+            check("and it holds take metadata", len(stems) > 0, True)
+            stamps = set()
+            for s in stems:
+                m = json.loads((derived / s).read_text())
+                stamps.add(m["timestamp"])
+            check("every take carries its session's stamp",
+                  stamps, {1758000002})
+        else:
+            print("  [skip] the take-writing checks: /mnt/c/proart_capture "
+                  "is not on this machine")
+        check("the state file is out of the gate's way",
+              (corpus / HARVEST_DIR / HARVEST_STATE).is_file(), True)
+        check("and the gate does not see it as a take",
+              len(list(corpus.glob("*.json"))), 0)
+        gate = run_gate(derived)
+        check("the derived corpus passes the gate",
+              gate.get("n_failed"), 0)
+
     print("-" * 60)
     if failures:
         print(f"SELFTEST FAILED: {len(failures)} check(s)")
@@ -1617,6 +1746,504 @@ def selftest() -> int:
         return 1
     print("SELFTEST PASSED")
     return 0
+
+
+# ============================================================================
+# the HARVESTER -- the batch pass that turns a room into a corpus
+# ============================================================================
+
+# The state file lives in its OWN subdirectory of the corpus, because the
+# gate individuates every root-level *.json as a take.
+HARVEST_DIR = "harvest"
+HARVEST_STATE = "state.json"
+# The derived takes live in their OWN corpus root. They cannot share one
+# with the script's takes: the gate's stimulus check fails any take whose
+# stimulus differs from the corpus majority, so a derived take ("free
+# session") beside a script take ("invictus") would fail one of them.
+DERIVED_DIR = "derived"
+
+
+def _harvest_state_path(corpus_dir: Path) -> Path:
+    return Path(corpus_dir) / HARVEST_DIR / HARVEST_STATE
+
+
+def _load_harvest_state(corpus_dir: Path) -> dict:
+    p = _harvest_state_path(corpus_dir)
+    if not p.is_file():
+        return {"sessions": {}, "runs": 0, "passes_with_nothing_new": 0}
+    try:
+        data = json.loads(p.read_text())
+    except Exception:  # noqa: BLE001
+        return {"sessions": {}, "runs": 0, "passes_with_nothing_new": 0}
+    if not isinstance(data, dict):
+        return {"sessions": {}, "runs": 0, "passes_with_nothing_new": 0}
+    data.setdefault("sessions", {})
+    data.setdefault("runs", 0)
+    data.setdefault("passes_with_nothing_new", 0)
+    return data
+
+
+def _save_harvest_state(corpus_dir: Path, state: dict) -> None:
+    p = _harvest_state_path(corpus_dir)
+    p.parent.mkdir(parents=True, exist_ok=True)
+    p.write_text(json.dumps(state, indent=2))
+
+
+def _session_stamp(session_dir: Path) -> int | None:
+    """The session's own stamp -- its folder name, when it is an integer.
+
+    EVERY take derived from one session carries this stamp, and that is what
+    makes the gate count one session once. The gate's session identity is
+    the take's `timestamp`; if each slice carried its own, one recording
+    would count as a dozen independent sessions, which is exactly the
+    over-counting `corpus_integrity.py` exists to prevent.
+    """
+    try:
+        return int(session_dir.name)
+    except ValueError:
+        return None
+
+
+def harvest_session(session_dir: Path, takes_dir: Path,
+                    min_segment_s: float = MIN_SEGMENT_S,
+                    min_label_s: float = MIN_LABEL_S,
+                    upscale: int = UPSCALE) -> dict:
+    """Process ONE free session into derived takes.
+
+    Returns a record of what happened, for the harvest report.
+    """
+    session_dir = Path(session_dir)
+    record = {
+        "session": str(session_dir),
+        "stamp": _session_stamp(session_dir),
+        "takes": [],
+        "skipped": [],
+        "error": None,
+        "notes": [],
+    }
+    stamp = record["stamp"]
+    if stamp is None:
+        record["error"] = ("the folder name is not an integer stamp, so the "
+                            "derived takes cannot carry a session identity")
+        return record
+
+    session = read_session(session_dir)
+    record["sources"] = session.sources
+    record["n_frames"] = session.n_frames
+    record["duration_s"] = session.duration_s
+    if session.warnings:
+        record["notes"] = list(session.warnings)
+
+    # A session folder being WRITTEN RIGHT NOW looks like an inconsistent
+    # one. Skip it, do not mark it processed, and let the next pass retry.
+    if any("n_frames is" in w for w in session.warnings):
+        record["error"] = ("the session is incomplete or inconsistent with "
+                           "its own metadata; it will be retried")
+        return record
+    if session.luma is None or session.n_frames < 2:
+        record["error"] = "no luma stream was found in the session folder"
+        return record
+
+    report = analyse_session(session, out_dir=None,
+                             min_segment_s=min_segment_s,
+                             min_label_s=min_label_s, upscale=upscale)
+    if report.get("error"):
+        record["error"] = report["error"]
+        return record
+
+    # write the takes, with the SESSION's stamp on every one of them
+    counters = {}
+    for seg in report.get("segments", []):
+        if not seg.get("usable"):
+            record["skipped"].append({
+                "start_s": seg.get("start_s"), "end_s": seg.get("end_s"),
+                "face_state": seg.get("face_state"),
+                "speech_state": seg.get("speech_state"),
+                "reason": seg.get("reason", "not usable")})
+            continue
+        cond = seg["condition"]
+        counters[cond] = counters.get(cond, 0) + 1
+        name = f"{cond}{counters[cond]}"
+        try:
+            written = write_take(takes_dir, seg, session, stamp, name)
+        except Exception as exc:  # noqa: BLE001
+            record["skipped"].append({"start_s": seg.get("start_s"),
+                                      "end_s": seg.get("end_s"),
+                                      "reason": f"could not be written: {exc}"})
+            continue
+        written.update({"condition": cond,
+                        "start_s": seg["start_s"], "end_s": seg["end_s"],
+                        "seconds": seg["duration_s"],
+                        "confidence": seg["confidence"],
+                        "face_confidence": seg["face_confidence"],
+                        "speech_confidence": seg["speech_confidence"],
+                        "face_state": seg["face_state"],
+                        "speech_state": seg["speech_state"]})
+        record["takes"].append(written)
+
+    # the session's own segment table, beside the takes
+    rich = Path(takes_dir) / "rich"
+    rich.mkdir(parents=True, exist_ok=True)
+    (rich / f"segments_{stamp}.json").write_text(json.dumps(report, indent=2))
+    record["segments_json"] = str(rich / f"segments_{stamp}.json")
+    record["segments"] = len(report.get("segments", []))
+    return record
+
+
+def harvest(corpus_dir: Path, takes_dir: Path | None = None,
+            report_path: Path | None = None,
+            min_segment_s: float = MIN_SEGMENT_S,
+            min_label_s: float = MIN_LABEL_S,
+            upscale: int = UPSCALE,
+            reharvest: bool = False,
+            append: bool = True) -> dict:
+    """One batch pass over a corpus's free sessions.
+
+    Every session folder under `<corpus>/free_sessions/` that has not been
+    harvested before is processed, its derived takes are written, and a
+    section is appended to the harvest report.
+    """
+    corpus_dir = Path(corpus_dir)
+    sessions_root = corpus_dir / "free_sessions"
+    takes_dir = Path(takes_dir) if takes_dir else corpus_dir / DERIVED_DIR
+    state = _load_harvest_state(corpus_dir)
+
+    found = sorted([p for p in sessions_root.iterdir() if p.is_dir()]) \
+        if sessions_root.is_dir() else []
+
+    run = {
+        "started_at": time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime()),
+        "corpus": str(corpus_dir),
+        "takes_dir": str(takes_dir),
+        "sessions_found": len(found),
+        "sessions_new": 0,
+        "sessions_skipped": 0,
+        "sessions_failed": 0,
+        "records": [],
+        "takes": [],
+        "gate": None,
+    }
+
+    for session_dir in found:
+        stamp = _session_stamp(session_dir)
+        key = str(stamp) if stamp is not None else session_dir.name
+        if key in state["sessions"] and not reharvest:
+            run["sessions_skipped"] += 1
+            continue
+        rec = harvest_session(session_dir, takes_dir,
+                              min_segment_s=min_segment_s,
+                              min_label_s=min_label_s, upscale=upscale)
+        run["records"].append(rec)
+        if rec["error"]:
+            run["sessions_failed"] += 1
+            # NOT recorded in the state: a failed session is retried.
+            continue
+        run["sessions_new"] += 1
+        state["sessions"][key] = {
+            "session": str(session_dir),
+            "stamp": stamp,
+            "n_frames": rec.get("n_frames"),
+            "duration_s": rec.get("duration_s"),
+            "takes": [t["stem"] for t in rec["takes"]],
+            "harvested_at": run["started_at"],
+        }
+        run["takes"].extend(rec["takes"])
+
+    # the gate over the derived corpus -- the coverage numbers are the
+    # repository's own, not a summary of my own
+    if takes_dir.is_dir():
+        gate = run_gate(takes_dir)
+        run["gate"] = {"n_takes": gate.get("n_takes"),
+                       "n_failed": gate.get("n_failed"),
+                       "ok": gate.get("ok"),
+                       "error": gate.get("error")}
+        try:
+            greport = _gate().analyse(takes_dir)
+            run["coverage"] = greport.get("coverage")
+            run["stimulus"] = greport.get("stimulus")
+        except Exception:  # noqa: BLE001
+            run["coverage"] = None
+        run["cumulative"] = _cumulative(takes_dir)
+
+    state["runs"] = int(state.get("runs", 0)) + 1
+    if run["sessions_new"] == 0:
+        state["passes_with_nothing_new"] = int(
+            state.get("passes_with_nothing_new", 0)) + 1
+    else:
+        state["passes_with_nothing_new"] = 0
+    _save_harvest_state(corpus_dir, state)
+
+    run["passes_with_nothing_new"] = state["passes_with_nothing_new"]
+    run["total_sessions_known"] = len(state["sessions"])
+    if report_path is not None and append and (run["sessions_new"] > 0
+                                               or run["sessions_failed"] > 0):
+        append_harvest_report(Path(report_path), run)
+        run["report_appended"] = str(report_path)
+    return run
+
+
+# -- the harvest report ------------------------------------------------------
+
+def _condition_table(takes: list[dict], key: str = "condition") -> str:
+    """Minutes, takes and confidences per derived condition."""
+    per: dict = {}
+    for t in takes:
+        c = t.get(key) or "-"
+        e = per.setdefault(c, {"takes": 0, "seconds": 0.0, "confs": []})
+        e["takes"] += 1
+        e["seconds"] += float(t.get("seconds", 0.0) or 0.0)
+        e["confs"].append(float(t.get("confidence", 0.0) or 0.0))
+    lines = ["| condition | takes | minutes | mean conf | min conf | max conf |",
+             "|---|---|---|---|---|---|"]
+    for c in sorted(per):
+        e = per[c]
+        confs = e["confs"] or [0.0]
+        lines.append(
+            f"| {c} | {e['takes']} | {e['seconds'] / 60.0:.2f} | "
+            f"{sum(confs) / len(confs):.3f} | {min(confs):.3f} | {max(confs):.3f} |")
+    if not per:
+        lines.append("| (none) | 0 | 0.00 | - | - | - |")
+    return "\n".join(lines)
+
+
+def _cumulative(takes_dir: Path) -> dict:
+    """What the derived corpus holds in TOTAL, read from the takes on disk.
+
+    The report is appended, so a reader needs to know the standing as well
+    as the run's delta -- and the standing is read from the corpus itself,
+    not from a running total that could drift.
+    """
+    per: dict = {}
+    sessions: set = set()
+    total_s = 0.0
+    for p in sorted(Path(takes_dir).glob("*.json")):
+        if p.name.endswith("_timing.json"):
+            continue
+        try:
+            meta = json.loads(p.read_text())
+        except Exception:  # noqa: BLE001
+            continue
+        if not isinstance(meta, dict) or "condition" not in meta:
+            continue
+        cond = str(meta.get("condition"))
+        e = per.setdefault(cond, {"takes": 0, "seconds": 0.0, "confs": [],
+                                   "sessions": set()})
+        e["takes"] += 1
+        e["seconds"] += float(meta.get("seconds", 0.0) or 0.0)
+        e["confs"].append(float((meta.get("derived") or {})
+                                .get("confidence", 0.0) or 0.0))
+        ts = meta.get("timestamp")
+        if ts is not None:
+            e["sessions"].add(str(ts))
+            sessions.add(str(ts))
+        total_s += float(meta.get("seconds", 0.0) or 0.0)
+    return {"per_condition": per, "sessions": len(sessions),
+            "minutes": total_s / 60.0}
+
+
+def format_harvest(run: dict) -> str:
+    """The section appended to the harvest report."""
+    lines = []
+    lines.append(f"## Run {run['started_at']} — {run['sessions_new']} new "
+                 f"session(s), {run['sessions_failed']} failed")
+    lines.append("")
+    lines.append(f"**corpus** `{run['corpus']}`  ")
+    lines.append(f"**derived takes** `{run['takes_dir']}`  ")
+    lines.append(f"**sessions found** {run['sessions_found']}, "
+                 f"**new** {run['sessions_new']}, "
+                 f"**already harvested** {run['sessions_skipped']}, "
+                 f"**failed** {run['sessions_failed']}  ")
+    lines.append(f"**takes written** {len(run['takes'])}  ")
+    lines.append(f"**sessions known to the harvester** "
+                 f"{run.get('total_sessions_known', 0)}")
+    lines.append("")
+
+    lines.append("### Minutes harvested this run")
+    lines.append("")
+    lines.append(_condition_table(run["takes"]))
+    lines.append("")
+
+    cum = run.get("cumulative")
+    if cum and cum.get("per_condition"):
+        lines.append("### Minutes harvested in total, from the derived corpus")
+        lines.append("")
+        rows = []
+        for c, e in sorted(cum["per_condition"].items()):
+            confs = e["confs"] or [0.0]
+            rows.append(f"| {c} | {e['takes']} | {e['seconds'] / 60.0:.2f} | "
+                        f"{sum(confs) / len(confs):.3f} | {min(confs):.3f} | "
+                        f"{max(confs):.3f} | {len(e['sessions'])} |")
+        lines.append("| condition | takes | minutes | mean conf | min conf | "
+                     "max conf | sessions |")
+        lines.append("|---|---|---|---|---|---|---|")
+        lines.extend(rows)
+        lines.append("")
+        lines.append(f"**{cum['minutes']:.2f} minutes in total, from "
+                     f"{cum['sessions']} independent session(s).**")
+        lines.append("")
+
+    gate = run.get("gate") or {}
+    if gate:
+        lines.append(f"### The gate over the derived corpus")
+        lines.append("")
+        lines.append(f"**{gate.get('n_takes')} takes, {gate.get('n_failed')} "
+                     f"failed, ok={gate.get('ok')}**")
+        lines.append("")
+
+    cov = run.get("coverage")
+    if cov:
+        lines.append("### Coverage against the target")
+        lines.append("")
+        lines.append(f"Target: **{cov.get('target_sessions_per_class')} "
+                     f"independent sessions per class** "
+                     f"({cov.get('target_source')}).")
+        lines.append("")
+        lines.append("| class | takes | distinct sessions | usable sessions | "
+                     "gap to target |")
+        lines.append("|---|---|---|---|---|")
+        for cls, c in sorted((cov.get("per_class") or {}).items()):
+            gap = c.get("gap_to_target")
+            gap_s = "-" if gap is None else str(gap)
+            lines.append(f"| {cls} | {c.get('takes')} | "
+                         f"{c.get('distinct_sessions')} | "
+                         f"{c.get('usable_sessions')} | {gap_s} |")
+        lines.append("")
+        per_cond = cov.get("per_condition") or {}
+        if per_cond:
+            lines.append("| condition | takes | distinct sessions | "
+                         "usable sessions | gap to target |")
+            lines.append("|---|---|---|---|---|")
+            for c, e in sorted(per_cond.items()):
+                gap = e.get("gap_to_target")
+                gap_s = "-" if gap is None else str(gap)
+                lines.append(f"| {c} | {e.get('takes')} | "
+                             f"{e.get('distinct_sessions')} | "
+                             f"{e.get('usable_sessions')} | {gap_s} |")
+            lines.append("")
+
+    lines.append("### What is still missing")
+    lines.append("")
+    lines.extend(_what_is_missing(run))
+    lines.append("")
+
+    failed = [r for r in run.get("records", []) if r.get("error")]
+    if failed:
+        lines.append("### Sessions that failed")
+        lines.append("")
+        for r in failed:
+            lines.append(f"- `{r['session']}` — {r['error']}")
+        lines.append("")
+
+    notes = [r for r in run.get("records", []) if r.get("notes")]
+    if notes:
+        lines.append("### Sessions with inconsistent metadata")
+        lines.append("")
+        for r in notes:
+            lines.append(f"- `{r['session']}` — {'; '.join(r['notes'])}")
+        lines.append("")
+    return "\n".join(lines)
+
+
+def _what_is_missing(run: dict) -> list[str]:
+    """What the room still has to give, said plainly."""
+    out = []
+    cov = run.get("coverage")
+    if not cov:
+        out.append("- No coverage is available yet: no derived corpus has "
+                   "been written.")
+        return out
+    target = cov.get("target_sessions_per_class", 0)
+    per_class = cov.get("per_class") or {}
+    speak = per_class.get("SPEAK", {})
+    silent = per_class.get("SILENT", {})
+    s_gap = speak.get("gap_to_target")
+    l_gap = silent.get("gap_to_target")
+    if s_gap is not None and s_gap > 0:
+        out.append(f"- **SPEAK is {s_gap} sessions short of the {target} "
+                   f"target** ({speak.get('distinct_sessions')} recorded). "
+                   f"Each free session that contains talking fills it.")
+    elif s_gap is not None:
+        out.append(f"- SPEAK has met the {target}-session target.")
+    if l_gap is not None and l_gap > 0:
+        out.append(f"- **SILENT is {l_gap} sessions short of the {target} "
+                   f"target** ({silent.get('distinct_sessions')} recorded). "
+                   f"It is the harder half: the room has to be quiet on "
+                   f"purpose.")
+    elif l_gap is not None:
+        out.append(f"- SILENT has met the {target}-session target.")
+    per_cond = cov.get("per_condition") or {}
+    prefixes: dict = {}
+    for c, e in per_cond.items():
+        if (e.get("gap_to_target") or 0) > 0:
+            p = c.rstrip("0123456789") or c
+            prefixes[p] = prefixes.get(p, 0) + 1
+    if prefixes:
+        out.append("- The conditions still short of the target: "
+                   + ", ".join(f"{p} ({prefixes[p]} take"
+                              + ("s)" if prefixes[p] != 1 else ")")
+                              for p in sorted(prefixes))
+                   + ". The target is per CLASS, so these are a record of "
+                     "which behaviour the room has been asked for, not a "
+                     "separate quota.")
+    if not run.get("takes"):
+        out.append("- **No takes were harvested in this run.** A session "
+                   "yields nothing when the face is not found (an empty "
+                   "room), when no segment is long enough, or when the "
+                   "speech sits between the two thresholds and is "
+                   "therefore ambiguous.")
+    if run.get("passes_with_nothing_new"):
+        out.append(f"- {run['passes_with_nothing_new']} consecutive pass(es) "
+                   f"found nothing new. The corpus is not growing.")
+    return out
+
+
+HARVEST_REPORT_HEADER = """# HARVEST REPORT — what the room gave us
+
+**Appended by:** `experiments/free_session_analyze.py --harvest`
+**Corpus:** `/mnt/c/proart_capture/corpus` (the capture page's output
+directory; its free sessions arrive under `free_sessions/`)
+**Derived takes:** `<corpus>/derived/` — its own corpus root, because the
+gate's stimulus check fails any take whose stimulus differs from the
+corpus majority, so a derived take cannot sit beside a script take.
+
+This report is APPENDED, once per run. Each section is one pass of the
+harvester over the corpus: the minutes it harvested per condition, the
+confidence of those labels, the coverage against the target of 63
+independent sessions per class, and what is still missing.
+
+The steady state this buys: **Casey does nothing.** The page records, the
+harvester derives, and this file says what the room produced.
+
+**The first section below is a DRY RUN**, over the captures that exist
+today: the script's A, B, C and empty1 recordings, re-encoded in the
+free-record layout so the harvester could be exercised over the room that
+is already on disk. Its numbers are real measurements of real footage. The
+minutes are small because the captures are thirty seconds each.
+
+**To run it:**
+
+```bash
+# one pass (this is the cron line)
+/home/proart/projects/gpu-venv/bin/python experiments/free_session_analyze.py \\
+    --harvest /mnt/c/proart_capture/corpus
+
+# or continuously
+/home/proart/projects/gpu-venv/bin/python experiments/free_session_analyze.py \\
+    --harvest /mnt/c/proart_capture/corpus --watch 60
+```
+
+---
+"""
+
+
+def append_harvest_report(path: Path, run: dict) -> None:
+    """Append one run's section to the harvest report."""
+    path = Path(path)
+    path.parent.mkdir(parents=True, exist_ok=True)
+    if not path.is_file():
+        path.write_text(HARVEST_REPORT_HEADER)
+    with path.open("a", encoding="utf-8") as f:
+        f.write("\n" + format_harvest(run) + "\n")
 
 
 # ============================================================================
@@ -1644,10 +2271,56 @@ def main(argv=None) -> int:
                          "derived takes and report its verdict")
     ap.add_argument("--selftest", action="store_true",
                     help="unit-test the slicer on synthetic arrays")
+    ap.add_argument("--harvest", default=None, metavar="DIR",
+                    help="batch pass over DIR/free_sessions/: derive the "
+                         "takes, write them, append the harvest report")
+    ap.add_argument("--watch", type=float, default=0.0, metavar="SECONDS",
+                    help="with --harvest, repeat the pass every SECONDS "
+                         "instead of once")
+    ap.add_argument("--takes-dir", default=None, metavar="DIR",
+                    help="where the harvested takes go "
+                         "(default: <corpus>/derived)")
+    ap.add_argument("--report", default=None, metavar="PATH",
+                    help="the harvest report to append to "
+                         "(default: docs/research/HARVEST-REPORT.md)")
+    ap.add_argument("--reharvest", action="store_true",
+                    help="process sessions that were harvested before")
     a = ap.parse_args(argv)
 
     if a.selftest:
         return selftest()
+
+    if a.harvest:
+        corpus = Path(a.harvest)
+        report_path = (Path(a.report) if a.report
+                       else ROOT / "docs" / "research" / "HARVEST-REPORT.md")
+        while True:
+            run = harvest(corpus,
+                          takes_dir=Path(a.takes_dir) if a.takes_dir else None,
+                          report_path=report_path,
+                          min_segment_s=a.min_segment_s,
+                          min_label_s=a.min_label_s,
+                          upscale=a.upscale,
+                          reharvest=a.reharvest)
+            print(f"harvest: {run['sessions_found']} session(s) found, "
+                  f"{run['sessions_new']} new, "
+                  f"{run['sessions_skipped']} already harvested, "
+                  f"{run['sessions_failed']} failed, "
+                  f"{len(run['takes'])} take(s) written")
+            for rec in run.get("records", []):
+                for t in rec.get("takes", []):
+                    print(f"  {t['stem']:<24} {t['condition']}  "
+                          f"{t['start_s']:.1f}-{t['end_s']:.1f}s  "
+                          f"{t['seconds'] / 60.0:.2f} min  "
+                          f"conf {t['confidence']:.3f}")
+                if rec.get("error"):
+                    print(f"  FAILED {rec['session']}: {rec['error']}")
+            if run.get("report_appended"):
+                print(f"  report appended to {run['report_appended']}")
+            if a.watch and a.watch > 0:
+                time.sleep(a.watch)
+                continue
+            return 0 if run["sessions_failed"] == 0 else 1
 
     if a.recover:
         rep = recovery_report(Path(a.recover),

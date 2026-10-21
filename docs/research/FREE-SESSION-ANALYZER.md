@@ -5,8 +5,8 @@ branch `acceptance/browser-capture`)
 **Date:** 2026-10-21
 **Brief:** `docs/research/BRIEF-FREE-SESSION-ANALYZER.md`
 **Tool:** `experiments/free_session_analyze.py`
-**Evidence:** `--selftest` (52 checks) and the recovery report (§6)
-**Closes:** the camera-probe lane (`docs/research/CAMERA-RND-FINDINGS.md`), §7
+**Evidence:** `--selftest` (66 checks) and the recovery report (§6)
+**Closes:** the camera-probe lane (`docs/research/CAMERA-RND-FINDINGS.md`), §8
 
 ---
 
@@ -322,7 +322,7 @@ both of them.
 ### 6.1 The unit tests
 
 `--selftest` exercises the segmenter, the label rules, the take writer and
-the **real free-session layout** on synthetic arrays: **52 checks, all
+the **real free-session layout** on synthetic arrays: **66 checks, all
 passing**. The layout case builds a session folder exactly as
 `free_record.html` writes one — raw luma, millisecond timestamps, a 48 kHz
 WAV, the page's own metadata — reads it back, and slices it, so the
@@ -448,7 +448,74 @@ the production path has two clocks that can disagree.
 
 ---
 
-## 7. THE CAMERA PROBE, FOLDED IN — AND THIS LANE IS CLOSED
+## 7. THE HARVESTER — the analyzer as a batch pass
+
+Casey escalated the lane once more, and the right reading of it is that the
+analyzer is now a **harvester**: it runs unattended over the corpus, it
+processes every new session, and it writes down what the room gave.
+
+```bash
+# one pass -- this is the cron line
+/home/proart/projects/gpu-venv/bin/python experiments/free_session_analyze.py \
+    --harvest /mnt/c/proart_capture/corpus
+
+# or continuously
+/home/proart/projects/gpu-venv/bin/python experiments/free_session_analyze.py \
+    --harvest /mnt/c/proart_capture/corpus --watch 60
+```
+
+**Three decisions carry the design, and each of them is forced by
+something the gate or the page already decided.**
+
+- **The derived takes get their own corpus root** — `<corpus>/derived/` —
+  not a place in the script's corpus. The gate's stimulus check fails any
+  take whose stimulus differs from the corpus majority ("a mixed stimulus
+  cannot be pooled"), so a derived take (`free-session`) sitting beside a
+  script take (`invictus`) would fail one of them. Two corpora, each
+  internally consistent, is the only arrangement the gate accepts.
+- **Every take from one session carries that session's stamp.** The gate's
+  session identity is the take's `timestamp`, and the gate counts
+  *distinct sessions*, not distinct files, because "one session recorded
+  twice is one session". If each slice carried its own stamp, one
+  recording would count as a dozen independent sessions — exactly the
+  over-counting `corpus_integrity.py` exists to prevent. The derived
+  filenames are `<COND><n>_<session stamp>`, so the identity is in the
+  name too.
+- **A session that is being written RIGHT NOW is skipped, not harvested.**
+  The page writes the five files in sequence, so a folder caught
+  mid-write is short a file. The analyzer cross-checks the metadata
+  against what it read (§1) and a session whose frame count disagrees is
+  **not** recorded in the state, so the next pass retries it. A session
+  that fails is never marked done.
+
+**The state** lives at `<corpus>/harvest/state.json` — in a subdirectory,
+because the gate individuates every root-level `*.json` as a take, and
+the harvester must not be the thing that breaks the gate.
+
+**The report** is `docs/research/HARVEST-REPORT.md`, appended once per run:
+the minutes harvested per derived condition, the confidence of those
+labels, the coverage against the 63-sessions-per-class target, and what
+is still missing. The coverage numbers are the **gate's own** — the
+harvester runs `experiments/corpus_integrity.py` over the derived corpus
+and quotes it, rather than keeping a tally of its own.
+
+### The dry run
+
+There is no real free session yet, so the first pass ran over what does
+exist: the script's A, B, C and empty1 recordings, re-encoded in the
+free-record layout. **4 sessions, 4 takes, 0 failed by the gate, 0.69
+minutes** — A 0.15 min, B 0.06 min, C 0.49 min, and nothing at all from
+the empty room, because there is no face in it. The gap to the target:
+**SPEAK is 61 sessions short, SILENT is 62.** Two thirds of the target is
+still missing and a free session is worth one session, so the arithmetic
+is brutal and honest: the corpus grows by *sessions*, and only Casey's
+time in front of the camera moves that number.
+
+The full numbers are in `docs/research/HARVEST-REPORT.md`.
+
+---
+
+## 8. THE CAMERA PROBE, FOLDED IN — AND THIS LANE IS CLOSED
 
 The brief folds the probe's measurements in here and closes that lane. The
 full record is `docs/research/CAMERA-RND-FINDINGS.md`; the part that belongs
@@ -515,11 +582,11 @@ constraints, not a precondition for deriving labels offline.
 So the probe lane closes here, with its instrument intact: `experiments/camera_probe/`
 stays in the tree, the server is still running on `127.0.0.1:8766`, and
 `?sweep=1` will write the whole decision table — P0, P1, P3, P4 back to
-back — the first time the camera is free. What is still open is in §8.
+back — the first time the camera is free. What is still open is in §9.
 
 ---
 
-## 8. WHAT IS STILL OPEN
+## 9. WHAT IS STILL OPEN
 
 - **No real free session exists yet.** The production path is exercised only
   on a synthetic session built in the exact layout the page writes. The
@@ -545,7 +612,7 @@ back — the first time the camera is free. What is still open is in §8.
 
 ---
 
-## 9. HOW TO REPRODUCE ALL OF THIS
+## 10. HOW TO REPRODUCE ALL OF THIS
 
 ```bash
 cd ~/projects/communicator-acceptance
