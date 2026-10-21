@@ -332,6 +332,8 @@ function diagSend(kind, fields) {
     audio_silent_s: audioCtx && nAudioBlocks ?
       Math.round((performance.now() - lastSoundAt) / 100) / 10 : null,
     saved: savedCount, pending_uploads: pendingSaves.length,
+    wake_buf_s: audioCtx ? Math.round(wakeBuf.n / realRate) : 0,
+    wakes_fired: wakeFiredCount,
     visibility: document.visibilityState,
   }, fields || {}));
   try {
@@ -813,6 +815,7 @@ function buildPayload(seg) {
       "tab degrades them to a slow interval; speech detection continues " +
       "on the audio thread) -- keep this tab in the foreground",
   };
+  if (seg.wake) meta.wake = seg.wake;
   const ts = { wall_clock_start: seg.wallStart,
                frame_offsets_ms: seg.frameTs };
 
@@ -912,6 +915,113 @@ $("recBtn").onclick = () => {
 const PROBE_CYCLE_S = 20;
 const RAILS = { gainMax: 0.3, dutyWindowS: 60, dutyMaxS: 5,
                 nightStart: 22, nightEnd: 7 };
+
+/* ============================================================================
+   THE PRE-WAKE BUFFER + WAKE ASSEMBLY (BRIEF-WAKE-AND-TURN mechanism 1).
+   While ambient, the last ~PRE_WAKE_S of mic audio stays in the tab; a
+   WAKE is the first speech after >= WAKE_QUIET_S of quiet -- the human
+   starts a prompt, maybe with pronouns that reach back into the buffer
+   ("that thing I said"). On wake, the buffer window is ASSEMBLED and
+   saved as a wake_prompt bundle on the same clock as the prompt session
+   that follows it (joined by timestamps). The buffer is DESCRIPTION
+   ONLY -- no judgments banked against it; pronoun resolution happens
+   at wake with more information, per doctrine, and LANDS WITH THE
+   SCORER (the resolver slot says so). Capture is destiny: the buffer
+   is recorded NOW regardless.                                    */
+const QP = new URLSearchParams(location.search);
+const PRE_WAKE_S = Math.max(30, parseFloat(QP.get("prewake")) || 300);
+const WAKE_QUIET_S = 15;
+const wakeBuf = { chunks: [], n: 0 };   // the rolling ring, armed only
+let quietSince = null;                   // ms timestamp quiet began
+let lastSpeechAt = 0, wakeFiredCount = 0;
+
+function feedWakeBuf(blk) {
+  if (paused || deaf) { quietSince = null; return; }
+  // feed while ARMED; once a segment opens the buffer stops growing
+  // (what it holds at the onset IS the pre-wake window)
+  if (openSeg) return;
+  wakeBuf.chunks.push(blk);
+  wakeBuf.n += blk.length;
+  const cap = Math.ceil(realRate * (PRE_WAKE_S + 2));
+  while (wakeBuf.n > cap && wakeBuf.chunks.length > 1) {
+    wakeBuf.n -= wakeBuf.chunks[0].length;
+    wakeBuf.chunks.shift();
+  }
+}
+function wakeOnset(nowSpeaking) {
+  // called every audio block. The WAKE fires on the speech ONSET itself
+  // -- the same onset AUTO opens its segment on (the first E2E taught
+  // this: a check gated on !openSeg never sees an onset, because AUTO
+  // is already recording). The wake and the segment are the same event
+  // read two ways: the segment captures the prompt; the assembly banks
+  // what came BEFORE it.
+  if (paused || deaf) return;
+  const now = performance.now();
+  if (nowSpeaking) {
+    const quietFor = quietSince ? (now - quietSince) / 1000 : 0;
+    quietSince = null; lastSpeechAt = now;
+    if (quietFor >= WAKE_QUIET_S &&
+        wakeBuf.n >= realRate * 25 && wakeFiredCount < 50) {
+      fireWake(quietFor).catch(function (err) {
+        diagSend("WAKE_SAVE_FAILED",
+                 { error: String(err && err.message || err) });
+      });
+    }
+  } else if (!quietSince && now - lastSpeechAt > 1500) {
+    quietSince = now;
+  }
+}
+async function fireWake(quietForS) {
+  wakeFiredCount++;
+  const snapshot = wakeBuf.chunks.slice();
+  let n = 0;
+  for (const c of snapshot) n += c.length;
+  const preMs = Math.min(PRE_WAKE_S * 1000,
+    snapshot.length ? performance.now() - wakeStartedAt : 0);
+  const seg = {
+    mode: "wake_prompt", trigger: "speech_onset_after_quiet",
+    close_reason: "wake_assembled",
+    wallStart: new Date(Date.now() - preMs).toISOString(),
+    t0ms: performance.now() - preMs,
+    frames: [], frameTs: [], nFrames: 0,
+    audioChunks: snapshot, nSamples: n,
+    webmChunks: [], webm: null, recorder: null, mime: null,
+    lastActive: 0, peakRms: 0,
+    wallEnd: new Date().toISOString(),
+    floors: { speech_floor: speechFloor, speech_thr: speechThr(),
+              motion_floor: motionFloor, motion_thr: motionThr() },
+  };
+  seg.wake = {
+    wake_at: new Date().toISOString(),
+    quiet_before_s: Math.round(quietForS * 10) / 10,
+    buffer_s: Math.round(n / realRate * 10) / 10,
+    window_s: PRE_WAKE_S,
+    prompt_join: "the prompt itself is the auto/manual segment that "
+      + "opens at this wake point -- joined on the timestamps clock; "
+      + "the buffer ends at the wake instant (the pre-wake audio ends "
+      + "quiet BY DESIGN -- the first prompt syllable belongs to the "
+      + "segment)",
+    resolver: null,
+    resolver_note: "pronoun resolution (recency x salience, Jev-style) "
+      + "lands with the scorer; the buffer is captured now because "
+      + "capture is destiny. The buffer is description only; no "
+      + "judgments are banked against it.",
+  };
+  try {
+    const payload = buildPayload(seg);
+    const resp = await fetch("/free", { method: "POST",
+      body: payload.blob });
+    const j = await resp.json().catch(() => ({ ok: false }));
+    if (!j.ok) throw new Error(j.error || resp.status);
+    diagSend("WAKE_FIRED", { buffer_s: seg.wake.buffer_s,
+      quiet_before_s: seg.wake.quiet_before_s, dir: j.dir });
+  } catch (err) {
+    diagSend("WAKE_SAVE_FAILED", { error: String(err.message) });
+  }
+  // the ring continues: the NEXT wake needs another long quiet
+  quietSince = performance.now();
+}
+let wakeStartedAt = performance.now();
 let probeCollect = null;          // {chunks, n} -- the tap while probing
 let probeBusy = false;
 const probeMods = {};             // name -> {mod, version}
@@ -1337,12 +1447,14 @@ async function tryBoot() {
     nAudioBlocks++;
     if (level > 1e-5) lastSoundAt = performance.now();
     speechStep(level);
+    wakeOnset(speechNow);
     if (openSeg) {
       openSeg.audioChunks.push(blk);
       openSeg.nSamples += blk.length;
       if (level > (openSeg.peakRms || 0)) openSeg.peakRms = level;
     } else if (!paused) {
       feedPreAudio(blk);
+      feedWakeBuf(blk);
     }
   };
   src.connect(node);

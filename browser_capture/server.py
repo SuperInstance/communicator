@@ -375,7 +375,7 @@ def _last_page_heartbeat() -> dict:
 LIAISON_FORWARD_KINDS = {"BOOT", "DEAF_ON", "DEAF_OFF", "DEVICE_FAILURE",
                          "SEGMENT_CLOSE", "MIC_SWITCH", "CAM_SWITCH",
                          "GC_DRY_RUN", "PIN_SET", "PIN_CLEARED",
-                         "LENS_UPDATED"}
+                         "LENS_UPDATED", "WAKE_FIRED", "WAKE_SAVE_FAILED"}
 
 
 # -- the NPY format, by hand (numpy is not stdlib) --------------------------

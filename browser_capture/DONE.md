@@ -1023,3 +1023,32 @@ verification, and rides a `lens_updated` event to the outbox/digest.
 Verify suite: **182 passed, 0 failed** (three new: seeded lenses
 served with the SILENT_AUDIO signature; merge + verification stamp;
 persistence).
+
+## Patch 2026-10-21: the pre-wake buffer + wake assembly (BRIEF-WAKE-AND-TURN mechanism 1)
+
+The conversation surface's my-lane half that the scorer does NOT gate
+(capture is destiny): while ARMED, the evolve page keeps a rolling
+~5-minute mic ring (the PRE-WAKE BUFFER); a WAKE is the first speech
+onset after >= 15 s of quiet, observed in the audio path itself. At
+wake, the buffer window is assembled and saved as a `wake_prompt`
+bundle -- description only, no judgments banked, with a `resolver:
+null` slot whose note says pronoun resolution (recency x salience,
+Jev-style) lands with the scorer. The prompt itself is the ordinary
+AUTO/manual segment that opens on the same onset; the two join on the
+timestamps clock, and the meta says so. `WAKE_FIRED`/`WAKE_SAVE_FAILED`
+ride the heartbeat feed and the liaison outbox; the heartbeat carries
+`wake_buf_s` and `wakes_fired`.
+
+**Proven by a headless E2E** (fake mic looping speech-2s + quiet-28s):
+wakes fired exactly on the quiet cadence (quiet 26.5-29.2 s measured),
+buffers growing to the window cap, and each saved bundle carrying the
+full wake record with its WAV matching the buffer length. Three real
+bugs the E2E caught and killed: a wake check gated on `!openSeg` can
+NEVER observe an onset (AUTO opens its segment on the same onset --
+the wake now rides the onset in the audio path); `fireWake` could die
+in a silent unhandled rejection (the wake stub seg lacked the floors
+`buildPayload` reads -- call-site catch added so a failure speaks);
+and mutating `payload.meta` after `buildPayload` touches nothing (the
+blob is serialised inside -- the wake record now rides the seg). Also
+learned, kept as design truth: the buffer ends quiet BY DESIGN -- the
+first prompt syllable belongs to the segment, not the buffer.
