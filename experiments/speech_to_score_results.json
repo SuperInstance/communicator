@@ -1,6 +1,6 @@
 {
   "tool": "experiments/speech_to_score.py",
-  "generated_at": "2026-10-21T04:10:00Z",
+  "generated_at": "2026-10-21T06:10:00Z",
   "device": "cuda / float16 (RTX 4050) for faster-whisper small.en; CPU for the repo's pitch tracker",
   "corpus_cross_check_source": "examples/realaudio/corpus/MANIFEST.md (src.score.measure)",
   "runs": [
@@ -654,6 +654,171 @@
         "manifest_voiced_fraction": 0.55,
         "voiced_over_manifest": 1.0085
       }
+    },
+    {
+      "run": "1792560597",
+      "input": "/mnt/c/proart_capture/corpus/free_sessions/1792560597",
+      "data_class": "drilled",
+      "trigger": "manual",
+      "audio": {
+        "path": "/mnt/c/proart_capture/corpus/free_sessions/1792560597/audio.wav",
+        "source_sample_rate": 48000,
+        "analysis_sample_rate": 16000,
+        "n_samples": 437376,
+        "duration_s": 27.336,
+        "poisoned_samples": 0,
+        "resample_note": "src/wavio.py resamples with linear interpolation and does NOT anti-alias; the time base is exact but content near the old Nyquist folds"
+      },
+      "clock": {
+        "source": "/mnt/c/proart_capture/corpus/free_sessions/1792560597/timestamps.json",
+        "has_frames": true,
+        "n_frames": 1626,
+        "wall_clock_start": "2026-10-21T05:29:30.527Z",
+        "origin_offset_s": 450.1223,
+        "time_base": "session-relative: the session's first frame is t=0; the raw offsets are page-relative (performance.now() minus the page's base) and are shifted by -origin_offset_s",
+        "audio_lead_s": -0.071,
+        "audio_lead_source": "wall_clock_end - wall_clock_start - audio length: the audio's end and the wall clock's end are the same close, so the difference is where the WAV's first sample sits against the first frame",
+        "first_frame_s": 0.0,
+        "last_frame_s": 27.25,
+        "median_fps": 59.880239521110376
+      },
+      "words": 17,
+      "syllables": 19,
+      "notes": 29,
+      "notes_per_syllable": 1.526,
+      "syllables_without_note": 0,
+      "voiced_fraction": 0.1184,
+      "first_frame": 1158,
+      "last_frame": 1623,
+      "segment_join": {
+        "segments": 8,
+        "rows_joined": 19,
+        "rows_unjoined": 0
+      },
+      "transcribe_s": 3.14,
+      "pitch_s": 4.58,
+      "midi": {
+        "path": "/tmp/s2s_real/1792560597/session.mid",
+        "bytes": 317,
+        "ticks_per_beat": 1000,
+        "ms_per_tick": 1.0,
+        "n_notes": 29,
+        "n_words": 17,
+        "n_tracks": 1,
+        "track_name": "speech: 29 notes, 17 words"
+      },
+      "no_speech": null
+    },
+    {
+      "run": "1792560758",
+      "input": "/mnt/c/proart_capture/corpus/free_sessions/1792560758",
+      "data_class": "ambient",
+      "trigger": "motion",
+      "audio": {
+        "path": "/mnt/c/proart_capture/corpus/free_sessions/1792560758/audio.wav",
+        "source_sample_rate": 48000,
+        "analysis_sample_rate": 16000,
+        "n_samples": 2478293,
+        "duration_s": 154.8933125,
+        "poisoned_samples": 0,
+        "resample_note": "src/wavio.py resamples with linear interpolation and does NOT anti-alias; the time base is exact but content near the old Nyquist folds"
+      },
+      "clock": {
+        "source": "/mnt/c/proart_capture/corpus/free_sessions/1792560758/timestamps.json",
+        "has_frames": true,
+        "n_frames": 9260,
+        "wall_clock_start": "2026-10-21T05:30:02.795Z",
+        "origin_offset_s": 1.5549,
+        "time_base": "session-relative: the session's first frame is t=0; the raw offsets are page-relative (performance.now() minus the page's base) and are shifted by -origin_offset_s",
+        "audio_lead_s": -0.092333,
+        "audio_lead_source": "wall_clock_end - wall_clock_start - audio length: the audio's end and the wall clock's end are the same close, so the difference is where the WAV's first sample sits against the first frame",
+        "first_frame_s": 0.0,
+        "last_frame_s": 154.7842,
+        "median_fps": 59.88023952098299
+      },
+      "words": 230,
+      "syllables": 295,
+      "notes": 280,
+      "notes_per_syllable": 0.949,
+      "syllables_without_note": 13,
+      "voiced_fraction": 0.2571,
+      "first_frame": 178,
+      "last_frame": 6224,
+      "segment_join": {
+        "segments": 98,
+        "rows_joined": 295,
+        "rows_unjoined": 0
+      },
+      "transcribe_s": 4.58,
+      "pitch_s": 56.02,
+      "midi": {
+        "path": "/tmp/s2s_real/1792560758/session.mid",
+        "bytes": 2540,
+        "ticks_per_beat": 1000,
+        "ms_per_tick": 1.0,
+        "n_notes": 280,
+        "n_words": 230,
+        "n_tracks": 1,
+        "track_name": "speech: 280 notes, 230 words"
+      },
+      "no_speech": null
+    },
+    {
+      "run": "1792560773",
+      "input": "/mnt/c/proart_capture/corpus/free_sessions/1792560773",
+      "data_class": "ambient",
+      "trigger": "motion",
+      "audio": {
+        "path": "/mnt/c/proart_capture/corpus/free_sessions/1792560773/audio.wav",
+        "source_sample_rate": 48000,
+        "analysis_sample_rate": 16000,
+        "n_samples": 256981,
+        "duration_s": 16.0613125,
+        "poisoned_samples": 0,
+        "resample_note": "src/wavio.py resamples with linear interpolation and does NOT anti-alias; the time base is exact but content near the old Nyquist folds"
+      },
+      "clock": {
+        "source": "/mnt/c/proart_capture/corpus/free_sessions/1792560773/timestamps.json",
+        "has_frames": true,
+        "n_frames": 934,
+        "wall_clock_start": "2026-10-21T05:32:37.597Z",
+        "origin_offset_s": 156.3574,
+        "time_base": "session-relative: the session's first frame is t=0; the raw offsets are page-relative (performance.now() minus the page's base) and are shifted by -origin_offset_s",
+        "audio_lead_s": -0.006333,
+        "audio_lead_source": "wall_clock_end - wall_clock_start - audio length: the audio's end and the wall clock's end are the same close, so the difference is where the WAV's first sample sits against the first frame",
+        "first_frame_s": 0.0,
+        "last_frame_s": 16.04830000000004,
+        "median_fps": 59.88023952100847
+      },
+      "words": 0,
+      "syllables": 0,
+      "notes": 0,
+      "notes_per_syllable": null,
+      "syllables_without_note": 0,
+      "voiced_fraction": null,
+      "first_frame": null,
+      "last_frame": null,
+      "segment_join": {},
+      "transcribe_s": 1.43,
+      "pitch_s": null,
+      "midi": {
+        "path": "/tmp/s2s_real/1792560773/session.mid",
+        "bytes": 61,
+        "ticks_per_beat": 1000,
+        "ms_per_tick": 1.0,
+        "n_notes": 0,
+        "n_words": 0,
+        "n_tracks": 1,
+        "track_name": "speech: 0 notes, 0 words"
+      },
+      "no_speech": {
+        "reason": "the transcript is empty",
+        "audio_peak_rms": 0.000462141083751961,
+        "audio_mean_rms": 0.00029534557413612636,
+        "frames_over_energy_floor": 1602,
+        "n_frames": 1602,
+        "verdict": "the audio is SILENT -- there is nothing to transcribe, nothing to pitch and no syllables to align"
+      }
     }
   ],
   "brief_target": {
@@ -663,8 +828,12 @@
       "has_frames": true,
       "n_frames": 15514,
       "wall_clock_start": "2026-10-21T03:19:40.683Z",
-      "first_frame_s": 6.8347,
-      "last_frame_s": 265.7362,
+      "origin_offset_s": 6.8347,
+      "time_base": "session-relative: the session's first frame is t=0; the raw offsets are page-relative (performance.now() minus the page's base) and are shifted by -origin_offset_s",
+      "audio_lead_s": -0.085667,
+      "audio_lead_source": "wall_clock_end - wall_clock_start - audio length: the audio's end and the wall clock's end are the same close, so the difference is where the WAV's first sample sits against the first frame",
+      "first_frame_s": 0.0,
+      "last_frame_s": 258.9015,
       "median_fps": 59.88023952100847
     },
     "audio": {
@@ -681,5 +850,18 @@
     "frames_over_energy_floor": 0,
     "n_frames": 25895,
     "note": "all ten of tonight's free sessions are digitally silent; ZCode has the sick-lane fix; the first post-fix session is the real target"
-  }
+  },
+  "brief_target_session": "1792553040 -- still silent; the first real free-session target is 1792560597, scored below",
+  "data_classes": {
+    "rule": "the page's own trigger says which is which: manual/drill/potato/perform/recite/scripted is DRILLED, everything else is AMBIENT",
+    "drilled": [
+      "1792560597"
+    ],
+    "ambient": [
+      "1792560758",
+      "1792560773"
+    ],
+    "note": "the two classes are never averaged together. A drilled session is evidence about a performance and an ambient one is evidence about the person."
+  },
+  "clock_note": "the frame offsets in timestamps.json are PAGE-relative (performance.now() minus the page's base). The clock now names its origin: the session's first frame is t=0, the raw offsets are shifted by -origin_offset_s, and the WAV's edge against the first frame is carried as audio_lead_s and applied at the frame lookup."
 }
