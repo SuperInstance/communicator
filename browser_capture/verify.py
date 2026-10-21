@@ -739,6 +739,25 @@ def main() -> int:
         check("the thumbnail surfaces in /live-state",
               status == 200 and j.get("thumb", {}).get("data") ==
               "data:image/jpeg;base64,dmVyaWZ5")
+
+        # the live luma batch (the forwarder's source): post frames,
+        # read them back, same offsets, same bytes
+        import base64 as b64mod
+        n_b = 3
+        offs_b = [0, 33, 67]
+        luma_b = bytes(range(256)) * (n_b * LUMA_BYTES // 256)
+        luma_post = struct.pack("<Q", n_b) + struct.pack("<QQQ", *offs_b) \
+            + luma_b
+        status, body = http("POST", "/luma", luma_post)
+        check("POST /luma accepted", status == 200 and
+              json.loads(body).get("ok") and
+              json.loads(body).get("n") == n_b)
+        status, body = http("GET", "/luma-latest")
+        jl = json.loads(body)
+        check("the luma batch round-trips through /luma-latest",
+              status == 200 and jl.get("n") == n_b and
+              jl.get("offsets") == offs_b and
+              b64mod.b64decode(jl.get("luma_b64", "")) == luma_b)
         seg_dirs = {s["dir"] for s in j.get("segments", [])}
         check("the free session shows up in /live-state segments",
               f"free_sessions/{free_stamp}" in seg_dirs,

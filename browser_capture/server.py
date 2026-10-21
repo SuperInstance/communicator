@@ -88,6 +88,12 @@ ENDPOINTS:
                        folders with sizes, and any verdict.json
     POST /thumb     -> the capture page's latest 160x96 luma thumbnail
                        (kept in memory only, replaced every second)
+    POST /luma      -> the capture page's newest live luma batch (the
+                       last ~90 frames + per-frame offsets, binary);
+                       kept in memory only, replaced every couple of
+                       seconds -- the LIVE FORWARDER's source
+    GET  /luma-latest -> that batch back as JSON {n, offsets, luma_b64},
+                       for the forwarder sidecar
 
 THE AGENT API (docs/research/BRIEF-ROOM-LIAISON.md) -- the liaison in
 the room. JSON on localhost, meant for agents, additive to the pages:
@@ -192,6 +198,13 @@ DIAG_PATH = Path(__file__).resolve().parent / "diag.log"
 THUMB_LOCK = threading.Lock()
 THUMB = {"data": None, "ts": None}
 THUMB_MAX = 262144
+
+# The live luma batch (the LIVE FORWARDER's source): the page posts the
+# newest ~90 frames every couple of seconds while AUTO runs; only the
+# LATEST is kept, in memory.
+LUMA_LOCK = threading.Lock()
+LUMA_LATEST = {"n": 0, "offsets": [], "luma": b"", "ts": None}
+LUMA_MAX = 8 * 1024 * 1024
 
 # The luma frame the FREE RECORD page captures, same geometry as the plan
 # page's data view.
@@ -1146,6 +1159,42 @@ class Handler(BaseHTTPRequestHandler):
                 "%Y-%m-%dT%H:%M:%SZ", time.gmtime())
         self._json(200, {"ok": True})
 
+    def _handle_luma(self):
+        """The page's newest live luma batch: [u64 n][n x u64 offset_ms]
+        [n x 15360 luma bytes]. In-memory only, latest-wins."""
+        try:
+            n = int(self.headers.get("Content-Length", "0"))
+        except ValueError:
+            n = -1
+        if n <= 0 or n > LUMA_MAX:
+            self._json(400, {"ok": False, "error": "bad Content-Length"})
+            return
+        body = self.rfile.read(n)
+        if len(body) != n:
+            self._json(400, {"ok": False, "error": "truncated body"})
+            return
+        if len(body) < 8:
+            self._json(400, {"ok": False, "error": "no frame count"})
+            return
+        (count,) = struct.unpack_from("<Q", body, 0)
+        if count > 10000 or len(body) < 8 + count * 8:
+            self._json(400, {"ok": False, "error": "bad frame count"})
+            return
+        offsets = list(struct.unpack_from("<" + "Q" * count, body, 8)) \
+            if count else []
+        luma = body[8 + count * 8:]
+        if len(luma) != count * FREE_LUMA_BYTES:
+            self._json(400, {"ok": False,
+                             "error": f"luma is {len(luma)} bytes; "
+                                      f"{count} frames need "
+                                      f"{count * FREE_LUMA_BYTES}"})
+            return
+        with LUMA_LOCK:
+            LUMA_LATEST.update(
+                {"n": count, "offsets": offsets, "luma": luma,
+                 "ts": time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime())})
+        self._json(200, {"ok": True, "n": count})
+
     def _handle_free(self):
         """Write one FREE RECORD session folder (the front door's artifact)."""
         try:
@@ -1332,6 +1381,15 @@ class Handler(BaseHTTPRequestHandler):
             self._send(200, page, "text/html; charset=utf-8")
         elif route == "/live-state":
             self._json(200, live_state(self.out_dir))
+        elif route == "/luma-latest":
+            with LUMA_LOCK:
+                batch = dict(LUMA_LATEST)
+            import base64
+            self._json(200, {"ok": True, "n": batch["n"],
+                             "offsets": batch["offsets"],
+                             "ts": batch["ts"],
+                             "luma_b64": base64.b64encode(
+                                 batch["luma"]).decode("ascii")})
         elif route == "/api/status":
             self._api_status()
         elif route == "/api/sessions":
@@ -1354,6 +1412,9 @@ class Handler(BaseHTTPRequestHandler):
             return
         if route == "/thumb":
             self._handle_thumb()
+            return
+        if route == "/luma":
+            self._handle_luma()
             return
         if route == "/api/inbox":
             self._api_inbox_post()

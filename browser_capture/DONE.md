@@ -795,3 +795,27 @@ law:
 The teacher-dependence ratio is the loop's headline metric; nothing in
 this lane computes it yet — it belongs to the digest tier, and the
 liaison's job is only to make its inputs honest and measured.
+
+## Patch 2026-10-21: the LIVE FORWARDER for the Muse+Jetson pair
+
+While AUTO runs, the Jetson seat's analyzer gets its feed: every ~2 s
+the capture page POSTs the newest ~90 luma frames (with per-frame
+offsets) to `POST /luma` (in-memory, latest-wins — same pattern as the
+thumbnail), and a SEPARATE sidecar — `browser_capture/forwarder.py`,
+installed as **`browser-capture-forwarder.service`** — pushes every ~3 s
+to `jetson-lan:~/work/pair/live/`:
+`latest_luma.raw`, `latest_luma.json` (n, offsets_ms, frame shape,
+format), `heartbeat.json` (the newest page heartbeat). Writes land via
+temp+mv so the analyzer never reads a torn file. It ships only while a
+page heartbeat is fresher than 10 s; a dead Jetson or a failed cycle is
+logged and retried — **additive only: the sidecar is a separate process
+with zero coupling to the capture path, and the page's POST is
+fire-and-forget.**
+
+Deployed and proven live: a 3-frame batch POSTed to the running server
+was on the Jetson within one cycle (46,080 bytes = 3 × 15,360, offsets
+[0, 33, 67], format documented), alongside the real live heartbeat.
+The Jetson seat's replies ride the existing `verdict.json` contract.
+
+Verify suite: **169 passed, 0 failed** (two new checks: the /luma POST
+and the /luma-latest round-trip — same offsets, same bytes).

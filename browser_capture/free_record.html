@@ -326,9 +326,33 @@ function diagSend(kind, fields) {
 setInterval(() => {
   diagSend("heartbeat");
   postThumb();
+  postLumaBatch();
   deafCheck();
   deafGate();
 }, 1000);
+
+/* The LIVE FORWARDER's feed: every other tick, the newest ~90 luma
+   frames (with their offsets) go to the server, which hands them to the
+   Jetson pair seat. Observation only -- nothing here waits on it. */
+let lumaTick = 0;
+function postLumaBatch() {
+  if (!(lumaTick++ % 2) || !stream) return;
+  const src = openSeg ? openSeg.frames : preFrames;
+  const tsSrc = openSeg ? openSeg.frameTs : preTs;
+  if (!src || !src.length) return;
+  const K = Math.min(90, src.length);
+  const start = src.length - K;
+  const head = new DataView(new ArrayBuffer(8 + K * 8));
+  head.setBigUint64(0, BigInt(K), true);
+  for (let i = 0; i < K; i++)
+    head.setBigUint64(8 + i * 8, BigInt(Math.round(tsSrc[start + i])), true);
+  const parts = [new Uint8Array(head.buffer)];
+  for (let i = start; i < src.length; i++) parts.push(src[i]);
+  fetch("/luma", { method: "POST",
+    headers: { "Content-Type": "application/octet-stream" },
+    body: new Blob(parts),
+  }).catch(() => {});
+}
 
 /* -- the deafness watchdog --------------------------------------------------
    Live telemetry caught a sitting where speech level sat at exactly 0

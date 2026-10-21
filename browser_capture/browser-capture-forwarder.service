@@ -1,0 +1,26 @@
+# browser-capture-forwarder.service -- the LIVE FORWARDER sidecar.
+#
+# Ships the newest luma batch + latest heartbeat to the Jetson pair seat
+# (jetson-lan:~/work/pair/live/) every few seconds while AUTO runs.
+# A SEPARATE service on purpose: additive only; if it dies the capture
+# path never notices. Install:
+#   cp browser_capture/browser-capture-forwarder.service \
+#      ~/.config/systemd/user/
+#   systemctl --user daemon-reload
+#   systemctl --user enable --now browser-capture-forwarder.service
+
+[Unit]
+Description=communicator live forwarder (luma + heartbeat to the Jetson pair)
+Documentation=file:///home/proart/projects/communicator/browser_capture/DONE.md
+After=browser-capture.service
+
+[Service]
+Type=simple
+ExecStart=/usr/bin/python3 /home/proart/projects/communicator/browser_capture/forwarder.py
+Restart=on-failure
+RestartSec=5
+StandardOutput=append:/home/proart/projects/communicator/browser_capture/forwarder.log
+StandardError=append:/home/proart/projects/communicator/browser_capture/forwarder.log
+
+[Install]
+WantedBy=default.target
