@@ -396,3 +396,55 @@ accrues. A reload of the page is enough (server unchanged this time).
 Verify suite after this patch: 154 passed, 0 failed (the free-path
 checks cover the segment artifact unchanged; the AUTO logic itself is
 real-camera territory — tune it from diag.log).
+
+## Self-verify of AUTO, end-to-end (2026-10-21, step 1 of the polish queue)
+
+Not simulated — the real page in a real (headless) Chrome against the
+real server, with **file-backed fake media** chosen so the decisions
+must be made honestly: a static-gray Y4M camera (motion stays honestly
+absent) and a fake-mic WAV that is 4 s of room tone, 10 s of
+speech-level noise, then silence (speech must genuinely trigger, and
+quiet must genuinely close). Windows Chrome headless with
+`--use-fake-device-for-media-stream --use-file-for-fake-audio-capture=
+...wav --use-file-for-fake-video-capture=...y4m
+--use-fake-ui-for-media-stream --autoplay-policy=no-user-gesture-required`
+(unique `--user-data-dir`, PID-scoped stop), server on a scratch port
+and scratch out dir, 95 s run. Chrome loops the fake audio, so the run
+covers TWO full auto cycles.
+
+**The first run FOUND A REAL BUG**: the detection thresholds bootstrap
+at 1e-4 and no noise floor exists before the first 500 ms recompute, so
+room tone above −60 dB RMS opened a segment 100 ms after boot and — with
+the floor then frozen — never closed it. On a real machine AUTO would
+have recorded one eternal segment from page load. Fixed: a
+`FLOOR_WARMUP_MS = 2000` gate — no auto open/close decision until the
+floors are measured from real data (`FLOORS_READY` event in diag.log);
+until then speech/motion read honestly as unknown, and the manual
+fallback still works.
+
+**The second run passed, both cycles** (all numbers from the artifacts
+and diag.log, none from the DOM):
+
+- `BOOT armed` → `FLOORS_READY` at +2.0 s → `SEGMENT_OPEN
+  trigger=speech` at +3.6 s with ~1.2 s pre-roll → `SEGMENT_CLOSE
+  reason=quiet` at +21.6 s (the file's silence began at 14 s + the 8 s
+  grace) → `SEGMENT_SAVED` in the background, `tries: 0` → armed again
+  → a second identical cycle at +70 s (the re-arm, for free).
+- Heartbeats carried the AUTO states throughout, including the frozen
+  threshold while open (speech level 0.105 vs thr 0.030; room tone
+  0.0033 below it) and `saved` ticking 0 → 1 → 2.
+- Both session folders held all five files, intact: `luma.raw` ==
+  n_frames × 15,360 exactly (1,148 and 1,146 frames), one timestamp per
+  frame spanning ~19.2 s + 1.2 s pre-roll, an honest mono 16-bit 48 kHz
+  WAV with the full 925,696 samples, a 300 KB `video.webm`, and meta
+  with `mode: auto`, `trigger: speech`, `close_reason: quiet`,
+  achieved fps ≈ 59.8 (headless rAF runs at 60; the 30 fps fake camera
+  means duplicate frames — identifiable offline from the timestamps,
+  which is what they are for).
+
+What this proves and what it does not: the decision loop, the pre-roll,
+the quiet close, the background upload, the re-arm, the artifacts and
+the heartbeat are all verified against real browser behavior. It does
+not verify real-microphone speech/noise statistics or real-camera
+motion — those are what the heartbeat numbers are for on Casey's
+machine.

@@ -145,6 +145,13 @@ const LB = 160 * 96;
 const CLOSE_AFTER_MS = 8000;   // quiet time that closes an auto segment
 const PRE_ROLL_MS = 1000;      // what a segment starts with, before trigger
 const FLOOR_EVERY_MS = 500;    // floor recompute cadence while armed-idle
+const FLOOR_WARMUP_MS = 2000;  // no auto decision before the floors are
+                               // measured from real data -- a bootstrap
+                               // threshold would fire on plain room tone
+                               // (found by the headless self-verify: the
+                               // fake mic's silence sits above the 1e-4
+                               // bootstrap, so a segment opened at boot
+                               // and never closed)
 
 let stream = null, audioCtx = null, realRate = 0, micName = "", camName = "";
 let level = 0;                 // rms of the newest audio block
@@ -162,6 +169,7 @@ let speechFloor = 1e-4, motionFloor = 0.5;
 let speechNow = false, motionNow = false;
 let lastMotion = 0, prevLuma = null;
 let lastFloorAt = 0, lastFrameAt = 0;
+let armedAt = 0, floorsReady = false;
 
 function pct(arr, p) {
   if (!arr.length) return null;
@@ -175,7 +183,9 @@ function motionThr() { return Math.max(motionFloor * 5, 0.6); }
 function speechStep(rms) {
   speechRing.push(rms);
   if (speechRing.length > SPEECH_RING_MAX) speechRing.shift();
-  speechNow = rms >= speechThr();
+  // no decision before warm-up: an unmeasured floor means an honest
+  // "unknown", not a free pass for room tone
+  speechNow = floorsReady && rms >= speechThr();
   return speechNow;
 }
 
@@ -190,7 +200,7 @@ function motionStep(luma) {
     lastMotion = s / luma.length;
     motionRing.push(lastMotion);
     if (motionRing.length > MOTION_RING_MAX) motionRing.shift();
-    motionNow = lastMotion >= motionThr();
+    motionNow = floorsReady && lastMotion >= motionThr();
   }
   prevLuma = luma;
   return motionNow;
@@ -200,8 +210,15 @@ function maybeRecomputeFloors() {
   // frozen while a segment is open: continuous speech/motion must not
   // raise its own threshold and reclose mid-segment
   if (openSeg) return;
-  if (performance.now() - lastFloorAt < FLOOR_EVERY_MS) return;
-  lastFloorAt = performance.now();
+  const now = performance.now();
+  if (!floorsReady && armedAt && now - armedAt >= FLOOR_WARMUP_MS &&
+      speechRing.length >= 64 && motionRing.length >= 8) {
+    floorsReady = true;
+    diagSend("FLOORS_READY", {
+      speech_floor: speechFloor, motion_floor: motionFloor });
+  }
+  if (now - lastFloorAt < FLOOR_EVERY_MS) return;
+  lastFloorAt = now;
   const sf = pct(speechRing, 0.2), mf = pct(motionRing, 0.2);
   if (sf != null) speechFloor = sf;
   if (mf != null) motionFloor = mf;
@@ -246,6 +263,7 @@ function diagSend(kind, fields) {
     motion: Math.round(lastMotion * 100) / 100,
     motion_thr: Math.round(motionThr() * 100) / 100,
     motion_now: motionNow,
+    floors_ready: floorsReady,
     saved: savedCount, pending_uploads: pendingSaves.length,
     visibility: document.visibilityState,
   }, fields || {}));
@@ -694,6 +712,7 @@ async function boot() {
     }
   };
   src.connect(node);
+  armedAt = performance.now();
   paint();
   diagSend("BOOT", { cam: camName, mic: micName, rate: realRate,
     auto: true });
