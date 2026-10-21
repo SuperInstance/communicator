@@ -341,16 +341,21 @@ def main() -> int:
                 time.sleep(0.2)
         print(f"server on :{PORT} up={up}  out={out_dir}")
 
-        print("\n== GET / and /info ==")
+        print("\n== GET /, /plan and /info ==")
         status, page = http("GET", "/")
         check("GET / returns 200", status == 200)
         page_s = page.decode("utf-8")
-        check("GET / is the repo's index.html",
-              page == (HERE / "index.html").read_bytes())
-        check("index.html has DOCTYPE", page_s.lstrip().lower()
+        check("GET / is the repo's free_record.html (the front door)",
+              page == (HERE / "free_record.html").read_bytes())
+        check("free_record.html has DOCTYPE", page_s.lstrip().lower()
               .startswith("<!doctype html>"))
         ext = re.findall(r"https?://[^\s'\"<>]+", page_s)
-        check("index.html references no external URLs", not ext, str(ext[:3]))
+        check("free_record.html references no external URLs", not ext,
+              str(ext[:3]))
+        status, plan = http("GET", "/plan")
+        check("GET /plan is the repo's index.html (plan mode intact)",
+              status == 200 and
+              plan == (HERE / "index.html").read_bytes())
         status, info = http("GET", "/info")
         check("GET /info", status == 200 and
               json.loads(info)["out"] == str(out_dir))
@@ -641,6 +646,73 @@ def main() -> int:
             check("gate summary says 0 takes failed",
                   summary and summary[0].startswith("SUMMARY: 0 of"),
                   str(summary))
+
+        print("\n== POST /free (the FREE RECORD session path) ==")
+        n_f = 5
+        fluma = bytes(range(256)) * (n_f * LUMA_BYTES // 256)
+        buf = BytesIO()
+        with wave.open(buf, "wb") as wv:
+            wv.setnchannels(1)
+            wv.setsampwidth(2)
+            wv.setframerate(RATE)
+            wv.writeframes(b"\x01\x00" * 800)
+        fwav = buf.getvalue()
+        fmeta = {"tool": "browser_free_record",
+                 "wall_clock_start": "2026-10-20T12:00:00.000Z",
+                 "wall_clock_end": "2026-10-20T12:00:05.000Z",
+                 "n_frames": n_f,
+                 "audio": {"sample_rate": RATE, "samples": 800}}
+        fts = {"wall_clock_start": fmeta["wall_clock_start"],
+               "frame_offsets_ms": [round(i * 33.4, 1)
+                                    for i in range(n_f)]}
+        fwebm = b"\x1a\x45\xdf\xa3" + b"\x00" * 16
+
+        def free_body(meta, wav, luma, ts, webm):
+            parts = []
+            for chunk in (json.dumps(meta).encode(), wav, luma,
+                          json.dumps(ts).encode(), webm):
+                parts.append(struct.pack("<Q", len(chunk)))
+                parts.append(chunk)
+            return b"".join(parts)
+
+        root_before = {p.name for p in out_dir.glob("*.json")}
+        status, body = http("POST", "/free", free_body(
+            fmeta, fwav, fluma, fts, fwebm))
+        j = json.loads(body)
+        check("POST /free accepted", status == 200 and j.get("ok"),
+              j.get("error", ""))
+        fdir = out_dir / "free_sessions" / str(j.get("stamp"))
+        check("session folder holds the five files",
+              j.get("ok") and all((fdir / f).is_file() for f in
+                                  ("meta.json", "audio.wav", "luma.raw",
+                                   "timestamps.json", "video.webm")))
+        check("luma.raw is frames x 15360",
+              j.get("ok") and
+              (fdir / "luma.raw").stat().st_size == n_f * LUMA_BYTES)
+        jmeta = json.loads((fdir / "meta.json").read_text())
+        check("meta.json round-trips",
+              jmeta.get("tool") == "browser_free_record" and
+              jmeta.get("n_frames") == n_f)
+        jts = json.loads((fdir / "timestamps.json").read_text())
+        check("timestamps.json holds one offset per frame",
+              len(jts.get("frame_offsets_ms", [])) == n_f)
+        root_after = {p.name for p in out_dir.glob("*.json")}
+        check("free session adds NO json to the out root (gate-safe)",
+              root_before == root_after)
+        status, body = http("POST", "/free", free_body(
+            dict(fmeta, n_frames=99), fwav, fluma, fts, fwebm))
+        check("luma/n_frames mismatch rejected with 400",
+              status == 400 and not json.loads(body).get("ok"))
+        status, body = http("POST", "/log",
+                            json.dumps({"kind": "verify-heartbeat",
+                                        "state": "idle"}).encode())
+        diag_line = ""
+        if (HERE / "diag.log").is_file():
+            diag_line = (HERE / "diag.log").read_text().strip().splitlines()[-1]
+        check("POST /log appends a JSONL line to diag.log",
+              status == 200 and json.loads(diag_line)
+              .get("kind") == "verify-heartbeat" and
+              "received_at" in json.loads(diag_line))
 
         failures = sum(1 for _, ok, _ in RESULTS if ok is False)
         skipped = sum(1 for _, ok, _ in RESULTS if ok is None)

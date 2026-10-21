@@ -296,3 +296,52 @@ at 2.5 s, a target+15 s cap); the hang was AFTER the loop. Three fixes:
 
 Also a browser reload, nothing server-side. Verify suite after this
 patch: 145 passed, 0 failed.
+
+## Patch 2026-10-20 (same session, sixth): THE PIVOT — FREE RECORD is the front door
+
+Casey is right that the plan page is over-built for what he needs at the
+chair; this supersedes the queued instrumentation patch. The heartbeat
+survives only where it rides for free — and it does, on the new page.
+
+**`/` is now FREE RECORD** (`free_record.html`): one RECORD button, one
+STOP button, a live preview, an elapsed clock and an audio level meter —
+nothing else. FOUR states — idle, recording, saving, saved — through a
+single `setState`; anything more is wrong. While recording it captures
+the native-res WebM (video + mic via MediaRecorder), the raw 160×96 luma
+canvas stream with a per-frame timestamp (one frame per
+requestAnimationFrame), and full-rate 16-bit mono WAV (the AudioContext
+opens at the browser's default rate; no resampling, no processing). At
+STOP it all POSTs once and the server writes `<out>/free_sessions/
+<stamp>/` holding five files: `video.webm`, `luma.raw`,
+`timestamps.json`, `audio.wav`, `meta.json` (camera track settings,
+achieved video fps, the honest audio rate, the luma layout). No
+conditions, no plan, no in-browser math pass — the browser records,
+analysis happens offline. Offline loading is one line:
+`np.fromfile("luma.raw", np.uint8).reshape(-1, 96, 160)`.
+
+- **The heartbeat rides for free**: while recording or saving, the page
+  POSTs `/log` once a second (state, frame/sample counts, recorder and
+  AudioContext state, tab visibility), plus every click and phase change
+  the instant they happen; the server appends JSONL to
+  `browser_capture/diag.log`, stamped on receipt. Watch live with
+  `tail -f browser_capture/diag.log`. A failed save keeps the session in
+  the tab behind a RETRY SAVE button; the upload is bounded at 300 s.
+- **Plan mode is intact at `/plan`** — the old page, unchanged behavior
+  (it gained one link back to the front door). The plan page's own
+  instrumentation was superseded and was not added.
+- **Gate safety preserved**: `free_sessions/` is a subdirectory, so its
+  JSONs are invisible to the gate's non-recursive out-root glob — the
+  same reasoning as `rich/`, now asserted in verify.py.
+- **`/free` validates honesty, not a schema**: luma length ==
+  n_frames × 15,360, one timestamp per frame, the WAV parses as mono
+  16-bit at exactly the rate meta claims, the WebM starts with the EBML
+  magic; bodies cap at 2 GB (~35-minute sessions).
+
+**RESTART THE SERVER for this one, then reload the page.** Routing
+changed (`/` serves a different page) and `/free` + `/log` are new
+endpoints — the first patch in this series that needs the restart.
+After it, http://localhost:8765 lands on FREE RECORD.
+
+Verify suite after this patch: 154 passed, 0 failed (nine new checks:
+front-door routing, plan intact at /plan, the /free write path, the
+gate-safe subfolder, the dishonest-body 400, and /log).

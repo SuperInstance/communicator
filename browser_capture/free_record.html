@@ -1,0 +1,481 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Free Record</title>
+<style>
+  :root { --bg:#101418; --panel:#1a2027; --line:#2d3945; --fg:#e8edf2;
+    --dim:#8fa1b3; --accent:#4db6ac; --rec:#e05252; --ok:#7ec97e; }
+  * { box-sizing: border-box; }
+  body { margin:0 auto; padding:16px 18px 40px; background:var(--bg);
+    color:var(--fg); font-family: system-ui, -apple-system, "Segoe UI",
+    Roboto, sans-serif; max-width: 900px; }
+  header { display:flex; align-items:baseline; gap:14px; flex-wrap:wrap;
+    border-bottom:1px solid var(--line); padding-bottom:10px;
+    margin-bottom:14px; }
+  h1 { font-size:22px; margin:0; letter-spacing:2px; }
+  .sub { color:var(--dim); font-size:13px; }
+  .spacer { flex:1; }
+  a.plain { color:var(--dim); font-size:13px; }
+  #videoWrap { position:relative; background:#000; border-radius:8px;
+    overflow:hidden; }
+  #video { width:100%; display:block; transform:scaleX(-1); }
+  #recBadge { position:absolute; top:10px; left:10px;
+    background:rgba(0,0,0,.65); border-radius:6px; padding:6px 12px;
+    font-size:15px; font-weight:700; color:var(--rec); display:none;
+    align-items:center; gap:8px; }
+  #recBadge .blink { width:12px; height:12px; border-radius:50%;
+    background:var(--rec); animation:blink 1s infinite; }
+  @keyframes blink { 50% { opacity:.15; } }
+  .row { display:flex; gap:18px; align-items:center; margin-top:12px;
+    flex-wrap:wrap; }
+  #elapsed { font-size:44px; font-weight:800;
+    font-variant-numeric:tabular-nums; }
+  #meter { flex:1; min-width:180px; height:16px; background:#0b0e11;
+    border:1px solid var(--line); border-radius:4px; overflow:hidden; }
+  #meterFill { height:100%; width:0%; background:linear-gradient(90deg,
+    #2e7d6e, #4db6ac 70%, #e0a458 90%, #e06c75); }
+  #state { font-size:15px; letter-spacing:2px; color:var(--dim);
+    font-weight:700; }
+  #state.recording { color:var(--rec); }
+  #state.saving { color:var(--accent); }
+  #state.saved { color:var(--ok); }
+  .controls { margin-top:14px; display:flex; gap:10px; align-items:center; }
+  button { background:#212a33; color:var(--fg); border:1px solid var(--line);
+    border-radius:6px; padding:10px 22px; font-size:16px; cursor:pointer; }
+  button:hover:not(:disabled) { border-color:var(--accent); }
+  button:disabled { opacity:.4; cursor:default; }
+  #recBtn { background:var(--rec); border:none; color:#fff;
+    font-weight:800; letter-spacing:1px; padding:12px 26px; }
+  #msg { margin-top:10px; color:var(--dim); font-size:14px;
+    min-height:20px; }
+  #msg.err { color:#e06c75; }
+</style>
+</head>
+<body>
+<header>
+  <h1>FREE RECORD</h1>
+  <span class="sub">the browser records; analysis happens offline</span>
+  <span class="spacer"></span>
+  <a class="plain" href="/plan">plan mode &rarr;</a>
+</header>
+<div id="videoWrap">
+  <video id="video" autoplay playsinline muted></video>
+  <div id="recBadge"><span class="blink"></span>REC</div>
+</div>
+<div class="row">
+  <div id="elapsed">0:00</div>
+  <div id="meter"><div id="meterFill"></div></div>
+  <div id="state">IDLE</div>
+</div>
+<div class="controls">
+  <button id="recBtn">RECORD</button>
+  <button id="stopBtn" disabled>STOP</button>
+  <button id="retryBtn" style="display:none;">RETRY SAVE</button>
+</div>
+<div id="msg"></div>
+<script>
+"use strict";
+/* ============================================================================
+   FREE RECORD -- the page's front door. One RECORD button, one STOP
+   button, a live preview, an elapsed clock and an audio level: nothing
+   else. STATES: idle, recording, saving, saved -- more than that is
+   wrong, and there is exactly one setState through which they all flow.
+
+   At STOP the whole session is POSTed once and written by the server as
+   <out>/free_sessions/<stamp>/ holding five files: video.webm (the
+   native-res stream with the mic muxed), luma.raw (the raw 160x96 luma
+   canvas stream), timestamps.json (a per-frame offset for every luma
+   frame), audio.wav (full-rate 16-bit mono), and meta.json (track
+   settings, achieved rates, layout). No conditions, no plan, no
+   in-browser math pass -- the browser records, analysis happens
+   offline. The plan page is intact behind this at /plan.
+
+   A diagnostics heartbeat rides along for free: while recording or
+   saving, one small POST /log per second (state, frame and sample
+   counts, recorder and AudioContext state, tab visibility) so a session
+   is never a black box on the server side. Pure observation.
+   ========================================================================== */
+const $ = (id) => document.getElementById(id);
+const videoEl = $("video");
+const LB = 160 * 96;
+
+let state = "idle";          // idle | recording | saving | saved
+let stream = null, audioCtx = null, realRate = 0, micName = "", camName = "";
+let recorder = null, webmChunks = [], webmMime = null;
+let frames = [], frameTs = [], nFrames = 0;
+let audioChunks = [], nSamples = 0;
+let level = 0;
+let t0ms = 0, wallStart = "";
+let payload = null;          // the unsaved session while saving / on failure
+
+function setState(s) {
+  state = s;
+  $("state").textContent = s.toUpperCase();
+  $("state").className = s;
+  $("recBtn").disabled = s === "recording" || s === "saving";
+  $("stopBtn").disabled = s !== "recording";
+  $("recBadge").style.display = s === "recording" ? "flex" : "none";
+  diagSend("PHASE", { to: s });
+}
+
+function fmtT(s) {
+  const m = Math.floor(s / 60), r = Math.floor(s % 60);
+  return m + ":" + String(r).padStart(2, "0");
+}
+function sleep(ms) { return new Promise(r => setTimeout(r, ms)); }
+function rms(a) {
+  let s = 0;
+  for (let i = 0; i < a.length; i++) s += a[i] * a[i];
+  return Math.sqrt(s / a.length);
+}
+
+/* -- the diagnostics heartbeat (rides for free) ------------------------- */
+function diagSend(kind, fields) {
+  const body = JSON.stringify(Object.assign({
+    kind: kind, page: "free_record", ts: new Date().toISOString(),
+    state: state, n_frames: nFrames, n_samples: nSamples,
+    audio_chunks: audioChunks.length,
+    recorder: recorder ? recorder.state : null,
+    audioCtxState: audioCtx ? audioCtx.state : null,
+    visibility: document.visibilityState,
+  }, fields || {}));
+  try {
+    if (navigator.sendBeacon && navigator.sendBeacon("/log",
+        new Blob([body], { type: "application/json" })))
+      return;
+  } catch (e) { /* fall through to fetch */ }
+  fetch("/log", { method: "POST", body: body, keepalive: true,
+    headers: { "Content-Type": "application/json" } }).catch(() => {});
+}
+setInterval(() => {
+  if (state === "recording" || state === "saving") diagSend("heartbeat");
+}, 1000);
+
+/* -- the recorder -------------------------------------------------------- */
+function pickMime() {
+  if (typeof MediaRecorder === "undefined") return null;
+  for (const c of ["video/webm;codecs=vp9,opus", "video/webm;codecs=vp8,opus",
+                   "video/webm"])
+    if (MediaRecorder.isTypeSupported(c)) return c;
+  return null;
+}
+
+async function relaxExposure(track) {
+  // capability-checked nudge, a no-op where unsupported: let the camera's
+  // own auto-exposure run (the plan page learned this the hard way)
+  try {
+    const caps = track && track.getCapabilities ? track.getCapabilities()
+      : null;
+    if (caps && Array.isArray(caps.exposureMode) &&
+        caps.exposureMode.includes("continuous"))
+      await track.applyConstraints(
+        { advanced: [{ exposureMode: "continuous" }] });
+  } catch (err) { /* best effort */ }
+}
+
+/* One luma frame + timestamp per requestAnimationFrame. rAF follows the
+   display, not the camera -- duplicate frames when the camera is slower
+   are identifiable offline from the timestamps. A backgrounded tab
+   throttles rAF; keep this tab in the foreground while recording. */
+const canvas = document.createElement("canvas");
+canvas.width = 160; canvas.height = 96;
+const cctx = canvas.getContext("2d", { willReadFrequently: true });
+cctx.imageSmoothingEnabled = true;
+cctx.imageSmoothingQuality = "high";
+
+function drawLoop() {
+  requestAnimationFrame(drawLoop);
+  if (!stream) return;
+  cctx.drawImage(videoEl, 0, 0, 160, 96);
+  if (state === "recording") {
+    const d = cctx.getImageData(0, 0, 160, 96).data;
+    const f = new Uint8Array(LB);
+    for (let i = 0, j = 0; i < d.length; i += 4, j++) {
+      // BT.601 full-range luma, the coefficients the corpus luma uses
+      let y = 0.299 * d[i] + 0.587 * d[i + 1] + 0.114 * d[i + 2];
+      f[j] = y > 255 ? 255 : Math.round(y);
+    }
+    frames.push(f);
+    frameTs.push(Math.round((performance.now() - t0ms) * 10) / 10);
+    nFrames++;
+    $("elapsed").textContent = fmtT((performance.now() - t0ms) / 1000);
+  }
+  const db = 20 * Math.log10(Math.max(level, 1e-7));
+  $("meterFill").style.width =
+    Math.max(0, Math.min(100, (db + 60) / 60 * 100)).toFixed(1) + "%";
+}
+
+/* -- RECORD / STOP ------------------------------------------------------- */
+$("recBtn").onclick = () => {
+  if (state === "recording" || state === "saving") return;
+  diagSend("RECORD_CLICKED");
+  frames = []; frameTs = []; nFrames = 0;
+  audioChunks = []; nSamples = 0;
+  webmChunks = []; webmMime = pickMime();
+  wallStart = new Date().toISOString();
+  t0ms = performance.now();
+  payload = null;
+  $("elapsed").textContent = "0:00";
+  $("msg").textContent = ""; $("msg").className = "";
+  $("retryBtn").style.display = "none";
+  if (webmMime) {
+    try {
+      recorder = new MediaRecorder(stream,
+        { mimeType: webmMime, videoBitsPerSecond: 4000000 });
+      recorder.ondataavailable = (e) => {
+        if (e.data && e.data.size) webmChunks.push(e.data);
+      };
+      recorder.start(1000);
+    } catch (err) { recorder = null; }
+  }
+  setState("recording");
+};
+
+$("stopBtn").onclick = async () => {
+  if (state !== "recording") return;
+  diagSend("STOP_CLICKED", { n_frames: nFrames, n_samples: nSamples });
+  setState("saving");
+  const wallEnd = new Date().toISOString();
+  if (recorder && recorder.state !== "inactive") {
+    // bounded, per the live bug: never wait forever on onstop
+    await Promise.race([
+      new Promise((res) => { recorder.onstop = res; recorder.stop(); }),
+      sleep(3000),
+    ]).catch(() => {});
+  }
+  diagSend("RECORDER_STOP", { state: recorder ? recorder.state : null });
+  $("elapsed").textContent = fmtT((performance.now() - t0ms) / 1000);
+  payload = await buildPayload(wallEnd);
+  await save();
+};
+
+$("retryBtn").onclick = () => { if (payload) save(); };
+
+async function save() {
+  setState("saving");
+  $("msg").textContent = "saving " + payload.meta.n_frames +
+    " frames, " + payload.meta.audio.samples + " samples ...";
+  const ctl = typeof AbortController !== "undefined" ?
+    new AbortController() : null;
+  const kill = ctl ? setTimeout(() => ctl.abort(), 300000) : 0;
+  try {
+    const resp = await fetch("/free", { method: "POST", body: payload.blob,
+      signal: ctl ? ctl.signal : undefined });
+    const j = await resp.json().catch(() => ({ ok: false,
+                                               error: "bad reply" }));
+    if (!resp.ok || !j.ok)
+      throw new Error(j.error || ("HTTP " + resp.status));
+    setState("saved");
+    $("msg").className = "";
+    $("msg").textContent = "saved " + j.dir + " -- " +
+      payload.meta.n_frames + " frames, " +
+      (payload.meta.audio.samples / payload.meta.audio.sample_rate)
+        .toFixed(1) + " s of audio" +
+      (j.files.includes("video.webm") ? ", webm" : "");
+    diagSend("SAVED", { dir: j.dir, n_frames: payload.meta.n_frames });
+    payload = null;   // the session is on disk; let it go
+  } catch (err) {
+    // back to idle (nothing in flight), the session still held in the
+    // tab: RETRY SAVE re-enters saving; RECORD would discard it
+    setState("idle");
+    $("msg").className = "err";
+    $("msg").textContent = "SAVE FAILED (" +
+      (err && err.name === "AbortError" ?
+        "no answer from the server for 300 s" : err.message) +
+      ") -- the session is still held in this tab; RETRY SAVE, and do " +
+      "not press RECORD unless you mean to discard it";
+    $("retryBtn").style.display = "";
+    diagSend("SAVE_FAILED", { error: String(err && err.message) });
+  } finally {
+    if (kill) clearTimeout(kill);
+  }
+}
+
+/* -- the POST body: five length-prefixed sections ----------------------- */
+function section(parts, bytes) {
+  const len = new ArrayBuffer(8);
+  new DataView(len).setBigUint64(0, BigInt(bytes.length), true);
+  parts.push(new Uint8Array(len), bytes);
+}
+const enc = (s) => new TextEncoder().encode(s);
+
+function buildWav(samples, n, rate) {
+  const buf = new ArrayBuffer(44 + n * 2);
+  const dv = new DataView(buf);
+  const ws = (off, s) => { for (let i = 0; i < s.length; i++)
+    dv.setUint8(off + i, s.charCodeAt(i)); };
+  ws(0, "RIFF"); dv.setUint32(4, 36 + n * 2, true); ws(8, "WAVE");
+  ws(12, "fmt "); dv.setUint32(16, 16, true); dv.setUint16(20, 1, true);
+  dv.setUint16(22, 1, true); dv.setUint32(24, rate, true);
+  dv.setUint32(28, rate * 2, true); dv.setUint16(32, 2, true);
+  dv.setUint16(34, 16, true); ws(36, "data"); dv.setUint32(40, n * 2, true);
+  const pcm = new Int16Array(buf, 44, n);
+  for (let i = 0; i < n; i++) {
+    let v = Math.round(samples[i] * 32767);
+    pcm[i] = v > 32767 ? 32767 : v < -32768 ? -32768 : v;
+  }
+  return new Uint8Array(buf);
+}
+
+async function buildPayload(wallEnd) {
+  const samples = new Float32Array(nSamples);
+  let off = 0;
+  for (const c of audioChunks) { samples.set(c, off); off += c.length; }
+  const wav = buildWav(samples, nSamples, realRate);
+  let webm = null;
+  if (webmChunks.length) {
+    try {
+      webm = new Uint8Array(await new Blob(webmChunks).arrayBuffer());
+    } catch (err) { webm = null; }
+  }
+  const luma = new Uint8Array(nFrames * LB);
+  for (let i = 0; i < nFrames; i++) luma.set(frames[i], i * LB);
+
+  // the camera track's own settings at stop time, plus the achieved rates
+  let camSettings = {};
+  const vt = stream ? stream.getVideoTracks()[0] : null;
+  if (vt && vt.getSettings) {
+    const st = vt.getSettings() || {};
+    for (const k of ["frameRate", "width", "height", "exposureTime",
+                     "exposureMode", "deviceId"])
+      if (st[k] !== undefined) camSettings[k] = st[k];
+  }
+  const spanMs = frameTs.length > 1 ? frameTs[frameTs.length - 1] : 0;
+  const meta = {
+    tool: "browser_free_record",
+    wall_clock_start: wallStart,
+    wall_clock_end: wallEnd,
+    n_frames: nFrames,
+    luma: {
+      width: 160, height: 96, frame_bytes: LB,
+      format: "uint8 BT.601 full-range luma (0.299R+0.587G+0.114B), " +
+        "row-major, frames concatenated -- " +
+        "np.fromfile(path, np.uint8).reshape(-1, 96, 160)",
+    },
+    timestamps: {
+      file: "timestamps.json",
+      frame_offsets_ms: "performance.now() minus the first frame; pair " +
+        "with wall_clock_start for absolute time",
+    },
+    video: {
+      webm_mime: webmMime, webm_bytes: webm ? webm.length : 0,
+      recorder_ran: !!recorder,
+    },
+    audio: {
+      sample_rate: realRate, samples: nSamples,
+      wav: "16-bit PCM mono at the AudioContext's honest rate (no " +
+        "resampling, no processing; the context is opened at the " +
+        "browser's default rate)",
+    },
+    achieved_video_fps: spanMs > 0 ?
+      Math.round((nFrames - 1) / (spanMs / 1000) * 10000) / 10000 : null,
+    camera: { label: camName, settings: camSettings },
+    mic: { label: micName },
+    browser: navigator.userAgent,
+    note: "frames are captured on requestAnimationFrame; a backgrounded " +
+      "tab throttles it -- keep this tab in the foreground",
+  };
+  const ts = { wall_clock_start: wallStart, frame_offsets_ms: frameTs };
+
+  const parts = [];
+  section(parts, enc(JSON.stringify(meta)));
+  section(parts, wav);
+  section(parts, luma);
+  section(parts, enc(JSON.stringify(ts)));
+  section(parts, webm || new Uint8Array(0));
+  return { blob: new Blob(parts, { type: "application/octet-stream" }),
+           meta: meta };
+}
+
+/* -- boot ---------------------------------------------------------------- */
+async function boot() {
+  drawLoop();
+  try {
+    stream = await navigator.mediaDevices.getUserMedia({
+      video: true,   // near-default: the camera's auto-exposure runs the show
+      audio: { channelCount: 1, echoCancellation: false,
+               noiseSuppression: false, autoGainControl: false },
+    });
+  } catch (err) {
+    $("msg").className = "err";
+    $("msg").textContent = "camera/microphone refused (" + err.name +
+      ") -- allow both, then reload";
+    return;
+  }
+  videoEl.srcObject = stream;
+  await videoEl.play();
+  micName = (stream.getAudioTracks()[0] || {}).label || "browser mic";
+  const vt = stream.getVideoTracks()[0];
+  camName = (vt || {}).label || "browser camera";
+  relaxExposure(vt);
+
+  try {
+    audioCtx = new AudioContext();   // default rate: full-rate audio
+  } catch (err) {
+    $("msg").className = "err";
+    $("msg").textContent = "no AudioContext (" + err.name +
+      ") -- recording needs one";
+    return;
+  }
+  await audioCtx.resume();
+  realRate = audioCtx.sampleRate;
+
+  const workletSrc =
+    "class PColl extends AudioWorkletProcessor {" +
+    "  process(inputs) {" +
+    "    const ins = inputs[0];" +
+    "    if (ins && ins.length) {" +
+    "      let ch = ins[0];" +
+    "      if (ins.length > 1) {" +
+    "        const m = new Float32Array(ch.length);" +
+    "        for (let i = 0; i < ch.length; i++)" +
+    "          m[i] = (ins[0][i] + ins[1][i]) * 0.5;" +
+    "        ch = m;" +
+    "      }" +
+    "      const c = new Float32Array(ch.length);" +
+    "      c.set(ch);" +
+    "      this.port.postMessage(c, [c.buffer]);" +
+    "    }" +
+    "    return true;" +
+    "  }" +
+    "}" +
+    "registerProcessor('pcoll', PColl);";
+  await audioCtx.audioWorklet.addModule(URL.createObjectURL(
+    new Blob([workletSrc], { type: "application/javascript" })));
+  const src = audioCtx.createMediaStreamSource(stream);
+  const node = new AudioWorkletNode(audioCtx, "pcoll");
+  node.port.onmessage = (ev) => {
+    level = rms(ev.data);
+    if (state === "recording") {
+      audioChunks.push(ev.data);
+      nSamples += ev.data.length;
+    }
+  };
+  src.connect(node);
+  diagSend("BOOT", { cam: camName, mic: micName, rate: realRate });
+
+  try {
+    const r = await fetch("/info");
+    const j = await r.json();
+    if (j && j.out)
+      $("msg").textContent = "ready -- sessions will be saved under " +
+        j.out + "/free_sessions/";
+  } catch (err) {
+    $("msg").className = "err";
+    $("msg").textContent = "server DOWN -- run: python3 " +
+      "browser_capture/server.py (recording works; SAVING needs the server)";
+  }
+}
+boot();
+
+window.addEventListener("beforeunload", (ev) => {
+  if (state === "recording" || state === "saving" || payload) {
+    ev.preventDefault();
+    ev.returnValue = "";
+  }
+});
+</script>
+</body>
+</html>

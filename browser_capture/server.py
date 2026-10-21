@@ -2,12 +2,15 @@
 server.py -- the localhost half of the browser-native corpus capture.
 
 WHY THIS EXISTS (docs/research/BRIEF-BROWSER-CAPTURE.md). The Windows-terminal
-capture flow works but is clunky. This server plus index.html give the same
-corpus recording a browser surface: live self-preview, big prompts, one click
-per plan. The DATA PRODUCT IS UNCHANGED -- every take this accepts is written
-in EXACTLY the layout `corpus_capture_win.py --plan` writes, so the existing
-pipeline (src/nv12.py, src/wavio.py, experiments/corpus_integrity.py) accepts
-the takes without modification.
+capture flow works but is clunky. This server serves two pages:
+free_record.html at / -- the FRONT DOOR, a FREE RECORD mode with one
+RECORD button and one STOP button that saves the whole raw session for
+offline analysis -- and index.html at /plan, the condition-plan surface
+(live self-preview, big prompts, one click per plan). The plan page's
+DATA PRODUCT IS UNCHANGED -- every take it accepts is written in EXACTLY
+the layout `corpus_capture_win.py --plan` writes, so the existing
+pipeline (src/nv12.py, src/wavio.py, experiments/corpus_integrity.py)
+accepts the takes without modification.
 
 PYTHON STDLIB ONLY. No numpy, no pip installs, no external calls. The one
 place that stings is the .npz: the script writes it with
@@ -59,7 +62,9 @@ invisible to the gate's non-recursive glob, one hop from everything they
 reference. verify.py asserts the gate stays green with all of this present.
 
 ENDPOINTS:
-    GET  /          -> index.html (no-store, so a refresh always gets latest)
+    GET  /          -> free_record.html, the FREE RECORD front door (no-store,
+                       so a refresh always gets latest)
+    GET  /plan      -> index.html, the condition-plan page (no-store)
     GET  /info      -> {"out": ..., "port": ...}
     GET  /takes     -> every take already in the out dir (script-made ones
                        included), newest first, with file presence and the
@@ -69,6 +74,12 @@ ENDPOINTS:
     POST /notes     -> {"condition", "stamp", "notes"}: update a take's
                        rich sidecar notes field ("what I actually did"),
                        then regenerate session.json
+    POST /free      -> write one FREE RECORD session folder under
+                       out/free_sessions/<stamp>/ (webm, luma.raw,
+                       timestamps.json, audio.wav, meta.json); the same
+                       length-prefix framing as /take but FIVE sections
+    POST /log       -> append one JSONL diagnostics line from a page to
+                       browser_capture/diag.log, stamped on receipt
 
 USAGE (from the repo root, inside WSL):
 
@@ -88,6 +99,7 @@ import json
 import re
 import struct
 import sys
+import threading
 import time
 import wave
 import zipfile
@@ -133,6 +145,22 @@ META_KEYS = [
 META_KEYS_FROM_CLIENT = [k for k in META_KEYS if k != "timestamp"]
 
 MAX_BODY = 512 * 1024 * 1024  # a 5-minute FREE take posts ~220 MB
+
+# A free session posts luma + full-rate WAV + native-res WebM in one body;
+# at ~4 Mbps webm + 30 fps luma that is roughly 35 minutes of headroom.
+MAX_FREE_BODY = 2 * 1024 * 1024 * 1024
+
+# The diagnostics heartbeat (see DONE.md): the pages POST /log while a
+# take/session runs, and every line lands here as JSONL, stamped on
+# receipt. Appends are serialized -- ThreadingHTTPServer can serve /log
+# concurrently with /take and /free.
+DIAG_LOCK = threading.Lock()
+DIAG_PATH = Path(__file__).resolve().parent / "diag.log"
+
+# The luma frame the FREE RECORD page captures, same geometry as the plan
+# page's data view.
+FREE_W, FREE_H = 160, 96
+FREE_LUMA_BYTES = FREE_W * FREE_H
 
 
 # -- the NPY format, by hand (numpy is not stdlib) --------------------------
@@ -427,6 +455,110 @@ def save_take(out: Path, take: dict) -> dict:
     }
 
 
+# -- the FREE RECORD session (the front door's artifact) ---------------------
+
+def parse_free_body(body: bytes) -> dict:
+    """Split the FIVE length-prefixed sections of a free session: meta
+    JSON, WAV bytes, luma bytes, timestamps JSON, WebM bytes.
+
+    The checks here are about honest files, not the take schema -- a free
+    session is a different artifact class (no conditions, no plan, no
+    math pass; analysis happens offline), so what must hold is only that
+    each file is what it claims to be.
+    """
+    sections, off = [], 0
+    for _ in range(5):
+        if off + 8 > len(body):
+            raise ValueError("body ended inside a length prefix")
+        (n,) = struct.unpack_from("<Q", body, off)
+        off += 8
+        if off + n > len(body):
+            raise ValueError("body ended inside a section payload")
+        sections.append(body[off:off + n])
+        off += n
+    if off != len(body):
+        raise ValueError(f"{len(body) - off} trailing bytes after last section")
+    meta_raw, wav, luma, ts_raw, webm = sections
+
+    try:
+        meta = json.loads(meta_raw.decode("utf-8"))
+        ts = json.loads(ts_raw.decode("utf-8"))
+    except (UnicodeDecodeError, json.JSONDecodeError) as exc:
+        raise ValueError(f"meta/timestamps is not UTF-8 JSON: {exc}") from exc
+    if not isinstance(meta, dict) or not isinstance(ts, dict):
+        raise ValueError("meta and timestamps must be JSON objects")
+    if meta.get("tool") != "browser_free_record":
+        raise ValueError(f"meta.tool {meta.get('tool')!r} is not this "
+                         "endpoint's")
+    for key in ("wall_clock_start", "wall_clock_end", "n_frames", "audio"):
+        if key not in meta:
+            raise ValueError(f"meta is missing {key!r}")
+    n = meta["n_frames"]
+    if not isinstance(n, int) or isinstance(n, bool) or n < 0:
+        raise ValueError("meta.n_frames must be a non-negative integer")
+    if len(luma) != n * FREE_LUMA_BYTES:
+        raise ValueError(f"luma is {len(luma)} bytes; n_frames {n} needs "
+                         f"{n * FREE_LUMA_BYTES} (160x96 per frame)")
+    offs = ts.get("frame_offsets_ms")
+    if not isinstance(offs, list) or len(offs) != n:
+        raise ValueError("timestamps.frame_offsets_ms must hold n_frames "
+                         "entries")
+    audio = meta["audio"]
+    if not isinstance(audio, dict):
+        raise ValueError("meta.audio must be an object")
+    rate = audio.get("sample_rate")
+    if not isinstance(rate, int) or rate <= 0:
+        raise ValueError("meta.audio.sample_rate must be a positive int")
+    # the WAV must be an honest mono 16-bit file at the claimed rate
+    try:
+        with wave.open(io.BytesIO(wav), "rb") as wv:
+            info = (wv.getnchannels(), wv.getsampwidth(), wv.getframerate(),
+                    wv.getnframes())
+    except wave.Error as exc:
+        raise ValueError(f"WAV does not parse: {exc}") from exc
+    if info[0] != 1 or info[1] != 2:
+        raise ValueError(f"WAV must be mono 16-bit, got ch={info[0]} "
+                         f"width={info[1] * 8}bit")
+    if info[2] != rate:
+        raise ValueError(f"WAV header says {info[2]} Hz but meta says "
+                         f"{rate} Hz -- the header must be honest")
+    if webm and webm[:4] != b"\x1a\x45\xdf\xa3":
+        raise ValueError("WebM section does not start with the EBML magic")
+
+    return {"meta": meta, "wav": wav, "luma": luma, "ts": ts, "webm": webm,
+            "wav_frames": info[3]}
+
+
+def save_free_session(out: Path, sess: dict) -> dict:
+    """One folder, out/free_sessions/<stamp>/, with the five files. NOT
+    the take layout, deliberately: no conditions, no plan, no math pass
+    -- the browser recorded, analysis happens offline. The subfolder also
+    keeps every json here away from the gate's out-root glob, the same
+    reasoning that puts the rich copies in out/rich/.
+    """
+    root = out / "free_sessions"
+    root.mkdir(parents=True, exist_ok=True)
+    stamp = int(time.time())
+    while (root / str(stamp)).exists():
+        stamp += 1
+    d = root / str(stamp)
+    d.mkdir()
+    files = ["meta.json", "audio.wav", "luma.raw", "timestamps.json"]
+    (d / "meta.json").write_text(json.dumps(sess["meta"], indent=2))
+    (d / "audio.wav").write_bytes(sess["wav"])
+    (d / "luma.raw").write_bytes(sess["luma"])
+    (d / "timestamps.json").write_text(json.dumps(sess["ts"]))
+    if sess["webm"]:
+        (d / "video.webm").write_bytes(sess["webm"])
+        files.append("video.webm")
+    meta = sess["meta"]
+    rate = meta["audio"]["sample_rate"]
+    print(f"[free] free_sessions/{stamp}: {meta['n_frames']} frames, "
+          f"audio {sess['wav_frames'] / rate:.2f}s @ {rate} Hz"
+          + (", webm" if sess["webm"] else ""), flush=True)
+    return {"stamp": stamp, "dir": f"free_sessions/{stamp}", "files": files}
+
+
 # -- the flags, mirrored from the gate so session.json can carry them -------
 
 def take_flags(meta: dict, timing: dict, has_npz: bool, has_wav: bool,
@@ -604,6 +736,7 @@ class Handler(BaseHTTPRequestHandler):
     # class-level wiring set by main()
     out_dir: Path = None
     index_path: Path = None
+    free_path: Path = None
 
     def log_message(self, fmt, *args):  # keep the console signal-heavy
         if self.command in ("POST",) or " 40" in (fmt % args) \
@@ -669,8 +802,76 @@ class Handler(BaseHTTPRequestHandler):
         print(f"[notes] {cond}_{stamp}: {len(notes)} chars", flush=True)
         self._json(200, {"ok": True, "condition": cond, "stamp": stamp})
 
+    def _handle_log(self):
+        """Append one diagnostics line from a page as JSONL, stamped on
+        receipt. Any JSON object is accepted: the heartbeat exists to be
+        watched live (tail -f browser_capture/diag.log), not judged.
+        """
+        try:
+            n = int(self.headers.get("Content-Length", "0"))
+        except ValueError:
+            n = -1
+        if n <= 0 or n > 65536:
+            self._json(400, {"ok": False, "error": "bad Content-Length"})
+            return
+        try:
+            evt = json.loads(self.rfile.read(n).decode("utf-8"))
+        except (UnicodeDecodeError, json.JSONDecodeError) as exc:
+            self._json(400, {"ok": False, "error": f"not JSON: {exc}"})
+            return
+        if not isinstance(evt, dict):
+            self._json(400, {"ok": False, "error": "expected a JSON object"})
+            return
+        now = time.time()
+        line = {"received_at": time.strftime("%Y-%m-%dT%H:%M:%S",
+                                             time.gmtime(now)) +
+                f".{int((now % 1) * 1000):03d}Z"}
+        line.update(evt)
+        with DIAG_LOCK:
+            with DIAG_PATH.open("a", encoding="utf-8") as f:
+                f.write(json.dumps(line) + "\n")
+        self._json(200, {"ok": True})
+
+    def _handle_free(self):
+        """Write one FREE RECORD session folder (the front door's artifact)."""
+        try:
+            n = int(self.headers.get("Content-Length", "0"))
+        except ValueError:
+            n = -1
+        if n <= 0:
+            self._json(400, {"ok": False, "error": "Content-Length required"})
+            return
+        if n > MAX_FREE_BODY:
+            self._json(400, {"ok": False, "error":
+                             f"body {n} > {MAX_FREE_BODY} bytes -- keep a "
+                             "free session under ~35 minutes, or it cannot "
+                             "be uploaded in one piece"})
+            return
+        body = self.rfile.read(n)
+        if len(body) != n:
+            self._json(400, {"ok": False, "error": "truncated body"})
+            return
+        try:
+            sess = parse_free_body(body)
+            result = save_free_session(self.out_dir, sess)
+        except ValueError as exc:
+            self._json(400, {"ok": False, "error": str(exc)})
+            return
+        except OSError as exc:
+            self._json(500, {"ok": False, "error": f"write failed: {exc}"})
+            return
+        self._json(200, {"ok": True, **result})
+
     def do_GET(self):
-        if self.path in ("/", "/index.html"):
+        if self.path in ("/", "/free", "/free_record.html"):
+            try:
+                page = self.free_path.read_bytes()
+            except OSError as exc:
+                self._json(500, {"ok": False,
+                                 "error": f"free_record.html: {exc}"})
+                return
+            self._send(200, page, "text/html; charset=utf-8")
+        elif self.path in ("/plan", "/index.html"):
             try:
                 page = self.index_path.read_bytes()
             except OSError as exc:
@@ -688,6 +889,12 @@ class Handler(BaseHTTPRequestHandler):
     def do_POST(self):
         if self.path == "/notes":
             self._handle_notes()
+            return
+        if self.path == "/log":
+            self._handle_log()
+            return
+        if self.path == "/free":
+            self._handle_free()
             return
         if self.path != "/take":
             self._json(404, {"ok": False, "error": f"no {self.path!r}"})
@@ -747,6 +954,7 @@ def main(argv=None) -> int:
     out.mkdir(parents=True, exist_ok=True)
     Handler.out_dir = out
     Handler.index_path = Path(__file__).resolve().parent / "index.html"
+    Handler.free_path = Path(__file__).resolve().parent / "free_record.html"
 
     httpd = ThreadingHTTPServer((a.host, a.port), Handler)
     httpd.daemon_threads = True
