@@ -84,6 +84,7 @@
   <h1>FREE RECORD &mdash; AUTO</h1>
   <span class="sub">it arms itself; the corpus accrues while you live your life</span>
   <span class="spacer"></span>
+  <a class="plain" href="/live">live monitor</a> &middot;
   <a class="plain" href="/plan">plan mode &rarr;</a>
 </header>
 
@@ -298,7 +299,24 @@ function diagSend(kind, fields) {
   fetch("/log", { method: "POST", body: body, keepalive: true,
     headers: { "Content-Type": "application/json" } }).catch(() => {});
 }
-setInterval(() => diagSend("heartbeat"), 1000);
+setInterval(() => {
+  diagSend("heartbeat");
+  postThumb();
+}, 1000);
+
+/* the LIVE MONITOR's window: one small JPEG of the 160x96 luma canvas
+   per second -- what the pipeline sees, not the pretty preview. Latest
+   wins server-side; nothing is stored. */
+function postThumb() {
+  if (!stream) return;
+  try {
+    const data = canvas.toDataURL("image/jpeg", 0.6);
+    fetch("/thumb", { method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ data: data, ts: new Date().toISOString() }),
+    }).catch(() => {});
+  } catch (err) { /* canvas unavailable -- the monitor goes without */ }
+}
 
 /* -- the canvas + frame capture ------------------------------------------- */
 const canvas = document.createElement("canvas");

@@ -681,6 +681,7 @@ def main() -> int:
         j = json.loads(body)
         check("POST /free accepted", status == 200 and j.get("ok"),
               j.get("error", ""))
+        free_stamp = j.get("stamp")
         fdir = out_dir / "free_sessions" / str(j.get("stamp"))
         check("session folder holds the five files",
               j.get("ok") and all((fdir / f).is_file() for f in
@@ -713,6 +714,31 @@ def main() -> int:
               status == 200 and json.loads(diag_line)
               .get("kind") == "verify-heartbeat" and
               "received_at" in json.loads(diag_line))
+
+        print("\n== the LIVE MONITOR endpoints ==")
+        status, body = http("GET", "/live")
+        check("GET /live is the repo's live.html",
+              status == 200 and body == (HERE / "live.html").read_bytes())
+        status, body = http("GET", "/live-state")
+        j = json.loads(body)
+        check("/live-state returns events and segments",
+              status == 200 and j.get("ok") and
+              isinstance(j.get("events"), list) and
+              isinstance(j.get("segments"), list))
+        status, body = http("POST", "/thumb", json.dumps(
+            {"data": "data:image/jpeg;base64,dmVyaWZ5",
+             "ts": "2026-10-21T00:00:00Z"}).encode())
+        check("POST /thumb accepted", status == 200 and
+              json.loads(body).get("ok"))
+        status, body = http("GET", "/live-state")
+        j = json.loads(body)
+        check("the thumbnail surfaces in /live-state",
+              status == 200 and j.get("thumb", {}).get("data") ==
+              "data:image/jpeg;base64,dmVyaWZ5")
+        seg_dirs = {s["dir"] for s in j.get("segments", [])}
+        check("the free session shows up in /live-state segments",
+              f"free_sessions/{free_stamp}" in seg_dirs,
+              str(sorted(seg_dirs)))
 
         failures = sum(1 for _, ok, _ in RESULTS if ok is False)
         skipped = sum(1 for _, ok, _ in RESULTS if ok is None)

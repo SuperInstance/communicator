@@ -569,3 +569,40 @@ until they were killed by command-line match
 (`Get-CimInstance Win32_Process` filtered on the unique
 `--user-data-dir`). All headless verification now kills that way, and
 each run gets a fresh profile directory.
+
+## Patch 2026-10-21 (AUTO polish 2): the LIVE MONITOR — the stream's window
+
+Casey asked for a live stream; the stream exists (the 1 s heartbeat) —
+**http://localhost:8765/live** is its window. Read-only: the monitor
+never touches the capture page or a session; it polls `/live-state`
+once a second and shows:
+
+- **Page state from the heartbeat**: ARMED / RECORDING / PAUSED (with a
+  STALE marker when the heartbeat is >5 s old and NO PAGE when >15 s),
+  segment age, frames, audio samples, saved count, uploads retrying,
+  floors status, tab visibility, recorder state.
+- **The detectors, live**: speech level and motion as bars against
+  their thresholds — the white tick IS the trigger; a bar crossing it
+  is a segment opening before your eyes.
+- **What the pipeline sees**: the latest 160×96 luma thumbnail, POSTed
+  once a second by the capture page (`POST /thumb`, in-memory only,
+  latest wins — a window, not a record), dimmed when stale.
+- **The event feed**: SEGMENT_OPEN / CLOSE / SAVED, rotations, device
+  failures, from the diag tail.
+- **Saved segments as they land**, with close reason, duration, frames
+  and MB — and **harvest verdicts**: the contract is that a harvester
+  (MiniMax's lane) writes `free_sessions/<stamp>/verdict.json` — any
+  JSON object — and the monitor surfaces it the next second. Nothing
+  else is agreed; the harvester owns the file, the server only reads.
+
+The capture page gained a "live monitor" link; its thumbnail rides in
+the same 1 s cadence as the heartbeat. Verify suite: **159 passed,
+0 failed** (five new checks: /live serves the page, /live-state returns
+events + segments, /thumb round-trips into /live-state, and the saved
+session appears in the segment list).
+
+**Deployed by `systemctl --user restart browser-capture`** — the same
+restart ships the query-string routing fix from the previous section.
+The capture pages already open in a browser are unaffected (they
+POST bare paths); the restart's ~2 s gap is absorbed by the pages'
+30 s save-retry by design.

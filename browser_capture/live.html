@@ -1,0 +1,292 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Live Monitor</title>
+<style>
+  :root { --bg:#101418; --panel:#1a2027; --panel2:#212a33; --line:#2d3945;
+    --fg:#e8edf2; --dim:#8fa1b3; --accent:#4db6ac; --rec:#e05252;
+    --ok:#7ec97e; --warn:#e0a458; }
+  * { box-sizing: border-box; }
+  body { margin:0 auto; padding:16px 18px 40px; background:var(--bg);
+    color:var(--fg); font-family: system-ui, -apple-system, "Segoe UI",
+    Roboto, sans-serif; max-width: 1100px; }
+  header { display:flex; align-items:baseline; gap:14px; flex-wrap:wrap;
+    border-bottom:1px solid var(--line); padding-bottom:10px;
+    margin-bottom:14px; }
+  h1 { font-size:22px; margin:0; letter-spacing:2px; }
+  .sub { color:var(--dim); font-size:13px; }
+  .spacer { flex:1; }
+  a.plain { color:var(--dim); font-size:13px; }
+
+  .grid { display:grid; grid-template-columns: minmax(300px, 1fr) 1.4fr;
+    gap:16px; align-items:start; }
+  @media (max-width: 900px) { .grid { grid-template-columns: 1fr; } }
+  .card { background:var(--panel); border:1px solid var(--line);
+    border-radius:10px; padding:14px; margin-bottom:16px; }
+  .card h2 { margin:0 0 10px; font-size:12px; letter-spacing:1.5px;
+    color:var(--dim); text-transform:uppercase; font-weight:600; }
+
+  #stateChip { display:inline-flex; align-items:center; gap:10px;
+    font-size:24px; font-weight:800; letter-spacing:2px; padding:8px 16px;
+    border-radius:8px; border:2px solid; }
+  #stateChip .dot { width:12px; height:12px; border-radius:50%;
+    background:currentColor; }
+  #stateChip.armed { color:var(--accent); border-color:var(--accent); }
+  #stateChip.rec { color:var(--rec); border-color:var(--rec);
+    animation:blink 1s infinite; }
+  #stateChip.paused { color:var(--warn); border-color:var(--warn); }
+  #stateChip.nopage { color:var(--dim); border-color:var(--dim); }
+  @keyframes blink { 50% { opacity:.35; } }
+  #hbAge { font-size:13px; color:var(--dim); margin-left:12px; }
+  #hbAge.stale { color:var(--warn); font-weight:700; }
+
+  .stats { display:grid; grid-template-columns: repeat(auto-fill,
+    minmax(150px, 1fr)); gap:8px; margin-top:12px; }
+  .stat { background:var(--panel2); border:1px solid var(--line);
+    border-radius:6px; padding:8px 10px; font-size:12px; color:var(--dim); }
+  .stat b { display:block; font-size:16px; color:var(--fg);
+    font-variant-numeric:tabular-nums; margin-top:2px; }
+
+  .barRow { margin:10px 0; }
+  .barRow .lbl { font-size:12px; color:var(--dim); display:flex;
+    justify-content:space-between; }
+  .bar { position:relative; height:14px; background:#0b0e11;
+    border:1px solid var(--line); border-radius:4px; overflow:hidden; }
+  .bar .fill { height:100%; width:0%;
+    background:linear-gradient(90deg,#2e7d6e,#4db6ac 70%,#e0a458,#e06c75); }
+  .bar .thr { position:absolute; top:0; bottom:0; left:33.33%;
+    width:2px; background:var(--fg); opacity:.8; }
+
+  #thumbWrap { text-align:center; }
+  #thumb { width:100%; max-width:320px; image-rendering:pixelated;
+    border:1px solid var(--line); border-radius:6px; background:#000; }
+  #thumb.stale { opacity:.3; }
+  #thumbCap { font-size:12px; color:var(--dim); margin-top:6px; }
+
+  #events { font-family: ui-monospace, Menlo, Consolas, monospace;
+    font-size:12.5px; line-height:1.8; max-height:420px; overflow:auto; }
+  #events .e { white-space:nowrap; }
+  #events .k { color:var(--accent); }
+  #events .r { color:var(--ok); }
+
+  table { width:100%; border-collapse:collapse; font-size:13px; }
+  th { text-align:left; color:var(--dim); font-size:11px;
+    letter-spacing:1px; text-transform:uppercase; padding:4px 8px;
+    border-bottom:1px solid var(--line); }
+  td { padding:6px 8px; border-bottom:1px solid #232d37;
+    font-variant-numeric:tabular-nums; }
+  .badge { font-size:11px; font-weight:700; padding:2px 8px;
+    border-radius:4px; border:1px solid; display:inline-block; }
+  .badge.maxlen { color:var(--warn); border-color:var(--warn); }
+  .badge.quiet { color:var(--dim); border-color:var(--dim); }
+  .badge.manual_stop, .badge.pause { color:var(--accent);
+    border-color:var(--accent); }
+  .verdict { font-size:12px; color:var(--ok); }
+  #noSegs { color:var(--dim); font-size:13px; }
+</style>
+</head>
+<body>
+<header>
+  <h1>LIVE MONITOR</h1>
+  <span class="sub">the system's eye on the capture page &mdash; read-only</span>
+  <span class="spacer"></span>
+  <a class="plain" href="/">free record</a> &middot;
+  <a class="plain" href="/plan">plan</a>
+</header>
+
+<div class="grid">
+  <div>
+    <div class="card">
+      <h2>Page state (from the heartbeat)</h2>
+      <span id="stateChip" class="nopage"><span class="dot"></span><span id="stateText">NO PAGE</span></span>
+      <span id="hbAge">no heartbeat yet</span>
+      <div class="stats" id="stats"></div>
+      <div class="barRow">
+        <div class="lbl"><span>speech level</span><span id="speechTxt">&mdash;</span></div>
+        <div class="bar"><div class="fill" id="speechFill"></div><div class="thr"></div></div>
+      </div>
+      <div class="barRow">
+        <div class="lbl"><span>motion</span><span id="motionTxt">&mdash;</span></div>
+        <div class="bar"><div class="fill" id="motionFill"></div><div class="thr"></div></div>
+      </div>
+      <div class="barRow" style="font-size:12px; color:var(--dim);">
+        the white tick is each detector's threshold: the bar crossing it
+        is the trigger
+      </div>
+    </div>
+    <div class="card">
+      <h2>What the pipeline sees</h2>
+      <div id="thumbWrap">
+        <img id="thumb" alt="latest 160x96 luma frame from the page"
+          src="data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7">
+        <div id="thumbCap">waiting for the first frame&hellip;</div>
+      </div>
+    </div>
+  </div>
+
+  <div>
+    <div class="card">
+      <h2>Events (the heartbeat feed, non-heartbeat lines)</h2>
+      <div id="events"></div>
+    </div>
+    <div class="card">
+      <h2>Saved segments &amp; harvest verdicts</h2>
+      <table>
+        <thead><tr><th>session</th><th>closed</th><th>dur</th><th>frames</th>
+          <th>MB</th><th>verdict</th></tr></thead>
+        <tbody id="segs"><tr><td id="noSegs" colspan="6">none yet</td></tr></tbody>
+      </table>
+      <div style="font-size:12px; color:var(--dim); margin-top:8px;">
+        harvesters: write <code>free_sessions/&lt;stamp&gt;/verdict.json</code>
+        and it appears here</div>
+    </div>
+  </div>
+</div>
+<script>
+"use strict";
+/* ============================================================================
+   LIVE MONITOR -- the system's-eye view of the capture page. Read-only:
+   this page never touches the capture page, the server, or a session; it
+   only reads /live-state once a second (the page's heartbeat stream from
+   diag.log, the latest 160x96 luma thumbnail POSTed by the page, the
+   session folders on disk, and any harvester verdicts). The stream
+   exists; this is its window.
+   ========================================================================== */
+const $ = (id) => document.getElementById(id);
+
+function fmtT(s) {
+  const m = Math.floor(s / 60), r = Math.floor(s % 60);
+  return m + ":" + String(r).padStart(2, "0");
+}
+function ago(iso, nowMs) {
+  const t = Date.parse(iso);
+  if (!t) return "?";
+  return Math.max(0, Math.round((nowMs - t) / 1000));
+}
+function esc(s) {
+  return String(s).replace(/&/g, "&amp;").replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;");
+}
+
+function renderState(j) {
+  const nowMs = Date.now();
+  const hbs = j.events.filter(e => e.kind === "heartbeat");
+  const hb = hbs[hbs.length - 1];
+  const chip = $("stateChip");
+  if (!hb || ago(hb.received_at, nowMs) > 15) {
+    chip.className = "nopage";
+    $("stateText").textContent = "NO PAGE";
+    $("hbAge").textContent = hb ?
+      "last heartbeat " + ago(hb.received_at, nowMs) + "s ago" :
+      "no heartbeat yet";
+    $("hbAge").className = "stale";
+  } else {
+    const s = hb.state || "?";
+    chip.className = s === "recording" ? "rec" :
+      s === "paused" ? "paused" : "armed";
+    $("stateText").textContent = s.toUpperCase();
+    const a = ago(hb.received_at, nowMs);
+    $("hbAge").textContent = "heartbeat " + a + "s ago" +
+      (a > 5 ? " -- STALE" : "");
+    $("hbAge").className = a > 5 ? "stale" : "";
+  }
+  const st = [["segment age", hb && hb.seg_age_s != null ?
+      fmtT(hb.seg_age_s) : "--"],
+    ["frames", hb ? hb.n_frames : "--"],
+    ["audio samples", hb ? hb.n_samples : "--"],
+    ["saved", hb ? hb.saved : "--"],
+    ["uploads retrying", hb ? hb.pending_uploads : "--"],
+    ["floors ready", hb ? (hb.floors_ready ? "yes" : "warming") : "--"],
+    ["tab", hb ? hb.visibility : "--"],
+    ["recorder", hb ? (hb.recorder || "--") : "--"]];
+  $("stats").innerHTML = st.map(x =>
+    '<div class="stat">' + esc(x[0]) + "<b>" + esc(x[1]) + "</b></div>")
+    .join("");
+  // bars: threshold sits at 1/3, so a crossing value fills past the tick
+  const sp = hb && hb.speech_thr ? hb.speech_level / hb.speech_thr : 0;
+  $("speechFill").style.width = Math.min(100, sp * 33.33) + "%";
+  $("speechTxt").textContent = hb ?
+    (hb.speech_now ? "YES -- " : "") + (hb.speech_level || 0) +
+    " / thr " + (hb.speech_thr || 0) : "--";
+  const mo = hb && hb.motion_thr ? hb.motion / hb.motion_thr : 0;
+  $("motionFill").style.width = Math.min(100, mo * 33.33) + "%";
+  $("motionTxt").textContent = hb ?
+    (hb.motion_now ? "YES -- " : "") + (hb.motion || 0) +
+    " / thr " + (hb.motion_thr || 0) : "--";
+}
+
+function renderThumb(j) {
+  const t = j.thumb;
+  if (!t || !t.data) return;
+  const img = $("thumb");
+  img.src = t.data;
+  const age = ago(t.ts, Date.now());
+  img.className = age > 5 ? "stale" : "";
+  $("thumbCap").textContent = "160x96 luma as the page records it -- " +
+    age + "s old" + (age > 5 ? " (stale: tab hidden or closed)" : "");
+}
+
+function renderEvents(j) {
+  const evs = j.events.filter(e => e.kind !== "heartbeat").slice(-25)
+    .reverse();
+  $("events").innerHTML = evs.map(e => {
+    const extra = e.trigger || e.reason || e.error || e.dir || "";
+    return '<div class="e">' + esc((e.received_at || "").slice(11, 23)) +
+      '  <span class="k">' + esc(e.kind) + "</span>" +
+      (extra ? '  <span class="r">' + esc(extra) + "</span>" : "") +
+      (e.n_frames ? "  " + e.n_frames + "fr" : "") + "</div>";
+  }).join("") || '<div class="e">no events yet</div>';
+}
+
+function mb(bytes) {
+  const t = Object.values(bytes || {}).reduce((a, b) => a + b, 0);
+  return (t / (1024 * 1024)).toFixed(1);
+}
+function verdictText(v) {
+  if (v == null) return "";
+  if (typeof v === "string") return v;
+  const keys = ["verdict", "result", "ok", "label", "note", "summary"];
+  const bits = keys.filter(k => v[k] !== undefined)
+    .map(k => k + ": " + JSON.stringify(v[k]));
+  return bits.length ? bits.join("  ") : JSON.stringify(v).slice(0, 120);
+}
+
+function renderSegs(j) {
+  const segs = j.segments || [];
+  if (!segs.length) return;
+  $("segs").innerHTML = segs.map(s => {
+    const v = s.verdict != null ?
+      '<span class="verdict">' + esc(verdictText(s.verdict)) + "</span>" :
+      '<span style="color:var(--dim)">&mdash;</span>';
+    return "<tr><td>" + esc(s.dir) + "</td>" +
+      '<td><span class="badge ' + esc(s.close_reason || "") + '">' +
+      esc(s.close_reason || "?") + "</span></td>" +
+      "<td>" + (s.duration_s != null ? s.duration_s + "s" : "?") + "</td>" +
+      "<td>" + (s.n_frames != null ? s.n_frames : "?") + "</td>" +
+      "<td>" + mb(s.bytes) + "</td><td>" + v + "</td></tr>";
+  }).join("");
+}
+
+async function poll() {
+  try {
+    const r = await fetch("/live-state");
+    const j = await r.json();
+    if (!j.ok) throw new Error("not ok");
+    renderState(j);
+    renderThumb(j);
+    renderEvents(j);
+    renderSegs(j);
+  } catch (err) {
+    $("stateText").textContent = "SERVER DOWN";
+    $("stateChip").className = "nopage";
+    $("hbAge").textContent = "/live-state unreachable: " + err.message;
+    $("hbAge").className = "stale";
+  }
+}
+poll();
+setInterval(poll, 1000);
+</script>
+</body>
+</html>

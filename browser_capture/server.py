@@ -80,6 +80,14 @@ ENDPOINTS:
                        length-prefix framing as /take but FIVE sections
     POST /log       -> append one JSONL diagnostics line from a page to
                        browser_capture/diag.log, stamped on receipt
+    GET  /live      -> live.html, the LIVE MONITOR (read-only window on
+                       the capture page: heartbeat state, thumbnail,
+                       events, saved segments, harvest verdicts)
+    GET  /live-state -> everything /live polls: the tail of the diag
+                       heartbeat feed, the latest thumbnail, the session
+                       folders with sizes, and any verdict.json
+    POST /thumb     -> the capture page's latest 160x96 luma thumbnail
+                       (kept in memory only, replaced every second)
 
 USAGE (from the repo root, inside WSL):
 
@@ -156,6 +164,13 @@ MAX_FREE_BODY = 2 * 1024 * 1024 * 1024
 # concurrently with /take and /free.
 DIAG_LOCK = threading.Lock()
 DIAG_PATH = Path(__file__).resolve().parent / "diag.log"
+
+# The LIVE MONITOR's thumbnail: the capture page POSTs a small JPEG of
+# the 160x96 luma canvas once a second; only the LATEST is kept, in
+# memory -- it is a window, not a record.
+THUMB_LOCK = threading.Lock()
+THUMB = {"data": None, "ts": None}
+THUMB_MAX = 262144
 
 # The luma frame the FREE RECORD page captures, same geometry as the plan
 # page's data view.
@@ -559,6 +574,69 @@ def save_free_session(out: Path, sess: dict) -> dict:
     return {"stamp": stamp, "dir": f"free_sessions/{stamp}", "files": files}
 
 
+# -- the LIVE MONITOR's data --------------------------------------------------
+
+def live_state(out: Path) -> dict:
+    """Everything /live polls, once a second. Read-only: the tail of the
+    heartbeat feed, the latest thumbnail, the session folders on disk
+    (newest first, with sizes), and any harvester verdicts -- a
+    verdict.json next to a session's meta.json is the harvester's to
+    write and this server's to surface, nothing more.
+    """
+    events = []
+    try:
+        with DIAG_PATH.open("rb") as f:
+            size = f.seek(0, 2)
+            f.seek(max(0, size - 131072))
+            tail = f.read().decode("utf-8", "replace").splitlines()
+        for ln in tail[-60:]:
+            try:
+                d = json.loads(ln)
+                if isinstance(d, dict):
+                    events.append(d)
+            except json.JSONDecodeError:
+                pass
+    except OSError:
+        pass
+    events = events[-30:]
+
+    segments = []
+    root = out / "free_sessions"
+    if root.is_dir():
+        for d in sorted(root.iterdir(), key=lambda p: p.name,
+                        reverse=True)[:50]:
+            try:
+                m = json.loads((d / "meta.json").read_text())
+            except (OSError, json.JSONDecodeError):
+                continue
+            audio = m.get("audio") or {}
+            entry = {
+                "dir": f"free_sessions/{d.name}", "stamp": d.name,
+                "mode": m.get("mode"), "trigger": m.get("trigger"),
+                "close_reason": m.get("close_reason"),
+                "n_frames": m.get("n_frames"),
+                "duration_s": round(
+                    audio.get("samples", 0) /
+                    max(audio.get("sample_rate", 1), 1), 1),
+                "bytes": {p.name: p.stat().st_size for p in d.iterdir()
+                          if p.name in ("luma.raw", "audio.wav",
+                                        "video.webm")},
+            }
+            v = d / "verdict.json"
+            if v.is_file():
+                try:
+                    entry["verdict"] = json.loads(v.read_text())
+                except (OSError, json.JSONDecodeError):
+                    entry["verdict"] = {"error": "verdict.json is not JSON"}
+            segments.append(entry)
+
+    with THUMB_LOCK:
+        thumb = dict(THUMB) if THUMB["data"] else None
+    return {"ok": True,
+            "now": time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime()),
+            "events": events, "thumb": thumb, "segments": segments}
+
+
 # -- the flags, mirrored from the gate so session.json can carry them -------
 
 def take_flags(meta: dict, timing: dict, has_npz: bool, has_wav: bool,
@@ -737,6 +815,7 @@ class Handler(BaseHTTPRequestHandler):
     out_dir: Path = None
     index_path: Path = None
     free_path: Path = None
+    live_path: Path = None
 
     def log_message(self, fmt, *args):  # keep the console signal-heavy
         if self.command in ("POST",) or " 40" in (fmt % args) \
@@ -832,6 +911,32 @@ class Handler(BaseHTTPRequestHandler):
                 f.write(json.dumps(line) + "\n")
         self._json(200, {"ok": True})
 
+    def _handle_thumb(self):
+        """The capture page's latest thumbnail: {data: dataURL, ts: ISO}.
+        In-memory only, latest-wins."""
+        try:
+            n = int(self.headers.get("Content-Length", "0"))
+        except ValueError:
+            n = -1
+        if n <= 0 or n > THUMB_MAX:
+            self._json(400, {"ok": False, "error": "bad Content-Length"})
+            return
+        try:
+            req = json.loads(self.rfile.read(n).decode("utf-8"))
+        except (UnicodeDecodeError, json.JSONDecodeError) as exc:
+            self._json(400, {"ok": False, "error": f"not JSON: {exc}"})
+            return
+        if not isinstance(req, dict) or not isinstance(req.get("data"), str) \
+                or not req["data"].startswith("data:image/"):
+            self._json(400, {"ok": False, "error":
+                             "expected {data: data:image/... , ts}"})
+            return
+        with THUMB_LOCK:
+            THUMB["data"] = req["data"]
+            THUMB["ts"] = req.get("ts") or time.strftime(
+                "%Y-%m-%dT%H:%M:%SZ", time.gmtime())
+        self._json(200, {"ok": True})
+
     def _handle_free(self):
         """Write one FREE RECORD session folder (the front door's artifact)."""
         try:
@@ -886,6 +991,15 @@ class Handler(BaseHTTPRequestHandler):
                              "port": self.server.server_address[1]})
         elif route == "/takes":
             self._json(200, {"ok": True, "takes": list_takes(self.out_dir)})
+        elif route == "/live":
+            try:
+                page = self.live_path.read_bytes()
+            except OSError as exc:
+                self._json(500, {"ok": False, "error": f"live.html: {exc}"})
+                return
+            self._send(200, page, "text/html; charset=utf-8")
+        elif route == "/live-state":
+            self._json(200, live_state(self.out_dir))
         else:
             self._json(404, {"ok": False, "error": f"no {self.path!r}"})
 
@@ -899,6 +1013,9 @@ class Handler(BaseHTTPRequestHandler):
             return
         if route == "/free":
             self._handle_free()
+            return
+        if route == "/thumb":
+            self._handle_thumb()
             return
         if route != "/take":
             self._json(404, {"ok": False, "error": f"no {self.path!r}"})
@@ -959,6 +1076,7 @@ def main(argv=None) -> int:
     Handler.out_dir = out
     Handler.index_path = Path(__file__).resolve().parent / "index.html"
     Handler.free_path = Path(__file__).resolve().parent / "free_record.html"
+    Handler.live_path = Path(__file__).resolve().parent / "live.html"
 
     httpd = ThreadingHTTPServer((a.host, a.port), Handler)
     httpd.daemon_threads = True
