@@ -1,0 +1,534 @@
+{
+  "study": "arrival null -- the floor on the double-hearing technique",
+  "generated_utc": "2026-10-21T19:02:59Z",
+  "method": {
+    "estimator": "the band-limited ENVELOPE cross-correlation (300-3400 Hz, the band the chain carries honestly), with parabolic interpolation around the peak at a 1 ms envelope hop",
+    "the_null": "a signal against a gain-shifted copy of itself: a second microphone with a different gain, and the same arrival, so the lag must be ZERO",
+    "the_calibration": "known delays injected into the signal, and the error in recovering each one",
+    "band_hz": [
+      300.0,
+      3400.0
+    ],
+    "envelope_hop_s": 0.001,
+    "speed_of_sound_m_s": 343.0
+  },
+  "sessions": [
+    {
+      "session": "1792560597",
+      "duration_s": 27.34,
+      "null": {
+        "lag_ms": -0.00015295320301035736,
+        "peak": 0.9999387976247633,
+        "margin": 0.18731062889207806,
+        "bias_ms": 0.00015295320301035736,
+        "bias_m": 5.246294863255258e-05
+      },
+      "resolution": [
+        {
+          "delay_ms": 0,
+          "recovered_ms": -0.0,
+          "error_ms": 0.0,
+          "peak": 1.0,
+          "margin": 0.2889,
+          "range_m": 0.0
+        },
+        {
+          "delay_ms": 1,
+          "recovered_ms": 0.999,
+          "error_ms": 0.001,
+          "peak": 0.9988,
+          "margin": 0.2862,
+          "range_m": 0.0
+        },
+        {
+          "delay_ms": 2,
+          "recovered_ms": 2.0,
+          "error_ms": 0.0,
+          "peak": 0.9984,
+          "margin": 0.2858,
+          "range_m": 0.0
+        },
+        {
+          "delay_ms": 5,
+          "recovered_ms": 4.999,
+          "error_ms": 0.001,
+          "peak": 0.9959,
+          "margin": 0.2808,
+          "range_m": 0.0
+        },
+        {
+          "delay_ms": 10,
+          "recovered_ms": 9.999,
+          "error_ms": 0.001,
+          "peak": 0.9919,
+          "margin": 0.2737,
+          "range_m": 0.0
+        },
+        {
+          "delay_ms": 20,
+          "recovered_ms": 19.999,
+          "error_ms": 0.001,
+          "peak": 0.9833,
+          "margin": 0.2588,
+          "range_m": 0.0
+        },
+        {
+          "delay_ms": 40,
+          "recovered_ms": 39.999,
+          "error_ms": 0.001,
+          "peak": 0.9657,
+          "margin": 0.2526,
+          "range_m": 0.0
+        },
+        {
+          "delay_ms": 80,
+          "recovered_ms": 79.999,
+          "error_ms": 0.001,
+          "peak": 0.9217,
+          "margin": 0.243,
+          "range_m": 0.0
+        }
+      ]
+    },
+    {
+      "session": "1792560758",
+      "duration_s": 154.89,
+      "null": {
+        "lag_ms": 7.674542591484699e-07,
+        "peak": 0.9999999565437032,
+        "margin": 0.22685425141824456,
+        "bias_ms": 7.674542591484699e-07,
+        "bias_m": 2.632368108879252e-07
+      },
+      "resolution": [
+        {
+          "delay_ms": 0,
+          "recovered_ms": -0.0,
+          "error_ms": 0.0,
+          "peak": 1.0,
+          "margin": 0.3125,
+          "range_m": 0.0
+        },
+        {
+          "delay_ms": 1,
+          "recovered_ms": 1.001,
+          "error_ms": 0.001,
+          "peak": 0.9996,
+          "margin": 0.3104,
+          "range_m": 0.0
+        },
+        {
+          "delay_ms": 2,
+          "recovered_ms": 2.0,
+          "error_ms": 0.0,
+          "peak": 0.9991,
+          "margin": 0.3105,
+          "range_m": 0.0
+        },
+        {
+          "delay_ms": 5,
+          "recovered_ms": 5.001,
+          "error_ms": 0.001,
+          "peak": 0.997,
+          "margin": 0.3077,
+          "range_m": 0.0
+        },
+        {
+          "delay_ms": 10,
+          "recovered_ms": 10.0,
+          "error_ms": 0.0,
+          "peak": 0.9932,
+          "margin": 0.3059,
+          "range_m": 0.0
+        },
+        {
+          "delay_ms": 20,
+          "recovered_ms": 19.999,
+          "error_ms": 0.001,
+          "peak": 0.9835,
+          "margin": 0.3082,
+          "range_m": 0.0
+        },
+        {
+          "delay_ms": 40,
+          "recovered_ms": 39.999,
+          "error_ms": 0.001,
+          "peak": 0.9588,
+          "margin": 0.3016,
+          "range_m": 0.0
+        },
+        {
+          "delay_ms": 80,
+          "recovered_ms": 79.999,
+          "error_ms": 0.001,
+          "peak": 0.9031,
+          "margin": 0.2983,
+          "range_m": 0.0
+        }
+      ]
+    },
+    {
+      "session": "1792560773",
+      "duration_s": 16.06,
+      "null": {
+        "lag_ms": -5.716050615441196e-05,
+        "peak": 0.9999856199292263,
+        "margin": 0.9478957253163778,
+        "bias_ms": 5.716050615441196e-05,
+        "bias_m": 1.96060536109633e-05
+      },
+      "resolution": [
+        {
+          "delay_ms": 0,
+          "recovered_ms": -0.0,
+          "error_ms": 0.0,
+          "peak": 1.0,
+          "margin": 0.8844,
+          "range_m": 0.0
+        },
+        {
+          "delay_ms": 1,
+          "recovered_ms": 0.999,
+          "error_ms": 0.001,
+          "peak": 0.9937,
+          "margin": 0.877,
+          "range_m": 0.0
+        },
+        {
+          "delay_ms": 2,
+          "recovered_ms": 1.997,
+          "error_ms": 0.003,
+          "peak": 0.9903,
+          "margin": 0.8752,
+          "range_m": 0.001
+        },
+        {
+          "delay_ms": 5,
+          "recovered_ms": 4.998,
+          "error_ms": 0.002,
+          "peak": 0.9712,
+          "margin": 0.8581,
+          "range_m": 0.001
+        },
+        {
+          "delay_ms": 10,
+          "recovered_ms": 9.999,
+          "error_ms": 0.001,
+          "peak": 0.9404,
+          "margin": 0.8139,
+          "range_m": 0.0
+        },
+        {
+          "delay_ms": 20,
+          "recovered_ms": 20.0,
+          "error_ms": 0.0,
+          "peak": 0.8739,
+          "margin": 0.7192,
+          "range_m": 0.0
+        },
+        {
+          "delay_ms": 40,
+          "recovered_ms": 39.999,
+          "error_ms": 0.001,
+          "peak": 0.7931,
+          "margin": 0.6447,
+          "range_m": 0.0
+        },
+        {
+          "delay_ms": 80,
+          "recovered_ms": 79.999,
+          "error_ms": 0.001,
+          "peak": 0.668,
+          "margin": 0.5187,
+          "range_m": 0.001
+        }
+      ]
+    },
+    {
+      "session": "1792596296",
+      "duration_s": 74.22,
+      "null": {
+        "lag_ms": -2.088001377053832e-05,
+        "peak": 0.9999984958659189,
+        "margin": 0.25093937878979744,
+        "bias_ms": 2.088001377053832e-05,
+        "bias_m": 7.161844723294643e-06
+      },
+      "resolution": [
+        {
+          "delay_ms": 0,
+          "recovered_ms": -0.0,
+          "error_ms": 0.0,
+          "peak": 1.0,
+          "margin": 0.46,
+          "range_m": 0.0
+        },
+        {
+          "delay_ms": 1,
+          "recovered_ms": 1.003,
+          "error_ms": 0.003,
+          "peak": 0.9991,
+          "margin": 0.4579,
+          "range_m": 0.001
+        },
+        {
+          "delay_ms": 2,
+          "recovered_ms": 2.003,
+          "error_ms": 0.003,
+          "peak": 0.9985,
+          "margin": 0.4578,
+          "range_m": 0.001
+        },
+        {
+          "delay_ms": 5,
+          "recovered_ms": 5.003,
+          "error_ms": 0.003,
+          "peak": 0.9951,
+          "margin": 0.4542,
+          "range_m": 0.001
+        },
+        {
+          "delay_ms": 10,
+          "recovered_ms": 10.002,
+          "error_ms": 0.002,
+          "peak": 0.99,
+          "margin": 0.4511,
+          "range_m": 0.001
+        },
+        {
+          "delay_ms": 20,
+          "recovered_ms": 20.003,
+          "error_ms": 0.003,
+          "peak": 0.9788,
+          "margin": 0.4435,
+          "range_m": 0.001
+        },
+        {
+          "delay_ms": 40,
+          "recovered_ms": 40.003,
+          "error_ms": 0.003,
+          "peak": 0.9554,
+          "margin": 0.4267,
+          "range_m": 0.001
+        },
+        {
+          "delay_ms": 80,
+          "recovered_ms": 80.004,
+          "error_ms": 0.004,
+          "peak": 0.9144,
+          "margin": 0.3976,
+          "range_m": 0.001
+        }
+      ]
+    },
+    {
+      "session": "1792596354",
+      "duration_s": 59.0,
+      "null": {
+        "lag_ms": -3.6402109708141676e-07,
+        "peak": 0.9999999935414274,
+        "margin": 0.32275774405554725,
+        "bias_ms": 3.6402109708141676e-07,
+        "bias_m": 1.2485923629892595e-07
+      },
+      "resolution": [
+        {
+          "delay_ms": 0,
+          "recovered_ms": -0.0,
+          "error_ms": 0.0,
+          "peak": 1.0,
+          "margin": 0.6618,
+          "range_m": 0.0
+        },
+        {
+          "delay_ms": 1,
+          "recovered_ms": 1.001,
+          "error_ms": 0.001,
+          "peak": 0.9968,
+          "margin": 0.6572,
+          "range_m": 0.0
+        },
+        {
+          "delay_ms": 2,
+          "recovered_ms": 2.0,
+          "error_ms": 0.0,
+          "peak": 0.9974,
+          "margin": 0.6588,
+          "range_m": 0.0
+        },
+        {
+          "delay_ms": 5,
+          "recovered_ms": 5.0,
+          "error_ms": 0.0,
+          "peak": 0.9941,
+          "margin": 0.6593,
+          "range_m": 0.0
+        },
+        {
+          "delay_ms": 10,
+          "recovered_ms": 9.997,
+          "error_ms": 0.003,
+          "peak": 0.9904,
+          "margin": 0.6601,
+          "range_m": 0.001
+        },
+        {
+          "delay_ms": 20,
+          "recovered_ms": 19.999,
+          "error_ms": 0.001,
+          "peak": 0.9827,
+          "margin": 0.6578,
+          "range_m": 0.0
+        },
+        {
+          "delay_ms": 40,
+          "recovered_ms": 39.998,
+          "error_ms": 0.002,
+          "peak": 0.9659,
+          "margin": 0.6552,
+          "range_m": 0.001
+        },
+        {
+          "delay_ms": 80,
+          "recovered_ms": 79.999,
+          "error_ms": 0.001,
+          "peak": 0.9295,
+          "margin": 0.6447,
+          "range_m": 0.0
+        }
+      ]
+    },
+    {
+      "session": "1792596369",
+      "duration_s": 13.54,
+      "null": {
+        "lag_ms": -9.07312545126493e-06,
+        "peak": 0.9999997914349379,
+        "margin": 0.2478474865948319,
+        "bias_ms": 9.07312545126493e-06,
+        "bias_m": 3.112082029783871e-06
+      },
+      "resolution": [
+        {
+          "delay_ms": 0,
+          "recovered_ms": -0.0,
+          "error_ms": 0.0,
+          "peak": 1.0,
+          "margin": 0.3049,
+          "range_m": 0.0
+        },
+        {
+          "delay_ms": 1,
+          "recovered_ms": 0.996,
+          "error_ms": 0.004,
+          "peak": 0.9992,
+          "margin": 0.3039,
+          "range_m": 0.001
+        },
+        {
+          "delay_ms": 2,
+          "recovered_ms": 1.996,
+          "error_ms": 0.004,
+          "peak": 0.9985,
+          "margin": 0.3022,
+          "range_m": 0.001
+        },
+        {
+          "delay_ms": 5,
+          "recovered_ms": 4.996,
+          "error_ms": 0.004,
+          "peak": 0.9964,
+          "margin": 0.298,
+          "range_m": 0.001
+        },
+        {
+          "delay_ms": 10,
+          "recovered_ms": 9.996,
+          "error_ms": 0.004,
+          "peak": 0.9928,
+          "margin": 0.2904,
+          "range_m": 0.001
+        },
+        {
+          "delay_ms": 20,
+          "recovered_ms": 19.996,
+          "error_ms": 0.004,
+          "peak": 0.9855,
+          "margin": 0.2759,
+          "range_m": 0.001
+        },
+        {
+          "delay_ms": 40,
+          "recovered_ms": 39.996,
+          "error_ms": 0.004,
+          "peak": 0.9709,
+          "margin": 0.2715,
+          "range_m": 0.001
+        },
+        {
+          "delay_ms": 80,
+          "recovered_ms": 79.996,
+          "error_ms": 0.004,
+          "peak": 0.9416,
+          "margin": 0.2715,
+          "range_m": 0.001
+        }
+      ]
+    }
+  ],
+  "summary": {
+    "n_sessions": 6,
+    "null_bias_ms": {
+      "median": 0.0,
+      "max": 0.0002,
+      "median_in_metres": 0.0
+    },
+    "resolution_error_ms": {
+      "median": 0.001,
+      "max": 0.004,
+      "median_in_metres": 0.0003
+    },
+    "by_injected_delay_ms": {
+      "0": {
+        "n": 6,
+        "median_error_ms": 0.0,
+        "max_error_ms": 0.0
+      },
+      "1": {
+        "n": 6,
+        "median_error_ms": 0.001,
+        "max_error_ms": 0.004
+      },
+      "2": {
+        "n": 6,
+        "median_error_ms": 0.0015,
+        "max_error_ms": 0.004
+      },
+      "5": {
+        "n": 6,
+        "median_error_ms": 0.0015,
+        "max_error_ms": 0.004
+      },
+      "10": {
+        "n": 6,
+        "median_error_ms": 0.0015,
+        "max_error_ms": 0.004
+      },
+      "20": {
+        "n": 6,
+        "median_error_ms": 0.001,
+        "max_error_ms": 0.004
+      },
+      "40": {
+        "n": 6,
+        "median_error_ms": 0.0015,
+        "max_error_ms": 0.004
+      },
+      "80": {
+        "n": 6,
+        "median_error_ms": 0.001,
+        "max_error_ms": 0.004
+      }
+    }
+  }
+}

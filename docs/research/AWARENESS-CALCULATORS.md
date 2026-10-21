@@ -5,6 +5,30 @@
 **Device:** CPU, numpy, the repository's own `src/energy.py` envelope and `src/pitch.py` tracker
 **Status of the brief:** present in the main checkout on disk, **not yet in `origin/master` or on this branch** — filed here because it is readable and it is the next brief in the queue.
 
+> **CORRECTION — 2026-10-21, filed after `ARRIVAL-NULL.md`.**
+> **§1's central claim was wrong and this note corrects it.**
+> This report said the double-hearing technique was blocked by the
+> fleet's **114 ms** arrival-time uncertainty — 39.1 m of range, "missed
+> by 5.7×". **That reasoning mistook one measurement's domain for
+> another's.** The 114 ms is the offset between the **audio and the
+> video within one capture**, measured through the wall clock. A
+> time-difference-of-arrival measurement compares the two audio signals
+> **to each other**, so the clock offset cancels and no clock
+> relationship is needed at all.
+>
+> The estimator, measured: **null bias 0.0002 ms**, **delay recovery
+> error 0.004 ms** across 0–80 ms — **0.0014 m of range**. The
+> technique is **ready**, and the remaining obstacle is a *calibration*
+> constant (the two devices' internal latency difference), not a
+> precision problem.
+>
+> **§1 below is left as filed, unedited, and its §1.2 and §1.4's
+> framing is superseded by this note.** The 114 ms remains correct *for
+> the question it answers* — how well the audio and video in one
+> capture align — which is what governs the walk-by envelope's
+> alignment to a crossing (§3.7 of `LENS-AND-WALK-BY.md`).
+> Full measurement: `docs/research/ARRIVAL-NULL.md`.
+
 ---
 
 ## 0. THE HEADLINE
@@ -16,7 +40,7 @@ is untested because the corpus has never heard two of anything.**
 
 | claim | verdict | the number |
 |---|---|---|
-| **Double-hearing is a sensor** — the delay between two arrivals is geometry | **untested, and the precondition is far off** | the fleet's arrival-time spread across 53 real sessions is **114.0 ms**, which is **39.1 m of range** |
+| **Double-hearing is a sensor** — the delay between two arrivals is geometry | **untested on this corpus, but the instrument is ready** *(corrected — see the note above)* | the estimator's **null bias is 0.0002 ms** and its **delay-recovery error is 0.004 ms** — **0.0014 m of range**. The clock offset cancels; what is left is a calibration constant |
 | **Acoustic scene learning** — a space learns its own sound | **the signature is 83 % the device's gain policy** | gain model **R² = 0.8328**; after gain removal the within-room spread is **114.9 Hz**; the between-room spread is **unmeasured** |
 | **Screen is a mode** — screen reading is a first-class input | **not measurable: no screen capture in the corpus** | 0 of 97 bundles carry a screen source |
 | **The calculator doctrine** — the fleet's real product is calculators | **the metric exists and reads 1.0** | teacher-dependence **1.000** in the tone game; **0 graders** exist fleet-wide |
