@@ -66,6 +66,15 @@
   #msg { margin-top:10px; color:var(--dim); font-size:14px;
     min-height:20px; }
   #msg.err { color:#e06c75; }
+  #receipts { display:none; margin-top:14px; border:1px solid var(--line);
+    border-radius:8px; background:var(--panel); padding:10px 14px; }
+  #receipts .rHead { font-size:12px; letter-spacing:1.5px;
+    color:var(--dim); text-transform: uppercase; font-weight:600;
+    margin-bottom:6px; }
+  #receiptList { font-family: ui-monospace, Menlo, Consolas, monospace;
+    font-size:12.5px; line-height:1.7; color:#c7d3dd; }
+  #receiptList .r { white-space:nowrap; overflow-x:auto; }
+  #receiptList .r .ok { color:var(--ok); }
   .fine { margin-top:12px; color:var(--dim); font-size:12px;
     line-height:1.6; }
 </style>
@@ -98,6 +107,10 @@
 <div id="msg"></div>
 <button id="retryDevices" style="display:none; margin-top:8px;">
   RETRY DEVICES</button>
+<div id="receipts">
+  <div class="rHead">Receipts &mdash; segments saved this sitting</div>
+  <div id="receiptList"></div>
+</div>
 <div class="fine">AUTO: a segment opens on speech or presence, closes after
   ~8 s of quiet, and uploads in the background as it closes &mdash; no button
   needed for the data to be safe. RECORD/STOP is the manual fallback;
@@ -386,6 +399,17 @@ setInterval(() => {
 async function uploadSegment(seg, tries) {
   tries = tries || 0;
   const payload = buildPayload(seg);
+  // the receipt, from the same numbers the heartbeat reports -- what was
+  // saved, how long it ran, and the bytes that landed
+  const receipt = {
+    dir: null, duration_s: realRate ? seg.nSamples / realRate : 0,
+    frames: seg.nFrames,
+    luma_bytes: seg.nFrames * LB,
+    wav_bytes: 44 + seg.nSamples * 2,
+    webm_bytes: seg.webm ? seg.webm.length : 0,
+  };
+  receipt.total_bytes = receipt.luma_bytes + receipt.wav_bytes +
+    receipt.webm_bytes;
   const ctl = typeof AbortController !== "undefined" ?
     new AbortController() : null;
   const kill = ctl ? setTimeout(() => ctl.abort(), 300000) : 0;
@@ -399,11 +423,13 @@ async function uploadSegment(seg, tries) {
     savedCount++;
     const i = pendingSaves.findIndex(p => p.seg === seg);
     if (i >= 0) pendingSaves.splice(i, 1);
+    receipt.dir = j.dir;
+    addReceipt(receipt);
     $("msg").className = "";
     $("msg").textContent = "saved " + j.dir + " -- " + seg.nFrames +
       " frames, " + (seg.nSamples / realRate).toFixed(1) + " s of audio";
     diagSend("SEGMENT_SAVED", { dir: j.dir, n_frames: seg.nFrames,
-      tries: tries });
+      tries: tries, receipt: receipt });
     paint();
   } catch (err) {
     if (!pendingSaves.some(p => p.seg === seg))
@@ -419,6 +445,33 @@ async function uploadSegment(seg, tries) {
   } finally {
     if (kill) clearTimeout(kill);
   }
+}
+
+/* -- receipts: every saved segment, with sizes and durations --------------- */
+function fmtBytes(n) {
+  if (n >= 1024 * 1024) return (n / (1024 * 1024)).toFixed(1) + " MB";
+  if (n >= 1024) return (n / 1024).toFixed(0) + " kB";
+  return n + " B";
+}
+
+function addReceipt(r) {
+  $("receipts").style.display = "block";
+  const list = $("receiptList");
+  const line = document.createElement("div");
+  line.className = "r";
+  line.innerHTML = '<span class="ok">&#10003;</span> ' +
+    new Date().toTimeString().slice(0, 8) + "  " + esc(r.dir) +
+    "  --  " + r.duration_s.toFixed(1) + " s, " + r.frames +
+    " frames, " + fmtBytes(r.total_bytes) + " " +
+    "(luma " + fmtBytes(r.luma_bytes) + " / wav " + fmtBytes(r.wav_bytes) +
+    " / webm " + fmtBytes(r.webm_bytes) + ")";
+  list.insertBefore(line, list.firstChild);
+  while (list.children.length > 30) list.removeChild(list.lastChild);
+}
+
+function esc(s) {
+  return String(s).replace(/&/g, "&amp;").replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;");
 }
 
 /* -- the POST body: five length-prefixed sections -------------------------- */

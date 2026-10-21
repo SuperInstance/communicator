@@ -475,3 +475,22 @@ Honest limit, stated: fake media devices cannot contend, so the
 headless self-verify — the branch is code-reviewed, the failure UI is
 exercised live, and the error name is logged for the first real
 occurrence.
+
+## Step 3 of the polish queue: receipts
+
+Every segment that lands gets a receipt on the page: a RECEIPTS panel
+(one line per saved segment, newest first, this sitting) reading
+`✓ 03:41:22  free_sessions/<stamp>  —  19.3 s, 1,148 frames, 19.8 MB
+(luma 17.6 MB / wav 1.9 MB / webm 0.3 MB)` — the saved duration, frame
+count, and the bytes that actually landed, per artifact. The same
+numbers ride in the `SEGMENT_SAVED` heartbeat line as a `receipt`
+object, so the page's claims are checkable against diag.log AND against
+the disk.
+
+**Proof, by re-running the headless end-to-end after the change**: two
+full auto cycles again; for both segments the receipt's `luma_bytes`,
+`wav_bytes`, `webm_bytes` and `total_bytes` equal the on-disk file
+sizes exactly, and `duration_s` equals the WAV-derived duration to the
+millisecond (19.267 s vs 19.267 s; 19.256 s vs 19.256 s). The verify
+suite stays at 154 passed, 0 failed. Still just a page reload — the
+server has not changed since the FREE RECORD pivot.
