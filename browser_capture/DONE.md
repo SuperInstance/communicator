@@ -448,3 +448,30 @@ the heartbeat are all verified against real browser behavior. It does
 not verify real-microphone speech/noise statistics or real-camera
 motion — those are what the heartbeat numbers are for on Casey's
 machine.
+
+## Step 2 of the polish queue: the single-consumer guard, in plain language
+
+Per MiniMax's camera findings: when `getUserMedia` fails
+`NotReadableError` (the classic single-consumer collision — the camera
+is held by another app or tab), the page must SAY so, never fail dark
+and silent.
+
+- **FREE RECORD** now names the failure on the big indicator itself —
+  `CAMERA BUSY` (amber), with the plain-language body: the camera is
+  being used by ANOTHER app or tab right now, close it (another tab
+  left open on this page, Teams/Zoom/OBS, the terminal capture script),
+  then press **RETRY DEVICES** — a button that appears ONLY on failure
+  and re-runs the whole device boot (old streams/contexts torn down,
+  floors re-measured, no page reload needed). `NO CAMERA` and
+  `PERMISSION REFUSED` get the same treatment, and every failure is a
+  `DEVICE_FAILURE` line in diag.log with the error name.
+- **The plan page** gets the same distinction in its error banner (it
+  previously said "permission was refused" for every failure, and told
+  you to click a RETRY DEVICES button that did not exist — starting a
+  take is the actual retry).
+
+Honest limit, stated: fake media devices cannot contend, so the
+`NotReadableError` branch itself could not be reproduced in the
+headless self-verify — the branch is code-reviewed, the failure UI is
+exercised live, and the error name is logged for the first real
+occurrence.

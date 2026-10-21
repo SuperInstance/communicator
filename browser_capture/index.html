@@ -890,8 +890,7 @@ async function startDevices() {
     stream = await open(camDeviceId);
   } catch (err) {
     if (!camDeviceId) {
-      showBanner("err", "Camera/microphone permission was refused (" + err.name +
-        "). Allow both, then click RETRY DEVICES.");
+      showBanner("err", deviceErrorText(err));
       return false;
     }
     // a remembered camera that is no longer attached -- forget it and let
@@ -901,8 +900,7 @@ async function startDevices() {
     try {
       stream = await open(null);
     } catch (err2) {
-      showBanner("err", "Camera/microphone permission was refused (" + err2.name +
-        "). Allow both, then click RETRY DEVICES.");
+      showBanner("err", deviceErrorText(err2));
       return false;
     }
   }
@@ -1729,6 +1727,27 @@ function showBanner(kind, msg) {
 }
 function hideBanner(kind) {
   $(kind === "err" ? "errBanner" : "warnBanner").style.display = "none";
+}
+
+/* The single-consumer guard, in plain language: NotReadableError means
+   the camera is being held by another app or tab -- the page says so,
+   it never fails dark and silent. */
+function deviceErrorText(err) {
+  const n = err && err.name;
+  if (n === "NotReadableError" || n === "TrackStartError")
+    return "The camera (or microphone) is being used by ANOTHER app or " +
+      "tab right now -- close it (another tab left open on this page, " +
+      "Teams/Zoom/OBS, the terminal capture script), then start the " +
+      "take again.";
+  if (n === "NotFoundError" || n === "DevicesNotFoundError")
+    return "No camera or microphone was found -- plug one in, then " +
+      "start the take again.";
+  if (n === "NotAllowedError" || n === "PermissionDeniedError")
+    return "Camera/microphone permission was refused (" + n + ") -- " +
+      "allow both in the address-bar camera icon, then start the take " +
+      "again.";
+  return "Opening the camera/microphone failed (" + n + ") -- start " +
+    "the take again.";
 }
 
 $("startBtn").onclick = async () => {

@@ -96,6 +96,8 @@
   <button id="recBtn">RECORD</button>
 </div>
 <div id="msg"></div>
+<button id="retryDevices" style="display:none; margin-top:8px;">
+  RETRY DEVICES</button>
 <div class="fine">AUTO: a segment opens on speech or presence, closes after
   ~8 s of quiet, and uploads in the background as it closes &mdash; no button
   needed for the data to be safe. RECORD/STOP is the manual fallback;
@@ -643,9 +645,49 @@ async function relaxExposure(track) {
   } catch (err) { /* best effort */ }
 }
 
-/* -- boot -------------------------------------------------------------------- */
-async function boot() {
-  drawLoop();
+/* -- boot --------------------------------------------------------------------
+   Failures here must never be dark and silent: the single-consumer guard
+   says IN PLAIN LANGUAGE when the camera is held by another app or tab
+   (NotReadableError -- the classic single-consumer collision), and a
+   RETRY DEVICES affordance appears with it.                                             */
+function deviceFailure(err) {
+  const name = err && err.name || String(err);
+  let head, body;
+  if (name === "NotReadableError" || name === "TrackStartError") {
+    head = "CAMERA BUSY";
+    body = "The camera (or microphone) is being used by ANOTHER app or " +
+      "tab right now, so this page cannot read it. Close the other one " +
+      "-- another tab left open on this page, Teams/Zoom/OBS, or the " +
+      "terminal capture script -- then press RETRY DEVICES.";
+  } else if (name === "NotFoundError" || name === "DevicesNotFoundError") {
+    head = "NO CAMERA";
+    body = "No camera or microphone was found. Plug one in, then press " +
+      "RETRY DEVICES.";
+  } else if (name === "NotAllowedError" || name === "PermissionDeniedError" ||
+             name === "SecurityError") {
+    head = "PERMISSION REFUSED";
+    body = "The browser blocked camera/microphone access for this page. " +
+      "Click the camera icon in the address bar, allow both, then press " +
+      "RETRY DEVICES.";
+  } else {
+    head = "DEVICES FAILED (" + name + ")";
+    body = (err && err.message || "") + " -- press RETRY DEVICES.";
+  }
+  $("indicator").className = "paused";
+  $("indText").textContent = head;
+  $("subState").textContent = "not armed -- the page cannot run without " +
+    "the camera and microphone";
+  $("msg").className = "err";
+  $("msg").textContent = body;
+  $("retryDevices").style.display = "";
+  diagSend("DEVICE_FAILURE", { error: name, head: head });
+}
+
+async function tryBoot() {
+  // full retry: tear down any half-open devices and contexts first
+  if (audioCtx) { try { await audioCtx.close(); } catch (e) {} audioCtx = null; }
+  if (stream) { stream.getTracks().forEach(t => t.stop()); stream = null; }
+  $("retryDevices").style.display = "none";
   try {
     stream = await navigator.mediaDevices.getUserMedia({
       video: true,   // near-default: the camera's auto-exposure runs the show
@@ -653,10 +695,8 @@ async function boot() {
                noiseSuppression: false, autoGainControl: false },
     });
   } catch (err) {
-    $("msg").className = "err";
-    $("msg").textContent = "camera/microphone refused (" + err.name +
-      ") -- allow both, then reload";
-    return;
+    deviceFailure(err);
+    return false;
   }
   videoEl.srcObject = stream;
   await videoEl.play();
@@ -713,6 +753,8 @@ async function boot() {
   };
   src.connect(node);
   armedAt = performance.now();
+  floorsReady = false;   // a retry re-arms: floors re-measure on the new
+                         // stream before any auto decision
   paint();
   diagSend("BOOT", { cam: camName, mic: micName, rate: realRate,
     auto: true });
@@ -728,8 +770,20 @@ async function boot() {
     $("msg").textContent = "server DOWN -- run: python3 " +
       "browser_capture/server.py (detection works; SAVING needs the server)";
   }
+  return true;
+}
+
+let loopStarted = false;
+async function boot() {
+  if (!loopStarted) { loopStarted = true; drawLoop(); }
+  await tryBoot();
 }
 boot();
+
+$("retryDevices").onclick = () => {
+  diagSend("RETRY_DEVICES_CLICKED");
+  tryBoot();
+};
 
 window.addEventListener("beforeunload", (ev) => {
   if (openSeg || pendingSaves.length) {
