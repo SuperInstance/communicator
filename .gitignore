@@ -16,3 +16,4 @@ browser_capture/liaison_inbox.jsonl
 browser_capture/liaison_outbox*.jsonl
 browser_capture/gc-report-latest.json
 browser_capture/gc.log
+browser_capture/lenses/verify-probe.json
