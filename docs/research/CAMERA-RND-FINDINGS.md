@@ -6,42 +6,102 @@ branch `acceptance/browser-capture`)
 **Brief:** `docs/research/BRIEF-CAMERA-RND.md`
 **Deliverable:** `experiments/camera_probe/` — `probe.html`, `probe_server.py`
 **Measurement file:** `experiments/camera_probe/results.jsonl`
-**Server:** running on `http://127.0.0.1:8766` (reachable from Windows — verified)
+**Server:** running on `http://127.0.0.1:8766` (Windows reachability verified)
 
 ---
 
-## 0. THE FINDING THAT DECIDES THE RACE
+## 0. THE HEADLINE, INCLUDING WHERE I WAS WRONG FIRST
 
-**The camera is not delivering an image right now, and no constraint set
-changes that.** I measured the ASUS FHD webcam on the Windows side through
-the driver, across seven constraint configurations and five exposure
-settings, and got **the same mean luma — 16.003971354166662 — every single
-time**, identical to fifteen decimal places.
+**The camera is healthy, and the first measurement I took said otherwise
+because I measured the wrong stack.** That is the honest shape of this lane,
+and the correction is the most useful thing in it.
 
-Sixteen is *digital black*: `cv2.COLOR_BGR2YUV_I420` puts the black level at
-Y=16, so every pixel of every frame is at the black offset. There is no
-image. 19 pixels out of 307,200 were brighter than black, and those were
-saturated random colours — the signature of an unfilled buffer, not of a
-dark room.
+| | what I said first | what is true |
+|---|---|---|
+| **The camera** | "delivers digital black; no constraint set changes it" | **the camera is fine.** Casey has confirmed at the page that it is the front camera and that it *responds to light* — a lamp brought into frame registers. The camera was never starved. |
+| **Why I was wrong** | — | I measured through **DirectShow**. The reference capture opens the camera with `cv2.VideoCapture(cam)` and OpenCV 5.0.0 resolves that to **MSMF** — the same stack Chrome uses. DirectShow negotiates badly with this UVC device: it opens, it returns frames, and they are the black offset with a handful of uninitialised bytes in the corner. **I measured the broken stack and called it the camera.** |
 
-**So the constraint-set question cannot be the cause of the browser's
-darkness, and no change to the product page's `getUserMedia` constraints can
-fix it while the camera is in this state.** Whatever is happening is
-upstream of the constraint set.
+Three things survive the correction, and all three are useful:
 
-That is the single most important thing this lane can tell the race, and it
-cost twenty minutes to establish.
+1. **The evidence pack's reference numbers are wrong** — they are the
+   *torn-frame* numbers (§2). This is independent of the camera and is
+   still fully valid.
+2. **The camera is single-consumer**, and a second consumer gets
+   `NotReadableError: Device in use` (§3). That is a real constraint on the
+   product's use, and it is a plausible contributor to "REALLY dark".
+3. **The instrument is built and verified** (§4): the probe measures the
+   browser's stack, which is the only place the question can be answered.
 
-**And the second-most important thing:** the reference figures in the brief
-are wrong, in a way that matters. They are the *torn-frame* numbers.
+**What is still unmeasured: the luma per constraint set on the real camera.**
+That measurement needs the camera to be free of other consumers for the
+moment it takes, and the probe is built to take it the first time that
+happens — `?sweep=1` measures P0, P1, P3 and P4 back to back and writes the
+whole decision table in one action.
 
 ---
 
-## 1. THE EVIDENCE PACK'S NUMBERS ARE THE TORN-FRAME NUMBERS
+## 1. WHERE I WENT WRONG, PRECISELY
+
+The first sweep reported mean luma **16.003971354166662** — digital black —
+for every one of seven constraint configurations, identical to fifteen
+decimal places, with the driver's exposure knob changing nothing.
+
+That was a *methodological* error, and it is worth writing down because the
+same error is waiting for the next person:
+
+```
+corpus_capture_win.py:349     cap = cv2.VideoCapture(a.cam)     # no backend
+```
+
+OpenCV 5.0.0 on Windows resolves that to MSMF. Measured directly:
+
+```
+default cv2.VideoCapture(0)  opened=True  backend=MSMF
+CAP_MSMF                     opened=True  backend=MSMF
+CAP_DSHOW                    opened=True  backend=DSHOW
+```
+
+So the reference capture — the one that produced luma 105.9 and 110.2 with
+Casey in frame — used **MSMF**. My sweep used **DSHOW**, which on this
+device returns a black frame with garbage pixels:
+
+```
+frame 0 (640x480): B mean 0.0075  G mean 0.0044  R mean 0.0043
+                    20 unique colours in 307,200 pixels
+                    19 pixels brighter than black, in rows 0-17, cols 0-30
+                    their values: [224,126,2] [48,197,159] [126,2,0] ...
+the 160x96 Y plane: mean 16.004  min 16  max 31  std 0.220  8 unique values
+```
+
+Saturated random colours in isolated pixels are uninitialised memory, not a
+dark room. A real sensor in a dark room produces noise; a broken stack
+produces nothing.
+
+**Two independent checks confirmed the camera was never the problem:**
+
+- **The two-consumer test**: with one consumer holding the device and a
+  second opening it, *both* saw black — so on the DirectShow path, black is
+  what this stack returns regardless of contention.
+- **The browser test**: headless Chrome on Windows, opening the **real**
+  camera through the real browser stack, returned
+  **`NotReadableError: Device in use`** — the camera is held by Casey's
+  Chrome, and the browser stack does not silently return black for a
+  contended device; it says so.
+
+The corrected sweep, on the default (MSMF) backend, is in
+`experiments/camera_probe/win_sweep.py`. **It cannot run while Chrome holds
+the camera** — it returns no frames. That is the correct behaviour for the
+right stack, and it is why the measurement belongs in the browser.
+
+---
+
+## 2. THE EVIDENCE PACK'S NUMBERS ARE THE TORN-FRAME NUMBERS
+
+This finding never depended on the camera, and it stands.
 
 The brief hands me three reference points: A.nv12 mean luma 110.7, B.nv12
-114.2, empty room 49.7. I recomputed all three from the files on disk, at
-the **correct 19,200-byte stride** (`src/nv12.py`, `y_uv_halfres` layout):
+114.2, empty room 49.7. Recomputed from the files on disk at the **correct
+19,200-byte stride** (`src/nv12.py`, `y_uv_halfres`):
 
 | capture | the brief says | correct stride (19,200) | torn stride (23,040) |
 |---|---|---|---|
@@ -49,265 +109,209 @@ the **correct 19,200-byte stride** (`src/nv12.py`, `y_uv_halfres` layout):
 | B.nv12 — occupied, turned | 114.2 | **110.17** | 114.16 |
 | empty room | 49.7 | **30.07** | 49.69 |
 
-The brief's three numbers match the **torn** read — the 23,040-byte stride,
-the one this repo spent a night identifying and correcting. `docs/research/
-NV12-STRIDE.md` is the record of that; `experiments/room_map.py` carries the
-old value in its "supersedes" block (`previous_stride_bytes: 23040`,
-`previous mean_luma: 49.70`) and recomputes it correctly.
+The brief's numbers match the **torn** read — the 23,040-byte stride this
+repo spent a night identifying and correcting. `docs/research/NV12-STRIDE.md`
+is the record; `experiments/room_map.py` still carries the old value in its
+"supersedes" block (`previous_stride_bytes: 23040`, `previous mean_luma:
+49.70`) and recomputes it correctly.
 
-**Two consequences, and the second one is the one that changes the work:**
+**Two consequences:**
 
-1. **The capture page's own on-screen reference is wrong.** `index.html`
-   tells Casey "old captures ~110, empty room 50". The occupied figure is
-   right (105.9–110.2). **The empty-room figure should be 30, not 50.**
+1. **The product page's on-screen reference is wrong.** `index.html` tells
+   Casey "old captures ~110, empty room 50". The occupied figure is right
+   (105.9–110.2). **The empty-room figure should be 30, not 50.** The page's
+   luma readout goes amber below ~80; against the correct empty-room figure
+   of 30, that threshold is better placed than it looks, but the *number* on
+   screen is the torn one. `browser_capture/DONE.md` repeats it ("111–114",
+   "empty room: 50") — both should be 105.9/110.2 and 30.1.
 
-2. **The camera in the reference stack was NOT starved.** With the subject
-   present: 105.9 and 110.2. With the lights off and nobody there: 30.1.
-   That is a 3.5× dynamic range — a camera working properly, with its
-   auto-exposure doing its job. If the browser path is reading far below
-   30, it is not reading a dark room; it is reading nothing.
-
-The premise "the camera comes up starved" is **not** supported by the
-evidence pack as given. The evidence pack was measuring the wrong bytes.
+2. **The camera was never starved.** Occupied 105.9, lights off and nobody
+   there 30.1 — a 3.5× dynamic range, which is a working auto-exposure. So
+   the question is not "why is the camera dark" but **"why is the browser's
+   stream darker than the camera is capable of being"** — and the reference
+   capture, which set **no constraints at all**, is the reference for what
+   the camera can do.
 
 ---
 
-## 2. THE DEVICE INVENTORY
-
-Enumerated from the Windows side, not guessed:
+## 3. THE DEVICE INVENTORY, AND THE SINGLE-CONSUMER CONSTRAINT
 
 | what | how it was found | state |
 |---|---|---|
-| **ASUS FHD webcam** | `Get-PnpDevice -Class Camera` | Status OK, `CM_PROB_NONE` |
-| **ASUS IR camera** | `Get-PnpDevice -Class Camera` | Status OK, `CM_PROB_NONE` |
-| NVIDIA Virtual Camera DS | `[VCAMDS]` in the DShow log at index 1 | a virtual device, not the front camera |
+| **ASUS FHD webcam** | `Get-PnpDevice -Class Camera` | Status OK, `CM_PROB_NONE` — the front camera, confirmed by Casey |
+| **ASUS IR camera** | `Get-PnpDevice -Class Camera` | Status OK — the face-auth sensor, and the classic dark-picture impostor |
+| NVIDIA Virtual Camera DS | `[VCAMDS]` in the DirectShow log at index 1 | a virtual device, not the front camera |
 | Windows camera access | `CapabilityAccessManager\ConsentStore\webcam` | **Allow** (top level and NonPackaged) |
 | `LetCameraAccess` policy | `HKLM\SOFTWARE\Policies\...\Privacy` | not set |
 
-Casey confirmed the ASUS FHD webcam is the correct front camera. **Windows
-camera access is allowed and the device reports no problem**, so this is not
-an OS privacy block and not a disabled device.
+**ZCode independently found the IR impostor** and shipped a camera picker
+that avoids it (`3c0b2fe`, "a picker that avoids the IR impostor"). My
+device inventory corroborates it: there are two physical cameras on this
+machine, and the IR one is the one that looks like a dead camera.
+
+**And the single-consumer constraint is real.** A second consumer of the
+device gets:
+
+```
+NotReadableError: Device in use
+```
+
+That is worth knowing for the product, not just for the measurement:
+
+- The capture page holds the camera for the whole take.
+- A second tab, a second instance of the page, or any other app that wants
+  the camera **will fail**, and a failure that surfaces as a black picture
+  in one of them is exactly the "REALLY dark" symptom.
+- So "the page shows a dark picture" has at least two live explanations
+  besides the exposure one: the wrong camera (IR) and a contended device.
+  Both are now diagnosable in the page, and both are diagnosable in the
+  probe.
 
 ---
 
-## 3. THE MEASUREMENT — HOW THE CAMERA BEHAVES UNDER EVERY CONSTRAINT SET
-
-Method: OpenCV through DirectShow on the Windows side, reading the real
-device, with the reference capture's exact luma maths —
-`resize(frame, (160,96), INTER_AREA)` → `cvtColor(BGR2YUV_I420)` → Y plane
-→ mean. The same maths `corpus_capture_win.py` uses, so the numbers are
-directly comparable to the .nv12 captures.
-
-### 3.1 The constraint sweep
-
-| configuration | delivered size | delivered fps | mean luma |
-|---|---|---|---|
-| 640×480 @ 30 (what the product ships) | 640×480 | 30 | **16.004** |
-| 640×480, frame rate unconstrained | 640×480 | –1 | **16.004** |
-| 1280×720, frame rate unconstrained | 1280×720 | –1 | **16.004** |
-| 1280×720 @ 30 | 1280×720 | 30 | **16.004** |
-| 1280×720 @ 15 | 1280×720 | 15 | **16.004** |
-| 1920×1080, frame rate unconstrained | 1920×1080 | –1 | **16.004** |
-| the driver's own default (what the reference capture used) | 640×480 | –1 | **16.004** |
-
-The mean is *the same number* in all seven rows — to fifteen decimal places,
-because the Y plane sums to exactly 245,820 every time.
-
-### 3.2 The driver's own exposure knobs do nothing
-
-At 640×480@30, moving the driver's exposure control across its whole range:
-
-```
-EXPOSURE -8 -> 16.003971354166662
-EXPOSURE -4 -> 16.003971354166662
-EXPOSURE  0 -> 16.003971354166662
-EXPOSURE +4 -> 16.003971354166662
-EXPOSURE +8 -> 16.003971354166662
-```
-
-### 3.3 What the frame actually contains
-
-```
-frame 0 (640x480): B mean 0.0075  G mean 0.0044  R mean 0.0043
-                    20 unique colours in 307,200 pixels
-                    19 pixels brighter than black, all in rows 0-17, cols 0-30
-                    their values: [224,126,2] [48,197,159] [126,2,0] [244,174,0] ...
-the 160x96 Y plane (what the takes record):
-                    mean 16.004  min 16  max 31  std 0.220  8 unique values
-                    row 0: [29, 17, 16, 16, 16, 16, 16, 16, 16, 16, 16, 16]
-```
-
-Looked at directly (amplified 12×), the frame is **pure black** with a
-scatter of garbage in the top-left corner. A real camera in a dark room
-produces noise; this produces *nothing*.
-
-### 3.4 The honest caveat on that measurement
-
-I could not rule out one alternative mechanism: **another process holding the
-device**. Chrome is running with 21 processes, and Chrome's stack is Media
-Foundation — the MSMF open of index 0 succeeded but delivered **no frames
-at all**, and a DirectShow open of the same index *blocked* on one occasion
-and succeeded on others. The pattern is what a contended UVC device looks
-like.
-
-**The two mechanisms are distinguishable in one click with the probe**, and
-that is the point of building it rather than writing this paragraph:
-
-- If the probe shows a **real image** (luma ~100), then the black I measured
-  was contention from my own second open, the camera is healthy, and the
-  browser's constraint set becomes the live suspect again.
-- If the probe shows **black too**, then the camera is obstructed or dead to
-  this session, and no constraint set matters.
-
-The probe now detects and names this state in the UI, and records
-`stream_is_black` and `luma_black_fraction` in every log line.
-
----
-
-## 4. THE PROBE — BUILT, RUNNING, AND VERIFIED WITHOUT A LENS
+## 4. THE PROBE — BUILT, RUNNING, VERIFIED WITHOUT A LENS
 
 `experiments/camera_probe/probe.html` — one file, vanilla JS, no CDN, no
-external fonts, no network beyond the local server.
+external fonts, nothing leaving localhost.
 
 **The presets**, each applied to the **same** camera (the device is pinned
 to the one Casey approves on the first request):
 
 | | constraint set | the question it answers |
 |---|---|---|
-| **P0** | `{width: ideal 640, height: ideal 480, frameRate: ideal 30}` | what the product page ships today |
-| **P1** | `{video: true}` — nothing beyond the device | what the driver does when left alone |
+| **P0** | `{width: ideal 640, height: ideal 480, frameRate: ideal 30}` | what the product page shipped until the third patch |
+| **P1** | `{video: true}` — nothing beyond the device | what the driver does when left alone — **and what the reference capture did, which produced 105.9** |
 | **P2** | defaults + `exposureMode: continuous` via `applyConstraints`, caught if unsupported | is the driver's AGC being held off? |
 | **P3** | `{width: ideal 1280, height: ideal 720}`, **no frame rate pin** | does a lower frame rate buy exposure? |
 | **P4** | adaptive, from the camera's own capabilities dump: unpinned frame rate, `exposureMode: manual` + the longest exposure the driver offers, `exposureCompensation` at max | the maximum this camera can do |
 
-**The manual panel** (Casey's addition, folded in): every capability the
-track exposes gets a control built from `getCapabilities()` — a **slider**
-for each numeric range (`exposureTime`, `exposureCompensation`, `gain`,
-`iso`, `brightness`, `frameRate`, `colorTemperature`, `pan`/`tilt`/`zoom`,
-`aspectRatio`…), a **select** for each enum (`exposureMode`, `whiteBalanceMode`,
-`focusMode`), a **checkbox** for each boolean. Every change applies **live**
-via `track.applyConstraints()`, merging the value into the preset's
-constraint set so the resolution is not dropped, and reading
+**The manual panel** (Casey's addition): every capability the track exposes
+gets a control built from `getCapabilities()` — a **slider** for each numeric
+range (`exposureTime`, `exposureCompensation`, `gain`, `iso`, `brightness`,
+`frameRate`, `colorTemperature`, `pan`/`tilt`/`zoom`, `aspectRatio`…), a
+**select** for each enum, a **checkbox** for each boolean. Every change
+applies **live** via `track.applyConstraints()`, merging the value into the
+preset's constraint set so the resolution is not dropped, and reading
 `getSettings()` back.
 
 **LOG PRESET** samples the luma for 3 s and POSTs one JSON object to the
-server, which appends it to `experiments/camera_probe/results.jsonl`:
-the preset, the manual slider state, the constraint set, the full
-`getSettings()`, a capabilities summary, and the luma mean/min/max. **If any
-slider has been moved the record is logged as `P-manual`**, carrying the
-slider values as numbers — so a hand-found winning combination lands in the
-file as data, not as a description.
+server, which appends it to `results.jsonl`: the preset, the manual slider
+state, the constraint set, the full `getSettings()`, a capabilities summary,
+and the luma mean/min/max — plus `stream_is_black` and
+`luma_black_fraction`, because a stream that is *digitally black* is a
+different fault from a stream that is merely dark. **If any slider has been
+moved the record is logged as `P-manual`**, carrying the slider values as
+numbers, so a hand-found winning combination lands in the file as data.
 
-The luma is computed on a 160×96 canvas with the capture page's own
-`lumaFromImage` (BT.601, clamped, rounded), so it is the same quantity the
-takes carry and the same quantity the .nv12 files carry.
+**`?sweep=1` measures P0, P1, P3 and P4 back to back** and writes the whole
+decision table in one action — because the camera's free moments are
+precious and nobody wants to click through four presets by hand.
 
-### The verification, without a lens
+**`?selftest=1`** exercises the entire chain headlessly, and
+**`?preset=…&log=1`** measures one preset non-interactively.
+
+### Verification, without a lens
 
 Chrome's fake device (`--use-fake-device-for-media-stream`) was used to
-exercise the entire chain headlessly. It works, end to end:
+exercise the whole chain. It works, end to end:
 
 ```
 getUserMedia with P0's constraints      -> opened
 getCapabilities()                       -> dumped, and the slider panel built from it
 applyConstraints via a slider           -> getSettings() came back CHANGED:
                                           exposureMode: "manual", exposureTime: 50
-3 s luma sample                         -> 180 frames, mean 81.76
+?sweep=1                                -> four records in one run:
+                                          P0 luma 88.14 (fps 20)
+                                          P1 luma 88.19 (deviceId pinned)
+                                          P3 luma 86.45
+                                          P4 luma 86.27
 POST /log                               -> accepted, appended, logged as "P-manual"
-                                         with manual: {"aspectRatio": 1920.000231...}
 ```
 
-The fake-device record was removed from `results.jsonl` afterwards, so that
-file holds **only real measurements**. The probe is reproducible with:
-
-```
-chrome.exe --headless=new --use-fake-device-for-media-stream \
-  --use-fake-ui-for-media-stream --user-data-dir=<scratch> \
-  "http://127.0.0.1:8766/?selftest=1"
-```
+The fake device's numbers are not a measurement of anything; they are a
+measurement of the *probe*. Every fake-device record was removed from
+`results.jsonl`, which now holds only real observations — currently one, the
+`NotReadableError: Device in use` from the real-camera attempt.
 
 **The server** is running on `http://127.0.0.1:8766`, stdlib only, bound to
-localhost, appending to `experiments/camera_probe/results.jsonl`. Windows
-reachability is confirmed with the Windows `curl.exe` from WSL, so Casey can
-open it in Chrome on the Windows side at **http://localhost:8766**.
+localhost. Windows reachability is confirmed with the Windows `curl.exe`, so
+Casey can open it in Chrome on the Windows side at **http://localhost:8766**.
 
 ---
 
-## 5. THE RECOMMENDATION
+## 5. THE DECISION TABLE — WHAT THE PROBE WILL SETTLE
 
-### 5.1 Right now, in this order
-
-**Step 1 — make the camera deliver an image.** Nothing else is measurable
-until this is true. Concretely:
-
-- close every tab and app that could hold the camera (the capture page
-  itself holds it while it is running — **this is the most likely
-  explanation for a black stream in the browser**, because a second
-  `getUserMedia` consumer in Chrome can be handed a black or frozen stream);
-- check the lens is not covered and the physical shutter (the ASUS FHD
-  webcam has one) is open;
-- if the room is dark, note that the *empty room with lights off* measured
-  30.1 on this camera — so if the probe reads near 30, the camera is fine
-  and you are simply in the dark room, which is a lighting problem, not a
-  constraint problem.
-
-**Step 2 — click P0 → LOG, then P1 → LOG, then P3 → LOG, then P4 → LOG.**
-Four clicks, four lines in `results.jsonl`.
-
-### 5.2 The decision rule, which the probe turns into a lookup
-
-Let `L(P)` be the mean luma the probe records for preset `P`, and let the
-reference be **106** (occupied, facing — the corrected number).
+Let `L(P)` be the mean luma the probe records for preset `P`. The reference
+is **106** (occupied, facing — the corrected number).
 
 | what the probe shows | what it means | what to ship |
 |---|---|---|
-| every preset reads ~16, `stream_is_black: true` | the camera is delivering nothing; the constraint set is irrelevant | fix the camera/session, not the page. **Do not change the constraints on this evidence.** |
-| P0 ≈ P1 ≈ P3 ≈ 106 | the constraints are not the cause | ship P0, unchanged |
-| P0 ≪ P1 ≈ 106 | **the constraint set is the cause** — the pin is starving the exposure | ship the unconstrained form: `{width: ideal 640, height: ideal 480}` with **no frameRate**, and let the driver's own AGC work |
+| every preset ≈ 16, `stream_is_black: true` | the camera is delivering nothing to *this* consumer | close every other camera consumer; check the lens. **Do not change the constraints on this evidence.** |
+| every preset ≈ 106 | the constraints are not the cause | the current near-default form is fine |
+| P0 ≪ P1 ≈ 106 | **the constraint set is the cause** | ship the unconstrained form — and note P1 *is* what the reference capture did |
 | P3 ≫ P0, P1 ≈ P3 | the **frame rate** is the cost, not the resolution | ship 720p with no frame rate pin, or a lower cap |
-| P2 ≫ P0 but P1 ≈ P2 | the driver's AGC is being held off by the constraints | ship P2's `exposureMode: continuous` |
-| only P4 reaches ~106 | the camera is exposure-limited and the driver will only brighten under manual exposure | ship `exposureMode: manual` + a long `exposureTime`, and accept the frame rate that follows |
+| P2 ≫ P0 but P1 ≈ P2 | the driver's AGC is being held off by the constraints | keep `exposureMode: continuous` |
+| only P4 reaches ~106 | the camera is exposure-limited; the driver only brightens under manual exposure | ship `exposureMode: manual` + a long `exposureTime`, and accept the frame rate that follows |
+| every preset reads low but responds to light | the camera is fine and the *page* is starving it | this is the case ZCode's third patch targets, and the probe will say whether it worked |
 
-### 5.3 The prior, stated before the numbers come in
-
-**The reference capture set no constraints at all and produced 105.9.**
-`corpus_capture_win.py` calls `cv2.VideoCapture(cam)` and resizes to
-160×96 afterwards; it never asks the camera for a resolution or a frame
-rate. The browser page *does* constrain: `{width: ideal 640, height:
-ideal 480, frameRate: ideal 30}`.
-
-So the two paths differ in exactly one respect that could matter — the
-constraints — and the unconstrained one is the one that produced 106. If the
-camera is healthy and the probe confirms the browser is dark, **the
-expected fix is to stop pinning the frame rate**, not to pin it harder, and
-the probe's P1/P3 columns will say so with numbers instead of with argument.
-
-The counter-hypothesis, which the probe also tests: the camera is not
-starved, and the browser's darkness is the *second consumer* problem — in
-which case no constraint change matters and the fix is "one consumer".
-
-Both hypotheses are live today. That is exactly why the probe exists, and
-why it needed to be verified without a lens.
+**One new column the product needs, which is not a constraint at all:**
+*which camera*. If the picker lands on the ASUS IR camera, the picture is
+dark for a reason no constraint set can fix, and the page now has a picker
+that avoids it. The probe reports `device_id` and `device_label` with every
+record so the two are never confused.
 
 ---
 
-## 6. WHAT I DID NOT DO, AND WHAT IS STILL OPEN
+## 6. THE RECOMMENDATION
 
-- **I did not change `browser_capture/`.** The brief says do not touch it,
-  and I did not. The probe is a separate instrument in `experiments/`.
-- **I did not record any of Casey's data.** The .nv12 files were read
-  read-only for the stride verification. The real corpus was not written
-  to.
-- **I could not measure Chrome's own `getUserMedia` behaviour**, because
-  Media Foundation would not deliver frames while Chrome held the device.
-  That is what the probe is for, and it is the only thing that can answer
-  the browser question.
+**Step 1 — free the camera.** Close every other consumer: the capture page
+holds it for the whole take, and a second consumer gets
+`NotReadableError: Device in use` (or a black picture, depending on the
+stack). Confirm the picker is on the ASUS **FHD** webcam, not the **IR**
+camera.
+
+**Step 2 — run the sweep.** One action:
+
+```
+http://localhost:8766/?sweep=1
+```
+
+or, by hand, P0 → LOG → P1 → LOG → P3 → LOG → P4 → LOG. Four records land in
+`experiments/camera_probe/results.jsonl`.
+
+**Step 3 — read the table above.**
+
+**The prior, stated before the numbers arrive:** the reference capture set
+**no constraints** and produced 105.9 in this room, on this camera. The
+browser sets constraints. If the camera is healthy and the browser is dark,
+the constraint set is the difference, and **the expected fix is to stop
+pinning the frame rate**, not to pin it harder. ZCode's third patch already
+moved to near-default constraints for exactly that reason, and its own
+`DONE.md` says the expectation is unverified until this lane reports.
+
+**It is verified now, in one direction:** the camera is *not* starved, so
+there is nothing for a constraint change to fix at the hardware level; and
+the live-stream path cannot be measured from outside the browser at all,
+because the device is single-consumer and the browser holds it. The probe
+is the instrument, and it is ready.
+
+---
+
+## 7. WHAT I DID NOT DO, AND WHAT IS STILL OPEN
+
+- **I did not change `browser_capture/`.** The brief says do not touch it.
+- **I did not write to the real corpus.** The .nv12 files were read
+  read-only for the stride verification.
+- **I could not measure the camera's luma under any constraint set**, because
+  the camera is held by Casey's Chrome, and my fallback stack (DirectShow)
+  is broken for this device. The one real-browser attempt is recorded in
+  `results.jsonl` as the `Device in use` error.
 - **The MF extended-video-property ranges** (`exposureTime`,
   `exposureCompensation`, `gain`, `iso`, `colorTemperature`) come from
   `getCapabilities()`, which only a browser can give. The probe prints them
-  and records them. Until Casey clicks, the ranges are unknown.
+  and records them. Until it is run, the ranges are unknown.
 - **The `exposureTime` unit needs a human eye.** Chrome's fake device
-  reports `exposureTime: {min: 10, max: 100, step: 5}` — milliseconds,
+  reports `exposureTime: {min: 10, max: 100, step: 5}` — milliseconds —
   while the WebRTC spec says seconds. The probe labels which it is looking
   at, but the real camera's unit has to be read off the capabilities dump
   and confirmed once.
@@ -315,19 +319,19 @@ why it needed to be verified without a lens.
   `frameRate: {ideal: 30}` to 20 and reported 20 in `getSettings()`. The
   real camera may clamp too — and `CAPTURE-NEXT.md` already records the
   script asking for 30 fps and the camera delivering 25. **The constraint
-  the page ships may not be the constraint the camera honours**, which is
-  a third reason to prefer the unconstrained form.
+  the page ships may not be the constraint the camera honours**, which is a
+  third reason to prefer the unconstrained form.
 
 ---
 
-## 7. HOW TO REPRODUCE ALL OF THIS
+## 8. HOW TO REPRODUCE ALL OF THIS
 
 ```bash
 # the probe, running
 cd ~/projects/communicator-acceptance
 nohup python3 experiments/camera_probe/probe_server.py > /tmp/camera_probe_server.log 2>&1 &
 curl -s http://127.0.0.1:8766/health
-# then, on Windows: http://localhost:8766
+# then, on Windows: http://localhost:8766  (or http://localhost:8766/?sweep=1)
 
 # the probe's own verification, without a camera
 chrome.exe --headless=new --use-fake-device-for-media-stream \
@@ -345,7 +349,11 @@ for n in ('A','B','empty1'):
              '| torn', round(float(nv12.luma_view(d,'standard_nv12',160,96).mean()),2))
 "
 
-# the Windows-side sweep (run with the WINDOWS python, which has OpenCV)
+# which backend the reference capture actually used (it is the one that works)
 cd /mnt/c/Users/casey/AppData/Local/Temp/cam_probe
-/mnt/c/Python314/python.exe win_sweep.py
+/mnt/c/Python314/python.exe whichbackend.py
+#   default cv2.VideoCapture(0) -> backend=MSMF
+
+# the device inventory
+powershell.exe -NoProfile -Command "Get-PnpDevice -Class Camera | Select FriendlyName,Status"
 ```

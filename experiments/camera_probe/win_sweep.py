@@ -1,35 +1,35 @@
 """
-win_sweep.py -- THE DECISIVE EXPERIMENT: how does this camera's brightness
-respond to the constraint sets the browser could ship?
+win_sweep2.py -- the constraint sweep on the RIGHT backend.
 
-WHY THIS IS THE DECISIVE EXPERIMENT.
+THE CORRECTION.
 
-The reference capture on this machine -- corpus_capture_win.py -- put the
-occupied room at mean luma 105.9 (A) and 110.2 (B), read at the CORRECT
-19,200-byte stride. That capture set NO constraints: `cv2.VideoCapture(cam)`
-and whatever the driver chose. The browser page DOES constrain:
-{width: ideal 640, height: ideal 480, frameRate: ideal 30}.
+The first sweep used DirectShow and reported digital black for every
+constraint set. That was a measurement error, and the evidence is in this
+repo:
 
-Casey's hypothesis is that pinning the frame rate caps the exposure (a UVC
-camera's maximum exposure is one frame time, so 30 fps caps the shutter at
-33 ms), and that the driver behaves differently under explicit constraints
-than under defaults.
+  * `corpus_capture_win.py` opens the camera with `cv2.VideoCapture(a.cam)`
+    -- no backend -- and OpenCV 5.0.0 on Windows resolves that to **MSMF**,
+    Media Foundation, which is the SAME stack Chrome uses.
+  * `cv2.VideoCapture(0).getBackendName()` returns "MSMF".
+  * DirectShow on this UVC device negotiates badly: it opens, it returns
+    frames, and those frames are the black offset with a handful of
+    uninitialised bytes in the corner.
 
-This sweep measures the camera's luma across exactly that axis: resolution x
-frame rate, plus the driver's own exposure knobs. The luma is the reference's
-exact maths:
+So the first sweep measured the WRONG STACK and was measuring the stack's
+failure, not the camera's. This sweep uses the default backend (MSMF) and
+reports which backend it actually got.
 
-    frame -> cv2.resize(frame, (160,96), INTER_AREA)
-          -> cv2.cvtColor(frame, COLOR_BGR2YUV_I420) -> Y plane -> mean
+THE QUESTION, RESTATED.
 
-DSHOW is used, because that is the backend that works while Chrome holds the
-Media Foundation source.
+Does the frame rate constraint cap the exposure? A UVC camera's maximum
+exposure is one frame time, so pinning 30 fps caps the shutter near 33 ms.
+If the driver behaves differently under an explicit constraint than under
+its default, then the browser's `{frameRate: {ideal: 30}}` is what makes
+the page dark, and dropping it is the fix. The reference capture set NO
+constraints and got 105.9.
 
-CAUTION, STATED UP FRONT: this is the driver, not the browser. It does not
-prove what Chrome's getUserMedia will do -- that is what the probe page is
-for. What it does is establish whether the camera CAN be this bright under
-each constraint set, and what the driver's own knobs do. The probe page then
-measures the browser's version of the same question.
+THE LUMA IS THE REFERENCE'S EXACT MATHS, so the numbers compare directly
+with the .nv12 captures on disk.
 """
 
 import json
@@ -39,8 +39,10 @@ import cv2
 import numpy as np
 
 W, H = 160, 96
-N_FRAMES = 20
-OUT = "win_sweep.json"
+N_FRAMES = 25
+OUT = "win_sweep2.json"
+
+results = {"opencv": cv2.__version__, "sweep": [], "knobs": []}
 
 
 def ref_luma(cap, n=N_FRAMES):
@@ -62,93 +64,63 @@ def ref_luma(cap, n=N_FRAMES):
             "delivered_fps": round(len(vals) / dt, 2) if dt > 0 else None}
 
 
+def open_cam(backend=cv2.CAP_ANY):
+    cap = cv2.VideoCapture(0, backend)
+    if not cap.isOpened():
+        return None
+    return cap
+
+
+def save():
+    with open(OUT, "w", encoding="utf-8") as f:
+        json.dump(results, f, indent=2)
+
+
 def sweep():
-    results = []
-    # the constraint sets that matter: what the product ships now (P0),
-    # 720p with no fps pin (P3), the driver's own default (what the
-    # reference capture used), and the frame-rate axis on its own.
     configs = [
-        {"tag": "P0-like 640x480@30", "w": 640, "h": 480, "fps": 30},
-        {"tag": "640x480 unconstrained", "w": 640, "h": 480, "fps": None},
-        {"tag": "P3-like 1280x720", "w": 1280, "h": 720, "fps": None},
+        {"tag": "reference-style (no constraints)", "w": None, "h": None, "fps": None},
+        {"tag": "P0-style 640x480@30", "w": 640, "h": 480, "fps": 30},
+        {"tag": "640x480, no fps pin", "w": 640, "h": 480, "fps": None},
+        {"tag": "P3-style 1280x720, no fps pin", "w": 1280, "h": 720, "fps": None},
         {"tag": "1280x720@30", "w": 1280, "h": 720, "fps": 30},
         {"tag": "1280x720@15", "w": 1280, "h": 720, "fps": 15},
-        {"tag": "1920x1080 unconstrained", "w": 1920, "h": 1080, "fps": None},
-        {"tag": "driver default", "w": None, "h": None, "fps": None},
     ]
     for cfg in configs:
-        cap = cv2.VideoCapture(0, cv2.CAP_DSHOW)
-        if not cap.isOpened():
-            results.append({**cfg, "error": "did not open"})
+        cap = open_cam()
+        if cap is None:
+            results["sweep"].append({**cfg, "error": "did not open"})
+            save()
             continue
         entry = dict(cfg)
+        entry["backend"] = cap.getBackendName()
         if cfg["w"]:
             cap.set(cv2.CAP_PROP_FRAME_WIDTH, cfg["w"])
         if cfg["h"]:
             cap.set(cv2.CAP_PROP_FRAME_HEIGHT, cfg["h"])
         if cfg["fps"]:
             cap.set(cv2.CAP_PROP_FPS, cfg["fps"])
-        time.sleep(0.4)  # let the driver settle into the new mode
+        time.sleep(0.5)
         entry["properties"] = {
             "width": cap.get(cv2.CAP_PROP_FRAME_WIDTH),
             "height": cap.get(cv2.CAP_PROP_FRAME_HEIGHT),
             "fps": cap.get(cv2.CAP_PROP_FPS),
             "auto_exposure": cap.get(cv2.CAP_PROP_AUTO_EXPOSURE),
-            "gain": cap.get(cv2.CAP_PROP_GAIN),
-            "brightness": cap.get(cv2.CAP_PROP_BRIGHTNESS),
             "exposure": cap.get(cv2.CAP_PROP_EXPOSURE),
+            "gain": cap.get(cv2.CAP_PROP_GAIN),
         }
         entry["luma"] = ref_luma(cap)
         cap.release()
-        lum = entry["luma"]
-        print(f"{cfg['tag']:<26} -> "
-              f"{entry['properties']['width']:.0f}x{entry['properties']['height']:.0f} "
-              f"@ {entry['properties']['fps']:.0f}  "
-              f"luma {lum['mean']:.1f}" if lum else
-              f"{cfg['tag']:<26} -> no frames", flush=True)
-        results.append(entry)
-        with open(OUT, "w", encoding="utf-8") as f:
-            json.dump(results, f, indent=2)
-    return results
-
-
-def knob_response():
-    """What the driver's OWN exposure knobs do to the luma, at the shipped
-    640x480@30 setting. If moving them does nothing, the browser has no
-    lever and the constraint set is the only lever."""
-    out = []
-    cap = cv2.VideoCapture(0, cv2.CAP_DSHOW)
-    if not cap.isOpened():
-        return [{"error": "did not open"}]
-    cap.set(cv2.CAP_PROP_FRAME_WIDTH, 640)
-    cap.set(cv2.CAP_PROP_FRAME_HEIGHT, 480)
-    cap.set(cv2.CAP_PROP_FPS, 30)
-    time.sleep(0.4)
-    for prop, values in (("EXPOSURE", [-8, -4, 0, 4, 8]),
-                         ("GAIN", [0, 32, 64, 128, 255]),
-                         ("BRIGHTNESS", [-64, 0, 64])):
-        cid = getattr(cv2, "CAP_PROP_" + prop, None)
-        if cid is None:
-            continue
-        readings = []
-        for v in values:
-            cap.set(cid, float(v))
-            time.sleep(0.35)
-            r = ref_luma(cap)
-            readings.append({"set": v, "readback": cap.get(cid),
-                             "luma": r["mean"] if r else None})
-        print(f"{prop}: " + ", ".join(f"{x['set']}->{x['luma']}"
-                                      for x in readings), flush=True)
-        out.append({"prop": prop, "readings": readings})
-    cap.release()
-    return out
+        l = entry["luma"]
+        print(f"{cfg['tag']:<38} [{entry['backend']}] -> " +
+              (f"luma {l['mean']:7.2f}  frames {l['n']}  "
+               f"delivered_fps {l['delivered_fps']}"
+               if l else "NO FRAMES"), flush=True)
+        results["sweep"].append(entry)
+        save()
 
 
 if __name__ == "__main__":
-    print("=== constraint sweep ===", flush=True)
-    res = sweep()
-    print("\n=== driver knob response at 640x480@30 ===", flush=True)
-    knobs = knob_response()
-    with open(OUT, "w", encoding="utf-8") as f:
-        json.dump({"sweep": res, "knobs": knobs}, f, indent=2)
+    print(f"openCV {cv2.__version__}", flush=True)
+    sweep()
+    save()
     print("wrote " + OUT, flush=True)

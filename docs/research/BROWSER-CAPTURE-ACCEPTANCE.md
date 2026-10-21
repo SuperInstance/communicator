@@ -48,7 +48,8 @@ proves nothing about it.
 **My checker's verdict on the session: FAIL** — 3 of 12 checks failed
 (`LAYOUT`, `SPEECH`, `WEBM`), all three of them on the addendum's rich
 artifacts or on the speech gate, and none of them on the pipeline-exact
-artifacts. **That is not a verdict on the production build's correctness**:
+artifacts. **This verdict was re-measured against the build as it stands
+after ZCode's five further commits; the result is identical** (§1.4). **That is not a verdict on the production build's correctness**:
 every one of the three is a property of the *synthetic verify session*, and
 each is disclosed in ZCode's own `DONE.md`. The production path for two of
 them is unexercised offline.
@@ -149,10 +150,42 @@ part of the evidence.
 
 ---
 
+## 1.4 THE BUILD MOVED; THIS VERDICT WAS RE-MEASURED AGAINST IT
+
+While the camera lane was running, ZCode shipped five more commits on top
+of the build this verdict originally measured:
+
+```
+e42143b  the performer never guesses again: a phase banner, STOP & SAVE, bounded ends
+49f4053  every camera parameter on screen: a controls panel from the real capabilities
+5194314  stop driving the camera like the terminal script did: near-default constraints
+3c0b2fe  the dark camera made diagnosable: a picker that avoids the IR impostor
+a941354  the page learns --stimulus-file
+```
+
+`index.html` grew from 55,807 to 79,702 bytes. So the verdict below is **not**
+a measurement of the build I first looked at: I re-derived the session from
+the **current** `verify.py` (the same one-line output-location patch, nothing
+else) and re-ran the checker against it.
+
+**The result is unchanged.** The same three checks fail (`LAYOUT`, `SPEECH`,
+`WEBM`) and the same nine pass; the gate still exits 0 on the directory and on
+the takes alone; ZCode's own suite still reports **145 passed, 0 failed**.
+That is the expected outcome, because all five patches are client-side page
+changes and none of them touches the take format — which is exactly what
+"the pipeline accepts the takes unchanged" requires of them.
+
+One of the new commits did land a finding I had made independently: `3c0b2fe`
+adds a camera picker that "avoids the IR impostor", and my device inventory
+found the same thing from the Windows side — this machine has **two**
+physical cameras, the ASUS FHD webcam and the ASUS IR camera, and the IR one
+is the classic dark-picture impostor. See
+`docs/research/CAMERA-RND-FINDINGS.md` §3.
+
 ## 2. PASS / FAIL PER CHECK
 
-Measured on the pristine session (`/tmp/zcode_venv/corpus`, 5 takes:
-A1 ×2, C1, D1, F1).
+Measured on the pristine session produced by the **current** `verify.py`
+(`/tmp/zcode_new/corpus`, 5 takes: A1 ×2, C1, D1, F1).
 
 | Check | Result | What it means here |
 |---|---|---|
@@ -167,6 +200,7 @@ A1 ×2, C1, D1, F1).
 | `RICH` | **PASS** | all eight addendum items present, matched semantically |
 | `WEBM` | **FAIL** | every WebM is a 37-byte stub with no video track and no audio track |
 | `MANIFEST` | **PASS** | every take listed, with files, labels, flags and notes |
+| *(reference figures)* | **FAIL** | the page's on-screen "empty room 50" is the torn-frame number; the correct value is 30 — see §4.6 |
 | `PLAN` | **PASS** (reported) | 4 of 16 plan conditions present — a synthetic session, as expected |
 | `GATE` | **PASS** | the gate exits 0 on the directory as it stands, and on the takes alone |
 
@@ -366,6 +400,42 @@ A, B, C, D, F, then one long FREE — **16 takes**, matching the reference
 
 ---
 
+### 4.6 The deliverable's on-screen reference numbers are the torn-frame numbers
+
+This one came out of the camera lane, and it is a defect in the deliverable.
+
+`index.html:212` tells Casey, on the page:
+
+> The existing captures on this camera and in this room sat around 110;
+> **the empty room read 50.**
+
+The occupied figure is right. **The empty-room figure is the torn-frame
+number.** Recomputed from the files at the correct 19,200-byte stride:
+
+| capture | the page says | correct (19,200) | torn (23,040) |
+|---|---|---|---|
+| A.nv12 — occupied, facing | ~110 | **105.94** | 110.73 |
+| B.nv12 — occupied, turned | ~111 (DONE.md) | **110.17** | 114.16 |
+| empty room | 50 | **30.07** | 49.69 |
+
+The page's number matches the torn read exactly. `browser_capture/DONE.md`
+repeats it ("111–114", "empty room: 50").
+
+It is a small thing, and it is a real thing: the number Casey is told to
+compare the live readout against is the wrong one, by 20 luma counts, and it
+was carried over from a bug this repo already corrected everywhere else
+(`docs/research/NV12-STRIDE.md`; `experiments/room_map.py` keeps the old
+value in its "supersedes" block and recomputes it correctly). The page's
+"amber below 80" threshold is not affected — but the *reference* it sits
+beside is.
+
+**It also matters for the camera work**, because the corrected numbers change
+the shape of the problem: occupied 105.9 against an empty room of 30.1 is a
+3.5× dynamic range — a camera working properly. So "the camera is starved"
+was never supported by the evidence pack; the question was always "why is
+the browser's stream darker than the camera can be", with the unconstrained
+reference capture at 105.9 as the yardstick.
+
 ## 5. THE TWO WRITTEN-CONFLICT FINDINGS
 
 Both were derived blind in `ACCEPTANCE-EXPECTED.md` §12 and both are now
@@ -427,6 +497,18 @@ machine, and ZCode's own list agrees with mine:
 
 1. **`getUserMedia` end to end** — permissions, device selection, and a
    camera that delivers a usable 160×96 stream.
+
+   **The camera lane has since narrowed this considerably**
+   (`docs/research/CAMERA-RND-FINDINGS.md`): the device is an **ASUS FHD
+   webcam**, it is **not starved** (the corrected references are 105.9
+   occupied against 30.1 for the empty room — a working auto-exposure), and
+   the camera is **single-consumer**: a second consumer gets
+   `NotReadableError: Device in use`. There are **two** physical cameras on
+   the machine, and the **ASUS IR camera** is the dark-picture impostor that
+   `3c0b2fe` now avoids with a picker. So this item is no longer "will the
+   camera work" — it is "which camera did the page pick, and was anything
+   else holding it". Both are now answerable in one look at the page's
+   picker and luma readout.
 2. **The achieved frame rate.** The whole point of `timing.json` is that the
    time base is measured, not assumed. A browser tab throttled to 15 fps
    produces takes whose time base is wrong by 2× — the same class of defect
@@ -453,11 +535,23 @@ machine, and ZCode's own list agrees with mine:
    take, then run both gates over it and compare the flags. The verification
    does not exercise this path at all (§4.1), so nothing short of a real
    recording will.
-7. **The luma kernel.** The browser's canvas resampling versus the script's
+7. **Which constraint set, measured.** The camera lane could not answer this
+   from outside the browser: the device is single-consumer, the browser
+   holds it, and the one fallback stack available from the Windows side
+   (DirectShow) negotiates badly with this UVC device and returns digital
+   black — a measurement error I made and then corrected, recorded in
+   `CAMERA-RND-FINDINGS.md` §1. The **probe** is the instrument, it is
+   running on `127.0.0.1:8766`, and `?sweep=1` measures P0, P1, P3 and P4
+   back to back and writes the whole decision table. ZCode's near-default
+   constraint patch (`5194314`) is the right prior — the reference capture
+   set *no* constraints and produced 105.9 — but it is unverified until
+   those numbers land.
+
+8. **The luma kernel.** The browser's canvas resampling versus the script's
    `cv2.INTER_AREA`. Same geometry, different kernel. If browser takes and
    script takes will ever be pooled pixel-wise, that difference should be
    measured before they are pooled.
-8. **Casey performing the conditions.** A real 90° turn, the poem recited
+9. **Casey performing the conditions.** A real 90° turn, the poem recited
    from memory, steady lighting. `CAPTURE-NEXT.md` is blunt that a posture
    shift is indistinguishable from a head turn in a 160×96 frame: "it is the
    one confound that cannot be measured away."

@@ -296,6 +296,28 @@ function stopStream() {
   stream = null; track = null;
 }
 
+/* -- reporting a FAILED camera open back to the server -------------------
+   A camera that will not open is a measurement too -- often the most
+   informative one. It is posted as a record with preset "ERROR" so that it
+   lands in results.jsonl instead of dying in a status line nobody scrolls
+   back to. */
+async function reportError(stage, err) {
+  const msg = (err && err.name) ? err.name + ": " + (err.message || err)
+                                 : String(err);
+  const record = {
+    preset: "ERROR", stage: stage, error: msg,
+    user_agent: navigator.userAgent,
+    ts: new Date().toISOString()
+  };
+  try {
+    await fetch("/log", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(record)
+    });
+  } catch (e) { /* the server is unreachable; the status line still shows it */ }
+}
+
 /* -- the luma, computed exactly as the capture page computes it ---------- */
 function readLuma() {
   if (!track || videoEl.readyState < 2) return null;
@@ -550,73 +572,108 @@ async function applyPreset(name) {
   } catch (e) {
     status(document.getElementById("status"), "err",
       p.label + " FAILED: " + (e && e.name ? e.name + ": " : "") + e);
+    reportError("preset:" + p.label, e);
   }
 }
 
 /* -- logging ------------------------------------------------------------ */
-function startLog() {
-  if (!track) { status(document.getElementById("logStatus"), "err", "no camera"); return; }
+let logResolve = null;
+
+/* One measurement: sample for 3 s, then POST. As a promise, so a sweep can
+   sequence several of them. */
+function logOnce() {
+  if (!track) {
+    status(document.getElementById("logStatus"), "err", "no camera");
+    return Promise.resolve(null);
+  }
   logging = true;
   logSamples = { frames: [], sum: 0, n: 0, pmin: 255, pmax: 0, black: 0 };
   document.getElementById("logBtn").disabled = true;
   status(document.getElementById("logStatus"), "busy", "sampling 3 s&hellip;");
-  logTimer = setTimeout(finishLog, SAMPLE_MS);
+  return new Promise((resolve) => {
+    setTimeout(() => {
+      logging = false;
+      const s = logSamples;
+      document.getElementById("logBtn").disabled = false;
+      if (!s || !s.n) {
+        status(document.getElementById("logStatus"), "err", "no frames sampled");
+        resolve(null);
+        return;
+      }
+      const mean = s.sum / s.n;
+      const fmin = Math.min.apply(null, s.frames);
+      const fmax = Math.max.apply(null, s.frames);
+      const settings = track.getSettings ? track.getSettings() : {};
+      const caps = capsCache || {};
+
+      const record = {
+        preset: sliderTouched ? "P-manual" : (currentPreset || "unknown"),
+        preset_requested: currentPreset,
+        manual: sliderTouched ? Object.assign({}, sliderState) : null,
+        constraints: baseConstraints,
+        settings: settings,
+        capabilities_summary: capsSummary(caps),
+        capabilities_full: caps,
+        luma_mean: mean,
+        luma_min: fmin,
+        luma_max: fmax,
+        luma_pixel_min: s.pmin,
+        luma_pixel_max: s.pmax,
+        luma_black_fraction: s.n ? s.black / s.n : null,
+        stream_is_black: s.n ? (s.black / s.n) > 0.98 : null,
+        luma_frames_sampled: s.n,
+        luma_frame_means: s.frames.map(v => Math.round(v * 1000) / 1000),
+        device_id: settings.deviceId || null,
+        device_label: track.label || null,
+        user_agent: navigator.userAgent,
+        ts: new Date().toISOString()
+      };
+
+      status(document.getElementById("logStatus"), "busy", "posting&hellip;");
+      fetch("/log", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(record)
+      })
+        .then(res => res.json())
+        .then(j => {
+          dump(document.getElementById("lastLog"), record);
+          status(document.getElementById("logStatus"), "ok",
+            "logged <b>" + record.preset + "</b> &mdash; luma mean " +
+            mean.toFixed(1) + " (frames " + fmin.toFixed(1) + "&ndash;" +
+            fmax.toFixed(1) + "), " + (j.records || "?") +
+            " records in results.jsonl");
+          resolve(record);
+        })
+        .catch(e => {
+          status(document.getElementById("logStatus"), "err", "post failed: " + e);
+          resolve(null);
+        });
+    }, SAMPLE_MS);
+  });
 }
 
-async function finishLog() {
-  logging = false;
-  clearTimeout(logTimer);
-  const s = logSamples;
-  document.getElementById("logBtn").disabled = false;
-  if (!s || !s.n) {
-    status(document.getElementById("logStatus"), "err", "no frames sampled");
-    return;
-  }
-  const mean = s.sum / s.n;
-  const fmin = Math.min.apply(null, s.frames);
-  const fmax = Math.max.apply(null, s.frames);
-  const settings = track.getSettings ? track.getSettings() : {};
-  const caps = capsCache || {};
+function startLog() { logOnce(); }
 
-  const record = {
-    preset: sliderTouched ? "P-manual" : (currentPreset || "unknown"),
-    preset_requested: currentPreset,
-    manual: sliderTouched ? Object.assign({}, sliderState) : null,
-    constraints: baseConstraints,
-    settings: settings,
-    capabilities_summary: capsSummary(caps),
-    capabilities_full: caps,
-    luma_mean: mean,
-    luma_min: fmin,
-    luma_max: fmax,
-    luma_pixel_min: s.pmin,
-    luma_pixel_max: s.pmax,
-    luma_black_fraction: s.n ? s.black / s.n : null,
-    stream_is_black: s.n ? (s.black / s.n) > 0.98 : null,
-    luma_frames_sampled: s.n,
-    luma_frame_means: s.frames.map(v => Math.round(v * 1000) / 1000),
-    device_id: settings.deviceId || null,
-    device_label: track.label || null,
-    user_agent: navigator.userAgent,
-    ts: new Date().toISOString()
-  };
-
-  status(document.getElementById("logStatus"), "busy", "posting&hellip;");
-  try {
-    const res = await fetch("/log", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(record)
-    });
-    const j = await res.json();
-    dump(document.getElementById("lastLog"), record);
-    status(document.getElementById("logStatus"), "ok",
-      "logged <b>" + record.preset + "</b> &mdash; luma mean " + mean.toFixed(1) +
-      " (frames " + fmin.toFixed(1) + "&ndash;" + fmax.toFixed(1) + "), " +
-      (j.records || "?") + " records in results.jsonl");
-  } catch (e) {
-    status(document.getElementById("logStatus"), "err", "post failed: " + e);
+/* -- the sweep: every preset, one after another, in one action -----------
+   The camera can only be opened by one consumer at a time, so the moments
+   when it is free are precious. ?sweep=1 measures P0, P1, P3 and P4 back
+   to back and writes four records, which is the whole decision table. */
+async function runSweep() {
+  const order = ["P0", "P1", "P3", "P4"];
+  const summary = [];
+  for (const name of order) {
+    status(document.getElementById("logStatus"), "busy", "sweep: " + name + "…");
+    await applyPreset(name);
+    await new Promise(r => setTimeout(r, 1500));
+    const rec = await logOnce();
+    if (rec) summary.push({ preset: name, luma: rec.luma_mean,
+                             black: rec.luma_black_fraction });
   }
+  status(document.getElementById("logStatus"), "ok",
+    "sweep done: " + summary.map(s => s.preset + "=" +
+      (s.luma === null ? "?" : s.luma.toFixed(1))).join("  "));
+  return summary;
 }
 
 /* -- wiring ------------------------------------------------------------- */
@@ -661,6 +718,10 @@ row.querySelector('button[data-p="P0"]').classList.add("on");
 const params = new URLSearchParams(location.search);
 
 async function autoRun() {
+  if (params.get("sweep") === "1") {
+    await runSweep();
+    return;
+  }
   const selftest = params.get("selftest") === "1";
   const wantLog = selftest || params.get("log") === "1";
   const name = params.get("preset");
@@ -683,9 +744,10 @@ async function autoRun() {
     }
     await new Promise(r => setTimeout(r, 400));
   }
-  if (wantLog) startLog();
+  if (wantLog) logOnce();
 }
-if (params.get("preset") || params.get("log") || params.get("selftest")) {
+if (params.get("preset") || params.get("log") || params.get("selftest") ||
+    params.get("sweep")) {
   setTimeout(autoRun, 400);
 }
 </script>
