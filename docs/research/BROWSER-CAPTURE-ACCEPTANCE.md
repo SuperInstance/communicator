@@ -252,6 +252,40 @@ recording, and the labels are derived from it afterwards — offline, by
 `experiments/free_session_analyze.py`
 (`docs/research/FREE-SESSION-ANALYZER.md`).
 
+## 1.6 THE BUILD MOVED A THIRD TIME, WHILE THIS VERDICT WAS BEING WRITTEN
+
+`081f5ae` ("AUTO: the page arms itself — segments open on speech or
+presence, close after 8 s quiet, and save in the background while Casey
+lives his life") landed while §1.5 was being written, and
+`browser_capture/free_record.html` has an uncommitted edit on top of it.
+So the verdict was measured a third time, against **the build as it
+stands**, uncommitted edit included.
+
+| | |
+|---|---|
+| ZCode's suite, audio venv | **154 passed, 0 failed, 0 skipped** |
+| my checker | **FAIL — 3 checks failed** (`LAYOUT`, `SPEECH`, `WEBM`), 9 pass |
+| the gate, on the directory and on the takes alone | **PASS**, 5 takes, 0 failed |
+
+**Identical again.** And the reason is in the diff: `081f5ae` changes
+`browser_capture/free_record.html` and `browser_capture/DONE.md` and
+**nothing else** — not `index.html`, not `server.py`, not `verify.py`. The
+take format, the take writer and the verifier are untouched, so nothing
+this verdict measures can have changed. The free-record page grew by 656
+lines and the patch is entirely on the free path.
+
+That is the third time this has happened, and the pattern is worth
+naming: **every patch so far has been a client-side page change, and the
+take format has never moved.** The pipeline accepts the takes unchanged,
+which is the binding requirement, and the three checks that fail are still
+the same three, still for the same reasons, still properties of the
+synthetic verify session.
+
+It also means the verifier's own free-session checks are now exercising a
+page that is still being edited. A verdict measured against a moving
+target is worth its timestamp, and that is why this one carries the
+build it was measured on.
+
 ## 2. PASS / FAIL PER CHECK
 
 Measured on the pristine session produced by the **current** `verify.py`
