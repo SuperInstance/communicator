@@ -122,3 +122,31 @@ browser will run, not a Python translation of it.
   in-page blob for the AudioWorklet.
 - `corpus_capture_win.py`, `CAPTURE-NEXT.md`, the gate and `src/` are
   untouched.
+
+## Patch 2026-10-20 (live session): the operator's stimulus — the page's `--stimulus-file`
+
+Casey does not know Invictus by heart, and the page gave him no way to use
+a piece he does. The poem card shown for the recite conditions (A and B)
+now holds a **stimulus name** field and an **editable stimulus text** area
+(default: Invictus, verbatim from `src/stimulus.py`). Whatever is in them
+when a take finishes is stamped into that take's metadata —
+`stimulus`, `stimulus_title`, `stimulus_estimated_s`, exactly where
+`corpus_capture_win.py` records them — and into the rich sidecar's
+`stimulus` / `stimulus_title`; `session.json` follows from the metadata.
+Nothing else about the take changed.
+
+- The untouched default records the corpus identity (`invictus`, 40 s), so
+  those takes stay pooled with the script's.
+- Anything typed over it records under its own slug (lowercase,
+  non-alphanumerics collapsed to `-`, so "Sea Fever" → `sea-fever`, the
+  `ALTERNATIVES` key convention in `src/stimulus.py`), estimated the way
+  `load_stimulus` estimates a supplied file: 0.4 s per word. `invictus` is
+  reserved for the default poem — a different text under that name records
+  as `custom` rather than silently pooling with real Invictus takes.
+- The gate fails a corpus whose takes mix stimuli, by design. A different
+  piece means a separate out dir, or a gate run that says so.
+
+**Picking it up: a browser reload is enough — no server restart.** The
+server reads `index.html` from disk on every GET (served `no-store`), and
+this patch changes nothing server-side. Verify suite after the patch:
+145 passed, 0 failed.

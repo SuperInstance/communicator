@@ -88,8 +88,15 @@
     border-radius: 8px; padding: 12px 16px; margin-top: 10px; max-height: 300px;
     overflow: auto; }
   #poemCard .t { color: var(--accent); font-size: 14px; margin-bottom: 8px; }
-  #poemCard pre { margin: 0; font-family: Georgia, serif; font-size: 17px;
-    line-height: 1.55; white-space: pre-wrap; }
+  #poemCard .cap { color: var(--dim); font-size: 11px; letter-spacing: 1px;
+    text-transform: uppercase; margin: 8px 0 4px; }
+  #stimName { width: 100%; background: var(--bg); color: var(--fg);
+    border: 1px solid var(--line); border-radius: 6px; padding: 6px 10px;
+    font-size: 14px; font-family: inherit; }
+  #stimText { width: 100%; min-height: 130px; max-height: 210px;
+    resize: vertical; background: var(--bg); color: var(--fg);
+    border: 1px solid var(--line); border-radius: 6px; padding: 8px 10px;
+    font-family: Georgia, serif; font-size: 17px; line-height: 1.55; }
   #poemCard .rem { color: var(--warn); font-size: 13px; margin-top: 10px;
     font-family: system-ui, sans-serif; }
 
@@ -199,9 +206,15 @@
       <div id="stateLine">click START PLAN when you are ready</div>
       <div id="poemCard">
         <div class="t" id="poemTitle"></div>
-        <pre id="poemBody"></pre>
+        <div class="cap">stimulus name &mdash; recorded into every take's
+          metadata</div>
+        <input id="stimName" type="text" value="Invictus" spellcheck="false"
+          autocomplete="off">
+        <div class="cap">stimulus text &mdash; type a piece you know by heart
+          over Invictus, or leave it as is</div>
+        <textarea id="stimText" spellcheck="false"></textarea>
         <div class="rem">RECITE FROM MEMORY. The same words every time &mdash; that is
-          the point. The poem is on screen to check yourself, not to read.</div>
+          the point. The text is on screen to check yourself, not to read.</div>
       </div>
     </div>
 
@@ -283,6 +296,41 @@ const POEM_STANZAS = [
    "I am the captain of my soul!"],
 ];
 const POEM_TITLE = "Invictus -- William Ernest Henley, 1875 (public domain)";
+const DEFAULT_STIM_TEXT = POEM_STANZAS.map(s => s.join("\n")).join("\n\n");
+
+/* ============================================================================
+   The operator's stimulus: the page's --stimulus-file. Casey may know a
+   different piece by heart; the terminal script lets him name it, and now
+   so does the page. currentStimulus() mirrors src/stimulus.py's
+   load_stimulus: the untouched default records the corpus identity
+   ("invictus", 40 s) so browser takes stay pooled with the script's, and
+   anything typed over it is recorded under its own slug -- the
+   ALTERNATIVES key convention, so "Sea Fever" records as "sea-fever" --
+   estimated the way the script estimates a supplied file, 0.4 s a word.
+   ========================================================================== */
+function stimSlug(name) {
+  return name.toLowerCase().replace(/[^a-z0-9]+/g, "-")
+    .replace(/^-+|-+$/g, "");
+}
+function currentStimulus() {
+  const name = $("stimName").value.trim();
+  const text = $("stimText").value;
+  if (name.toLowerCase() === "invictus" && text === DEFAULT_STIM_TEXT)
+    return { stimulus: "invictus", stimulus_title: "Invictus",
+             stimulus_estimated_s: 40.0 };
+  // "invictus" belongs to the default poem alone -- a different text under
+  // that name must not silently pool with real Invictus takes.
+  let slug = stimSlug(name);
+  if (slug === "invictus" || !slug) slug = "custom";
+  const words = text.trim().split(/\s+/).filter(Boolean).length;
+  return { stimulus: slug, stimulus_title: name || slug,
+           stimulus_estimated_s: Math.round(words * 0.4 * 100) / 100 };
+}
+function updatePoemTitle() {
+  const s = currentStimulus();
+  $("poemTitle").textContent = "STIMULUS: " +
+    (s.stimulus === "invictus" ? POEM_TITLE : s.stimulus_title);
+}
 
 const FPS = 30, RATE = 16000, COUNTDOWN_S = 5;
 const SPEAK_MIN = 0.15, SPEAK_MAX = 0.05, DRIFT_MAX = 5.0;
@@ -799,6 +847,7 @@ function section(blobParts, bytes) {
 
 async function finalizeTake(rec) {
   const spec = rec.spec;
+  const stim = currentStimulus();
   const proc0 = performance.now();
   setStateLine("processing take " + spec.name + " ...");
   await twoFrames();  // let the "processing" state paint before the math
@@ -834,9 +883,9 @@ async function finalizeTake(rec) {
     note: spec.note,
     pose: spec.pose,
     speak: spec.speak,
-    stimulus: "invictus",
-    stimulus_title: "Invictus",
-    stimulus_estimated_s: 40.0,
+    stimulus: stim.stimulus,
+    stimulus_title: stim.stimulus_title,
+    stimulus_estimated_s: stim.stimulus_estimated_s,
     speech_frac: speech.frac,
     n_frames: n,
     seconds: videoSeconds,
@@ -872,8 +921,8 @@ async function finalizeTake(rec) {
     speak: spec.speak,
     instruction_text: spec.display,
     instruction_note: spec.note,
-    stimulus: "invictus",
-    stimulus_title: "Invictus",
+    stimulus: stim.stimulus,
+    stimulus_title: stim.stimulus_title,
     wall_clock_start: rec.wallStart,
     wall_clock_end: rec.wallEnd,
     achieved_fps: timing.achieved_fps,
@@ -1101,12 +1150,10 @@ function setPhase(phase, idx) {
     $("condText").textContent = spec.display;
     $("condNote").textContent = spec.note + " -- " + spec.seconds + " s";
     const poem = spec.speak === true;
+    // the stimulus fields are the operator's to edit -- the plan only shows
+    // or hides them with the speaking conditions, never overwrites them
     $("poemCard").style.display = poem ? "block" : "none";
-    if (poem) {
-      $("poemTitle").textContent = "STIMULUS: " + POEM_TITLE;
-      $("poemBody").textContent =
-        POEM_STANZAS.map(s => s.join("\n")).join("\n\n");
-    }
+    if (poem) updatePoemTitle();
   }
   if (phase === "idle" && !driver.running) {
     const nxt = PLAN.findIndex(p => !isDone(p.name));
@@ -1284,6 +1331,9 @@ $("retryBtn").onclick = async () => {
   if (lastUpload) await uploadTake(lastUpload);
 };
 $("notesBtn").onclick = saveNotes;
+$("stimText").value = DEFAULT_STIM_TEXT;
+$("stimName").addEventListener("input", updatePoemTitle);
+$("stimText").addEventListener("input", updatePoemTitle);
 $("mirrorBtn").onclick = () => {
   videoEl.classList.toggle("mirrored");
   const on = videoEl.classList.contains("mirrored");
