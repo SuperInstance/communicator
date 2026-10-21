@@ -532,3 +532,40 @@ a systemd USER service** (linger is on, so it starts with WSL):
 
 Deploying future server.py changes means `systemctl --user restart
 browser-capture` (a ~2 s gap; the pages' saves retry by design).
+
+## Patch 2026-10-21 (AUTO polish 1): segments rotate at max length, mid-activity
+
+Muse's live telemetry during Casey's first auto session: a segment only
+closed on silence+stillness, so a long active stretch pooled EVERYTHING
+in the tab — exactly the risk AUTO exists to kill. Auto segments now
+**rotate at `MAX_SEG_MS` (default 5 minutes) even mid-activity**: close,
+upload in the background, and — the activity still going — reopen on the
+next tick (~1 s seam while the pre-roll refills; the timestamps are
+honest about it). `close_reason: "maxlen"` lands in meta.json, and
+`?maxseg=<seconds>` tunes the length (and made the path provable).
+Manual segments do NOT rotate — the operator is present, and STOP is
+theirs.
+
+**Proven by the headless end-to-end at `?maxseg=8`**: two `maxlen`
+closes mid-speech at 8.0/8.1 s, an 18 ms reopen seam while speech
+continued, and a correct no-reopen when the second rotation landed after
+speech had ended (armed, waiting — silence does not reopen). Both
+session folders intact, `close_reason: maxlen`, `max_segment_s: 8`
+recorded in meta, 480 frames/segment at the headless 60 fps rAF.
+
+**The same run caught and fixed a real server bug**: any request with a
+query string (`/?maxseg=8`) 404'd — the handlers matched `self.path`
+exactly, query included, so the routing fix strips `?...` before
+matching (GET and POST). Found because the rotation test page refused
+to load at all; the fix rides in this commit and deploys with the
+service restart that ships the /live monitor (next section) — the
+running pages (already loaded, POSTing bare paths) are unaffected
+either way.
+
+Test-harness lesson, recorded: the earlier headless runs' Stop-Process
+killed only Chrome's launcher process, leaving browser processes alive
+— ghosts that kept posting heartbeats and confused this run's forensics
+until they were killed by command-line match
+(`Get-CimInstance Win32_Process` filtered on the unique
+`--user-data-dir`). All headless verification now kills that way, and
+each run gets a fresh profile directory.

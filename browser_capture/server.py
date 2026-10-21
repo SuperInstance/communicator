@@ -863,7 +863,10 @@ class Handler(BaseHTTPRequestHandler):
         self._json(200, {"ok": True, **result})
 
     def do_GET(self):
-        if self.path in ("/", "/free", "/free_record.html"):
+        # match on the path portion only -- a query string (e.g.
+        # /?maxseg=8) must not turn a route into a 404
+        route = self.path.split("?", 1)[0]
+        if route in ("/", "/free", "/free_record.html"):
             try:
                 page = self.free_path.read_bytes()
             except OSError as exc:
@@ -871,32 +874,33 @@ class Handler(BaseHTTPRequestHandler):
                                  "error": f"free_record.html: {exc}"})
                 return
             self._send(200, page, "text/html; charset=utf-8")
-        elif self.path in ("/plan", "/index.html"):
+        elif route in ("/plan", "/index.html"):
             try:
                 page = self.index_path.read_bytes()
             except OSError as exc:
                 self._json(500, {"ok": False, "error": f"index.html: {exc}"})
                 return
             self._send(200, page, "text/html; charset=utf-8")
-        elif self.path == "/info":
+        elif route == "/info":
             self._json(200, {"ok": True, "out": str(self.out_dir),
                              "port": self.server.server_address[1]})
-        elif self.path == "/takes":
+        elif route == "/takes":
             self._json(200, {"ok": True, "takes": list_takes(self.out_dir)})
         else:
             self._json(404, {"ok": False, "error": f"no {self.path!r}"})
 
     def do_POST(self):
-        if self.path == "/notes":
+        route = self.path.split("?", 1)[0]   # query strings are not routing
+        if route == "/notes":
             self._handle_notes()
             return
-        if self.path == "/log":
+        if route == "/log":
             self._handle_log()
             return
-        if self.path == "/free":
+        if route == "/free":
             self._handle_free()
             return
-        if self.path != "/take":
+        if route != "/take":
             self._json(404, {"ok": False, "error": f"no {self.path!r}"})
             return
         try:

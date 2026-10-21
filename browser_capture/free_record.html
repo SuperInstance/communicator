@@ -167,6 +167,14 @@ const FLOOR_WARMUP_MS = 2000;  // no auto decision before the floors are
                                // fake mic's silence sits above the 1e-4
                                // bootstrap, so a segment opened at boot
                                // and never closed)
+// ROTATION: an auto segment closes at max length EVEN MID-ACTIVITY. A
+// segment that only closes on silence pools a whole long session in the
+// tab -- exactly the risk AUTO exists to kill; closed segments must flow
+// to the server continuously. ?maxseg=<seconds> tunes it (and lets the
+// headless self-verify prove the path with a short value).
+const MAX_SEG_MS = Math.max(5,
+  parseFloat(new URLSearchParams(location.search).get("maxseg")) || 300)
+  * 1000;
 
 let stream = null, audioCtx = null, realRate = 0, micName = "", camName = "";
 let level = 0;                 // rms of the newest audio block
@@ -527,8 +535,10 @@ function buildPayload(seg) {
     detection: {
       rule: "speech: rms >= 10x the 20th-percentile floor (floor frozen " +
         "while open); presence: mean |dLuma| >= 5x its 20th-percentile " +
-        "floor; close after " + (CLOSE_AFTER_MS / 1000) + "s of neither",
+        "floor; close after " + (CLOSE_AFTER_MS / 1000) + "s of neither; " +
+        "rotate at " + (MAX_SEG_MS / 1000) + "s even mid-activity",
       pre_roll_s: PRE_ROLL_MS / 1000,
+      max_segment_s: MAX_SEG_MS / 1000,
       speech_floor_rms: seg.floors.speech_floor,
       speech_thr_rms: seg.floors.speech_thr,
       motion_floor: seg.floors.motion_floor,
@@ -665,9 +675,19 @@ function tick() {
     if (!openSeg && (speechNow || motionNow)) {
       openSegment(speechNow ? "speech" : "motion");
     } else if (openSeg && openSeg.mode === "auto") {
-      if (speechNow || motionNow) openSeg.lastActive = performance.now();
-      else if (performance.now() - openSeg.lastActive > CLOSE_AFTER_MS)
+      const now = performance.now();
+      if (now - openSeg.t0ms >= MAX_SEG_MS) {
+        // rotation, mid-activity: close at max length so the data flows;
+        // the activity still going, the next tick opens a fresh segment
+        // (a ~1 s seam while the pre-roll refills -- the timestamps are
+        // honest about it). Manual segments do NOT rotate: the operator
+        // is present and STOP is theirs.
+        closeSegment("maxlen");
+      } else if (speechNow || motionNow) {
+        openSeg.lastActive = now;
+      } else if (now - openSeg.lastActive > CLOSE_AFTER_MS) {
         closeSegment("quiet");
+      }
     }
   }
   if (openSeg)
