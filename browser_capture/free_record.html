@@ -6,7 +6,8 @@
 <title>Free Record</title>
 <style>
   :root { --bg:#101418; --panel:#1a2027; --line:#2d3945; --fg:#e8edf2;
-    --dim:#8fa1b3; --accent:#4db6ac; --rec:#e05252; --ok:#7ec97e; }
+    --dim:#8fa1b3; --accent:#4db6ac; --rec:#e05252; --ok:#7ec97e;
+    --warn:#e0a458; }
   * { box-sizing: border-box; }
   body { margin:0 auto; padding:16px 18px 40px; background:var(--bg);
     color:var(--fg); font-family: system-ui, -apple-system, "Segoe UI",
@@ -18,16 +19,30 @@
   .sub { color:var(--dim); font-size:13px; }
   .spacer { flex:1; }
   a.plain { color:var(--dim); font-size:13px; }
+
+  /* the big honest indicator -- visible from across the room */
+  #indicator { display:flex; align-items:center; justify-content:center;
+    gap:14px; padding:18px 10px; border-radius:10px; border:2px solid;
+    font-size:34px; font-weight:800; letter-spacing:4px;
+    margin-bottom:12px; }
+  #indicator .dot { width:18px; height:18px; border-radius:50%;
+    background:currentColor; flex:none; }
+  #indicator.armed { color:var(--accent); border-color:var(--accent);
+    background:rgba(77,182,172,.07); }
+  #indicator.rec { color:var(--rec); border-color:var(--rec);
+    background:rgba(224,82,82,.09); }
+  #indicator.rec .dot { animation:blink 1s infinite; }
+  #indicator.paused { color:var(--warn); border-color:var(--warn);
+    background:rgba(224,164,88,.08); }
+  @keyframes blink { 50% { opacity:.12; } }
+  #subState { text-align:center; color:var(--dim); font-size:14px;
+    min-height:18px; margin-bottom:10px; }
+  #segCount { text-align:center; color:var(--ok); font-size:13px;
+    min-height:16px; margin-bottom:6px; }
+
   #videoWrap { position:relative; background:#000; border-radius:8px;
     overflow:hidden; }
   #video { width:100%; display:block; transform:scaleX(-1); }
-  #recBadge { position:absolute; top:10px; left:10px;
-    background:rgba(0,0,0,.65); border-radius:6px; padding:6px 12px;
-    font-size:15px; font-weight:700; color:var(--rec); display:none;
-    align-items:center; gap:8px; }
-  #recBadge .blink { width:12px; height:12px; border-radius:50%;
-    background:var(--rec); animation:blink 1s infinite; }
-  @keyframes blink { 50% { opacity:.15; } }
   .row { display:flex; gap:18px; align-items:center; margin-top:12px;
     flex-wrap:wrap; }
   #elapsed { font-size:44px; font-weight:800;
@@ -36,109 +51,202 @@
     border:1px solid var(--line); border-radius:4px; overflow:hidden; }
   #meterFill { height:100%; width:0%; background:linear-gradient(90deg,
     #2e7d6e, #4db6ac 70%, #e0a458 90%, #e06c75); }
-  #state { font-size:15px; letter-spacing:2px; color:var(--dim);
-    font-weight:700; }
-  #state.recording { color:var(--rec); }
-  #state.saving { color:var(--accent); }
-  #state.saved { color:var(--ok); }
-  .controls { margin-top:14px; display:flex; gap:10px; align-items:center; }
+  #detRead { font-size:12px; color:var(--dim); width:100%;
+    font-variant-numeric:tabular-nums; }
+
+  .controls { margin-top:14px; display:flex; gap:10px; align-items:center;
+    flex-wrap:wrap; }
   button { background:#212a33; color:var(--fg); border:1px solid var(--line);
     border-radius:6px; padding:10px 22px; font-size:16px; cursor:pointer; }
   button:hover:not(:disabled) { border-color:var(--accent); }
   button:disabled { opacity:.4; cursor:default; }
-  #recBtn { background:var(--rec); border:none; color:#fff;
-    font-weight:800; letter-spacing:1px; padding:12px 26px; }
+  #pauseBtn { border-color:var(--rec); color:var(--rec); font-weight:700; }
+  #recBtn.rec { background:var(--rec); border:none; color:#fff;
+    font-weight:800; }
   #msg { margin-top:10px; color:var(--dim); font-size:14px;
     min-height:20px; }
   #msg.err { color:#e06c75; }
+  .fine { margin-top:12px; color:var(--dim); font-size:12px;
+    line-height:1.6; }
 </style>
 </head>
 <body>
 <header>
-  <h1>FREE RECORD</h1>
-  <span class="sub">the browser records; analysis happens offline</span>
+  <h1>FREE RECORD &mdash; AUTO</h1>
+  <span class="sub">it arms itself; the corpus accrues while you live your life</span>
   <span class="spacer"></span>
   <a class="plain" href="/plan">plan mode &rarr;</a>
 </header>
+
+<div id="indicator" class="armed"><span class="dot"></span><span id="indText">ARMED</span></div>
+<div id="subState">listening for speech or presence &mdash; a segment opens by itself</div>
+<div id="segCount"></div>
+
 <div id="videoWrap">
   <video id="video" autoplay playsinline muted></video>
-  <div id="recBadge"><span class="blink"></span>REC</div>
 </div>
 <div class="row">
   <div id="elapsed">0:00</div>
   <div id="meter"><div id="meterFill"></div></div>
-  <div id="state">IDLE</div>
+  <div id="detRead">speech &mdash; / presence &mdash;</div>
 </div>
+
 <div class="controls">
+  <button id="pauseBtn">PAUSE EVERYTHING</button>
   <button id="recBtn">RECORD</button>
-  <button id="stopBtn" disabled>STOP</button>
-  <button id="retryBtn" style="display:none;">RETRY SAVE</button>
 </div>
 <div id="msg"></div>
+<div class="fine">AUTO: a segment opens on speech or presence, closes after
+  ~8 s of quiet, and uploads in the background as it closes &mdash; no button
+  needed for the data to be safe. RECORD/STOP is the manual fallback;
+  PAUSE EVERYTHING closes and saves whatever is open, then holds. Keep this
+  tab in the foreground: a backgrounded tab keeps detecting SPEECH (audio
+  thread) but the browser stops its video frames.</div>
 <script>
 "use strict";
 /* ============================================================================
-   FREE RECORD -- the page's front door. One RECORD button, one STOP
-   button, a live preview, an elapsed clock and an audio level: nothing
-   else. STATES: idle, recording, saving, saved -- more than that is
-   wrong, and there is exactly one setState through which they all flow.
+   FREE RECORD, AUTO -- the front door. After permissions the page ARMS
+   ITSELF: a segment opens when speech or presence is detected, closes
+   after ~8 s of silence/stillness, and every closed segment uploads in
+   the BACKGROUND as it finishes (chunked -- no end-of-session crunch, no
+   STOP needed for the data to be safe). Casey opens the page once, puts
+   it aside, forgets it.
 
-   At STOP the whole session is POSTed once and written by the server as
-   <out>/free_sessions/<stamp>/ holding five files: video.webm (the
-   native-res stream with the mic muxed), luma.raw (the raw 160x96 luma
-   canvas stream), timestamps.json (a per-frame offset for every luma
-   frame), audio.wav (full-rate 16-bit mono), and meta.json (track
-   settings, achieved rates, layout). No conditions, no plan, no
-   in-browser math pass -- the browser records, analysis happens
-   offline. The plan page is intact behind this at /plan.
+   Exactly two controls: PAUSE EVERYTHING (kill switch -- closes and
+   saves the open segment, then holds) and RECORD/STOP (manual fallback;
+   a manual segment has no auto-close). The indicator is big and honest
+   at all times: ARMED / RECORDING / PAUSED.
 
-   A diagnostics heartbeat rides along for free: while recording or
-   saving, one small POST /log per second (state, frame and sample
-   counts, recorder and AudioContext state, tab visibility) so a session
-   is never a black box on the server side. Pure observation.
+   DETECTION, and why these rules:
+   - SPEECH: the corpus's own energy-adaptive rule (speechStats /
+     meterFrame on the plan page) -- threshold at 10x the 20th-percentile
+     RMS floor of a rolling ring. The floor is FROZEN while a segment is
+     open, so continuous speech cannot recalibrate itself into silence.
+   - PRESENCE: honest proxy -- adaptive motion energy over the 160x96
+     luma frames (mean |frame - prev frame| vs its own 20th-percentile
+     floor x5, frozen likewise). Not a face detector; it answers "is a
+     person present and doing something", which is the question.
+   - Every floor, threshold, level and decision goes out in the
+     heartbeat, so AUTO can be tuned from diag.log on the real machine.
+   - ~1 s of PRE-ROLL (audio + luma + timestamps) seeds each segment, so
+     the opening syllable that TRIGGERED it is inside the artifact. The
+     WebM starts at segment open (MediaRecorder cannot reach back);
+     meta.json says so.
+
+   Artifacts are unchanged: each segment is one POST /free -> one
+   <out>/free_sessions/<stamp>/ folder (video.webm, luma.raw,
+   timestamps.json, audio.wav, meta.json) -- the server needs no
+   changes, and analysis happens offline.
    ========================================================================== */
 const $ = (id) => document.getElementById(id);
 const videoEl = $("video");
 const LB = 160 * 96;
 
-let state = "idle";          // idle | recording | saving | saved
+const CLOSE_AFTER_MS = 8000;   // quiet time that closes an auto segment
+const PRE_ROLL_MS = 1000;      // what a segment starts with, before trigger
+const FLOOR_EVERY_MS = 500;    // floor recompute cadence while armed-idle
+
 let stream = null, audioCtx = null, realRate = 0, micName = "", camName = "";
-let recorder = null, webmChunks = [], webmMime = null;
-let frames = [], frameTs = [], nFrames = 0;
-let audioChunks = [], nSamples = 0;
-let level = 0;
-let t0ms = 0, wallStart = "";
-let payload = null;          // the unsaved session while saving / on failure
+let level = 0;                 // rms of the newest audio block
+let paused = false;
+let openSeg = null;            // the live segment (auto or manual)
+let savedCount = 0;
+const pendingSaves = [];       // segments whose upload failed, auto-retried
 
-function setState(s) {
-  state = s;
-  $("state").textContent = s.toUpperCase();
-  $("state").className = s;
-  $("recBtn").disabled = s === "recording" || s === "saving";
-  $("stopBtn").disabled = s !== "recording";
-  $("recBadge").style.display = s === "recording" ? "flex" : "none";
-  diagSend("PHASE", { to: s });
+/* -- detection state ------------------------------------------------------ */
+const speechRing = [];         // rms ring (~5.5 s at ~375 blocks/s)
+const SPEECH_RING_MAX = 2048;
+const motionRing = [];         // mean |dLuma| ring (~15 s at ~60 fps)
+const MOTION_RING_MAX = 900;
+let speechFloor = 1e-4, motionFloor = 0.5;
+let speechNow = false, motionNow = false;
+let lastMotion = 0, prevLuma = null;
+let lastFloorAt = 0, lastFrameAt = 0;
+
+function pct(arr, p) {
+  if (!arr.length) return null;
+  const s = Array.from(arr).sort(function (a, b) { return a - b; });
+  return s[Math.min(s.length - 1, Math.floor(s.length * p))];
 }
 
-function fmtT(s) {
-  const m = Math.floor(s / 60), r = Math.floor(s % 60);
-  return m + ":" + String(r).padStart(2, "0");
-}
-function sleep(ms) { return new Promise(r => setTimeout(r, ms)); }
-function rms(a) {
-  let s = 0;
-  for (let i = 0; i < a.length; i++) s += a[i] * a[i];
-  return Math.sqrt(s / a.length);
+function speechThr() { return Math.max(speechFloor * 10, 1e-4); }
+function motionThr() { return Math.max(motionFloor * 5, 0.6); }
+
+function speechStep(rms) {
+  speechRing.push(rms);
+  if (speechRing.length > SPEECH_RING_MAX) speechRing.shift();
+  speechNow = rms >= speechThr();
+  return speechNow;
 }
 
-/* -- the diagnostics heartbeat (rides for free) ------------------------- */
+function motionStep(luma) {
+  if (prevLuma && prevLuma.length === luma.length) {
+    let s = 0;
+    for (let i = 0; i < luma.length; i++) {
+      let d = luma[i] - prevLuma[i];
+      if (d < 0) d = -d;
+      s += d;
+    }
+    lastMotion = s / luma.length;
+    motionRing.push(lastMotion);
+    if (motionRing.length > MOTION_RING_MAX) motionRing.shift();
+    motionNow = lastMotion >= motionThr();
+  }
+  prevLuma = luma;
+  return motionNow;
+}
+
+function maybeRecomputeFloors() {
+  // frozen while a segment is open: continuous speech/motion must not
+  // raise its own threshold and reclose mid-segment
+  if (openSeg) return;
+  if (performance.now() - lastFloorAt < FLOOR_EVERY_MS) return;
+  lastFloorAt = performance.now();
+  const sf = pct(speechRing, 0.2), mf = pct(motionRing, 0.2);
+  if (sf != null) speechFloor = sf;
+  if (mf != null) motionFloor = mf;
+}
+
+/* -- pre-roll rings (seed the next segment, include the trigger) ---------- */
+let preAudio = [], preAudioSamples = 0, preFrames = [], preTs = [];
+
+function feedPreAudio(blk) {
+  preAudio.push(blk);
+  preAudioSamples += blk.length;
+  const cap = Math.ceil(realRate * (PRE_ROLL_MS / 1000) * 1.2) + 4096;
+  while (preAudioSamples > cap && preAudio.length > 1) {
+    preAudioSamples -= preAudio[0].length;
+    preAudio.shift();
+  }
+}
+function feedPreFrame(f, ts) {
+  preFrames.push(f);
+  preTs.push(ts);
+  while (preTs.length > 2 &&
+         ts - preTs[0] > PRE_ROLL_MS * 1.2) {
+    preFrames.shift();
+    preTs.shift();
+  }
+}
+
+/* -- diagnostics heartbeat (rides for free) ------------------------------- */
 function diagSend(kind, fields) {
   const body = JSON.stringify(Object.assign({
-    kind: kind, page: "free_record", ts: new Date().toISOString(),
-    state: state, n_frames: nFrames, n_samples: nSamples,
-    audio_chunks: audioChunks.length,
-    recorder: recorder ? recorder.state : null,
+    kind: kind, page: "free_record_auto", ts: new Date().toISOString(),
+    state: paused ? "paused" : openSeg ? "recording" : "armed",
+    seg_open: !!openSeg, seg_age_s: openSeg ?
+      Math.round((performance.now() - openSeg.t0ms) / 100) / 10 : null,
+    n_frames: openSeg ? openSeg.nFrames : 0,
+    n_samples: openSeg ? openSeg.nSamples : 0,
+    recorder: openSeg && openSeg.recorder ? openSeg.recorder.state : null,
     audioCtxState: audioCtx ? audioCtx.state : null,
+    speech_level: Math.round(level * 1e6) / 1e6,
+    speech_thr: Math.round(speechThr() * 1e6) / 1e6,
+    speech_now: speechNow,
+    motion: Math.round(lastMotion * 100) / 100,
+    motion_thr: Math.round(motionThr() * 100) / 100,
+    motion_now: motionNow,
+    saved: savedCount, pending_uploads: pendingSaves.length,
     visibility: document.visibilityState,
   }, fields || {}));
   try {
@@ -149,11 +257,34 @@ function diagSend(kind, fields) {
   fetch("/log", { method: "POST", body: body, keepalive: true,
     headers: { "Content-Type": "application/json" } }).catch(() => {});
 }
-setInterval(() => {
-  if (state === "recording" || state === "saving") diagSend("heartbeat");
-}, 1000);
+setInterval(() => diagSend("heartbeat"), 1000);
 
-/* -- the recorder -------------------------------------------------------- */
+/* -- the canvas + frame capture ------------------------------------------- */
+const canvas = document.createElement("canvas");
+canvas.width = 160; canvas.height = 96;
+const cctx = canvas.getContext("2d", { willReadFrequently: true });
+cctx.imageSmoothingEnabled = true;
+cctx.imageSmoothingQuality = "high";
+
+function captureFrame() {
+  // one luma frame + timestamp; guarded so the rAF path and the
+  // hidden-tab interval path never double-capture
+  const now = performance.now();
+  if (now - lastFrameAt < 15) return null;
+  lastFrameAt = now;
+  cctx.drawImage(videoEl, 0, 0, 160, 96);
+  const d = cctx.getImageData(0, 0, 160, 96).data;
+  const f = new Uint8Array(LB);
+  for (let i = 0, j = 0; i < d.length; i += 4, j++) {
+    // BT.601 full-range luma, the coefficients the corpus luma uses
+    let y = 0.299 * d[i] + 0.587 * d[i + 1] + 0.114 * d[i + 2];
+    f[j] = y > 255 ? 255 : Math.round(y);
+  }
+  return { f: f, ts: Math.round((now - baseT0) * 10) / 10 };
+}
+const baseT0 = performance.now();
+
+/* -- segments -------------------------------------------------------------- */
 function pickMime() {
   if (typeof MediaRecorder === "undefined") return null;
   for (const c of ["video/webm;codecs=vp9,opus", "video/webm;codecs=vp8,opus",
@@ -162,101 +293,79 @@ function pickMime() {
   return null;
 }
 
-async function relaxExposure(track) {
-  // capability-checked nudge, a no-op where unsupported: let the camera's
-  // own auto-exposure run (the plan page learned this the hard way)
-  try {
-    const caps = track && track.getCapabilities ? track.getCapabilities()
-      : null;
-    if (caps && Array.isArray(caps.exposureMode) &&
-        caps.exposureMode.includes("continuous"))
-      await track.applyConstraints(
-        { advanced: [{ exposureMode: "continuous" }] });
-  } catch (err) { /* best effort */ }
-}
-
-/* One luma frame + timestamp per requestAnimationFrame. rAF follows the
-   display, not the camera -- duplicate frames when the camera is slower
-   are identifiable offline from the timestamps. A backgrounded tab
-   throttles rAF; keep this tab in the foreground while recording. */
-const canvas = document.createElement("canvas");
-canvas.width = 160; canvas.height = 96;
-const cctx = canvas.getContext("2d", { willReadFrequently: true });
-cctx.imageSmoothingEnabled = true;
-cctx.imageSmoothingQuality = "high";
-
-function drawLoop() {
-  requestAnimationFrame(drawLoop);
-  if (!stream) return;
-  cctx.drawImage(videoEl, 0, 0, 160, 96);
-  if (state === "recording") {
-    const d = cctx.getImageData(0, 0, 160, 96).data;
-    const f = new Uint8Array(LB);
-    for (let i = 0, j = 0; i < d.length; i += 4, j++) {
-      // BT.601 full-range luma, the coefficients the corpus luma uses
-      let y = 0.299 * d[i] + 0.587 * d[i + 1] + 0.114 * d[i + 2];
-      f[j] = y > 255 ? 255 : Math.round(y);
-    }
-    frames.push(f);
-    frameTs.push(Math.round((performance.now() - t0ms) * 10) / 10);
-    nFrames++;
-    $("elapsed").textContent = fmtT((performance.now() - t0ms) / 1000);
-  }
-  const db = 20 * Math.log10(Math.max(level, 1e-7));
-  $("meterFill").style.width =
-    Math.max(0, Math.min(100, (db + 60) / 60 * 100)).toFixed(1) + "%";
-}
-
-/* -- RECORD / STOP ------------------------------------------------------- */
-$("recBtn").onclick = () => {
-  if (state === "recording" || state === "saving") return;
-  diagSend("RECORD_CLICKED");
-  frames = []; frameTs = []; nFrames = 0;
-  audioChunks = []; nSamples = 0;
-  webmChunks = []; webmMime = pickMime();
-  wallStart = new Date().toISOString();
-  t0ms = performance.now();
-  payload = null;
-  $("elapsed").textContent = "0:00";
-  $("msg").textContent = ""; $("msg").className = "";
-  $("retryBtn").style.display = "none";
-  if (webmMime) {
+function openSegment(trigger) {
+  const now = performance.now();
+  const preMs = preTs.length ? Math.max(0, now - baseT0 - preTs[0]) : 0;
+  const seg = {
+    mode: trigger === "manual" ? "manual" : "auto",
+    trigger: trigger,
+    close_reason: null,
+    wallStart: new Date(Date.now() - preMs).toISOString(),
+    t0ms: now - preMs,
+    frames: preFrames.slice(), frameTs: preTs.slice(),
+    nFrames: preFrames.length,
+    audioChunks: preAudio.slice(), nSamples: preAudioSamples,
+    webmChunks: [], webm: null, recorder: null,
+    mime: pickMime(),
+    lastActive: now,
+    floors: { speech_floor: speechFloor, speech_thr: speechThr(),
+              motion_floor: motionFloor, motion_thr: motionThr() },
+  };
+  if (seg.mime) {
     try {
-      recorder = new MediaRecorder(stream,
-        { mimeType: webmMime, videoBitsPerSecond: 4000000 });
-      recorder.ondataavailable = (e) => {
-        if (e.data && e.data.size) webmChunks.push(e.data);
+      seg.recorder = new MediaRecorder(stream,
+        { mimeType: seg.mime, videoBitsPerSecond: 4000000 });
+      seg.recorder.ondataavailable = (e) => {
+        if (e.data && e.data.size) seg.webmChunks.push(e.data);
       };
-      recorder.start(1000);
-    } catch (err) { recorder = null; }
+      seg.recorder.start(1000);
+    } catch (err) { seg.recorder = null; }
   }
-  setState("recording");
-};
+  openSeg = seg;
+  paint();
+  diagSend("SEGMENT_OPEN", { trigger: trigger, pre_roll_ms: preMs,
+    mode: seg.mode });
+}
 
-$("stopBtn").onclick = async () => {
-  if (state !== "recording") return;
-  diagSend("STOP_CLICKED", { n_frames: nFrames, n_samples: nSamples });
-  setState("saving");
-  const wallEnd = new Date().toISOString();
-  if (recorder && recorder.state !== "inactive") {
+async function closeSegment(reason) {
+  const seg = openSeg;
+  if (!seg) return;
+  openSeg = null;
+  // the pre-roll rings froze while the segment was open -- what is in
+  // them is stale by the segment's whole length, so the next segment
+  // starts its pre-roll from now
+  preAudio = []; preAudioSamples = 0; preFrames = []; preTs = [];
+  seg.close_reason = reason;
+  seg.wallEnd = new Date().toISOString();
+  if (seg.recorder && seg.recorder.state !== "inactive") {
     // bounded, per the live bug: never wait forever on onstop
     await Promise.race([
-      new Promise((res) => { recorder.onstop = res; recorder.stop(); }),
+      new Promise((res) => { seg.recorder.onstop = res;
+                             seg.recorder.stop(); }),
       sleep(3000),
     ]).catch(() => {});
   }
-  diagSend("RECORDER_STOP", { state: recorder ? recorder.state : null });
-  $("elapsed").textContent = fmtT((performance.now() - t0ms) / 1000);
-  payload = await buildPayload(wallEnd);
-  await save();
-};
+  diagSend("RECORDER_STOP", { state: seg.recorder ? seg.recorder.state
+    : null });
+  if (seg.webmChunks.length) {
+    try {
+      seg.webm = new Uint8Array(await new Blob(seg.webmChunks).arrayBuffer());
+    } catch (err) { seg.webm = null; }
+  }
+  paint();
+  diagSend("SEGMENT_CLOSE", { reason: reason, n_frames: seg.nFrames,
+    n_samples: seg.nSamples });
+  uploadSegment(seg);   // background, never awaited
+}
 
-$("retryBtn").onclick = () => { if (payload) save(); };
+/* -- background upload + retry -------------------------------------------- */
+setInterval(() => {
+  for (const p of pendingSaves.slice()) uploadSegment(p.seg, p.tries + 1);
+}, 30000);
 
-async function save() {
-  setState("saving");
-  $("msg").textContent = "saving " + payload.meta.n_frames +
-    " frames, " + payload.meta.audio.samples + " samples ...";
+async function uploadSegment(seg, tries) {
+  tries = tries || 0;
+  const payload = buildPayload(seg);
   const ctl = typeof AbortController !== "undefined" ?
     new AbortController() : null;
   const kill = ctl ? setTimeout(() => ctl.abort(), 300000) : 0;
@@ -267,33 +376,32 @@ async function save() {
                                                error: "bad reply" }));
     if (!resp.ok || !j.ok)
       throw new Error(j.error || ("HTTP " + resp.status));
-    setState("saved");
+    savedCount++;
+    const i = pendingSaves.findIndex(p => p.seg === seg);
+    if (i >= 0) pendingSaves.splice(i, 1);
     $("msg").className = "";
-    $("msg").textContent = "saved " + j.dir + " -- " +
-      payload.meta.n_frames + " frames, " +
-      (payload.meta.audio.samples / payload.meta.audio.sample_rate)
-        .toFixed(1) + " s of audio" +
-      (j.files.includes("video.webm") ? ", webm" : "");
-    diagSend("SAVED", { dir: j.dir, n_frames: payload.meta.n_frames });
-    payload = null;   // the session is on disk; let it go
+    $("msg").textContent = "saved " + j.dir + " -- " + seg.nFrames +
+      " frames, " + (seg.nSamples / realRate).toFixed(1) + " s of audio";
+    diagSend("SEGMENT_SAVED", { dir: j.dir, n_frames: seg.nFrames,
+      tries: tries });
+    paint();
   } catch (err) {
-    // back to idle (nothing in flight), the session still held in the
-    // tab: RETRY SAVE re-enters saving; RECORD would discard it
-    setState("idle");
+    if (!pendingSaves.some(p => p.seg === seg))
+      pendingSaves.push({ seg: seg, tries: tries });
     $("msg").className = "err";
     $("msg").textContent = "SAVE FAILED (" +
       (err && err.name === "AbortError" ?
         "no answer from the server for 300 s" : err.message) +
-      ") -- the session is still held in this tab; RETRY SAVE, and do " +
-      "not press RECORD unless you mean to discard it";
-    $("retryBtn").style.display = "";
-    diagSend("SAVE_FAILED", { error: String(err && err.message) });
+      ") -- the segment is held in this tab and retried every 30 s";
+    diagSend("SEGMENT_SAVE_FAILED", { error: String(err && err.message),
+      tries: tries, n_frames: seg.nFrames });
+    paint();
   } finally {
     if (kill) clearTimeout(kill);
   }
 }
 
-/* -- the POST body: five length-prefixed sections ----------------------- */
+/* -- the POST body: five length-prefixed sections -------------------------- */
 function section(parts, bytes) {
   const len = new ArrayBuffer(8);
   new DataView(len).setBigUint64(0, BigInt(bytes.length), true);
@@ -319,21 +427,15 @@ function buildWav(samples, n, rate) {
   return new Uint8Array(buf);
 }
 
-async function buildPayload(wallEnd) {
-  const samples = new Float32Array(nSamples);
+function buildPayload(seg) {
+  const samples = new Float32Array(seg.nSamples);
   let off = 0;
-  for (const c of audioChunks) { samples.set(c, off); off += c.length; }
-  const wav = buildWav(samples, nSamples, realRate);
-  let webm = null;
-  if (webmChunks.length) {
-    try {
-      webm = new Uint8Array(await new Blob(webmChunks).arrayBuffer());
-    } catch (err) { webm = null; }
-  }
-  const luma = new Uint8Array(nFrames * LB);
-  for (let i = 0; i < nFrames; i++) luma.set(frames[i], i * LB);
+  for (const c of seg.audioChunks) { samples.set(c, off); off += c.length; }
+  const wav = buildWav(samples, seg.nSamples, realRate);
+  const luma = new Uint8Array(seg.nFrames * LB);
+  for (let i = 0; i < seg.nFrames; i++) luma.set(seg.frames[i], i * LB);
 
-  // the camera track's own settings at stop time, plus the achieved rates
+  // the camera track's own settings now, plus the detection context
   let camSettings = {};
   const vt = stream ? stream.getVideoTracks()[0] : null;
   if (vt && vt.getSettings) {
@@ -342,12 +444,26 @@ async function buildPayload(wallEnd) {
                      "exposureMode", "deviceId"])
       if (st[k] !== undefined) camSettings[k] = st[k];
   }
-  const spanMs = frameTs.length > 1 ? frameTs[frameTs.length - 1] : 0;
+  const spanMs = seg.frameTs.length > 1 ?
+    seg.frameTs[seg.frameTs.length - 1] - seg.frameTs[0] : 0;
   const meta = {
     tool: "browser_free_record",
-    wall_clock_start: wallStart,
-    wall_clock_end: wallEnd,
-    n_frames: nFrames,
+    mode: seg.mode,                 // "auto" | "manual"
+    trigger: seg.trigger,           // what opened it
+    close_reason: seg.close_reason, // "quiet" | "manual_stop" | "pause"
+    detection: {
+      rule: "speech: rms >= 10x the 20th-percentile floor (floor frozen " +
+        "while open); presence: mean |dLuma| >= 5x its 20th-percentile " +
+        "floor; close after " + (CLOSE_AFTER_MS / 1000) + "s of neither",
+      pre_roll_s: PRE_ROLL_MS / 1000,
+      speech_floor_rms: seg.floors.speech_floor,
+      speech_thr_rms: seg.floors.speech_thr,
+      motion_floor: seg.floors.motion_floor,
+      motion_thr: seg.floors.motion_thr,
+    },
+    wall_clock_start: seg.wallStart,
+    wall_clock_end: seg.wallEnd,
+    n_frames: seg.nFrames,
     luma: {
       width: 160, height: 96, frame_bytes: LB,
       format: "uint8 BT.601 full-range luma (0.299R+0.587G+0.114B), " +
@@ -356,40 +472,160 @@ async function buildPayload(wallEnd) {
     },
     timestamps: {
       file: "timestamps.json",
-      frame_offsets_ms: "performance.now() minus the first frame; pair " +
+      frame_offsets_ms: "performance.now() minus the pre-roll base; pair " +
         "with wall_clock_start for absolute time",
     },
     video: {
-      webm_mime: webmMime, webm_bytes: webm ? webm.length : 0,
-      recorder_ran: !!recorder,
+      webm_mime: seg.mime, webm_bytes: seg.webm ? seg.webm.length : 0,
+      recorder_ran: !!seg.recorder,
+      note: "the WebM starts at segment open (no pre-roll); luma and wav " +
+        "include the " + (PRE_ROLL_MS / 1000) + "s pre-roll",
     },
     audio: {
-      sample_rate: realRate, samples: nSamples,
+      sample_rate: realRate, samples: seg.nSamples,
       wav: "16-bit PCM mono at the AudioContext's honest rate (no " +
         "resampling, no processing; the context is opened at the " +
         "browser's default rate)",
     },
     achieved_video_fps: spanMs > 0 ?
-      Math.round((nFrames - 1) / (spanMs / 1000) * 10000) / 10000 : null,
+      Math.round((seg.nFrames - 1) / (spanMs / 1000) * 10000) / 10000 : null,
     camera: { label: camName, settings: camSettings },
     mic: { label: micName },
     browser: navigator.userAgent,
-    note: "frames are captured on requestAnimationFrame; a backgrounded " +
-      "tab throttles it -- keep this tab in the foreground",
+    note: "frames are captured on requestAnimationFrame (a backgrounded " +
+      "tab degrades them to a slow interval; speech detection continues " +
+      "on the audio thread) -- keep this tab in the foreground",
   };
-  const ts = { wall_clock_start: wallStart, frame_offsets_ms: frameTs };
+  const ts = { wall_clock_start: seg.wallStart,
+               frame_offsets_ms: seg.frameTs };
 
   const parts = [];
   section(parts, enc(JSON.stringify(meta)));
   section(parts, wav);
   section(parts, luma);
   section(parts, enc(JSON.stringify(ts)));
-  section(parts, webm || new Uint8Array(0));
+  section(parts, seg.webm || new Uint8Array(0));
   return { blob: new Blob(parts, { type: "application/octet-stream" }),
            meta: meta };
 }
 
-/* -- boot ---------------------------------------------------------------- */
+/* -- UI --------------------------------------------------------------------- */
+function paint() {
+  const ind = $("indicator");
+  if (paused) { ind.className = "paused"; $("indText").textContent = "PAUSED"; }
+  else if (openSeg) { ind.className = "rec"; $("indText").textContent = "RECORDING"; }
+  else { ind.className = "armed"; $("indText").textContent = "ARMED"; }
+  $("subState").textContent = paused ?
+    "held -- PAUSE EVERYTHING is on; RESUME to arm again" :
+    openSeg ? (openSeg.mode === "manual" ?
+      "manual segment (no auto-close) -- STOP closes and saves it" :
+      "auto segment -- closes after " + (CLOSE_AFTER_MS / 1000) +
+        "s of quiet, then saves in the background") :
+    "listening for speech or presence -- a segment opens by itself";
+  $("segCount").textContent =
+    (savedCount ? savedCount + " segment" + (savedCount > 1 ? "s" : "") +
+      " saved" : "") +
+    (pendingSaves.length ? (savedCount ? " - " : "") +
+      pendingSaves.length + " upload(s) retrying" : "");
+  $("pauseBtn").textContent = paused ? "RESUME" : "PAUSE EVERYTHING";
+  $("recBtn").textContent = openSeg ? "STOP" : "RECORD";
+  $("recBtn").className = openSeg ? "rec" : "";
+  $("recBtn").disabled = paused;
+}
+
+function fmtT(s) {
+  const m = Math.floor(s / 60), r = Math.floor(s % 60);
+  return m + ":" + String(r).padStart(2, "0");
+}
+function sleep(ms) { return new Promise(r => setTimeout(r, ms)); }
+function rms(a) {
+  let s = 0;
+  for (let i = 0; i < a.length; i++) s += a[i] * a[i];
+  return Math.sqrt(s / a.length);
+}
+
+/* the two controls that survive */
+$("pauseBtn").onclick = async () => {
+  if (paused) {
+    paused = false;
+    diagSend("RESUME_CLICKED");
+    paint();
+    return;
+  }
+  paused = true;
+  diagSend("PAUSE_CLICKED", { seg_open: !!openSeg });
+  paint();
+  if (openSeg) await closeSegment("pause");   // the data is safe, then quiet
+};
+
+$("recBtn").onclick = () => {
+  if (paused) return;
+  if (openSeg) {
+    diagSend("MANUAL_STOP_CLICKED", { n_frames: openSeg.nFrames });
+    closeSegment("manual_stop");
+  } else {
+    diagSend("RECORD_CLICKED");
+    openSegment("manual");
+  }
+};
+
+/* -- the loops ---------------------------------------------------------------
+   rAF drives everything while the tab is visible. A backgrounded tab
+   stops rAF entirely (browser rule), so a slow interval keeps the page
+   alive there: speech detection runs on the audio thread's messages,
+   luma frames degrade to interval rate, and the auto-close clock keeps
+   ticking honestly.                                                            */
+function tick() {
+  const fr = (stream && !paused) ? captureFrame() : null;
+  if (fr) {
+    motionStep(fr.f);
+    if (openSeg) {
+      openSeg.frames.push(fr.f);
+      openSeg.frameTs.push(fr.ts);
+      openSeg.nFrames++;
+    } else if (!paused) {
+      feedPreFrame(fr.f, fr.ts);
+    }
+  }
+  maybeRecomputeFloors();
+  if (!paused) {
+    if (!openSeg && (speechNow || motionNow)) {
+      openSegment(speechNow ? "speech" : "motion");
+    } else if (openSeg && openSeg.mode === "auto") {
+      if (speechNow || motionNow) openSeg.lastActive = performance.now();
+      else if (performance.now() - openSeg.lastActive > CLOSE_AFTER_MS)
+        closeSegment("quiet");
+    }
+  }
+  if (openSeg)
+    $("elapsed").textContent = fmtT((performance.now() - openSeg.t0ms) / 1000);
+  const db = 20 * Math.log10(Math.max(level, 1e-7));
+  $("meterFill").style.width =
+    Math.max(0, Math.min(100, (db + 60) / 60 * 100)).toFixed(1) + "%";
+  $("detRead").textContent = "speech " + (speechNow ? "YES" : "no") +
+    " (level " + level.toExponential(1) + " / thr " +
+    speechThr().toExponential(1) + ")   presence " +
+    (motionNow ? "YES" : "no") + " (motion " +
+    (Math.round(lastMotion * 100) / 100) + " / thr " +
+    (Math.round(motionThr() * 100) / 100) + ")";
+}
+function drawLoop() { requestAnimationFrame(drawLoop); tick(); }
+setInterval(tick, 500);   // the background-tab heartbeat path
+
+async function relaxExposure(track) {
+  // capability-checked nudge, a no-op where unsupported: let the camera's
+  // own auto-exposure run (the plan page learned this the hard way)
+  try {
+    const caps = track && track.getCapabilities ? track.getCapabilities()
+      : null;
+    if (caps && Array.isArray(caps.exposureMode) &&
+        caps.exposureMode.includes("continuous"))
+      await track.applyConstraints(
+        { advanced: [{ exposureMode: "continuous" }] });
+  } catch (err) { /* best effort */ }
+}
+
+/* -- boot -------------------------------------------------------------------- */
 async function boot() {
   drawLoop();
   try {
@@ -416,7 +652,7 @@ async function boot() {
   } catch (err) {
     $("msg").className = "err";
     $("msg").textContent = "no AudioContext (" + err.name +
-      ") -- recording needs one";
+      ") -- AUTO needs one";
     return;
   }
   await audioCtx.resume();
@@ -447,31 +683,37 @@ async function boot() {
   const src = audioCtx.createMediaStreamSource(stream);
   const node = new AudioWorkletNode(audioCtx, "pcoll");
   node.port.onmessage = (ev) => {
-    level = rms(ev.data);
-    if (state === "recording") {
-      audioChunks.push(ev.data);
-      nSamples += ev.data.length;
+    const blk = ev.data;
+    level = rms(blk);
+    speechStep(level);
+    if (openSeg) {
+      openSeg.audioChunks.push(blk);
+      openSeg.nSamples += blk.length;
+    } else if (!paused) {
+      feedPreAudio(blk);
     }
   };
   src.connect(node);
-  diagSend("BOOT", { cam: camName, mic: micName, rate: realRate });
+  paint();
+  diagSend("BOOT", { cam: camName, mic: micName, rate: realRate,
+    auto: true });
 
   try {
     const r = await fetch("/info");
     const j = await r.json();
     if (j && j.out)
-      $("msg").textContent = "ready -- sessions will be saved under " +
+      $("msg").textContent = "armed -- segments save automatically under " +
         j.out + "/free_sessions/";
   } catch (err) {
     $("msg").className = "err";
     $("msg").textContent = "server DOWN -- run: python3 " +
-      "browser_capture/server.py (recording works; SAVING needs the server)";
+      "browser_capture/server.py (detection works; SAVING needs the server)";
   }
 }
 boot();
 
 window.addEventListener("beforeunload", (ev) => {
-  if (state === "recording" || state === "saving" || payload) {
+  if (openSeg || pendingSaves.length) {
     ev.preventDefault();
     ev.returnValue = "";
   }

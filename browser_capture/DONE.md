@@ -345,3 +345,54 @@ After it, http://localhost:8765 lands on FREE RECORD.
 Verify suite after this patch: 154 passed, 0 failed (nine new checks:
 front-door routing, plan intact at /plan, the /free write path, the
 gate-safe subfolder, the dishonest-body 400, and /log).
+
+## Patch 2026-10-20 (same session, seventh): AUTO — the page arms itself
+
+Even one button per sitting is 20th century. FREE RECORD is now AUTO by
+default: **after permissions, the page ARMS ITSELF** — a segment opens
+when speech or presence is detected, closes after ~8 s of silence and
+stillness, and every closed segment uploads **in the background as it
+finishes**. Chunked, no end-of-session crunch, no STOP needed for the
+data to be safe. Open the page once, put it aside, forget it; the corpus
+accrues. A reload of the page is enough (server unchanged this time).
+
+- **The indicator is big and honest at all times**: ARMED (listening) /
+  RECORDING (blinking red, segment elapsed) / PAUSED — visible from
+  across the room, plus a live line of speech/presence levels against
+  their thresholds.
+- **Exactly two controls survive**: PAUSE EVERYTHING (the kill switch —
+  closes and saves whatever is open, then holds until RESUME) and
+  RECORD/STOP, the manual fallback (a manual segment has no auto-close).
+- **Detection, honestly named**: speech is the corpus's own rule — RMS
+  at 10× the 20th-percentile noise floor of a ~5.5 s rolling ring, the
+  floor FROZEN while a segment is open so continuous speech cannot
+  recalibrate itself into silence. "Presence" is an adaptive MOTION
+  proxy over the 160×96 luma frames (mean |Δluma| at 5× its
+  20th-percentile floor, frozen likewise) — not a face detector; it
+  answers "is a person present and doing something". Every level,
+  floor, threshold and decision is in the 1 s heartbeat, so the
+  thresholds can be tuned from `diag.log` on the real machine before
+  anyone changes a line of code.
+- **~1 s of pre-roll** (audio + luma + timestamps) seeds each segment,
+  so the syllable that triggered it is inside the artifact. The WebM
+  starts at segment open (MediaRecorder cannot reach back); meta.json
+  says so. The pre-roll rings are cleared on close, so a new segment
+  never seeds with stale data.
+- **Artifacts unchanged**: each segment is one `POST /free` → one
+  `<out>/free_sessions/<stamp>/` folder with the same five files;
+  meta.json gains `mode` (auto/manual), `trigger`, `close_reason`, and
+  the full detection context (floors and thresholds at open — the
+  offline record of WHY the segment exists). The server needed no
+  changes.
+- **Background-tab honesty**: speech detection runs on the audio
+  thread and keeps working with the tab aside, but browsers stop
+  rAF-driven video frames in background tabs — a 500 ms interval keeps
+  capturing degraded luma and keeps the auto-close clock ticking. The
+  page says so, meta.json says so, and the heartbeat's visibility field
+  shows when it is happening.
+- Failed background saves are held in the tab and retried every 30 s
+  (upload bounded at 300 s); the heartbeat carries the retry count.
+
+Verify suite after this patch: 154 passed, 0 failed (the free-path
+checks cover the segment artifact unchanged; the AUTO logic itself is
+real-camera territory — tune it from diag.log).
