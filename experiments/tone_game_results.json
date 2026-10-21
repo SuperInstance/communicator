@@ -1,0 +1,3693 @@
+{
+  "tool": "experiments/tone_game.py",
+  "generated_at": "2026-10-21T05:04:27Z",
+  "carrier": "i love you",
+  "intents": [
+    "sincere",
+    "leaving",
+    "obligated",
+    "everything",
+    "joking",
+    "quiet-furious"
+  ],
+  "chance": 0.1667,
+  "casey_prior": 0.7,
+  "seed_captures": {
+    "A": {
+      "source": "/mnt/c/proart_capture/A.wav",
+      "n_notes_measured": 66,
+      "n_syllables_measured": 0,
+      "note_duration_median_s": 0.185,
+      "note_duration_p10_s": 0.09,
+      "note_duration_p90_s": 0.5,
+      "step_median_semitones": 0.028,
+      "step_p90_abs_semitones": 4.566,
+      "pitch_range_semitones": 6.401,
+      "centre_midi": 45.72,
+      "rate_notes_per_s": 5.011
+    },
+    "B": {
+      "source": "/mnt/c/proart_capture/B.wav",
+      "n_notes_measured": 57,
+      "n_syllables_measured": 0,
+      "note_duration_median_s": 0.22,
+      "note_duration_p10_s": 0.09,
+      "note_duration_p90_s": 0.508,
+      "step_median_semitones": -0.468,
+      "step_p90_abs_semitones": 13.169,
+      "pitch_range_semitones": 7.113,
+      "centre_midi": 45.71,
+      "rate_notes_per_s": 4.335
+    }
+  },
+  "pooled_envelope": {
+    "source": "pooled: A, B",
+    "n_notes_measured": 0,
+    "n_syllables_measured": 0,
+    "note_duration_median_s": 0.2,
+    "note_duration_p10_s": 0.09,
+    "note_duration_p90_s": 0.508,
+    "step_median_semitones": -0.239,
+    "step_p90_abs_semitones": 5.541,
+    "pitch_range_semitones": 6.757,
+    "centre_midi": 45.71,
+    "rate_notes_per_s": 4.673
+  },
+  "style_envelope": {
+    "centre": [
+      -12.0,
+      12.0
+    ],
+    "range": [
+      3.0,
+      8.0
+    ],
+    "tilt": [
+      -8.0,
+      8.0
+    ],
+    "arc": [
+      -6.0,
+      8.0
+    ],
+    "zig": [
+      0.0,
+      6.0
+    ],
+    "drop": [
+      0.0,
+      9.0
+    ],
+    "density": [
+      0.8,
+      2.2
+    ],
+    "jitter": [
+      0.0,
+      2.5
+    ],
+    "pause": [
+      0.0,
+      0.8
+    ],
+    "hold": [
+      0.8,
+      2.0
+    ]
+  },
+  "starting_styles": {
+    "sincere": {
+      "centre": 0,
+      "range": 7,
+      "tilt": 1.5,
+      "arc": 2.5,
+      "zig": 0.0,
+      "drop": 0.0,
+      "density": 1.0,
+      "jitter": 0.5,
+      "pause": 0.25,
+      "hold": 1.3
+    },
+    "leaving": {
+      "centre": -1,
+      "range": 8,
+      "tilt": -4.0,
+      "arc": 1.0,
+      "zig": 0.0,
+      "drop": 0.0,
+      "density": 1.0,
+      "jitter": 0.6,
+      "pause": 0.45,
+      "hold": 1.55
+    },
+    "obligated": {
+      "centre": 0,
+      "range": 3,
+      "tilt": 0.0,
+      "arc": 0.4,
+      "zig": 0.0,
+      "drop": 0.0,
+      "density": 1.0,
+      "jitter": 0.3,
+      "pause": 0.15,
+      "hold": 1.05
+    },
+    "everything": {
+      "centre": 2,
+      "range": 13,
+      "tilt": 2.0,
+      "arc": 5.0,
+      "zig": 0.0,
+      "drop": 0.0,
+      "density": 1.7,
+      "jitter": 1.0,
+      "pause": 0.2,
+      "hold": 1.2
+    },
+    "joking": {
+      "centre": 4,
+      "range": 9,
+      "tilt": 0.0,
+      "arc": 0.0,
+      "zig": 3.5,
+      "drop": 0.0,
+      "density": 1.5,
+      "jitter": 1.2,
+      "pause": 0.1,
+      "hold": 0.95
+    },
+    "quiet-furious": {
+      "centre": -6,
+      "range": 6,
+      "tilt": -1.0,
+      "arc": 0.0,
+      "zig": 0.0,
+      "drop": 5.0,
+      "density": 1.1,
+      "jitter": 0.4,
+      "pause": 0.35,
+      "hold": 1.45
+    }
+  },
+  "starting_styles_effective": {
+    "sincere": {
+      "centre": 1.5,
+      "range": 7,
+      "tilt": 1.5,
+      "arc": 2.5,
+      "zig": 0.0,
+      "drop": 0.0,
+      "density": 1.0,
+      "jitter": 0.5,
+      "pause": 0.25,
+      "hold": 1.3
+    },
+    "leaving": {
+      "centre": -1,
+      "range": 8.0,
+      "tilt": -4.0,
+      "arc": 1.0,
+      "zig": 0.0,
+      "drop": 0.0,
+      "density": 1.0,
+      "jitter": 0.6,
+      "pause": 0.45,
+      "hold": 1.55
+    },
+    "obligated": {
+      "centre": 0,
+      "range": 3.0,
+      "tilt": 0.0,
+      "arc": 0.4,
+      "zig": 0.0,
+      "drop": 0.0,
+      "density": 1.0,
+      "jitter": 0.3,
+      "pause": 0.15,
+      "hold": 1.05
+    },
+    "everything": {
+      "centre": 4.25,
+      "range": 8.0,
+      "tilt": 5.0,
+      "arc": 5.0,
+      "zig": 0.0,
+      "drop": 0.0,
+      "density": 1.7,
+      "jitter": 1.0,
+      "pause": 0.2,
+      "hold": 1.2
+    },
+    "joking": {
+      "centre": 7.75,
+      "range": 8.0,
+      "tilt": -2.25,
+      "arc": 2.25,
+      "zig": 5.0,
+      "drop": 2.25,
+      "density": 1.5,
+      "jitter": 0.44999999999999996,
+      "pause": 0.1,
+      "hold": 0.95
+    },
+    "quiet-furious": {
+      "centre": -6,
+      "range": 6,
+      "tilt": -1.0,
+      "arc": 0.0,
+      "zig": 0.0,
+      "drop": 5.0,
+      "density": 1.1,
+      "jitter": 0.4,
+      "pause": 0.35,
+      "hold": 1.45
+    }
+  },
+  "clamped_by_the_envelope": {
+    "everything": {
+      "range": [
+        13,
+        8.0
+      ]
+    },
+    "joking": {
+      "range": [
+        9,
+        8.0
+      ]
+    }
+  },
+  "final_styles": {
+    "sincere": {
+      "centre": 1.5,
+      "range": 7,
+      "tilt": 1.5,
+      "arc": 2.5,
+      "zig": 0.0,
+      "drop": 0.0,
+      "density": 1.0,
+      "jitter": 0.5,
+      "pause": 0.25,
+      "hold": 1.3
+    },
+    "leaving": {
+      "centre": -1,
+      "range": 8.0,
+      "tilt": -4.0,
+      "arc": 1.0,
+      "zig": 0.0,
+      "drop": 0.0,
+      "density": 1.0,
+      "jitter": 0.6,
+      "pause": 0.45,
+      "hold": 1.55
+    },
+    "obligated": {
+      "centre": 0,
+      "range": 3.0,
+      "tilt": 0.0,
+      "arc": 0.4,
+      "zig": 0.0,
+      "drop": 0.0,
+      "density": 1.0,
+      "jitter": 0.3,
+      "pause": 0.15,
+      "hold": 1.05
+    },
+    "everything": {
+      "centre": 4.25,
+      "range": 8.0,
+      "tilt": 5.0,
+      "arc": 5.0,
+      "zig": 0.0,
+      "drop": 0.0,
+      "density": 1.7,
+      "jitter": 1.0,
+      "pause": 0.2,
+      "hold": 1.2
+    },
+    "joking": {
+      "centre": 7.75,
+      "range": 8.0,
+      "tilt": -2.25,
+      "arc": 2.25,
+      "zig": 5.0,
+      "drop": 2.25,
+      "density": 1.5,
+      "jitter": 0.44999999999999996,
+      "pause": 0.1,
+      "hold": 0.95
+    },
+    "quiet-furious": {
+      "centre": -6,
+      "range": 6,
+      "tilt": -1.0,
+      "arc": 0.0,
+      "zig": 0.0,
+      "drop": 5.0,
+      "density": 1.1,
+      "jitter": 0.4,
+      "pause": 0.35,
+      "hold": 1.45
+    }
+  },
+  "provenance": {
+    "sincere": "real-seeded from capture A",
+    "leaving": "real-seeded from capture B",
+    "obligated": "synthetic inside the real-prosody envelope",
+    "everything": "synthetic inside the real-prosody envelope",
+    "joking": "synthetic inside the real-prosody envelope",
+    "quiet-furious": "synthetic inside the real-prosody envelope"
+  },
+  "rounds": [
+    {
+      "round": 0,
+      "elapsed_s": 68.8,
+      "styles": {
+        "sincere": {
+          "centre": 0,
+          "range": 7,
+          "tilt": 1.5,
+          "arc": 2.5,
+          "zig": 0.0,
+          "drop": 0.0,
+          "density": 1.0,
+          "jitter": 0.5,
+          "pause": 0.25,
+          "hold": 1.3
+        },
+        "leaving": {
+          "centre": -1,
+          "range": 8.0,
+          "tilt": -4.0,
+          "arc": 1.0,
+          "zig": 0.0,
+          "drop": 0.0,
+          "density": 1.0,
+          "jitter": 0.6,
+          "pause": 0.45,
+          "hold": 1.55
+        },
+        "obligated": {
+          "centre": 0,
+          "range": 3.0,
+          "tilt": 0.0,
+          "arc": 0.4,
+          "zig": 0.0,
+          "drop": 0.0,
+          "density": 1.0,
+          "jitter": 0.3,
+          "pause": 0.15,
+          "hold": 1.05
+        },
+        "everything": {
+          "centre": 2,
+          "range": 8.0,
+          "tilt": 2.0,
+          "arc": 5.0,
+          "zig": 0.0,
+          "drop": 0.0,
+          "density": 1.7,
+          "jitter": 1.0,
+          "pause": 0.2,
+          "hold": 1.2
+        },
+        "joking": {
+          "centre": 4,
+          "range": 8.0,
+          "tilt": 0.0,
+          "arc": 0.0,
+          "zig": 3.5,
+          "drop": 0.0,
+          "density": 1.5,
+          "jitter": 1.2,
+          "pause": 0.1,
+          "hold": 0.95
+        },
+        "quiet-furious": {
+          "centre": -6,
+          "range": 6,
+          "tilt": -1.0,
+          "arc": 0.0,
+          "zig": 0.0,
+          "drop": 5.0,
+          "density": 1.1,
+          "jitter": 0.4,
+          "pause": 0.35,
+          "hold": 1.45
+        }
+      },
+      "results": {
+        "all": {
+          "accuracy": 1.0,
+          "chance": 0.1667,
+          "confusion": [
+            [
+              8,
+              0,
+              0,
+              0,
+              0,
+              0
+            ],
+            [
+              0,
+              8,
+              0,
+              0,
+              0,
+              0
+            ],
+            [
+              0,
+              0,
+              8,
+              0,
+              0,
+              0
+            ],
+            [
+              0,
+              0,
+              0,
+              8,
+              0,
+              0
+            ],
+            [
+              0,
+              0,
+              0,
+              0,
+              8,
+              0
+            ],
+            [
+              0,
+              0,
+              0,
+              0,
+              0,
+              8
+            ]
+          ],
+          "confusion_text": "true \\ predicted  sincere  leaving  obligat  everyth   joking  quiet-f\nsincere                 8        0        0        0        0        0\nleaving                 0        8        0        0        0        0\nobligated               0        0        8        0        0        0\neverything              0        0        0        8        0        0\njoking                  0        0        0        0        8        0\nquiet-furious           0        0        0        0        0        8",
+          "train_loss": 0.22968,
+          "n_train": 48,
+          "n_test": 48,
+          "feature_indices": [
+            0,
+            1,
+            2,
+            3,
+            4,
+            5,
+            6,
+            7,
+            8,
+            9,
+            10
+          ],
+          "feature_names": [
+            "centre_midi",
+            "range_st",
+            "slope_st_per_s",
+            "n_notes",
+            "note_rate",
+            "note_dur_median",
+            "note_dur_std",
+            "step_abs_mean",
+            "step_std",
+            "step_signed_mean",
+            "voiced_fraction"
+          ]
+        },
+        "pitch_only": {
+          "accuracy": 0.9792,
+          "chance": 0.1667,
+          "confusion": [
+            [
+              8,
+              0,
+              0,
+              0,
+              0,
+              0
+            ],
+            [
+              0,
+              8,
+              0,
+              0,
+              0,
+              0
+            ],
+            [
+              1,
+              0,
+              7,
+              0,
+              0,
+              0
+            ],
+            [
+              0,
+              0,
+              0,
+              8,
+              0,
+              0
+            ],
+            [
+              0,
+              0,
+              0,
+              0,
+              8,
+              0
+            ],
+            [
+              0,
+              0,
+              0,
+              0,
+              0,
+              8
+            ]
+          ],
+          "confusion_text": "true \\ predicted  sincere  leaving  obligat  everyth   joking  quiet-f\nsincere                 8        0        0        0        0        0\nleaving                 0        8        0        0        0        0\nobligated               1        0        7        0        0        0\neverything              0        0        0        8        0        0\njoking                  0        0        0        0        8        0\nquiet-furious           0        0        0        0        0        8",
+          "train_loss": 0.26999,
+          "n_train": 48,
+          "n_test": 48,
+          "feature_indices": [
+            0,
+            1,
+            2,
+            7,
+            8,
+            9
+          ],
+          "feature_names": [
+            "centre_midi",
+            "range_st",
+            "slope_st_per_s",
+            "step_abs_mean",
+            "step_std",
+            "step_signed_mean"
+          ]
+        },
+        "timing_only": {
+          "accuracy": 0.3542,
+          "chance": 0.1667,
+          "confusion": [
+            [
+              0,
+              3,
+              1,
+              2,
+              2,
+              0
+            ],
+            [
+              0,
+              4,
+              2,
+              1,
+              1,
+              0
+            ],
+            [
+              0,
+              3,
+              1,
+              1,
+              3,
+              0
+            ],
+            [
+              0,
+              3,
+              0,
+              1,
+              4,
+              0
+            ],
+            [
+              0,
+              1,
+              1,
+              3,
+              3,
+              0
+            ],
+            [
+              0,
+              0,
+              0,
+              0,
+              0,
+              8
+            ]
+          ],
+          "confusion_text": "true \\ predicted  sincere  leaving  obligat  everyth   joking  quiet-f\nsincere                 0        3        1        2        2        0\nleaving                 0        4        2        1        1        0\nobligated               0        3        1        1        3        0\neverything              0        3        0        1        4        0\njoking                  0        1        1        3        3        0\nquiet-furious           0        0        0        0        0        8",
+          "train_loss": 1.31495,
+          "n_train": 48,
+          "n_test": 48,
+          "feature_indices": [
+            3,
+            4,
+            5,
+            6,
+            10
+          ],
+          "feature_names": [
+            "n_notes",
+            "note_rate",
+            "note_dur_median",
+            "note_dur_std",
+            "voiced_fraction"
+          ]
+        }
+      }
+    },
+    {
+      "round": 1,
+      "elapsed_s": 68.86,
+      "styles": {
+        "sincere": {
+          "centre": 0,
+          "range": 7,
+          "tilt": 1.5,
+          "arc": 2.5,
+          "zig": 0.0,
+          "drop": 0.0,
+          "density": 1.0,
+          "jitter": 0.5,
+          "pause": 0.25,
+          "hold": 1.3
+        },
+        "leaving": {
+          "centre": -1,
+          "range": 8.0,
+          "tilt": -4.0,
+          "arc": 1.0,
+          "zig": 0.0,
+          "drop": 0.0,
+          "density": 1.0,
+          "jitter": 0.6,
+          "pause": 0.45,
+          "hold": 1.55
+        },
+        "obligated": {
+          "centre": 0,
+          "range": 3.0,
+          "tilt": 0.0,
+          "arc": 0.4,
+          "zig": 0.0,
+          "drop": 0.0,
+          "density": 1.0,
+          "jitter": 0.3,
+          "pause": 0.15,
+          "hold": 1.05
+        },
+        "everything": {
+          "centre": 2.75,
+          "range": 8.0,
+          "tilt": 3.5,
+          "arc": 5.0,
+          "zig": 0.0,
+          "drop": 0.0,
+          "density": 1.7,
+          "jitter": 1.0,
+          "pause": 0.2,
+          "hold": 1.2
+        },
+        "joking": {
+          "centre": 6.25,
+          "range": 8.0,
+          "tilt": -2.25,
+          "arc": 2.25,
+          "zig": 5.0,
+          "drop": 2.25,
+          "density": 1.5,
+          "jitter": 0.44999999999999996,
+          "pause": 0.1,
+          "hold": 0.95
+        },
+        "quiet-furious": {
+          "centre": -6,
+          "range": 6,
+          "tilt": -1.0,
+          "arc": 0.0,
+          "zig": 0.0,
+          "drop": 5.0,
+          "density": 1.1,
+          "jitter": 0.4,
+          "pause": 0.35,
+          "hold": 1.45
+        }
+      },
+      "results": {
+        "all": {
+          "accuracy": 1.0,
+          "chance": 0.1667,
+          "confusion": [
+            [
+              8,
+              0,
+              0,
+              0,
+              0,
+              0
+            ],
+            [
+              0,
+              8,
+              0,
+              0,
+              0,
+              0
+            ],
+            [
+              0,
+              0,
+              8,
+              0,
+              0,
+              0
+            ],
+            [
+              0,
+              0,
+              0,
+              8,
+              0,
+              0
+            ],
+            [
+              0,
+              0,
+              0,
+              0,
+              8,
+              0
+            ],
+            [
+              0,
+              0,
+              0,
+              0,
+              0,
+              8
+            ]
+          ],
+          "confusion_text": "true \\ predicted  sincere  leaving  obligat  everyth   joking  quiet-f\nsincere                 8        0        0        0        0        0\nleaving                 0        8        0        0        0        0\nobligated               0        0        8        0        0        0\neverything              0        0        0        8        0        0\njoking                  0        0        0        0        8        0\nquiet-furious           0        0        0        0        0        8",
+          "train_loss": 0.13612,
+          "n_train": 48,
+          "n_test": 48,
+          "feature_indices": [
+            0,
+            1,
+            2,
+            3,
+            4,
+            5,
+            6,
+            7,
+            8,
+            9,
+            10
+          ],
+          "feature_names": [
+            "centre_midi",
+            "range_st",
+            "slope_st_per_s",
+            "n_notes",
+            "note_rate",
+            "note_dur_median",
+            "note_dur_std",
+            "step_abs_mean",
+            "step_std",
+            "step_signed_mean",
+            "voiced_fraction"
+          ]
+        },
+        "pitch_only": {
+          "accuracy": 1.0,
+          "chance": 0.1667,
+          "confusion": [
+            [
+              8,
+              0,
+              0,
+              0,
+              0,
+              0
+            ],
+            [
+              0,
+              8,
+              0,
+              0,
+              0,
+              0
+            ],
+            [
+              0,
+              0,
+              8,
+              0,
+              0,
+              0
+            ],
+            [
+              0,
+              0,
+              0,
+              8,
+              0,
+              0
+            ],
+            [
+              0,
+              0,
+              0,
+              0,
+              8,
+              0
+            ],
+            [
+              0,
+              0,
+              0,
+              0,
+              0,
+              8
+            ]
+          ],
+          "confusion_text": "true \\ predicted  sincere  leaving  obligat  everyth   joking  quiet-f\nsincere                 8        0        0        0        0        0\nleaving                 0        8        0        0        0        0\nobligated               0        0        8        0        0        0\neverything              0        0        0        8        0        0\njoking                  0        0        0        0        8        0\nquiet-furious           0        0        0        0        0        8",
+          "train_loss": 0.17268,
+          "n_train": 48,
+          "n_test": 48,
+          "feature_indices": [
+            0,
+            1,
+            2,
+            7,
+            8,
+            9
+          ],
+          "feature_names": [
+            "centre_midi",
+            "range_st",
+            "slope_st_per_s",
+            "step_abs_mean",
+            "step_std",
+            "step_signed_mean"
+          ]
+        },
+        "timing_only": {
+          "accuracy": 0.4167,
+          "chance": 0.1667,
+          "confusion": [
+            [
+              0,
+              2,
+              1,
+              2,
+              3,
+              0
+            ],
+            [
+              0,
+              4,
+              2,
+              1,
+              1,
+              0
+            ],
+            [
+              0,
+              2,
+              2,
+              1,
+              3,
+              0
+            ],
+            [
+              0,
+              2,
+              1,
+              1,
+              4,
+              0
+            ],
+            [
+              0,
+              1,
+              1,
+              1,
+              5,
+              0
+            ],
+            [
+              0,
+              0,
+              0,
+              0,
+              0,
+              8
+            ]
+          ],
+          "confusion_text": "true \\ predicted  sincere  leaving  obligat  everyth   joking  quiet-f\nsincere                 0        2        1        2        3        0\nleaving                 0        4        2        1        1        0\nobligated               0        2        2        1        3        0\neverything              0        2        1        1        4        0\njoking                  0        1        1        1        5        0\nquiet-furious           0        0        0        0        0        8",
+          "train_loss": 1.32792,
+          "n_train": 48,
+          "n_test": 48,
+          "feature_indices": [
+            3,
+            4,
+            5,
+            6,
+            10
+          ],
+          "feature_names": [
+            "n_notes",
+            "note_rate",
+            "note_dur_median",
+            "note_dur_std",
+            "voiced_fraction"
+          ]
+        }
+      }
+    },
+    {
+      "round": 2,
+      "elapsed_s": 64.5,
+      "styles": {
+        "sincere": {
+          "centre": 0.75,
+          "range": 7,
+          "tilt": 1.5,
+          "arc": 2.5,
+          "zig": 0.0,
+          "drop": 0.0,
+          "density": 1.0,
+          "jitter": 0.5,
+          "pause": 0.25,
+          "hold": 1.3
+        },
+        "leaving": {
+          "centre": -1,
+          "range": 8.0,
+          "tilt": -4.0,
+          "arc": 1.0,
+          "zig": 0.0,
+          "drop": 0.0,
+          "density": 1.0,
+          "jitter": 0.6,
+          "pause": 0.45,
+          "hold": 1.55
+        },
+        "obligated": {
+          "centre": 0,
+          "range": 3.0,
+          "tilt": 0.0,
+          "arc": 0.4,
+          "zig": 0.0,
+          "drop": 0.0,
+          "density": 1.0,
+          "jitter": 0.3,
+          "pause": 0.15,
+          "hold": 1.05
+        },
+        "everything": {
+          "centre": 4.25,
+          "range": 8.0,
+          "tilt": 3.5,
+          "arc": 5.0,
+          "zig": 0.0,
+          "drop": 0.0,
+          "density": 1.7,
+          "jitter": 1.0,
+          "pause": 0.2,
+          "hold": 1.2
+        },
+        "joking": {
+          "centre": 6.25,
+          "range": 8.0,
+          "tilt": -2.25,
+          "arc": 2.25,
+          "zig": 5.0,
+          "drop": 2.25,
+          "density": 1.5,
+          "jitter": 0.44999999999999996,
+          "pause": 0.1,
+          "hold": 0.95
+        },
+        "quiet-furious": {
+          "centre": -6,
+          "range": 6,
+          "tilt": -1.0,
+          "arc": 0.0,
+          "zig": 0.0,
+          "drop": 5.0,
+          "density": 1.1,
+          "jitter": 0.4,
+          "pause": 0.35,
+          "hold": 1.45
+        }
+      },
+      "results": {
+        "all": {
+          "accuracy": 1.0,
+          "chance": 0.1667,
+          "confusion": [
+            [
+              8,
+              0,
+              0,
+              0,
+              0,
+              0
+            ],
+            [
+              0,
+              8,
+              0,
+              0,
+              0,
+              0
+            ],
+            [
+              0,
+              0,
+              8,
+              0,
+              0,
+              0
+            ],
+            [
+              0,
+              0,
+              0,
+              8,
+              0,
+              0
+            ],
+            [
+              0,
+              0,
+              0,
+              0,
+              8,
+              0
+            ],
+            [
+              0,
+              0,
+              0,
+              0,
+              0,
+              8
+            ]
+          ],
+          "confusion_text": "true \\ predicted  sincere  leaving  obligat  everyth   joking  quiet-f\nsincere                 8        0        0        0        0        0\nleaving                 0        8        0        0        0        0\nobligated               0        0        8        0        0        0\neverything              0        0        0        8        0        0\njoking                  0        0        0        0        8        0\nquiet-furious           0        0        0        0        0        8",
+          "train_loss": 0.10343,
+          "n_train": 48,
+          "n_test": 48,
+          "feature_indices": [
+            0,
+            1,
+            2,
+            3,
+            4,
+            5,
+            6,
+            7,
+            8,
+            9,
+            10
+          ],
+          "feature_names": [
+            "centre_midi",
+            "range_st",
+            "slope_st_per_s",
+            "n_notes",
+            "note_rate",
+            "note_dur_median",
+            "note_dur_std",
+            "step_abs_mean",
+            "step_std",
+            "step_signed_mean",
+            "voiced_fraction"
+          ]
+        },
+        "pitch_only": {
+          "accuracy": 1.0,
+          "chance": 0.1667,
+          "confusion": [
+            [
+              8,
+              0,
+              0,
+              0,
+              0,
+              0
+            ],
+            [
+              0,
+              8,
+              0,
+              0,
+              0,
+              0
+            ],
+            [
+              0,
+              0,
+              8,
+              0,
+              0,
+              0
+            ],
+            [
+              0,
+              0,
+              0,
+              8,
+              0,
+              0
+            ],
+            [
+              0,
+              0,
+              0,
+              0,
+              8,
+              0
+            ],
+            [
+              0,
+              0,
+              0,
+              0,
+              0,
+              8
+            ]
+          ],
+          "confusion_text": "true \\ predicted  sincere  leaving  obligat  everyth   joking  quiet-f\nsincere                 8        0        0        0        0        0\nleaving                 0        8        0        0        0        0\nobligated               0        0        8        0        0        0\neverything              0        0        0        8        0        0\njoking                  0        0        0        0        8        0\nquiet-furious           0        0        0        0        0        8",
+          "train_loss": 0.15279,
+          "n_train": 48,
+          "n_test": 48,
+          "feature_indices": [
+            0,
+            1,
+            2,
+            7,
+            8,
+            9
+          ],
+          "feature_names": [
+            "centre_midi",
+            "range_st",
+            "slope_st_per_s",
+            "step_abs_mean",
+            "step_std",
+            "step_signed_mean"
+          ]
+        },
+        "timing_only": {
+          "accuracy": 0.3958,
+          "chance": 0.1667,
+          "confusion": [
+            [
+              0,
+              3,
+              1,
+              1,
+              3,
+              0
+            ],
+            [
+              2,
+              3,
+              2,
+              1,
+              0,
+              0
+            ],
+            [
+              0,
+              3,
+              3,
+              0,
+              2,
+              0
+            ],
+            [
+              0,
+              2,
+              1,
+              1,
+              4,
+              0
+            ],
+            [
+              0,
+              1,
+              1,
+              2,
+              4,
+              0
+            ],
+            [
+              0,
+              0,
+              0,
+              0,
+              0,
+              8
+            ]
+          ],
+          "confusion_text": "true \\ predicted  sincere  leaving  obligat  everyth   joking  quiet-f\nsincere                 0        3        1        1        3        0\nleaving                 2        3        2        1        0        0\nobligated               0        3        3        0        2        0\neverything              0        2        1        1        4        0\njoking                  0        1        1        2        4        0\nquiet-furious           0        0        0        0        0        8",
+          "train_loss": 1.29066,
+          "n_train": 48,
+          "n_test": 48,
+          "feature_indices": [
+            3,
+            4,
+            5,
+            6,
+            10
+          ],
+          "feature_names": [
+            "n_notes",
+            "note_rate",
+            "note_dur_median",
+            "note_dur_std",
+            "voiced_fraction"
+          ]
+        }
+      }
+    },
+    {
+      "round": 3,
+      "elapsed_s": 67.89,
+      "styles": {
+        "sincere": {
+          "centre": 1.5,
+          "range": 7,
+          "tilt": 1.5,
+          "arc": 2.5,
+          "zig": 0.0,
+          "drop": 0.0,
+          "density": 1.0,
+          "jitter": 0.5,
+          "pause": 0.25,
+          "hold": 1.3
+        },
+        "leaving": {
+          "centre": -1,
+          "range": 8.0,
+          "tilt": -4.0,
+          "arc": 1.0,
+          "zig": 0.0,
+          "drop": 0.0,
+          "density": 1.0,
+          "jitter": 0.6,
+          "pause": 0.45,
+          "hold": 1.55
+        },
+        "obligated": {
+          "centre": 0,
+          "range": 3.0,
+          "tilt": 0.0,
+          "arc": 0.4,
+          "zig": 0.0,
+          "drop": 0.0,
+          "density": 1.0,
+          "jitter": 0.3,
+          "pause": 0.15,
+          "hold": 1.05
+        },
+        "everything": {
+          "centre": 4.25,
+          "range": 8.0,
+          "tilt": 5.0,
+          "arc": 5.0,
+          "zig": 0.0,
+          "drop": 0.0,
+          "density": 1.7,
+          "jitter": 1.0,
+          "pause": 0.2,
+          "hold": 1.2
+        },
+        "joking": {
+          "centre": 7.75,
+          "range": 8.0,
+          "tilt": -2.25,
+          "arc": 2.25,
+          "zig": 5.0,
+          "drop": 2.25,
+          "density": 1.5,
+          "jitter": 0.44999999999999996,
+          "pause": 0.1,
+          "hold": 0.95
+        },
+        "quiet-furious": {
+          "centre": -6,
+          "range": 6,
+          "tilt": -1.0,
+          "arc": 0.0,
+          "zig": 0.0,
+          "drop": 5.0,
+          "density": 1.1,
+          "jitter": 0.4,
+          "pause": 0.35,
+          "hold": 1.45
+        }
+      },
+      "results": {
+        "all": {
+          "accuracy": 1.0,
+          "chance": 0.1667,
+          "confusion": [
+            [
+              8,
+              0,
+              0,
+              0,
+              0,
+              0
+            ],
+            [
+              0,
+              8,
+              0,
+              0,
+              0,
+              0
+            ],
+            [
+              0,
+              0,
+              8,
+              0,
+              0,
+              0
+            ],
+            [
+              0,
+              0,
+              0,
+              8,
+              0,
+              0
+            ],
+            [
+              0,
+              0,
+              0,
+              0,
+              8,
+              0
+            ],
+            [
+              0,
+              0,
+              0,
+              0,
+              0,
+              8
+            ]
+          ],
+          "confusion_text": "true \\ predicted  sincere  leaving  obligat  everyth   joking  quiet-f\nsincere                 8        0        0        0        0        0\nleaving                 0        8        0        0        0        0\nobligated               0        0        8        0        0        0\neverything              0        0        0        8        0        0\njoking                  0        0        0        0        8        0\nquiet-furious           0        0        0        0        0        8",
+          "train_loss": 0.12221,
+          "n_train": 48,
+          "n_test": 48,
+          "feature_indices": [
+            0,
+            1,
+            2,
+            3,
+            4,
+            5,
+            6,
+            7,
+            8,
+            9,
+            10
+          ],
+          "feature_names": [
+            "centre_midi",
+            "range_st",
+            "slope_st_per_s",
+            "n_notes",
+            "note_rate",
+            "note_dur_median",
+            "note_dur_std",
+            "step_abs_mean",
+            "step_std",
+            "step_signed_mean",
+            "voiced_fraction"
+          ]
+        },
+        "pitch_only": {
+          "accuracy": 1.0,
+          "chance": 0.1667,
+          "confusion": [
+            [
+              8,
+              0,
+              0,
+              0,
+              0,
+              0
+            ],
+            [
+              0,
+              8,
+              0,
+              0,
+              0,
+              0
+            ],
+            [
+              0,
+              0,
+              8,
+              0,
+              0,
+              0
+            ],
+            [
+              0,
+              0,
+              0,
+              8,
+              0,
+              0
+            ],
+            [
+              0,
+              0,
+              0,
+              0,
+              8,
+              0
+            ],
+            [
+              0,
+              0,
+              0,
+              0,
+              0,
+              8
+            ]
+          ],
+          "confusion_text": "true \\ predicted  sincere  leaving  obligat  everyth   joking  quiet-f\nsincere                 8        0        0        0        0        0\nleaving                 0        8        0        0        0        0\nobligated               0        0        8        0        0        0\neverything              0        0        0        8        0        0\njoking                  0        0        0        0        8        0\nquiet-furious           0        0        0        0        0        8",
+          "train_loss": 0.17673,
+          "n_train": 48,
+          "n_test": 48,
+          "feature_indices": [
+            0,
+            1,
+            2,
+            7,
+            8,
+            9
+          ],
+          "feature_names": [
+            "centre_midi",
+            "range_st",
+            "slope_st_per_s",
+            "step_abs_mean",
+            "step_std",
+            "step_signed_mean"
+          ]
+        },
+        "timing_only": {
+          "accuracy": 0.625,
+          "chance": 0.1667,
+          "confusion": [
+            [
+              1,
+              4,
+              3,
+              0,
+              0,
+              0
+            ],
+            [
+              0,
+              5,
+              3,
+              0,
+              0,
+              0
+            ],
+            [
+              0,
+              2,
+              6,
+              0,
+              0,
+              0
+            ],
+            [
+              0,
+              0,
+              1,
+              4,
+              3,
+              0
+            ],
+            [
+              0,
+              0,
+              0,
+              2,
+              6,
+              0
+            ],
+            [
+              0,
+              0,
+              0,
+              0,
+              0,
+              8
+            ]
+          ],
+          "confusion_text": "true \\ predicted  sincere  leaving  obligat  everyth   joking  quiet-f\nsincere                 1        4        3        0        0        0\nleaving                 0        5        3        0        0        0\nobligated               0        2        6        0        0        0\neverything              0        0        1        4        3        0\njoking                  0        0        0        2        6        0\nquiet-furious           0        0        0        0        0        8",
+          "train_loss": 1.24598,
+          "n_train": 48,
+          "n_test": 48,
+          "feature_indices": [
+            3,
+            4,
+            5,
+            6,
+            10
+          ],
+          "feature_names": [
+            "n_notes",
+            "note_rate",
+            "note_dur_median",
+            "note_dur_std",
+            "voiced_fraction"
+          ]
+        }
+      }
+    }
+  ],
+  "ablations": {
+    "free_note_count": {
+      "what": "the same game with the note count free, so the reader may use how many notes were sung",
+      "rounds": [
+        {
+          "round": 0,
+          "results": {
+            "all": {
+              "accuracy": 0.9583,
+              "chance": 0.1667,
+              "confusion": [
+                [
+                  7,
+                  0,
+                  1,
+                  0,
+                  0,
+                  0
+                ],
+                [
+                  0,
+                  8,
+                  0,
+                  0,
+                  0,
+                  0
+                ],
+                [
+                  0,
+                  0,
+                  8,
+                  0,
+                  0,
+                  0
+                ],
+                [
+                  0,
+                  0,
+                  0,
+                  8,
+                  0,
+                  0
+                ],
+                [
+                  0,
+                  0,
+                  0,
+                  1,
+                  7,
+                  0
+                ],
+                [
+                  0,
+                  0,
+                  0,
+                  0,
+                  0,
+                  8
+                ]
+              ],
+              "confusion_text": "true \\ predicted  sincere  leaving  obligat  everyth   joking  quiet-f\nsincere                 7        0        1        0        0        0\nleaving                 0        8        0        0        0        0\nobligated               0        0        8        0        0        0\neverything              0        0        0        8        0        0\njoking                  0        0        0        1        7        0\nquiet-furious           0        0        0        0        0        8",
+              "train_loss": 0.19748,
+              "n_train": 48,
+              "n_test": 48,
+              "feature_indices": [
+                0,
+                1,
+                2,
+                3,
+                4,
+                5,
+                6,
+                7,
+                8,
+                9,
+                10
+              ],
+              "feature_names": [
+                "centre_midi",
+                "range_st",
+                "slope_st_per_s",
+                "n_notes",
+                "note_rate",
+                "note_dur_median",
+                "note_dur_std",
+                "step_abs_mean",
+                "step_std",
+                "step_signed_mean",
+                "voiced_fraction"
+              ]
+            },
+            "pitch_only": {
+              "accuracy": 0.9167,
+              "chance": 0.1667,
+              "confusion": [
+                [
+                  6,
+                  0,
+                  2,
+                  0,
+                  0,
+                  0
+                ],
+                [
+                  0,
+                  8,
+                  0,
+                  0,
+                  0,
+                  0
+                ],
+                [
+                  1,
+                  0,
+                  7,
+                  0,
+                  0,
+                  0
+                ],
+                [
+                  0,
+                  0,
+                  0,
+                  8,
+                  0,
+                  0
+                ],
+                [
+                  0,
+                  0,
+                  0,
+                  1,
+                  7,
+                  0
+                ],
+                [
+                  0,
+                  0,
+                  0,
+                  0,
+                  0,
+                  8
+                ]
+              ],
+              "confusion_text": "true \\ predicted  sincere  leaving  obligat  everyth   joking  quiet-f\nsincere                 6        0        2        0        0        0\nleaving                 0        8        0        0        0        0\nobligated               1        0        7        0        0        0\neverything              0        0        0        8        0        0\njoking                  0        0        0        1        7        0\nquiet-furious           0        0        0        0        0        8",
+              "train_loss": 0.37105,
+              "n_train": 48,
+              "n_test": 48,
+              "feature_indices": [
+                0,
+                1,
+                2,
+                7,
+                8,
+                9
+              ],
+              "feature_names": [
+                "centre_midi",
+                "range_st",
+                "slope_st_per_s",
+                "step_abs_mean",
+                "step_std",
+                "step_signed_mean"
+              ]
+            },
+            "timing_only": {
+              "accuracy": 0.625,
+              "chance": 0.1667,
+              "confusion": [
+                [
+                  1,
+                  2,
+                  5,
+                  0,
+                  0,
+                  0
+                ],
+                [
+                  1,
+                  2,
+                  5,
+                  0,
+                  0,
+                  0
+                ],
+                [
+                  1,
+                  3,
+                  4,
+                  0,
+                  0,
+                  0
+                ],
+                [
+                  0,
+                  0,
+                  0,
+                  8,
+                  0,
+                  0
+                ],
+                [
+                  0,
+                  0,
+                  0,
+                  0,
+                  8,
+                  0
+                ],
+                [
+                  0,
+                  0,
+                  1,
+                  0,
+                  0,
+                  7
+                ]
+              ],
+              "confusion_text": "true \\ predicted  sincere  leaving  obligat  everyth   joking  quiet-f\nsincere                 1        2        5        0        0        0\nleaving                 1        2        5        0        0        0\nobligated               1        3        4        0        0        0\neverything              0        0        0        8        0        0\njoking                  0        0        0        0        8        0\nquiet-furious           0        0        1        0        0        7",
+              "train_loss": 0.8005,
+              "n_train": 48,
+              "n_test": 48,
+              "feature_indices": [
+                3,
+                4,
+                5,
+                6,
+                10
+              ],
+              "feature_names": [
+                "n_notes",
+                "note_rate",
+                "note_dur_median",
+                "note_dur_std",
+                "voiced_fraction"
+              ]
+            }
+          }
+        },
+        {
+          "round": 1,
+          "results": {
+            "all": {
+              "accuracy": 1.0,
+              "chance": 0.1667,
+              "confusion": [
+                [
+                  8,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0
+                ],
+                [
+                  0,
+                  8,
+                  0,
+                  0,
+                  0,
+                  0
+                ],
+                [
+                  0,
+                  0,
+                  8,
+                  0,
+                  0,
+                  0
+                ],
+                [
+                  0,
+                  0,
+                  0,
+                  8,
+                  0,
+                  0
+                ],
+                [
+                  0,
+                  0,
+                  0,
+                  0,
+                  8,
+                  0
+                ],
+                [
+                  0,
+                  0,
+                  0,
+                  0,
+                  0,
+                  8
+                ]
+              ],
+              "confusion_text": "true \\ predicted  sincere  leaving  obligat  everyth   joking  quiet-f\nsincere                 8        0        0        0        0        0\nleaving                 0        8        0        0        0        0\nobligated               0        0        8        0        0        0\neverything              0        0        0        8        0        0\njoking                  0        0        0        0        8        0\nquiet-furious           0        0        0        0        0        8",
+              "train_loss": 0.10978,
+              "n_train": 48,
+              "n_test": 48,
+              "feature_indices": [
+                0,
+                1,
+                2,
+                3,
+                4,
+                5,
+                6,
+                7,
+                8,
+                9,
+                10
+              ],
+              "feature_names": [
+                "centre_midi",
+                "range_st",
+                "slope_st_per_s",
+                "n_notes",
+                "note_rate",
+                "note_dur_median",
+                "note_dur_std",
+                "step_abs_mean",
+                "step_std",
+                "step_signed_mean",
+                "voiced_fraction"
+              ]
+            },
+            "pitch_only": {
+              "accuracy": 1.0,
+              "chance": 0.1667,
+              "confusion": [
+                [
+                  8,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0
+                ],
+                [
+                  0,
+                  8,
+                  0,
+                  0,
+                  0,
+                  0
+                ],
+                [
+                  0,
+                  0,
+                  8,
+                  0,
+                  0,
+                  0
+                ],
+                [
+                  0,
+                  0,
+                  0,
+                  8,
+                  0,
+                  0
+                ],
+                [
+                  0,
+                  0,
+                  0,
+                  0,
+                  8,
+                  0
+                ],
+                [
+                  0,
+                  0,
+                  0,
+                  0,
+                  0,
+                  8
+                ]
+              ],
+              "confusion_text": "true \\ predicted  sincere  leaving  obligat  everyth   joking  quiet-f\nsincere                 8        0        0        0        0        0\nleaving                 0        8        0        0        0        0\nobligated               0        0        8        0        0        0\neverything              0        0        0        8        0        0\njoking                  0        0        0        0        8        0\nquiet-furious           0        0        0        0        0        8",
+              "train_loss": 0.18617,
+              "n_train": 48,
+              "n_test": 48,
+              "feature_indices": [
+                0,
+                1,
+                2,
+                7,
+                8,
+                9
+              ],
+              "feature_names": [
+                "centre_midi",
+                "range_st",
+                "slope_st_per_s",
+                "step_abs_mean",
+                "step_std",
+                "step_signed_mean"
+              ]
+            },
+            "timing_only": {
+              "accuracy": 0.6667,
+              "chance": 0.1667,
+              "confusion": [
+                [
+                  2,
+                  3,
+                  3,
+                  0,
+                  0,
+                  0
+                ],
+                [
+                  2,
+                  3,
+                  3,
+                  0,
+                  0,
+                  0
+                ],
+                [
+                  2,
+                  2,
+                  4,
+                  0,
+                  0,
+                  0
+                ],
+                [
+                  0,
+                  0,
+                  0,
+                  8,
+                  0,
+                  0
+                ],
+                [
+                  0,
+                  0,
+                  0,
+                  0,
+                  8,
+                  0
+                ],
+                [
+                  1,
+                  0,
+                  0,
+                  0,
+                  0,
+                  7
+                ]
+              ],
+              "confusion_text": "true \\ predicted  sincere  leaving  obligat  everyth   joking  quiet-f\nsincere                 2        3        3        0        0        0\nleaving                 2        3        3        0        0        0\nobligated               2        2        4        0        0        0\neverything              0        0        0        8        0        0\njoking                  0        0        0        0        8        0\nquiet-furious           1        0        0        0        0        7",
+              "train_loss": 0.8082,
+              "n_train": 48,
+              "n_test": 48,
+              "feature_indices": [
+                3,
+                4,
+                5,
+                6,
+                10
+              ],
+              "feature_names": [
+                "n_notes",
+                "note_rate",
+                "note_dur_median",
+                "note_dur_std",
+                "voiced_fraction"
+              ]
+            }
+          }
+        },
+        {
+          "round": 2,
+          "results": {
+            "all": {
+              "accuracy": 1.0,
+              "chance": 0.1667,
+              "confusion": [
+                [
+                  8,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0
+                ],
+                [
+                  0,
+                  8,
+                  0,
+                  0,
+                  0,
+                  0
+                ],
+                [
+                  0,
+                  0,
+                  8,
+                  0,
+                  0,
+                  0
+                ],
+                [
+                  0,
+                  0,
+                  0,
+                  8,
+                  0,
+                  0
+                ],
+                [
+                  0,
+                  0,
+                  0,
+                  0,
+                  8,
+                  0
+                ],
+                [
+                  0,
+                  0,
+                  0,
+                  0,
+                  0,
+                  8
+                ]
+              ],
+              "confusion_text": "true \\ predicted  sincere  leaving  obligat  everyth   joking  quiet-f\nsincere                 8        0        0        0        0        0\nleaving                 0        8        0        0        0        0\nobligated               0        0        8        0        0        0\neverything              0        0        0        8        0        0\njoking                  0        0        0        0        8        0\nquiet-furious           0        0        0        0        0        8",
+              "train_loss": 0.10048,
+              "n_train": 48,
+              "n_test": 48,
+              "feature_indices": [
+                0,
+                1,
+                2,
+                3,
+                4,
+                5,
+                6,
+                7,
+                8,
+                9,
+                10
+              ],
+              "feature_names": [
+                "centre_midi",
+                "range_st",
+                "slope_st_per_s",
+                "n_notes",
+                "note_rate",
+                "note_dur_median",
+                "note_dur_std",
+                "step_abs_mean",
+                "step_std",
+                "step_signed_mean",
+                "voiced_fraction"
+              ]
+            },
+            "pitch_only": {
+              "accuracy": 0.9792,
+              "chance": 0.1667,
+              "confusion": [
+                [
+                  7,
+                  0,
+                  1,
+                  0,
+                  0,
+                  0
+                ],
+                [
+                  0,
+                  8,
+                  0,
+                  0,
+                  0,
+                  0
+                ],
+                [
+                  0,
+                  0,
+                  8,
+                  0,
+                  0,
+                  0
+                ],
+                [
+                  0,
+                  0,
+                  0,
+                  8,
+                  0,
+                  0
+                ],
+                [
+                  0,
+                  0,
+                  0,
+                  0,
+                  8,
+                  0
+                ],
+                [
+                  0,
+                  0,
+                  0,
+                  0,
+                  0,
+                  8
+                ]
+              ],
+              "confusion_text": "true \\ predicted  sincere  leaving  obligat  everyth   joking  quiet-f\nsincere                 7        0        1        0        0        0\nleaving                 0        8        0        0        0        0\nobligated               0        0        8        0        0        0\neverything              0        0        0        8        0        0\njoking                  0        0        0        0        8        0\nquiet-furious           0        0        0        0        0        8",
+              "train_loss": 0.16459,
+              "n_train": 48,
+              "n_test": 48,
+              "feature_indices": [
+                0,
+                1,
+                2,
+                7,
+                8,
+                9
+              ],
+              "feature_names": [
+                "centre_midi",
+                "range_st",
+                "slope_st_per_s",
+                "step_abs_mean",
+                "step_std",
+                "step_signed_mean"
+              ]
+            },
+            "timing_only": {
+              "accuracy": 0.7292,
+              "chance": 0.1667,
+              "confusion": [
+                [
+                  4,
+                  2,
+                  2,
+                  0,
+                  0,
+                  0
+                ],
+                [
+                  2,
+                  4,
+                  2,
+                  0,
+                  0,
+                  0
+                ],
+                [
+                  3,
+                  1,
+                  4,
+                  0,
+                  0,
+                  0
+                ],
+                [
+                  0,
+                  0,
+                  0,
+                  8,
+                  0,
+                  0
+                ],
+                [
+                  0,
+                  0,
+                  0,
+                  0,
+                  8,
+                  0
+                ],
+                [
+                  0,
+                  0,
+                  1,
+                  0,
+                  0,
+                  7
+                ]
+              ],
+              "confusion_text": "true \\ predicted  sincere  leaving  obligat  everyth   joking  quiet-f\nsincere                 4        2        2        0        0        0\nleaving                 2        4        2        0        0        0\nobligated               3        1        4        0        0        0\neverything              0        0        0        8        0        0\njoking                  0        0        0        0        8        0\nquiet-furious           0        0        1        0        0        7",
+              "train_loss": 0.76421,
+              "n_train": 48,
+              "n_test": 48,
+              "feature_indices": [
+                3,
+                4,
+                5,
+                6,
+                10
+              ],
+              "feature_names": [
+                "n_notes",
+                "note_rate",
+                "note_dur_median",
+                "note_dur_std",
+                "voiced_fraction"
+              ]
+            }
+          }
+        },
+        {
+          "round": 3,
+          "results": {
+            "all": {
+              "accuracy": 1.0,
+              "chance": 0.1667,
+              "confusion": [
+                [
+                  8,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0
+                ],
+                [
+                  0,
+                  8,
+                  0,
+                  0,
+                  0,
+                  0
+                ],
+                [
+                  0,
+                  0,
+                  8,
+                  0,
+                  0,
+                  0
+                ],
+                [
+                  0,
+                  0,
+                  0,
+                  8,
+                  0,
+                  0
+                ],
+                [
+                  0,
+                  0,
+                  0,
+                  0,
+                  8,
+                  0
+                ],
+                [
+                  0,
+                  0,
+                  0,
+                  0,
+                  0,
+                  8
+                ]
+              ],
+              "confusion_text": "true \\ predicted  sincere  leaving  obligat  everyth   joking  quiet-f\nsincere                 8        0        0        0        0        0\nleaving                 0        8        0        0        0        0\nobligated               0        0        8        0        0        0\neverything              0        0        0        8        0        0\njoking                  0        0        0        0        8        0\nquiet-furious           0        0        0        0        0        8",
+              "train_loss": 0.08487,
+              "n_train": 48,
+              "n_test": 48,
+              "feature_indices": [
+                0,
+                1,
+                2,
+                3,
+                4,
+                5,
+                6,
+                7,
+                8,
+                9,
+                10
+              ],
+              "feature_names": [
+                "centre_midi",
+                "range_st",
+                "slope_st_per_s",
+                "n_notes",
+                "note_rate",
+                "note_dur_median",
+                "note_dur_std",
+                "step_abs_mean",
+                "step_std",
+                "step_signed_mean",
+                "voiced_fraction"
+              ]
+            },
+            "pitch_only": {
+              "accuracy": 1.0,
+              "chance": 0.1667,
+              "confusion": [
+                [
+                  8,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0
+                ],
+                [
+                  0,
+                  8,
+                  0,
+                  0,
+                  0,
+                  0
+                ],
+                [
+                  0,
+                  0,
+                  8,
+                  0,
+                  0,
+                  0
+                ],
+                [
+                  0,
+                  0,
+                  0,
+                  8,
+                  0,
+                  0
+                ],
+                [
+                  0,
+                  0,
+                  0,
+                  0,
+                  8,
+                  0
+                ],
+                [
+                  0,
+                  0,
+                  0,
+                  0,
+                  0,
+                  8
+                ]
+              ],
+              "confusion_text": "true \\ predicted  sincere  leaving  obligat  everyth   joking  quiet-f\nsincere                 8        0        0        0        0        0\nleaving                 0        8        0        0        0        0\nobligated               0        0        8        0        0        0\neverything              0        0        0        8        0        0\njoking                  0        0        0        0        8        0\nquiet-furious           0        0        0        0        0        8",
+              "train_loss": 0.17841,
+              "n_train": 48,
+              "n_test": 48,
+              "feature_indices": [
+                0,
+                1,
+                2,
+                7,
+                8,
+                9
+              ],
+              "feature_names": [
+                "centre_midi",
+                "range_st",
+                "slope_st_per_s",
+                "step_abs_mean",
+                "step_std",
+                "step_signed_mean"
+              ]
+            },
+            "timing_only": {
+              "accuracy": 0.7083,
+              "chance": 0.1667,
+              "confusion": [
+                [
+                  4,
+                  0,
+                  0,
+                  4,
+                  0,
+                  0
+                ],
+                [
+                  0,
+                  5,
+                  3,
+                  0,
+                  0,
+                  0
+                ],
+                [
+                  0,
+                  3,
+                  5,
+                  0,
+                  0,
+                  0
+                ],
+                [
+                  4,
+                  0,
+                  0,
+                  4,
+                  0,
+                  0
+                ],
+                [
+                  0,
+                  0,
+                  0,
+                  0,
+                  8,
+                  0
+                ],
+                [
+                  0,
+                  0,
+                  0,
+                  0,
+                  0,
+                  8
+                ]
+              ],
+              "confusion_text": "true \\ predicted  sincere  leaving  obligat  everyth   joking  quiet-f\nsincere                 4        0        0        4        0        0\nleaving                 0        5        3        0        0        0\nobligated               0        3        5        0        0        0\neverything              4        0        0        4        0        0\njoking                  0        0        0        0        8        0\nquiet-furious           0        0        0        0        0        8",
+              "train_loss": 0.73217,
+              "n_train": 48,
+              "n_test": 48,
+              "feature_indices": [
+                3,
+                4,
+                5,
+                6,
+                10
+              ],
+              "feature_names": [
+                "n_notes",
+                "note_rate",
+                "note_dur_median",
+                "note_dur_std",
+                "voiced_fraction"
+              ]
+            }
+          }
+        }
+      ]
+    },
+    "other_carrier": {
+      "carrier": "i am leaving now",
+      "what": "the same styles and the same reader on a different phrase; the words carry nothing in either case, and a reader that survives the swap is reading the melody",
+      "rounds": [
+        {
+          "round": 0,
+          "results": {
+            "all": {
+              "accuracy": 1.0,
+              "chance": 0.1667,
+              "confusion": [
+                [
+                  8,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0
+                ],
+                [
+                  0,
+                  8,
+                  0,
+                  0,
+                  0,
+                  0
+                ],
+                [
+                  0,
+                  0,
+                  8,
+                  0,
+                  0,
+                  0
+                ],
+                [
+                  0,
+                  0,
+                  0,
+                  8,
+                  0,
+                  0
+                ],
+                [
+                  0,
+                  0,
+                  0,
+                  0,
+                  8,
+                  0
+                ],
+                [
+                  0,
+                  0,
+                  0,
+                  0,
+                  0,
+                  8
+                ]
+              ],
+              "confusion_text": "true \\ predicted  sincere  leaving  obligat  everyth   joking  quiet-f\nsincere                 8        0        0        0        0        0\nleaving                 0        8        0        0        0        0\nobligated               0        0        8        0        0        0\neverything              0        0        0        8        0        0\njoking                  0        0        0        0        8        0\nquiet-furious           0        0        0        0        0        8",
+              "train_loss": 0.14783,
+              "n_train": 48,
+              "n_test": 48,
+              "feature_indices": [
+                0,
+                1,
+                2,
+                3,
+                4,
+                5,
+                6,
+                7,
+                8,
+                9,
+                10
+              ],
+              "feature_names": [
+                "centre_midi",
+                "range_st",
+                "slope_st_per_s",
+                "n_notes",
+                "note_rate",
+                "note_dur_median",
+                "note_dur_std",
+                "step_abs_mean",
+                "step_std",
+                "step_signed_mean",
+                "voiced_fraction"
+              ]
+            },
+            "pitch_only": {
+              "accuracy": 1.0,
+              "chance": 0.1667,
+              "confusion": [
+                [
+                  8,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0
+                ],
+                [
+                  0,
+                  8,
+                  0,
+                  0,
+                  0,
+                  0
+                ],
+                [
+                  0,
+                  0,
+                  8,
+                  0,
+                  0,
+                  0
+                ],
+                [
+                  0,
+                  0,
+                  0,
+                  8,
+                  0,
+                  0
+                ],
+                [
+                  0,
+                  0,
+                  0,
+                  0,
+                  8,
+                  0
+                ],
+                [
+                  0,
+                  0,
+                  0,
+                  0,
+                  0,
+                  8
+                ]
+              ],
+              "confusion_text": "true \\ predicted  sincere  leaving  obligat  everyth   joking  quiet-f\nsincere                 8        0        0        0        0        0\nleaving                 0        8        0        0        0        0\nobligated               0        0        8        0        0        0\neverything              0        0        0        8        0        0\njoking                  0        0        0        0        8        0\nquiet-furious           0        0        0        0        0        8",
+              "train_loss": 0.17962,
+              "n_train": 48,
+              "n_test": 48,
+              "feature_indices": [
+                0,
+                1,
+                2,
+                7,
+                8,
+                9
+              ],
+              "feature_names": [
+                "centre_midi",
+                "range_st",
+                "slope_st_per_s",
+                "step_abs_mean",
+                "step_std",
+                "step_signed_mean"
+              ]
+            },
+            "timing_only": {
+              "accuracy": 0.5208,
+              "chance": 0.1667,
+              "confusion": [
+                [
+                  3,
+                  1,
+                  1,
+                  2,
+                  1,
+                  0
+                ],
+                [
+                  2,
+                  4,
+                  2,
+                  0,
+                  0,
+                  0
+                ],
+                [
+                  2,
+                  3,
+                  2,
+                  1,
+                  0,
+                  0
+                ],
+                [
+                  1,
+                  0,
+                  1,
+                  3,
+                  3,
+                  0
+                ],
+                [
+                  0,
+                  0,
+                  0,
+                  3,
+                  5,
+                  0
+                ],
+                [
+                  0,
+                  0,
+                  0,
+                  0,
+                  0,
+                  8
+                ]
+              ],
+              "confusion_text": "true \\ predicted  sincere  leaving  obligat  everyth   joking  quiet-f\nsincere                 3        1        1        2        1        0\nleaving                 2        4        2        0        0        0\nobligated               2        3        2        1        0        0\neverything              1        0        1        3        3        0\njoking                  0        0        0        3        5        0\nquiet-furious           0        0        0        0        0        8",
+              "train_loss": 1.31914,
+              "n_train": 48,
+              "n_test": 48,
+              "feature_indices": [
+                3,
+                4,
+                5,
+                6,
+                10
+              ],
+              "feature_names": [
+                "n_notes",
+                "note_rate",
+                "note_dur_median",
+                "note_dur_std",
+                "voiced_fraction"
+              ]
+            }
+          }
+        },
+        {
+          "round": 1,
+          "results": {
+            "all": {
+              "accuracy": 1.0,
+              "chance": 0.1667,
+              "confusion": [
+                [
+                  8,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0
+                ],
+                [
+                  0,
+                  8,
+                  0,
+                  0,
+                  0,
+                  0
+                ],
+                [
+                  0,
+                  0,
+                  8,
+                  0,
+                  0,
+                  0
+                ],
+                [
+                  0,
+                  0,
+                  0,
+                  8,
+                  0,
+                  0
+                ],
+                [
+                  0,
+                  0,
+                  0,
+                  0,
+                  8,
+                  0
+                ],
+                [
+                  0,
+                  0,
+                  0,
+                  0,
+                  0,
+                  8
+                ]
+              ],
+              "confusion_text": "true \\ predicted  sincere  leaving  obligat  everyth   joking  quiet-f\nsincere                 8        0        0        0        0        0\nleaving                 0        8        0        0        0        0\nobligated               0        0        8        0        0        0\neverything              0        0        0        8        0        0\njoking                  0        0        0        0        8        0\nquiet-furious           0        0        0        0        0        8",
+              "train_loss": 0.16048,
+              "n_train": 48,
+              "n_test": 48,
+              "feature_indices": [
+                0,
+                1,
+                2,
+                3,
+                4,
+                5,
+                6,
+                7,
+                8,
+                9,
+                10
+              ],
+              "feature_names": [
+                "centre_midi",
+                "range_st",
+                "slope_st_per_s",
+                "n_notes",
+                "note_rate",
+                "note_dur_median",
+                "note_dur_std",
+                "step_abs_mean",
+                "step_std",
+                "step_signed_mean",
+                "voiced_fraction"
+              ]
+            },
+            "pitch_only": {
+              "accuracy": 1.0,
+              "chance": 0.1667,
+              "confusion": [
+                [
+                  8,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0
+                ],
+                [
+                  0,
+                  8,
+                  0,
+                  0,
+                  0,
+                  0
+                ],
+                [
+                  0,
+                  0,
+                  8,
+                  0,
+                  0,
+                  0
+                ],
+                [
+                  0,
+                  0,
+                  0,
+                  8,
+                  0,
+                  0
+                ],
+                [
+                  0,
+                  0,
+                  0,
+                  0,
+                  8,
+                  0
+                ],
+                [
+                  0,
+                  0,
+                  0,
+                  0,
+                  0,
+                  8
+                ]
+              ],
+              "confusion_text": "true \\ predicted  sincere  leaving  obligat  everyth   joking  quiet-f\nsincere                 8        0        0        0        0        0\nleaving                 0        8        0        0        0        0\nobligated               0        0        8        0        0        0\neverything              0        0        0        8        0        0\njoking                  0        0        0        0        8        0\nquiet-furious           0        0        0        0        0        8",
+              "train_loss": 0.20088,
+              "n_train": 48,
+              "n_test": 48,
+              "feature_indices": [
+                0,
+                1,
+                2,
+                7,
+                8,
+                9
+              ],
+              "feature_names": [
+                "centre_midi",
+                "range_st",
+                "slope_st_per_s",
+                "step_abs_mean",
+                "step_std",
+                "step_signed_mean"
+              ]
+            },
+            "timing_only": {
+              "accuracy": 0.5,
+              "chance": 0.1667,
+              "confusion": [
+                [
+                  1,
+                  2,
+                  3,
+                  1,
+                  1,
+                  0
+                ],
+                [
+                  1,
+                  3,
+                  4,
+                  0,
+                  0,
+                  0
+                ],
+                [
+                  1,
+                  1,
+                  4,
+                  1,
+                  1,
+                  0
+                ],
+                [
+                  0,
+                  0,
+                  1,
+                  4,
+                  3,
+                  0
+                ],
+                [
+                  0,
+                  0,
+                  1,
+                  3,
+                  4,
+                  0
+                ],
+                [
+                  0,
+                  0,
+                  0,
+                  0,
+                  0,
+                  8
+                ]
+              ],
+              "confusion_text": "true \\ predicted  sincere  leaving  obligat  everyth   joking  quiet-f\nsincere                 1        2        3        1        1        0\nleaving                 1        3        4        0        0        0\nobligated               1        1        4        1        1        0\neverything              0        0        1        4        3        0\njoking                  0        0        1        3        4        0\nquiet-furious           0        0        0        0        0        8",
+              "train_loss": 1.31801,
+              "n_train": 48,
+              "n_test": 48,
+              "feature_indices": [
+                3,
+                4,
+                5,
+                6,
+                10
+              ],
+              "feature_names": [
+                "n_notes",
+                "note_rate",
+                "note_dur_median",
+                "note_dur_std",
+                "voiced_fraction"
+              ]
+            }
+          }
+        }
+      ]
+    },
+    "caricature_curve": {
+      "what": "the accuracy against the exaggeration of the delivery; the design is held fixed and only the exaggeration moves, and at x=0 every intent is the neutral delivery so the reader is at chance -- that end of the curve is the control",
+      "neutral_style": {
+        "centre": 1.0833,
+        "range": 6.6667,
+        "tilt": -0.125,
+        "arc": 1.8583,
+        "zig": 0.8333,
+        "drop": 1.2083,
+        "density": 1.2167,
+        "jitter": 0.5417,
+        "pause": 0.25,
+        "hold": 1.25
+      },
+      "curve": [
+        {
+          "exaggeration": 0.0,
+          "accuracy": 0.1667,
+          "accuracy_pitch_only": 0.1667,
+          "accuracy_timing_only": 0.1667,
+          "per_intent_recall": {
+            "sincere": 0.0,
+            "leaving": 0.0,
+            "obligated": 0.5,
+            "everything": 0.5,
+            "joking": 0.0,
+            "quiet-furious": 0.0
+          },
+          "confusion": [
+            [
+              0,
+              0,
+              4,
+              4,
+              0,
+              0
+            ],
+            [
+              0,
+              0,
+              4,
+              4,
+              0,
+              0
+            ],
+            [
+              0,
+              0,
+              4,
+              4,
+              0,
+              0
+            ],
+            [
+              0,
+              0,
+              4,
+              4,
+              0,
+              0
+            ],
+            [
+              0,
+              0,
+              4,
+              4,
+              0,
+              0
+            ],
+            [
+              0,
+              0,
+              4,
+              4,
+              0,
+              0
+            ]
+          ]
+        },
+        {
+          "exaggeration": 0.1,
+          "accuracy": 0.7917,
+          "accuracy_pitch_only": 0.6875,
+          "accuracy_timing_only": 0.2292,
+          "per_intent_recall": {
+            "sincere": 0.625,
+            "leaving": 0.5,
+            "obligated": 0.75,
+            "everything": 0.875,
+            "joking": 1.0,
+            "quiet-furious": 1.0
+          },
+          "confusion": [
+            [
+              5,
+              0,
+              0,
+              2,
+              1,
+              0
+            ],
+            [
+              0,
+              4,
+              3,
+              0,
+              0,
+              1
+            ],
+            [
+              1,
+              1,
+              6,
+              0,
+              0,
+              0
+            ],
+            [
+              1,
+              0,
+              0,
+              7,
+              0,
+              0
+            ],
+            [
+              0,
+              0,
+              0,
+              0,
+              8,
+              0
+            ],
+            [
+              0,
+              0,
+              0,
+              0,
+              0,
+              8
+            ]
+          ]
+        },
+        {
+          "exaggeration": 0.2,
+          "accuracy": 0.8542,
+          "accuracy_pitch_only": 0.8333,
+          "accuracy_timing_only": 0.25,
+          "per_intent_recall": {
+            "sincere": 0.625,
+            "leaving": 0.875,
+            "obligated": 0.75,
+            "everything": 0.875,
+            "joking": 1.0,
+            "quiet-furious": 1.0
+          },
+          "confusion": [
+            [
+              5,
+              1,
+              1,
+              1,
+              0,
+              0
+            ],
+            [
+              0,
+              7,
+              1,
+              0,
+              0,
+              0
+            ],
+            [
+              1,
+              1,
+              6,
+              0,
+              0,
+              0
+            ],
+            [
+              1,
+              0,
+              0,
+              7,
+              0,
+              0
+            ],
+            [
+              0,
+              0,
+              0,
+              0,
+              8,
+              0
+            ],
+            [
+              0,
+              0,
+              0,
+              0,
+              0,
+              8
+            ]
+          ]
+        },
+        {
+          "exaggeration": 0.35,
+          "accuracy": 0.9583,
+          "accuracy_pitch_only": 0.9375,
+          "accuracy_timing_only": 0.3958,
+          "per_intent_recall": {
+            "sincere": 0.75,
+            "leaving": 1.0,
+            "obligated": 1.0,
+            "everything": 1.0,
+            "joking": 1.0,
+            "quiet-furious": 1.0
+          },
+          "confusion": [
+            [
+              6,
+              0,
+              1,
+              1,
+              0,
+              0
+            ],
+            [
+              0,
+              8,
+              0,
+              0,
+              0,
+              0
+            ],
+            [
+              0,
+              0,
+              8,
+              0,
+              0,
+              0
+            ],
+            [
+              0,
+              0,
+              0,
+              8,
+              0,
+              0
+            ],
+            [
+              0,
+              0,
+              0,
+              0,
+              8,
+              0
+            ],
+            [
+              0,
+              0,
+              0,
+              0,
+              0,
+              8
+            ]
+          ]
+        },
+        {
+          "exaggeration": 0.5,
+          "accuracy": 1.0,
+          "accuracy_pitch_only": 0.9583,
+          "accuracy_timing_only": 0.3333,
+          "per_intent_recall": {
+            "sincere": 1.0,
+            "leaving": 1.0,
+            "obligated": 1.0,
+            "everything": 1.0,
+            "joking": 1.0,
+            "quiet-furious": 1.0
+          },
+          "confusion": [
+            [
+              8,
+              0,
+              0,
+              0,
+              0,
+              0
+            ],
+            [
+              0,
+              8,
+              0,
+              0,
+              0,
+              0
+            ],
+            [
+              0,
+              0,
+              8,
+              0,
+              0,
+              0
+            ],
+            [
+              0,
+              0,
+              0,
+              8,
+              0,
+              0
+            ],
+            [
+              0,
+              0,
+              0,
+              0,
+              8,
+              0
+            ],
+            [
+              0,
+              0,
+              0,
+              0,
+              0,
+              8
+            ]
+          ]
+        },
+        {
+          "exaggeration": 0.75,
+          "accuracy": 0.9583,
+          "accuracy_pitch_only": 0.9792,
+          "accuracy_timing_only": 0.3958,
+          "per_intent_recall": {
+            "sincere": 0.875,
+            "leaving": 1.0,
+            "obligated": 0.875,
+            "everything": 1.0,
+            "joking": 1.0,
+            "quiet-furious": 1.0
+          },
+          "confusion": [
+            [
+              7,
+              0,
+              1,
+              0,
+              0,
+              0
+            ],
+            [
+              0,
+              8,
+              0,
+              0,
+              0,
+              0
+            ],
+            [
+              1,
+              0,
+              7,
+              0,
+              0,
+              0
+            ],
+            [
+              0,
+              0,
+              0,
+              8,
+              0,
+              0
+            ],
+            [
+              0,
+              0,
+              0,
+              0,
+              8,
+              0
+            ],
+            [
+              0,
+              0,
+              0,
+              0,
+              0,
+              8
+            ]
+          ]
+        },
+        {
+          "exaggeration": 1.0,
+          "accuracy": 1.0,
+          "accuracy_pitch_only": 1.0,
+          "accuracy_timing_only": 0.4167,
+          "per_intent_recall": {
+            "sincere": 1.0,
+            "leaving": 1.0,
+            "obligated": 1.0,
+            "everything": 1.0,
+            "joking": 1.0,
+            "quiet-furious": 1.0
+          },
+          "confusion": [
+            [
+              8,
+              0,
+              0,
+              0,
+              0,
+              0
+            ],
+            [
+              0,
+              8,
+              0,
+              0,
+              0,
+              0
+            ],
+            [
+              0,
+              0,
+              8,
+              0,
+              0,
+              0
+            ],
+            [
+              0,
+              0,
+              0,
+              8,
+              0,
+              0
+            ],
+            [
+              0,
+              0,
+              0,
+              0,
+              8,
+              0
+            ],
+            [
+              0,
+              0,
+              0,
+              0,
+              0,
+              8
+            ]
+          ]
+        },
+        {
+          "exaggeration": 1.5,
+          "accuracy": 1.0,
+          "accuracy_pitch_only": 0.9792,
+          "accuracy_timing_only": 0.4583,
+          "per_intent_recall": {
+            "sincere": 1.0,
+            "leaving": 1.0,
+            "obligated": 1.0,
+            "everything": 1.0,
+            "joking": 1.0,
+            "quiet-furious": 1.0
+          },
+          "confusion": [
+            [
+              8,
+              0,
+              0,
+              0,
+              0,
+              0
+            ],
+            [
+              0,
+              8,
+              0,
+              0,
+              0,
+              0
+            ],
+            [
+              0,
+              0,
+              8,
+              0,
+              0,
+              0
+            ],
+            [
+              0,
+              0,
+              0,
+              8,
+              0,
+              0
+            ],
+            [
+              0,
+              0,
+              0,
+              0,
+              8,
+              0
+            ],
+            [
+              0,
+              0,
+              0,
+              0,
+              0,
+              8
+            ]
+          ]
+        },
+        {
+          "exaggeration": 2.0,
+          "accuracy": 1.0,
+          "accuracy_pitch_only": 0.9167,
+          "accuracy_timing_only": 0.5833,
+          "per_intent_recall": {
+            "sincere": 1.0,
+            "leaving": 1.0,
+            "obligated": 1.0,
+            "everything": 1.0,
+            "joking": 1.0,
+            "quiet-furious": 1.0
+          },
+          "confusion": [
+            [
+              8,
+              0,
+              0,
+              0,
+              0,
+              0
+            ],
+            [
+              0,
+              8,
+              0,
+              0,
+              0,
+              0
+            ],
+            [
+              0,
+              0,
+              8,
+              0,
+              0,
+              0
+            ],
+            [
+              0,
+              0,
+              0,
+              8,
+              0,
+              0
+            ],
+            [
+              0,
+              0,
+              0,
+              0,
+              8,
+              0
+            ],
+            [
+              0,
+              0,
+              0,
+              0,
+              0,
+              8
+            ]
+          ]
+        },
+        {
+          "exaggeration": 3.0,
+          "accuracy": 1.0,
+          "accuracy_pitch_only": 0.9792,
+          "accuracy_timing_only": 0.6042,
+          "per_intent_recall": {
+            "sincere": 1.0,
+            "leaving": 1.0,
+            "obligated": 1.0,
+            "everything": 1.0,
+            "joking": 1.0,
+            "quiet-furious": 1.0
+          },
+          "confusion": [
+            [
+              8,
+              0,
+              0,
+              0,
+              0,
+              0
+            ],
+            [
+              0,
+              8,
+              0,
+              0,
+              0,
+              0
+            ],
+            [
+              0,
+              0,
+              8,
+              0,
+              0,
+              0
+            ],
+            [
+              0,
+              0,
+              0,
+              8,
+              0,
+              0
+            ],
+            [
+              0,
+              0,
+              0,
+              0,
+              8,
+              0
+            ],
+            [
+              0,
+              0,
+              0,
+              0,
+              0,
+              8
+            ]
+          ]
+        }
+      ]
+    }
+  },
+  "equal_notes_per_syllable": 2,
+  "listening_pack": {
+    "dir": "/tmp/tone_v2/listening_check",
+    "n_items": 12,
+    "grade_sheet": "/tmp/tone_v2/listening_check/GRADE-SHEET.csv",
+    "answer_key": "/tmp/tone_v2/listening_check/key/ANSWER-KEY.csv",
+    "note": "the key is held back so the grading is blind"
+  },
+  "headline": {
+    "recovery_rate_round0": 1.0,
+    "recovery_rate_final": 1.0,
+    "chance": 0.1667,
+    "casey_prior": 0.7
+  },
+  "renders": {
+    "note": "the renders are large and are written to the run's --out directory, not committed; the listening pack is the small, gradeable piece",
+    "listening_pack": {
+      "dir": "/tmp/tone_v2/listening_check",
+      "n_items": 12,
+      "grade_sheet": "/tmp/tone_v2/listening_check/GRADE-SHEET.csv",
+      "answer_key": "/tmp/tone_v2/listening_check/key/ANSWER-KEY.csv",
+      "note": "the key is held back so the grading is blind"
+    }
+  },
+  "teacher_dependence": {
+    "ratio": 1.0,
+    "definition": "the fraction of judgments the system must still send to a teacher, at held referee-graded quality",
+    "why": "the reader's training labels all come from the performer's own priors, and no referee has graded anything yet, so not one of its judgments is certified; the moment Casey's blind grades are in, --score-listening reports the ratio as 1 - (machine's agreement with the referee)"
+  }
+}
