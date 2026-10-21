@@ -628,3 +628,65 @@ the AUTO face said so. Now:
   same second the page does.
 
 Page-only — a reload picks it up; the server is unchanged.
+
+## SICK LANE 2026-10-21: the silent WAVs — evidence, cause, fix, and measured proof
+
+**The report**: every free-session WAV saved tonight is digital silence
+— Muse measured 0 nonzero samples out of 12.4 million.
+
+**The evidence, all measured from the artifacts and diag.log:**
+- All 34 real sessions (two sittings, mic = "Microphone Array
+  (Realtek(R) Audio)"): **82,383,616 WAV samples, every one zero.**
+- The WebM audio tracks (opus, recorded by MediaRecorder straight off
+  the track, bypassing our worklet entirely) are **also exactly zero** —
+  so the silence was upstream of every consumer the page has.
+- The worklet agreed: `speech_floor_rms ≈ 7.16e-10` in every meta, and
+  **every trigger was `motion`** — speech never fired once in either
+  real sitting (max speech_level = exactly 0 across 1,268 real-sitting
+  heartbeats). The "meter fires on speech" reading came from the
+  fake-device test runs sharing diag.log, not from Casey's mic.
+- **Conclusion: meter and samples never diverged in code — both
+  faithfully recorded an input device that delivered literal zeros.**
+  The code path stands cleared by the same evidence: the identical
+  pipeline fed by the fake mic produces healthy files (below). The
+  failing component was the device Chrome held — muted, dead, or the
+  wrong input — invisible to the operator all night while MOTION
+  accrued sessions.
+
+**The fix (page-side; a reload picks it up):**
+1. **Mic and camera pickers on the AUTO face** — the held devices are
+   NAMED and SWITCHABLE in one click. A mic switch re-taps the worklet
+   and re-measures the floors (a different device is a different
+   instrument); choices persist; a remembered-but-vanished device falls
+   back to defaults automatically.
+2. **The 60-second deafness GATE**: with samples flowing but flat
+   silent for 60 s, the indicator goes **DEAF — MIC SILENT**, any open
+   auto segment is closed (`close_reason: "deaf"`), and **no new
+   segments open — motion included — until the mic hears something**.
+   Tonight's 34 worthless folders become one visible stop. Manual
+   RECORD stays available (explicit intent outranks the gate).
+3. **`audio_silent: true` + `peak_rms` stamped into every session's
+   meta.json** — a silent-audio segment is distinguishable forever, on
+   disk, for the analysis and the live monitor.
+
+**Measured proof, per the standard "the files measure speech, not the
+code reads right" — headless Chrome on this machine's real Chrome build,
+fake mic speaking speech-shaped bursts (room tone + three phrases),
+scratch server and out dir:**
+- 3 speech-triggered segments saved (`trigger: speech`,
+  `close_reason: quiet`):
+  - **WAV**: 590,592 samples each, **589,411–589,443 nonzero (99.8%)**,
+    **RMS 0.0443–0.0457**, peak 0.39–0.40.
+  - **WebM audio, decoded with pyav**: 1,054,080 samples,
+    **100% nonzero**, **RMS 0.0468–0.0482**, peak 0.42–0.44.
+- Deaf-gate run (fake mic = exact zeros, fake camera = constant motion):
+  one motion segment during the 60 s grace, closed at 60 s with
+  `close_reason: "deaf"`, `audio_silent: true`, `peak_rms: 0` (its WAV:
+  0 nonzero of 2,876,416 — honestly stamped), then **zero further
+  SEGMENT_OPENs despite constant motion**, `DEAF_ON` in diag.log, deaf
+  flags in the heartbeats.
+
+The one step no automation can do: Casey picks a live mic at the page
+(the picker names them; the deaf line goes quiet the moment the room is
+heard) and speaks once — the receipts and the live monitor then show
+measured speech, or the page says exactly why not.

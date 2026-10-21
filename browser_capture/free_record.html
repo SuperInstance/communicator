@@ -79,6 +79,13 @@
   #receiptList .r .ok { color:var(--ok); }
   .fine { margin-top:12px; color:var(--dim); font-size:12px;
     line-height:1.6; }
+  .devPick { display:flex; gap:10px; align-items:center; margin-top:10px;
+    flex-wrap:wrap; }
+  .devPick .cap { font-size:11px; color:var(--dim); letter-spacing:1px;
+    text-transform:uppercase; }
+  .devPick select { background:var(--panel2); color:var(--fg);
+    border:1px solid var(--line); border-radius:6px; padding:6px 8px;
+    font-size:13px; max-width:320px; }
 </style>
 </head>
 <body>
@@ -96,6 +103,10 @@
 
 <div id="videoWrap">
   <video id="video" autoplay playsinline muted></video>
+</div>
+<div class="devPick">
+  <span class="cap">mic</span><select id="micSelect"></select>
+  <span class="cap">cam</span><select id="camSelect"></select>
 </div>
 <div class="row">
   <div id="elapsed">0:00</div>
@@ -181,6 +192,10 @@ const MAX_SEG_MS = Math.max(5,
   * 1000;
 
 let stream = null, audioCtx = null, realRate = 0, micName = "", camName = "";
+let micDeviceId = null, camDeviceId = null;
+try { micDeviceId = localStorage.bcMic || null; } catch (e) {}
+try { camDeviceId = localStorage.bcCam || null; } catch (e) {}
+let audioSrcNode = null, audioTapNode = null;   // the mic -> worklet tap
 let level = 0;                 // rms of the newest audio block
 let nAudioBlocks = 0, lastSoundAt = 0;   // the deafness watchdog's inputs
 let paused = false;
@@ -292,6 +307,7 @@ function diagSend(kind, fields) {
     motion_thr: Math.round(motionThr() * 100) / 100,
     motion_now: motionNow,
     floors_ready: floorsReady,
+    deaf: deaf,
     mic: micName, cam: camName,
     audio_blocks: nAudioBlocks,
     audio_silent_s: audioCtx && nAudioBlocks ?
@@ -311,6 +327,7 @@ setInterval(() => {
   diagSend("heartbeat");
   postThumb();
   deafCheck();
+  deafGate();
 }, 1000);
 
 /* -- the deafness watchdog --------------------------------------------------
@@ -334,13 +351,127 @@ function deafCheck() {
       Math.round((performance.now() - lastSoundAt) / 1000) +
       " s -- mic \"" + micName + "\" is delivering silence. A healthy " +
       "room is never this quiet: check the Windows input device and the " +
-      "mic mute, or the browser took the wrong mic (address-bar camera " +
-      "icon).";
+      "mic mute, or pick a live mic above. Silent for 60 s, AUTO stops " +
+      "opening segments.";
   } else {
     el.className = "";
     el.textContent = "mic: " + micName + " @ " + realRate + " Hz" +
       "   \u00b7   cam: " + camName;
   }
+}
+
+/* -- the deafness GATE -------------------------------------------------------
+   The live incident, 2026-10-21: the mic delivered exact zeros for two
+   whole sittings while MOTION kept opening segments -- 34 saved
+   sessions, 82.4 million audio samples, every one zero. A deaf AUTO
+   session is worthless by construction, so after 60 s of flat silence
+   the page stops opening segments (the indicator says so); it resumes
+   the moment the mic hears anything. Manual RECORD stays available --
+   explicit operator intent outranks the gate.                           */
+let deaf = false;
+function deafGate() {
+  const silent = nAudioBlocks > 0 && audioCtx &&
+    audioCtx.state === "running" &&
+    performance.now() - lastSoundAt > 60000;
+  if (silent && !deaf) {
+    deaf = true;
+    diagSend("DEAF_ON", { mic: micName });
+    if (openSeg && openSeg.mode === "auto") closeSegment("deaf");
+    paint();
+  } else if (!silent && deaf) {
+    deaf = false;
+    diagSend("DEAF_OFF", { mic: micName });
+    paint();
+  }
+}
+
+/* -- the device pickers -------------------------------------------------------
+   "Casey cannot tell WHICH mic the page holds" -- tonight it held a
+   dead one, invisibly, all night. The pickers make the held devices
+   NAMED and SWITCHABLE in one click; a mic switch re-taps the worklet
+   and re-measures the floors, because a different device is a
+   different instrument.                                                        */
+const BAD_CAM_RE = /(^|[^a-z])(ir|infrared|virtual)([^a-z]|$)/i;
+
+async function refreshPickers() {
+  if (!navigator.mediaDevices || !navigator.mediaDevices.enumerateDevices)
+    return;
+  let devs = [];
+  try {
+    devs = await navigator.mediaDevices.enumerateDevices();
+  } catch (err) { return; }
+  const mics = devs.filter(d => d.kind === "audioinput");
+  const cams = devs.filter(d => d.kind === "videoinput");
+  const fill = (sel, list, chosen) => {
+    sel.innerHTML = "";
+    list.forEach((d, i) => {
+      const o = document.createElement("option");
+      o.value = d.deviceId;
+      o.textContent = d.label || ("device " + (i + 1));
+      sel.appendChild(o);
+    });
+    if (chosen && list.some(d => d.deviceId === chosen)) sel.value = chosen;
+  };
+  fill($("micSelect"), mics, micDeviceId);
+  const goodCam = cams.find(d => d.label && !BAD_CAM_RE.test(d.label));
+  const camWant = camDeviceId && cams.some(d => d.deviceId === camDeviceId)
+    ? camDeviceId : (goodCam ? goodCam.deviceId :
+                     (cams[0] ? cams[0].deviceId : null));
+  fill($("camSelect"), cams, camWant);
+  if (camWant && camWant !== camDeviceId) {
+    camDeviceId = camWant;
+    try { localStorage.bcCam = camWant; } catch (e) {}
+  }
+}
+
+async function switchMic(devId) {
+  // open the new mic FIRST; swap the track on the live stream; re-tap
+  // the worklet; re-measure the floors (different device, different
+  // instrument)
+  const s = await navigator.mediaDevices.getUserMedia({
+    audio: { deviceId: { exact: devId }, channelCount: 1,
+             echoCancellation: false, noiseSuppression: false,
+             autoGainControl: false },
+  });
+  const nt = s.getAudioTracks()[0];
+  if (!nt) { s.getTracks().forEach(t => t.stop());
+    throw new Error("that mic gave no track"); }
+  const old = stream.getAudioTracks()[0];
+  if (audioSrcNode) { try { audioSrcNode.disconnect(); } catch (e) {} }
+  if (old) { stream.removeTrack(old); old.stop(); }
+  stream.addTrack(nt);
+  audioSrcNode = audioCtx.createMediaStreamSource(new MediaStream([nt]));
+  audioSrcNode.connect(audioTapNode);
+  micDeviceId = devId;
+  try { localStorage.bcMic = devId; } catch (e) {}
+  micName = nt.label || "browser mic";
+  speechRing = []; speechFloor = 1e-4; floorsReady = false;
+  armedAt = performance.now(); lastSoundAt = armedAt; nAudioBlocks = 0;
+  deaf = false;
+  deafCheck(); paint();
+}
+
+async function switchCam(devId) {
+  const s = await navigator.mediaDevices.getUserMedia({
+    video: { deviceId: { exact: devId } },
+  });
+  const nt = s.getVideoTracks()[0];
+  if (!nt) { s.getTracks().forEach(t => t.stop());
+    throw new Error("that camera gave no track"); }
+  const old = stream.getVideoTracks()[0];
+  if (old) { stream.removeTrack(old); old.stop(); }
+  stream.addTrack(nt);
+  camDeviceId = devId;
+  try { localStorage.bcCam = devId; } catch (e) {}
+  camName = nt.label || "browser camera";
+  try {
+    const caps = nt.getCapabilities ? nt.getCapabilities() : null;
+    if (caps && Array.isArray(caps.exposureMode) &&
+        caps.exposureMode.includes("continuous"))
+      await nt.applyConstraints(
+        { advanced: [{ exposureMode: "continuous" }] });
+  } catch (err) {}
+  deafCheck(); paint();
 }
 
 /* the LIVE MONITOR's window: one small JPEG of the 160x96 luma canvas
@@ -623,6 +754,8 @@ function buildPayload(seg) {
     },
     audio: {
       sample_rate: realRate, samples: seg.nSamples,
+      peak_rms: seg.peakRms || 0,
+      audio_silent: seg.nSamples > 0 && !(seg.peakRms > 0),
       wav: "16-bit PCM mono at the AudioContext's honest rate (no " +
         "resampling, no processing; the context is opened at the " +
         "browser's default rate)",
@@ -653,10 +786,16 @@ function buildPayload(seg) {
 function paint() {
   const ind = $("indicator");
   if (paused) { ind.className = "paused"; $("indText").textContent = "PAUSED"; }
+  else if (deaf) { ind.className = "rec"; $("indText").textContent =
+    "DEAF -- MIC SILENT"; }
   else if (openSeg) { ind.className = "rec"; $("indText").textContent = "RECORDING"; }
   else { ind.className = "armed"; $("indText").textContent = "ARMED"; }
   $("subState").textContent = paused ?
     "held -- PAUSE EVERYTHING is on; RESUME to arm again" :
+    deaf ?
+    "the mic has been silent for 60 s -- NO new segments open until it " +
+    "hears something. Pick a live mic above (the line under the meters " +
+    "names the one being held); RECORD still works by hand." :
     openSeg ? (openSeg.mode === "manual" ?
       "manual segment (no auto-close) -- STOP closes and saves it" :
       "auto segment -- closes after " + (CLOSE_AFTER_MS / 1000) +
@@ -671,6 +810,8 @@ function paint() {
   $("recBtn").textContent = openSeg ? "STOP" : "RECORD";
   $("recBtn").className = openSeg ? "rec" : "";
   $("recBtn").disabled = paused;
+  $("micSelect").disabled = !!openSeg;   // a mic swap mid-segment would
+  $("camSelect").disabled = !!openSeg;   // break the recorder and the tap
 }
 
 function fmtT(s) {
@@ -728,7 +869,7 @@ function tick() {
     }
   }
   maybeRecomputeFloors();
-  if (!paused) {
+  if (!paused && !deaf) {
     if (!openSeg && (speechNow || motionNow)) {
       openSegment(speechNow ? "speech" : "motion");
     } else if (openSeg && openSeg.mode === "auto") {
@@ -821,13 +962,31 @@ async function tryBoot() {
   $("retryDevices").style.display = "none";
   try {
     stream = await navigator.mediaDevices.getUserMedia({
-      video: true,   // near-default: the camera's auto-exposure runs the show
-      audio: { channelCount: 1, echoCancellation: false,
-               noiseSuppression: false, autoGainControl: false },
+      video: camDeviceId ? { deviceId: { exact: camDeviceId } } : true,
+      audio: Object.assign({ channelCount: 1, echoCancellation: false,
+        noiseSuppression: false, autoGainControl: false },
+        micDeviceId ? { deviceId: { exact: micDeviceId } } : {}),
     });
   } catch (err) {
-    deviceFailure(err);
-    return false;
+    // a remembered device that is gone: forget and retry with defaults
+    if (micDeviceId || camDeviceId) {
+      micDeviceId = null; camDeviceId = null;
+      try { localStorage.bcMic = ""; localStorage.bcCam = ""; }
+      catch (e) {}
+      try {
+        stream = await navigator.mediaDevices.getUserMedia({
+          video: true,
+          audio: { channelCount: 1, echoCancellation: false,
+            noiseSuppression: false, autoGainControl: false },
+        });
+      } catch (err2) {
+        deviceFailure(err2);
+        return false;
+      }
+    } else {
+      deviceFailure(err);
+      return false;
+    }
   }
   videoEl.srcObject = stream;
   await videoEl.play();
@@ -880,13 +1039,18 @@ async function tryBoot() {
     if (openSeg) {
       openSeg.audioChunks.push(blk);
       openSeg.nSamples += blk.length;
+      if (level > (openSeg.peakRms || 0)) openSeg.peakRms = level;
     } else if (!paused) {
       feedPreAudio(blk);
     }
   };
   src.connect(node);
+  audioSrcNode = src;   // kept: a mic switch re-taps through these
+  audioTapNode = node;
+  refreshPickers();
   armedAt = performance.now();
   lastSoundAt = armedAt;   // the deafness clock starts with the stream
+  nAudioBlocks = 0;
   floorsReady = false;   // a retry re-arms: floors re-measure on the new
                          // stream before any auto decision
   deafCheck();
@@ -918,6 +1082,41 @@ boot();
 $("retryDevices").onclick = () => {
   diagSend("RETRY_DEVICES_CLICKED");
   tryBoot();
+};
+$("micSelect").onchange = async () => {
+  const sel = $("micSelect");
+  if (openSeg) {   // never mid-segment: the swap breaks tap and recorder
+    if (micDeviceId) sel.value = micDeviceId;
+    return;
+  }
+  diagSend("MIC_SWITCH", { to: sel.value });
+  try {
+    await switchMic(sel.value);
+    $("msg").className = "";
+    $("msg").textContent = "mic: " + micName + " -- floors re-measuring " +
+      "for the new device; the deafness gate re-arms";
+  } catch (err) {
+    $("msg").className = "err";
+    $("msg").textContent = "that mic would not open (" + err.name +
+      "); the previous one is still live";
+    if (micDeviceId) sel.value = micDeviceId;
+  }
+};
+$("camSelect").onchange = async () => {
+  const sel = $("camSelect");
+  if (openSeg) {
+    if (camDeviceId) sel.value = camDeviceId;
+    return;
+  }
+  diagSend("CAM_SWITCH", { to: sel.value });
+  try {
+    await switchCam(sel.value);
+  } catch (err) {
+    $("msg").className = "err";
+    $("msg").textContent = "that camera would not open (" + err.name +
+      "); the previous one is still live";
+    if (camDeviceId) sel.value = camDeviceId;
+  }
 };
 
 window.addEventListener("beforeunload", (ev) => {
