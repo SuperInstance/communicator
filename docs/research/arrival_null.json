@@ -1,6 +1,6 @@
 {
   "study": "arrival null -- the floor on the double-hearing technique",
-  "generated_utc": "2026-10-21T19:02:59Z",
+  "generated_utc": "2026-10-21T19:10:57Z",
   "method": {
     "estimator": "the band-limited ENVELOPE cross-correlation (300-3400 Hz, the band the chain carries honestly), with parabolic interpolation around the peak at a 1 ms envelope hop",
     "the_null": "a signal against a gain-shifted copy of itself: a second microphone with a different gain, and the same arrival, so the lag must be ZERO",
@@ -17,11 +17,11 @@
       "session": "1792560597",
       "duration_s": 27.34,
       "null": {
-        "lag_ms": -0.00015295320301035736,
+        "lag_ms": -0.00015295320301058894,
         "peak": 0.9999387976247633,
         "margin": 0.18731062889207806,
-        "bias_ms": 0.00015295320301035736,
-        "bias_m": 5.246294863255258e-05
+        "bias_ms": 0.00015295320301058894,
+        "bias_m": 5.246294863263201e-05
       },
       "resolution": [
         {
@@ -94,11 +94,11 @@
       "session": "1792560758",
       "duration_s": 154.89,
       "null": {
-        "lag_ms": 7.674542591484699e-07,
-        "peak": 0.9999999565437032,
-        "margin": 0.22685425141824456,
-        "bias_ms": 7.674542591484699e-07,
-        "bias_m": 2.632368108879252e-07
+        "lag_ms": 7.674542601752918e-07,
+        "peak": 0.9999999565437027,
+        "margin": 0.22685425141824445,
+        "bias_ms": 7.674542601752918e-07,
+        "bias_m": 2.632368112401251e-07
       },
       "resolution": [
         {
@@ -171,11 +171,11 @@
       "session": "1792560773",
       "duration_s": 16.06,
       "null": {
-        "lag_ms": -5.716050615441196e-05,
-        "peak": 0.9999856199292263,
-        "margin": 0.9478957253163778,
-        "bias_ms": 5.716050615441196e-05,
-        "bias_m": 1.96060536109633e-05
+        "lag_ms": -5.716050615448199e-05,
+        "peak": 0.9999856199292262,
+        "margin": 0.9478957253163777,
+        "bias_ms": 5.716050615448199e-05,
+        "bias_m": 1.960605361098732e-05
       },
       "resolution": [
         {
@@ -248,11 +248,11 @@
       "session": "1792596296",
       "duration_s": 74.22,
       "null": {
-        "lag_ms": -2.088001377053832e-05,
-        "peak": 0.9999984958659189,
-        "margin": 0.25093937878979744,
-        "bias_ms": 2.088001377053832e-05,
-        "bias_m": 7.161844723294643e-06
+        "lag_ms": -2.0880013770538363e-05,
+        "peak": 0.9999984958659187,
+        "margin": 0.25093937878979733,
+        "bias_ms": 2.0880013770538363e-05,
+        "bias_m": 7.161844723294659e-06
       },
       "resolution": [
         {
@@ -325,11 +325,11 @@
       "session": "1792596354",
       "duration_s": 59.0,
       "null": {
-        "lag_ms": -3.6402109708141676e-07,
-        "peak": 0.9999999935414274,
+        "lag_ms": -3.640210973239339e-07,
+        "peak": 0.9999999935414275,
         "margin": 0.32275774405554725,
-        "bias_ms": 3.6402109708141676e-07,
-        "bias_m": 1.2485923629892595e-07
+        "bias_ms": 3.640210973239339e-07,
+        "bias_m": 1.2485923638210932e-07
       },
       "resolution": [
         {
@@ -402,11 +402,11 @@
       "session": "1792596369",
       "duration_s": 13.54,
       "null": {
-        "lag_ms": -9.07312545126493e-06,
-        "peak": 0.9999997914349379,
-        "margin": 0.2478474865948319,
-        "bias_ms": 9.07312545126493e-06,
-        "bias_m": 3.112082029783871e-06
+        "lag_ms": -9.073125450325866e-06,
+        "peak": 0.9999997914349378,
+        "margin": 0.24784748659483213,
+        "bias_ms": 9.073125450325866e-06,
+        "bias_m": 3.1120820294617716e-06
       },
       "resolution": [
         {

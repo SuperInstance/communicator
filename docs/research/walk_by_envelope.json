@@ -1,6 +1,6 @@
 {
  "study": "walk-by envelope",
- "generated_utc": "2026-10-21T17:50:16Z",
+ "generated_utc": "2026-10-21T19:13:41Z",
  "method": {
   "crossing": "a BURST of change events whose change-map centroid drifts consistently across the frame; the video has no consecutive changed frames, because the recorder repeats a picture until it changes",
   "direction": "the drift of the change map's horizontal centroid",
@@ -17139,6 +17139,86 @@
    "n_frames": 795,
    "session_noise_floor_db": -180.0,
    "speech_s": 0.9,
+   "n_crossings": 0,
+   "crossings": []
+  },
+  {
+   "session": "1792608460",
+   "change_threshold": 3.0,
+   "input_device": "SYNTHETIC",
+   "n_frames": 669,
+   "session_noise_floor_db": -51.03,
+   "speech_s": 2.05,
+   "n_crossings": 0,
+   "crossings": []
+  },
+  {
+   "session": "1792608490",
+   "change_threshold": 3.0,
+   "input_device": "SYNTHETIC",
+   "n_frames": 669,
+   "session_noise_floor_db": -51.03,
+   "speech_s": 2.05,
+   "n_crossings": 0,
+   "crossings": []
+  },
+  {
+   "session": "1792608612",
+   "change_threshold": 3.0,
+   "input_device": "SYNTHETIC",
+   "n_frames": 660,
+   "session_noise_floor_db": -51.01,
+   "speech_s": 2.05,
+   "n_crossings": 0,
+   "crossings": []
+  },
+  {
+   "session": "1792608642",
+   "change_threshold": 3.0,
+   "input_device": "SYNTHETIC",
+   "n_frames": 659,
+   "session_noise_floor_db": -51.01,
+   "speech_s": 2.05,
+   "n_crossings": 0,
+   "crossings": []
+  },
+  {
+   "session": "1792608750",
+   "change_threshold": 3.0,
+   "input_device": "SYNTHETIC",
+   "n_frames": 662,
+   "session_noise_floor_db": -51.03,
+   "speech_s": 2.05,
+   "n_crossings": 0,
+   "crossings": []
+  },
+  {
+   "session": "1792608780",
+   "change_threshold": 3.0,
+   "input_device": "SYNTHETIC",
+   "n_frames": 667,
+   "session_noise_floor_db": -51.01,
+   "speech_s": 2.05,
+   "n_crossings": 0,
+   "crossings": []
+  },
+  {
+   "session": "1792608899",
+   "change_threshold": 3.0,
+   "input_device": "SYNTHETIC",
+   "n_frames": 663,
+   "session_noise_floor_db": -51.01,
+   "speech_s": 2.05,
+   "n_crossings": 0,
+   "crossings": []
+  },
+  {
+   "session": "1792608929",
+   "change_threshold": 3.0,
+   "input_device": "SYNTHETIC",
+   "n_frames": 664,
+   "session_noise_floor_db": -51.01,
+   "speech_s": 2.05,
    "n_crossings": 0,
    "crossings": []
   }

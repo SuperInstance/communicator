@@ -618,6 +618,27 @@ def lens_microphone():
                                "each session's meta.json"),
             },
             {
+                "id": "ARRIVAL_ESTIMATOR",
+                "class": "delay",
+                "statement": ("the delay between two arrivals of one sound "
+                              "is measured by the band-limited ENVELOPE "
+                              "cross-correlation, and it resolves to 0.004 "
+                              "ms -- 0.0014 m of range -- with a null bias "
+                              "of 0.0002 ms.  The estimator needs NO clock "
+                              "relationship between the two devices: the "
+                              "offset cancels, because the two signals are "
+                              "compared to each other rather than to a "
+                              "third reference.  What survives is a "
+                              "CONSTANT bias per device pair (the two "
+                              "devices' own internal latencies), which is a "
+                              "calibration and not a precision problem."),
+                "measurement": arrival_estimator_measurement(),
+                "provenance": ("experiments/arrival_null.py, over the "
+                               "corpus's real-microphone sessions that "
+                               "carry signal; the full study is "
+                               "docs/research/ARRIVAL-NULL.md"),
+            },
+            {
                 "id": "SYNTHETIC_INPUT_DEVICE",
                 "class": "failure_signature",
                 "statement": ("the corpus holds an end-to-end TEST rig "
@@ -667,6 +688,42 @@ def lens_microphone():
                                "experiments/speech_to_score.py:load_clock"),
             },
         ],
+    }
+
+
+def arrival_estimator_measurement():
+    """The arrival-time estimator's own numbers, read from its results
+    file if it has been run.
+
+    The estimator is a calculator of the fleet's, so its behaviour is
+    filed here with a number, a unit and a provenance like every other
+    sensor behaviour.  If the results file is not there, the entry says
+    so rather than guessing."""
+    path = ROOT / "docs" / "research" / "arrival_null.json"
+    if not path.is_file():
+        return {"status": "not measured yet",
+                "why": "experiments/arrival_null.py has not been run"}
+    try:
+        d = json.loads(path.read_text())
+    except Exception:  # noqa: BLE001
+        return {"status": "unreadable"}
+    s = d.get("summary", {})
+    return {
+        "n_sessions": s.get("n_sessions"),
+        "null_bias_ms": s.get("null_bias_ms"),
+        "resolution_error_ms": s.get("resolution_error_ms"),
+        "by_injected_delay_ms": s.get("by_injected_delay_ms"),
+        "the_null": ("a signal against a gain-shifted copy of itself: a "
+                     "second channel of one device, and the same "
+                     "arrival, so the lag must be ZERO"),
+        "the_range_resolution_m": (round(s["resolution_error_ms"]["median"]
+                                         / 1000.0 * 343.0, 5)
+                                   if s.get("resolution_error_ms", {})
+                                   .get("median") is not None else None),
+        "the_caveat": ("the null is a WITHIN-DEVICE bias; the "
+                       "device-to-device bias is a different constant and "
+                       "is NOT measured, because the corpus holds one real "
+                       "device"),
     }
 
 
