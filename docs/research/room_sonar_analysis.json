@@ -1,0 +1,786 @@
+{
+  "session": "/mnt/c/proart_capture/corpus/free_sessions/1792561741",
+  "probe": {
+    "name": "sonar-band",
+    "version": 1
+  },
+  "probe_version": 1,
+  "device": "the local machine, numpy only -- no API, no network",
+  "sample_rate": 48000,
+  "samples": 236160,
+  "duration_s": 4.92,
+  "taps": {
+    "noise": [
+      448,
+      19648
+    ],
+    "sweep": [
+      19648,
+      178048
+    ],
+    "gap": [
+      178048,
+      197248
+    ],
+    "pink": [
+      197248,
+      235648
+    ],
+    "lead_samples": 448,
+    "gap_is_digital_zero": true
+  },
+  "the_probe_said": {
+    "usable_band": "22-24 kHz",
+    "rule": "usable = sweep SNR >= 10 dB and transfer within 40 dB of best; widest contiguous run in 15-24 kHz",
+    "bands": [
+      {
+        "f0": 15000,
+        "f1": 15250,
+        "transfer_db": -64.2,
+        "snr_db": 78,
+        "pink_snr_db": -17.5,
+        "usable": true
+      },
+      {
+        "f0": 15250,
+        "f1": 15500,
+        "transfer_db": -75.5,
+        "snr_db": 70.1,
+        "pink_snr_db": -18.7,
+        "usable": true
+      },
+      {
+        "f0": 15500,
+        "f1": 15750,
+        "transfer_db": -80.3,
+        "snr_db": 61.7,
+        "pink_snr_db": -17,
+        "usable": true
+      },
+      {
+        "f0": 15750,
+        "f1": 16000,
+        "transfer_db": -99,
+        "snr_db": 51.1,
+        "pink_snr_db": -13.4,
+        "usable": false
+      },
+      {
+        "f0": 16000,
+        "f1": 16250,
+        "transfer_db": -165.5,
+        "snr_db": -23.6,
+        "pink_snr_db": -13.5,
+        "usable": false
+      },
+      {
+        "f0": 16250,
+        "f1": 16500,
+        "transfer_db": -175.8,
+        "snr_db": -26.6,
+        "pink_snr_db": -16.3,
+        "usable": false
+      },
+      {
+        "f0": 16500,
+        "f1": 16750,
+        "transfer_db": -160.7,
+        "snr_db": -20.2,
+        "pink_snr_db": -18.7,
+        "usable": false
+      },
+      {
+        "f0": 16750,
+        "f1": 17000,
+        "transfer_db": -169.1,
+        "snr_db": -19.1,
+        "pink_snr_db": -18.9,
+        "usable": false
+      },
+      {
+        "f0": 17000,
+        "f1": 17250,
+        "transfer_db": -170.6,
+        "snr_db": -22.6,
+        "pink_snr_db": -16.6,
+        "usable": false
+      },
+      {
+        "f0": 17250,
+        "f1": 17500,
+        "transfer_db": -181.5,
+        "snr_db": -27.1,
+        "pink_snr_db": -16.5,
+        "usable": false
+      },
+      {
+        "f0": 17500,
+        "f1": 17750,
+        "transfer_db": -175.3,
+        "snr_db": -26.4,
+        "pink_snr_db": -17.4,
+        "usable": false
+      },
+      {
+        "f0": 17750,
+        "f1": 18000,
+        "transfer_db": -174.9,
+        "snr_db": -19.2,
+        "pink_snr_db": -15.6,
+        "usable": false
+      },
+      {
+        "f0": 18000,
+        "f1": 18250,
+        "transfer_db": -172.3,
+        "snr_db": -16.8,
+        "pink_snr_db": -11.1,
+        "usable": false
+      },
+      {
+        "f0": 18250,
+        "f1": 18500,
+        "transfer_db": -183.9,
+        "snr_db": -24.7,
+        "pink_snr_db": -14.3,
+        "usable": false
+      },
+      {
+        "f0": 18500,
+        "f1": 18750,
+        "transfer_db": -180,
+        "snr_db": -24.6,
+        "pink_snr_db": -14.5,
+        "usable": false
+      },
+      {
+        "f0": 18750,
+        "f1": 19000,
+        "transfer_db": -175.5,
+        "snr_db": -18.7,
+        "pink_snr_db": -16,
+        "usable": false
+      },
+      {
+        "f0": 19000,
+        "f1": 19250,
+        "transfer_db": -173.7,
+        "snr_db": -20.1,
+        "pink_snr_db": -16.3,
+        "usable": false
+      },
+      {
+        "f0": 19250,
+        "f1": 19500,
+        "transfer_db": -180.9,
+        "snr_db": -22.4,
+        "pink_snr_db": -12.5,
+        "usable": false
+      },
+      {
+        "f0": 19500,
+        "f1": 19750,
+        "transfer_db": -177.2,
+        "snr_db": -25.5,
+        "pink_snr_db": -20,
+        "usable": false
+      },
+      {
+        "f0": 19750,
+        "f1": 20000,
+        "transfer_db": -172.3,
+        "snr_db": -16.3,
+        "pink_snr_db": -14.8,
+        "usable": false
+      },
+      {
+        "f0": 20000,
+        "f1": 20250,
+        "transfer_db": -181.3,
+        "snr_db": -25.5,
+        "pink_snr_db": -14.5,
+        "usable": false
+      },
+      {
+        "f0": 20250,
+        "f1": 20500,
+        "transfer_db": -180.2,
+        "snr_db": -24.4,
+        "pink_snr_db": -14.4,
+        "usable": false
+      },
+      {
+        "f0": 20500,
+        "f1": 20750,
+        "transfer_db": -169,
+        "snr_db": -13.4,
+        "pink_snr_db": -13.5,
+        "usable": false
+      },
+      {
+        "f0": 20750,
+        "f1": 21000,
+        "transfer_db": -179.3,
+        "snr_db": -23.3,
+        "pink_snr_db": -14.7,
+        "usable": false
+      },
+      {
+        "f0": 21000,
+        "f1": 21250,
+        "transfer_db": -177.2,
+        "snr_db": -21.8,
+        "pink_snr_db": -14.8,
+        "usable": false
+      },
+      {
+        "f0": 21250,
+        "f1": 21500,
+        "transfer_db": -169.6,
+        "snr_db": -13.1,
+        "pink_snr_db": -16.6,
+        "usable": false
+      },
+      {
+        "f0": 21500,
+        "f1": 21750,
+        "transfer_db": -181.8,
+        "snr_db": -26.6,
+        "pink_snr_db": -14.5,
+        "usable": false
+      },
+      {
+        "f0": 21750,
+        "f1": 22000,
+        "transfer_db": -104.5,
+        "snr_db": 51.4,
+        "pink_snr_db": -14.9,
+        "usable": false
+      },
+      {
+        "f0": 22000,
+        "f1": 22250,
+        "transfer_db": -74.6,
+        "snr_db": 83.2,
+        "pink_snr_db": -14.1,
+        "usable": true
+      },
+      {
+        "f0": 22250,
+        "f1": 22500,
+        "transfer_db": -61.2,
+        "snr_db": 96.4,
+        "pink_snr_db": -15,
+        "usable": true
+      },
+      {
+        "f0": 22500,
+        "f1": 22750,
+        "transfer_db": -55.3,
+        "snr_db": 100.1,
+        "pink_snr_db": -14.3,
+        "usable": true
+      },
+      {
+        "f0": 22750,
+        "f1": 23000,
+        "transfer_db": -52.3,
+        "snr_db": 105.5,
+        "pink_snr_db": -11.9,
+        "usable": true
+      },
+      {
+        "f0": 23000,
+        "f1": 23250,
+        "transfer_db": -48.9,
+        "snr_db": 110,
+        "pink_snr_db": -11.3,
+        "usable": true
+      },
+      {
+        "f0": 23250,
+        "f1": 23500,
+        "transfer_db": -49,
+        "snr_db": 107.2,
+        "pink_snr_db": -14.7,
+        "usable": true
+      },
+      {
+        "f0": 23500,
+        "f1": 23750,
+        "transfer_db": -48,
+        "snr_db": 110.2,
+        "pink_snr_db": -11.7,
+        "usable": true
+      },
+      {
+        "f0": 23750,
+        "f1": 24000,
+        "transfer_db": -47.3,
+        "snr_db": 112.5,
+        "pink_snr_db": -13.2,
+        "usable": true
+      }
+    ]
+  },
+  "the_gated_verdict": {
+    "usable_bands": [],
+    "usable_band": "NONE",
+    "rule": "a band is usable when the STIMULUS drove energy there (within 60 dB of the stimulus's own peak) AND the return is at least 10 dB above the noise floor",
+    "excitation_gated_bands": 23,
+    "bands_total": 36
+  },
+  "the_ultrasonic_floor": {
+    "sweep_tap_16_24k_db": -67.28,
+    "pink_tap_16_24k_db": -67.37,
+    "noise_tap_16_24k_db": -67.54,
+    "sweep_minus_noise_db": 0.26,
+    "pink_minus_noise_db": 0.17,
+    "note": "the sweep tap and the pink tap are the same level in this band, so the band holds the floor and nothing else"
+  },
+  "the_deconvolution": {
+    "peak_ms": 0.0,
+    "peak_amplitude": 8141.817320657399,
+    "peak_to_median_db": 48.22,
+    "decay_slope_db_per_s": -312.497,
+    "rt60_s": 0.192,
+    "grows_instead_of_decaying": false,
+    "return_over_noise_db": 0.26,
+    "meaningful": false,
+    "verdict": "NOT a room, and not anything else: the return sits on the noise floor, so there is no stimulus in it to deconvolve. This response is the inverse of the stimulus, not the room's answer to it."
+  },
+  "bands": [
+    {
+      "f0": 15000,
+      "f1": 15250,
+      "probe_transfer_db": 8.9,
+      "probe_snr_db": 76.9,
+      "reference_db": -76.1,
+      "return_db": -67.5,
+      "noise_db": -68.0,
+      "return_over_noise_db": 0.5,
+      "return_over_stimulus_db": 8.7,
+      "excited": false
+    },
+    {
+      "f0": 15250,
+      "f1": 15500,
+      "probe_transfer_db": 3.2,
+      "probe_snr_db": 71.4,
+      "reference_db": -70.7,
+      "return_db": -67.1,
+      "noise_db": -68.2,
+      "return_over_noise_db": 1.1,
+      "return_over_stimulus_db": 3.7,
+      "excited": false
+    },
+    {
+      "f0": 15500,
+      "f1": 15750,
+      "probe_transfer_db": -5.3,
+      "probe_snr_db": 63.4,
+      "reference_db": -61.9,
+      "return_db": -67.3,
+      "noise_db": -68.7,
+      "return_over_noise_db": 1.3,
+      "return_over_stimulus_db": -5.5,
+      "excited": false
+    },
+    {
+      "f0": 15750,
+      "f1": 16000,
+      "probe_transfer_db": -22.1,
+      "probe_snr_db": 45.4,
+      "reference_db": -45.7,
+      "return_db": -67.2,
+      "noise_db": -67.5,
+      "return_over_noise_db": 0.3,
+      "return_over_stimulus_db": -21.6,
+      "excited": false
+    },
+    {
+      "f0": 16000,
+      "f1": 16250,
+      "probe_transfer_db": -94.6,
+      "probe_snr_db": -25.9,
+      "reference_db": 26.5,
+      "return_db": -67.5,
+      "noise_db": -68.7,
+      "return_over_noise_db": 1.2,
+      "return_over_stimulus_db": -94.1,
+      "excited": true
+    },
+    {
+      "f0": 16250,
+      "f1": 16500,
+      "probe_transfer_db": -93.4,
+      "probe_snr_db": -27.1,
+      "reference_db": 25.4,
+      "return_db": -67.1,
+      "noise_db": -66.4,
+      "return_over_noise_db": -0.8,
+      "return_over_stimulus_db": -92.5,
+      "excited": true
+    },
+    {
+      "f0": 16500,
+      "f1": 16750,
+      "probe_transfer_db": -89.8,
+      "probe_snr_db": -20.4,
+      "reference_db": 21.7,
+      "return_db": -67.6,
+      "noise_db": -69.4,
+      "return_over_noise_db": 1.8,
+      "return_over_stimulus_db": -89.2,
+      "excited": true
+    },
+    {
+      "f0": 16750,
+      "f1": 17000,
+      "probe_transfer_db": -88.1,
+      "probe_snr_db": -20.3,
+      "reference_db": 21.7,
+      "return_db": -67.0,
+      "noise_db": -67.8,
+      "return_over_noise_db": 0.8,
+      "return_over_stimulus_db": -88.7,
+      "excited": true
+    },
+    {
+      "f0": 17000,
+      "f1": 17250,
+      "probe_transfer_db": -91.4,
+      "probe_snr_db": -24.3,
+      "reference_db": 25.0,
+      "return_db": -67.3,
+      "noise_db": -67.1,
+      "return_over_noise_db": -0.2,
+      "return_over_stimulus_db": -92.3,
+      "excited": true
+    },
+    {
+      "f0": 17250,
+      "f1": 17500,
+      "probe_transfer_db": -94.0,
+      "probe_snr_db": -24.9,
+      "reference_db": 26.8,
+      "return_db": -66.9,
+      "noise_db": -69.1,
+      "return_over_noise_db": 2.1,
+      "return_over_stimulus_db": -93.8,
+      "excited": true
+    },
+    {
+      "f0": 17500,
+      "f1": 17750,
+      "probe_transfer_db": -94.1,
+      "probe_snr_db": -25.1,
+      "reference_db": 26.7,
+      "return_db": -67.2,
+      "noise_db": -69.0,
+      "return_over_noise_db": 1.7,
+      "return_over_stimulus_db": -93.9,
+      "excited": true
+    },
+    {
+      "f0": 17750,
+      "f1": 18000,
+      "probe_transfer_db": -87.9,
+      "probe_snr_db": -21.3,
+      "reference_db": 20.6,
+      "return_db": -67.4,
+      "noise_db": -66.5,
+      "return_over_noise_db": -0.8,
+      "return_over_stimulus_db": -88.0,
+      "excited": true
+    },
+    {
+      "f0": 18000,
+      "f1": 18250,
+      "probe_transfer_db": -87.5,
+      "probe_snr_db": -19.3,
+      "reference_db": 19.9,
+      "return_db": -67.6,
+      "noise_db": -68.1,
+      "return_over_noise_db": 0.5,
+      "return_over_stimulus_db": -87.6,
+      "excited": true
+    },
+    {
+      "f0": 18250,
+      "f1": 18500,
+      "probe_transfer_db": -94.2,
+      "probe_snr_db": -26.7,
+      "reference_db": 26.7,
+      "return_db": -67.4,
+      "noise_db": -67.5,
+      "return_over_noise_db": 0.1,
+      "return_over_stimulus_db": -94.1,
+      "excited": true
+    },
+    {
+      "f0": 18500,
+      "f1": 18750,
+      "probe_transfer_db": -93.6,
+      "probe_snr_db": -25.6,
+      "reference_db": 26.9,
+      "return_db": -67.1,
+      "noise_db": -68.0,
+      "return_over_noise_db": 0.9,
+      "return_over_stimulus_db": -94.0,
+      "excited": true
+    },
+    {
+      "f0": 18750,
+      "f1": 19000,
+      "probe_transfer_db": -86.7,
+      "probe_snr_db": -18.8,
+      "reference_db": 19.2,
+      "return_db": -67.4,
+      "noise_db": -68.0,
+      "return_over_noise_db": 0.6,
+      "return_over_stimulus_db": -86.6,
+      "excited": true
+    },
+    {
+      "f0": 19000,
+      "f1": 19250,
+      "probe_transfer_db": -86.6,
+      "probe_snr_db": -20.0,
+      "reference_db": 19.5,
+      "return_db": -67.2,
+      "noise_db": -66.6,
+      "return_over_noise_db": -0.6,
+      "return_over_stimulus_db": -86.7,
+      "excited": true
+    },
+    {
+      "f0": 19250,
+      "f1": 19500,
+      "probe_transfer_db": -94.4,
+      "probe_snr_db": -25.5,
+      "reference_db": 26.9,
+      "return_db": -67.4,
+      "noise_db": -68.9,
+      "return_over_noise_db": 1.5,
+      "return_over_stimulus_db": -94.3,
+      "excited": true
+    },
+    {
+      "f0": 19500,
+      "f1": 19750,
+      "probe_transfer_db": -89.4,
+      "probe_snr_db": -21.8,
+      "reference_db": 24.2,
+      "return_db": -66.7,
+      "noise_db": -67.6,
+      "return_over_noise_db": 0.9,
+      "return_over_stimulus_db": -90.9,
+      "excited": true
+    },
+    {
+      "f0": 19750,
+      "f1": 20000,
+      "probe_transfer_db": -85.6,
+      "probe_snr_db": -18.6,
+      "reference_db": 18.6,
+      "return_db": -67.1,
+      "noise_db": -67.0,
+      "return_over_noise_db": -0.1,
+      "return_over_stimulus_db": -85.7,
+      "excited": true
+    },
+    {
+      "f0": 20000,
+      "f1": 20250,
+      "probe_transfer_db": -93.8,
+      "probe_snr_db": -26.2,
+      "reference_db": 27.1,
+      "return_db": -67.0,
+      "noise_db": -67.5,
+      "return_over_noise_db": 0.5,
+      "return_over_stimulus_db": -94.1,
+      "excited": true
+    },
+    {
+      "f0": 20250,
+      "f1": 20500,
+      "probe_transfer_db": -94.1,
+      "probe_snr_db": -26.3,
+      "reference_db": 27.0,
+      "return_db": -67.6,
+      "noise_db": -67.8,
+      "return_over_noise_db": 0.2,
+      "return_over_stimulus_db": -94.6,
+      "excited": true
+    },
+    {
+      "f0": 20500,
+      "f1": 20750,
+      "probe_transfer_db": -84.7,
+      "probe_snr_db": -18.1,
+      "reference_db": 18.1,
+      "return_db": -67.2,
+      "noise_db": -66.5,
+      "return_over_noise_db": -0.6,
+      "return_over_stimulus_db": -85.3,
+      "excited": true
+    },
+    {
+      "f0": 20750,
+      "f1": 21000,
+      "probe_transfer_db": -94.2,
+      "probe_snr_db": -26.1,
+      "reference_db": 26.9,
+      "return_db": -66.8,
+      "noise_db": -68.0,
+      "return_over_noise_db": 1.2,
+      "return_over_stimulus_db": -93.7,
+      "excited": true
+    },
+    {
+      "f0": 21000,
+      "f1": 21250,
+      "probe_transfer_db": -93.6,
+      "probe_snr_db": -25.5,
+      "reference_db": 26.7,
+      "return_db": -67.1,
+      "noise_db": -68.1,
+      "return_over_noise_db": 1.0,
+      "return_over_stimulus_db": -93.8,
+      "excited": true
+    },
+    {
+      "f0": 21250,
+      "f1": 21500,
+      "probe_transfer_db": -84.6,
+      "probe_snr_db": -17.8,
+      "reference_db": 17.2,
+      "return_db": -67.3,
+      "noise_db": -66.8,
+      "return_over_noise_db": -0.5,
+      "return_over_stimulus_db": -84.5,
+      "excited": true
+    },
+    {
+      "f0": 21500,
+      "f1": 21750,
+      "probe_transfer_db": -94.2,
+      "probe_snr_db": -26.3,
+      "reference_db": 27.0,
+      "return_db": -67.3,
+      "noise_db": -67.9,
+      "return_over_noise_db": 0.6,
+      "return_over_stimulus_db": -94.3,
+      "excited": true
+    },
+    {
+      "f0": 21750,
+      "f1": 22000,
+      "probe_transfer_db": -19.8,
+      "probe_snr_db": 47.5,
+      "reference_db": -48.3,
+      "return_db": -67.8,
+      "noise_db": -67.2,
+      "return_over_noise_db": -0.5,
+      "return_over_stimulus_db": -19.5,
+      "excited": false
+    },
+    {
+      "f0": 22000,
+      "f1": 22250,
+      "probe_transfer_db": 12.8,
+      "probe_snr_db": 79.6,
+      "reference_db": -80.1,
+      "return_db": -67.4,
+      "noise_db": -66.8,
+      "return_over_noise_db": -0.6,
+      "return_over_stimulus_db": 12.7,
+      "excited": false
+    },
+    {
+      "f0": 22250,
+      "f1": 22500,
+      "probe_transfer_db": 24.8,
+      "probe_snr_db": 91.7,
+      "reference_db": -92.7,
+      "return_db": -67.8,
+      "noise_db": -66.9,
+      "return_over_noise_db": -0.9,
+      "return_over_stimulus_db": 24.9,
+      "excited": false
+    },
+    {
+      "f0": 22500,
+      "f1": 22750,
+      "probe_transfer_db": 32.7,
+      "probe_snr_db": 100.7,
+      "reference_db": -99.5,
+      "return_db": -67.1,
+      "noise_db": -68.0,
+      "return_over_noise_db": 0.9,
+      "return_over_stimulus_db": 32.4,
+      "excited": false
+    },
+    {
+      "f0": 22750,
+      "f1": 23000,
+      "probe_transfer_db": 36.1,
+      "probe_snr_db": 104.0,
+      "reference_db": -103.6,
+      "return_db": -67.4,
+      "noise_db": -67.9,
+      "return_over_noise_db": 0.5,
+      "return_over_stimulus_db": 36.2,
+      "excited": false
+    },
+    {
+      "f0": 23000,
+      "f1": 23250,
+      "probe_transfer_db": 39.0,
+      "probe_snr_db": 107.6,
+      "reference_db": -106.4,
+      "return_db": -67.5,
+      "noise_db": -68.6,
+      "return_over_noise_db": 1.1,
+      "return_over_stimulus_db": 38.9,
+      "excited": false
+    },
+    {
+      "f0": 23250,
+      "f1": 23500,
+      "probe_transfer_db": 41.1,
+      "probe_snr_db": 108.4,
+      "reference_db": -108.4,
+      "return_db": -67.3,
+      "noise_db": -67.3,
+      "return_over_noise_db": 0.0,
+      "return_over_stimulus_db": 41.1,
+      "excited": false
+    },
+    {
+      "f0": 23500,
+      "f1": 23750,
+      "probe_transfer_db": 42.3,
+      "probe_snr_db": 108.8,
+      "reference_db": -109.7,
+      "return_db": -67.3,
+      "noise_db": -66.5,
+      "return_over_noise_db": -0.8,
+      "return_over_stimulus_db": 42.4,
+      "excited": false
+    },
+    {
+      "f0": 23750,
+      "f1": 24000,
+      "probe_transfer_db": 43.9,
+      "probe_snr_db": 112.6,
+      "reference_db": -110.6,
+      "return_db": -66.8,
+      "noise_db": -68.7,
+      "return_over_noise_db": 2.0,
+      "return_over_stimulus_db": 43.9,
+      "excited": false
+    }
+  ]
+}
