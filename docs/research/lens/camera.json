@@ -1,0 +1,64 @@
+{
+ "sensor": "camera",
+ "device": "ASUS FHD webcam (3277:0059), 160x96 BT.601 luma",
+ "behaviours": [
+  {
+   "id": "REPEAT_FRAMES",
+   "class": "deadband",
+   "statement": "the recorder writes a frame only when the picture changed, and the driver repeats frames to fill the grid: a large fraction of the frames in the file are byte-identical to their predecessor",
+   "measurement": {
+    "n_sessions_sampled": 25,
+    "n_sessions_available": 97,
+    "sample": [
+     "1792553040",
+     "1792553042",
+     "1792553152",
+     "1792553234",
+     "1792553329",
+     "1792553518",
+     "1792553766",
+     "1792553784",
+     "1792553803",
+     "1792553812",
+     "1792553852",
+     "1792553885"
+    ],
+    "repeat_fraction_median": 0.669,
+    "repeat_fraction_min": 0.6333,
+    "repeat_fraction_max": 0.6697
+   },
+   "provenance": "measured over the corpus's sessions; the room map reports 85,306 of 127,527 frames as repeats"
+  },
+  {
+   "id": "SENSOR_NOISE_FLOOR",
+   "class": "deadband",
+   "statement": "a CHANGED frame differs from its predecessor by about 1.15 luma on average over the whole frame; below that, the change is the sensor's own noise and not the person",
+   "measurement": {
+    "per_session_nonzero_median_luma": {
+     "n": 25,
+     "min": 0.4482,
+     "p25": 0.4964,
+     "median": 0.6725,
+     "p75": 0.9193,
+     "max": 1.8113,
+     "mean": 0.741352
+    },
+    "pooled_median_luma": 0.6725,
+    "person_zone_mean_median": 0.4273
+   },
+   "provenance": "measured over the corpus's sessions; the room map's per-pixel motion noise sigma is 0.61 luma per change"
+  },
+  {
+   "id": "FROZEN_VIDEO",
+   "class": "failure_signature",
+   "statement": "every frame in a session can be byte-identical to every other frame: the camera delivered nothing while the audio layer was alive",
+   "measurement": {
+    "n_frozen_sessions": 0,
+    "sessions": []
+   },
+   "provenance": "measured over the corpus's sessions"
+  }
+ ],
+ "lens_version": 1,
+ "generated_utc": "2026-10-21T17:30:50Z"
+}

@@ -1,0 +1,297 @@
+{
+ "sensor": "microphone",
+ "device": "Microphone Array (Realtek(R) Audio)",
+ "capture_rate_hz": 48000,
+ "behaviours": [
+  {
+   "id": "SILENT_AUDIO",
+   "class": "failure_signature",
+   "statement": "the input device delivers literal zeros: the saved WAV's peak is exactly 0 and every sample is 0",
+   "detector": "peak_abs == 0 and nonzero == 0",
+   "measurement": {
+    "n_sessions_with_a_wav": 97,
+    "n_silent": 56,
+    "fraction_silent": 0.5773,
+    "peak_of_the_loud_sessions": {
+     "min": 54,
+     "max": 18064,
+     "median": 13399
+    }
+   },
+   "provenance": "measured over the corpus's free sessions; the class was 34 folders and 82.4M samples on the night it happened (browser_capture/DONE.md)"
+  },
+  {
+   "id": "GAIN_CHANGE",
+   "class": "level",
+   "statement": "the same microphone produced peaks of about 3000 and about 18000 within one day: the level is not a property of the device alone",
+   "measurement": {
+    "loud_peak_min": 54,
+    "loud_peak_max": 18064,
+    "ratio": 334.52
+   },
+   "provenance": "measured over the corpus's free sessions on 2026-10-21; the older sessions peak near 3000 and the newer ones near 18000"
+  },
+  {
+   "id": "RESAMPLE_FOLD",
+   "class": "deadband",
+   "statement": "src/wavio.py resamples 48 kHz to 16 kHz by linear interpolation with NO anti-aliasing, so content above 8 kHz folds down.  The TIME BASE is exact; the top of the band is not.",
+   "measurement": {
+    "what": "a synthetic tone at 48 kHz, resampled to 16 kHz the repository's way, and where its energy actually lands",
+    "rows": [
+     {
+      "input_hz": 1000.0,
+      "measured_hz_at_16k": 1000.0,
+      "fold_error_cents": 0.0
+     },
+     {
+      "input_hz": 5000.0,
+      "measured_hz_at_16k": 5000.0,
+      "fold_error_cents": 0.0
+     },
+     {
+      "input_hz": 8000.0,
+      "measured_hz_at_16k": 8000.0,
+      "fold_error_cents": 0.0
+     },
+     {
+      "input_hz": 10000.0,
+      "measured_hz_at_16k": 6000.0,
+      "fold_error_cents": -884.4
+     },
+     {
+      "input_hz": 14000.0,
+      "measured_hz_at_16k": 2000.0,
+      "fold_error_cents": -3368.8
+     }
+    ],
+    "note": "below 8 kHz the tone lands where it was put"
+   },
+   "provenance": "src/wavio.py:resample; the note is already in experiments/speech_to_score.py's resample_note"
+  },
+  {
+   "id": "AUDIO_LEAD",
+   "class": "delay",
+   "statement": "the WAV's first sample does not sit at the session's first frame; the two rings are trimmed independently",
+   "measurement": {
+    "what": "the session time of the WAV's first sample, against the session's first frame",
+    "rows": [
+     {
+      "session": "1792560597",
+      "audio_lead_ms": -71.0,
+      "source": "wall_clock_end - wall_clock_start - audio length: the audio's end and the wall clock's end are the same close, so the di"
+     },
+     {
+      "session": "1792560758",
+      "audio_lead_ms": -92.3,
+      "source": "wall_clock_end - wall_clock_start - audio length: the audio's end and the wall clock's end are the same close, so the di"
+     },
+     {
+      "session": "1792560773",
+      "audio_lead_ms": -6.3,
+      "source": "wall_clock_end - wall_clock_start - audio length: the audio's end and the wall clock's end are the same close, so the di"
+     }
+    ]
+   },
+   "provenance": "the clock is src/wavio.py + the session's own timestamps.json, read through experiments/speech_to_score.py:load_clock"
+  },
+  {
+   "id": "WALK_BY_ENVELOPE",
+   "class": "signature",
+   "statement": "the envelope carries the EVENT -- a crossing of the microphone's field shows up as a loudness hump -- but on this corpus it does NOT carry the direction.  Graded against the video's own radial label (the blob's apparent size grows toward the phone and shrinks away from it), the envelope's direction agrees 34 % of the time, which is chance.  The reason is measurable: the hump at a crossing is the SPEAKER'S OWN VOICE.  The envelope's peak lands on one of the session's own speech segments at 70-88 % of crossings, against a 32-42 % baseline for a random moment.  The corpus contains no labelled toward/pass/away crossings, so the claim is untested rather than refuted.",
+   "measurement": {
+    "n_sessions": 80,
+    "n_crossings": 574,
+    "n_with_an_envelope": 574,
+    "envelope_excursion_db": {
+     "n": 574,
+     "min": 0.0,
+     "p25": 0.0,
+     "median": 0.0,
+     "p75": 0.0,
+     "max": 124.20691818369545,
+     "mean": 4.2383549749158
+    },
+    "envelope_direction_counts": {
+     "AWAY": 40,
+     "TOWARD": 51,
+     "PASS": 483
+    },
+    "video_frame_direction_counts": {
+     "RIGHT": 271,
+     "LEFT": 303
+    },
+    "video_radial_label_counts": {
+     "AWAY": 196,
+     "TOWARD": 253,
+     "PASS": 125
+    },
+    "n_graded": 574,
+    "n_agreeing_with_the_video_radial_label": 142,
+    "agreement_rate": 0.2474,
+    "confusion_rows_video_cols_envelope": {
+     "TOWARD": {
+      "TOWARD": 28,
+      "PASS": 208,
+      "AWAY": 17
+     },
+     "PASS": {
+      "TOWARD": 8,
+      "PASS": 104,
+      "AWAY": 13
+     },
+     "AWAY": {
+      "TOWARD": 15,
+      "PASS": 171,
+      "AWAY": 10
+     }
+    },
+    "auc_envelope_slope_toward_vs_away": 0.5105,
+    "n_envelope_peak_on_a_speech_segment": 70,
+    "envelope_peak_on_speech_rate": 0.122,
+    "audio_bearing_subset": {
+     "n_crossings_with_a_live_envelope": 94,
+     "n_agreeing_with_the_video_radial_label": 39,
+     "agreement_rate": 0.4149,
+     "auc_envelope_slope_toward_vs_away": 0.5064,
+     "n_envelope_peak_on_a_speech_segment": 70,
+     "envelope_peak_on_speech_rate": 0.7447,
+     "note": "the other crossings sit in sessions whose audio is digital silence, so their envelopes are flat and their direction is the direction of a constant"
+    }
+   },
+   "provenance": "experiments/lens.py:walk_by_study, over the corpus's sessions with a live video layer; the radial label is the blob's apparent-size growth, and the room map's own words are that an image plane measures no distance"
+  },
+  {
+   "id": "DOPPLER_BELOW_THRESHOLD",
+   "class": "deadband",
+   "statement": "the Doppler shift at walking speed is 7.05 cents, and the pitch tracker's own frame-to-frame jitter is larger than that on this material: the pitch channel cannot carry the direction, and the envelope has to.",
+   "measurement": {
+    "doppler_cents_at_1_4_ms": 7.05,
+    "per_crossing": [
+     {
+      "session": "1792560597",
+      "n_voiced_frames": 28,
+      "f0_median_hz": 163.82,
+      "step_cents_median": 18.26,
+      "step_cents_p90": 922.78,
+      "step_cents_max": 2311.13,
+      "doppler_cents_expected": 7.05,
+      "note": "the Doppler shift is compared against the tracker's own frame-to-frame jitter: a shift smaller than the jitter is not a measurement"
+     },
+     {
+      "session": "1792560758",
+      "n_voiced_frames": 76,
+      "f0_median_hz": 131.38,
+      "step_cents_median": 14.93,
+      "step_cents_p90": 127.63,
+      "step_cents_max": 1815.91,
+      "doppler_cents_expected": 7.05,
+      "note": "the Doppler shift is compared against the tracker's own frame-to-frame jitter: a shift smaller than the jitter is not a measurement"
+     },
+     {
+      "session": "1792560758",
+      "n_voiced_frames": 49,
+      "f0_median_hz": 136.83,
+      "step_cents_median": 13.29,
+      "step_cents_p90": 70.28,
+      "step_cents_max": 238.98,
+      "doppler_cents_expected": 7.05,
+      "note": "the Doppler shift is compared against the tracker's own frame-to-frame jitter: a shift smaller than the jitter is not a measurement"
+     },
+     {
+      "session": "1792560758",
+      "n_voiced_frames": 214,
+      "f0_median_hz": 162.88,
+      "step_cents_median": 13.08,
+      "step_cents_p90": 60.23,
+      "step_cents_max": 2364.89,
+      "doppler_cents_expected": 7.05,
+      "note": "the Doppler shift is compared against the tracker's own frame-to-frame jitter: a shift smaller than the jitter is not a measurement"
+     },
+     {
+      "session": "1792560758",
+      "n_voiced_frames": 149,
+      "f0_median_hz": 151.84,
+      "step_cents_median": 13.1,
+      "step_cents_p90": 50.52,
+      "step_cents_max": 779.97,
+      "doppler_cents_expected": 7.05,
+      "note": "the Doppler shift is compared against the tracker's own frame-to-frame jitter: a shift smaller than the jitter is not a measurement"
+     },
+     {
+      "session": "1792560758",
+      "n_voiced_frames": 260,
+      "f0_median_hz": 141.19,
+      "step_cents_median": 14.0,
+      "step_cents_p90": 630.66,
+      "step_cents_max": 2156.77,
+      "doppler_cents_expected": 7.05,
+      "note": "the Doppler shift is compared against the tracker's own frame-to-frame jitter: a shift smaller than the jitter is not a measurement"
+     },
+     {
+      "session": "1792560758",
+      "n_voiced_frames": 188,
+      "f0_median_hz": 115.67,
+      "step_cents_median": 14.47,
+      "step_cents_p90": 66.04,
+      "step_cents_max": 1351.62,
+      "doppler_cents_expected": 7.05,
+      "note": "the Doppler shift is compared against the tracker's own frame-to-frame jitter: a shift smaller than the jitter is not a measurement"
+     },
+     {
+      "session": "1792560758",
+      "n_voiced_frames": 101,
+      "f0_median_hz": 112.04,
+      "step_cents_median": 18.23,
+      "step_cents_p90": 63.86,
+      "step_cents_max": 1254.3,
+      "doppler_cents_expected": 7.05,
+      "note": "the Doppler shift is compared against the tracker's own frame-to-frame jitter: a shift smaller than the jitter is not a measurement"
+     },
+     {
+      "session": "1792596296",
+      "n_voiced_frames": 44,
+      "f0_median_hz": 81.46,
+      "step_cents_median": 15.66,
+      "step_cents_p90": 325.77,
+      "step_cents_max": 1218.51,
+      "doppler_cents_expected": 7.05,
+      "note": "the Doppler shift is compared against the tracker's own frame-to-frame jitter: a shift smaller than the jitter is not a measurement"
+     },
+     {
+      "session": "1792596296",
+      "n_voiced_frames": 102,
+      "f0_median_hz": 130.15,
+      "step_cents_median": 17.83,
+      "step_cents_p90": 78.33,
+      "step_cents_max": 1175.24,
+      "doppler_cents_expected": 7.05,
+      "note": "the Doppler shift is compared against the tracker's own frame-to-frame jitter: a shift smaller than the jitter is not a measurement"
+     },
+     {
+      "session": "1792596296",
+      "n_voiced_frames": 49,
+      "f0_median_hz": 129.11,
+      "step_cents_median": 15.26,
+      "step_cents_p90": 1195.53,
+      "step_cents_max": 1480.72,
+      "doppler_cents_expected": 7.05,
+      "note": "the Doppler shift is compared against the tracker's own frame-to-frame jitter: a shift smaller than the jitter is not a measurement"
+     },
+     {
+      "session": "1792596296",
+      "n_voiced_frames": 85,
+      "f0_median_hz": 138.75,
+      "step_cents_median": 11.22,
+      "step_cents_p90": 54.51,
+      "step_cents_max": 1890.45,
+      "doppler_cents_expected": 7.05,
+      "note": "the Doppler shift is compared against the tracker's own frame-to-frame jitter: a shift smaller than the jitter is not a measurement"
+     }
+    ]
+   },
+   "provenance": "Casey's claim, measured against the repository's own tracker"
+  }
+ ],
+ "lens_version": 1,
+ "generated_utc": "2026-10-21T17:30:50Z"
+}

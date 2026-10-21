@@ -1,0 +1,23 @@
+{
+ "sensor": "asr",
+ "device": "faster-whisper small.en, CPU int8 / CUDA float16",
+ "behaviours": [
+  {
+   "id": "NON_SPEECH_HALLUCINATION",
+   "class": "failure_signature",
+   "statement": "the ASR returns WORDS for a non-speech stimulus: a 16-22 kHz exponential sweep with a pink burst produced 14 words in one probe and none in the other three.",
+   "measurement": {
+    "n_probes": 4,
+    "n_words_returned": {
+     "1792561741": 0,
+     "1792561867": 0,
+     "1792561987": 0,
+     "1792596245": 14
+    }
+   },
+   "provenance": "the pause study's probe_artifacts"
+  }
+ ],
+ "lens_version": 1,
+ "generated_utc": "2026-10-21T17:30:50Z"
+}

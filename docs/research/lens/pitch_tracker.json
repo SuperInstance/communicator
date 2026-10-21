@@ -1,0 +1,18 @@
+{
+ "sensor": "pitch_tracker",
+ "device": "src/pitch.py, YIN, 50 ms frames, 10 ms hop",
+ "behaviours": [
+  {
+   "id": "OCTAVE_ARTEFACT",
+   "class": "failure_signature",
+   "statement": "the largest frame-to-frame pitch jumps are tracker artefacts -- a near-doubling or a halving -- and not voices.  A label taken from the biggest jump is a label taken from an artefact.",
+   "measurement": {
+    "note": "see the pause study's free-corpus slope tail: +344 st/s is not a slope, it is an octave error inside one 300 ms window",
+    "max_observed_slope_st_s": 343.84
+   },
+   "provenance": "docs/research/F0-SPEAKER-CHANGE.md reports one octave artefact and seven of thirteen subharmonic artefacts in one cell; the pause study's free corpus reaches +344 st/s"
+  }
+ ],
+ "lens_version": 1,
+ "generated_utc": "2026-10-21T17:30:50Z"
+}

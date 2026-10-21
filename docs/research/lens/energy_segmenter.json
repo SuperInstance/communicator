@@ -1,0 +1,33 @@
+{
+ "sensor": "energy_segmenter",
+ "device": "src/energy.py, 50 ms frames, 10 ms hop",
+ "behaviours": [
+  {
+   "id": "LEADING_SILENCE_ESCAPES",
+   "class": "deadband",
+   "statement": "the first segment of a file is kept unconditionally (src/energy.py:290), so the silence BEFORE the first word escapes the min_silence filter and is reported as a pause.  It is a file-edge artefact, not an inter-utterance pause.",
+   "measurement": {
+    "published_shortest_pause_s": 0.11,
+    "artefact_free_shortest_s": 0.15,
+    "affected_cells": [
+     "dialogue",
+     "shakespeare",
+     "children"
+    ]
+   },
+   "provenance": "docs/research/PAUSE-THRESHOLD.md \u00a74 and docs/research/SILENCE-LEADING-ARTEFACT.md"
+  },
+  {
+   "id": "PEAK_ANCHORED_THRESHOLD",
+   "class": "deadband",
+   "statement": "the speech threshold is 10 % of the clip's LOUDEST frame.  In a longer recording where the loudest frame is a clap, a knock or an applause, the threshold is set by the transient and the recording is labelled speech.  The limitation is stated in the source.",
+   "measurement": {
+    "threshold_fraction_of_peak": 0.1,
+    "stated_limit": "src/energy.py:224 -- 'a longer recording with applause would need a percentile instead'"
+   },
+   "provenance": "src/energy.py:224"
+  }
+ ],
+ "lens_version": 1,
+ "generated_utc": "2026-10-21T17:30:50Z"
+}
