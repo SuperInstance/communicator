@@ -116,6 +116,18 @@
   #timerRow .l { font-size: 11px; color: var(--dim); letter-spacing: 2px; }
   #stateLine { text-align: center; color: var(--dim); font-size: 14px; min-height: 20px; }
 
+  #phaseBadge { display: none; align-items: center; gap: 10px;
+    font-size: 22px; font-weight: 800; letter-spacing: 1px;
+    margin: 2px 0 4px; }
+  #phaseBadge .pdot { width: 13px; height: 13px; border-radius: 50%;
+    background: currentColor; flex: none; }
+  #phaseBadge.rec { color: var(--rec); display: flex; }
+  #phaseBadge.rec .pdot { animation: blink 1s infinite; }
+  #phaseBadge.work { color: var(--accent); display: flex; }
+  #phaseBadge.start { color: var(--warn); display: flex; }
+  #phaseBadge.ok { color: var(--ok); display: flex; }
+  button.okbtn { border-color: var(--ok); color: var(--ok); font-weight: 700; }
+
   #poemCard { display: none; background: var(--panel2); border: 1px solid var(--line);
     border-radius: 8px; padding: 12px 16px; margin-top: 10px; max-height: 300px;
     overflow: auto; }
@@ -245,6 +257,7 @@
     <div class="card" id="conditionCard">
       <h2>Condition</h2>
       <div id="condName">READY</div>
+      <div id="phaseBadge"><span class="pdot"></span><span id="phaseText"></span></div>
       <div id="condText">PRESS START PLAN</div>
       <div id="condNote">16 takes, about 16 minutes. The camera and microphone
         stay on the whole time; each take uploads the moment it ends.</div>
@@ -277,6 +290,7 @@
         <button id="pauseBtn" disabled>PAUSE</button>
         <button id="skipBtn" disabled>SKIP TAKE</button>
         <button id="redoBtn" disabled>REDO THIS TAKE</button>
+        <button id="stopBtn" class="okbtn" title="End the take now and save the frames recorded so far, flagged short_take in the metadata. ABORT TAKE is the discard." disabled>STOP &amp; SAVE</button>
         <button id="abortBtn" class="danger" disabled>ABORT TAKE</button>
         <span id="planLabel"></span>
       </div>
@@ -1066,7 +1080,7 @@ function buildWav(samples, n, rate) {
    what makes n_samples/rate land on n_frames/30 and the spans agree, and it
    is why the timestamps in timing.json are the truth.
    ========================================================================== */
-let capturing = false, abortFlag = false;
+let capturing = false, abortFlag = false, stopSaveFlag = false;
 const LB = 160 * 96;
 
 /* The addendum's parallel full-fidelity artifact: a native-res WebM with the
@@ -1099,7 +1113,7 @@ async function recordSpec(spec) {
   const samples = new Float32Array(n * blk);
   let captured = 0, nSamples = 0;
 
-  capturing = true; abortFlag = false;
+  capturing = true; abortFlag = false; stopSaveFlag = false;
   flushAudio();
 
   const wallStart = new Date().toISOString();
@@ -1119,11 +1133,21 @@ async function recordSpec(spec) {
 
   const t0 = performance.now();
   const lastCamSec = (spec.seconds * 1000) + 15000;  // stall watchdog
+  let lastFrameAt = t0;   // the moment the last frame was actually captured
   const result = await new Promise((resolve) => {
     const tick = () => {
       if (abortFlag) { resolve("aborted"); return; }
+      if (stopSaveFlag) {
+        // STOP & SAVE: finalize with what exists -- unless the script's
+        // own 10-frame minimum makes it unsavable
+        resolve(captured >= 10 ? "stopped" : "tooshort"); return;
+      }
       if (captured >= n) { resolve("done"); return; }
-      if (performance.now() - t0 > lastCamSec) {
+      // every end condition is bounded on the wall clock: the absolute
+      // target+15s cap, and a 5s no-progress trip for an audio clock or
+      // worklet that dies mid-take (frames frozen but time passing)
+      if (performance.now() - t0 > lastCamSec ||
+          (captured > 0 && performance.now() - lastFrameAt > 5000)) {
         resolve("stalled"); return;
       }
       if (captured === 0 && performance.now() - t0 > 2500 && qTotal === 0) {
@@ -1137,6 +1161,7 @@ async function recordSpec(spec) {
         const got = popAudio(blk, samples, captured * blk);
         nSamples += got;
         captured++;
+        lastFrameAt = performance.now();
         uiRecordingProgress(spec, captured, n, stamps[0]);
       }
       setTimeout(tick, 3);
@@ -1148,14 +1173,27 @@ async function recordSpec(spec) {
 
   let webm = null;
   if (recorder && recorder.state !== "inactive") {
-    await new Promise((res) => { recorder.onstop = res; recorder.stop(); })
-      .catch(() => {});
+    // BOUNDED: a recorder whose onstop never fires must not hang the
+    // take after the frames are already safe in memory (the observed
+    // live bug: performed take, "running" forever, no POST). Race the
+    // stop against 3 seconds and move on with what was buffered.
+    await Promise.race([
+      new Promise((res) => { recorder.onstop = res; recorder.stop(); }),
+      sleep(3000),
+    ]).catch(() => {});
   }
-  if (result === "done" && webmChunks.length) {
+  if ((result === "done" || result === "stopped" || result === "stalled") &&
+      webmChunks.length) {
     try { webm = new Uint8Array(await new Blob(webmChunks).arrayBuffer()); }
     catch (err) { webm = null; }
   }
-  return { result, spec, n, captured, luma, stamps, samples, nSamples, blk,
+  const frames = Math.min(captured, n);
+  return { result, spec, n: frames, captured,
+           // an early end ships exactly the frames that exist: a
+           // full-length luma buffer would fail the server's n_frames
+           // cross-check
+           luma: frames === n ? luma : luma.subarray(0, frames * LB),
+           stamps, samples, nSamples, blk,
            wallStart, wallEnd, webm };
 }
 
@@ -1230,6 +1268,9 @@ async function finalizeTake(rec) {
     capture_tool: "browser_capture",
     speech_gate: speech.frac == null ? "unavailable" : "browser_rms_adaptive",
   };
+  // STOP & SAVE, or a stall the watchdog ended early: the take is honest,
+  // and this says it did not run to the condition's full length
+  if (rec.short) meta.short_take = true;
 
   const parts = [];
   section(parts, new TextEncoder().encode(JSON.stringify(meta)));
@@ -1247,6 +1288,7 @@ async function finalizeTake(rec) {
     speak: spec.speak,
     instruction_text: spec.display,
     instruction_note: spec.note,
+    short_take: !!rec.short,
     stimulus: stim.stimulus,
     stimulus_title: stim.stimulus_title,
     wall_clock_start: rec.wallStart,
@@ -1335,8 +1377,14 @@ let lastUpload = null, lastSaved = null;
 async function uploadTake(finalized) {
   lastUpload = finalized;
   document.getElementById("retryBtn").style.display = "none";
+  // bounded: a server that never answers must not leave the page in
+  // UPLOADING forever -- the take stays in memory either way
+  const ctl = typeof AbortController !== "undefined" ?
+    new AbortController() : null;
+  const kill = ctl ? setTimeout(() => ctl.abort(), 120000) : 0;
   try {
-    const resp = await fetch("/take", { method: "POST", body: finalized.blob });
+    const resp = await fetch("/take", { method: "POST", body: finalized.blob,
+      signal: ctl ? ctl.signal : undefined });
     const j = await resp.json().catch(() => ({ ok: false, error: "bad reply" }));
     if (!resp.ok || !j.ok) throw new Error(j.error || ("HTTP " + resp.status));
     lastUpload = null;
@@ -1354,8 +1402,12 @@ async function uploadTake(finalized) {
   } catch (err) {
     document.getElementById("retryBtn").style.display = "";
     setStateLine("UPLOAD FAILED for " + finalized.meta.condition +
-      " -- the take is kept in memory; click Retry upload (" + err.message + ")");
+      " -- the take is kept in memory; click Retry upload (" +
+      (err && err.name === "AbortError" ?
+        "no answer from the server for 120 s" : err.message) + ")");
     return false;
+  } finally {
+    if (kill) clearTimeout(kill);
   }
 }
 
@@ -1417,18 +1469,35 @@ async function doTake(idx) {
 
   // record
   setPhase("recording", idx);
+  setStateLine("RECORDING " + spec.name + " -- STOP & SAVE keeps a shorter " +
+    "take, ABORT TAKE discards it; the take uploads the moment it ends");
   const rec = await recordSpec(spec);
-  if (rec.result !== "done") {
+  const savable = rec.result === "done" ||
+    ((rec.result === "stopped" || rec.result === "stalled") && rec.n >= 10);
+  if (!savable) {
     setPhase("idle", driver.idx);
     if (rec.result === "aborted")
       setStateLine("take " + spec.name + " aborted -- nothing was saved");
+    else if (rec.result === "tooshort")
+      setStateLine("take " + spec.name + " stopped under the 10-frame " +
+        "minimum -- nothing can be saved and nothing was written; REDO " +
+        "THIS TAKE when ready");
     else if (rec.result === "noaudio")
       showBanner("err", "The microphone delivered no audio. Recording needs " +
         "the mic for the A/V correspondence check; fix the mic and retry.");
     else
-      showBanner("err", "Recording stalled (audio clock stopped delivering). " +
-        "Take discarded.");
+      showBanner("err", "Recording stalled with under a second of frames " +
+        "(audio clock stopped delivering). Take discarded.");
     return false;
+  }
+  if (rec.result !== "done") {
+    // STOP & SAVE, or a stall the watchdog ended: what was performed is
+    // kept, and the metadata says it is short
+    rec.short = true;
+    setStateLine(rec.result === "stopped" ?
+      "stopped early -- saving " + rec.n + " frames, flagged short_take" :
+      "the audio clock stalled -- saving the " +
+      (rec.n / FPS).toFixed(1) + "s that were recorded, flagged short_take");
   }
 
   // finalise + upload
@@ -1437,6 +1506,7 @@ async function doTake(idx) {
   setPhase("uploading", idx);
   const ok = await uploadTake(finalized);
   setPhase("idle", driver.idx);
+  if (ok) flashSaved(spec.name);
   return ok;
 }
 
@@ -1463,9 +1533,35 @@ async function runPlan() {
    ========================================================================== */
 const $ = (id) => document.getElementById(id);
 
+function setPhaseBadge(cls, text) {
+  $("phaseBadge").className = cls;
+  $("phaseText").textContent = text;
+}
+
+let savedFlashSeq = 0;
+function flashSaved(name) {
+  setPhaseBadge("ok", "SAVED -- TAKE " + name);
+  const seq = ++savedFlashSeq;
+  setTimeout(() => {
+    // never clear a badge a newer take has already repainted
+    if (seq === savedFlashSeq && $("phaseBadge").className === "ok")
+      $("phaseBadge").className = "";
+  }, 3000);
+}
+
 function setPhase(phase, idx) {
   uiPhase = phase;
   const spec = idx != null ? PLAN[idx] : null;
+  if (phase === "countdown")
+    setPhaseBadge("start", "STARTING");
+  else if (phase === "recording")
+    setPhaseBadge("rec", "RECORDING 0:00 / " + fmtT(spec ? spec.seconds : 0));
+  else if (phase === "processing")
+    setPhaseBadge("work", "PROCESSING THE TAKE");
+  else if (phase === "uploading")
+    setPhaseBadge("work", "UPLOADING");
+  else
+    $("phaseBadge").className = "";
   const showTimer = phase === "recording";
   $("timerRow").style.display = showTimer ? "flex" : "none";
   $("bigNumber").style.display = phase === "countdown" ? "block" : "none";
@@ -1502,6 +1598,8 @@ function uiRecordingProgress(spec, captured, n, t0ms) {
   $("tRemaining").textContent = fmtT(remain);
   $("tElapsed").textContent = fmtT(elap);
   $("tFrames").textContent = captured + " / " + n;
+  $("phaseText").textContent = "RECORDING " + fmtT(elap) + " / " +
+    fmtT(spec.seconds);
 }
 function fmtT(s) {
   const m = Math.floor(s / 60), r = Math.floor(s % 60);
@@ -1608,6 +1706,7 @@ function updateControls() {
   $("redoBtn").disabled = busy;
   $("abortBtn").disabled = !(busy && uiPhase !== "uploading" &&
     uiPhase !== "processing");
+  $("stopBtn").disabled = uiPhase !== "recording";
   $("camSelect").disabled = busy;   // a camera swap mid-take would stall it
 }
 
@@ -1654,6 +1753,11 @@ $("redoBtn").onclick = async () => {
   await doTake(driver.idx);
 };
 $("abortBtn").onclick = () => { abortFlag = true; };
+$("stopBtn").onclick = () => {
+  stopSaveFlag = true;
+  setStateLine("stopping -- the take will be saved with the frames " +
+    "recorded so far, flagged short_take in the metadata");
+};
 $("retryBtn").onclick = async () => {
   if (lastUpload) await uploadTake(lastUpload);
 };

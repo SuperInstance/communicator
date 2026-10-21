@@ -256,3 +256,43 @@ property of the takes, and the metadata records the world the camera
 saw). Boost preview remains the separate cosmetic control it already
 was. Still a browser reload, never a server restart. Verify suite after
 this patch: 145 passed, 0 failed.
+
+## Patch 2026-10-20 (same session, fifth): the take that looked hung
+
+Casey clicked a take from the table, performed 50+ seconds, and from his
+chair it was indistinguishable from hung: one ambiguous "running", no
+stop control, and — confirmed server-side — no POST ever arrived. The
+record loop itself was already bounded (done at `captured >= n`, noaudio
+at 2.5 s, a target+15 s cap); the hang was AFTER the loop. Three fixes:
+
+1. **Explicit take states.** A large phase banner in the condition card
+   carries the whole arc: STARTING → **RECORDING 0:37 / 1:40** (blinking
+   red dot; elapsed/target counts up with every captured frame) →
+   PROCESSING THE TAKE → UPLOADING → **SAVED — TAKE A1** (green, three
+   seconds). The banner is driven by the phase transitions around
+   finalize/upload themselves, so it cannot lie about where the take is;
+   the takes-table chip remains as the per-take view.
+2. **STOP & SAVE.** A green button beside ABORT TAKE, enabled only while
+   recording. It finalizes the take with the frames that exist and
+   stamps `short_take: true` into the metadata (and the rich sidecar) —
+   an honest take that did not run to the condition's full length, kept
+   rather than discarded. Under the script's 10-frame minimum nothing
+   can be saved and the state line says so; SKIP/ABORT remain the
+   discard paths.
+3. **The stall audit — every end is bounded on the wall clock.**
+   - The genuinely unbounded wait — `await recorder.onstop` after
+     `recorder.stop()`, which if the driver never fires it leaves a
+     finished take hung forever with no POST (the observed failure) — is
+     now raced against a 3-second timer; whatever was buffered is used.
+   - A new no-progress watchdog ends the take when no frame has arrived
+     for 5 s (audio clock or worklet dying mid-take): ≥10 frames are
+     SAVED flagged `short_take` with the reason on the state line,
+     fewer are discarded with the reason.
+   - The original target+15 s cap stays as the backstop, with the same
+     save-if-possible semantics.
+   - The upload fetch aborts after 120 s and says so, instead of
+     sitting in UPLOADING forever; the take stays in memory with the
+     Retry path either way.
+
+Also a browser reload, nothing server-side. Verify suite after this
+patch: 145 passed, 0 failed.
