@@ -1,0 +1,281 @@
+{
+  "results": [
+    {
+      "capture": "A",
+      "known": {
+        "face": "facing",
+        "speech": "speaking"
+      },
+      "known_from": "corpus/A_seed.json, corpus_v2/A.json",
+      "recovered": {
+        "face": "facing",
+        "speech": "speaking"
+      },
+      "speech_fraction": 0.6693,
+      "face_detection_rate": 1.0,
+      "n_segments": 21,
+      "n_frames": 900,
+      "face_errors": 0,
+      "symmetry": {
+        "n": 900,
+        "min": -0.1769022511304164,
+        "max": 0.10505861078278539,
+        "mean": -0.021234100597755417,
+        "std": 0.059902105995584196,
+        "threshold": 0.18,
+        "n_at_or_above_threshold": 0
+      },
+      "recovered_correctly": true,
+      "layout": "y_uv_halfres (19200 B/frame)",
+      "maps_vs_takes": [
+        {
+          "n_maps": 599,
+          "differing_cells": 2279091,
+          "total_cells": 2300160,
+          "max_abs_diff": 255,
+          "scale_derived": 9.010416666666671,
+          "scale_stored": 143.2708282470703,
+          "scale_matches": false,
+          "take": "corpus/A_seed.json"
+        },
+        {
+          "n_maps": 899,
+          "differing_cells": 0,
+          "total_cells": 3452160,
+          "max_abs_diff": 0,
+          "scale_derived": 8.00000000000001,
+          "scale_stored": 8.0,
+          "scale_matches": true,
+          "take": "corpus_v2/A.json"
+        }
+      ],
+      "derived_takes": [
+        "A1_1792550772",
+        "A2_1792550772",
+        "A3_1792550772",
+        "A4_1792550772",
+        "A5_1792550772",
+        "A6_1792550772",
+        "A7_1792550772",
+        "A8_1792550772",
+        "A9_1792550772"
+      ],
+      "derived_skipped": 12,
+      "gate": {
+        "n_takes": 9,
+        "n_failed": 0,
+        "ok": true,
+        "error": null,
+        "failures": []
+      }
+    },
+    {
+      "capture": "B",
+      "known": {
+        "face": "turned",
+        "speech": "speaking"
+      },
+      "known_from": "corpus/B_seed.json, corpus_v2/B.json",
+      "recovered": {
+        "face": "turned",
+        "speech": "speaking"
+      },
+      "speech_fraction": 0.6267,
+      "face_detection_rate": 1.0,
+      "n_segments": 26,
+      "n_frames": 900,
+      "face_errors": 0,
+      "symmetry": {
+        "n": 900,
+        "min": 0.24602571923346253,
+        "max": 0.4226907349492834,
+        "mean": 0.3499240827363018,
+        "std": 0.03411292132495482,
+        "threshold": 0.18,
+        "n_at_or_above_threshold": 900
+      },
+      "recovered_correctly": true,
+      "layout": "y_uv_halfres (19200 B/frame)",
+      "maps_vs_takes": [
+        {
+          "n_maps": 599,
+          "differing_cells": 2290513,
+          "total_cells": 2300160,
+          "max_abs_diff": 255,
+          "scale_derived": 2.765625,
+          "scale_stored": 131.3177032470703,
+          "scale_matches": false,
+          "take": "corpus/B_seed.json"
+        },
+        {
+          "n_maps": 899,
+          "differing_cells": 0,
+          "total_cells": 3452160,
+          "max_abs_diff": 0,
+          "scale_derived": 3.0,
+          "scale_stored": 3.0,
+          "scale_matches": true,
+          "take": "corpus_v2/B.json"
+        }
+      ],
+      "derived_takes": [
+        "B1_1792550783",
+        "B2_1792550783",
+        "B3_1792550783",
+        "B4_1792550783",
+        "B5_1792550783",
+        "B6_1792550783",
+        "B7_1792550783",
+        "B8_1792550783",
+        "B9_1792550783",
+        "B10_1792550783"
+      ],
+      "derived_skipped": 16,
+      "gate": {
+        "n_takes": 10,
+        "n_failed": 0,
+        "ok": true,
+        "error": null,
+        "failures": []
+      }
+    },
+    {
+      "capture": "C",
+      "known": {
+        "face": "facing",
+        "speech": "silent"
+      },
+      "known_from": "corpus/C_seed.json, corpus_v2/C.json",
+      "recovered": {
+        "face": "facing",
+        "speech": "silent"
+      },
+      "speech_fraction": 0.007,
+      "face_detection_rate": 1.0,
+      "n_segments": 1,
+      "n_frames": 900,
+      "face_errors": 0,
+      "symmetry": {
+        "n": 900,
+        "min": -0.03711530407596791,
+        "max": 0.05920833871559315,
+        "mean": 0.017425128270013416,
+        "std": 0.014154287857115415,
+        "threshold": 0.18,
+        "n_at_or_above_threshold": 0
+      },
+      "recovered_correctly": true,
+      "layout": "y_uv_halfres (19200 B/frame)",
+      "maps_vs_takes": [
+        {
+          "n_maps": 599,
+          "differing_cells": 2288896,
+          "total_cells": 2300160,
+          "max_abs_diff": 255,
+          "scale_derived": 2.898971354166859,
+          "scale_stored": 140.046875,
+          "scale_matches": false,
+          "take": "corpus/C_seed.json"
+        },
+        {
+          "n_maps": 899,
+          "differing_cells": 0,
+          "total_cells": 3452160,
+          "max_abs_diff": 0,
+          "scale_derived": 2.5,
+          "scale_stored": 2.5,
+          "scale_matches": true,
+          "take": "corpus_v2/C.json"
+        }
+      ],
+      "derived_takes": [
+        "C1_1792550795"
+      ],
+      "derived_skipped": 0,
+      "gate": {
+        "n_takes": 1,
+        "n_failed": 0,
+        "ok": true,
+        "error": null,
+        "failures": []
+      }
+    },
+    {
+      "capture": "empty1",
+      "known": {
+        "face": "absent",
+        "speech": "silent"
+      },
+      "known_from": "fallback (no labelled take exists)",
+      "recovered": {
+        "face": "absent",
+        "speech": "silent"
+      },
+      "speech_fraction": 0.0456,
+      "face_detection_rate": 0.0,
+      "n_segments": 3,
+      "n_frames": 4500,
+      "face_errors": 0,
+      "symmetry": {
+        "n": 0,
+        "min": null,
+        "max": null,
+        "mean": null,
+        "std": null,
+        "threshold": 0.18,
+        "n_at_or_above_threshold": 0
+      },
+      "recovered_correctly": true,
+      "layout": "y_uv_halfres (19200 B/frame)",
+      "maps_vs_takes": [],
+      "derived_takes": [],
+      "derived_skipped": 3,
+      "gate": {
+        "n_takes": 0,
+        "n_failed": 0,
+        "ok": true,
+        "error": null,
+        "failures": []
+      }
+    }
+  ],
+  "recovered": 4,
+  "total": 4,
+  "maps_reproduced": 3,
+  "maps_total": 6,
+  "gate": {
+    "n_takes": 20,
+    "n_failed": 0,
+    "ok": true,
+    "per_capture": {
+      "A": {
+        "n_takes": 9,
+        "n_failed": 0,
+        "ok": true,
+        "error": null,
+        "failures": []
+      },
+      "B": {
+        "n_takes": 10,
+        "n_failed": 0,
+        "ok": true,
+        "error": null,
+        "failures": []
+      },
+      "C": {
+        "n_takes": 1,
+        "n_failed": 0,
+        "ok": true,
+        "error": null,
+        "failures": []
+      },
+      "empty1": {
+        "n_takes": 0,
+        "n_failed": 0,
+        "ok": true,
+        "error": null,
+        "failures": []
+      }
+    }
+  }
+}
