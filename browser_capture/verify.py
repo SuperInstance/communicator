@@ -360,6 +360,22 @@ def main() -> int:
         check("a query string does not break routing (the 404 class)",
               status == 200 and
               qpage == (HERE / "free_record.html").read_bytes())
+        status, body = http("GET", "/evolve")
+        check("GET /evolve is the repo's evolve.html (the lab shell)",
+              status == 200 and
+              body == (HERE / "evolve.html").read_bytes())
+        status, body = http("GET", "/probes/manifest.json")
+        man = json.loads(body)
+        check("/probes/manifest.json lists sonar-band and audio-health",
+              status == 200 and
+              {p.get("name") for p in man.get("probes", [])} >=
+              {"sonar-band", "audio-health"})
+        status, body = http("GET", "/probes/sonar-band.js")
+        check("probe modules are served from disk",
+              status == 200 and b"sonar-band" in body)
+        status, body = http("GET", "/probes/../server.py")
+        check("probe path traversal is refused",
+              status == 404 and not json.loads(body).get("ok"))
         status, info = http("GET", "/info")
         check("GET /info", status == 200 and
               json.loads(info)["out"] == str(out_dir))

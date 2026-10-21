@@ -65,6 +65,12 @@ ENDPOINTS:
     GET  /          -> free_record.html, the FREE RECORD front door (no-store,
                        so a refresh always gets latest)
     GET  /plan      -> index.html, the condition-plan page (no-store)
+    GET  /evolve    -> evolve.html, THE LAB: the stable shell (capture +
+                       probe engine + safety rails) whose probes hot-swap
+                       without reloads
+    GET  /probes/*  -> the versioned probe modules and manifest.json,
+                       re-read from disk on every request (an agent's
+                       edit reaches already-open pages on the next cycle)
     GET  /info      -> {"out": ..., "port": ...}
     GET  /takes     -> every take already in the out dir (script-made ones
                        included), newest first, with file presence and the
@@ -1029,6 +1035,8 @@ class Handler(BaseHTTPRequestHandler):
     index_path: Path = None
     free_path: Path = None
     live_path: Path = None
+    evolve_path: Path = None
+    probes_dir: Path = None
 
     def log_message(self, fmt, *args):  # keep the console signal-heavy
         if self.command in ("POST",) or " 40" in (fmt % args) \
@@ -1381,6 +1389,29 @@ class Handler(BaseHTTPRequestHandler):
             self._send(200, page, "text/html; charset=utf-8")
         elif route == "/live-state":
             self._json(200, live_state(self.out_dir))
+        elif route == "/evolve":
+            try:
+                page = self.evolve_path.read_bytes()
+            except OSError as exc:
+                self._json(500, {"ok": False,
+                                 "error": f"evolve.html: {exc}"})
+                return
+            self._send(200, page, "text/html; charset=utf-8")
+        elif route.startswith("/probes/"):
+            name = route[len("/probes/"):]
+            if "/" in name or ".." in name or not re.fullmatch(
+                    r"[A-Za-z0-9._-]+", name):
+                self._json(404, {"ok": False, "error": "no such probe"})
+                return
+            p = self.probes_dir / name
+            try:
+                body = p.read_bytes()
+            except OSError:
+                self._json(404, {"ok": False, "error": f"no {name!r}"})
+                return
+            ctype = "application/javascript" if name.endswith(".js") \
+                else "application/json"
+            self._send(200, body, ctype + "; charset=utf-8")
         elif route == "/luma-latest":
             with LUMA_LOCK:
                 batch = dict(LUMA_LATEST)
@@ -1479,6 +1510,8 @@ def main(argv=None) -> int:
     Handler.index_path = Path(__file__).resolve().parent / "index.html"
     Handler.free_path = Path(__file__).resolve().parent / "free_record.html"
     Handler.live_path = Path(__file__).resolve().parent / "live.html"
+    Handler.evolve_path = Path(__file__).resolve().parent / "evolve.html"
+    Handler.probes_dir = Path(__file__).resolve().parent / "probes"
 
     httpd = ThreadingHTTPServer((a.host, a.port), Handler)
     httpd.daemon_threads = True

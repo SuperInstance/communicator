@@ -1,0 +1,1432 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Evolve Lab</title>
+<style>
+  :root { --bg:#101418; --panel:#1a2027; --line:#2d3945; --fg:#e8edf2;
+    --dim:#8fa1b3; --accent:#4db6ac; --rec:#e05252; --ok:#7ec97e;
+    --warn:#e0a458; }
+  * { box-sizing: border-box; }
+  body { margin:0 auto; padding:16px 18px 40px; background:var(--bg);
+    color:var(--fg); font-family: system-ui, -apple-system, "Segoe UI",
+    Roboto, sans-serif; max-width: 900px; }
+  header { display:flex; align-items:baseline; gap:14px; flex-wrap:wrap;
+    border-bottom:1px solid var(--line); padding-bottom:10px;
+    margin-bottom:14px; }
+  h1 { font-size:22px; margin:0; letter-spacing:2px; }
+  .sub { color:var(--dim); font-size:13px; }
+  .spacer { flex:1; }
+  a.plain { color:var(--dim); font-size:13px; }
+
+  /* the big honest indicator -- visible from across the room */
+  #indicator { display:flex; align-items:center; justify-content:center;
+    gap:14px; padding:18px 10px; border-radius:10px; border:2px solid;
+    font-size:34px; font-weight:800; letter-spacing:4px;
+    margin-bottom:12px; }
+  #indicator .dot { width:18px; height:18px; border-radius:50%;
+    background:currentColor; flex:none; }
+  #indicator.armed { color:var(--accent); border-color:var(--accent);
+    background:rgba(77,182,172,.07); }
+  #indicator.rec { color:var(--rec); border-color:var(--rec);
+    background:rgba(224,82,82,.09); }
+  #indicator.rec .dot { animation:blink 1s infinite; }
+  #indicator.paused { color:var(--warn); border-color:var(--warn);
+    background:rgba(224,164,88,.08); }
+  @keyframes blink { 50% { opacity:.12; } }
+  #subState { text-align:center; color:var(--dim); font-size:14px;
+    min-height:18px; margin-bottom:10px; }
+  #segCount { text-align:center; color:var(--ok); font-size:13px;
+    min-height:16px; margin-bottom:6px; }
+
+  #videoWrap { position:relative; background:#000; border-radius:8px;
+    overflow:hidden; }
+  #video { width:100%; display:block; transform:scaleX(-1); }
+  .row { display:flex; gap:18px; align-items:center; margin-top:12px;
+    flex-wrap:wrap; }
+  #elapsed { font-size:44px; font-weight:800;
+    font-variant-numeric:tabular-nums; }
+  #meter { flex:1; min-width:180px; height:16px; background:#0b0e11;
+    border:1px solid var(--line); border-radius:4px; overflow:hidden; }
+  #meterFill { height:100%; width:0%; background:linear-gradient(90deg,
+    #2e7d6e, #4db6ac 70%, #e0a458 90%, #e06c75); }
+  #detRead { font-size:12px; color:var(--dim); width:100%;
+    font-variant-numeric:tabular-nums; }
+  #devLine { font-size:12.5px; color:var(--dim); width:100%; }
+  #devLine.deaf { color:var(--rec); font-weight:700; font-size:13.5px; }
+
+  .controls { margin-top:14px; display:flex; gap:10px; align-items:center;
+    flex-wrap:wrap; }
+  button { background:#212a33; color:var(--fg); border:1px solid var(--line);
+    border-radius:6px; padding:10px 22px; font-size:16px; cursor:pointer; }
+  button:hover:not(:disabled) { border-color:var(--accent); }
+  button:disabled { opacity:.4; cursor:default; }
+  #pauseBtn { border-color:var(--rec); color:var(--rec); font-weight:700; }
+  #recBtn.rec { background:var(--rec); border:none; color:#fff;
+    font-weight:800; }
+  #msg { margin-top:10px; color:var(--dim); font-size:14px;
+    min-height:20px; }
+  #msg.err { color:#e06c75; }
+  #receipts { display:none; margin-top:14px; border:1px solid var(--line);
+    border-radius:8px; background:var(--panel); padding:10px 14px; }
+  #receipts .rHead { font-size:12px; letter-spacing:1.5px;
+    color:var(--dim); text-transform: uppercase; font-weight:600;
+    margin-bottom:6px; }
+  #receiptList { font-family: ui-monospace, Menlo, Consolas, monospace;
+    font-size:12.5px; line-height:1.7; color:#c7d3dd; }
+  #receiptList .r { white-space:nowrap; overflow-x:auto; }
+  #receiptList .r .ok { color:var(--ok); }
+  .fine { margin-top:12px; color:var(--dim); font-size:12px;
+    line-height:1.6; }
+  #labPanel { margin-top:16px; border:1px solid var(--line);
+    border-radius:10px; background:var(--panel); padding:12px 16px; }
+  #labPanel .labHead { font-size:12px; letter-spacing:1.5px;
+    color:var(--dim); text-transform:uppercase; font-weight:600;
+    margin-bottom:8px; }
+  #labState { font-size:13px; color:var(--accent); min-height:18px; }
+  #labState.err { color:var(--rec); }
+  #labRows div { font-size:12.5px; line-height:1.7; color:#c7d3dd;
+    font-family: ui-monospace, Menlo, Consolas, monospace; }
+  #labRows .refused { color:var(--warn); }
+  #labRows .fail { color:var(--rec); }
+  .devPick { display:flex; gap:10px; align-items:center; margin-top:10px;
+    flex-wrap:wrap; }
+  .devPick .cap { font-size:11px; color:var(--dim); letter-spacing:1px;
+    text-transform:uppercase; }
+  .devPick select { background:var(--panel2); color:var(--fg);
+    border:1px solid var(--line); border-radius:6px; padding:6px 8px;
+    font-size:13px; max-width:320px; }
+</style>
+</head>
+<body>
+<header>
+  <h1>EVOLVE LAB</h1>
+  <span class="sub">capture as usual + a lab the fleet iterates all night, no reloads</span>
+  <span class="spacer"></span>
+  <a class="plain" href="/live">live monitor</a> &middot;
+  <a class="plain" href="/plan">plan mode &rarr;</a>
+</header>
+
+<div id="indicator" class="armed"><span class="dot"></span><span id="indText">ARMED</span></div>
+<div id="subState">listening for speech or presence &mdash; a segment opens by itself</div>
+<div id="segCount"></div>
+
+<div id="videoWrap">
+  <video id="video" autoplay playsinline muted></video>
+</div>
+<div class="devPick">
+  <span class="cap">mic</span><select id="micSelect"></select>
+  <span class="cap">cam</span><select id="camSelect"></select>
+</div>
+<div class="row">
+  <div id="elapsed">0:00</div>
+  <div id="meter"><div id="meterFill"></div></div>
+  <div id="detRead">speech &mdash; / presence &mdash;</div>
+  <div id="devLine">mic: &mdash; &middot; cam: &mdash;</div>
+</div>
+
+<div class="controls">
+  <button id="pauseBtn">PAUSE EVERYTHING</button>
+  <button id="recBtn">RECORD</button>
+</div>
+<div id="msg"></div>
+<button id="retryDevices" style="display:none; margin-top:8px;">
+  RETRY DEVICES</button>
+<div id="receipts">
+  <div class="rHead">Receipts &mdash; segments saved this sitting</div>
+  <div id="receiptList"></div>
+</div>
+<div class="fine">AUTO: a segment opens on speech or presence, closes after
+  ~8 s of quiet, and uploads in the background as it closes &mdash; no button
+  needed for the data to be safe. RECORD/STOP is the manual fallback;
+  PAUSE EVERYTHING closes and saves whatever is open, then holds. Keep this
+  tab in the foreground: a backgrounded tab keeps detecting SPEECH (audio
+  thread) but the browser stops its video frames.</div>
+<div id="labPanel">
+  <div class="labHead">The lab &mdash; probes hot-swap without a reload;
+    safety rails live here, not in the probes</div>
+  <div id="labState">probe engine: starting ...</div>
+  <div id="labRows"></div>
+</div>
+<script>
+"use strict";
+/* ============================================================================
+   FREE RECORD, AUTO -- the front door. After permissions the page ARMS
+   ITSELF: a segment opens when speech or presence is detected, closes
+   after ~8 s of silence/stillness, and every closed segment uploads in
+   the BACKGROUND as it finishes (chunked -- no end-of-session crunch, no
+   STOP needed for the data to be safe). Casey opens the page once, puts
+   it aside, forgets it.
+
+   Exactly two controls: PAUSE EVERYTHING (kill switch -- closes and
+   saves the open segment, then holds) and RECORD/STOP (manual fallback;
+   a manual segment has no auto-close). The indicator is big and honest
+   at all times: ARMED / RECORDING / PAUSED.
+
+   DETECTION, and why these rules:
+   - SPEECH: the corpus's own energy-adaptive rule (speechStats /
+     meterFrame on the plan page) -- threshold at 10x the 20th-percentile
+     RMS floor of a rolling ring. The floor is FROZEN while a segment is
+     open, so continuous speech cannot recalibrate itself into silence.
+   - PRESENCE: honest proxy -- adaptive motion energy over the 160x96
+     luma frames (mean |frame - prev frame| vs its own 20th-percentile
+     floor x5, frozen likewise). Not a face detector; it answers "is a
+     person present and doing something", which is the question.
+   - Every floor, threshold, level and decision goes out in the
+     heartbeat, so AUTO can be tuned from diag.log on the real machine.
+   - ~1 s of PRE-ROLL (audio + luma + timestamps) seeds each segment, so
+     the opening syllable that TRIGGERED it is inside the artifact. The
+     WebM starts at segment open (MediaRecorder cannot reach back);
+     meta.json says so.
+
+   Artifacts are unchanged: each segment is one POST /free -> one
+   <out>/free_sessions/<stamp>/ folder (video.webm, luma.raw,
+   timestamps.json, audio.wav, meta.json) -- the server needs no
+   changes, and analysis happens offline.
+   ========================================================================== */
+const $ = (id) => document.getElementById(id);
+const videoEl = $("video");
+const LB = 160 * 96;
+
+const CLOSE_AFTER_MS = 8000;   // quiet time that closes an auto segment
+const PRE_ROLL_MS = 1000;      // what a segment starts with, before trigger
+const FLOOR_EVERY_MS = 500;    // floor recompute cadence while armed-idle
+const FLOOR_WARMUP_MS = 2000;  // no auto decision before the floors are
+                               // measured from real data -- a bootstrap
+                               // threshold would fire on plain room tone
+                               // (found by the headless self-verify: the
+                               // fake mic's silence sits above the 1e-4
+                               // bootstrap, so a segment opened at boot
+                               // and never closed)
+// ROTATION: an auto segment closes at max length EVEN MID-ACTIVITY. A
+// segment that only closes on silence pools a whole long session in the
+// tab -- exactly the risk AUTO exists to kill; closed segments must flow
+// to the server continuously. ?maxseg=<seconds> tunes it (and lets the
+// headless self-verify prove the path with a short value).
+const MAX_SEG_MS = Math.max(5,
+  parseFloat(new URLSearchParams(location.search).get("maxseg")) || 300)
+  * 1000;
+
+let stream = null, audioCtx = null, realRate = 0, micName = "", camName = "";
+let noVideo = false;   // camera held elsewhere: audio-only lab (probes
+                        // and speech live; motion and frames do not)
+let micDeviceId = null, camDeviceId = null;
+try { micDeviceId = localStorage.bcMic || null; } catch (e) {}
+try { camDeviceId = localStorage.bcCam || null; } catch (e) {}
+let audioSrcNode = null, audioTapNode = null;   // the mic -> worklet tap
+let level = 0;                 // rms of the newest audio block
+let nAudioBlocks = 0, lastSoundAt = 0;   // the deafness watchdog's inputs
+let paused = false;
+let openSeg = null;            // the live segment (auto or manual)
+let savedCount = 0;
+const pendingSaves = [];       // segments whose upload failed, auto-retried
+
+/* -- detection state ------------------------------------------------------ */
+const speechRing = [];         // rms ring (~5.5 s at ~375 blocks/s)
+const SPEECH_RING_MAX = 2048;
+const motionRing = [];         // mean |dLuma| ring (~15 s at ~60 fps)
+const MOTION_RING_MAX = 900;
+let speechFloor = 1e-4, motionFloor = 0.5;
+let speechNow = false, motionNow = false;
+let lastMotion = 0, prevLuma = null;
+let lastFloorAt = 0, lastFrameAt = 0;
+let armedAt = 0, floorsReady = false;
+
+function pct(arr, p) {
+  if (!arr.length) return null;
+  const s = Array.from(arr).sort(function (a, b) { return a - b; });
+  return s[Math.min(s.length - 1, Math.floor(s.length * p))];
+}
+
+function speechThr() { return Math.max(speechFloor * 10, 1e-4); }
+function motionThr() { return Math.max(motionFloor * 5, 0.6); }
+
+function speechStep(rms) {
+  speechRing.push(rms);
+  if (speechRing.length > SPEECH_RING_MAX) speechRing.shift();
+  // no decision before warm-up: an unmeasured floor means an honest
+  // "unknown", not a free pass for room tone
+  speechNow = floorsReady && rms >= speechThr();
+  return speechNow;
+}
+
+function motionStep(luma) {
+  if (prevLuma && prevLuma.length === luma.length) {
+    let s = 0;
+    for (let i = 0; i < luma.length; i++) {
+      let d = luma[i] - prevLuma[i];
+      if (d < 0) d = -d;
+      s += d;
+    }
+    lastMotion = s / luma.length;
+    motionRing.push(lastMotion);
+    if (motionRing.length > MOTION_RING_MAX) motionRing.shift();
+    motionNow = floorsReady && lastMotion >= motionThr();
+  }
+  prevLuma = luma;
+  return motionNow;
+}
+
+function maybeRecomputeFloors() {
+  // frozen while a segment is open: continuous speech/motion must not
+  // raise its own threshold and reclose mid-segment
+  if (openSeg) return;
+  const now = performance.now();
+  if (!floorsReady && armedAt && now - armedAt >= FLOOR_WARMUP_MS &&
+      speechRing.length >= 64 && motionRing.length >= 8) {
+    floorsReady = true;
+    diagSend("FLOORS_READY", {
+      speech_floor: speechFloor, motion_floor: motionFloor });
+  }
+  if (now - lastFloorAt < FLOOR_EVERY_MS) return;
+  lastFloorAt = now;
+  const sf = pct(speechRing, 0.2), mf = pct(motionRing, 0.2);
+  if (sf != null) speechFloor = sf;
+  if (mf != null) motionFloor = mf;
+}
+
+/* -- pre-roll rings (seed the next segment, include the trigger) ---------- */
+let preAudio = [], preAudioSamples = 0, preFrames = [], preTs = [];
+
+function feedPreAudio(blk) {
+  preAudio.push(blk);
+  preAudioSamples += blk.length;
+  const cap = Math.ceil(realRate * (PRE_ROLL_MS / 1000) * 1.2) + 4096;
+  while (preAudioSamples > cap && preAudio.length > 1) {
+    preAudioSamples -= preAudio[0].length;
+    preAudio.shift();
+  }
+}
+function feedPreFrame(f, ts) {
+  preFrames.push(f);
+  preTs.push(ts);
+  while (preTs.length > 2 &&
+         ts - preTs[0] > PRE_ROLL_MS * 1.2) {
+    preFrames.shift();
+    preTs.shift();
+  }
+}
+
+/* -- diagnostics heartbeat (rides for free) ------------------------------- */
+function diagSend(kind, fields) {
+  const body = JSON.stringify(Object.assign({
+    kind: kind, page: "free_record_auto", ts: new Date().toISOString(),
+    state: paused ? "paused" : openSeg ? "recording" : "armed",
+    seg_open: !!openSeg, seg_age_s: openSeg ?
+      Math.round((performance.now() - openSeg.t0ms) / 100) / 10 : null,
+    n_frames: openSeg ? openSeg.nFrames : 0,
+    n_samples: openSeg ? openSeg.nSamples : 0,
+    recorder: openSeg && openSeg.recorder ? openSeg.recorder.state : null,
+    audioCtxState: audioCtx ? audioCtx.state : null,
+    speech_level: Math.round(level * 1e6) / 1e6,
+    speech_thr: Math.round(speechThr() * 1e6) / 1e6,
+    speech_now: speechNow,
+    motion: Math.round(lastMotion * 100) / 100,
+    motion_thr: Math.round(motionThr() * 100) / 100,
+    motion_now: motionNow,
+    floors_ready: floorsReady,
+    deaf: deaf,
+    mic: micName, cam: camName,
+    audio_blocks: nAudioBlocks,
+    audio_silent_s: audioCtx && nAudioBlocks ?
+      Math.round((performance.now() - lastSoundAt) / 100) / 10 : null,
+    saved: savedCount, pending_uploads: pendingSaves.length,
+    visibility: document.visibilityState,
+  }, fields || {}));
+  try {
+    if (navigator.sendBeacon && navigator.sendBeacon("/log",
+        new Blob([body], { type: "application/json" })))
+      return;
+  } catch (e) { /* fall through to fetch */ }
+  fetch("/log", { method: "POST", body: body, keepalive: true,
+    headers: { "Content-Type": "application/json" } }).catch(() => {});
+}
+setInterval(() => {
+  diagSend("heartbeat");
+  postThumb();
+  postLumaBatch();
+  deafCheck();
+  deafGate();
+}, 1000);
+
+/* The LIVE FORWARDER's feed: every other tick, the newest ~90 luma
+   frames (with their offsets) go to the server, which hands them to the
+   Jetson pair seat. Observation only -- nothing here waits on it. */
+let lumaTick = 0;
+function postLumaBatch() {
+  if (!(lumaTick++ % 2) || !stream || noVideo) return;
+  const src = openSeg ? openSeg.frames : preFrames;
+  const tsSrc = openSeg ? openSeg.frameTs : preTs;
+  if (!src || !src.length) return;
+  const K = Math.min(90, src.length);
+  const start = src.length - K;
+  const head = new DataView(new ArrayBuffer(8 + K * 8));
+  head.setBigUint64(0, BigInt(K), true);
+  for (let i = 0; i < K; i++)
+    head.setBigUint64(8 + i * 8, BigInt(Math.round(tsSrc[start + i])), true);
+  const parts = [new Uint8Array(head.buffer)];
+  for (let i = start; i < src.length; i++) parts.push(src[i]);
+  fetch("/luma", { method: "POST",
+    headers: { "Content-Type": "application/octet-stream" },
+    body: new Blob(parts),
+  }).catch(() => {});
+}
+
+/* -- the deafness watchdog --------------------------------------------------
+   Live telemetry caught a sitting where speech level sat at exactly 0
+   for minutes while segments still saved -- a mic delivering digital
+   silence (wrong device, or hardware mute). A deaf page must be obvious
+   AT A GLANCE: the device line names the mic and camera the page
+   actually holds, and turns red with the reason when the audio is
+   silent or dead.                                                            */
+function deafCheck() {
+  if (!audioCtx) return;
+  const el = $("devLine");
+  if (nAudioBlocks === 0) {
+    el.className = "deaf";
+    el.textContent = "AUDIO DEAD -- no samples have reached the page " +
+      "(the audio tap failed). Reload the page.";
+  } else if (audioCtx.state === "running" &&
+             performance.now() - lastSoundAt > 20000) {
+    el.className = "deaf";
+    el.textContent = "AUDIO SILENT for " +
+      Math.round((performance.now() - lastSoundAt) / 1000) +
+      " s -- mic \"" + micName + "\" is delivering silence. A healthy " +
+      "room is never this quiet: check the Windows input device and the " +
+      "mic mute, or pick a live mic above. Silent for 60 s, AUTO stops " +
+      "opening segments.";
+  } else {
+    el.className = "";
+    el.textContent = "mic: " + micName + " @ " + realRate + " Hz" +
+      "   \u00b7   cam: " + camName;
+  }
+}
+
+/* -- the deafness GATE -------------------------------------------------------
+   The live incident, 2026-10-21: the mic delivered exact zeros for two
+   whole sittings while MOTION kept opening segments -- 34 saved
+   sessions, 82.4 million audio samples, every one zero. A deaf AUTO
+   session is worthless by construction, so after 60 s of flat silence
+   the page stops opening segments (the indicator says so); it resumes
+   the moment the mic hears anything. Manual RECORD stays available --
+   explicit operator intent outranks the gate.                           */
+let deaf = false;
+function deafGate() {
+  const silent = nAudioBlocks > 0 && audioCtx &&
+    audioCtx.state === "running" &&
+    performance.now() - lastSoundAt > 60000;
+  if (silent && !deaf) {
+    deaf = true;
+    diagSend("DEAF_ON", { mic: micName });
+    if (openSeg && openSeg.mode === "auto") closeSegment("deaf");
+    paint();
+  } else if (!silent && deaf) {
+    deaf = false;
+    diagSend("DEAF_OFF", { mic: micName });
+    paint();
+  }
+}
+
+/* -- the device pickers -------------------------------------------------------
+   "Casey cannot tell WHICH mic the page holds" -- tonight it held a
+   dead one, invisibly, all night. The pickers make the held devices
+   NAMED and SWITCHABLE in one click; a mic switch re-taps the worklet
+   and re-measures the floors, because a different device is a
+   different instrument.                                                        */
+const BAD_CAM_RE = /(^|[^a-z])(ir|infrared|virtual)([^a-z]|$)/i;
+
+async function refreshPickers() {
+  if (!navigator.mediaDevices || !navigator.mediaDevices.enumerateDevices)
+    return;
+  let devs = [];
+  try {
+    devs = await navigator.mediaDevices.enumerateDevices();
+  } catch (err) { return; }
+  const mics = devs.filter(d => d.kind === "audioinput");
+  const cams = devs.filter(d => d.kind === "videoinput");
+  const fill = (sel, list, chosen) => {
+    sel.innerHTML = "";
+    list.forEach((d, i) => {
+      const o = document.createElement("option");
+      o.value = d.deviceId;
+      o.textContent = d.label || ("device " + (i + 1));
+      sel.appendChild(o);
+    });
+    if (chosen && list.some(d => d.deviceId === chosen)) sel.value = chosen;
+  };
+  fill($("micSelect"), mics, micDeviceId);
+  const goodCam = cams.find(d => d.label && !BAD_CAM_RE.test(d.label));
+  const camWant = camDeviceId && cams.some(d => d.deviceId === camDeviceId)
+    ? camDeviceId : (goodCam ? goodCam.deviceId :
+                     (cams[0] ? cams[0].deviceId : null));
+  fill($("camSelect"), cams, camWant);
+  if (camWant && camWant !== camDeviceId) {
+    camDeviceId = camWant;
+    try { localStorage.bcCam = camWant; } catch (e) {}
+  }
+}
+
+async function switchMic(devId) {
+  // open the new mic FIRST; swap the track on the live stream; re-tap
+  // the worklet; re-measure the floors (different device, different
+  // instrument)
+  const s = await navigator.mediaDevices.getUserMedia({
+    audio: { deviceId: { exact: devId }, channelCount: 1,
+             echoCancellation: false, noiseSuppression: false,
+             autoGainControl: false },
+  });
+  const nt = s.getAudioTracks()[0];
+  if (!nt) { s.getTracks().forEach(t => t.stop());
+    throw new Error("that mic gave no track"); }
+  const old = stream.getAudioTracks()[0];
+  if (audioSrcNode) { try { audioSrcNode.disconnect(); } catch (e) {} }
+  if (old) { stream.removeTrack(old); old.stop(); }
+  stream.addTrack(nt);
+  audioSrcNode = audioCtx.createMediaStreamSource(new MediaStream([nt]));
+  audioSrcNode.connect(audioTapNode);
+  micDeviceId = devId;
+  try { localStorage.bcMic = devId; } catch (e) {}
+  micName = nt.label || "browser mic";
+  speechRing = []; speechFloor = 1e-4; floorsReady = false;
+  armedAt = performance.now(); lastSoundAt = armedAt; nAudioBlocks = 0;
+  deaf = false;
+  deafCheck(); paint();
+}
+
+async function switchCam(devId) {
+  const s = await navigator.mediaDevices.getUserMedia({
+    video: { deviceId: { exact: devId } },
+  });
+  const nt = s.getVideoTracks()[0];
+  if (!nt) { s.getTracks().forEach(t => t.stop());
+    throw new Error("that camera gave no track"); }
+  const old = stream.getVideoTracks()[0];
+  if (old) { stream.removeTrack(old); old.stop(); }
+  stream.addTrack(nt);
+  camDeviceId = devId;
+  try { localStorage.bcCam = devId; } catch (e) {}
+  camName = nt.label || "browser camera";
+  try {
+    const caps = nt.getCapabilities ? nt.getCapabilities() : null;
+    if (caps && Array.isArray(caps.exposureMode) &&
+        caps.exposureMode.includes("continuous"))
+      await nt.applyConstraints(
+        { advanced: [{ exposureMode: "continuous" }] });
+  } catch (err) {}
+  deafCheck(); paint();
+}
+
+/* the LIVE MONITOR's window: one small JPEG of the 160x96 luma canvas
+   per second -- what the pipeline sees, not the pretty preview. Latest
+   wins server-side; nothing is stored. */
+function postThumb() {
+  if (!stream || noVideo) return;
+  try {
+    const data = canvas.toDataURL("image/jpeg", 0.6);
+    fetch("/thumb", { method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ data: data, ts: new Date().toISOString() }),
+    }).catch(() => {});
+  } catch (err) { /* canvas unavailable -- the monitor goes without */ }
+}
+
+/* -- the canvas + frame capture ------------------------------------------- */
+const canvas = document.createElement("canvas");
+canvas.width = 160; canvas.height = 96;
+const cctx = canvas.getContext("2d", { willReadFrequently: true });
+cctx.imageSmoothingEnabled = true;
+cctx.imageSmoothingQuality = "high";
+
+function captureFrame() {
+  if (noVideo) return null;
+  // one luma frame + timestamp; guarded so the rAF path and the
+  // hidden-tab interval path never double-capture
+  const now = performance.now();
+  if (now - lastFrameAt < 15) return null;
+  lastFrameAt = now;
+  cctx.drawImage(videoEl, 0, 0, 160, 96);
+  const d = cctx.getImageData(0, 0, 160, 96).data;
+  const f = new Uint8Array(LB);
+  for (let i = 0, j = 0; i < d.length; i += 4, j++) {
+    // BT.601 full-range luma, the coefficients the corpus luma uses
+    let y = 0.299 * d[i] + 0.587 * d[i + 1] + 0.114 * d[i + 2];
+    f[j] = y > 255 ? 255 : Math.round(y);
+  }
+  return { f: f, ts: Math.round((now - baseT0) * 10) / 10 };
+}
+const baseT0 = performance.now();
+
+/* -- segments -------------------------------------------------------------- */
+function pickMime() {
+  if (typeof MediaRecorder === "undefined") return null;
+  for (const c of ["video/webm;codecs=vp9,opus", "video/webm;codecs=vp8,opus",
+                   "video/webm"])
+    if (MediaRecorder.isTypeSupported(c)) return c;
+  return null;
+}
+
+function openSegment(trigger) {
+  const now = performance.now();
+  const preMs = preTs.length ? Math.max(0, now - baseT0 - preTs[0]) : 0;
+  const seg = {
+    mode: trigger === "manual" ? "manual" : "auto",
+    trigger: trigger,
+    close_reason: null,
+    wallStart: new Date(Date.now() - preMs).toISOString(),
+    t0ms: now - preMs,
+    frames: preFrames.slice(), frameTs: preTs.slice(),
+    nFrames: preFrames.length,
+    audioChunks: preAudio.slice(), nSamples: preAudioSamples,
+    webmChunks: [], webm: null, recorder: null,
+    mime: pickMime(),
+    lastActive: now,
+    floors: { speech_floor: speechFloor, speech_thr: speechThr(),
+              motion_floor: motionFloor, motion_thr: motionThr() },
+  };
+  if (seg.mime) {
+    try {
+      seg.recorder = new MediaRecorder(stream,
+        { mimeType: seg.mime, videoBitsPerSecond: 4000000 });
+      seg.recorder.ondataavailable = (e) => {
+        if (e.data && e.data.size) seg.webmChunks.push(e.data);
+      };
+      seg.recorder.start(1000);
+    } catch (err) { seg.recorder = null; }
+  }
+  openSeg = seg;
+  paint();
+  diagSend("SEGMENT_OPEN", { trigger: trigger, pre_roll_ms: preMs,
+    mode: seg.mode });
+}
+
+async function closeSegment(reason) {
+  const seg = openSeg;
+  if (!seg) return;
+  openSeg = null;
+  // the pre-roll rings froze while the segment was open -- what is in
+  // them is stale by the segment's whole length, so the next segment
+  // starts its pre-roll from now
+  preAudio = []; preAudioSamples = 0; preFrames = []; preTs = [];
+  seg.close_reason = reason;
+  seg.wallEnd = new Date().toISOString();
+  if (seg.recorder && seg.recorder.state !== "inactive") {
+    // bounded, per the live bug: never wait forever on onstop
+    await Promise.race([
+      new Promise((res) => { seg.recorder.onstop = res;
+                             seg.recorder.stop(); }),
+      sleep(3000),
+    ]).catch(() => {});
+  }
+  diagSend("RECORDER_STOP", { state: seg.recorder ? seg.recorder.state
+    : null });
+  if (seg.webmChunks.length) {
+    try {
+      seg.webm = new Uint8Array(await new Blob(seg.webmChunks).arrayBuffer());
+    } catch (err) { seg.webm = null; }
+  }
+  paint();
+  diagSend("SEGMENT_CLOSE", { reason: reason, n_frames: seg.nFrames,
+    n_samples: seg.nSamples });
+  uploadSegment(seg);   // background, never awaited
+}
+
+/* -- background upload + retry -------------------------------------------- */
+setInterval(() => {
+  for (const p of pendingSaves.slice()) uploadSegment(p.seg, p.tries + 1);
+}, 30000);
+
+async function uploadSegment(seg, tries) {
+  tries = tries || 0;
+  const payload = buildPayload(seg);
+  // the receipt, from the same numbers the heartbeat reports -- what was
+  // saved, how long it ran, and the bytes that landed
+  const receipt = {
+    dir: null, duration_s: realRate ? seg.nSamples / realRate : 0,
+    frames: seg.nFrames,
+    luma_bytes: seg.nFrames * LB,
+    wav_bytes: 44 + seg.nSamples * 2,
+    webm_bytes: seg.webm ? seg.webm.length : 0,
+  };
+  receipt.total_bytes = receipt.luma_bytes + receipt.wav_bytes +
+    receipt.webm_bytes;
+  const ctl = typeof AbortController !== "undefined" ?
+    new AbortController() : null;
+  const kill = ctl ? setTimeout(() => ctl.abort(), 300000) : 0;
+  try {
+    const resp = await fetch("/free", { method: "POST", body: payload.blob,
+      signal: ctl ? ctl.signal : undefined });
+    const j = await resp.json().catch(() => ({ ok: false,
+                                               error: "bad reply" }));
+    if (!resp.ok || !j.ok)
+      throw new Error(j.error || ("HTTP " + resp.status));
+    savedCount++;
+    const i = pendingSaves.findIndex(p => p.seg === seg);
+    if (i >= 0) pendingSaves.splice(i, 1);
+    receipt.dir = j.dir;
+    addReceipt(receipt);
+    $("msg").className = "";
+    $("msg").textContent = "saved " + j.dir + " -- " + seg.nFrames +
+      " frames, " + (seg.nSamples / realRate).toFixed(1) + " s of audio";
+    diagSend("SEGMENT_SAVED", { dir: j.dir, n_frames: seg.nFrames,
+      tries: tries, receipt: receipt });
+    paint();
+  } catch (err) {
+    if (!pendingSaves.some(p => p.seg === seg))
+      pendingSaves.push({ seg: seg, tries: tries });
+    $("msg").className = "err";
+    $("msg").textContent = "SAVE FAILED (" +
+      (err && err.name === "AbortError" ?
+        "no answer from the server for 300 s" : err.message) +
+      ") -- the segment is held in this tab and retried every 30 s";
+    diagSend("SEGMENT_SAVE_FAILED", { error: String(err && err.message),
+      tries: tries, n_frames: seg.nFrames });
+    paint();
+  } finally {
+    if (kill) clearTimeout(kill);
+  }
+}
+
+/* -- receipts: every saved segment, with sizes and durations --------------- */
+function fmtBytes(n) {
+  if (n >= 1024 * 1024) return (n / (1024 * 1024)).toFixed(1) + " MB";
+  if (n >= 1024) return (n / 1024).toFixed(0) + " kB";
+  return n + " B";
+}
+
+function addReceipt(r) {
+  $("receipts").style.display = "block";
+  const list = $("receiptList");
+  const line = document.createElement("div");
+  line.className = "r";
+  line.innerHTML = '<span class="ok">&#10003;</span> ' +
+    new Date().toTimeString().slice(0, 8) + "  " + esc(r.dir) +
+    "  --  " + r.duration_s.toFixed(1) + " s, " + r.frames +
+    " frames, " + fmtBytes(r.total_bytes) + " " +
+    "(luma " + fmtBytes(r.luma_bytes) + " / wav " + fmtBytes(r.wav_bytes) +
+    " / webm " + fmtBytes(r.webm_bytes) + ")";
+  list.insertBefore(line, list.firstChild);
+  while (list.children.length > 30) list.removeChild(list.lastChild);
+}
+
+function esc(s) {
+  return String(s).replace(/&/g, "&amp;").replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;");
+}
+
+/* -- the POST body: five length-prefixed sections -------------------------- */
+function section(parts, bytes) {
+  const len = new ArrayBuffer(8);
+  new DataView(len).setBigUint64(0, BigInt(bytes.length), true);
+  parts.push(new Uint8Array(len), bytes);
+}
+const enc = (s) => new TextEncoder().encode(s);
+
+function buildWav(samples, n, rate) {
+  const buf = new ArrayBuffer(44 + n * 2);
+  const dv = new DataView(buf);
+  const ws = (off, s) => { for (let i = 0; i < s.length; i++)
+    dv.setUint8(off + i, s.charCodeAt(i)); };
+  ws(0, "RIFF"); dv.setUint32(4, 36 + n * 2, true); ws(8, "WAVE");
+  ws(12, "fmt "); dv.setUint32(16, 16, true); dv.setUint16(20, 1, true);
+  dv.setUint16(22, 1, true); dv.setUint32(24, rate, true);
+  dv.setUint32(28, rate * 2, true); dv.setUint16(32, 2, true);
+  dv.setUint16(34, 16, true); ws(36, "data"); dv.setUint32(40, n * 2, true);
+  const pcm = new Int16Array(buf, 44, n);
+  for (let i = 0; i < n; i++) {
+    let v = Math.round(samples[i] * 32767);
+    pcm[i] = v > 32767 ? 32767 : v < -32768 ? -32768 : v;
+  }
+  return new Uint8Array(buf);
+}
+
+function buildPayload(seg) {
+  const samples = new Float32Array(seg.nSamples);
+  let off = 0;
+  for (const c of seg.audioChunks) { samples.set(c, off); off += c.length; }
+  const wav = buildWav(samples, seg.nSamples, realRate);
+  const luma = new Uint8Array(seg.nFrames * LB);
+  for (let i = 0; i < seg.nFrames; i++) luma.set(seg.frames[i], i * LB);
+
+  // the camera track's own settings now, plus the detection context
+  let camSettings = {};
+  const vt = stream ? stream.getVideoTracks()[0] : null;
+  if (vt && vt.getSettings) {
+    const st = vt.getSettings() || {};
+    for (const k of ["frameRate", "width", "height", "exposureTime",
+                     "exposureMode", "deviceId"])
+      if (st[k] !== undefined) camSettings[k] = st[k];
+  }
+  const spanMs = seg.frameTs.length > 1 ?
+    seg.frameTs[seg.frameTs.length - 1] - seg.frameTs[0] : 0;
+  const meta = {
+    tool: "browser_free_record",
+    mode: seg.mode,                 // "auto" | "manual"
+    trigger: seg.trigger,           // what opened it
+    close_reason: seg.close_reason, // "quiet" | "manual_stop" | "pause"
+    detection: {
+      rule: "speech: rms >= 10x the 20th-percentile floor (floor frozen " +
+        "while open); presence: mean |dLuma| >= 5x its 20th-percentile " +
+        "floor; close after " + (CLOSE_AFTER_MS / 1000) + "s of neither; " +
+        "rotate at " + (MAX_SEG_MS / 1000) + "s even mid-activity",
+      pre_roll_s: PRE_ROLL_MS / 1000,
+      max_segment_s: MAX_SEG_MS / 1000,
+      speech_floor_rms: seg.floors.speech_floor,
+      speech_thr_rms: seg.floors.speech_thr,
+      motion_floor: seg.floors.motion_floor,
+      motion_thr: seg.floors.motion_thr,
+    },
+    wall_clock_start: seg.wallStart,
+    wall_clock_end: seg.wallEnd,
+    n_frames: seg.nFrames,
+    luma: {
+      width: 160, height: 96, frame_bytes: LB,
+      format: "uint8 BT.601 full-range luma (0.299R+0.587G+0.114B), " +
+        "row-major, frames concatenated -- " +
+        "np.fromfile(path, np.uint8).reshape(-1, 96, 160)",
+    },
+    timestamps: {
+      file: "timestamps.json",
+      frame_offsets_ms: "performance.now() minus the pre-roll base; pair " +
+        "with wall_clock_start for absolute time",
+    },
+    video: {
+      webm_mime: seg.mime, webm_bytes: seg.webm ? seg.webm.length : 0,
+      recorder_ran: !!seg.recorder,
+      note: "the WebM starts at segment open (no pre-roll); luma and wav " +
+        "include the " + (PRE_ROLL_MS / 1000) + "s pre-roll",
+    },
+    audio: {
+      sample_rate: realRate, samples: seg.nSamples,
+      peak_rms: seg.peakRms || 0,
+      audio_silent: seg.nSamples > 0 && !(seg.peakRms > 0),
+      wav: "16-bit PCM mono at the AudioContext's honest rate (no " +
+        "resampling, no processing; the context is opened at the " +
+        "browser's default rate)",
+    },
+    achieved_video_fps: spanMs > 0 ?
+      Math.round((seg.nFrames - 1) / (spanMs / 1000) * 10000) / 10000 : null,
+    camera: { label: camName, settings: camSettings },
+    mic: { label: micName },
+    browser: navigator.userAgent,
+    note: "frames are captured on requestAnimationFrame (a backgrounded " +
+      "tab degrades them to a slow interval; speech detection continues " +
+      "on the audio thread) -- keep this tab in the foreground",
+  };
+  const ts = { wall_clock_start: seg.wallStart,
+               frame_offsets_ms: seg.frameTs };
+
+  const parts = [];
+  section(parts, enc(JSON.stringify(meta)));
+  section(parts, wav);
+  section(parts, luma);
+  section(parts, enc(JSON.stringify(ts)));
+  section(parts, seg.webm || new Uint8Array(0));
+  return { blob: new Blob(parts, { type: "application/octet-stream" }),
+           meta: meta };
+}
+
+/* -- UI --------------------------------------------------------------------- */
+function paint() {
+  const ind = $("indicator");
+  if (paused) { ind.className = "paused"; $("indText").textContent = "PAUSED"; }
+  else if (deaf) { ind.className = "rec"; $("indText").textContent =
+    "DEAF -- MIC SILENT"; }
+  else if (openSeg) { ind.className = "rec"; $("indText").textContent = "RECORDING"; }
+  else { ind.className = "armed"; $("indText").textContent = "ARMED"; }
+  $("subState").textContent = paused ?
+    "held -- PAUSE EVERYTHING is on; RESUME to arm again" :
+    deaf ?
+    "the mic has been silent for 60 s -- NO new segments open until it " +
+    "hears something. Pick a live mic above (the line under the meters " +
+    "names the one being held); RECORD still works by hand." :
+    openSeg ? (openSeg.mode === "manual" ?
+      "manual segment (no auto-close) -- STOP closes and saves it" :
+      "auto segment -- closes after " + (CLOSE_AFTER_MS / 1000) +
+        "s of quiet, then saves in the background") :
+    "listening for speech or presence -- a segment opens by itself" +
+    (noVideo ? " (AUDIO-ONLY: the camera is held by another tab)" : "");
+  $("segCount").textContent =
+    (savedCount ? savedCount + " segment" + (savedCount > 1 ? "s" : "") +
+      " saved" : "") +
+    (pendingSaves.length ? (savedCount ? " - " : "") +
+      pendingSaves.length + " upload(s) retrying" : "");
+  $("pauseBtn").textContent = paused ? "RESUME" : "PAUSE EVERYTHING";
+  $("recBtn").textContent = openSeg ? "STOP" : "RECORD";
+  $("recBtn").className = openSeg ? "rec" : "";
+  $("recBtn").disabled = paused;
+  $("micSelect").disabled = !!openSeg;   // a mic swap mid-segment would
+  $("camSelect").disabled = !!openSeg;   // break the recorder and the tap
+}
+
+function fmtT(s) {
+  const m = Math.floor(s / 60), r = Math.floor(s % 60);
+  return m + ":" + String(r).padStart(2, "0");
+}
+function sleep(ms) { return new Promise(r => setTimeout(r, ms)); }
+function rms(a) {
+  let s = 0;
+  for (let i = 0; i < a.length; i++) s += a[i] * a[i];
+  return Math.sqrt(s / a.length);
+}
+
+/* the two controls that survive */
+$("pauseBtn").onclick = async () => {
+  if (paused) {
+    paused = false;
+    diagSend("RESUME_CLICKED");
+    paint();
+    return;
+  }
+  paused = true;
+  diagSend("PAUSE_CLICKED", { seg_open: !!openSeg });
+  paint();
+  if (openSeg) await closeSegment("pause");   // the data is safe, then quiet
+};
+
+$("recBtn").onclick = () => {
+  if (paused) return;
+  if (openSeg) {
+    diagSend("MANUAL_STOP_CLICKED", { n_frames: openSeg.nFrames });
+    closeSegment("manual_stop");
+  } else {
+    diagSend("RECORD_CLICKED");
+    openSegment("manual");
+  }
+};
+
+
+/* ============================================================================
+   THE LAB: hot-swappable probes, versioned modules, no reloads.
+   Every PROBE_CYCLE_S the shell re-fetches /probes/manifest.json; a probe
+   whose module version changed is re-imported from a fresh blob URL and
+   the NEXT run of it uses the new code -- an agent rewrites
+   browser_capture/probes/<name>.js, bumps its version, and this already-
+   open page picks it up. THE RAILS LIVE HERE, NOT IN THE PROBES: audible
+   probes are refused outright between 22:00 and 07:00 local, every
+   stimulus is gain-clamped and duty-capped regardless of what a probe
+   asks, and nothing runs while PAUSE EVERYTHING is on. Every run,
+   refusal, and failure is posted to /log and shown in the lab rows --
+   no silent experiments, ever.
+   ========================================================================== */
+const PROBE_CYCLE_S = 20;
+const RAILS = { gainMax: 0.3, dutyWindowS: 60, dutyMaxS: 5,
+                nightStart: 22, nightEnd: 7 };
+let probeCollect = null;          // {chunks, n} -- the tap while probing
+let probeBusy = false;
+const probeMods = {};             // name -> {mod, version}
+const probeLastRun = {};          // name -> ms
+const probeDuty = {};             // name -> [ms timestamps of stimulus use]
+const probeLastResult = {};       // name -> text (for the lab rows)
+
+function isNight() {
+  const h = new Date().getHours();
+  return h >= RAILS.nightStart || h < RAILS.nightEnd;
+}
+
+function labSay(cls, text) {
+  $("labState").className = cls === "err" ? "err" : "";
+  $("labState").textContent = text;
+}
+
+function labRow(name, cls, text) {
+  const rows = $("labRows");
+  const div = document.createElement("div");
+  if (cls) div.className = cls;
+  div.textContent = new Date().toTimeString().slice(0, 8) + "  " + name +
+    "  " + text;
+  rows.insertBefore(div, rows.firstChild);
+  while (rows.children.length > 40) rows.removeChild(rows.lastChild);
+}
+
+function installProbeTap() {
+  // wrap the worklet handler so probes can tap the mic without touching
+  // the capture path
+  const orig = audioTapNode.port.onmessage;
+  audioTapNode.port.onmessage = (ev) => {
+    if (probeCollect) {
+      probeCollect.chunks.push(ev.data);
+      probeCollect.n += ev.data.length;
+    }
+    orig(ev);
+  };
+}
+
+/* the probe context: everything a probe may do, railed shell-side */
+function probeCtx(entry) {
+  return {
+    shell: {
+      // the derived phase, same rule the indicator paints by
+      state: () => ({ phase: paused ? "paused" : deaf ? "deaf" :
+                        openSeg ? "recording" : "armed",
+                      deaf: deaf, segOpen: !!openSeg,
+                      saved: savedCount, rate: realRate, mic: micName,
+                      cam: camName, noVideo: noVideo }),
+    },
+    mic: {
+      async tapFor(ms) {
+        probeCollect = { chunks: [], n: 0 };
+        await sleep(ms);
+        const c = probeCollect;
+        probeCollect = null;
+        const out = new Float32Array(c.n);
+        let off = 0;
+        for (const b of c.chunks) { out.set(b, off); off += b.length; }
+        return out;
+      },
+    },
+    async playStimulus(samples, opts) {
+      opts = opts || {};
+      const now = Date.now();
+      const durS = samples.length / realRate;
+      // RAIL: duty ceiling per probe, whatever the probe asks
+      probeDuty[entry.name] = (probeDuty[entry.name] || [])
+        .filter(t => now - t < RAILS.dutyWindowS * 1000);
+      const used = probeDuty[entry.name].reduce(
+        (a, t) => a + t.dur, 0);
+      if (used + durS > RAILS.dutyMaxS)
+        return { refused: true,
+                 reason: "duty ceiling (" + RAILS.dutyMaxS + "s/" +
+                   RAILS.dutyWindowS + "s) reached" };
+      // RAIL: gain ceiling, always
+      const gain = Math.min(opts.gain == null ? RAILS.gainMax : opts.gain,
+                            RAILS.gainMax);
+      const buf = audioCtx.createBuffer(1, samples.length, realRate);
+      buf.copyToChannel(samples, 0);
+      const g = audioCtx.createGain();
+      g.gain.value = gain;
+      g.connect(audioCtx.destination);
+      const srcN = audioCtx.createBufferSource();
+      srcN.buffer = buf;
+      srcN.connect(g);
+      srcN.start();
+      probeDuty[entry.name].push({ t: now, dur: durS });
+      await sleep(durS * 1000);
+      return { refused: false, gainUsed: gain, durationS: durS };
+    },
+    async result(payload) {
+      diagSend("probe_result", Object.assign(
+        { probe: entry.name, version: probeMods[entry.name].version },
+        payload));
+    },
+    async saveArtifact(meta, wav) {
+      const m = Object.assign({
+        tool: "browser_free_record", mode: "probe",
+        trigger: "probe", close_reason: "probe_complete",
+        detection: { rule: "probe artifact, no detection" },
+        wall_clock_start: new Date().toISOString(),
+        wall_clock_end: new Date().toISOString(),
+        n_frames: 0,
+        luma: { width: 0, height: 0, frame_bytes: 0, format: "none" },
+        timestamps: { file: "timestamps.json", frame_offsets_ms: "none" },
+        video: { webm_mime: null, webm_bytes: 0, recorder_ran: false },
+        audio: { sample_rate: realRate, samples: wav.length / 2,
+                 wav: "probe artifact" },
+      }, meta);
+      const parts = [];
+      const enc = (x) => new TextEncoder().encode(x);
+      const sec = (b) => {
+        const len = new ArrayBuffer(8);
+        new DataView(len).setBigUint64(0, BigInt(b.length), true);
+        parts.push(new Uint8Array(len), b);
+      };
+      sec(enc(JSON.stringify(m)));
+      sec(wav);
+      sec(new Uint8Array(0));
+      sec(enc(JSON.stringify({ frame_offsets_ms: [] })));
+      sec(new Uint8Array(0));
+      const resp = await fetch("/free", { method: "POST",
+        body: new Blob(parts, { type: "application/octet-stream" }) });
+      const j = await resp.json().catch(() => ({ ok: false }));
+      if (!j.ok) throw new Error(j.error || resp.status);
+      return j.dir;
+    },
+  };
+}
+
+async function loadProbeModule(entry) {
+  const resp = await fetch("/probes/" + entry.file + "?v=" +
+                           Math.floor(Date.now() / 1000));
+  if (!resp.ok) throw new Error("fetch " + entry.file + ": " + resp.status);
+  const text = await resp.text();
+  const url = URL.createObjectURL(new Blob([text],
+    { type: "text/javascript" }));
+  const mod = await import(url);   // fresh blob URL: no module-cache hits
+  const ver = (mod.meta && mod.meta.version) || entry.version || 0;
+  if (!probeMods[entry.name] || probeMods[entry.name].version !== ver) {
+    probeMods[entry.name] = { mod: mod, version: ver };
+    labRow(entry.name, "",
+      "module v" + ver + " loaded" +
+      (probeLastRun[entry.name] ? "  (hot-swapped, no reload)" : ""));
+  }
+  return probeMods[entry.name];
+}
+
+async function runProbe(entry) {
+  const m = await loadProbeModule(entry);
+  const ctx = probeCtx(entry);
+  labRow(entry.name, "", "running v" + m.version + " ...");
+  try {
+    const res = await m.mod.run(ctx) || {};
+    probeLastResult[entry.name] = res.summary || "done";
+    labRow(entry.name, "", "v" + m.version + " -> " +
+      (res.summary || "done"));
+  } catch (err) {
+    probeLastResult[entry.name] = "FAILED: " + err.message;
+    labRow(entry.name, "fail", "v" + m.version + " FAILED: " + err.message);
+    diagSend("probe_failed", { probe: entry.name, version: m.version,
+      error: String(err.message) });
+  }
+}
+
+function startProbeEngine() {
+  installProbeTap();
+  labSay("", "probe engine: watching /probes/manifest.json every " +
+    PROBE_CYCLE_S + "s");
+  let booted = false;
+  setInterval(async () => {
+    if (paused || probeBusy) return;
+    probeBusy = true;
+    try {
+      const r = await fetch("/probes/manifest.json");
+      const man = await r.json();
+      const probes = (man && man.probes) || [];
+      for (const entry of probes) {
+        if (!entry.name || !entry.file) continue;
+        // RAIL: audible probes are refused outright at night
+        if (entry.audible && isNight()) {
+          if (!probeLastResult[entry.name] ||
+              !probeLastResult[entry.name].startsWith("REFUSED")) {
+            probeLastResult[entry.name] =
+              "REFUSED: audible probe, night hours";
+            labRow(entry.name, "refused",
+              "REFUSED by the shell rail: audible probe, night hours " +
+              "(22:00-07:00)");
+          }
+          continue;
+        }
+        const due = !probeLastRun[entry.name] ||
+          (entry.interval_s && Date.now() - probeLastRun[entry.name] >=
+            entry.interval_s * 1000);
+        const startNow = !booted && entry.run_at_start && !probeLastRun[entry.name];
+        if (due || startNow) {
+          probeLastRun[entry.name] = Date.now();
+          await runProbe(entry);
+        }
+      }
+      booted = true;
+      labSay("", "probes: " + probes.map(e => e.name + " (" +
+        (probeLastResult[e.name] || "pending") + ")").join(" | "));
+    } catch (err) {
+      labSay("err", "probe engine: manifest fetch failed (" +
+        err.message + "); retrying next cycle");
+    } finally {
+      probeBusy = false;
+    }
+  }, PROBE_CYCLE_S * 1000);
+  // give capture's floors ~15 s to warm before the first probe wave
+  setTimeout(() => { if (!paused) labSay("", "first probe wave soon"); },
+             15000 - (Date.now() % 1));
+}
+
+/* -- the loops ---------------------------------------------------------------
+   rAF drives everything while the tab is visible. A backgrounded tab
+   stops rAF entirely (browser rule), so a slow interval keeps the page
+   alive there: speech detection runs on the audio thread's messages,
+   luma frames degrade to interval rate, and the auto-close clock keeps
+   ticking honestly.                                                            */
+function tick() {
+  const fr = (stream && !paused) ? captureFrame() : null;
+  if (fr) {
+    motionStep(fr.f);
+    if (openSeg) {
+      openSeg.frames.push(fr.f);
+      openSeg.frameTs.push(fr.ts);
+      openSeg.nFrames++;
+    } else if (!paused) {
+      feedPreFrame(fr.f, fr.ts);
+    }
+  }
+  maybeRecomputeFloors();
+  if (!paused && !deaf) {
+    if (!openSeg && (speechNow || motionNow)) {
+      openSegment(speechNow ? "speech" : "motion");
+    } else if (openSeg && openSeg.mode === "auto") {
+      const now = performance.now();
+      if (now - openSeg.t0ms >= MAX_SEG_MS) {
+        // rotation, mid-activity: close at max length so the data flows;
+        // the activity still going, the next tick opens a fresh segment
+        // (a ~1 s seam while the pre-roll refills -- the timestamps are
+        // honest about it). Manual segments do NOT rotate: the operator
+        // is present and STOP is theirs.
+        closeSegment("maxlen");
+      } else if (speechNow || motionNow) {
+        openSeg.lastActive = now;
+      } else if (now - openSeg.lastActive > CLOSE_AFTER_MS) {
+        closeSegment("quiet");
+      }
+    }
+  }
+  if (openSeg)
+    $("elapsed").textContent = fmtT((performance.now() - openSeg.t0ms) / 1000);
+  const db = 20 * Math.log10(Math.max(level, 1e-7));
+  $("meterFill").style.width =
+    Math.max(0, Math.min(100, (db + 60) / 60 * 100)).toFixed(1) + "%";
+  $("detRead").textContent = "speech " + (speechNow ? "YES" : "no") +
+    " (level " + level.toExponential(1) + " / thr " +
+    speechThr().toExponential(1) + ", mic " + db.toFixed(0) + " dB)" +
+    "   presence " +
+    (motionNow ? "YES" : "no") + " (motion " +
+    (Math.round(lastMotion * 100) / 100) + " / thr " +
+    (Math.round(motionThr() * 100) / 100) + ")";
+}
+function drawLoop() { requestAnimationFrame(drawLoop); tick(); }
+setInterval(tick, 500);   // the background-tab heartbeat path
+
+async function relaxExposure(track) {
+  // capability-checked nudge, a no-op where unsupported: let the camera's
+  // own auto-exposure run (the plan page learned this the hard way)
+  try {
+    const caps = track && track.getCapabilities ? track.getCapabilities()
+      : null;
+    if (caps && Array.isArray(caps.exposureMode) &&
+        caps.exposureMode.includes("continuous"))
+      await track.applyConstraints(
+        { advanced: [{ exposureMode: "continuous" }] });
+  } catch (err) { /* best effort */ }
+}
+
+/* -- boot --------------------------------------------------------------------
+   Failures here must never be dark and silent: the single-consumer guard
+   says IN PLAIN LANGUAGE when the camera is held by another app or tab
+   (NotReadableError -- the classic single-consumer collision), and a
+   RETRY DEVICES affordance appears with it.                                             */
+function deviceFailure(err) {
+  const name = err && err.name || String(err);
+  let head, body;
+  if (name === "NotReadableError" || name === "TrackStartError") {
+    head = "CAMERA BUSY";
+    body = "The camera (or microphone) is being used by ANOTHER app or " +
+      "tab right now, so this page cannot read it. Close the other one " +
+      "-- another tab left open on this page, Teams/Zoom/OBS, or the " +
+      "terminal capture script -- then press RETRY DEVICES.";
+  } else if (name === "NotFoundError" || name === "DevicesNotFoundError") {
+    head = "NO CAMERA";
+    body = "No camera or microphone was found. Plug one in, then press " +
+      "RETRY DEVICES.";
+  } else if (name === "NotAllowedError" || name === "PermissionDeniedError" ||
+             name === "SecurityError") {
+    head = "PERMISSION REFUSED";
+    body = "The browser blocked camera/microphone access for this page. " +
+      "Click the camera icon in the address bar, allow both, then press " +
+      "RETRY DEVICES.";
+  } else {
+    head = "DEVICES FAILED (" + name + ")";
+    body = (err && err.message || "") + " -- press RETRY DEVICES.";
+  }
+  $("indicator").className = "paused";
+  $("indText").textContent = head;
+  $("subState").textContent = "not armed -- the page cannot run without " +
+    "the camera and microphone";
+  $("msg").className = "err";
+  $("msg").textContent = body;
+  $("retryDevices").style.display = "";
+  diagSend("DEVICE_FAILURE", { error: name, head: head });
+}
+
+async function tryBoot() {
+  // full retry: tear down any half-open devices and contexts first
+  if (audioCtx) { try { await audioCtx.close(); } catch (e) {} audioCtx = null; }
+  if (stream) { stream.getTracks().forEach(t => t.stop()); stream = null; }
+  $("retryDevices").style.display = "none";
+  try {
+    stream = await navigator.mediaDevices.getUserMedia({
+      video: camDeviceId ? { deviceId: { exact: camDeviceId } } : true,
+      audio: Object.assign({ channelCount: 1, echoCancellation: false,
+        noiseSuppression: false, autoGainControl: false },
+        micDeviceId ? { deviceId: { exact: micDeviceId } } : {}),
+    });
+  } catch (err) {
+    // CAMERA BUSY (another tab holds it -- the single-consumer guard):
+    // the lab's value is the MIC + speakers; degrade to audio-only and
+    // say so, instead of dying. Probes, speech detection and the deaf
+    // gate live on; motion and video frames do not.
+    const busy = err && (err.name === "NotReadableError" ||
+                         err.name === "TrackStartError");
+    if (busy && !noVideo) {
+      try {
+        stream = await navigator.mediaDevices.getUserMedia({
+          audio: { channelCount: 1, echoCancellation: false,
+                   noiseSuppression: false, autoGainControl: false },
+          video: false,
+        });
+        noVideo = true;
+        camName = "(camera busy -- audio-only lab)";
+        micName = (stream.getAudioTracks()[0] || {}).label || "browser mic";
+        diagSend("AUDIO_ONLY_FALLBACK", { error: err.name });
+      } catch (err2) {
+        deviceFailure(err2);
+        return false;
+      }
+    }
+    // a remembered device that is gone: forget and retry with defaults
+    else if (micDeviceId || camDeviceId) {
+      micDeviceId = null; camDeviceId = null;
+      try { localStorage.bcMic = ""; localStorage.bcCam = ""; }
+      catch (e) {}
+      try {
+        stream = await navigator.mediaDevices.getUserMedia({
+          video: true,
+          audio: { channelCount: 1, echoCancellation: false,
+            noiseSuppression: false, autoGainControl: false },
+        });
+      } catch (err2) {
+        deviceFailure(err2);
+        return false;
+      }
+    } else {
+      deviceFailure(err);
+      return false;
+    }
+  }
+  videoEl.srcObject = stream;
+  await videoEl.play();
+  micName = (stream.getAudioTracks()[0] || {}).label || "browser mic";
+  const vt = stream.getVideoTracks()[0];
+  camName = (vt || {}).label || "browser camera";
+  relaxExposure(vt);
+
+  try {
+    audioCtx = new AudioContext();   // default rate: full-rate audio
+  } catch (err) {
+    $("msg").className = "err";
+    $("msg").textContent = "no AudioContext (" + err.name +
+      ") -- AUTO needs one";
+    return;
+  }
+  await audioCtx.resume();
+  realRate = audioCtx.sampleRate;
+
+  const workletSrc =
+    "class PColl extends AudioWorkletProcessor {" +
+    "  process(inputs) {" +
+    "    const ins = inputs[0];" +
+    "    if (ins && ins.length) {" +
+    "      let ch = ins[0];" +
+    "      if (ins.length > 1) {" +
+    "        const m = new Float32Array(ch.length);" +
+    "        for (let i = 0; i < ch.length; i++)" +
+    "          m[i] = (ins[0][i] + ins[1][i]) * 0.5;" +
+    "        ch = m;" +
+    "      }" +
+    "      const c = new Float32Array(ch.length);" +
+    "      c.set(ch);" +
+    "      this.port.postMessage(c, [c.buffer]);" +
+    "    }" +
+    "    return true;" +
+    "  }" +
+    "}" +
+    "registerProcessor('pcoll', PColl);";
+  await audioCtx.audioWorklet.addModule(URL.createObjectURL(
+    new Blob([workletSrc], { type: "application/javascript" })));
+  const src = audioCtx.createMediaStreamSource(stream);
+  const node = new AudioWorkletNode(audioCtx, "pcoll");
+  node.port.onmessage = (ev) => {
+    const blk = ev.data;
+    level = rms(blk);
+    nAudioBlocks++;
+    if (level > 1e-5) lastSoundAt = performance.now();
+    speechStep(level);
+    if (openSeg) {
+      openSeg.audioChunks.push(blk);
+      openSeg.nSamples += blk.length;
+      if (level > (openSeg.peakRms || 0)) openSeg.peakRms = level;
+    } else if (!paused) {
+      feedPreAudio(blk);
+    }
+  };
+  src.connect(node);
+  audioSrcNode = src;   // kept: a mic switch re-taps through these
+  audioTapNode = node;
+  refreshPickers();
+  armedAt = performance.now();
+  lastSoundAt = armedAt;   // the deafness clock starts with the stream
+  nAudioBlocks = 0;
+  floorsReady = false;   // a retry re-arms: floors re-measure on the new
+                         // stream before any auto decision
+  deafCheck();
+  paint();
+  diagSend("BOOT", { cam: camName, mic: micName, rate: realRate,
+    auto: true });
+
+  try {
+    const r = await fetch("/info");
+    const j = await r.json();
+    if (j && j.out)
+      $("msg").textContent = "armed -- segments save automatically under " +
+        j.out + "/free_sessions/";
+  } catch (err) {
+    $("msg").className = "err";
+    $("msg").textContent = "server DOWN -- run: python3 " +
+      "browser_capture/server.py (detection works; SAVING needs the server)";
+  }
+  return true;
+}
+
+let loopStarted = false;
+async function boot() {
+  if (!loopStarted) { loopStarted = true; drawLoop(); }
+  const ok = await tryBoot();
+  if (ok && audioTapNode) startProbeEngine();
+}
+boot();
+
+$("retryDevices").onclick = () => {
+  diagSend("RETRY_DEVICES_CLICKED");
+  tryBoot();
+};
+$("micSelect").onchange = async () => {
+  const sel = $("micSelect");
+  if (openSeg) {   // never mid-segment: the swap breaks tap and recorder
+    if (micDeviceId) sel.value = micDeviceId;
+    return;
+  }
+  diagSend("MIC_SWITCH", { to: sel.value });
+  try {
+    await switchMic(sel.value);
+    $("msg").className = "";
+    $("msg").textContent = "mic: " + micName + " -- floors re-measuring " +
+      "for the new device; the deafness gate re-arms";
+  } catch (err) {
+    $("msg").className = "err";
+    $("msg").textContent = "that mic would not open (" + err.name +
+      "); the previous one is still live";
+    if (micDeviceId) sel.value = micDeviceId;
+  }
+};
+$("camSelect").onchange = async () => {
+  const sel = $("camSelect");
+  if (openSeg) {
+    if (camDeviceId) sel.value = camDeviceId;
+    return;
+  }
+  diagSend("CAM_SWITCH", { to: sel.value });
+  try {
+    await switchCam(sel.value);
+  } catch (err) {
+    $("msg").className = "err";
+    $("msg").textContent = "that camera would not open (" + err.name +
+      "); the previous one is still live";
+    if (camDeviceId) sel.value = camDeviceId;
+  }
+};
+
+window.addEventListener("beforeunload", (ev) => {
+  if (openSeg || pendingSaves.length) {
+    ev.preventDefault();
+    ev.returnValue = "";
+  }
+});
+</script>
+</body>
+</html>

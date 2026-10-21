@@ -854,3 +854,40 @@ from the page's own claims; the heartbeat's `deaf` / `audio_silent_s` /
 proof method is the headless file-backed fake-mic run documented above
 (speech-shaped WAV in → measured nonzero WAV and WebM out; exact-zero
 WAV in → gate, no accrual, honest stamp).
+
+## THE EVOLVE LAB IS LOADABLE — /evolve (Casey: open it once)
+
+Per `BRIEF-EVOLVE-PAGE.md`: **open http://localhost:8765/evolve once and
+leave it** — that tab is the lab. It is the full AUTO capture page
+(devices, segments, rotation, deaf gate, pickers) plus the probe engine:
+every 20 s it re-fetches `browser_capture/probes/manifest.json` from the
+server's disk, and any probe whose module version changed is re-imported
+and RUNS THE NEW CODE WITHOUT A RELOAD — proven live tonight: the open
+page ran sonar-band v1, the module was rewritten on disk, and the same
+open tab produced v2's corrected verdict minutes later.
+
+- **The rails live in the shell, not the probes**: audible-flagged probes
+  are refused outright 22:00–07:00 local; EVERY stimulus is gain-clamped
+  (≤0.3) and duty-capped (≤5 s per 60 s per probe) regardless of what a
+  probe requests; PAUSE EVERYTHING is the one kill switch for capture
+  AND probes; every run, refusal, and failure is posted to /log and
+  shown in the lab rows — no silent experiments.
+- **Camera-busy coexistence** (learned on the first real run: Casey's
+  own tab holds the camera, as it should): the shell degrades to
+  AUDIO-ONLY — probes, speech detection and the deaf gate live; motion
+  and video frames honestly stop; the face says why. The lab and the
+  capture page coexist overnight.
+- **Agents iterate** by editing `browser_capture/probes/<name>.js`,
+  bumping its `meta.version`, and (optionally) the manifest's
+  schedule — the open page picks it up next cycle. Results land as
+  `probe_result` lines in diag.log; artifacts as `mode: "probe"` session
+  folders. Tenant 1: **sonar-band** (room sonar step 1 — verdict filed
+  in `docs/research/ROOM-SONAR-REPORT.md`: **usable band NONE on this
+  hardware**, return 12–29 dB under the room floor in every excited
+  band, lane closed with a number unless Casey reopens it with an
+  external speaker or a raised ceiling). Tenant 2: **audio-health**
+  (patrols the measured WAV health of recent sessions; tonight it
+  correctly flagged the pre-fix silent era and passed the new ones).
+
+Verify suite: **173 passed, 0 failed** (evolve shell served, manifest +
+modules served from disk, path traversal refused).

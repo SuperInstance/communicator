@@ -1,0 +1,22 @@
+{
+  "probes": [
+    {
+      "name": "sonar-band",
+      "file": "sonar-band.js",
+      "version": 1,
+      "interval_s": 600,
+      "run_at_start": true,
+      "audible": false,
+      "description": "room sonar step 1: exponential sweep 16-22 kHz + pink burst through the real speakers, measure per-frequency survival through the speaker+mic chain; the usable band on this hardware, measured never assumed"
+    },
+    {
+      "name": "audio-health",
+      "file": "audio-health.js",
+      "version": 1,
+      "interval_s": 300,
+      "run_at_start": true,
+      "audible": false,
+      "description": "patrol the measured WAV health of the most recent sessions (the SILENT_AUDIO class, patrolled forever, not remembered)"
+    }
+  ]
+}
