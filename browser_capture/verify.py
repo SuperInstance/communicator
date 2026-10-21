@@ -740,6 +740,60 @@ def main() -> int:
               f"free_sessions/{free_stamp}" in seg_dirs,
               str(sorted(seg_dirs)))
 
+        print("\n== the LIAISON agent API ==")
+        status, body = http("GET", "/api/status")
+        j = json.loads(body)
+        check("/api/status answers with uptime, page, rendezvous",
+              status == 200 and j.get("ok") and "uptime_s" in j and
+              "page" in j and "rendezvous" in j and
+              "sessions_saved" in j)
+        status, body = http("GET", "/api/sessions")
+        j = json.loads(body)
+        mine = [s for s in j.get("sessions", [])
+                if s.get("stamp") == str(free_stamp)]
+        check("/api/sessions lists the saved session",
+              status == 200 and len(mine) == 1)
+        # the synthetic wav is 800 samples of value 1: measured, not asserted
+        am = mine[0].get("audio_measured", {}) if mine else {}
+        check("audio stats are MEASURED from the file",
+              am.get("peak_abs") == 1 and am.get("nonzero") == 800 and
+              am.get("samples") == 800, str(am))
+        status, body = http("POST", "/api/inbox",
+                            json.dumps({"from": "verify.py",
+                                        "text": "inbox round trip"}).encode())
+        check("POST /api/inbox accepted",
+              status == 200 and json.loads(body).get("ok"))
+        status, body = http("GET", "/api/inbox")
+        j = json.loads(body)
+        check("inbox round-trips (GET reads the POSTed message)",
+              any(m.get("from") == "verify.py" and
+                  m.get("text") == "inbox round trip"
+                  for m in j.get("messages", [])))
+        # a FORCED SILENT WAV must self-report as a SILENT_AUDIO alert
+        swav = BytesIO()
+        with wave.open(swav, "wb") as wv:
+            wv.setnchannels(1)
+            wv.setsampwidth(2)
+            wv.setframerate(RATE)
+            wv.writeframes(b"\x00\x00" * 800)
+        status, body = http("POST", "/free", free_body(
+            fmeta, swav.getvalue(), fluma, fts, fwebm))
+        j = json.loads(body)
+        check("forced silent session accepted for the alert test",
+              status == 200 and j.get("ok"))
+        time.sleep(0.3)
+        alerts = []
+        if (HERE / "liaison_outbox.jsonl").is_file():
+            outbox_tail = (HERE / "liaison_outbox.jsonl").read_text() \
+                .splitlines()[-30:]
+            for ln in outbox_tail:
+                d = json.loads(ln)
+                if d.get("kind") == "SILENT_AUDIO":
+                    alerts.append(d)
+        check("a silent WAV raised its own SILENT_AUDIO alert in the outbox",
+              any(a.get("stamp") == j.get("stamp") for a in alerts),
+              str(alerts[-1] if alerts else "no alerts"))
+
         failures = sum(1 for _, ok, _ in RESULTS if ok is False)
         skipped = sum(1 for _, ok, _ in RESULTS if ok is None)
         print(f"\n==== {len(RESULTS) - failures - skipped} passed, "

@@ -12,3 +12,5 @@ experiments/_matrix/
 docs/research/**/__pycache__/
 models/
 .pytest_cache/
+browser_capture/liaison_inbox.jsonl
+browser_capture/liaison_outbox*.jsonl

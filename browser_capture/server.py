@@ -89,6 +89,23 @@ ENDPOINTS:
     POST /thumb     -> the capture page's latest 160x96 luma thumbnail
                        (kept in memory only, replaced every second)
 
+THE AGENT API (docs/research/BRIEF-ROOM-LIAISON.md) -- the liaison in
+the room. JSON on localhost, meant for agents, additive to the pages:
+    GET  /api/status   -> uptime, page state from the last heartbeat,
+                          sessions saved, rendezvous ship health
+    GET  /api/sessions -> every free session, meta PLUS MEASURED audio
+                          stats (peak, nonzero, RMS) computed from the
+                          WAV files -- artifact health is measured,
+                          never asserted
+    POST /api/inbox    -> {from, text} appended to liaison_inbox.jsonl;
+                          local agents message the room through this
+    GET  /api/inbox    -> the recent inbox lines
+
+SELF-CHECKS: liaison events (session_saved, segment_closed, deafness,
+device failures) append to liaison_outbox.jsonl and are shipped to a
+rendezvous on the Oracle; a saved WAV whose MEASURED peak is 0 raises a
+SILENT_AUDIO alert immediately -- the liaison reports its own sickness.
+
 USAGE (from the repo root, inside WSL):
 
     python3 browser_capture/server.py                 # default out dir below
@@ -102,10 +119,14 @@ forwarding reaches it; with mirrored networking it also just works).
 from __future__ import annotations
 
 import argparse
+import array
 import io
 import json
+import math
+import os
 import re
 import struct
+import subprocess
 import sys
 import threading
 import time
@@ -176,6 +197,164 @@ THUMB_MAX = 262144
 # page's data view.
 FREE_W, FREE_H = 160, 96
 FREE_LUMA_BYTES = FREE_W * FREE_H
+
+# -- the LIAISON (docs/research/BRIEF-ROOM-LIAISON.md) -----------------------
+# The local host is the agent in the room: an agent API on localhost, an
+# outbox of liaison events, self-reported health alerts, and a shipper to
+# a rendezvous on the Oracle. The outbox file is the durable record; the
+# ship is best-effort with honest failure reporting and retry.
+LIAISON_INBOX = Path(__file__).resolve().parent / "liaison_inbox.jsonl"
+LIAISON_OUTBOX = Path(__file__).resolve().parent / "liaison_outbox.jsonl"
+LIAISON_PENDING = Path(__file__).resolve().parent / "liaison_outbox.pending.jsonl"
+LIAISON_STARTED_AT = time.time()
+LIAISON_LOCKS = {name: threading.Lock() for name in
+                 ("inbox", "outbox", "pending", "audio")}
+LIAISON_AUDIO_CACHE = {}   # (path, size, mtime) -> measured stats
+LIAISON_SHIP_Q = None      # queue.Queue, created in main()
+RENDEZVOUS = {
+    "user": "wsl-tunnel",
+    "host": "147.224.38.131",      # the Oracle the reverse tunnel ends on
+    "key": str(Path.home() / ".ssh" / "wsl-tunnel"),
+    "remote": "rendezvous/room-liaison/events.jsonl",
+    # v1 reality, stated: the wsl-tunnel account is nologin for shells
+    # AND sftp, so every ship attempt refuses until a writable path is
+    # granted; failures are self-reported in /api/status and retried.
+    # Muse can read the outbox meanwhile through the reverse tunnel
+    # (Oracle loopback :2222 -> this host's sshd).
+}
+
+
+def wav_audio_stats(path: Path) -> dict:
+    """MEASURED audio health of a saved WAV: peak abs sample, nonzero
+    count, RMS. Computed from the file, never asserted; memoized on
+    (size, mtime) so repeat API calls are instant.
+    """
+    st = path.stat()
+    key = (str(path), st.st_size, st.st_mtime)
+    with LIAISON_LOCKS["audio"]:
+        if key in LIAISON_AUDIO_CACHE:
+            return dict(LIAISON_AUDIO_CACHE[key])
+    with wave.open(str(path), "rb") as w:
+        rate, nframes = w.getframerate(), w.getnframes()
+        frames = w.readframes(nframes)
+    a = array.array("h")
+    a.frombytes(frames[:len(frames) // 2 * 2])
+    if sys.byteorder == "big":
+        a.byteswap()
+    if len(a):
+        peak = max(max(a), -min(a))
+        nonzero = len(a) - a.count(0)
+        acc = 0
+        CH = 1 << 20
+        for i in range(0, len(a), CH):
+            c = a[i:i + CH]
+            acc += math.sumprod(c, c)
+        rms = math.sqrt(acc / len(a)) / 32768.0
+    else:
+        peak, nonzero, rms = 0, 0, 0.0
+    stats = {"samples": len(a), "sample_rate": rate,
+             "peak_abs": peak, "nonzero": nonzero,
+             "rms": round(rms, 6)}
+    with LIAISON_LOCKS["audio"]:
+        LIAISON_AUDIO_CACHE[key] = stats
+    return dict(stats)
+
+
+def liaison_event(ev: dict) -> None:
+    """Append one liaison event to the durable outbox and queue it for
+    the rendezvous ship."""
+    ev = dict(ev)
+    ev.setdefault("ts", time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime()))
+    line = json.dumps(ev) + "\n"
+    with LIAISON_LOCKS["outbox"]:
+        with LIAISON_OUTBOX.open("a", encoding="utf-8") as f:
+            f.write(line)
+    with LIAISON_LOCKS["pending"]:
+        with LIAISON_PENDING.open("a", encoding="utf-8") as f:
+            f.write(line)
+    if LIAISON_SHIP_Q is not None:
+        LIAISON_SHIP_Q.put(line)
+    if ev.get("class") == "alert":
+        print(f"[liaison][ALERT] {ev.get('kind')}: {ev.get('dir')}",
+              flush=True)
+
+
+def _ship_line(line: str) -> bool:
+    r = RENDEZVOUS
+    cmd = ["ssh", "-i", r["key"], "-o", "BatchMode=yes",
+           "-o", "ConnectTimeout=8", "-o", "StrictHostKeyChecking=accept-new",
+           f"{r['user']}@{r['host']}",
+           "mkdir -p ~/rendezvous/room-liaison && cat >> ~/" + r["remote"]]
+    try:
+        p = subprocess.run(cmd, input=line.encode(), capture_output=True,
+                           timeout=15)
+        return p.returncode == 0
+    except (OSError, subprocess.TimeoutExpired):
+        return False
+
+
+def _mark_shipped(line: str) -> None:
+    with LIAISON_LOCKS["pending"]:
+        if LIAISON_PENDING.is_file():
+            lines = LIAISON_PENDING.read_text().splitlines(True)
+            kept = [l for l in lines if l != line]
+            LIAISON_PENDING.write_text("".join(kept))
+
+
+def _liaison_shipper(q) -> None:
+    """Ships outbox lines to the Oracle rendezvous; failures stay in the
+    pending file and retry every 5 minutes and on every new event."""
+    import queue as queue_mod
+    last_fail_log = 0.0
+    while True:
+        try:
+            item = q.get(timeout=300)
+            batch = [item]
+            while True:
+                try:
+                    batch.append(q.get_nowait())
+                except queue_mod.Empty:
+                    break
+        except queue_mod.Empty:
+            with LIAISON_LOCKS["pending"]:
+                batch = (LIAISON_PENDING.read_text().splitlines(True)
+                         if LIAISON_PENDING.is_file() else [])
+            batch = [b for b in batch if b.strip()]
+        for line in batch:
+            if _ship_line(line):
+                _mark_shipped(line)
+            elif time.time() - last_fail_log > 300:
+                last_fail_log = time.time()
+                print("[liaison] rendezvous ship refused (reported in "
+                      "/api/status, retrying)", flush=True)
+                break   # keep the rest pending; no point hammering
+
+
+def _last_page_heartbeat() -> dict:
+    """The newest page heartbeat from diag.log, with its age."""
+    try:
+        with DIAG_PATH.open("rb") as f:
+            size = f.seek(0, 2)
+            f.seek(max(0, size - 65536))
+            tail = f.read().decode("utf-8", "replace").splitlines()
+    except OSError:
+        return {"present": False}
+    for ln in reversed(tail):
+        try:
+            d = json.loads(ln)
+        except json.JSONDecodeError:
+            continue
+        if isinstance(d, dict) and d.get("kind") == "heartbeat":
+            age = max(0, int(time.time() - time.mktime(
+                time.strptime(d["received_at"][:19], "%Y-%m-%dT%H:%M:%S"))))
+            return {"present": True, "age_s": age, "fields": d}
+    return {"present": False}
+
+
+# page diag events the liaison forwards to its outbox (the page's own
+# SEGMENT_SAVED is superseded by the server's measured session_saved)
+LIAISON_FORWARD_KINDS = {"BOOT", "DEAF_ON", "DEAF_OFF", "DEVICE_FAILURE",
+                         "SEGMENT_CLOSE", "MIC_SWITCH", "CAM_SWITCH"}
 
 
 # -- the NPY format, by hand (numpy is not stdlib) --------------------------
@@ -571,6 +750,27 @@ def save_free_session(out: Path, sess: dict) -> dict:
     print(f"[free] free_sessions/{stamp}: {meta['n_frames']} frames, "
           f"audio {sess['wav_frames'] / rate:.2f}s @ {rate} Hz"
           + (", webm" if sess["webm"] else ""), flush=True)
+
+    # the liaison's self-check: MEASURE the WAV that just landed; a peak
+    # of 0 is a SILENT_AUDIO alert the room files about itself
+    wavp = d / "audio.wav"
+    stats = wav_audio_stats(wavp) if wavp.is_file() else None
+    liaison_event({"class": "session_saved",
+                   "dir": f"free_sessions/{stamp}", "stamp": stamp,
+                   "mode": meta.get("mode"), "trigger": meta.get("trigger"),
+                   "close_reason": meta.get("close_reason"),
+                   "n_frames": meta.get("n_frames"),
+                   "duration_s": round(sess["wav_frames"] / rate, 2),
+                   "audio_measured": stats,
+                   "audio_silent": bool(stats and stats["peak_abs"] == 0)})
+    if stats and stats["peak_abs"] == 0:
+        liaison_event({"class": "alert", "kind": "SILENT_AUDIO",
+                       "dir": f"free_sessions/{stamp}", "stamp": stamp,
+                       "detail": "the saved WAV measures zero: peak_abs=0, "
+                                 f"nonzero={stats['nonzero']} of "
+                                 f"{stats['samples']} -- the input device "
+                                 "delivered silence",
+                       "audio_measured": stats})
     return {"stamp": stamp, "dir": f"free_sessions/{stamp}", "files": files}
 
 
@@ -909,6 +1109,15 @@ class Handler(BaseHTTPRequestHandler):
         with DIAG_LOCK:
             with DIAG_PATH.open("a", encoding="utf-8") as f:
                 f.write(json.dumps(line) + "\n")
+        # page events of liaison interest ride the outbox too
+        if evt.get("kind") in LIAISON_FORWARD_KINDS:
+            liaison_event({"class": "page_" + str(evt.get("kind")).lower(),
+                           "source": "capture_page", "page": evt.get("page"),
+                           **{k: v for k, v in evt.items()
+                              if k not in ("kind", "page", "ts",
+                                           "speech_level", "motion",
+                                           "speech_thr", "motion_thr",
+                                           "visibility", "floors_ready")}})
         self._json(200, {"ok": True})
 
     def _handle_thumb(self):
@@ -967,6 +1176,129 @@ class Handler(BaseHTTPRequestHandler):
             return
         self._json(200, {"ok": True, **result})
 
+    # -- the agent API: the liaison in the room -------------------------
+
+    def _api_status(self):
+        hb = _last_page_heartbeat()
+        page = None
+        if hb.get("present"):
+            f = hb["fields"]
+            page = {k: f.get(k) for k in (
+                "state", "deaf", "seg_open", "seg_age_s", "n_frames",
+                "n_samples", "speech_level", "speech_thr", "speech_now",
+                "saved", "pending_uploads", "mic", "cam", "visibility")}
+            page["heartbeat_age_s"] = hb["age_s"]
+            page["received_at"] = f.get("received_at")
+        n_sessions = 0
+        root = self.out_dir / "free_sessions"
+        if root.is_dir():
+            n_sessions = len(list(root.iterdir()))
+        with LIAISON_LOCKS["pending"]:
+            pending_ship = (len(LIAISON_PENDING.read_text().splitlines())
+                            if LIAISON_PENDING.is_file() else 0)
+        self._json(200, {
+            "ok": True,
+            "now": time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime()),
+            "uptime_s": round(time.time() - LIAISON_STARTED_AT, 1),
+            "out": str(self.out_dir),
+            "port": self.server.server_address[1],
+            "sessions_saved": n_sessions,
+            "page": page,
+            "rendezvous": {
+                "target": f"{RENDEZVOUS['user']}@{RENDEZVOUS['host']}"
+                          f":~/{RENDEZVOUS['remote']}",
+                "pending_ship": pending_ship,
+                "note": "ships are attempted per event and retried every "
+                        "5 min; failures are honest, not silent",
+            },
+        })
+
+    def _api_sessions(self):
+        """Every free session, meta PLUS measured audio health."""
+        segments = []
+        root = self.out_dir / "free_sessions"
+        if root.is_dir():
+            for d in sorted(root.iterdir(), key=lambda p: p.name,
+                            reverse=True):
+                try:
+                    meta = json.loads((d / "meta.json").read_text())
+                except (OSError, json.JSONDecodeError):
+                    continue
+                audio = meta.get("audio") or {}
+                entry = {
+                    "dir": f"free_sessions/{d.name}", "stamp": d.name,
+                    "mode": meta.get("mode"), "trigger": meta.get("trigger"),
+                    "close_reason": meta.get("close_reason"),
+                    "n_frames": meta.get("n_frames"),
+                    "duration_s": round(
+                        audio.get("samples", 0) /
+                        max(audio.get("sample_rate", 1), 1), 2),
+                    "bytes": {p.name: p.stat().st_size for p in d.iterdir()
+                              if p.name in ("luma.raw", "audio.wav",
+                                            "video.webm")},
+                }
+                wavp = d / "audio.wav"
+                if wavp.is_file():
+                    entry["audio_measured"] = wav_audio_stats(wavp)
+                    entry["audio_silent"] = \
+                        entry["audio_measured"]["peak_abs"] == 0
+                    entry["meta_asserted_audio_silent"] = \
+                        audio.get("audio_silent")
+                v = d / "verdict.json"
+                if v.is_file():
+                    try:
+                        entry["verdict"] = json.loads(v.read_text())
+                    except (OSError, json.JSONDecodeError):
+                        pass
+                segments.append(entry)
+        self._json(200, {"ok": True, "n": len(segments),
+                         "sessions": segments})
+
+    def _api_inbox_get(self):
+        lines = []
+        if LIAISON_INBOX.is_file():
+            with LIAISON_LOCKS["inbox"]:
+                text = LIAISON_INBOX.read_text()
+            for ln in text.splitlines()[-100:]:
+                try:
+                    lines.append(json.loads(ln))
+                except json.JSONDecodeError:
+                    pass
+        self._json(200, {"ok": True, "n": len(lines), "messages": lines})
+
+    def _api_inbox_post(self):
+        try:
+            n = int(self.headers.get("Content-Length", "0"))
+        except ValueError:
+            n = -1
+        if n <= 0 or n > 65536:
+            self._json(400, {"ok": False, "error": "bad Content-Length"})
+            return
+        try:
+            req = json.loads(self.rfile.read(n).decode("utf-8"))
+        except (UnicodeDecodeError, json.JSONDecodeError) as exc:
+            self._json(400, {"ok": False, "error": f"not JSON: {exc}"})
+            return
+        if not isinstance(req, dict) or \
+                not isinstance(req.get("from"), str) or \
+                not isinstance(req.get("text"), str) or \
+                not req["from"].strip() or not req["text"].strip():
+            self._json(400, {"ok": False,
+                             "error": "expected {from: str, text: str}"})
+            return
+        if len(req["from"]) > 64 or len(req["text"]) > 8000:
+            self._json(400, {"ok": False,
+                             "error": "from <= 64 chars, text <= 8000"})
+            return
+        msg = {"ts": time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime()),
+               "from": req["from"], "text": req["text"]}
+        with LIAISON_LOCKS["inbox"]:
+            with LIAISON_INBOX.open("a", encoding="utf-8") as f:
+                f.write(json.dumps(msg) + "\n")
+        liaison_event({"class": "inbox_message", "from": req["from"],
+                       "chars": len(req["text"])})
+        self._json(200, {"ok": True, **msg})
+
     def do_GET(self):
         # match on the path portion only -- a query string (e.g.
         # /?maxseg=8) must not turn a route into a 404
@@ -1000,6 +1332,12 @@ class Handler(BaseHTTPRequestHandler):
             self._send(200, page, "text/html; charset=utf-8")
         elif route == "/live-state":
             self._json(200, live_state(self.out_dir))
+        elif route == "/api/status":
+            self._api_status()
+        elif route == "/api/sessions":
+            self._api_sessions()
+        elif route == "/api/inbox":
+            self._api_inbox_get()
         else:
             self._json(404, {"ok": False, "error": f"no {self.path!r}"})
 
@@ -1016,6 +1354,9 @@ class Handler(BaseHTTPRequestHandler):
             return
         if route == "/thumb":
             self._handle_thumb()
+            return
+        if route == "/api/inbox":
+            self._api_inbox_post()
             return
         if route != "/take":
             self._json(404, {"ok": False, "error": f"no {self.path!r}"})
@@ -1080,6 +1421,17 @@ def main(argv=None) -> int:
 
     httpd = ThreadingHTTPServer((a.host, a.port), Handler)
     httpd.daemon_threads = True
+
+    # the liaison: shipper thread + a start event; ship failures are
+    # reported, never fatal
+    import queue as queue_mod
+    global LIAISON_SHIP_Q
+    LIAISON_SHIP_Q = queue_mod.Queue()
+    t = threading.Thread(target=_liaison_shipper,
+                         args=(LIAISON_SHIP_Q,), daemon=True)
+    t.start()
+    liaison_event({"class": "liaison_started", "port": a.port,
+                   "out": str(out), "pid": os.getpid()})
     print(f"browser_capture serving on http://{a.host}:{a.port}")
     print(f"takes will be written to   {out}")
     print("open the URL in the browser, allow camera + microphone, "

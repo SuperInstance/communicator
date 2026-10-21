@@ -690,3 +690,59 @@ The one step no automation can do: Casey picks a live mic at the page
 (the picker names them; the deaf line goes quiet the moment the room is
 heard) and speaks once — the receipts and the live monitor then show
 measured speech, or the page says exactly why not.
+
+## Patch 2026-10-21: the ROOM LIAISON v1 (docs/research/BRIEF-ROOM-LIAISON.md)
+
+The local host graduates from a web page into the AGENT IN THE ROOM:
+a resident JSON API for agents, an outbox shipped toward Muse, and
+self-reported health. Deployed with `systemctl --user restart
+browser-capture` (server-side change). The pages are untouched — the
+API is additive.
+
+**The agent API (localhost, JSON):**
+- `GET /api/status` — uptime, the page's live state from the last
+  heartbeat (state, deaf, segment age, speech level/threshold, devices,
+  heartbeat age), sessions saved, and the rendezvous ship health.
+- `GET /api/sessions` — every free session with its meta PLUS **measured
+  audio health: peak abs sample, nonzero count, RMS — computed from the
+  WAV files with `array`/`math.sumprod`, memoized on (size, mtime),
+  never asserted.** The meta's page-asserted `audio_silent` rides along
+  for contrast with the measured truth.
+- `POST /api/inbox {from, text}` — appends `liaison_inbox.jsonl`;
+  `GET /api/inbox` reads it back. Local agents message the room through
+  this; every message also lands in the outbox.
+
+**The outbox and self-checks** (`liaison_outbox.jsonl`, gitignored):
+- Event classes: `session_saved` (with the measured audio stats),
+  `page_segment_closed`, `page_deaf_on/off`, `page_device_failure`,
+  `page_boot`, `inbox_message`, `liaison_started`.
+- **SILENT_AUDIO self-alert**: the moment a saved session's WAV measures
+  peak 0, the liaison files an `alert` about itself — tonight's bug
+  class is now a self-report, measured at save time. Proven in verify by
+  FORCING a silent WAV through the real POST path and finding the alert
+  in the outbox.
+- Each event is appended durably, then shipped (background thread) to
+  `wsl-tunnel@147.224.38.131:~/rendezvous/room-liaison/events.jsonl`
+  (the Oracle the reverse tunnel terminates on); failures retry every
+  5 minutes and are reported in `/api/status.rendezvous`, never silent.
+
+**Rendezvous reality, stated plainly (v1)**: the `wsl-tunnel` account on
+the Oracle is nologin for shells AND sftp, so every ship attempt refuses
+until a writable path is granted — the liaison says so itself rather
+than pretending. The read path that works TODAY: Muse's rounds reach
+this host through the existing reverse tunnel (Oracle loopback `:2222`
+→ this host's sshd) and can `curl http://127.0.0.1:8765/api/status`,
+`/api/sessions`, `/api/inbox` from there.
+
+**Muse-side contract (documented, not built, per the brief)**: Muse is
+this liaison's MAINTENANCE AGENT (Casey owns it). On its rounds (the
+tunnel path above, or the rendezvous once writable), Muse reads status
++ alerts, and replies via `POST /api/inbox {from: "muse", text: ...}`;
+the operator sees inbox messages at the bench. Latency is minutes-scale,
+maintenance-grade — this is a resident agent, not a chat.
+
+Verify suite: **166 passed, 0 failed** (seven new liaison checks: the
+status shape, the measured-audio contract — 800 samples of value 1
+measure as peak 1 / nonzero 800 — the inbox round-trip, the forced
+silent WAV raising its own SILENT_AUDIO alert, and the ship-refusal
+honesty).
