@@ -805,6 +805,272 @@ def grid_sweep(frames: np.ndarray, clock, ref_interval_s: float,
     return out
 
 
+def rate_policy(session_dir: Path, out_dir: Path,
+                live_grid=(20, 12), coarse_grid=(16, 10),
+                fine_grid=(80, 48), interval_s: float = 1.0,
+                scene_threshold: float = 6.0, sparse_threshold: float = 4.0,
+                ref_png_bytes: int | None = None,
+                still_threshold: float = 3.0) -> dict:
+    """THE RATE POLICY, measured on one session.
+
+    Casey's phone addendum: "adaptive fidelity (motion-indexed spend)".
+    A STILL phone drops its frame rate and RAISES its resolution -- a
+    static scene is described ONCE at high fidelity and the live channel
+    then carries only changes.  A MOVING phone scales its resolution back
+    to afford motion.  "The budget follows the change, never the clock."
+
+    So the question this answers is concrete: the bytes-per-second number
+    the stream costs today is a CLOCK-indexed rate, and the policy turns
+    it into a CHANGE-indexed one.  What does that do to the number?
+
+    The measurement, on the real session:
+      * every frame is encoded at the live grid and compared with the
+        previous frame's encoding: an identical encoding means the
+        picture did not change, and under the policy that frame costs
+        NOTHING in the live channel;
+      * a maximal run of unchanged frames is a STILL STRETCH: it gets
+        ONE description at the fine grid, not one per clock second;
+      * a frame that did change is carried at the COARSE grid, because
+        motion buys frame rate and resolution scales back;
+      * the sparse motion events are carried only for frames that
+        changed, for the same reason.
+
+    The exchange rate is not invented here: it is the grid sweep's own
+    table.  Resolution is expensive (80x48 is 73x the bytes of 8x6) and
+    the fidelity it buys is comparatively cheap (the error falls by half
+    while the bytes rise 15x), which is exactly why the policy spends
+    resolution on STILLNESS and frame rate on MOTION.
+    """
+    t0 = time.time()
+    sess = load_session(session_dir)
+    frames = sess["frames"]
+    clock = sess["clock"]
+    n = len(frames)
+    if n < 2:
+        return {"ok": False, "why": "session too short"}
+
+    lgw, lgh = live_grid
+    cgw, cgh = coarse_grid
+    fgw, fgh = fine_grid
+
+    refs, ref_info = reference_indices(frames, clock, interval_s,
+                                       scene_threshold)
+    motion = motion_maps(frames)
+
+    # the SAME scale the live stream uses, so the byte counts here are the
+    # bytes the stream would really cost
+    sample = frames[:: max(1, n // 400)]
+    ref0 = refs[0]
+    d0 = block_mean(sample, lgw, lgh) - block_mean(frames[ref0][None], lgw, lgh)
+    scale = max(1.0, float(np.percentile(np.abs(d0), 90)))
+
+    live_chars = lgw * lgh + max(0, lgh - 1)
+    coarse_chars = cgw * cgh + max(0, cgh - 1)
+    fine_chars = fgw * fgh + max(0, fgh - 1)
+
+    changed = [False] * n
+    delta_bytes_clock = 0
+    delta_bytes_policy = 0
+    sparse_bytes_clock = 0
+    sparse_bytes_policy = 0
+    ref_i = 0
+    # STILLNESS IS A PROPERTY OF THE PICTURE, and it has to be measured
+    # in the units the test uses.
+    #
+    # The first version compared the encoded delta line with the
+    # previous frame's, and it was wrong twice over: the reference
+    # advances on a clock, so every reference advance changed the line
+    # even when the picture had not moved, and a BYTE comparison calls
+    # the camera's own noise "movement".  The second version compared
+    # the picture's grid for equality and was still wrong, because the
+    # camera's noise makes every changed frame differ and 66.6 % of the
+    # frames in this session are byte-identical repeats with the
+    # remaining ones a continuum with no valley in it.
+    #
+    # So stillness is a MAGNITUDE test, and the threshold is measured:
+    # the whole-frame consecutive change has a non-zero median of 1.152
+    # luma (the camera's own change at a changed frame) and the room map
+    # measured the per-pixel noise sigma at 0.61 luma.  A threshold of
+    # `still_threshold` (default 3.0 luma, about 2.6x the non-zero
+    # median and about 5x the noise sigma) puts the sensor's own noise
+    # below the line and leaves the person above it.
+    px0, px1, py0, py1 = 7, 119, 42, 95
+    zone = frames[:, py0:py1, px0:px1].astype(np.float32)
+    cons = np.abs(np.diff(frames.astype(np.float32), axis=0)).mean(axis=(1, 2))
+    cons_zone = np.abs(np.diff(zone, axis=0)).mean(axis=(1, 2))
+    nz = cons[cons > 0]
+    noise = {
+        "n_consecutive": int(cons.size),
+        "n_zero": int((cons == 0).sum()),
+        "zero_fraction": round(float((cons == 0).mean()), 4),
+        "nonzero_median_luma": float(np.median(nz)) if nz.size else None,
+        "nonzero_p90_luma": float(np.percentile(nz, 90)) if nz.size else None,
+        "still_threshold_luma": still_threshold,
+    }
+    # The motion map and the whole-frame change DISAGREE, and the
+    # disagreement is the finding: the motion map measures WHERE the
+    # change is (edges) and the whole-frame mean measures HOW MUCH
+    # changed.  A person crossing a corner of the frame moves edges
+    # without moving the frame's mean, so a trigger on either measure
+    # alone misses something the other catches.  The union is the
+    # defensible "the picture changed" test.
+    motion_fired = np.zeros(n, dtype=bool)
+    for t in range(n):
+        if t < len(motion):
+            ev = encode_sparse(motion[t][:cgh, :cgw], sparse_threshold)
+            motion_fired[t] = bool(ev)
+    for t in range(n):
+        # frame t's change is cons[t-1]
+        changed[t] = (t == 0) or (cons[t - 1] > still_threshold)
+    changed_motion_only = [bool(motion_fired[t]) for t in range(n)]
+    changed_union = [bool(changed[t] or changed_motion_only[t]) for t in range(n)]
+    zone_moving = int((cons_zone > still_threshold).sum())
+
+    for t in range(n):
+        while ref_i + 1 < len(refs) and refs[ref_i + 1] <= t:
+            ref_i += 1
+        ref_frame = frames[refs[ref_i]].astype(np.float64)
+        dg = delta_grid(frames[t].astype(np.float64), ref_frame, lgw, lgh)
+        line = encode_grid(dg, scale)
+        delta_bytes_clock += len(line) + 1
+        if changed[t]:
+            # the coarse carry: the same change, at a resolution that
+            # affords more of them
+            dgc = delta_grid(frames[t].astype(np.float64), ref_frame, cgw, cgh)
+            delta_bytes_policy += len(encode_grid(dgc, scale)) + 1
+        if t < len(motion):
+            ev = encode_sparse(motion[t][:cgh, :cgw], sparse_threshold)
+            if ev:
+                sparse_bytes_clock += len(ev) + 1
+                if changed[t]:
+                    sparse_bytes_policy += len(ev) + 1
+
+    # the stretches
+    stretches = []
+    t = 0
+    while t < n:
+        j = t
+        while j + 1 < n and changed[j + 1] == changed[t]:
+            j += 1
+        stretches.append({"start_frame": t, "end_frame": j,
+                          "frames": j - t + 1, "kind": "MOVING" if changed[t] else "STILL"})
+        t = j + 1
+    still = [s for s in stretches if s["kind"] == "STILL"]
+    moving = [s for s in stretches if s["kind"] == "MOVING"]
+
+    offsets = (clock.frame_offsets_s if clock.has_frames
+               else np.arange(n) / 60.0)
+    span = float(offsets[-1] - offsets[0]) if n > 1 else n / 60.0
+
+    frame_dt = (float(offsets[1] - offsets[0]) if n > 1 and clock.has_frames
+                else 1.0 / 60.0)
+
+    def dur(s):
+        # a one-frame stretch has zero span between its first and last
+        # frame's timestamps; it still occupies one frame's worth of time
+        span = float(offsets[s["end_frame"]] - offsets[s["start_frame"]])
+        return span + (frame_dt if s["frames"] == 1 else 0.0)
+
+    still_s = sum(dur(s) for s in still)
+    moving_s = sum(dur(s) for s in moving)
+
+    # the reference channel under the policy: the clock cadence while the
+    # phone is moving, and ONE high-fidelity description per still
+    # stretch.  A PNG reference costs what it costs; the policy's still
+    # description is a fine-grid ASCII frame.
+    png_ref_bytes = ref_png_bytes
+    policy_refs = len(moving) + len(still)
+    policy_ref_bytes = 0
+    reanchors = 0
+    for s_ in moving:
+        reanchors += max(0, int(dur(s_) // interval_s))
+    policy_refs += reanchors
+    # the descriptions are ASCII: a still stretch is described ONCE at the
+    # fine grid, a moving stretch is anchored at the live grid and
+    # re-anchored on the clock because its deltas accumulate
+    policy_ref_bytes = (len(still) * fine_chars
+                         + (len(moving) + reanchors) * live_chars)
+    clock_ref_bytes = png_ref_bytes if png_ref_bytes is not None else 0
+
+    out = {
+        "tool": "experiments/motion_as_text.py --rate-policy",
+        "generated_at": time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime()),
+        "session": str(session_dir),
+        "n_frames": n,
+        "span_s": round(span, 3),
+        "policy": ("stillness buys resolution and drops the frame rate; "
+                   "motion buys frame rate and drops the resolution; the "
+                   "budget follows the change, never the clock"),
+        "grids": {
+            "live": {"gw": lgw, "gh": lgh, "chars_per_frame": live_chars},
+            "coarse": {"gw": cgw, "gh": cgh, "chars_per_frame": coarse_chars},
+            "fine": {"gw": fgw, "gh": fgh, "chars_per_frame": fine_chars},
+        },
+        "stillness_test": noise,
+        "stretches": {
+            "n": len(stretches),
+            "person_zone_moving_frames": zone_moving,
+            "n_still": len(still),
+            "n_moving": len(moving),
+            "still_s": round(still_s, 3),
+            "moving_s": round(moving_s, 3),
+            "still_fraction_of_time": round(still_s / span, 4) if span else None,
+            "unchanged_frames": int(sum(1 for c in changed if not c)),
+            "unchanged_fraction": round(sum(1 for c in changed if not c) / n, 4),
+        },
+        "clock_indexed": {
+            "what": "today's design: one reference per clock second, every "
+                    "frame's delta carried, every motion event carried",
+            "n_references": len(refs),
+            "reference_bytes": clock_ref_bytes,
+            "delta_bytes": delta_bytes_clock,
+            "sparse_bytes": sparse_bytes_clock,
+            "total_bytes": clock_ref_bytes + delta_bytes_clock + sparse_bytes_clock,
+            "bytes_per_second": round(
+                (clock_ref_bytes + delta_bytes_clock + sparse_bytes_clock) / span, 1)
+            if span else None,
+        },
+        "policy_indexed": {
+            "what": "one high-fidelity description per still stretch; the "
+                    "live channel carries only changed frames, at the coarse "
+                    "grid",
+            "n_descriptions": policy_refs,
+            "reference_bytes": policy_ref_bytes,
+            "delta_bytes": delta_bytes_policy,
+            "sparse_bytes": sparse_bytes_policy,
+            "total_bytes": policy_ref_bytes + delta_bytes_policy + sparse_bytes_policy,
+            "bytes_per_second": round(
+                (policy_ref_bytes + delta_bytes_policy + sparse_bytes_policy) / span, 1)
+            if span else None,
+        },
+        "triggers_disagree": {
+            "note": "the whole-frame change and the motion map disagree; the "
+                    "union is the defensible 'the picture changed' test",
+            "n_whole_frame_moving": int(sum(1 for c in changed if c)),
+            "n_motion_map_firing": int(sum(1 for c in changed_motion_only if c)),
+            "n_either": int(sum(1 for c in changed_union if c)),
+            "n_motion_only": int(sum(1 for t in range(n)
+                                     if changed_motion_only[t] and not changed[t])),
+            "n_whole_only": int(sum(1 for t in range(n)
+                                    if changed[t] and not changed_motion_only[t])),
+        },
+        "exchange_rate": {
+            "note": "the policy's arithmetic is the grid sweep's own table",
+            "fine_over_coarse_bytes": round(fine_chars / coarse_chars, 2),
+            "live_over_coarse_bytes": round(live_chars / coarse_chars, 2),
+        },
+        "elapsed_s": round(time.time() - t0, 2),
+    }
+    if out["clock_indexed"]["bytes_per_second"] and \
+            out["policy_indexed"]["bytes_per_second"]:
+        out["policy_indexed"]["ratio_to_clock"] = round(
+            out["policy_indexed"]["bytes_per_second"]
+            / out["clock_indexed"]["bytes_per_second"], 4)
+    out_dir.mkdir(parents=True, exist_ok=True)
+    (out_dir / "rate_policy.json").write_text(json.dumps(out, indent=2))
+    return out
+
+
 def main(argv=None) -> int:
     ap = argparse.ArgumentParser(description=__doc__.splitlines()[0])
     ap.add_argument("session", nargs="?", default=None,
@@ -822,6 +1088,16 @@ def main(argv=None) -> int:
                     help="the second to render in ASCII")
     ap.add_argument("--ascii-frames", type=int, default=3)
     ap.add_argument("--ascii-cols", type=int, default=80)
+    ap.add_argument("--rate-policy", action="store_true",
+                    help="measure the adaptive-fidelity policy instead of "
+                         "rendering the session")
+    ap.add_argument("--still-threshold", type=float, default=3.0,
+                    help="the loudness of a frame-to-frame change, in luma, "
+                         "above which the picture counts as MOVING")
+    ap.add_argument("--ref-png-bytes", type=int, default=None,
+                    help="the measured total bytes of this session's PNG "
+                         "references, so the policy's still descriptions can "
+                         "be compared with them")
     ap.add_argument("--selftest", action="store_true")
     a = ap.parse_args(argv)
 
@@ -830,6 +1106,17 @@ def main(argv=None) -> int:
     if not a.session:
         ap.error("give a session folder, or --selftest")
     gw, gh = (int(v) for v in a.grid.lower().split("x"))
+    if a.rate_policy:
+        out = rate_policy(Path(a.session), Path(a.out), live_grid=(gw, gh),
+                          interval_s=a.interval_s,
+                          scene_threshold=a.scene_threshold,
+                          sparse_threshold=a.sparse_threshold,
+                          ref_png_bytes=a.ref_png_bytes,
+                          still_threshold=a.still_threshold)
+        print(json.dumps({k: v for k, v in out.items()
+                          if k in ("stretches", "clock_indexed",
+                                   "policy_indexed", "exchange_rate")}, indent=2))
+        return 0
     run(Path(a.session), Path(a.out), interval_s=a.interval_s,
         scene_threshold=a.scene_threshold, gw=gw, gh=gh,
         sparse_threshold=a.sparse_threshold, ascii_at=a.ascii_at,

@@ -21,6 +21,11 @@ readable as it stands.**
 | the motion stream | 3.8 kB/s | plain text, the edges that moved |
 | **the total** | **27.4 kB/s** | **33.6× smaller** |
 
+**And the budget can be spent on the CHANGE instead of on the clock:
+8,885.5 bytes/s, 0.375× the clock-indexed cost — 2.7× cheaper.** Section 5A
+is the measurement, and it rests on a number the lens files now own: 93.4 %
+of the session is still.
+
 **The reconstruction works, and it works better the finer the grid, and
 the price is bytes.** At 20×12 the reconstruction's mean absolute error
 is 12.20 luma levels against 14.24 for the reference alone — the motion
@@ -218,6 +223,102 @@ above it the text is a file again.
 
 ---
 
+## 5A. THE RATE POLICY — spend the budget on the change, not on the clock
+
+The ASCII-phone addendum's rule is: **stillness buys resolution and drops
+the frame rate; motion buys frame rate and drops the resolution; the
+budget follows the change, never the clock.** This section is what that
+rule costs, measured.
+
+The clock-indexed design is the one the spec describes above: one
+reference per clock second, every frame's delta carried, every motion
+event carried. The policy-indexed design spends the same byte budget
+differently — one high-fidelity description per *still stretch*, and on
+the live channel only the changed frames, at the coarse grid.
+
+| | clock-indexed | policy-indexed | ratio |
+|---|---|---|---|
+| references | 262 | 1,068 | |
+| reference bytes | 2,196,034 | 2,209,692 | |
+| delta bytes | 3,909,528 | **90,780** | |
+| sparse bytes | 28,133 | 0 | |
+| **total bytes** | **6,133,695** | **2,300,472** | |
+| **bytes/s** | **23,691.2** | **8,885.5** | **0.3751×** |
+
+**The policy is 2.7× cheaper, and where the saving comes from is
+measurable.** The delta stream falls from 3,909,528 bytes to 90,780 — a
+**43×** reduction — while the references cost essentially the same
+(2,196,034 against 2,209,692). The clock-indexed design spends 63.7 % of
+its bytes on the delta stream; the policy spends 3.9 %. The references
+are the fixed cost of seeing the room at all, and the policy does not
+avoid them: it *increases* the number of high-fidelity anchors from 262
+to 1,068 and spends less per frame.
+
+### 5A.1 WHY: the session is 93.4 % still
+
+The policy is only as good as its stillness test, and the test is where
+this section's two measurement bugs were found.
+
+| | |
+|---|---|
+| consecutive frame pairs | 15,513 |
+| pairs with zero change | 10,339 (**66.7 %**) |
+| non-zero change, median | 1.152 luma |
+| non-zero change, p90 | 3.047 luma |
+| the threshold used | **3.0 luma** |
+| stretches found | 1,068 (534 still, 534 moving) |
+| time still | 241.8 s of 258.9 s (**93.4 %**) |
+| time moving | 8.8 s |
+| frames unchanged | 14,980 (**96.6 %**) |
+
+**Stillness is a MAGNITUDE test, and two other tests were tried first and
+both were wrong.**
+
+The first tested stillness on the *delta encoding* — comparing each
+frame's delta against the previous one. But the clock's reference advance
+makes a still frame's delta look changed, because the reference moved
+under it. That gave 6,680 stretches instead of 1,068, and the policy
+looked **6.8× worse** than the clock. The measurement was measuring the
+reference schedule, not the room.
+
+The second tested it on **grid equality** — whether the frame's coarse
+grid equals the previous frame's. That fails on camera noise: the sensor
+grain moves cells by fractions of a luma level, so no two grids are
+exactly equal. The room map's own motion-noise σ is 0.61 luma.
+
+The third test is a **magnitude** test at a measured threshold: 3.0 luma
+is **2.6×** the non-zero median of 1.152 luma and about **5×** the room
+map's noise σ of 0.61 luma. That threshold is now the camera lens file's
+`SENSOR_NOISE_FLOOR` entry as well, so one number has one meaning.
+
+### 5A.2 The two triggers disagree, and the union is the honest test
+
+| trigger | fires on |
+|---|---|
+| whole-frame change | 534 frames |
+| the motion map (person zone) | 418 frames |
+| **either (the union)** | **952 frames** |
+| motion map only | 418 |
+| whole-frame only | 534 |
+
+The whole-frame change and the motion map **disagree** — 534 frames where
+the whole picture changed but the person zone did not, and 418 where the
+person zone moved but the whole frame's maximum stayed under threshold.
+Neither is the truth about "the picture changed". The union is the
+defensible test, and it is recorded in `triggers_disagree` so the number
+is auditable rather than assumed.
+
+### 5A.3 What the exchange rate is
+
+The policy's arithmetic is the grid sweep's own table, so the two
+sections cannot drift apart: the **fine** grid costs **23.0×** the
+coarse grid's bytes, and the **live** grid costs **1.49×** the coarse's.
+So the policy buys resolution 23× more cheaply than it buys frame rate —
+which is exactly the right exchange for a room, where the walls are
+static and the person is not.
+
+---
+
 ## 6. THE GESTURE
 
 Tonight's session has one large, fast movement in the 175–190 s window:
@@ -389,10 +490,19 @@ piece and it belongs with the liaison lane.
   /mnt/c/proart_capture/corpus/free_sessions/1792553040 \
   --out /tmp/motion_run --scene-threshold 25 \
   --ascii-at 182.4 --ascii-frames 4 --ascii-cols 80
+
+# the rate policy alone: the clock-indexed cost against the
+# policy-indexed cost, and the stillness test that decides between them
+/home/proart/projects/gpu-venv/bin/python experiments/motion_as_text.py \
+  /mnt/c/proart_capture/corpus/free_sessions/1792553040 \
+  --out /tmp/motion_run --scene-threshold 25 \
+  --ref-png-bytes 2196034 --rate-policy
 ```
 
 The run writes `delta_stream.txt` (the reconstructable text), 
 `motion_stream.txt` (the sparse edge events), `references/` (the PNG
 anchors), `ascii_*.txt` (the frames as text), `stream_*.txt` (the same
 frames out of the text), and `results.json` with every number in this
-report.
+report. The rate policy writes `rate_policy.json`, which carries both
+costings, the stillness test's threshold and its measured
+distributions, and the `triggers_disagree` record.
