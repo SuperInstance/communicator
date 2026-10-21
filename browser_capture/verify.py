@@ -356,6 +356,10 @@ def main() -> int:
         check("GET /plan is the repo's index.html (plan mode intact)",
               status == 200 and
               plan == (HERE / "index.html").read_bytes())
+        status, qpage = http("GET", "/?tuned=maxseg")
+        check("a query string does not break routing (the 404 class)",
+              status == 200 and
+              qpage == (HERE / "free_record.html").read_bytes())
         status, info = http("GET", "/info")
         check("GET /info", status == 200 and
               json.loads(info)["out"] == str(out_dir))

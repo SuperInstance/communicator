@@ -768,3 +768,30 @@ construction, and the compliance is load-bearing, not decorative:
   become a score later even before the scorer (MiniMax, build-order
   item 3) lands. The conversation page (item 4) therefore waits on the
   scorer per the brief's own order, without losing anything.
+
+## North-star anchor (docs/research/BRIEF-SYNERGY-LEARNING-LOOP.md)
+
+The liaison is steps 1 and 2 of the synergy loop — CAPTURE (automatic,
+everything on one clock: the session bundles already carry audio + luma
++ the timestamps spine; the score slot is what build-order item 3 fills)
+and LOCAL SCORING (the measured-not-asserted health is the first local
+computation on the box; the decomposition stages plug into the same
+bundles as files) — plus the FAILURE-DETECTOR HOME: "every failure
+becomes (a) a detector in the liaison, (b) a test in the suite, (c) a
+line in the digest." Audit of this build's failure classes against that
+law:
+
+- **SILENT_AUDIO** (the brief's named prototype): detector at save time
+  ✓, suite test (forced silent WAV through the real POST path) ✓, outbox
+  line ✓. The full triple, live — it fired in production within minutes
+  of deployment.
+- **Query-string 404**: fix ✓, suite test added this change ✓.
+- **Deaf input / AUDIO DEAD / DEVICE_FAILURE / cold-start floors**:
+  detectors ✓ (page gate + heartbeat fields), outbox lines ✓
+  (`page_deaf_on/off`, `page_device_failure`), and E2E-proven — but the
+  browser-dependent tests are not in the stdlib suite; recorded as the
+  known gap, honestly, until the E2E is suite-enclosed.
+
+The teacher-dependence ratio is the loop's headline metric; nothing in
+this lane computes it yet — it belongs to the digest tier, and the
+liaison's job is only to make its inputs honest and measured.
