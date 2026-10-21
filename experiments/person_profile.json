@@ -1,168 +1,242 @@
 {
   "tool": "experiments/person_profile.py",
-  "created_at": "2026-10-21T05:11:56Z",
-  "updated_at": "2026-10-21T05:11:56Z",
-  "n_sessions": 4,
+  "created_at": "2026-10-21T05:54:36Z",
+  "updated_at": "2026-10-21T05:54:36Z",
+  "n_sessions": 3,
   "sessions": [
     {
-      "label": "/tmp/harvest_dry3/free_sessions/1758000001",
-      "at": "2026-10-21T05:11:56Z",
-      "n_bundles": 4,
-      "duration_s": 13.9,
-      "n_words": 41,
-      "n_syllables": 48,
-      "n_notes": 53,
+      "label": "/mnt/c/proart_capture/corpus/free_sessions/1792560597",
+      "data_class": "drilled",
+      "trigger": "manual",
+      "mode": "manual",
+      "at": "2026-10-21T05:54:36Z",
+      "n_bundles": 1,
+      "duration_s": 27.25,
+      "n_words": 17,
+      "n_syllables": 19,
+      "n_notes": 28,
       "stats": {
-        "centre_midi": 45.625,
-        "range_semitones": 8.0,
-        "slope_semitones_per_s": -1.2183,
-        "notes_per_second": 3.9688,
-        "median_note_s": 0.1475,
-        "note_duration_std": 0.1036,
-        "step_abs_mean": 2.4112,
-        "step_std": 2.8695,
-        "jitter_semitones": 1.908,
-        "voiced_fraction": 0.567
+        "centre_midi": 50.5,
+        "range_semitones": 18.0,
+        "slope_semitones_per_s": 0.029,
+        "notes_per_second": 3.758,
+        "median_note_s": 0.13,
+        "note_duration_std": 0.0532,
+        "step_abs_mean": 4.926,
+        "step_std": 6.645,
+        "jitter_semitones": 4.885,
+        "voiced_fraction": 0.1169
       },
       "motifs": {
-        "arched": 2,
-        "falling": 2
+        "falling": 1
+      },
+      "intents": [],
+      "new_words": [
+        "darn",
+        "get",
+        "gonna",
+        "got",
+        "mic",
+        "my",
+        "now",
+        "on",
+        "page",
+        "reset",
+        "so",
+        "the",
+        "there",
+        "you"
+      ],
+      "drift": {},
+      "drift_baseline": "all",
+      "drift_baseline_sessions": 0
+    },
+    {
+      "label": "/mnt/c/proart_capture/corpus/free_sessions/1792560758",
+      "data_class": "ambient",
+      "trigger": "motion",
+      "mode": "auto",
+      "at": "2026-10-21T05:54:36Z",
+      "n_bundles": 1,
+      "duration_s": 154.784,
+      "n_words": 229,
+      "n_syllables": 294,
+      "n_notes": 288,
+      "stats": {
+        "centre_midi": 46.0,
+        "range_semitones": 30.0,
+        "slope_semitones_per_s": -0.057,
+        "notes_per_second": 2.122,
+        "median_note_s": 0.14,
+        "note_duration_std": 0.1641,
+        "step_abs_mean": 3.401,
+        "step_std": 4.845,
+        "jitter_semitones": 3.763,
+        "voiced_fraction": 0.2567
+      },
+      "motifs": {
+        "rising": 1
       },
       "intents": [],
       "new_words": [
         "a",
-        "across",
+        "able",
+        "act",
+        "all",
+        "an",
         "and",
-        "away",
+        "audio",
         "bar",
-        "bus",
-        "came",
-        "coffee",
-        "cup",
-        "did",
-        "east",
-        "from",
-        "he",
-        "in",
-        "light",
-        "long",
-        "near",
-        "not",
-        "of",
-        "pulled",
-        "sat",
-        "the",
-        "then",
-        "through",
-        "turned",
-        "window",
-        "with"
-      ],
-      "drift": {}
-    },
-    {
-      "label": "/tmp/harvest_dry3/free_sessions/1758000002",
-      "at": "2026-10-21T05:11:56Z",
-      "n_bundles": 4,
-      "duration_s": 9.733,
-      "n_words": 24,
-      "n_syllables": 29,
-      "n_notes": 42,
-      "stats": {
-        "centre_midi": 46.625,
-        "range_semitones": 11.0,
-        "slope_semitones_per_s": -1.3063,
-        "notes_per_second": 4.8057,
-        "median_note_s": 0.1512,
-        "note_duration_std": 0.0956,
-        "step_abs_mean": 2.767,
-        "step_std": 3.8457,
-        "jitter_semitones": 2.7512,
-        "voiced_fraction": 0.7083
-      },
-      "motifs": {
-        "rising": 2,
-        "falling": 2
-      },
-      "intents": [],
-      "new_words": [
-        "at",
-        "coat",
-        "great",
+        "be",
+        "big",
+        "but",
+        "can",
+        "catch",
+        "coming",
+        "different",
+        "discovered",
+        "do",
+        "effective",
+        "experience",
+        "fake",
+        "feel",
+        "few",
+        "first",
+        "for",
+        "gestures",
+        "getting",
+        "good",
+        "happens",
+        "have",
+        "hear",
         "here",
-        "library",
-        "look",
-        "opened",
-        "set"
+        "how",
+        "i",
+        "if",
+        "in",
+        "inspiration",
+        "into",
+        "is",
+        "it",
+        "just",
+        "kind",
+        "lenses",
+        "like",
+        "looks",
+        "make",
+        "maybe",
+        "me",
+        "means",
+        "nice",
+        "nothing",
+        "noticed",
+        "of",
+        "part",
+        "probably",
+        "real",
+        "reason",
+        "second",
+        "seconds",
+        "see",
+        "seeing",
+        "someone",
+        "sync",
+        "system",
+        "take",
+        "talk",
+        "temporal",
+        "that",
+        "then",
+        "thing",
+        "think",
+        "this",
+        "through",
+        "time",
+        "to",
+        "trying",
+        "until",
+        "up",
+        "video",
+        "we",
+        "when",
+        "who",
+        "why",
+        "with",
+        "wrong"
       ],
       "drift": {
         "centre_midi": {
-          "value": 46.625,
-          "baseline_mean": 45.625,
-          "delta": 1.0,
+          "value": 46.0,
+          "baseline_mean": 50.5,
+          "delta": -4.5,
           "sd_from_baseline": null
         },
         "range_semitones": {
-          "value": 11.0,
-          "baseline_mean": 8.0,
-          "delta": 3.0,
+          "value": 30.0,
+          "baseline_mean": 18.0,
+          "delta": 12.0,
           "sd_from_baseline": null
         },
         "slope_semitones_per_s": {
-          "value": -1.3063,
-          "baseline_mean": -1.2183,
-          "delta": -0.088,
+          "value": -0.057,
+          "baseline_mean": 0.029,
+          "delta": -0.086,
           "sd_from_baseline": null
         },
         "notes_per_second": {
-          "value": 4.8057,
-          "baseline_mean": 3.9688,
-          "delta": 0.8369,
+          "value": 2.122,
+          "baseline_mean": 3.758,
+          "delta": -1.636,
           "sd_from_baseline": null
         },
         "median_note_s": {
-          "value": 0.1512,
-          "baseline_mean": 0.1475,
-          "delta": 0.0037,
+          "value": 0.14,
+          "baseline_mean": 0.13,
+          "delta": 0.01,
           "sd_from_baseline": null
         },
         "note_duration_std": {
-          "value": 0.0956,
-          "baseline_mean": 0.1036,
-          "delta": -0.008,
+          "value": 0.1641,
+          "baseline_mean": 0.0532,
+          "delta": 0.1109,
           "sd_from_baseline": null
         },
         "step_abs_mean": {
-          "value": 2.767,
-          "baseline_mean": 2.4112,
-          "delta": 0.3558,
+          "value": 3.401,
+          "baseline_mean": 4.926,
+          "delta": -1.525,
           "sd_from_baseline": null
         },
         "step_std": {
-          "value": 3.8457,
-          "baseline_mean": 2.8695,
-          "delta": 0.9762,
+          "value": 4.845,
+          "baseline_mean": 6.645,
+          "delta": -1.8,
           "sd_from_baseline": null
         },
         "jitter_semitones": {
-          "value": 2.7512,
-          "baseline_mean": 1.908,
-          "delta": 0.8432,
+          "value": 3.763,
+          "baseline_mean": 4.885,
+          "delta": -1.122,
           "sd_from_baseline": null
         },
         "voiced_fraction": {
-          "value": 0.7083,
-          "baseline_mean": 0.567,
-          "delta": 0.1413,
+          "value": 0.2567,
+          "baseline_mean": 0.1169,
+          "delta": 0.1398,
           "sd_from_baseline": null
         }
-      }
+      },
+      "drift_baseline": "all",
+      "drift_baseline_sessions": 1
     },
     {
-      "label": "/tmp/harvest_dry3/free_sessions/1758000003",
-      "at": "2026-10-21T05:11:56Z",
-      "n_bundles": 2,
-      "duration_s": 29.981,
+      "label": "/mnt/c/proart_capture/corpus/free_sessions/1792560773",
+      "data_class": "ambient",
+      "trigger": "motion",
+      "mode": "auto",
+      "at": "2026-10-21T05:54:36Z",
+      "n_bundles": 1,
+      "duration_s": 16.048,
       "n_words": 0,
       "n_syllables": 0,
       "n_notes": 0,
@@ -179,174 +253,431 @@
         "voiced_fraction": 0.0
       },
       "motifs": {
-        "level": 2
+        "level": 1
       },
       "intents": [],
       "new_words": [],
       "drift": {
         "voiced_fraction": {
           "value": 0.0,
-          "baseline_mean": 0.6377,
-          "delta": -0.6377,
-          "sd_from_baseline": -9.02
+          "baseline_mean": 0.2567,
+          "delta": -0.2567,
+          "sd_from_baseline": null
         }
-      }
-    },
-    {
-      "label": "/tmp/harvest_dry3/free_sessions/1758000004",
-      "at": "2026-10-21T05:11:56Z",
-      "n_bundles": 4,
-      "duration_s": 148.306,
-      "n_words": 0,
-      "n_syllables": 0,
-      "n_notes": 0,
-      "stats": {
-        "centre_midi": null,
-        "range_semitones": null,
-        "slope_semitones_per_s": null,
-        "notes_per_second": null,
-        "median_note_s": null,
-        "note_duration_std": null,
-        "step_abs_mean": null,
-        "step_std": null,
-        "jitter_semitones": null,
-        "voiced_fraction": 0.0
       },
-      "motifs": {
-        "level": 4
-      },
-      "intents": [],
-      "new_words": [],
-      "drift": {
-        "voiced_fraction": {
-          "value": 0.0,
-          "baseline_mean": 0.4251,
-          "delta": -0.4251,
-          "sd_from_baseline": -1.389
-        }
-      }
+      "drift_baseline": "ambient",
+      "drift_baseline_sessions": 1
     }
   ],
   "vocabulary": {
-    "size": 35,
+    "size": 98,
     "words": [
       "a",
-      "across",
+      "able",
+      "act",
+      "all",
+      "an",
       "and",
-      "at",
-      "away",
+      "audio",
       "bar",
-      "bus",
-      "came",
-      "coat",
-      "coffee",
-      "cup",
-      "did",
-      "east",
-      "from",
-      "great",
-      "he",
+      "be",
+      "big",
+      "but",
+      "can",
+      "catch",
+      "coming",
+      "darn",
+      "different",
+      "discovered",
+      "do",
+      "effective",
+      "experience",
+      "fake",
+      "feel",
+      "few",
+      "first",
+      "for",
+      "gestures",
+      "get",
+      "getting",
+      "gonna",
+      "good",
+      "got",
+      "happens",
+      "have",
+      "hear",
       "here",
+      "how",
+      "i",
+      "if",
       "in",
-      "library",
-      "light",
-      "long",
-      "look",
-      "near",
-      "not",
+      "inspiration",
+      "into",
+      "is",
+      "it",
+      "just",
+      "kind",
+      "lenses",
+      "like",
+      "looks",
+      "make",
+      "maybe",
+      "me",
+      "means",
+      "mic",
+      "my",
+      "nice",
+      "nothing",
+      "noticed",
+      "now",
       "of",
-      "opened",
-      "pulled",
-      "sat",
-      "set",
+      "on",
+      "page",
+      "part",
+      "probably",
+      "real",
+      "reason",
+      "reset",
+      "second",
+      "seconds",
+      "see",
+      "seeing",
+      "so",
+      "someone",
+      "sync",
+      "system",
+      "take",
+      "talk",
+      "temporal",
+      "that",
       "the",
       "then",
+      "there",
+      "thing",
+      "think",
+      "this",
       "through",
-      "turned",
-      "window",
-      "with"
+      "time",
+      "to",
+      "trying",
+      "until",
+      "up",
+      "video",
+      "we",
+      "when",
+      "who",
+      "why",
+      "with",
+      "wrong",
+      "you"
     ]
   },
   "motif_vocabulary": {
-    "rising": 2,
-    "falling": 4,
-    "level": 6,
-    "arched": 2,
+    "rising": 1,
+    "falling": 1,
+    "level": 1,
+    "arched": 0,
     "dipped": 0,
     "mixed": 0
   },
   "intent_vocabulary": {},
   "baseline": {
     "centre_midi": {
-      "mean": 46.125,
-      "sd": 0.5,
+      "mean": 48.25,
+      "sd": 2.25,
       "n": 2,
-      "min": 45.625,
-      "max": 46.625
+      "min": 46.0,
+      "max": 50.5
     },
     "range_semitones": {
-      "mean": 9.5,
-      "sd": 1.5,
+      "mean": 24.0,
+      "sd": 6.0,
       "n": 2,
-      "min": 8.0,
-      "max": 11.0
+      "min": 18.0,
+      "max": 30.0
     },
     "slope_semitones_per_s": {
-      "mean": -1.2623,
-      "sd": 0.044,
+      "mean": -0.014,
+      "sd": 0.043,
       "n": 2,
-      "min": -1.3063,
-      "max": -1.2183
+      "min": -0.057,
+      "max": 0.029
     },
     "notes_per_second": {
-      "mean": 4.3872,
-      "sd": 0.4184,
+      "mean": 2.94,
+      "sd": 0.818,
       "n": 2,
-      "min": 3.9688,
-      "max": 4.8057
+      "min": 2.122,
+      "max": 3.758
     },
     "median_note_s": {
-      "mean": 0.1493,
-      "sd": 0.0019,
+      "mean": 0.135,
+      "sd": 0.005,
       "n": 2,
-      "min": 0.1475,
-      "max": 0.1512
+      "min": 0.13,
+      "max": 0.14
     },
     "note_duration_std": {
-      "mean": 0.0996,
-      "sd": 0.004,
+      "mean": 0.1086,
+      "sd": 0.0554,
       "n": 2,
-      "min": 0.0956,
-      "max": 0.1036
+      "min": 0.0532,
+      "max": 0.1641
     },
     "step_abs_mean": {
-      "mean": 2.5891,
-      "sd": 0.1779,
+      "mean": 4.1635,
+      "sd": 0.7625,
       "n": 2,
-      "min": 2.4112,
-      "max": 2.767
+      "min": 3.401,
+      "max": 4.926
     },
     "step_std": {
-      "mean": 3.3576,
-      "sd": 0.4881,
+      "mean": 5.745,
+      "sd": 0.9,
       "n": 2,
-      "min": 2.8695,
-      "max": 3.8457
+      "min": 4.845,
+      "max": 6.645
     },
     "jitter_semitones": {
-      "mean": 2.3296,
-      "sd": 0.4216,
+      "mean": 4.324,
+      "sd": 0.561,
       "n": 2,
-      "min": 1.908,
-      "max": 2.7512
+      "min": 3.763,
+      "max": 4.885
     },
     "voiced_fraction": {
-      "mean": 0.3188,
-      "sd": 0.3227,
-      "n": 4,
+      "mean": 0.1245,
+      "sd": 0.1049,
+      "n": 3,
       "min": 0.0,
-      "max": 0.7083
+      "max": 0.2567
     }
+  },
+  "baselines": {
+    "all": {
+      "centre_midi": {
+        "mean": 48.25,
+        "sd": 2.25,
+        "n": 2,
+        "min": 46.0,
+        "max": 50.5
+      },
+      "range_semitones": {
+        "mean": 24.0,
+        "sd": 6.0,
+        "n": 2,
+        "min": 18.0,
+        "max": 30.0
+      },
+      "slope_semitones_per_s": {
+        "mean": -0.014,
+        "sd": 0.043,
+        "n": 2,
+        "min": -0.057,
+        "max": 0.029
+      },
+      "notes_per_second": {
+        "mean": 2.94,
+        "sd": 0.818,
+        "n": 2,
+        "min": 2.122,
+        "max": 3.758
+      },
+      "median_note_s": {
+        "mean": 0.135,
+        "sd": 0.005,
+        "n": 2,
+        "min": 0.13,
+        "max": 0.14
+      },
+      "note_duration_std": {
+        "mean": 0.1086,
+        "sd": 0.0554,
+        "n": 2,
+        "min": 0.0532,
+        "max": 0.1641
+      },
+      "step_abs_mean": {
+        "mean": 4.1635,
+        "sd": 0.7625,
+        "n": 2,
+        "min": 3.401,
+        "max": 4.926
+      },
+      "step_std": {
+        "mean": 5.745,
+        "sd": 0.9,
+        "n": 2,
+        "min": 4.845,
+        "max": 6.645
+      },
+      "jitter_semitones": {
+        "mean": 4.324,
+        "sd": 0.561,
+        "n": 2,
+        "min": 3.763,
+        "max": 4.885
+      },
+      "voiced_fraction": {
+        "mean": 0.1245,
+        "sd": 0.1049,
+        "n": 3,
+        "min": 0.0,
+        "max": 0.2567
+      }
+    },
+    "ambient": {
+      "centre_midi": {
+        "mean": 46.0,
+        "sd": 0.0,
+        "n": 1,
+        "min": 46.0,
+        "max": 46.0
+      },
+      "range_semitones": {
+        "mean": 30.0,
+        "sd": 0.0,
+        "n": 1,
+        "min": 30.0,
+        "max": 30.0
+      },
+      "slope_semitones_per_s": {
+        "mean": -0.057,
+        "sd": 0.0,
+        "n": 1,
+        "min": -0.057,
+        "max": -0.057
+      },
+      "notes_per_second": {
+        "mean": 2.122,
+        "sd": 0.0,
+        "n": 1,
+        "min": 2.122,
+        "max": 2.122
+      },
+      "median_note_s": {
+        "mean": 0.14,
+        "sd": 0.0,
+        "n": 1,
+        "min": 0.14,
+        "max": 0.14
+      },
+      "note_duration_std": {
+        "mean": 0.1641,
+        "sd": 0.0,
+        "n": 1,
+        "min": 0.1641,
+        "max": 0.1641
+      },
+      "step_abs_mean": {
+        "mean": 3.401,
+        "sd": 0.0,
+        "n": 1,
+        "min": 3.401,
+        "max": 3.401
+      },
+      "step_std": {
+        "mean": 4.845,
+        "sd": 0.0,
+        "n": 1,
+        "min": 4.845,
+        "max": 4.845
+      },
+      "jitter_semitones": {
+        "mean": 3.763,
+        "sd": 0.0,
+        "n": 1,
+        "min": 3.763,
+        "max": 3.763
+      },
+      "voiced_fraction": {
+        "mean": 0.1283,
+        "sd": 0.1283,
+        "n": 2,
+        "min": 0.0,
+        "max": 0.2567
+      }
+    },
+    "drilled": {
+      "centre_midi": {
+        "mean": 50.5,
+        "sd": 0.0,
+        "n": 1,
+        "min": 50.5,
+        "max": 50.5
+      },
+      "range_semitones": {
+        "mean": 18.0,
+        "sd": 0.0,
+        "n": 1,
+        "min": 18.0,
+        "max": 18.0
+      },
+      "slope_semitones_per_s": {
+        "mean": 0.029,
+        "sd": 0.0,
+        "n": 1,
+        "min": 0.029,
+        "max": 0.029
+      },
+      "notes_per_second": {
+        "mean": 3.758,
+        "sd": 0.0,
+        "n": 1,
+        "min": 3.758,
+        "max": 3.758
+      },
+      "median_note_s": {
+        "mean": 0.13,
+        "sd": 0.0,
+        "n": 1,
+        "min": 0.13,
+        "max": 0.13
+      },
+      "note_duration_std": {
+        "mean": 0.0532,
+        "sd": 0.0,
+        "n": 1,
+        "min": 0.0532,
+        "max": 0.0532
+      },
+      "step_abs_mean": {
+        "mean": 4.926,
+        "sd": 0.0,
+        "n": 1,
+        "min": 4.926,
+        "max": 4.926
+      },
+      "step_std": {
+        "mean": 6.645,
+        "sd": 0.0,
+        "n": 1,
+        "min": 6.645,
+        "max": 6.645
+      },
+      "jitter_semitones": {
+        "mean": 4.885,
+        "sd": 0.0,
+        "n": 1,
+        "min": 4.885,
+        "max": 4.885
+      },
+      "voiced_fraction": {
+        "mean": 0.1169,
+        "sd": 0.0,
+        "n": 1,
+        "min": 0.1169,
+        "max": 0.1169
+      }
+    }
+  },
+  "class_counts": {
+    "ambient": 2,
+    "drilled": 1
+  },
+  "data_classes": {
+    "ambient": "caught first time: the page opened because there was motion or sound, and whatever was said was said unposed. Evidence about the person.",
+    "drilled": "performed on purpose: the words were chosen and the delivery was on purpose. Evidence about the performance."
   },
   "note": "descriptive only. These are measurements of how the voice moved, and a drift says a thing moved; it does not say what the speaker was doing. The interpretation is earned slowly or not at all."
 }

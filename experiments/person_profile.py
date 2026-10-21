@@ -39,10 +39,15 @@ import argparse
 import json
 import math
 import statistics
+import sys
 import time
 from pathlib import Path
 
 REPO = Path(__file__).resolve().parent.parent
+if str(REPO / "experiments") not in sys.path:
+    sys.path.insert(0, str(REPO / "experiments"))
+
+import provenance  # noqa: E402
 
 #: The statistics the profile carries. They are the same set the speech
 #: tool measures, so a session measured by one tool is comparable with a
@@ -113,6 +118,28 @@ def contour_stats(notes: list) -> dict:
     }
 
 
+def baseline_from(sessions: list) -> dict:
+    """The baseline a set of sessions gives.
+
+    For each statistic: the mean over the sessions that have it, the
+    spread, and how many there were. A session with no measurement of a
+    statistic does not drag the baseline towards zero; it is simply not
+    in that statistic's count.
+    """
+    base = {}
+    for key in CONTOUR_STATS:
+        vals = [s.get("stats", {}).get(key) for s in sessions
+                if s.get("stats", {}).get(key) is not None]
+        if not vals:
+            continue
+        mean = sum(vals) / len(vals)
+        sd = statistics.pstdev(vals) if len(vals) > 1 else 0.0
+        base[key] = {"mean": round(mean, 4), "sd": round(sd, 4),
+                     "n": len(vals), "min": round(min(vals), 4),
+                     "max": round(max(vals), 4)}
+    return base
+
+
 def motif_of(notes: list) -> str:
     """The coarse shape of a phrase.
 
@@ -174,8 +201,20 @@ def read_bundle(path: Path) -> dict:
         if lab and lab not in intents:
             intents.append(lab)
 
+    # WHAT KIND OF DATA THIS IS. A session somebody performed and a
+    # session the page caught carry different evidentiary weight, and
+    # the bundle records which it was.
+    prov = doc.get("provenance") or {}
+    if prov.get("data_class"):
+        dclass = prov["data_class"]
+    else:
+        dclass = provenance.data_class({}).get("data_class")
+
     return {
         "bundle": str(path),
+        "data_class": dclass,
+        "trigger": prov.get("trigger"),
+        "mode": prov.get("mode"),
         "session": doc.get("session") or doc.get("bundle_session"),
         "segment_start_s": doc.get("segment_start_s"),
         "segment_end_s": doc.get("segment_end_s"),
@@ -206,6 +245,12 @@ def empty_profile() -> dict:
         "motif_vocabulary": {m: 0 for m in MOTIFS},
         "intent_vocabulary": {},
         "baseline": {},
+        "baselines": {"all": {}, "ambient": {}, "drilled": {}},
+        "class_counts": {"ambient": 0, "drilled": 0},
+        "data_classes": {
+            "ambient": provenance.CLASS_NOTES[provenance.AMBIENT],
+            "drilled": provenance.CLASS_NOTES[provenance.DRILLED],
+        },
         "note": ("descriptive only. These are measurements of how the voice "
                  "moved, and a drift says a thing moved; it does not say "
                  "what the speaker was doing. The interpretation is earned "
@@ -217,8 +262,13 @@ def update_profile(profile: dict, bundles: list, label: str | None = None) -> di
     """Fold a session's bundles into the profile."""
     if not bundles:
         return profile
+    classes = [b.get("data_class") for b in bundles if b.get("data_class")]
+    dclass = classes[0] if classes else provenance.AMBIENT
     session = {
         "label": label or bundles[0].get("session") or bundles[0]["bundle"],
+        "data_class": dclass,
+        "trigger": bundles[0].get("trigger"),
+        "mode": bundles[0].get("mode"),
         "at": time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime()),
         "n_bundles": len(bundles),
         "duration_s": round(sum(b.get("duration_s") or 0.0 for b in bundles), 3),
@@ -261,8 +311,27 @@ def update_profile(profile: dict, bundles: list, label: str | None = None) -> di
         profile["intent_vocabulary"][lab] = \
             profile["intent_vocabulary"].get(lab, 0) + 1
 
-    # the drift, against the baseline of every session so far
-    prev = profile.get("baseline") or {}
+    # THE DRIFT, AGAINST THE BASELINE OF THE SESSION'S OWN CLASS.
+    #
+    # A drilled session and an ambient session are different kinds of
+    # evidence, so each is measured against the sessions of its own kind
+    # and NOT against a pooled baseline that mixes them: the number would
+    # then be about the average of a person and their performance, which
+    # is about neither. When the class has nothing to compare against yet,
+    # the all-sessions baseline is used, and the session says which one it
+    # was measured against rather than leaving it to be guessed.
+    cls = session.get("data_class")
+    same_class = [s for s in profile["sessions"]
+                  if s.get("data_class") == cls]
+    if same_class:
+        prev = baseline_from(same_class)
+        baseline_name = cls
+    else:
+        prev = baseline_from(profile["sessions"])
+        baseline_name = "all"
+    session["drift_baseline"] = baseline_name
+    session["drift_baseline_sessions"] = (len(same_class) if same_class
+                                          else len(profile["sessions"]))
     for key in CONTOUR_STATS:
         v = session["stats"].get(key)
         base = prev.get(key)
@@ -285,19 +354,16 @@ def update_profile(profile: dict, bundles: list, label: str | None = None) -> di
     profile["n_sessions"] = len(profile["sessions"])
     profile["updated_at"] = session["at"]
 
-    # the baseline is recomputed over every session seen so far
-    base = {}
-    for key in CONTOUR_STATS:
-        vals = [s["stats"].get(key) for s in profile["sessions"]
-                if s["stats"].get(key) is not None]
-        if not vals:
-            continue
-        mean = sum(vals) / len(vals)
-        sd = statistics.pstdev(vals) if len(vals) > 1 else 0.0
-        base[key] = {"mean": round(mean, 4), "sd": round(sd, 4),
-                     "n": len(vals), "min": round(min(vals), 4),
-                     "max": round(max(vals), 4)}
-    profile["baseline"] = base
+    # the baselines are recomputed, per class and overall
+    groups = {"all": list(profile["sessions"])}
+    for c in (provenance.AMBIENT, provenance.DRILLED):
+        groups[c] = [s for s in profile["sessions"]
+                     if s.get("data_class") == c]
+    baselines = {name: baseline_from(group) for name, group in groups.items()}
+    profile["baselines"] = baselines
+    profile["baseline"] = baselines.get("all", {})
+    profile["class_counts"] = {c: len(groups.get(c, []))
+                               for c in (provenance.AMBIENT, provenance.DRILLED)}
     return profile
 
 
@@ -323,13 +389,36 @@ def render_markdown(profile: dict) -> str:
     L.append("---")
     L.append("")
 
-    L.append("## 1. THE CONTOUR BASELINE")
+    L.append("## 0. THE TWO CLASSES OF DATA")
     L.append("")
-    base = profile.get("baseline") or {}
-    if not base:
-        L.append("No sessions yet.")
-    else:
-        L.append("What this voice does, averaged over every session folded in so far.")
+    L.append("A session somebody performed and a session the page caught are")
+    L.append("different kinds of evidence, and they are not averaged together.")
+    L.append("The page's own trigger says which is which, so the class is a")
+    L.append("reading of the provenance and not a guess.")
+    L.append("")
+    counts = profile.get("class_counts") or {}
+    L.append("| class | sessions | what it is |")
+    L.append("|---|---|---|")
+    for c in (provenance.AMBIENT, provenance.DRILLED):
+        L.append(f"| {c} | {counts.get(c, 0)} | "
+                 f"{profile.get('data_classes', {}).get(c, '')} |")
+    L.append("")
+    L.append("A drilled session is evidence about a performance and an ambient")
+    L.append("one is evidence about the person. Both are kept. A single number")
+    L.append("averaging them would be evidence about neither.")
+    L.append("")
+
+    L.append("## 1. THE CONTOUR BASELINE, BY CLASS")
+    L.append("")
+    baselines = profile.get("baselines") or {}
+    for c in (provenance.AMBIENT, provenance.DRILLED, "all"):
+        base = baselines.get(c) or {}
+        if not base:
+            continue
+        title = ("every session, both classes" if c == "all" else
+                 f"the {c} sessions only")
+        L.append(f"**{title}** ({base.get(next(iter(base)), {}).get('n', 0)} "
+                 f"session(s) with measurements)")
         L.append("")
         L.append("| statistic | mean | sd | min | max | n |")
         L.append("|---|---|---|---|---|---|")
@@ -339,22 +428,40 @@ def render_markdown(profile: dict) -> str:
                 continue
             L.append(f"| {key} | {b['mean']} | {b['sd']} | {b['min']} | "
                      f"{b['max']} | {b['n']} |")
-    L.append("")
+        L.append("")
 
     L.append("## 2. THE DRIFT, SESSION BY SESSION")
     L.append("")
-    L.append("How far each session sat from the baseline of everything before it.")
-    L.append("The first session has no drift: it is the baseline. The second")
-    L.append("carries a delta but no standard deviations, because a baseline of")
-    L.append("one point has no spread to measure against; from the third on the")
-    L.append("comparison is in standard deviations.")
+    L.append("How far each session sat from the baseline of its own class.")
+    L.append("The first session of a class has no drift: it is that class's")
+    L.append("baseline. The second carries a delta but no standard deviations,")
+    L.append("because a baseline of one point has no spread to measure")
+    L.append("against; from the third on the comparison is in standard")
+    L.append("deviations.")
     L.append("")
     for s in profile["sessions"]:
         L.append(f"### {s['label']}")
         L.append("")
-        L.append(f"{s['at']} — {s['n_bundles']} segment(s), {s['duration_s']} s, "
-                 f"{s['n_words']} words, {s['n_syllables']} syllables, "
-                 f"{s['n_notes']} notes.")
+        L.append(f"**{s.get('data_class', 'ambient')}**"
+                 + (f" — the page recorded trigger={s.get('trigger')!r}, "
+                    f"mode={s.get('mode')!r}"
+                    if s.get("trigger") else "")
+                 + f" — {s['at']}, {s['n_bundles']} segment(s), "
+                 f"{s['duration_s']} s, {s['n_words']} words, "
+                 f"{s['n_syllables']} syllables, {s['n_notes']} notes.")
+        L.append("")
+        base_name = s.get("drift_baseline", "all")
+        base_n = s.get("drift_baseline_sessions", 0)
+        if base_name == "all":
+            L.append(f"Measured against the **all** baseline, because no "
+                     f"{s.get('data_class', 'ambient')} session had been folded "
+                     f"in before this one. That is a placeholder, not a class "
+                     f"comparison: it pools the two classes, and the second "
+                     f"{s.get('data_class', 'ambient')} session is measured "
+                     f"against its own kind instead.")
+        else:
+            L.append(f"Measured against the **{base_name}** baseline "
+                     f"({base_n} earlier {base_name} session(s)).")
         L.append("")
         if not s["drift"]:
             L.append("No drift yet — this is the baseline, or there is not "
@@ -411,6 +518,11 @@ def render_markdown(profile: dict) -> str:
     L.append("sessions, and it needs a second opinion, and Casey's own drill")
     L.append("deliveries are the ground truth that would make it mean anything.")
     L.append("")
+    L.append("It does not average the two classes together either. A session")
+    L.append("that somebody performed and a session the page caught are not the")
+    L.append("same kind of thing, and a portrait that mixed them would be a")
+    L.append("portrait of the average of a person and their performance.")
+    L.append("")
     return "\n".join(L) + "\n"
 
 
@@ -432,6 +544,13 @@ def main(argv=None) -> int:
                     help="where the living document is written")
     ap.add_argument("--report", action="store_true",
                     help="print the profile and change nothing")
+    ap.add_argument("--reset", action="store_true",
+                    help="start the profile from nothing, so it holds exactly "
+                         "the bundles given and not the ones a previous run "
+                         "folded in. The profile normally ACCUMULATES, which "
+                         "is right for a corpus that grows; it is wrong when "
+                         "the old entries were a dry run and the new ones "
+                         "are the real thing.")
     ap.add_argument("--selftest", action="store_true")
     a = ap.parse_args(argv)
 
@@ -439,7 +558,9 @@ def main(argv=None) -> int:
         return selftest()
 
     profile_path = Path(a.profile)
-    if profile_path.is_file():
+    if a.reset:
+        profile = empty_profile()
+    elif profile_path.is_file():
         profile = json.loads(profile_path.read_text())
     else:
         profile = empty_profile()

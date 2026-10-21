@@ -2,6 +2,8 @@
 
 **Built by:** `experiments/speech_to_score.py`
 **Target in the brief:** `/mnt/c/proart_capture/corpus/free_sessions/1792553040`
+— still silent, and reported as such. **The first real free-session
+target**, `1792560597`, is scored in section 5.7.
 **Device:** the local RTX 4050 — `faster-whisper small.en` on `cuda` with
 `float16`, and the repository's own pure-Python pitch tracker on the CPU.
 No paid API, no network, no subscription.
@@ -12,17 +14,23 @@ No paid API, no network, no subscription.
 
 The pipeline is built, it runs end to end, and it is validated against the
 seed corpus with an independent measurement the repository already had.
-Three things are worth stating first.
+Four things are worth stating first.
 
-**Tonight's free session has no audio in it.** The WAV at
-`/mnt/c/proart_capture/corpus/free_sessions/1792553040/audio.wav` is
-digital silence — every one of its 12,431,744 samples is zero, its peak
-RMS is 0.00000000, and none of its 25,895 analysis frames rises above the
-energy floor. All ten of tonight's sessions are the same. The tool says
-so and stops: there is nothing to transcribe, nothing to pitch, and
-nothing to align. ZCode has this as the sick-lane fix, and the first real
-free-session target is the first session recorded after that fix lands.
-Until then the proof runs on real speech that exists.
+**The first real free session is scored.** The sick-lane fix landed, and
+session `1792560597` is the first thing that came out of a real microphone:
+27.3 seconds of Casey's voice. The tool transcribed 17 words and 19
+syllables, found 29 note events, and placed every syllable on the session's
+own frame indices — frames 1158 through 1623, of 1626. The ambient session
+that followed it, `1792560758`, is 154.9 seconds and 229 words, and Casey is
+in it saying that the audio had only just started arriving in the video,
+which is true, and is why the session exists at all.
+
+**The clock had a real bug, and it was found by the real session.** The
+frame offsets in `timestamps.json` are page-relative — the session that
+opened 450 seconds after its page did starts at 450122.3 ms, not at 0 — and
+the tool was reading them as session seconds. Every word in that session
+landed on frame 0. The fix, the measurement that pins it down, and the
+86-millisecond audio-versus-video question it opened up are in section 2.
 
 **The melody the tool extracts agrees with the measurement the repository
 already trusted.** The seed corpus's own manifest records the F0 median
@@ -39,7 +47,8 @@ session's own `timestamps.json`. Every syllable row carries its start and
 end in seconds *and* the frame indices it spans, so "which note owns
 frames 46 to 60" is a lookup and not a re-derivation. The analyzer's face
 and speech segments join onto the same frame index — 80 of 80 rows joined
-on the session in the proof below, with nothing re-measured.
+on the seed session, 19 of 19 and 295 of 295 on the two real ones, with
+nothing re-measured.
 
 ---
 
@@ -147,6 +156,67 @@ the syllable touches. Joining them without noticing costs a frame at
 every boundary. The join converts the row's end to an exclusive bound
 before comparing, and the unit test checks a row that sits on a boundary
 joins the later segment.
+
+### 2.1 The origin, and the 86 milliseconds
+
+The real session found a real bug, and the bug is worth writing down
+because it is the kind that never shows itself in a test fixture.
+
+**The offsets are page-relative, not session-relative.** The recorder
+stamps each frame with `performance.now()` minus the page's own origin.
+A session that opens 450 seconds after its page loaded therefore starts at
+450122.3 ms, not at 0. That is the page's clock and the recorder's right
+to use it, but a tool that treats those numbers as session seconds is
+reading the wrong clock — and it fails silently, because the frames
+*exist*, they are just in the wrong place. Session `1792560597` printed
+`frames 0..0` for every one of its nineteen syllables.
+
+The fix is to name the origin instead of assuming it: the session's first
+frame is t=0, and the raw offsets are shifted by their own first value.
+The shift is recorded (`origin_offset_s`), not hidden, so the wall clock
+still turns it back into an absolute time. `free_session_analyze.py` was
+already doing this — `arr - arr[0]` at its line 415 — which is why the
+analyzer's segments joined onto the tool's frames so cleanly on the seed
+corpus and why the two now agree on the real one.
+
+**Then there were 86 milliseconds.** The audio is 27.3360 seconds long.
+The frames span 27.2500 seconds. Nothing in the tool was wrong; two
+rings of two different things simply do not end on the same instant. The
+recorder keeps a pre-roll of frames (up to 1.2 seconds) and a pre-roll of
+audio (up to 1.2 seconds plus one block), and the two are trimmed
+independently, so the WAV's first sample sits against the first frame by
+an amount that depends on where the block boundary fell.
+
+Three ways of measuring it, on all three real sessions:
+
+| session | class | the WAV's first sample against the first frame |
+|---|---|---|
+| `1792560597` | drilled | −67.3 ms |
+| `1792560758` | ambient | −92.3 ms |
+| `1792560773` | ambient | +5.7 ms |
+
+The number above is the truth, measured from the page's own sample
+counter: the diagnostics heartbeat reports the accumulated sample count
+every second, and a least-squares fit of that count against the page's
+wall clock gives the audio's position on the page clock to within 5 to 9
+milliseconds. The pre-roll model agrees with it to within 2
+milliseconds, which is the two-clock difference between `Date.now()` and
+`performance.now()`.
+
+The tool cannot use the diagnostics log — it is not part of the session
+— so it estimates the lead from the session's own two records: the
+wall-clock span and the audio's own length. The audio's end and the wall
+clock's end are the same close, and the first frame is the wall clock's
+start, so the difference between the wall span and the audio length is
+where the WAV's first sample sits. Measured against the truth above, that
+estimate is within **3.7 ms, 0.0 ms and 12.0 ms** — under one frame at
+60 fps in the worst case, against a systematic error of up to 92 ms
+without it.
+
+The lead is applied in exactly one place, `SessionClock.frames_for_audio_span`,
+and the clock reports it, says how it was measured, and refuses to apply
+it when the audio it was handed is not the session's own recording. A
+seed-corpus WAV analysed beside a session directory is left alone.
 
 ---
 
@@ -333,11 +403,83 @@ unchanged.
 
 ### 5.6 The unit tests
 
-`--selftest` runs 40 checks that need no model: the clock's frame
-arithmetic including a span past the end of the recording, the MIDI round
-trip, the syllable split and its weights, the note segmentation and the
-placement of the cut, the alignment's note choice, and the segment join.
-All 40 pass.
+`--selftest` runs 49 checks that need no model: the clock's frame
+arithmetic including a span past the end of the recording, the clock's
+origin shift and its audio lead, the MIDI round trip, the syllable split
+and its weights, the note segmentation and the placement of the cut, the
+alignment's note choice, and the segment join. All 49 pass.
+
+### 5.7 The first real free session
+
+This is the thing the brief was waiting for, so it is given in full.
+
+| | `1792560597` | `1792560758` | `1792560773` |
+|---|---|---|---|
+| class | **drilled** | ambient | ambient |
+| the page's trigger | `manual` | `motion` | `motion` |
+| length | 27.34 s | 154.89 s | 16.06 s |
+| frames | 1626 at 59.63 fps | 9260 at 59.82 fps | 934 at 58.14 fps |
+| words | 17 | 229 | 0 |
+| syllables | 19 | 294 | 0 |
+| note events | 29 | 288 | 0 |
+| audio lead | −71.0 ms | −92.3 ms | −6.3 ms |
+| rows joined to the analyzer | 19 of 19 | 295 of 295 | — |
+| frame span of the first syllable | 1158 | 178 | — |
+
+Casey's own words in the drilled session, from `transcript.txt`:
+
+```
+[ 19.50 - 20.20] There
+[ 20.20 - 21.30] now
+[ 21.30 - 21.50] you
+[ 21.50 - 21.68] got
+[ 21.68 - 21.88] my
+[ 21.88 - 22.22] mic
+[ 22.22 - 22.90] on
+[ 22.90 - 23.98] darn
+[ 23.98 - 25.78] I'm
+[ 25.78 - 25.80] gonna
+...
+```
+
+And from the ambient session that came after it, which is the session
+where the audio started arriving in the video:
+
+```
+There. Now you're getting me with my mic. You weren't getting me with my
+mic in before, so. Huh. All that stuff. Whatever. Cool, though. Well, here
+I am. Now you get me in my temporal state. So if I talk into this thing,
+you'll be able to sync up with it. That's all good stuff. Big thing is, how
+do we make it effective and efficient? All that good stuff. So I noticed
+that the audio wasn't coming through in the video until just a few seconds
+ago. So now I reset the page and it looks like you're for the first time
+probably getting audio in the video on the computer. ...
+```
+
+Two things in that transcript are worth stopping on.
+
+The first is that it is evidence about the person and not about a
+performance. Nobody composed "So I noticed that the audio wasn't coming
+through in the video until just a few seconds ago" — the page caught it
+because there was motion, and what it caught was Casey working something
+out. That is exactly the distinction the data classes are for: this
+session is evidence about Casey, the drilled one is evidence about a
+delivery.
+
+The second is that the corpus now contains the doctrine's own
+justification, in Casey's words, unposed and first take:
+
+> I feel like a second take you can't you can't fake it like like the
+> first take is real discovery. The second take is you're trying to act
+> like you discovered and that's part of the reason why it'd be nice to
+> have this kind of system is then when inspiration happens you've got all
+> the different lenses to catch it in.
+
+The third session, `1792560773`, is honest about being nothing: the
+transcript is empty, the pitch tracker found no voiced run, and the tool
+writes `no_speech` with the measured peak RMS instead of inventing a
+syllable. A corpus with a session in it that says nothing is a corpus
+that can be trusted when it says something.
 
 ---
 
@@ -394,13 +536,29 @@ state, with the deltas between the instances of the same phrase.
 
 ## 7. THE FAILURE MODES, HONESTLY
 
-**The brief's literal target yields nothing.** Tonight's session is
-digital silence, and so are all ten of tonight's sessions. The tool
-reports that plainly — peak RMS 0.00000000, 0 of 25,895 frames over the
-energy floor, "there is nothing to transcribe, nothing to pitch and no
+**The brief's literal target yields nothing — and now something else
+does.** Session `1792553040`, the brief's target, is still digital
+silence: every one of its 12,431,744 samples is zero. The tool reports
+that plainly — peak RMS 0.00000000, 0 of 25,895 frames over the energy
+floor, "there is nothing to transcribe, nothing to pitch and no
 syllables to align" — and writes an empty but well-formed set of outputs
-rather than failing. The pipeline's real-speech proof is on the seed
-corpus and on Casey's own capture until the sick-lane fix lands.
+rather than failing. The sick-lane fix has since landed, and the three
+sessions that came after it are scored in section 5.7.
+
+**A clock can be wrong without looking wrong.** The page-relative origin
+in section 2.1 is the example that keeps: the frames existed, the lookup
+returned a frame, the table printed, and every row said frame 0. Nothing
+in the output said "wrong" — it said "zero" with great confidence. The
+unit test that now covers it is built from the real numbers of the real
+session, not from a tidy fixture, because a tidy fixture starts at zero
+and so cannot catch this at all.
+
+**The audio lead is an estimate, and it is off by up to 12 milliseconds.**
+The truth is knowable to about a millisecond from the page's own sample
+counter, but the page's counter is not in the session directory, so the
+tool estimates it from the wall clock and the audio's length. The error
+is under one frame in the worst case measured and the direction is
+consistent, but it is an estimate and it is labelled as one.
 
 **The resampler does not anti-alias.** `src/wavio.py` resamples with
 linear interpolation and says so in its own docstring. The *time base* is
@@ -412,12 +570,13 @@ path, where the note centre still matched the manifest to 2.1%. This is
 a stated limit of a repository component and was not changed.
 
 **The pitch tracker is slow.** It is pure Python and runs at about
-1× realtime — 69 seconds for 75 seconds of audio. The transcription is
-fast by comparison (12.2 s for the oration on the GPU), so a long session
-is dominated by the tracker. This is a correctness-and-time tradeoff
-that was made knowingly: the repository's tracker is the thing that was
-validated against the corpus manifest, and a faster tracker would have
-been a second, unvalidated measurement.
+1× realtime — 69 seconds for 75 seconds of audio, and 56 seconds for the
+154.9-second ambient session. The transcription is fast by comparison
+(4.6 s for the same session on the GPU), so a long session is dominated
+by the tracker. This is a correctness-and-time tradeoff that was made
+knowingly: the repository's tracker is the thing that was validated
+against the corpus manifest, and a faster tracker would have been a
+second, unvalidated measurement.
 
 **Notes and syllables disagree, and the direction is meaningful.** The
 ratio runs from 0.73 in the essay to 1.65 in the poetry. The tool reports
@@ -441,19 +600,26 @@ the pitch tracker found no voiced run under them. They are reported as
 
 ## 8. WHAT IS STILL OPEN
 
-**The first post-fix session is the real target.** Everything above is
-the pipeline and its validation; the one thing not yet done is running it
-on a session that came out of a real microphone. The command is the same
-one, with the session's own path.
+**The corpus is too thin to say anything about drift.** Three sessions
+have audio: one drilled, two ambient, and one of the ambient ones is
+silent. The person profile has one ambient baseline and no drilled
+baseline at all, so a drift number would be a number with nothing to be
+drifted from. The apparatus is ready; the corpus is the missing part.
 
-**The tone game consumes this.** The pitch tooling, the note
-segmentation, the one-clock alignment and the drill's table are all
-here, and the tone game's reader is meant to work on exactly the note
-representations this tool produces.
+**The drill's ground truth is still Casey's own deliveries.** The natural
+repetitions in the oration are a stand-in for the drill's shape, not its
+data, and no potato drill has been recorded yet. Until one lands, the
+notes-per-syllable ratio and the rest are measured on free speech, and
+they are measurements of the method, not of the intent.
 
-**The drill's ground truth is still Casey's own deliveries.** The
-natural repetitions in the oration are a stand-in for the drill's shape,
-not its data.
+**The note count is not a meaning.** The tool says which MIDI note each
+syllable carries. It does not say what the melody meant, and section 6's
+table is a shape, not an emotion.
+
+**The tone game consumes this.** The pitch tooling, the note segmentation,
+the one-clock alignment and the drill's table are all here, and the tone
+game's reader is meant to work on exactly the note representations this
+tool produces.
 
 ---
 
@@ -463,7 +629,7 @@ not its data.
 # the environment: the local speech venv, with CUDA's libraries on the path
 export LD_LIBRARY_PATH="/home/proart/projects/speech-venv/lib/python3.12/site-packages/nvidia/cublas/lib:/home/proart/projects/speech-venv/lib/python3.12/site-packages/nvidia/cudnn/lib:/home/proart/projects/speech-venv/lib/python3.12/site-packages/nvidia/cuda_nvrtc/lib:$LD_LIBRARY_PATH"
 
-# the unit tests -- no model, no GPU, 40 checks
+# the unit tests -- no model, no GPU, 49 checks
 /home/proart/projects/speech-venv/bin/python experiments/speech_to_score.py --selftest
 
 # the seed corpus
@@ -477,11 +643,17 @@ done
   examples/realaudio/corpus/oration_jfks19620912.wav --drill 2 \
   --out /tmp/s2s_corpus/oration_drill2
 
-# a real session, with the analyzer's segments joined onto the frame index
+# the analyzer's segment table for a real session
+/home/proart/projects/gpu-venv/bin/python experiments/free_session_analyze.py \
+  /mnt/c/proart_capture/corpus/free_sessions/1792560597 \
+  --out /tmp/fsa_new/1792560597 \
+  --json /tmp/fsa_new/1792560597/free_session_segments.json
+
+# a REAL session, with the analyzer's segments joined onto the frame index
 /home/proart/projects/speech-venv/bin/python experiments/speech_to_score.py \
-  /mnt/c/proart_capture/corpus/free_sessions/1792553040 \
-  --segments /tmp/harvest_dry3/derived/rich/segments_1758000001.json \
-  --out /tmp/s2s_corpus/session
+  /mnt/c/proart_capture/corpus/free_sessions/1792560597 \
+  --segments /tmp/fsa_new/1792560597/free_session_segments.json \
+  --out /tmp/s2s_real/1792560597
 ```
 
 Every run writes `transcript.txt`, `transcript.json`, `session.mid` and

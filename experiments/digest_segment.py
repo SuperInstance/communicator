@@ -52,6 +52,7 @@ for p in (REPO, REPO / "experiments"):
     if str(p) not in sys.path:
         sys.path.insert(0, str(p))
 
+import provenance  # noqa: E402
 import speech_to_score as s2s  # noqa: E402
 from src import wavio  # noqa: E402
 
@@ -92,11 +93,18 @@ def slice_audio(audio, start_s: float, end_s: float) -> np.ndarray:
     return np.asarray(audio.samples[a:b], dtype=np.float32)
 
 
-def segment_bounds(args, session_dir: Path) -> tuple[float, float, dict]:
+def segment_bounds(args, session_dir: Path, clock=None) -> tuple[float, float, dict]:
     """Where the segment is, in the session's own seconds.
 
     Three ways to say it, in order of preference: an explicit range, an
     index into the analyzer's segment table, or the whole session.
+
+    THE TIME BASE. These are SESSION seconds -- the same base as the
+    session's first frame -- because that is what the analyzer's table
+    speaks and what the frame indices are. The audio's own seconds are a
+    few tens of milliseconds away (the WAV's first sample sits against the
+    first frame by the session's audio lead), and the conversion happens
+    once, at the slice.
     """
     if args.start is not None and args.end is not None:
         return args.start, args.end, {"source": "explicit range"}
@@ -125,8 +133,10 @@ def segment_bounds(args, session_dir: Path) -> tuple[float, float, dict]:
         except Exception:  # noqa: BLE001
             meta = {}
     dur = float(meta.get("duration_s", 0.0) or 0.0)
-    if dur <= 0:
-        dur = 0.0
+    if dur <= 0 and clock is not None and clock.has_frames:
+        # the free-record meta carries no duration; the CLOCK does -- the
+        # span from the first frame to the last one is the session's length
+        dur = float(clock.frame_offsets_s[-1])
     return 0.0, dur, {"source": "the whole session"}
 
 
@@ -136,12 +146,19 @@ def segment_bounds(args, session_dir: Path) -> tuple[float, float, dict]:
 
 def score_segment(samples: np.ndarray, clock, start_s: float, out_dir: Path,
                    model: str, device: str, compute_type: str,
-                   segments_path: Path | None, session: str | None = None) -> dict:
+                   segments_path: Path | None, session: str | None = None,
+                   prov: dict | None = None) -> dict:
     """The segment's score: words, melody, syllables, frames.
 
     The frame indices are the session's, not the segment's. A syllable
-    that starts at 1.5 s into a segment that began at 12.0 s starts at
-    frame N in the SESSION, so the page can link straight to the video.
+    that starts at 4.2 s into the segment is not at frame 4; it is at
+    whatever frame the session's own clock says 4.2 s into the session
+    falls on, and only the session's clock can say that.
+
+    `start_s` is where the segment starts on the session's AUDIO
+    timeline -- the WAV's own seconds -- so that the words and the notes
+    land on that timeline and the clock's audio lead can be applied once,
+    at the frame lookup.
     """
     out_dir.mkdir(parents=True, exist_ok=True)
 
@@ -176,8 +193,11 @@ def score_segment(samples: np.ndarray, clock, start_s: float, out_dir: Path,
 
     report = {
         "session": session,
-        "segment_start_s": start_s,
-        "segment_end_s": start_s + len(samples) / float(s2s.ANALYSIS_SR),
+        "provenance": prov or {},
+        "segment_start_s": round(clock.session_time_for_audio(start_s), 4),
+        "segment_end_s": round(clock.session_time_for_audio(start_s)
+                               + len(samples) / float(s2s.ANALYSIS_SR), 4),
+        "segment_audio_start_s": round(start_s, 4),
         "duration_s": len(samples) / float(s2s.ANALYSIS_SR),
         "clock": clock.describe(),
         "transcribe": wmeta,
@@ -201,17 +221,20 @@ def score_segment(samples: np.ndarray, clock, start_s: float, out_dir: Path,
                                        if r["syllable_source"] == "heuristic"}),
         },
         "midi": midi_info,
-        "note": ("the words are offset onto the SESSION's clock, so every "
-                 "syllable carries the session's frame indices and the page "
-                 "can link straight to the video"),
+        "note": ("the words are offset onto the session's AUDIO timeline, and "
+                 "the session's clock carries them onto the frame clock, so "
+                 "every syllable carries the session's frame indices and the "
+                 "page can link straight to the video"),
     }
     (out_dir / "alignment.json").write_text(json.dumps(report, indent=2))
     (out_dir / "transcript.json").write_text(json.dumps(
         {"words": [{"text": w.text, "start_s": round(w.start, 4),
                     "end_s": round(w.end, 4),
+                    "session_start_s": round(clock.session_time_for_audio(w.start), 4),
+                    "session_end_s": round(clock.session_time_for_audio(w.end), 4),
                     "probability": round(w.probability, 4),
-                    "frame_start": clock.frames_for_span(w.start, w.end)[0],
-                    "frame_end": clock.frames_for_span(w.start, w.end)[1]}
+                    "frame_start": clock.frames_for_audio_span(w.start, w.end)[0],
+                    "frame_end": clock.frames_for_audio_span(w.start, w.end)[1]}
                    for w in offset_words], "meta": wmeta}, indent=2))
     with (out_dir / "transcript.txt").open("w", encoding="utf-8") as f:
         for w in offset_words:
@@ -372,11 +395,20 @@ def main(argv=None) -> int:
         print(f"no audio.wav in {session_dir}", file=sys.stderr)
         return 2
 
-    start_s, end_s, segment_info = segment_bounds(a, session_dir)
+    start_s, end_s, segment_info = segment_bounds(a, session_dir, sess["clock"])
     out_dir = Path(a.out) if a.out else session_dir / "digestions" / \
         f"{int(start_s):06d}-{int(end_s):06d}"
 
-    samples = slice_audio(sess["audio"], start_s, end_s)
+    # The bounds are SESSION seconds. The audio is the WAV's own seconds,
+    # and the two differ by the session's audio lead -- the WAV's first
+    # sample sits against the first frame by that much. One conversion,
+    # here, so the words land on the audio timeline and the clock applies
+    # the lead once at the frame lookup.
+    lead = sess["clock"].audio_lead_s or 0.0
+    audio_start = start_s - lead
+    audio_end = end_s - lead
+
+    samples = slice_audio(sess["audio"], audio_start, audio_end)
     if samples.size == 0:
         print(f"the segment {start_s}-{end_s} s is outside the recording "
               f"({len(sess['audio'].samples) / sess['audio'].sample_rate:.1f} s)")
@@ -384,14 +416,17 @@ def main(argv=None) -> int:
 
     print(f"session   {session_dir}")
     print(f"segment   {start_s:.2f} - {end_s:.2f} s  ({segment_info['source']})")
+    print(f"clock     lead {lead * 1000:+.1f} ms "
+          f"(the WAV's first sample against the first frame)")
     print(f"audio     {len(samples) / float(s2s.ANALYSIS_SR):.2f} s at "
           f"{s2s.ANALYSIS_SR} Hz")
 
     t0 = time.time()
-    scored = score_segment(samples, sess["clock"], start_s, out_dir,
+    scored = score_segment(samples, sess["clock"], audio_start, out_dir,
                            a.model, a.device, a.compute_type,
                            Path(a.segments) if a.segments else None,
-                           session=str(session_dir))
+                           session=str(session_dir),
+                           prov=provenance.provenance(session_dir))
     report = scored["report"]
     print(f"scored    {report['transcribe'].get('n_words', 0)} words, "
           f"{report['pitch']['n_notes']} notes, "

@@ -104,6 +104,8 @@ if str(ROOT) not in sys.path:
 
 from src import energy, pitch, score, smf, wavio  # noqa: E402
 
+import provenance  # noqa: E402
+
 # -- the clock ---------------------------------------------------------------
 
 #: The repository's analysis rate. `src/pitch.py` is designed for it
@@ -136,11 +138,51 @@ class SessionClock:
     `timestamps.json` holds `frame_offsets_ms`: the time of every captured
     frame, relative to the recording's origin. It is the spine. A time in
     seconds becomes a frame range by asking THIS array and nothing else.
+
+    THE ORIGIN, AND WHY IT IS SHIFTED.
+
+    The raw offsets are PAGE-relative, not session-relative. The recorder
+    stamps each frame with `performance.now() - baseT0`, where `baseT0` is
+    the page's own origin -- so a session that opens 450 s after the page
+    loaded starts at 450122.3 ms, not at 0. That is not a bug in the
+    recorder; it is the page's clock, and it is the recorder's right to
+    use it. But a tool that treats those numbers as session seconds is
+    reading the wrong clock: every frame lookup for a session that did
+    not open at page-time zero returns frame 0.
+
+    So the clock's origin is made EXPLICIT here: the session's first frame
+    is t=0, and the raw offsets are shifted by their own first value. The
+    shift is recorded, not hidden -- `origin_offset_s` is the page's base
+    and the wall clock still turns it back into an absolute time.
+
+    THE AUDIO'S LEAD.
+
+    The audio and the video are two rings of different things, so their
+    edges do not land on the same instant. The recorder keeps a pre-roll
+    of frames (up to 1.2 s) and a pre-roll of audio (up to 1.2 s plus
+    one block), and the two are trimmed independently, so the WAV's first
+    sample sits a few tens of milliseconds before or after the first
+    frame. Measured on the three real sessions: -92.3, -67.3 and +5.7 ms.
+
+    `audio_lead_s` is that offset -- the session time of audio sample 0.
+    It is estimated from the session's own two records (the wall-clock
+    span and the audio's own length) and it is applied wherever an audio
+    time is turned into a frame. Without it the A/V mapping is wrong by
+    up to a fifth of a second; with it, the residual is under 12 ms,
+    which is under one frame.
     """
     path: Path
     frame_offsets_s: np.ndarray = None
     wall_clock_start: str = ""
     n_frames: int = 0
+    #: the raw first offset -- the page's own base, in seconds
+    origin_offset_s: float = 0.0
+    #: the session time of audio sample 0; None when it cannot be measured
+    audio_lead_s: float | None = None
+    #: how `audio_lead_s` was arrived at, in words
+    audio_lead_source: str = ""
+    #: the length of the session's own audio, as the session declares it
+    declared_audio_s: float | None = None
 
     @property
     def has_frames(self) -> bool:
@@ -153,6 +195,9 @@ class SessionClock:
         The span is HALF-OPEN, [t0, t1): a frame at exactly t1 is the first
         frame of the NEXT span, and counting it in both would make two
         adjacent syllables claim the same frame.
+
+        The times here are SESSION seconds -- the same base as
+        `frame_offsets_s`, whose frame 0 is t=0.
         """
         if not self.has_frames:
             return None, None
@@ -169,14 +214,58 @@ class SessionClock:
         f0, _ = self.frames_for_span(t, t)
         return f0
 
+    def session_time_for_audio(self, t: float) -> float:
+        """An audio time, as a session time.
+
+        The identity when there is no measured lead; shifted by the lead
+        when there is. This is the ONLY place the two timelines meet.
+        """
+        if self.audio_lead_s is None:
+            return t
+        return t + self.audio_lead_s
+
+    def frames_for_audio_span(self, t0: float, t1: float) -> tuple[int | None, int | None]:
+        """The frames an AUDIO span covers.
+
+        The same lookup as `frames_for_span`, with the audio's lead
+        applied first. Audio times and session times are different by a
+        few tens of milliseconds; asking the frame array with the raw
+        audio time is a small mistake that is invisible in the output and
+        wrong in the alignment, so it is made here instead of at the
+        call sites.
+        """
+        return self.frames_for_span(self.session_time_for_audio(t0),
+                                     self.session_time_for_audio(t1))
+
     def describe(self) -> dict:
         d = {"source": str(self.path), "has_frames": self.has_frames,
-             "n_frames": self.n_frames, "wall_clock_start": self.wall_clock_start}
+             "n_frames": self.n_frames, "wall_clock_start": self.wall_clock_start,
+             "origin_offset_s": round(self.origin_offset_s, 6),
+             "time_base": ("session-relative: the session's first frame is t=0; "
+                           "the raw offsets are page-relative (performance.now() "
+                           "minus the page's base) and are shifted by "
+                           "-origin_offset_s"),
+             "audio_lead_s": (None if self.audio_lead_s is None
+                              else round(self.audio_lead_s, 6)),
+             "audio_lead_source": self.audio_lead_source}
         if self.has_frames:
             d["first_frame_s"] = float(self.frame_offsets_s[0])
             d["last_frame_s"] = float(self.frame_offsets_s[-1])
             d["median_fps"] = float(1.0 / np.median(np.diff(self.frame_offsets_s)))
         return d
+
+
+def _iso_span_s(start: str, end: str) -> float | None:
+    """The seconds between two ISO timestamps, or None."""
+    if not start or not end:
+        return None
+    try:
+        import datetime
+        a = datetime.datetime.fromisoformat(str(start).replace("Z", "+00:00"))
+        b = datetime.datetime.fromisoformat(str(end).replace("Z", "+00:00"))
+        return (b - a).total_seconds()
+    except Exception:  # noqa: BLE001
+        return None
 
 
 def load_clock(session_dir: Path | None) -> SessionClock:
@@ -193,7 +282,10 @@ def load_clock(session_dir: Path | None) -> SessionClock:
             data = {}
         offs = data.get("frame_offsets_ms")
         if isinstance(offs, list) and len(offs) > 1:
-            clock.frame_offsets_s = np.asarray(offs, dtype=np.float64) / 1000.0
+            raw = np.asarray(offs, dtype=np.float64) / 1000.0
+            # the page's base becomes the session's origin -- see the class doc
+            clock.origin_offset_s = float(raw[0])
+            clock.frame_offsets_s = raw - clock.origin_offset_s
             clock.n_frames = len(clock.frame_offsets_s)
         clock.wall_clock_start = str(data.get("wall_clock_start", ""))
     meta_path = session_dir / "meta.json"
@@ -202,6 +294,24 @@ def load_clock(session_dir: Path | None) -> SessionClock:
             meta = json.loads(meta_path.read_text())
             clock.wall_clock_start = str(meta.get("wall_clock_start",
                                                    clock.wall_clock_start))
+            wall_span = _iso_span_s(meta.get("wall_clock_start", ""),
+                                    meta.get("wall_clock_end", ""))
+            audio = meta.get("audio") or {}
+            sr = audio.get("sample_rate")
+            n = audio.get("samples")
+            if wall_span is not None and sr and n:
+                audio_s = float(n) / float(sr)
+                clock.declared_audio_s = audio_s
+                # The audio's end sits at the close, the wall clock's end
+                # sits at the close too, and the first frame sits at the
+                # wall clock's start. So the WAV's first sample is
+                # (wall span - audio length) away from the first frame.
+                clock.audio_lead_s = wall_span - audio_s
+                clock.audio_lead_source = (
+                    "wall_clock_end - wall_clock_start - audio length: the "
+                    "audio's end and the wall clock's end are the same close, "
+                    "so the difference is where the WAV's first sample sits "
+                    "against the first frame")
         except Exception:  # noqa: BLE001
             pass
     return clock
@@ -792,7 +902,7 @@ def align(notes: list[NoteEvent], words: list[Word],
                 if ov > best_ov:
                     best_ov = ov
                     best = nt
-            f0, f1 = clock.frames_for_span(s0, s1)
+            f0, f1 = clock.frames_for_audio_span(s0, s1)
             row = {
                 "syllable_index": len(rows),
                 "word_index": wi,
@@ -803,6 +913,8 @@ def align(notes: list[NoteEvent], words: list[Word],
                 "start_s": round(s0, 4),
                 "end_s": round(s1, 4),
                 "duration_s": round(s1 - s0, 4),
+                "session_start_s": round(clock.session_time_for_audio(s0), 4),
+                "session_end_s": round(clock.session_time_for_audio(s1), 4),
                 "frame_start": f0,
                 "frame_end": f1,
                 "midi": best.midi if best is not None else None,
@@ -852,12 +964,28 @@ def analyse(audio_path: Path, session_dir: Path | None, out_dir: Path,
     clock = load_clock(session_dir)
     arr, audio_meta = load_audio(audio_path)
 
+    # The lead only means anything if the audio IS the session's own audio.
+    # A seed-corpus WAV handed to the same tool beside a session directory
+    # would otherwise be shifted by the session's lead, which is a lie.
+    if clock.audio_lead_s is not None and clock.declared_audio_s is not None:
+        if abs(float(audio_meta["duration_s"]) - clock.declared_audio_s) > 0.05:
+            clock.audio_lead_s = None
+            clock.audio_lead_source = (
+                f"not applied: the audio given is {audio_meta['duration_s']:.3f} s "
+                f"long and the session declares {clock.declared_audio_s:.3f} s, "
+                "so this is not the session's own recording")
+
     report: dict = {
         "session": str(session_dir) if session_dir else None,
         "audio": audio_meta,
         "clock": clock.describe(),
         "generated_at": time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime()),
     }
+    if session_dir is not None:
+        # WHAT KIND OF DATA THIS IS. A session somebody performed and a
+        # session the page caught are different kinds of evidence, and
+        # the page's own trigger already says which is which.
+        report["provenance"] = provenance.provenance(session_dir)
 
     # 1. the words
     t0 = time.time()
@@ -947,9 +1075,11 @@ def analyse(audio_path: Path, session_dir: Path | None, out_dir: Path,
     (out_dir / "transcript.json").write_text(json.dumps(
         {"words": [{"text": w.text, "start_s": round(w.start, 4),
                     "end_s": round(w.end, 4),
+                    "session_start_s": round(clock.session_time_for_audio(w.start), 4),
+                    "session_end_s": round(clock.session_time_for_audio(w.end), 4),
                     "probability": round(w.probability, 4),
-                    "frame_start": clock.frames_for_span(w.start, w.end)[0],
-                    "frame_end": clock.frames_for_span(w.start, w.end)[1]}
+                    "frame_start": clock.frames_for_audio_span(w.start, w.end)[0],
+                    "frame_end": clock.frames_for_audio_span(w.start, w.end)[1]}
                    for w in words], "meta": wmeta}, indent=2))
     with (out_dir / "transcript.txt").open("w", encoding="utf-8") as f:
         for w in words:
@@ -1019,6 +1149,51 @@ def selftest() -> int:
         # and the audio's seconds are the same seconds
         check("the clock and the audio share a unit",
               round(clock.frame_offsets_s[60], 6), 1.0)
+        # a session with no audio metadata has no lead, and says so
+        check("no audio metadata means no lead", clock.audio_lead_s, None)
+        check("and the audio time is the session time",
+              clock.session_time_for_audio(3.5), 3.5)
+
+    # 1b. THE PAGE-RELATIVE ORIGIN. The real session 1792560597 opens
+    # 450 s after its page did, and the offsets say so. A clock that reads
+    # those numbers as session seconds puts every word on frame 0.
+    with tempfile.TemporaryDirectory() as td:
+        d = Path(td) / "sess"
+        d.mkdir()
+        base = 450122.3
+        offs = [round(base + i * 1000.0 / 60.0, 3) for i in range(120)]
+        (d / "timestamps.json").write_text(json.dumps({
+            "wall_clock_start": "2026-01-01T00:00:00Z", "frame_offsets_ms": offs}))
+        # the WAV is 71 ms longer than the wall span, so its first sample
+        # sits 71 ms BEFORE the first frame -- which is what the three
+        # real sessions measured
+        (d / "meta.json").write_text(json.dumps({
+            "n_frames": 120,
+            "wall_clock_start": "2026-01-01T00:00:00Z",
+            "wall_clock_end": "2026-01-01T00:00:01.984Z",
+            "audio": {"sample_rate": 48000, "samples": 98640}}))
+        clock = load_clock(d)
+        check("the origin is the page's own base",
+              round(clock.origin_offset_s, 3), 450.122)
+        check("the first frame is t=0", float(clock.frame_offsets_s[0]), 0.0)
+        check("and the span is unchanged",
+              round(float(clock.frame_offsets_s[-1]), 3), 1.983)
+        check("the frame at 1.0 s is still frame 60",
+              clock.frames_for_span(1.0, 1.0)[0], 60)
+        check("the audio lead is measured",
+              round(clock.audio_lead_s, 3), -0.071)
+        check("an audio time is shifted by the lead",
+              round(clock.session_time_for_audio(1.0), 4), 0.929)
+        check("and the frame lookup follows the lead",
+              clock.frames_for_audio_span(1.071, 1.071)[0], 60)
+        check("without the lead the same word lands elsewhere",
+              clock.frames_for_span(1.071, 1.071)[0], 65)
+        d = clock.describe()
+        check("the lead is reported", d["audio_lead_s"], -0.071)
+        check("and so is how it was measured",
+              d["audio_lead_source"].startswith("wall_clock_end"), True)
+        check("and the time base says what it is",
+              d["time_base"].startswith("session-relative"), True)
 
     # 2. THE .mid ROUND TRIP. A writer without a reader is a slogan.
     with tempfile.TemporaryDirectory() as td:
