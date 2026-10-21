@@ -891,3 +891,37 @@ open tab produced v2's corrected verdict minutes later.
 
 Verify suite: **173 passed, 0 failed** (evolve shell served, manifest +
 modules served from disk, path traversal refused).
+
+## Patch 2026-10-21: the OVER probe (BRIEF-WAKE-AND-TURN mechanism 3)
+
+The trained transmit word, as evolve-lab probe `over-detector` (v4):
+OVER fires ONLY as the conjunction -- the word in terminal position
+(template match, multi-duration fixed-grid mel matcher against
+OPERATOR-CALIBRATED templates in localStorage), terminal falling
+prosody (48k-geometry YIN on the run's tail, slope-or-below-mean rule),
+and >= 1.5 s trailing silence (energy envelope; 1.2-1.5 s near-misses
+reported separately). Page-tier only -- 20-year-old tools, decomposed,
+no model. Calibration is self-instructing (say OVER alone five times;
+first run without templates does it); every ambient run reports the
+brief's headline numbers: fires + component counts as false-fires per
+hour, with the full per-event table saved in the probe artifact.
+
+**Proven by a three-phase browser E2E** (headless Chrome, synthetic
+fake-mic speech through the REAL worklet/localStorage/probe chain):
+calibration (5 templates), clean ambient (7 runs, 0 word-matched,
+**0 FIREs**), over-like ambient (5 runs, **1 word-matched, 1 FIRE** --
+falling prosody + 13.6 s trailing silence; every non-over burst
+measured dist >= 0.42 vs the over burst's 0.104, which set the honest
+0.25 threshold floor). Missed-yield measurement needs meant-OVER ground
+truth -- the drill-deck class the brief plans; the pieces are exposed.
+
+Bugs found and fixed on the way (all by the E2E, kept as the record):
+trailing-slash URLs 404'd (`/evolve/` -- routing now normalizes, server
+deployed); "over" is TWO syllables and the energy detector split every
+spoken OVER in half (runs now merge across <80 ms intra-word gaps); the
+YIN port's 512-frame geometry was 16k-native and returned empty tracks
+at 48k (now 1024); a shadowed variable in the distance function crashed
+every calibration (the `b` loop index vs the `b` parameter); identical
+synthetic calibrations produced a degenerate 0.02 threshold (floor 0.25
+from the measured separation). audio-health v2 now skips probe
+artifacts (sonar returns are often honestly silent).

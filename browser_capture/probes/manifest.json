@@ -17,6 +17,15 @@
       "run_at_start": true,
       "audible": false,
       "description": "patrol the measured WAV health of the most recent sessions (the SILENT_AUDIO class, patrolled forever, not remembered)"
+    },
+    {
+      "name": "over-detector",
+      "file": "over-detector.js",
+      "version": 1,
+      "interval_s": 600,
+      "run_at_start": true,
+      "audible": false,
+      "description": "BRIEF-WAKE-AND-TURN mechanism 3: the OVER transmit word as a conjunction (terminal position + falling terminal prosody + >=1.5s trailing silence), template-matched against operator calibration; measures ambient false-fires per hour"
     }
   ]
 }

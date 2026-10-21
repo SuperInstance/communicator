@@ -6,12 +6,15 @@
  *
  * Bump meta.version to hot-swap into already-open pages (no reload).
  */
-export const meta = { name: "audio-health", version: 1 };
+export const meta = { name: "audio-health", version: 2 };
 
 export async function run(ctx) {
   const r = await fetch("/api/sessions");
   const j = await r.json();
-  const recent = (j.sessions || []).slice(0, 5);
+  // probe artifacts (sonar returns etc.) are often honestly
+  // silent -- patrol CAPTURE sessions only
+  const recent = (j.sessions || []).filter(
+    s => s.mode !== "probe").slice(0, 5);
   if (!recent.length)
     return { summary: "no sessions on disk yet" };
   const silent = recent.filter(s => s.audio_silent).length;

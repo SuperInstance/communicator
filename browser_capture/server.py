@@ -1357,9 +1357,12 @@ class Handler(BaseHTTPRequestHandler):
         self._json(200, {"ok": True, **msg})
 
     def do_GET(self):
-        # match on the path portion only -- a query string (e.g.
-        # /?maxseg=8) must not turn a route into a 404
+        # match on the path portion only -- query strings (/ ?maxseg=8)
+        # and trailing slashes (/evolve/) must not turn a route into a
+        # 404 (the OVER-probe E2E caught the slash class)
         route = self.path.split("?", 1)[0]
+        if len(route) > 1:
+            route = route.rstrip("/")
         if route in ("/", "/free", "/free_record.html"):
             try:
                 page = self.free_path.read_bytes()
@@ -1432,6 +1435,8 @@ class Handler(BaseHTTPRequestHandler):
 
     def do_POST(self):
         route = self.path.split("?", 1)[0]   # query strings are not routing
+        if len(route) > 1:
+            route = route.rstrip("/")
         if route == "/notes":
             self._handle_notes()
             return
