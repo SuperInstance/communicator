@@ -1,0 +1,685 @@
+{
+  "tool": "experiments/speech_to_score.py",
+  "generated_at": "2026-10-21T04:10:00Z",
+  "device": "cuda / float16 (RTX 4050) for faster-whisper small.en; CPU for the repo's pitch tracker",
+  "corpus_cross_check_source": "examples/realaudio/corpus/MANIFEST.md (src.score.measure)",
+  "runs": [
+    {
+      "run": "alice01",
+      "input": "/home/proart/projects/communicator/examples/realaudio/alice01_excerpt.wav",
+      "audio": {
+        "source_sample_rate": 44100,
+        "analysis_sample_rate": 16000,
+        "duration_s": 90.0
+      },
+      "clock": {
+        "n_frames": 0,
+        "median_fps": null,
+        "has_frames": false
+      },
+      "words": 227,
+      "syllables": 265,
+      "notes": 309,
+      "notes_per_syllable": 1.166,
+      "syllables_without_note": 3,
+      "melody_centre_hz": 233.76,
+      "voiced_fraction": 0.4978,
+      "note_duration_median_s": 0.13,
+      "syllables_from_dictionary": 264,
+      "syllables_from_heuristic": 1,
+      "heuristic_words": [
+        "-four"
+      ],
+      "ambiguous_pronunciations": 32,
+      "transcribe_s": 4.87,
+      "pitch_s": 61.58,
+      "midi": {
+        "path": "/tmp/s2s_corpus/alice01/session.mid",
+        "bytes": 2771,
+        "ticks_per_beat": 1000,
+        "ms_per_tick": 1.0,
+        "n_notes": 309,
+        "n_words": 227,
+        "n_tracks": 1,
+        "track_name": "speech: 309 notes, 227 words"
+      },
+      "manifest_cross_check": {
+        "manifest_f0_median_hz": 229,
+        "melody_over_manifest": 1.0208,
+        "manifest_voiced_fraction": 0.5,
+        "voiced_over_manifest": 0.9956
+      }
+    },
+    {
+      "run": "casey_voice",
+      "input": "/mnt/c/proart_capture/A.wav",
+      "audio": {
+        "source_sample_rate": 16000,
+        "analysis_sample_rate": 16000,
+        "duration_s": 29.98125
+      },
+      "clock": {
+        "n_frames": 0,
+        "median_fps": null,
+        "has_frames": false
+      },
+      "words": 68,
+      "syllables": 80,
+      "notes": 84,
+      "notes_per_syllable": 1.05,
+      "syllables_without_note": 4,
+      "melody_centre_hz": 115.98,
+      "voiced_fraction": 0.4399,
+      "note_duration_median_s": 0.15,
+      "syllables_from_dictionary": 80,
+      "syllables_from_heuristic": 0,
+      "heuristic_words": [],
+      "ambiguous_pronunciations": 9,
+      "transcribe_s": 2.84,
+      "pitch_s": 15.2,
+      "midi": {
+        "path": "/tmp/s2s_corpus/casey_voice/session.mid",
+        "bytes": 814,
+        "ticks_per_beat": 1000,
+        "ms_per_tick": 1.0,
+        "n_notes": 84,
+        "n_words": 68,
+        "n_tracks": 1,
+        "track_name": "speech: 84 notes, 68 words"
+      }
+    },
+    {
+      "run": "children",
+      "input": "/home/proart/projects/communicator-acceptance/examples/realaudio/corpus/children_english_fairy_tales_joy_librivox.wav",
+      "audio": {
+        "source_sample_rate": 16000,
+        "analysis_sample_rate": 16000,
+        "duration_s": 75.0
+      },
+      "clock": {
+        "n_frames": 0,
+        "median_fps": null,
+        "has_frames": false
+      },
+      "words": 226,
+      "syllables": 279,
+      "notes": 281,
+      "notes_per_syllable": 1.0072,
+      "syllables_without_note": 8,
+      "melody_centre_hz": 178.06,
+      "voiced_fraction": 0.5331,
+      "note_duration_median_s": 0.14,
+      "syllables_from_dictionary": 267,
+      "syllables_from_heuristic": 12,
+      "heuristic_words": [
+        "?\u00ee",
+        "away\u00ee",
+        "reproachfully.",
+        "rose\u00ee",
+        "\u00ecAll",
+        "\u00ecWhat"
+      ],
+      "ambiguous_pronunciations": 27,
+      "transcribe_s": 4.13,
+      "pitch_s": 70.85,
+      "midi": {
+        "path": "/tmp/s2s_corpus/children/session.mid",
+        "bytes": 2532,
+        "ticks_per_beat": 1000,
+        "ms_per_tick": 1.0,
+        "n_notes": 281,
+        "n_words": 226,
+        "n_tracks": 1,
+        "track_name": "speech: 281 notes, 226 words"
+      },
+      "manifest_cross_check": {
+        "manifest_f0_median_hz": 181,
+        "melody_over_manifest": 0.9838,
+        "manifest_voiced_fraction": 0.53,
+        "voiced_over_manifest": 1.0058
+      }
+    },
+    {
+      "run": "essay",
+      "input": "/home/proart/projects/communicator-acceptance/examples/realaudio/corpus/essay_perpetual_peace_librivox.wav",
+      "audio": {
+        "source_sample_rate": 16000,
+        "analysis_sample_rate": 16000,
+        "duration_s": 75.0
+      },
+      "clock": {
+        "n_frames": 0,
+        "median_fps": null,
+        "has_frames": false
+      },
+      "words": 130,
+      "syllables": 218,
+      "notes": 160,
+      "notes_per_syllable": 0.7339,
+      "syllables_without_note": 21,
+      "melody_centre_hz": 92.83,
+      "voiced_fraction": 0.3064,
+      "note_duration_median_s": 0.14,
+      "syllables_from_dictionary": 213,
+      "syllables_from_heuristic": 5,
+      "heuristic_words": [
+        "1795.",
+        "1891.",
+        "Kant's",
+        "signboard"
+      ],
+      "ambiguous_pronunciations": 23,
+      "transcribe_s": 3.34,
+      "pitch_s": 43.96,
+      "midi": {
+        "path": "/tmp/s2s_corpus/essay/session.mid",
+        "bytes": 1491,
+        "ticks_per_beat": 1000,
+        "ms_per_tick": 1.0,
+        "n_notes": 160,
+        "n_words": 130,
+        "n_tracks": 1,
+        "track_name": "speech: 160 notes, 130 words"
+      },
+      "manifest_cross_check": {
+        "manifest_f0_median_hz": 90,
+        "melody_over_manifest": 1.0315,
+        "manifest_voiced_fraction": 0.31,
+        "voiced_over_manifest": 0.9884
+      }
+    },
+    {
+      "run": "oration",
+      "input": "/home/proart/projects/communicator-acceptance/examples/realaudio/corpus/oration_jfks19620912.wav",
+      "audio": {
+        "source_sample_rate": 16000,
+        "analysis_sample_rate": 16000,
+        "duration_s": 75.0
+      },
+      "clock": {
+        "n_frames": 0,
+        "median_fps": null,
+        "has_frames": false
+      },
+      "words": 165,
+      "syllables": 242,
+      "notes": 343,
+      "notes_per_syllable": 1.4174,
+      "syllables_without_note": 0,
+      "melody_centre_hz": 189.32,
+      "voiced_fraction": 0.6397,
+      "note_duration_median_s": 0.13,
+      "syllables_from_dictionary": 241,
+      "syllables_from_heuristic": 1,
+      "heuristic_words": [
+        "12"
+      ],
+      "ambiguous_pronunciations": 36,
+      "transcribe_s": 12.15,
+      "pitch_s": 70.25,
+      "midi": {
+        "path": "/tmp/s2s_corpus/oration/session.mid",
+        "bytes": 2997,
+        "ticks_per_beat": 1000,
+        "ms_per_tick": 1.0,
+        "n_notes": 343,
+        "n_words": 165,
+        "n_tracks": 1,
+        "track_name": "speech: 343 notes, 165 words"
+      },
+      "manifest_cross_check": {
+        "manifest_f0_median_hz": 196,
+        "melody_over_manifest": 0.9659,
+        "manifest_voiced_fraction": 0.64,
+        "voiced_over_manifest": 0.9995
+      }
+    },
+    {
+      "run": "oration_drill",
+      "input": "examples/realaudio/corpus/oration_jfks19620912.wav",
+      "audio": {
+        "source_sample_rate": 16000,
+        "analysis_sample_rate": 16000,
+        "duration_s": 75.0
+      },
+      "clock": {
+        "n_frames": 0,
+        "median_fps": null,
+        "has_frames": false
+      },
+      "words": 165,
+      "syllables": 242,
+      "notes": 343,
+      "notes_per_syllable": 1.4174,
+      "syllables_without_note": 0,
+      "melody_centre_hz": 189.32,
+      "voiced_fraction": 0.6397,
+      "note_duration_median_s": 0.13,
+      "syllables_from_dictionary": 241,
+      "syllables_from_heuristic": 1,
+      "heuristic_words": [
+        "12"
+      ],
+      "ambiguous_pronunciations": 36,
+      "transcribe_s": 3.99,
+      "pitch_s": 69.05,
+      "midi": {
+        "path": "/tmp/s2s_corpus/oration_drill/session.mid",
+        "bytes": 2997,
+        "ticks_per_beat": 1000,
+        "ms_per_tick": 1.0,
+        "n_notes": 343,
+        "n_words": 165,
+        "n_tracks": 1,
+        "track_name": "speech: 343 notes, 165 words"
+      },
+      "drill": {
+        "n_gram": 3,
+        "n_repeated_phrases": 3,
+        "noted_for": []
+      }
+    },
+    {
+      "run": "oration_drill2",
+      "input": "examples/realaudio/corpus/oration_jfks19620912.wav",
+      "audio": {
+        "source_sample_rate": 16000,
+        "analysis_sample_rate": 16000,
+        "duration_s": 75.0
+      },
+      "clock": {
+        "n_frames": 0,
+        "median_fps": null,
+        "has_frames": false
+      },
+      "words": 165,
+      "syllables": 242,
+      "notes": 343,
+      "notes_per_syllable": 1.4174,
+      "syllables_without_note": 0,
+      "melody_centre_hz": 189.32,
+      "voiced_fraction": 0.6397,
+      "note_duration_median_s": 0.13,
+      "syllables_from_dictionary": 241,
+      "syllables_from_heuristic": 1,
+      "heuristic_words": [
+        "12"
+      ],
+      "ambiguous_pronunciations": 36,
+      "transcribe_s": 3.87,
+      "pitch_s": 71.33,
+      "midi": {
+        "path": "/tmp/s2s_corpus/oration_drill2/session.mid",
+        "bytes": 2997,
+        "ticks_per_beat": 1000,
+        "ms_per_tick": 1.0,
+        "n_notes": 343,
+        "n_words": 165,
+        "n_tracks": 1,
+        "track_name": "speech: 343 notes, 165 words"
+      },
+      "drill": {
+        "n_gram": 2,
+        "n_repeated_phrases": 14,
+        "noted_for": [
+          {
+            "phrase": "noted for",
+            "n_instances": 3,
+            "instances": [
+              {
+                "start_s": 13.32,
+                "end_s": 15.2,
+                "duration_s": 1.88,
+                "n_notes": 9,
+                "midi": [
+                  57,
+                  38,
+                  55,
+                  42,
+                  38,
+                  50,
+                  56,
+                  58,
+                  53
+                ],
+                "hz_median": 171.06,
+                "note_durations_s": [
+                  0.54,
+                  0.07,
+                  0.09,
+                  0.06,
+                  0.58,
+                  0.08,
+                  0.24,
+                  0.06,
+                  0.07
+                ],
+                "mean_rms": 0.0745,
+                "peak_rms": 0.318398,
+                "n_syllables_in_span": 2
+              },
+              {
+                "start_s": 17.22,
+                "end_s": 17.72,
+                "duration_s": 0.5,
+                "n_notes": 3,
+                "midi": [
+                  57,
+                  54,
+                  55
+                ],
+                "hz_median": 194.51,
+                "note_durations_s": [
+                  0.14,
+                  0.21,
+                  0.21
+                ],
+                "mean_rms": 0.14655,
+                "peak_rms": 0.258352,
+                "n_syllables_in_span": 2
+              },
+              {
+                "start_s": 19.68,
+                "end_s": 20.16,
+                "duration_s": 0.48,
+                "n_notes": 2,
+                "midi": [
+                  55,
+                  54
+                ],
+                "hz_median": 191.47,
+                "note_durations_s": [
+                  0.25,
+                  0.39
+                ],
+                "mean_rms": 0.099012,
+                "peak_rms": 0.234097,
+                "n_syllables_in_span": 2
+              }
+            ],
+            "deltas": [
+              {
+                "against": 17.22,
+                "pitch_delta_semitones": 2.224,
+                "duration_delta_s": -1.38,
+                "note_count_delta": -6,
+                "mean_rms_ratio": 1.9671
+              },
+              {
+                "against": 19.68,
+                "pitch_delta_semitones": 1.951,
+                "duration_delta_s": -1.4,
+                "note_count_delta": -7,
+                "mean_rms_ratio": 1.329
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "run": "poetry",
+      "input": "/home/proart/projects/communicator-acceptance/examples/realaudio/corpus/poetry_weeds_by_the_wall_1702_librivox.wav",
+      "audio": {
+        "source_sample_rate": 16000,
+        "analysis_sample_rate": 16000,
+        "duration_s": 20.011125
+      },
+      "clock": {
+        "n_frames": 0,
+        "median_fps": null,
+        "has_frames": false
+      },
+      "words": 22,
+      "syllables": 31,
+      "notes": 51,
+      "notes_per_syllable": 1.6452,
+      "syllables_without_note": 0,
+      "melody_centre_hz": 195.1,
+      "voiced_fraction": 0.3921,
+      "note_duration_median_s": 0.13,
+      "syllables_from_dictionary": 31,
+      "syllables_from_heuristic": 0,
+      "heuristic_words": [],
+      "ambiguous_pronunciations": 6,
+      "transcribe_s": 2.53,
+      "pitch_s": 10.85,
+      "midi": {
+        "path": "/tmp/s2s_corpus/poetry/session.mid",
+        "bytes": 510,
+        "ticks_per_beat": 1000,
+        "ms_per_tick": 1.0,
+        "n_notes": 51,
+        "n_words": 22,
+        "n_tracks": 1,
+        "track_name": "speech: 51 notes, 22 words"
+      },
+      "manifest_cross_check": {
+        "manifest_f0_median_hz": 196,
+        "melody_over_manifest": 0.9954,
+        "manifest_voiced_fraction": 0.39,
+        "voiced_over_manifest": 1.0054
+      }
+    },
+    {
+      "run": "session_casey",
+      "input": "/tmp/harvest_dry3/free_sessions/1758000001",
+      "audio": {
+        "source_sample_rate": 48000,
+        "analysis_sample_rate": 16000,
+        "duration_s": 29.9811875
+      },
+      "clock": {
+        "n_frames": 900,
+        "median_fps": 30.030030030029533,
+        "has_frames": true
+      },
+      "words": 68,
+      "syllables": 80,
+      "notes": 84,
+      "notes_per_syllable": 1.05,
+      "syllables_without_note": 4,
+      "melody_centre_hz": 115.98,
+      "voiced_fraction": 0.4399,
+      "note_duration_median_s": 0.15,
+      "syllables_from_dictionary": 80,
+      "syllables_from_heuristic": 0,
+      "heuristic_words": [],
+      "ambiguous_pronunciations": 9,
+      "transcribe_s": 2.59,
+      "pitch_s": 15.49,
+      "midi": {
+        "path": "/tmp/s2s_corpus/session_casey/session.mid",
+        "bytes": 814,
+        "ticks_per_beat": 1000,
+        "ms_per_tick": 1.0,
+        "n_notes": 84,
+        "n_words": 68,
+        "n_tracks": 1,
+        "track_name": "speech: 84 notes, 68 words"
+      }
+    },
+    {
+      "run": "session_casey_join",
+      "input": "/tmp/harvest_dry3/free_sessions/1758000001",
+      "audio": {
+        "source_sample_rate": 48000,
+        "analysis_sample_rate": 16000,
+        "duration_s": 29.9811875
+      },
+      "clock": {
+        "n_frames": 900,
+        "median_fps": 30.030030030029533,
+        "has_frames": true
+      },
+      "words": 68,
+      "syllables": 80,
+      "notes": 84,
+      "notes_per_syllable": 1.05,
+      "syllables_without_note": 4,
+      "melody_centre_hz": 115.98,
+      "voiced_fraction": 0.4399,
+      "note_duration_median_s": 0.15,
+      "syllables_from_dictionary": 80,
+      "syllables_from_heuristic": 0,
+      "heuristic_words": [],
+      "ambiguous_pronunciations": 9,
+      "transcribe_s": 2.53,
+      "pitch_s": 15.13,
+      "midi": {
+        "path": "/tmp/s2s_corpus/session_casey_join/session.mid",
+        "bytes": 814,
+        "ticks_per_beat": 1000,
+        "ms_per_tick": 1.0,
+        "n_notes": 84,
+        "n_words": 68,
+        "n_tracks": 1,
+        "track_name": "speech: 84 notes, 68 words"
+      },
+      "segment_join": {
+        "segments": 22,
+        "rows_joined": 80,
+        "rows_unjoined": 0,
+        "source": "experiments/free_session_analyze.py segment table (face state and speech state, joined on the session's own frame indices -- no second clock, no re-measure)",
+        "path": "/tmp/harvest_dry3/derived/rich/segments_1758000001.json"
+      }
+    },
+    {
+      "run": "shakespeare",
+      "input": "/home/proart/projects/communicator-acceptance/examples/realaudio/corpus/shakespeare_midsummernightsdream_1201_librivox.wav",
+      "audio": {
+        "source_sample_rate": 16000,
+        "analysis_sample_rate": 16000,
+        "duration_s": 75.0
+      },
+      "clock": {
+        "n_frames": 0,
+        "median_fps": null,
+        "has_frames": false
+      },
+      "words": 133,
+      "syllables": 180,
+      "notes": 285,
+      "notes_per_syllable": 1.5833,
+      "syllables_without_note": 2,
+      "melody_centre_hz": 149.26,
+      "voiced_fraction": 0.5277,
+      "note_duration_median_s": 0.13,
+      "syllables_from_dictionary": 160,
+      "syllables_from_heuristic": 20,
+      "heuristic_words": [
+        "-bag,",
+        "-bag.",
+        "-blossom,",
+        "-blossom.",
+        "-blossom?",
+        "-hipped",
+        "-roses",
+        "-seed,",
+        "-seed?",
+        "humblebee",
+        "overflown"
+      ],
+      "ambiguous_pronunciations": 18,
+      "transcribe_s": 3.89,
+      "pitch_s": 56.98,
+      "midi": {
+        "path": "/tmp/s2s_corpus/shakespeare/session.mid",
+        "bytes": 2553,
+        "ticks_per_beat": 1000,
+        "ms_per_tick": 1.0,
+        "n_notes": 285,
+        "n_words": 133,
+        "n_tracks": 1,
+        "track_name": "speech: 285 notes, 133 words"
+      },
+      "manifest_cross_check": {
+        "manifest_f0_median_hz": 154,
+        "melody_over_manifest": 0.9692,
+        "manifest_voiced_fraction": 0.53,
+        "voiced_over_manifest": 0.9957
+      }
+    },
+    {
+      "run": "shortstory",
+      "input": "/home/proart/projects/communicator-acceptance/examples/realaudio/corpus/shortstory_shortstory058_1405_librivox.wav",
+      "audio": {
+        "source_sample_rate": 16000,
+        "analysis_sample_rate": 16000,
+        "duration_s": 75.0
+      },
+      "clock": {
+        "n_frames": 0,
+        "median_fps": null,
+        "has_frames": false
+      },
+      "words": 201,
+      "syllables": 282,
+      "notes": 298,
+      "notes_per_syllable": 1.0567,
+      "syllables_without_note": 7,
+      "melody_centre_hz": 107.39,
+      "voiced_fraction": 0.5547,
+      "note_duration_median_s": 0.13,
+      "syllables_from_dictionary": 230,
+      "syllables_from_heuristic": 52,
+      "heuristic_words": [
+        "25th",
+        "Hoji,",
+        "Tozan",
+        "Tozan's",
+        "Tozan,",
+        "Tozan.",
+        "Umon",
+        "Umon's",
+        "Umon,",
+        "spiritless"
+      ],
+      "ambiguous_pronunciations": 40,
+      "transcribe_s": 4.18,
+      "pitch_s": 57.9,
+      "midi": {
+        "path": "/tmp/s2s_corpus/shortstory/session.mid",
+        "bytes": 2660,
+        "ticks_per_beat": 1000,
+        "ms_per_tick": 1.0,
+        "n_notes": 298,
+        "n_words": 201,
+        "n_tracks": 1,
+        "track_name": "speech: 298 notes, 201 words"
+      },
+      "manifest_cross_check": {
+        "manifest_f0_median_hz": 109,
+        "melody_over_manifest": 0.9853,
+        "manifest_voiced_fraction": 0.55,
+        "voiced_over_manifest": 1.0085
+      }
+    }
+  ],
+  "brief_target": {
+    "session": "/mnt/c/proart_capture/corpus/free_sessions/1792553040",
+    "clock": {
+      "source": "/mnt/c/proart_capture/corpus/free_sessions/1792553040/timestamps.json",
+      "has_frames": true,
+      "n_frames": 15514,
+      "wall_clock_start": "2026-10-21T03:19:40.683Z",
+      "first_frame_s": 6.8347,
+      "last_frame_s": 265.7362,
+      "median_fps": 59.88023952100847
+    },
+    "audio": {
+      "path": "/mnt/c/proart_capture/corpus/free_sessions/1792553040/audio.wav",
+      "source_sample_rate": 48000,
+      "analysis_sample_rate": 16000,
+      "n_samples": 4143915,
+      "duration_s": 258.9946875,
+      "poisoned_samples": 0,
+      "resample_note": "src/wavio.py resamples with linear interpolation and does NOT anti-alias; the time base is exact but content near the old Nyquist folds"
+    },
+    "verdict": "the audio is SILENT -- there is nothing to transcribe, nothing to pitch and no syllables to align",
+    "peak_rms": 0.0,
+    "frames_over_energy_floor": 0,
+    "n_frames": 25895,
+    "note": "all ten of tonight's free sessions are digitally silent; ZCode has the sick-lane fix; the first post-fix session is the real target"
+  }
+}
