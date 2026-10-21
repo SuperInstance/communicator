@@ -1,9 +1,9 @@
 {
   "question": "does the browser-capture deliverable produce takes that the existing corpus pipeline accepts unchanged?",
   "session": {
-    "given": "/tmp/zcode_new/corpus",
-    "takes_directory": "/tmp/zcode_new/corpus",
-    "manifest": "/tmp/zcode_new/corpus/rich/session.json",
+    "given": "/tmp/zcode_6c8dc1b_b/corpus",
+    "takes_directory": "/tmp/zcode_6c8dc1b_b/corpus",
+    "manifest": "/tmp/zcode_6c8dc1b_b/corpus/rich/session.json",
     "manifest_location": "in corpus/rich/ rather than at the out root, as the addendum asks",
     "n_takes": 5
   },
@@ -63,18 +63,18 @@
       "status": "FAIL",
       "n_failures": 1,
       "failures": [
-        "webm: F1_1792546196_full.webm is missing (addendum item 1)"
+        "webm: F1_1792550982_full.webm is missing (addendum item 1)"
       ],
       "notes": [
-        "A1_1792546193: the rich sidecar is in corpus/rich/ rather than next to the take",
-        "A1_1792546193: the full-resolution video is next to the take",
-        "A1_1792546197: the rich sidecar is in corpus/rich/ rather than next to the take",
-        "A1_1792546197: the full-resolution video is next to the take",
-        "C1_1792546194: the rich sidecar is in corpus/rich/ rather than next to the take",
-        "C1_1792546194: the full-resolution video is next to the take",
-        "D1_1792546195: the rich sidecar is in corpus/rich/ rather than next to the take",
-        "D1_1792546195: the full-resolution video is next to the take",
-        "F1_1792546196: the rich sidecar is in corpus/rich/ rather than next to the take"
+        "A1_1792550979: the rich sidecar is in corpus/rich/ rather than next to the take",
+        "A1_1792550979: the full-resolution video is next to the take",
+        "A1_1792550983: the rich sidecar is in corpus/rich/ rather than next to the take",
+        "A1_1792550983: the full-resolution video is next to the take",
+        "C1_1792550980: the rich sidecar is in corpus/rich/ rather than next to the take",
+        "C1_1792550980: the full-resolution video is next to the take",
+        "D1_1792550981: the rich sidecar is in corpus/rich/ rather than next to the take",
+        "D1_1792550981: the full-resolution video is next to the take",
+        "F1_1792550982: the rich sidecar is in corpus/rich/ rather than next to the take"
       ]
     },
     "JSON": {
@@ -88,16 +88,16 @@
       "n_failures": 0,
       "failures": [],
       "notes": [
-        "A1_1792546193: maps re-derives from the stored luma exactly (max difference 0 counts)",
-        "A1_1792546193: maps_raw re-derives from the stored luma exactly (max difference 0 counts)",
-        "A1_1792546197: maps re-derives from the stored luma exactly (max difference 0 counts)",
-        "A1_1792546197: maps_raw re-derives from the stored luma exactly (max difference 0 counts)",
-        "C1_1792546194: maps re-derives from the stored luma exactly (max difference 0 counts)",
-        "C1_1792546194: maps_raw re-derives from the stored luma exactly (max difference 0 counts)",
-        "D1_1792546195: maps re-derives from the stored luma exactly (max difference 0 counts)",
-        "D1_1792546195: maps_raw re-derives from the stored luma exactly (max difference 0 counts)",
-        "F1_1792546196: maps re-derives from the stored luma exactly (max difference 0 counts)",
-        "F1_1792546196: maps_raw re-derives from the stored luma exactly (max difference 0 counts)"
+        "A1_1792550979: maps re-derives from the stored luma exactly (max difference 0 counts)",
+        "A1_1792550979: maps_raw re-derives from the stored luma exactly (max difference 0 counts)",
+        "A1_1792550983: maps re-derives from the stored luma exactly (max difference 0 counts)",
+        "A1_1792550983: maps_raw re-derives from the stored luma exactly (max difference 0 counts)",
+        "C1_1792550980: maps re-derives from the stored luma exactly (max difference 0 counts)",
+        "C1_1792550980: maps_raw re-derives from the stored luma exactly (max difference 0 counts)",
+        "D1_1792550981: maps re-derives from the stored luma exactly (max difference 0 counts)",
+        "D1_1792550981: maps_raw re-derives from the stored luma exactly (max difference 0 counts)",
+        "F1_1792550982: maps re-derives from the stored luma exactly (max difference 0 counts)",
+        "F1_1792550982: maps_raw re-derives from the stored luma exactly (max difference 0 counts)"
       ]
     },
     "NV12": {
@@ -105,11 +105,11 @@
       "n_failures": 0,
       "failures": [],
       "notes": [
-        "A1_1792546193: frames x stride = 150 x 15360 = 2304000 bytes",
-        "A1_1792546197: frames x stride = 150 x 15360 = 2304000 bytes",
-        "C1_1792546194: frames x stride = 150 x 15360 = 2304000 bytes",
-        "D1_1792546195: frames x stride = 150 x 15360 = 2304000 bytes",
-        "F1_1792546196: frames x stride = 150 x 15360 = 2304000 bytes"
+        "A1_1792550979: frames x stride = 150 x 15360 = 2304000 bytes",
+        "A1_1792550983: frames x stride = 150 x 15360 = 2304000 bytes",
+        "C1_1792550980: frames x stride = 150 x 15360 = 2304000 bytes",
+        "D1_1792550981: frames x stride = 150 x 15360 = 2304000 bytes",
+        "F1_1792550982: frames x stride = 150 x 15360 = 2304000 bytes"
       ]
     },
     "WAV": {
@@ -117,11 +117,11 @@
       "n_failures": 0,
       "failures": [],
       "notes": [
-        "A1_1792546193: A1_1792546193.wav: 79950 samples at 16000 Hz = 4.997 s",
-        "A1_1792546197: A1_1792546197.wav: 79950 samples at 16000 Hz = 4.997 s",
-        "C1_1792546194: C1_1792546194.wav: 79950 samples at 16000 Hz = 4.997 s",
-        "D1_1792546195: D1_1792546195.wav: 79950 samples at 16000 Hz = 4.997 s",
-        "F1_1792546196: F1_1792546196.wav: 79950 samples at 16000 Hz = 4.997 s"
+        "A1_1792550979: A1_1792550979.wav: 79950 samples at 16000 Hz = 4.997 s",
+        "A1_1792550983: A1_1792550983.wav: 79950 samples at 16000 Hz = 4.997 s",
+        "C1_1792550980: C1_1792550980.wav: 79950 samples at 16000 Hz = 4.997 s",
+        "D1_1792550981: D1_1792550981.wav: 79950 samples at 16000 Hz = 4.997 s",
+        "F1_1792550982: F1_1792550982.wav: 79950 samples at 16000 Hz = 4.997 s"
       ]
     },
     "DRIFT": {
@@ -129,11 +129,11 @@
       "n_failures": 0,
       "failures": [],
       "notes": [
-        "A1_1792546193: drift re-derived from the stored luma: raw 3.392, after row removal 3.991",
-        "A1_1792546197: drift re-derived from the stored luma: raw 3.392, after row removal 3.991",
-        "C1_1792546194: drift re-derived from the stored luma: raw 3.429, after row removal 3.983",
-        "D1_1792546195: drift re-derived from the stored luma: raw 3.402, after row removal 3.966",
-        "F1_1792546196: drift re-derived from the stored luma: raw 3.396, after row removal 3.965"
+        "A1_1792550979: drift re-derived from the stored luma: raw 3.392, after row removal 3.991",
+        "A1_1792550983: drift re-derived from the stored luma: raw 3.392, after row removal 3.991",
+        "C1_1792550980: drift re-derived from the stored luma: raw 3.429, after row removal 3.983",
+        "D1_1792550981: drift re-derived from the stored luma: raw 3.402, after row removal 3.966",
+        "F1_1792550982: drift re-derived from the stored luma: raw 3.396, after row removal 3.965"
       ]
     },
     "FLAGS": {
@@ -152,12 +152,12 @@
         "the take is labelled as speaking, but the independent measurement of its audio finds almost no speech (0.0064): either the take is not what its label says, or the producer's gate and the pipeline's gate do not agree"
       ],
       "notes": [
-        "A1_1792546193: independent Silero re-measurement: 0.0064; recorded 0.72; the take records speech_gate='browser_rms_adaptive'",
-        "A1_1792546197: independent Silero re-measurement: 0.0064; recorded 0.72; the take records speech_gate='browser_rms_adaptive'",
-        "C1_1792546194: independent Silero re-measurement: 0.0064; recorded 0.01; the take records speech_gate='browser_rms_adaptive'",
-        "D1_1792546195: independent Silero re-measurement: 0.0064; recorded 0.02; the take records speech_gate='browser_rms_adaptive'",
-        "F1_1792546196: independent Silero re-measurement: 0.0064; recorded unmeasured; the take records speech_gate='browser_rms_adaptive'",
-        "F1_1792546196: the take records no speech_frac, so there is nothing to corroborate"
+        "A1_1792550979: independent Silero re-measurement: 0.0064; recorded 0.72; the take records speech_gate='browser_rms_adaptive'",
+        "A1_1792550983: independent Silero re-measurement: 0.0064; recorded 0.72; the take records speech_gate='browser_rms_adaptive'",
+        "C1_1792550980: independent Silero re-measurement: 0.0064; recorded 0.01; the take records speech_gate='browser_rms_adaptive'",
+        "D1_1792550981: independent Silero re-measurement: 0.0064; recorded 0.02; the take records speech_gate='browser_rms_adaptive'",
+        "F1_1792550982: independent Silero re-measurement: 0.0064; recorded unmeasured; the take records speech_gate='browser_rms_adaptive'",
+        "F1_1792550982: the take records no speech_frac, so there is nothing to corroborate"
       ]
     },
     "RICH": {
@@ -165,30 +165,30 @@
       "n_failures": 0,
       "failures": [],
       "notes": [
-        "A1_1792546193: timestamps_ref: references 'A1_1792546193_timing.json'",
-        "A1_1792546197: timestamps_ref: references 'A1_1792546197_timing.json'",
-        "A1_1792546197: notes: present and empty, as the addendum requires by default",
-        "C1_1792546194: timestamps_ref: references 'C1_1792546194_timing.json'",
-        "C1_1792546194: notes: present and empty, as the addendum requires by default",
-        "D1_1792546195: timestamps_ref: references 'D1_1792546195_timing.json'",
-        "D1_1792546195: notes: present and empty, as the addendum requires by default",
-        "F1_1792546196: timestamps_ref: references 'F1_1792546196_timing.json'",
-        "F1_1792546196: notes: present and empty, as the addendum requires by default"
+        "A1_1792550979: timestamps_ref: references 'A1_1792550979_timing.json'",
+        "A1_1792550983: timestamps_ref: references 'A1_1792550983_timing.json'",
+        "A1_1792550983: notes: present and empty, as the addendum requires by default",
+        "C1_1792550980: timestamps_ref: references 'C1_1792550980_timing.json'",
+        "C1_1792550980: notes: present and empty, as the addendum requires by default",
+        "D1_1792550981: timestamps_ref: references 'D1_1792550981_timing.json'",
+        "D1_1792550981: notes: present and empty, as the addendum requires by default",
+        "F1_1792550982: timestamps_ref: references 'F1_1792550982_timing.json'",
+        "F1_1792550982: notes: present and empty, as the addendum requires by default"
       ]
     },
     "WEBM": {
       "status": "FAIL",
       "n_failures": 9,
       "failures": [
-        "A1_1792546193_full.webm carries no video track",
-        "A1_1792546193_full.webm carries no audio track -- the addendum requires the mic audio to be muxed into it",
-        "A1_1792546197_full.webm carries no video track",
-        "A1_1792546197_full.webm carries no audio track -- the addendum requires the mic audio to be muxed into it",
-        "C1_1792546194_full.webm carries no video track",
-        "C1_1792546194_full.webm carries no audio track -- the addendum requires the mic audio to be muxed into it",
-        "D1_1792546195_full.webm carries no video track",
-        "D1_1792546195_full.webm carries no audio track -- the addendum requires the mic audio to be muxed into it",
-        "F1_1792546196_full.webm is missing"
+        "A1_1792550979_full.webm carries no video track",
+        "A1_1792550979_full.webm carries no audio track -- the addendum requires the mic audio to be muxed into it",
+        "A1_1792550983_full.webm carries no video track",
+        "A1_1792550983_full.webm carries no audio track -- the addendum requires the mic audio to be muxed into it",
+        "C1_1792550980_full.webm carries no video track",
+        "C1_1792550980_full.webm carries no audio track -- the addendum requires the mic audio to be muxed into it",
+        "D1_1792550981_full.webm carries no video track",
+        "D1_1792550981_full.webm carries no audio track -- the addendum requires the mic audio to be muxed into it",
+        "F1_1792550982_full.webm is missing"
       ],
       "notes": []
     },
@@ -215,9 +215,9 @@
   },
   "takes": [
     {
-      "stem": "A1_1792546193",
+      "stem": "A1_1792550979",
       "condition": "A1",
-      "meta_file": "A1_1792546193.json",
+      "meta_file": "A1_1792550979.json",
       "checks": {
         "LAYOUT": {
           "status": "PASS",
@@ -251,7 +251,7 @@
           "status": "PASS",
           "failures": [],
           "notes": [
-            "A1_1792546193.wav: 79950 samples at 16000 Hz = 4.997 s"
+            "A1_1792550979.wav: 79950 samples at 16000 Hz = 4.997 s"
           ]
         },
         "DRIFT": {
@@ -280,14 +280,14 @@
           "status": "PASS",
           "failures": [],
           "notes": [
-            "timestamps_ref: references 'A1_1792546193_timing.json'"
+            "timestamps_ref: references 'A1_1792550979_timing.json'"
           ]
         },
         "WEBM": {
           "status": "FAIL",
           "failures": [
-            "A1_1792546193_full.webm carries no video track",
-            "A1_1792546193_full.webm carries no audio track -- the addendum requires the mic audio to be muxed into it"
+            "A1_1792550979_full.webm carries no video track",
+            "A1_1792550979_full.webm carries no audio track -- the addendum requires the mic audio to be muxed into it"
           ],
           "notes": []
         },
@@ -300,9 +300,9 @@
       "ok": false
     },
     {
-      "stem": "A1_1792546197",
+      "stem": "A1_1792550983",
       "condition": "A1",
-      "meta_file": "A1_1792546197.json",
+      "meta_file": "A1_1792550983.json",
       "checks": {
         "LAYOUT": {
           "status": "PASS",
@@ -336,7 +336,7 @@
           "status": "PASS",
           "failures": [],
           "notes": [
-            "A1_1792546197.wav: 79950 samples at 16000 Hz = 4.997 s"
+            "A1_1792550983.wav: 79950 samples at 16000 Hz = 4.997 s"
           ]
         },
         "DRIFT": {
@@ -365,15 +365,15 @@
           "status": "PASS",
           "failures": [],
           "notes": [
-            "timestamps_ref: references 'A1_1792546197_timing.json'",
+            "timestamps_ref: references 'A1_1792550983_timing.json'",
             "notes: present and empty, as the addendum requires by default"
           ]
         },
         "WEBM": {
           "status": "FAIL",
           "failures": [
-            "A1_1792546197_full.webm carries no video track",
-            "A1_1792546197_full.webm carries no audio track -- the addendum requires the mic audio to be muxed into it"
+            "A1_1792550983_full.webm carries no video track",
+            "A1_1792550983_full.webm carries no audio track -- the addendum requires the mic audio to be muxed into it"
           ],
           "notes": []
         },
@@ -386,9 +386,9 @@
       "ok": false
     },
     {
-      "stem": "C1_1792546194",
+      "stem": "C1_1792550980",
       "condition": "C1",
-      "meta_file": "C1_1792546194.json",
+      "meta_file": "C1_1792550980.json",
       "checks": {
         "LAYOUT": {
           "status": "PASS",
@@ -422,7 +422,7 @@
           "status": "PASS",
           "failures": [],
           "notes": [
-            "C1_1792546194.wav: 79950 samples at 16000 Hz = 4.997 s"
+            "C1_1792550980.wav: 79950 samples at 16000 Hz = 4.997 s"
           ]
         },
         "DRIFT": {
@@ -448,15 +448,15 @@
           "status": "PASS",
           "failures": [],
           "notes": [
-            "timestamps_ref: references 'C1_1792546194_timing.json'",
+            "timestamps_ref: references 'C1_1792550980_timing.json'",
             "notes: present and empty, as the addendum requires by default"
           ]
         },
         "WEBM": {
           "status": "FAIL",
           "failures": [
-            "C1_1792546194_full.webm carries no video track",
-            "C1_1792546194_full.webm carries no audio track -- the addendum requires the mic audio to be muxed into it"
+            "C1_1792550980_full.webm carries no video track",
+            "C1_1792550980_full.webm carries no audio track -- the addendum requires the mic audio to be muxed into it"
           ],
           "notes": []
         },
@@ -469,9 +469,9 @@
       "ok": false
     },
     {
-      "stem": "D1_1792546195",
+      "stem": "D1_1792550981",
       "condition": "D1",
-      "meta_file": "D1_1792546195.json",
+      "meta_file": "D1_1792550981.json",
       "checks": {
         "LAYOUT": {
           "status": "PASS",
@@ -505,7 +505,7 @@
           "status": "PASS",
           "failures": [],
           "notes": [
-            "D1_1792546195.wav: 79950 samples at 16000 Hz = 4.997 s"
+            "D1_1792550981.wav: 79950 samples at 16000 Hz = 4.997 s"
           ]
         },
         "DRIFT": {
@@ -531,15 +531,15 @@
           "status": "PASS",
           "failures": [],
           "notes": [
-            "timestamps_ref: references 'D1_1792546195_timing.json'",
+            "timestamps_ref: references 'D1_1792550981_timing.json'",
             "notes: present and empty, as the addendum requires by default"
           ]
         },
         "WEBM": {
           "status": "FAIL",
           "failures": [
-            "D1_1792546195_full.webm carries no video track",
-            "D1_1792546195_full.webm carries no audio track -- the addendum requires the mic audio to be muxed into it"
+            "D1_1792550981_full.webm carries no video track",
+            "D1_1792550981_full.webm carries no audio track -- the addendum requires the mic audio to be muxed into it"
           ],
           "notes": []
         },
@@ -552,14 +552,14 @@
       "ok": false
     },
     {
-      "stem": "F1_1792546196",
+      "stem": "F1_1792550982",
       "condition": "F1",
-      "meta_file": "F1_1792546196.json",
+      "meta_file": "F1_1792550982.json",
       "checks": {
         "LAYOUT": {
           "status": "FAIL",
           "failures": [
-            "webm: F1_1792546196_full.webm is missing (addendum item 1)"
+            "webm: F1_1792550982_full.webm is missing (addendum item 1)"
           ],
           "notes": [
             "the rich sidecar is in corpus/rich/ rather than next to the take"
@@ -589,7 +589,7 @@
           "status": "PASS",
           "failures": [],
           "notes": [
-            "F1_1792546196.wav: 79950 samples at 16000 Hz = 4.997 s"
+            "F1_1792550982.wav: 79950 samples at 16000 Hz = 4.997 s"
           ]
         },
         "DRIFT": {
@@ -616,14 +616,14 @@
           "status": "PASS",
           "failures": [],
           "notes": [
-            "timestamps_ref: references 'F1_1792546196_timing.json'",
+            "timestamps_ref: references 'F1_1792550982_timing.json'",
             "notes: present and empty, as the addendum requires by default"
           ]
         },
         "WEBM": {
           "status": "FAIL",
           "failures": [
-            "F1_1792546196_full.webm is missing"
+            "F1_1792550982_full.webm is missing"
           ],
           "notes": []
         },
@@ -645,6 +645,9 @@
     "script": "experiments/browser_capture_acceptance.py",
     "script_sha256": "c276c8952413b81da0ae9823d02ddddb9fb78cca1b266bdac192e91b84780249",
     "python": "/home/proart/projects/glasses/.venv/bin/python",
-    "expectations": "docs/research/ACCEPTANCE-EXPECTED.md"
+    "expectations": "docs/research/ACCEPTANCE-EXPECTED.md",
+    "build_under_test": "6c8dc1b",
+    "session": "/tmp/zcode_6c8dc1b_b/corpus",
+    "note": "re-measured against 6c8dc1b; the verdict is unchanged from e42143b -- the same three checks fail (LAYOUT, SPEECH, WEBM) and the same nine pass. See docs/research/BROWSER-CAPTURE-ACCEPTANCE.md section 1.5."
   }
 }

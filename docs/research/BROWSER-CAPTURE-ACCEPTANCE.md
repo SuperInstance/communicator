@@ -4,7 +4,7 @@
 branch `acceptance/browser-capture`)
 **Subject under test:** `browser_capture/` in the main checkout
 (`~/projects/communicator`), built by ZCode
-**Date:** 2026-10-20
+**Date:** 2026-10-20, re-measured 2026-10-21 against `6c8dc1b` (§1.5)
 **Expectations:** `docs/research/ACCEPTANCE-EXPECTED.md` (written blind, before
 reading any of ZCode's code)
 **Checker:** `experiments/browser_capture_acceptance.py`
@@ -48,8 +48,10 @@ proves nothing about it.
 **My checker's verdict on the session: FAIL** — 3 of 12 checks failed
 (`LAYOUT`, `SPEECH`, `WEBM`), all three of them on the addendum's rich
 artifacts or on the speech gate, and none of them on the pipeline-exact
-artifacts. **This verdict was re-measured against the build as it stands
-after ZCode's five further commits; the result is identical** (§1.4). **That is not a verdict on the production build's correctness**:
+artifacts. **This verdict was re-measured twice, against the build as it
+stands after ZCode's five further commits (§1.4) and again after the sixth
+(§1.5); the result is identical both times.** **That is not a verdict on the
+production build's correctness**:
 every one of the three is a property of the *synthetic verify session*, and
 each is disclosed in ZCode's own `DONE.md`. The production path for two of
 them is unexercised offline.
@@ -90,8 +92,8 @@ was touched.**
 
 | ZCode's claim in `DONE.md` | My measurement |
 |---|---|
-| "145 checks passed, 0 failed" (audio-venv run) | **CONFIRMED** — 145 passed, 0 failed, 0 skipped |
-| "91 passed under bare system python3" | **CONFIRMED** — 91 passed, 0 failed, 1 skipped |
+| "145 checks passed, 0 failed" (the summary header) | **STALE** — the patch log under it says "154 passed, 0 failed" for the same build, and I measure **154 passed, 0 failed, 0 skipped**. The header was not updated with the patch log |
+| "91 passed under bare system python3 (numpy suite skipped there)" | **CONFIRMED, at the old build** — 91 at `e42143b`; at `6c8dc1b` the same suite under bare system python3 3.14.4 (no numpy) gives **100 passed, 0 failed, 1 skipped**, because the nine new checks do not need numpy. The header is stale for the same reason |
 | "every take produces the script's four files" | **CONFIRMED** — 4 files per take, correct names |
 | "compact-timing / indented-meta JSON styles" | **CONFIRMED** — timing has no newline; meta starts `{\n  "` |
 | "the npz contains exactly maps, scale, maps_raw, scale_raw, luma" | **CONFIRMED** |
@@ -182,10 +184,78 @@ physical cameras, the ASUS FHD webcam and the ASUS IR camera, and the IR one
 is the classic dark-picture impostor. See
 `docs/research/CAMERA-RND-FINDINGS.md` §3.
 
+## 1.5 THE BUILD MOVED AGAIN; THE VERDICT WAS RE-MEASURED A SECOND TIME
+
+ZCode has since shipped one more commit on top of the build §1.4 measured:
+
+```
+6c8dc1b  FREE RECORD is the front door: one RECORD, one STOP, four states, the whole raw session saved for offline analysis -- plan mode intact behind it
+```
+
+`browser_capture/` grew by 825 lines: a new `free_record.html` (481), a new
+`POST /free` endpoint and the session writer in `server.py` (224), nine new
+checks in `verify.py` (82), and a `DONE.md` section. `index.html` changed by
+three lines — a link to the new front door.
+
+**The result is unchanged, and the reason is now visible.** The same three
+checks fail (`LAYOUT`, `SPEECH`, `WEBM`) and the same nine pass; the gate
+still exits 0 on the directory and on the takes alone.
+
+ZCode's own suite, re-run on this build under all three interpreters:
+
+| interpreter | at `e42143b` | at `6c8dc1b` |
+|---|---|---|
+| the audio venv (numpy + the gate) | 145 passed, 0 failed | **154 passed, 0 failed, 0 skipped** |
+| the bare system python3 3.14.4 (no numpy) | 91 passed, 0 failed, 1 skipped | **100 passed, 0 failed, 1 skipped** |
+| the bare Windows python 3.14.3 (numpy 2.5.1) | — | **154 passed, 0 failed, 0 skipped** |
+
+The nine new checks are the free-session path, and they are the ones that
+raise the count. The "91" was never a second opinion about the same
+coverage: it was the same suite with the numpy-dependent checks **skipped**,
+because bare system python3 has no numpy. The Windows python has numpy, so
+it runs everything and agrees with the venv exactly.
+
+What did not change is what matters: **the new commit adds a free-session
+mode and its server endpoint, and it does not touch the take format.** So
+the checks that are about the take format still pass, and the three that
+fail still fail for exactly the reasons they failed before — and all three
+are properties of the *synthetic verify session*, not of the page.
+
+Two harness details worth recording, because both look like findings and
+neither is one:
+
+- **The mirror's symlinked `server.py` wrote into the real tree.** The
+  server derives its diagnostics path from `Path(__file__).resolve().parent`,
+  so a symlinked `server.py` resolves to the real checkout and its
+  `diag.log` went there. The file is gitignored (`.gitignore:6`, `*.log`),
+  nothing tracked changed, and the main checkout is clean — but the mirror
+  now holds a **real copy** of `server.py`, `index.html` and
+  `free_record.html` (byte-identical) and a patched `verify.py`
+  (byte-identical apart from the one-line output-location patch), so the
+  run is self-contained. The mirror is the harness, and the harness should
+  not be able to write into the thing under test.
+- **`verify.py` reads `free_record.html` from its own directory.** A mirror
+  built before the free-record mode has no such file, and the verifier
+  raises `FileNotFoundError` before it checks anything at all. That is a
+  property of the mirror, not of the build: the file is in the build.
+
+**One consequence for the free-session path, which is new and worth
+recording.** The new `POST /free` writes a session folder of five files —
+`meta.json`, `audio.wav`, `luma.raw`, `timestamps.json`, `video.webm` —
+and the verifier checks that it is honest (the luma length is
+`n_frames × 15,360`, the timestamps have one entry per frame, the WAV
+header matches the claimed rate, a mismatched body is rejected with a 400)
+and that it adds **no json to the out root**, so the gate still sees only
+takes. Those checks pass. The session folder is not a take and never
+pretends to be one, which is the right design: a free session is a
+recording, and the labels are derived from it afterwards — offline, by
+`experiments/free_session_analyze.py`
+(`docs/research/FREE-SESSION-ANALYZER.md`).
+
 ## 2. PASS / FAIL PER CHECK
 
 Measured on the pristine session produced by the **current** `verify.py`
-(`/tmp/zcode_new/corpus`, 5 takes: A1 ×2, C1, D1, F1).
+(`/tmp/zcode_6c8dc1b_b/corpus`, 5 takes: A1 ×2, C1, D1, F1).
 
 | Check | Result | What it means here |
 |---|---|---|
@@ -436,6 +506,35 @@ was never supported by the evidence pack; the question was always "why is
 the browser's stream darker than the camera can be", with the unconstrained
 reference capture at 105.9 as the yardstick.
 
+### 4.7 `DONE.md`'s summary header still quotes the pre-free-record test counts
+
+A small documentation discrepancy, found while re-measuring against
+`6c8dc1b` (§1.5), and worth one line because the numbers are the sort of
+thing a reader quotes.
+
+`browser_capture/DONE.md` opens with a summary of what was verified:
+
+> - **145 checks passed, 0 failed** (audio-venv run, numpy + gate included);
+>   91 passed under bare system python3 (numpy suite skipped there).
+
+**Both numbers are stale.** The same file's patch log, two hundred lines
+below, says:
+
+> Verify suite after this patch: 154 passed, 0 failed (nine new checks:
+> front-door routing, plan intact at /plan, the /free write path, the
+> gate-safe subfolder, the dishonest-body 400, and /log).
+
+The header was not updated with it — `git diff e42143b..6c8dc1b --
+browser_capture/DONE.md` touches the patch-log line and not the header. I
+measured **154 passed, 0 failed, 0 skipped** in the audio venv and
+**100 passed, 0 failed, 1 skipped** under bare system python3 3.14.4 (the
+91 was the same suite at the previous build, with the nine new checks
+absent; they need no numpy, so the numpy-less count rises by nine).
+
+The claims are true of the build they were written for, and stale for the
+build that is in the tree. Nothing here is a defect in the product; it is
+the reason this verdict quotes measurements rather than `DONE.md`.
+
 ## 5. THE TWO WRITTEN-CONFLICT FINDINGS
 
 Both were derived blind in `ACCEPTANCE-EXPECTED.md` §12 and both are now
@@ -572,13 +671,32 @@ python3 experiments/browser_capture_acceptance.py /tmp/fixture --require-full-pl
 # ZCode's own verification, reproduced
 cd /tmp/accept/communicator && BC_OUT=/tmp/zcode_venv/corpus \
     /path/to/audio-venv/bin/python browser_capture/verify.py
-#   -> 145 passed, 0 failed
+#   -> 154 passed, 0 failed, 0 skipped   (at 6c8dc1b; 145 at e42143b)
+
+# the same suite under a python with NO numpy -- the numpy checks are skipped
+cd /tmp/accept/communicator && BC_OUT=/tmp/zcode_bare/corpus \
+    /usr/bin/python3 browser_capture/verify.py
+#   -> 100 passed, 0 failed, 1 skipped   (91 at e42143b)
 
 # the page's OWN speech gate, over the WAV the server wrote
 python3 experiments/browser_capture_speech_probe.py \
     /tmp/zcode_venv/corpus/A1_*.wav
 #   -> the page's gate 0.6084, the pipeline's gate 0.0064, recorded 0.72
 ```
+
+The mirror at `/tmp/accept/communicator` holds **real copies** of
+`browser_capture/{server.py,index.html,free_record.html}` and of
+`verify.py` — byte-identical to the main checkout apart from the one-line
+output-location patch that makes the corpus land in `BC_OUT`:
+
+```
+out_dir = tmp / "corpus"
+  ->  out_dir = Path(_os.environ.get("BC_OUT", str(tmp / "corpus")))
+```
+
+Real copies, not symlinks, because the server derives its diagnostics path
+from `Path(__file__).resolve().parent` (§1.5): a symlinked `server.py`
+resolves into the real checkout and writes there.
 
 The checker's provenance block records the script's SHA-256, the numpy
 version, the Silero model it used, and the fact that the reference
@@ -598,3 +716,12 @@ implementation and the gate were both loaded from this checkout.
   verified session is FAIL, and it is reported as FAIL, with the reason for
   each failure separated into "defect" and "not verifiable offline" in §0
   and §6 rather than being buried.
+- **One file in the main checkout was appended to, and it is a log.**
+  Running ZCode's own verifier through a mirror whose `server.py` was a
+  symlink made the server resolve `Path(__file__).resolve().parent` into
+  the real tree and append one line to `browser_capture/diag.log`. The file
+  is gitignored (`.gitignore:6`, `*.log`), nothing tracked changed, and
+  `git status` in the main checkout is clean. The mirror now holds real
+  copies so it cannot recur. I am recording it rather than leaving it to
+  be found later, because the constraint was not to write into that tree
+  and the one write that happened was mine.
