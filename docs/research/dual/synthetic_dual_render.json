@@ -1,5 +1,5 @@
 {
-  "generated_utc": "2026-10-22T02:42:04Z",
+  "generated_utc": "2026-10-22T03:08:06Z",
   "the_pair_is_synthetic": true,
   "the_pair": {
     "fixed": {
@@ -258,6 +258,21 @@
       }
     ],
     "n_slices": 24
+  },
+  "the_witness_count": {
+    "n_slices": 24,
+    "both_moved": 20,
+    "only_fixed_moved": 0,
+    "only_roving_moved": 4,
+    "neither_moved": 0,
+    "the_fixed_view_moved_in": 20,
+    "the_roving_view_moved_in": 24,
+    "p_fixed": 0.8333,
+    "p_roving": 1.0,
+    "p_both": 0.8333,
+    "p_both_if_independent": 0.8333,
+    "the_excess_over_chance": 0.0,
+    "the_excess_in_slices": 0.0
   },
   "the_differenced_view": {
     "t_fixed_s": 4.463,

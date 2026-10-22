@@ -563,6 +563,113 @@ def render_fused_score(fixed: Stream, roving: Stream, align: Alignment,
     return lines, {'slices': rows, 'n_slices': n_slices}
 
 
+def witness_count(rows: list[dict]) -> dict:
+    """WHAT THE TWO VIEWS SAY TOGETHER THAT NEITHER SAYS ALONE.
+
+    The fused score's marks are a 2x2 table of the same minutes seen
+    two ways: both views moved, only the fixed moved, only the roving
+    moved, neither.  The number worth having is the EXCESS over
+    chance: if the two views were independent, they would both move in
+    p_fixed * p_roving of the slices, and the difference between that
+    and what they actually do is the agreement -- the two eyes seeing
+    the same movement from two places.
+
+    The slices TILE the time (each window is exactly one slice), so
+    they do not overlap.  They are still autocorrelated in time -- one
+    person's walk spans several slices -- so the chi-square's p-value
+    is OPTIMISTIC and is reported with that said.
+    """
+    n = len(rows)
+    if not n:
+        return {'n_slices': 0}
+    both = sum(1 for r in rows if r['mark'] == '=')
+    fixed_only = sum(1 for r in rows if r['mark'] == '>')
+    roving_only = sum(1 for r in rows if r['mark'] == '<')
+    neither = sum(1 for r in rows if r['mark'] == '.')
+    p_fixed = (both + fixed_only) / n
+    p_roving = (both + roving_only) / n
+    p_both = both / n
+    chance = p_fixed * p_roving
+    out = {
+        'n_slices': n,
+        'both_moved': both, 'only_fixed_moved': fixed_only,
+        'only_roving_moved': roving_only, 'neither_moved': neither,
+        'the_fixed_view_moved_in': both + fixed_only,
+        'the_roving_view_moved_in': both + roving_only,
+        'p_fixed': round(p_fixed, 4), 'p_roving': round(p_roving, 4),
+        'p_both': round(p_both, 4),
+        'p_both_if_independent': round(chance, 4),
+        'the_excess_over_chance': round(p_both - chance, 4),
+        'the_excess_in_slices': round((p_both - chance) * n, 2),
+    }
+    # chi-square on the 2x2 table, with the autocorrelation caveat
+    try:
+        from scipy.stats import chi2  # noqa: PLC0415
+        table = [[both, fixed_only], [roving_only, neither]]
+        total = n
+        row1 = both + fixed_only
+        row2 = roving_only + neither
+        col1 = both + roving_only
+        col2 = fixed_only + neither
+        denom = row1 * row2 * col1 * col2
+        if denom > 0:
+            chi = (total * (both * neither - fixed_only * roving_only) ** 2
+                   / denom)
+            out['the_chi_square'] = round(float(chi), 4)
+            out['the_p_value'] = float(chi2.sf(chi, 1))
+            out['the_p_value_caveat'] = (
+                'the p-value assumes the slices are independent of one '
+                'another; a movement spans slices, so this is OPTIMISTIC')
+    except Exception:  # noqa: BLE001
+        out['the_chi_square'] = None
+    return out
+
+
+def render_witness_count(count: dict, slice_s: float) -> list[str]:
+    """The witness count, printed."""
+    lines = []
+    lines.append('THE WITNESS COUNT -- what the two views say together that '
+                 'neither says alone')
+    if not count.get('n_slices'):
+        return lines
+    n = count['n_slices']
+    pct = lambda k: 100.0 * k / n  # noqa: E731
+    lines.append(f'  {n} slices of {slice_s:.2f} s; the windows TILE the '
+                 f'time, so they do not overlap')
+    lines.append(f'  both moved            {count["both_moved"]:6d}  '
+                 f'({pct(count["both_moved"]):5.1f} %)')
+    lines.append(f'  only the fixed moved  {count["only_fixed_moved"]:6d}  '
+                 f'({pct(count["only_fixed_moved"]):5.1f} %)')
+    lines.append(f'  only the roving moved {count["only_roving_moved"]:6d}  '
+                 f'({pct(count["only_roving_moved"]):5.1f} %)')
+    lines.append(f'  neither moved         {count["neither_moved"]:6d}  '
+                 f'({pct(count["neither_moved"]):5.1f} %)')
+    lines.append('')
+    lines.append(f'  the fixed view moved in  {count["the_fixed_view_moved_in"]} '
+                 f'slices ({pct(count["the_fixed_view_moved_in"]):.1f} %)')
+    lines.append(f'  the roving view moved in {count["the_roving_view_moved_in"]}'
+                 f' slices ({pct(count["the_roving_view_moved_in"]):.1f} %)')
+    lines.append(f'  if the two views were INDEPENDENT they would both move '
+                 f'in {count["p_both_if_independent"] * 100:.1f} % of the '
+                 f'slices')
+    lines.append(f'  they both move in {count["p_both"] * 100:.1f} % -- '
+                 f'{count["the_excess_over_chance"] * 100:+.1f} points over '
+                 f'chance')
+    if count.get('the_chi_square') is not None:
+        lines.append(f'  chi-square {count["the_chi_square"]:.2f} on 1 degree '
+                     f'of freedom, p = {count["the_p_value"]:.4g}')
+        lines.append(f'  {count["the_p_value_caveat"]}')
+    lines.append('')
+    lines.append('  THE EXCESS IS NOT TWO SENSORS AGREEING ABOUT A NUMBER. It '
+                 'is two eyes')
+    lines.append('  agreeing about a MOVEMENT -- the same person, seen from '
+                 'two places, at')
+    lines.append('  the same moment. That is the thing two sovereign logs of '
+                 'the same minutes')
+    lines.append('  can give that neither gives alone.')
+    return lines
+
+
 def render_differenced(fixed: Stream, roving: Stream, align: Alignment,
                        t: float, scale_mode: str,
                        half_window_s: float,
@@ -1032,6 +1139,30 @@ def selftest() -> int:
            '=' in marks and ('>' in marks or '<' in marks),
            ''.join(sorted(marks)))
 
+        # 6b. THE WITNESS COUNT: the two views together, against chance
+        count = witness_count(fnum['slices'])
+        ck('render: the witness count adds up',
+           (count['both_moved'] + count['only_fixed_moved']
+            + count['only_roving_moved'] + count['neither_moved'])
+           == count['n_slices'], str(count['n_slices']))
+        ck('render: the chance baseline is the product of the two rates',
+           abs(count['p_both_if_independent']
+               - count['p_fixed'] * count['p_roving']) < 1e-6)
+        ck('render: the excess over chance is signed',
+           abs(count['the_excess_over_chance']
+               - (count['p_both'] - count['p_both_if_independent'])) < 1e-6)
+        wtext = render_witness_count(count, 0.25)
+        ck('render: the witness count says what the excess is',
+           any('INDEPENDENT' in ln for ln in wtext) and
+           any('points over' in ln for ln in wtext))
+        # the printed rates must be the rates, not the counts run
+        # through a percentage converter
+        ck('render: the witness count prints the rates as rates',
+           any(f'{count["p_both"] * 100:.1f} %' in ln for ln in wtext) and
+           not any(f'{100.0 * count["p_both"] / count["n_slices"]:.1f} %'
+                   in ln for ln in wtext),
+           'the rate and the count must not be confused')
+
         diff, dnum2 = render_differenced(fixed, roving, al2, t_mid,
                                          'shared-auto', 0.25)
         ck('render: the differenced view names the witness',
@@ -1166,6 +1297,9 @@ def main(argv=None) -> int:
     blocks.extend(dual)
     fused, fnum = render_fused_score(fixed, roving, align, t0, t1, args.slice)
     blocks.extend(fused)
+    count = witness_count(fnum['slices'])
+    blocks.extend(render_witness_count(count, args.slice))
+    blocks.append('')
     mid = moments[len(moments) // 2] if moments else t0
     diff, dn2 = render_differenced(fixed, roving, align, mid, args.scale,
                                    args.window, args.map)
@@ -1179,6 +1313,7 @@ def main(argv=None) -> int:
         'the_pair': report,
         'the_dual_ascii': dnum,
         'the_fused_score': fnum,
+        'the_witness_count': count,
         'the_differenced_view': dn2,
         'the_rendering_choices': {
             'mode': args.mode, 'scale': args.scale, 'map': args.map,

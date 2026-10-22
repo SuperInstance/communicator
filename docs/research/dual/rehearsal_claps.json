@@ -1,16 +1,16 @@
 {
   "claps": {
     "fixed_ms": [
-      11834.7,
-      31834.7,
-      51834.7
+      541104.5,
+      545104.5,
+      549104.5
     ],
     "roving_ms": [
-      5120,
-      25120,
-      45120
+      3175.0,
+      7175.0,
+      11175.0
     ]
   },
   "the_clock": "frame_offsets_ms",
-  "note": "the rehearsal sidecar: the clap times are in each stream's own frame_offsets_ms clock and the render re-bases them onto each stream's first frame"
+  "note": "the NEGATIVE CONTROL's sidecar: the -175.000 ms is INJECTED, and the real pair's claps have never been detected"
 }

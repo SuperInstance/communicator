@@ -29,6 +29,20 @@ The three renders, all kept, all positional:
 3. **THE DIFFERENCED VIEW.** What moved in the fixed frame, the roving
    frame that explains it, and the difference between them.
 
+And the number that goes with the renders, because a picture of two
+views is not yet a finding:
+
+4. **THE WITNESS COUNT.** The score's marks are a 2×2 table of the same
+   minutes seen two ways — both views moved, only the fixed moved, only
+   the roving moved, neither. The number worth having is the **excess
+   over chance**: if the two views were independent they would both
+   move in `p_fixed × p_roving` of the slices, and the difference
+   between that and what they actually do is the agreement. That
+   agreement is not two sensors agreeing about a number; it is two eyes
+   agreeing about a **movement** — the same person, seen from two
+   places, at the same moment. It is the thing two sovereign logs of
+   the same minutes give that neither gives alone.
+
 ## 1. The two rules the renders do not break
 
 **THE PANELS ARE ALIGNED IN TIME, NOT IN SPACE.** The fixed camera sits
@@ -173,7 +187,7 @@ filtered for being dull.
 **Measured, on the tool's own fixture.** A synthetic pair — a person
 walking a known path, seen by a fixed witness and a roving eye with a
 known viewpoint transform — so the renders can be *graded* instead of
-admired. The selftest is **32 of 32** and it grades:
+admired. The selftest is **37 of 37** and it grades:
 
 - the fixed view's change centroid lands within **0.10** of the truth's
   position on both axes;
@@ -186,13 +200,29 @@ admired. The selftest is **32 of 32** and it grades:
   `=` to `<` and back;
 - the alignment: a 500 ppm drift is recovered as 500 ppm, one clap
   gives an offset and no drift, and the sidecar's clock is re-based
-  onto each stream's first frame.
+  onto each stream's first frame;
+- the witness count adds up, its chance baseline is the product of the
+  two rates, and its excess is signed.
 
 **Measured, on a real corpus session.** The rehearsal
 (`docs/research/dual/REHEARSAL-DUAL-RENDER.txt`) pairs a **real** ProArt
-session (1792553040) with a **synthetic** phone recording ingested
-through the new tool, and the injected **−120.000 ms** offset comes
-back with a **0.000 ms** residual.
+session (1792553329) with a **synthetic** phone recording of
+**meaningless** content, ingested through the new tool. It is a
+**negative control**, and it behaves like one:
+
+- the injected **−175.000 ms** offset comes back as **−175.000 ms**
+  with a **0.000 ms** residual;
+- the two streams have nothing to do with each other, and the witness
+  count says so: they both move in **29.4 %** of the 68 slices against
+  a chance baseline of **30.4 %** — an excess of **−1.0 points**,
+  chi-square **0.13** on 1 degree of freedom, **p = 0.72**.
+
+That is the control's whole job: **the measure does not manufacture
+agreement.** A witness count that found an excess between a real room
+and a meaningless video would be a bug in the measure, not a finding.
+
+**The selftests are 37 of 37** for the renderer and **12 of 12** for the
+ingest.
 
 **NOT measured, and not to be filed as if it were:**
 
@@ -251,14 +281,42 @@ a threshold on a mean. The **witness** question is asked of the
 **maximum** over the window instead, because a thing that moved for one
 frame in five still moved.
 
-## 7. The files
+## 7. The rehearsal, reproduced
+
+The rehearsal is a **negative control**: a real ProArt session beside a
+phone recording of meaningless content. It is reproducible with four
+commands, and every number in
+`docs/research/dual/REHEARSAL-DUAL-RENDER.txt` comes from them.
+
+```bash
+# 1. the meaningless phone recording (portrait, moves for one second and
+#    rests for one, so half the slices have movement)
+python experiments/dual_ingest.py --make-fixture /tmp/rehearsal/phone.mp4
+
+# 2. ingest it into the corpus's bundle format
+python experiments/dual_ingest.py --video /tmp/rehearsal/phone.mp4 \
+    --out /tmp/rehearsal/roving --label "the rehearsal phone"
+
+# 3. the sidecar: three claps, the roving's clock 175 ms ahead
+#    (the files are in docs/research/dual/rehearsal_claps.json)
+
+# 4. the renders
+python experiments/dual_render.py \
+    --fixed /mnt/c/proart_capture/corpus/free_sessions/1792553329 \
+    --roving /tmp/rehearsal/roving \
+    --sync docs/research/dual/rehearsal_claps.json \
+    --out /tmp/rehearsal/out --moments 2 --slice 0.25 \
+    --note "NEGATIVE CONTROL, NOT THE REAL PAIR"
+```
+
+## 8. The files
 
 | file | what it is |
 |---|---|
-| `experiments/dual_render.py` | the renderer: the three renders, the alignment consumer, the pair checker, the synthetic fixture, the selftest |
-| `experiments/dual_ingest.py` | the phone recording → the corpus's bundle format |
+| `experiments/dual_render.py` | the renderer: the three renders, the witness count, the alignment consumer, the pair checker, the synthetic fixture, the selftest |
+| `experiments/dual_ingest.py` | the phone recording → the corpus's bundle format, and the rehearsal fixture generator |
 | `docs/research/dual/SYNTHETIC-DUAL-RENDER.txt` | the renders of the synthetic pair — the grade |
-| `docs/research/dual/REHEARSAL-DUAL-RENDER.txt` | the renders of a real corpus session beside a synthetic phone |
+| `docs/research/dual/REHEARSAL-DUAL-RENDER.txt` | the negative control: a real corpus session beside a meaningless phone |
 | `docs/research/dual/synthetic_dual_render.json` | the numbers behind the synthetic render |
 | `docs/research/dual/rehearsal_dual_render.json` | the numbers behind the rehearsal render |
 | `docs/research/dual/rehearsal_ingest.json` | what the ingest measured on the rehearsal phone recording |

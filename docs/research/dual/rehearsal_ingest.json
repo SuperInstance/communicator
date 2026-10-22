@@ -1,28 +1,28 @@
 {
-  "the_out_dir": "/tmp/rehearsal/roving",
-  "the_video": "/tmp/rehearsal/phone.mp4",
+  "the_out_dir": "/tmp/rehearsal3/roving",
+  "the_video": "/tmp/rehearsal3/phone.mp4",
   "n_frames": 900,
   "the_frames_decoded_from_the_container": 900,
   "achieved_video_fps": 30.0,
   "the_frame_times": "the container's own per-frame timestamps",
   "the_frame_interval_spread_ms": 0.001,
   "the_frame_rate_is_variable": "the frame intervals are CONSTANT",
-  "the_wall_clock_start": "2026-10-22T02:46:37.325Z",
+  "the_wall_clock_start": "2026-10-22T03:02:46.500Z",
   "the_wall_clock_start_source": "the file's modification time -- AN APPROXIMATION: a phone recording carries no wall clock, and the file may have been uploaded later",
   "the_noise_of_this_sensor": {
     "the_change_map_noise_floor_is_NOT_carried_over_from_the_proart": true,
     "the_typical_cell": 0.0,
-    "the_typical_loudest_cell": 49.812,
-    "the_quietest_ten_percent_loudest_cell": 21.438,
+    "the_typical_loudest_cell": 2.062,
+    "the_quietest_ten_percent_loudest_cell": 0.938,
     "the_proarts_floor_for_comparison": 3.0,
     "note": "the change map is the corpus's own (experiments/lens.py). These are per-frame statistics over THIS recording: a recording with a lot of movement has them raised by the movement, so they are an upper bound on the noise."
   },
   "the_luma_statistics": {
     "min": 81,
-    "max": 237,
-    "mean": 92.759,
+    "max": 238,
+    "mean": 91.786,
     "p01": 87,
-    "p99": 228,
+    "p99": 108,
     "note": "a phone recording is often limited range (16-235) and a browser recording is full range (0-255); the CHANGE map is a difference and so is not moved by a constant gain, but the noise floor is a threshold and is"
   },
   "bytes_written": 13824000

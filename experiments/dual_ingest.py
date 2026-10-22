@@ -316,6 +316,50 @@ def ingest(video: Path, out_dir: Path, label: str = 'the phone camera',
     return report
 
 
+def synth_phone_video(path: Path, n_frames: int = 900, fps: float = 30.0,
+                      w: int = 270, h: int = 480, moving_half: bool = True,
+                      seed: int = 3) -> dict:
+    """A PHONE-SHAPED recording, for the rehearsal and the control.
+
+    Portrait (the phone is in Casey's hand), with a shape that moves for
+    one second and rests for one, so that HALF the slices have movement
+    and the witness count has a chance baseline to be measured against.
+    The content is deliberately MEANINGLESS: it is the negative control's
+    half -- a recording that has nothing to do with the real session it
+    is paired with, so that any agreement between the two streams would
+    be a bug in the measure rather than a finding.
+    """
+    cv2 = _cv2()
+    path = Path(path)
+    path.parent.mkdir(parents=True, exist_ok=True)
+    fourcc = cv2.VideoWriter_fourcc(*'mp4v')
+    writer = cv2.VideoWriter(str(path), fourcc, fps, (w, h))
+    if not writer.isOpened():
+        raise RuntimeError('cv2 could not open a VideoWriter for the fixture')
+    rng = np.random.default_rng(seed)
+    bg = np.full((h, w, 3), 90, np.uint8)
+    bg[:, ::12] = 120
+    for i in range(n_frames):
+        f = bg.copy()
+        t = i / fps
+        phase = t % 2.0
+        moving = (phase < 1.0) if moving_half else True
+        if moving:
+            x = int(w * 0.5 + w * 0.3 * math.sin(2 * math.pi * phase))
+            y = int(h * 0.55)
+            cv2.circle(f, (x, y), 14, (225, 230, 235), -1)
+        f = np.clip(f.astype(np.int16)
+                    + rng.normal(0, 3.0, f.shape).astype(np.int16),
+                    0, 255).astype(np.uint8)
+        writer.write(f)
+    writer.release()
+    return {'path': str(path), 'w': w, 'h': h, 'fps': fps,
+            'n_frames': n_frames,
+            'the_content': 'meaningless: a shape that moves for one second '
+                           'and rests for one, so that half the slices have '
+                           'movement'}
+
+
 # --------------------------------------------------------------------------
 # the selftest
 # --------------------------------------------------------------------------
@@ -462,12 +506,22 @@ def main(argv=None) -> int:
                     help='keep every Nth frame (1 keeps all)')
     ap.add_argument('--fit', default='crop', choices=('crop', 'stretch'))
     ap.add_argument('--max-frames', type=int, default=None)
+    ap.add_argument('--make-fixture', default=None,
+                    help='write the phone-shaped rehearsal fixture to this '
+                         'path and stop -- the content is MEANINGLESS on '
+                         'purpose, so it can be paired with a real session as '
+                         'a NEGATIVE CONTROL')
     args = ap.parse_args(argv)
 
     if args.selftest:
         return selftest()
+    if args.make_fixture:
+        info = synth_phone_video(Path(args.make_fixture))
+        print(json.dumps(info, indent=2))
+        return 0
     if not args.video or not args.out:
-        print('--video and --out are required (or --selftest)')
+        print('--video and --out are required (or --selftest, or '
+              '--make-fixture)')
         return 1
     ingest(Path(args.video), Path(args.out), label=args.label,
            wall_clock_start=args.wall_clock_start, stride=args.stride,

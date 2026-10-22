@@ -1,19 +1,19 @@
 ==============================================================================
 THE DUAL RENDER -- two cameras, two minutes, three ways
-  generated 2026-10-22T02:50:02Z
-  REHEARSAL, NOT THE REAL PAIR: the fixed side is a REAL corpus session (1792553040); the roving side is a SYNTHETIC phone recording, not Casey's phone. The real dual capture has NOT been made.
-  alignment: 3 clap pairs, offset -120.000 ms, drift -0.0 ppm, residual 0.000 ms
-  overlap: +0.00 s .. +29.97 s (29.97 s of shared minutes)
+  generated 2026-10-22T03:02:47Z
+  NEGATIVE CONTROL, NOT THE REAL PAIR: the fixed side is a REAL corpus session (1792553329) and the roving side is a SYNTHETIC phone recording of MEANINGLESS content. The two streams have nothing to do with each other, so the excess over chance is expected to be ZERO, and the injected -175.000 ms offset is expected to come back exactly. The real dual capture has NOT been made.
+  alignment: 3 clap pairs, offset -175.000 ms, drift +0.0 ppm, residual 0.000 ms
+  overlap: +0.00 s .. +17.08 s (17.08 s of shared minutes)
 ==============================================================================
 
 THE DUAL-ASCII -- the same moments from both views
-  fixed: /mnt/c/proart_capture/corpus/free_sessions/1792553040   roving: /tmp/rehearsal/roving
-  alignment: 3 clap pairs, offset -120.000 ms, drift -0.0 ppm, residual 0.000 ms
+  fixed: /mnt/c/proart_capture/corpus/free_sessions/1792553329   roving: /tmp/rehearsal3/roving
+  alignment: 3 clap pairs, offset -175.000 ms, drift +0.0 ppm, residual 0.000 ms
   the panels are aligned in TIME and NOT in space: the two cameras see the room from different places
   mode: change   scale: shared-auto   window statistic: mean   window: +/-0.25 s
 FIXED (fixed witness)                      |   ROVING (roving eye)                     
 
---- t = +7.492 s fixed / +7.612 s roving   fixed 337.6 luma  roving 307.4 luma   (30 vs 15 frames in the window)
+--- t = +4.271 s fixed / +4.446 s roving   fixed 400.9 luma  roving 1895.0 luma   (30 vs 15 frames in the window)
                                            |                                           
                                            |                                           
                                            |                                           
@@ -25,21 +25,21 @@ FIXED (fixed witness)                      |   ROVING (roving eye)
                                            |                                           
                                            |                                           
                                            |                                           
-                                      ..   |                                           
-                                    ..::   |                                           
-                                    .:::   |                                           
-                                     ..:   |                                           
-                                    ...:   |                                 .--       
-                                  ....:=   |                                 *#**      
-                                 .... ..   |                                -+.-#.     
-                                ..         |                                *:  #:     
-                     ..         :.     .   |                                +#--@      
-                   ......      --.:        |                                :*##:      
-                .  ..  .. ..   -=:-.       |                                  ..       
-               ..  .    ....   .:.:.       |                                           
-               .   .      ... . .:-:       |                                           
+                              .            |                                           
+                             .. ...        |                                           
+                             .  .:::.      |          .::----:-:-:--:-:-:-----::       
+                             .  .. :::     |         .===*%#%#%##%#%#%##%#%#@+===      
+                          . ..  ..  ...    |         :===+%#%#%##%#%#%##%#%#@===+      
+                         .      ........   |         .===*%#%#%##%#%#%##%#%#@===+      
+                        .        .......   |          :--++++=+=+==+=+=+=+++++--.      
+                       .         .......   |                                           
+                       . ..        .....   |                                           
+                       . ..       .::..    |                                           
+                        . .       ..       |                                           
+                        . .       .        |                                           
+                         ..       .        |                                           
 
---- t = +22.475 s fixed / +22.595 s roving   fixed 186.5 luma  roving 369.8 luma   (31 vs 15 frames in the window)
+--- t = +12.812 s fixed / +12.987 s roving   fixed 144.9 luma  roving 997.2 luma   (30 vs 15 frames in the window)
                                            |                                           
                                            |                                           
                                            |                                           
@@ -50,15 +50,15 @@ FIXED (fixed witness)                      |   ROVING (roving eye)
                                            |                                           
                                            |                                           
                                            |                                           
-                                           |         .==.                              
-                                           |         *###.                             
-                        .                  |        .%*=+-                             
-                                           |        .@. :+                             
-                                           |         @==#+                             
-                         .                 |         -###=                             
-                     .  .                  |          :==                              
-                      .                    |                                           
-                     . .                   |                                           
+                                           |                                           
+                                           |                                           
+                                           |                                           
+                                           |          ::------=:=:                     
+                                           |         -==*@@@@@@@@@-                    
+                                           |         ====%@@@@@@@@+                    
+                                           |         ===+%@@@@@@@@=                    
+                                           |         .--+***++*=*=                     
+                                           |                                           
                                            |                                           
                                            |                                           
                                            |                                           
@@ -66,55 +66,112 @@ FIXED (fixed witness)                      |   ROVING (roving eye)
                                            |                                           
 
 THE FUSED SCORE -- two staves, each channel annotating the other
-  fixed: /mnt/c/proart_capture/corpus/free_sessions/1792553040   roving: /tmp/rehearsal/roving
-  alignment: 3 clap pairs, offset -120.000 ms, drift -0.0 ppm, residual 0.000 ms
-  30 slices of 1.00 s from +0.00 s; the energy scale is shared, maximum 1915.4 luma (the mean change over the slice)
+  fixed: /mnt/c/proart_capture/corpus/free_sessions/1792553329   roving: /tmp/rehearsal3/roving
+  alignment: 3 clap pairs, offset -175.000 ms, drift +0.0 ppm, residual 0.000 ms
+  68 slices of 0.25 s from +0.00 s; the energy scale is shared, maximum 2495.7 luma (the mean change over the slice)
   marks:  = both moved   > only this one   < only the other   . neither
   a mark is decided by the STRONGEST frame in the slice, so a thing that moved for one frame still counts
 
-  time      |         |         |         
-  FIXED     ...-=-.::=@+::-..=+-.....::-..
-  <- roving ==============================
-  ROVING    -:--:--:--:--:--:--:--:--:--:-
-  <- fixed  ==============================
+  time      |         |         |         |         |         |         |       
+  FIXED     .....--::.:::::-..:::::-++=+-...... . ..................... . ......
+  <- roving =<<=>>>=====>>>=====>>>=====>>>===<<...<<<<<...<<<<<...<<<<<...<<<<<
+  ROVING    +@+-.. #+@+-.. #+@+-.. #+@+-.. #+@+-.. #+@+-.. %+@+-.. #+@+-.. %+@+-
+  <- fixed  =>>=<<<=====<<<=====<<<=====<<<===>>...>>>>>...>>>>>...>>>>>...>>>>>
 
   t(s)      fixed(luma)     roving(luma)     mark
-    +0.000           159.0           552.5  =
-    +1.000           197.5           368.0  =
-    +2.000           187.0           604.3  =
-    +3.000           651.4           560.2  =
-    +4.000           781.0           365.7  =
-    +5.000           563.5           616.2  =
-    +6.000           257.0           541.2  =
-    +7.000           345.1           379.4  =
-    +8.000           477.4           603.0  =
-    +9.000           795.8           553.1  =
-   +10.000          1915.4           356.1  =
-   +11.000          1152.9           618.9  =
-   +12.000           459.3           550.9  =
-   +13.000           509.0           373.1  =
-   +14.000           570.3           608.9  =
-   +15.000           309.8           561.4  =
-   +16.000           247.1           364.3  =
-   +17.000           918.0           618.2  =
-   +18.000          1079.1           554.1  =
-   +19.000           626.6           382.8  =
-   +20.000           252.3           605.1  =
-   +21.000           191.2           557.1  =
-   +22.000           202.2           360.8  =
-   +23.000           210.7           623.1  =
-   +24.000           221.8           548.4  =
-   +25.000           420.6           371.6  =
-   +26.000           495.1           607.2  =
-   +27.000           675.1           558.9  =
-   +28.000           310.8           365.1  =
-   +29.000           229.5           598.3  =
+    +0.000           166.6          1355.9  =
+    +0.250           158.9          2485.7  <
+    +0.500           160.2          1375.3  <
+    +0.750           157.3           711.9  =
+    +1.000           209.8           154.8  >
+    +1.250           866.3           163.9  >
+    +1.500           870.5            53.9  >
+    +1.750           652.4          2078.8  =
+    +2.000           422.5          1365.2  =
+    +2.250           393.3          2478.7  =
+    +2.500           487.8          1380.3  =
+    +2.750           557.3           705.8  =
+    +3.000           579.7           157.2  >
+    +3.250           612.4           167.3  >
+    +3.500           642.9            71.6  >
+    +3.750           726.9          2076.8  =
+    +4.000           360.6          1367.9  =
+    +4.250           357.2          2495.7  =
+    +4.500           496.8          1375.5  =
+    +4.750           629.1           715.8  =
+    +5.000           584.7           155.9  >
+    +5.250           608.0           161.7  >
+    +5.500           624.8            71.0  >
+    +5.750           695.4          2077.2  =
+    +6.000          1282.7          1358.2  =
+    +6.250          1483.2          2468.7  =
+    +6.500          1132.9          1370.6  =
+    +6.750          1264.9           713.6  =
+    +7.000           696.9           159.4  >
+    +7.250           244.1           172.4  >
+    +7.500           201.9            62.7  >
+    +7.750           264.7          2075.8  =
+    +8.000           400.2          1366.0  =
+    +8.250           224.7          2483.4  =
+    +8.500           190.7          1372.1  <
+    +8.750           134.5           706.8  <
+    +9.000           210.9           164.5  .
+    +9.250           130.5           163.3  .
+    +9.500           164.0            63.8  .
+    +9.750           165.5          2077.1  <
+   +10.000           153.7          1363.2  <
+   +10.250           149.9          2484.0  <
+   +10.500           152.3          1365.8  <
+   +10.750           153.2           714.3  <
+   +11.000           158.0           146.3  .
+   +11.250           161.8           166.5  .
+   +11.500           153.6            69.2  .
+   +11.750           150.7          2090.2  <
+   +12.000           149.5          1365.3  <
+   +12.250           145.8          2481.2  <
+   +12.500           144.6          1378.2  <
+   +12.750           144.5           711.2  <
+   +13.000           147.3           161.2  .
+   +13.250           146.6           165.1  .
+   +13.500           144.6            61.4  .
+   +13.750           144.3          2078.5  <
+   +14.000           144.5          1361.5  <
+   +14.250           144.3          2482.8  <
+   +14.500           144.7          1387.9  <
+   +14.750           114.1           708.7  <
+   +15.000           172.1           162.5  .
+   +15.250           114.3           176.7  .
+   +15.500           142.3            65.4  .
+   +15.750           144.2          2094.0  <
+   +16.000           144.4          1364.8  <
+   +16.250           142.4          2483.1  <
+   +16.500           143.9          1374.9  <
+   +16.750           142.6           708.0  <
   the energy is the sum over the 960 cells of the mean change per frame in the slice; the mark is decided by the strongest single frame
+THE WITNESS COUNT -- what the two views say together that neither says alone
+  68 slices of 0.25 s; the windows TILE the time, so they do not overlap
+  both moved                20  ( 29.4 %)
+  only the fixed moved      12  ( 17.6 %)
+  only the roving moved     24  ( 35.3 %)
+  neither moved             12  ( 17.6 %)
+
+  the fixed view moved in  32 slices (47.1 %)
+  the roving view moved in 44 slices (64.7 %)
+  if the two views were INDEPENDENT they would both move in 30.4 % of the slices
+  they both move in 29.4 % -- -1.0 points over chance
+  chi-square 0.13 on 1 degree of freedom, p = 0.7197
+  the p-value assumes the slices are independent of one another; a movement spans slices, so this is OPTIMISTIC
+
+  THE EXCESS IS NOT TWO SENSORS AGREEING ABOUT A NUMBER. It is two eyes
+  agreeing about a MOVEMENT -- the same person, seen from two places, at
+  the same moment. That is the thing two sovereign logs of the same minutes
+  can give that neither gives alone.
+
 THE DIFFERENCED VIEW -- the fixed frame, the roving frame, and the difference
-  fixed: /mnt/c/proart_capture/corpus/free_sessions/1792553040   roving: /tmp/rehearsal/roving
-  alignment: 3 clap pairs, offset -120.000 ms, drift -0.0 ppm, residual 0.000 ms
-  t = +22.475 s fixed / +22.595 s roving   window +/-0.25 s   scale: shared-auto   window statistic: mean
-  the fixed frame moved in 0 cells; the roving frame saw movement in 26 cells
+  fixed: /mnt/c/proart_capture/corpus/free_sessions/1792553329   roving: /tmp/rehearsal3/roving
+  alignment: 3 clap pairs, offset -175.000 ms, drift +0.0 ppm, residual 0.000 ms
+  t = +12.812 s fixed / +12.987 s roving   window +/-0.25 s   scale: shared-auto   window statistic: mean
+  the fixed frame moved in 0 cells; the roving frame saw movement in 66 cells
 
 FIXED CHANGE (fixed witness)               |   DIFFERENCE (witness mask)               
 ROVING CHANGE (roving eye)                 |   
@@ -129,15 +186,15 @@ ROVING CHANGE (roving eye)                 |
                                            |                                           
                                            |                                           
                                            |                                           
-                                           |         .==.                              
-                                           |         *###.                             
-                        .                  |        .%*=+-                             
-                                           |        .@. :+                             
-                                           |         @==#+                             
-                         .                 |         -###=                             
-                     .  .                  |          :==                              
-                      .                    |                                           
-                     . .                   |                                           
+                                           |                                           
+                                           |                                           
+                                           |                                           
+                                           |          ::------=:=:                     
+                                           |         -==*@@@@@@@@@-                    
+                                           |         ====%@@@@@@@@+                    
+                                           |         ===+%@@@@@@@@=                    
+                                           |         .--+***++*=*=                     
+                                           |                                           
                                            |                                           
                                            |                                           
                                            |                                           

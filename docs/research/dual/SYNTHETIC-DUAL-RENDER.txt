@@ -6,7 +6,7 @@ THE DUAL RENDER -- THE SYNTHETIC PAIR, NOT THE REAL ONE
   synthetic-pair/the_truth.json.  It is here so the
   renders can be GRADED before the real pair lands --
   the real capture has NOT been made.
-  generated 2026-10-22T02:42:04Z
+  generated 2026-10-22T03:08:06Z
   NO ALIGNMENT: none (the two streams are ASSUMED to start together) -- the two views are aligned only to the frame
   overlap: +0.00 s .. +5.95 s (5.95 s of shared minutes)
 ==============================================================================
@@ -109,6 +109,23 @@ THE FUSED SCORE -- two staves, each channel annotating the other
     +5.500          1715.2          2265.2  =
     +5.750          1772.3          2293.7  =
   the energy is the sum over the 960 cells of the mean change per frame in the slice; the mark is decided by the strongest single frame
+THE WITNESS COUNT -- what the two views say together that neither says alone
+  24 slices of 0.25 s; the windows TILE the time, so they do not overlap
+  both moved                20  ( 83.3 %)
+  only the fixed moved       0  (  0.0 %)
+  only the roving moved      4  ( 16.7 %)
+  neither moved              0  (  0.0 %)
+
+  the fixed view moved in  20 slices (83.3 %)
+  the roving view moved in 24 slices (100.0 %)
+  if the two views were INDEPENDENT they would both move in 83.3 % of the slices
+  they both move in 83.3 % -- +0.0 points over chance
+
+  THE EXCESS IS NOT TWO SENSORS AGREEING ABOUT A NUMBER. It is two eyes
+  agreeing about a MOVEMENT -- the same person, seen from two places, at
+  the same moment. That is the thing two sovereign logs of the same minutes
+  can give that neither gives alone.
+
 THE DIFFERENCED VIEW -- the fixed frame, the roving frame, and the difference
   fixed: /tmp/dual-stage/synthetic-pair/fixed   roving: /tmp/dual-stage/synthetic-pair/roving
   NO ALIGNMENT: none (the two streams are ASSUMED to start together) -- the two views are aligned only to the frame
