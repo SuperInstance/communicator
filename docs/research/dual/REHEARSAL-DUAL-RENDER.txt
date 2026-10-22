@@ -1,0 +1,175 @@
+==============================================================================
+THE DUAL RENDER -- two cameras, two minutes, three ways
+  generated 2026-10-22T02:50:02Z
+  REHEARSAL, NOT THE REAL PAIR: the fixed side is a REAL corpus session (1792553040); the roving side is a SYNTHETIC phone recording, not Casey's phone. The real dual capture has NOT been made.
+  alignment: 3 clap pairs, offset -120.000 ms, drift -0.0 ppm, residual 0.000 ms
+  overlap: +0.00 s .. +29.97 s (29.97 s of shared minutes)
+==============================================================================
+
+THE DUAL-ASCII -- the same moments from both views
+  fixed: /mnt/c/proart_capture/corpus/free_sessions/1792553040   roving: /tmp/rehearsal/roving
+  alignment: 3 clap pairs, offset -120.000 ms, drift -0.0 ppm, residual 0.000 ms
+  the panels are aligned in TIME and NOT in space: the two cameras see the room from different places
+  mode: change   scale: shared-auto   window statistic: mean   window: +/-0.25 s
+FIXED (fixed witness)                      |   ROVING (roving eye)                     
+
+--- t = +7.492 s fixed / +7.612 s roving   fixed 337.6 luma  roving 307.4 luma   (30 vs 15 frames in the window)
+                                           |                                           
+                                           |                                           
+                                           |                                           
+                                           |                                           
+                                           |                                           
+                                           |                                           
+                                           |                                           
+                                           |                                           
+                                           |                                           
+                                           |                                           
+                                           |                                           
+                                      ..   |                                           
+                                    ..::   |                                           
+                                    .:::   |                                           
+                                     ..:   |                                           
+                                    ...:   |                                 .--       
+                                  ....:=   |                                 *#**      
+                                 .... ..   |                                -+.-#.     
+                                ..         |                                *:  #:     
+                     ..         :.     .   |                                +#--@      
+                   ......      --.:        |                                :*##:      
+                .  ..  .. ..   -=:-.       |                                  ..       
+               ..  .    ....   .:.:.       |                                           
+               .   .      ... . .:-:       |                                           
+
+--- t = +22.475 s fixed / +22.595 s roving   fixed 186.5 luma  roving 369.8 luma   (31 vs 15 frames in the window)
+                                           |                                           
+                                           |                                           
+                                           |                                           
+                                           |                                           
+                                           |                                           
+                                           |                                           
+                                           |                                           
+                                           |                                           
+                                           |                                           
+                                           |                                           
+                                           |         .==.                              
+                                           |         *###.                             
+                        .                  |        .%*=+-                             
+                                           |        .@. :+                             
+                                           |         @==#+                             
+                         .                 |         -###=                             
+                     .  .                  |          :==                              
+                      .                    |                                           
+                     . .                   |                                           
+                                           |                                           
+                                           |                                           
+                                           |                                           
+                                           |                                           
+                                           |                                           
+
+THE FUSED SCORE -- two staves, each channel annotating the other
+  fixed: /mnt/c/proart_capture/corpus/free_sessions/1792553040   roving: /tmp/rehearsal/roving
+  alignment: 3 clap pairs, offset -120.000 ms, drift -0.0 ppm, residual 0.000 ms
+  30 slices of 1.00 s from +0.00 s; the energy scale is shared, maximum 1915.4 luma (the mean change over the slice)
+  marks:  = both moved   > only this one   < only the other   . neither
+  a mark is decided by the STRONGEST frame in the slice, so a thing that moved for one frame still counts
+
+  time      |         |         |         
+  FIXED     ...-=-.::=@+::-..=+-.....::-..
+  <- roving ==============================
+  ROVING    -:--:--:--:--:--:--:--:--:--:-
+  <- fixed  ==============================
+
+  t(s)      fixed(luma)     roving(luma)     mark
+    +0.000           159.0           552.5  =
+    +1.000           197.5           368.0  =
+    +2.000           187.0           604.3  =
+    +3.000           651.4           560.2  =
+    +4.000           781.0           365.7  =
+    +5.000           563.5           616.2  =
+    +6.000           257.0           541.2  =
+    +7.000           345.1           379.4  =
+    +8.000           477.4           603.0  =
+    +9.000           795.8           553.1  =
+   +10.000          1915.4           356.1  =
+   +11.000          1152.9           618.9  =
+   +12.000           459.3           550.9  =
+   +13.000           509.0           373.1  =
+   +14.000           570.3           608.9  =
+   +15.000           309.8           561.4  =
+   +16.000           247.1           364.3  =
+   +17.000           918.0           618.2  =
+   +18.000          1079.1           554.1  =
+   +19.000           626.6           382.8  =
+   +20.000           252.3           605.1  =
+   +21.000           191.2           557.1  =
+   +22.000           202.2           360.8  =
+   +23.000           210.7           623.1  =
+   +24.000           221.8           548.4  =
+   +25.000           420.6           371.6  =
+   +26.000           495.1           607.2  =
+   +27.000           675.1           558.9  =
+   +28.000           310.8           365.1  =
+   +29.000           229.5           598.3  =
+  the energy is the sum over the 960 cells of the mean change per frame in the slice; the mark is decided by the strongest single frame
+THE DIFFERENCED VIEW -- the fixed frame, the roving frame, and the difference
+  fixed: /mnt/c/proart_capture/corpus/free_sessions/1792553040   roving: /tmp/rehearsal/roving
+  alignment: 3 clap pairs, offset -120.000 ms, drift -0.0 ppm, residual 0.000 ms
+  t = +22.475 s fixed / +22.595 s roving   window +/-0.25 s   scale: shared-auto   window statistic: mean
+  the fixed frame moved in 0 cells; the roving frame saw movement in 26 cells
+
+FIXED CHANGE (fixed witness)               |   DIFFERENCE (witness mask)               
+ROVING CHANGE (roving eye)                 |   
+
+                                           |                                           
+                                           |                                           
+                                           |                                           
+                                           |                                           
+                                           |                                           
+                                           |                                           
+                                           |                                           
+                                           |                                           
+                                           |                                           
+                                           |                                           
+                                           |         .==.                              
+                                           |         *###.                             
+                        .                  |        .%*=+-                             
+                                           |        .@. :+                             
+                                           |         @==#+                             
+                         .                 |         -###=                             
+                     .  .                  |          :==                              
+                      .                    |                                           
+                     . .                   |                                           
+                                           |                                           
+                                           |                                           
+                                           |                                           
+                                           |                                           
+                                           |                                           
+
+THE DIFFERENCE PANEL, alone (it is the point of the render):
+........................................
+........................................
+........................................
+........................................
+........................................
+........................................
+........................................
+........................................
+........................................
+........................................
+........................................
+........................................
+........................................
+........................................
+........................................
+........................................
+........................................
+........................................
+........................................
+........................................
+........................................
+........................................
+........................................
+........................................
+
+  . nothing moved in the fixed frame
+  + the fixed frame moved and the roving frame saw NOTHING at that moment
+  # the fixed frame moved and the roving frame WITNESSED movement at that moment

@@ -135,6 +135,12 @@ class Stream:
         self.frames: np.ndarray = np.zeros((0, FRAME_H, FRAME_W), np.float32)
         self.offsets_s: np.ndarray = np.zeros(0)
         self.wall_clock_start = ''
+        #: The file's OWN first frame offset, before this class re-bases
+        #: it to zero.  A sidecar's clap times live in the FILE's clock,
+        #: so this is what has to come off them -- and it is NOT zero in
+        #: the corpus: the ProArt sessions start at 6834.7 ms because
+        #: their offsets are performance.now() minus the pre-roll base.
+        self.base_offset_ms: float = 0.0
         if luma.is_file() and ts.is_file():
             raw = np.fromfile(luma, dtype=np.uint8)
             n = raw.size // (FRAME_W * FRAME_H)
@@ -154,6 +160,7 @@ class Stream:
                 # the ORIGIN IS THE SESSION'S FIRST FRAME, the same
                 # convention `experiments/speech_to_score.py:load_clock`
                 # uses, so every tool in the fleet reads one clock
+                self.base_offset_ms = float(self.offsets_s[0] * 1000.0)
                 self.offsets_s = self.offsets_s - self.offsets_s[0]
             else:
                 self.problems.append('timestamps.json carries no frame_offsets_ms')
@@ -309,10 +316,10 @@ def load_alignment(path: Path | None, fixed: Stream | None = None,
             base_f = base_r = 0.0
             clock_note = 'the clap times are already relative to each stream\'s first frame'
         else:
-            base_f = (float(fixed.offsets_s[0]) * 1000.0
-                      if fixed is not None and fixed.offsets_s.size else 0.0)
-            base_r = (float(roving.offsets_s[0]) * 1000.0
-                      if roving is not None and roving.offsets_s.size else 0.0)
+            base_f = (float(fixed.base_offset_ms)
+                      if fixed is not None else 0.0)
+            base_r = (float(roving.base_offset_ms)
+                      if roving is not None else 0.0)
             clock_note = (f'the clap times were re-based onto each stream\'s '
                           f'first frame (fixed -{base_f:.1f} ms, roving '
                           f'-{base_r:.1f} ms)')
@@ -863,13 +870,25 @@ def selftest() -> int:
     # 3b. the sidecar: the clap times come in each stream's OWN clock
     #     and the tool re-bases them.  This is the part a hand-written
     #     sidecar gets wrong, so it is tested rather than assumed.
+    #     The fixture's base is made NON-ZERO on purpose: the corpus's
+    #     own sessions start at 6834.7 ms, and a fixture whose base is
+    #     zero hides the bug where the base is never taken off.
     with tempfile.TemporaryDirectory() as td:
         tmp = Path(td)
         synth_pair(tmp / 'pair', seed=5)
+        for name, base in (('fixed', 6834.7), ('roving', 120.5)):
+            p = tmp / 'pair' / name / 'timestamps.json'
+            data = json.loads(p.read_text())
+            data['frame_offsets_ms'] = [v + base for v in
+                                        data['frame_offsets_ms']]
+            p.write_text(json.dumps(data))
         fixed = Stream(tmp / 'pair' / 'fixed', 'synthetic fixed')
         roving = Stream(tmp / 'pair' / 'roving', 'synthetic roving')
-        base_f = float(fixed.offsets_s[0]) * 1000.0
-        base_r = float(roving.offsets_s[0]) * 1000.0
+        base_f = fixed.base_offset_ms
+        base_r = roving.base_offset_ms
+        ck('align: the stream keeps the file\'s own base',
+           abs(base_f - 6834.7) < 1e-6 and abs(base_r - 120.5) < 1e-6,
+           f'{base_f}, {base_r}')
         delta_ms = 250.0
         side = tmp / 'claps.json'
         side.write_text(json.dumps({'claps': {
@@ -1077,6 +1096,9 @@ def main(argv=None) -> int:
                     help='render the SYNTHETIC pair (a person walking a known '
                          'path) instead of a real one -- this is what grades '
                          'the renders before the real pair lands')
+    ap.add_argument('--note', default=None,
+                    help='a line to print in the header of every output, for '
+                         'saying what this pair IS and is not')
     args = ap.parse_args(argv)
 
     if args.selftest:
@@ -1129,6 +1151,9 @@ def main(argv=None) -> int:
     else:
         blocks.append('THE DUAL RENDER -- two cameras, two minutes, three ways')
     blocks.append(f'  generated {time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime())}')
+    if args.note:
+        for line in args.note.splitlines():
+            blocks.append(f'  {line}')
     blocks.append(f'  {align.describe()}')
     blocks.append(f'  overlap: {t0:+.2f} s .. {t1:+.2f} s '
                   f'({span:.2f} s of shared minutes)')
