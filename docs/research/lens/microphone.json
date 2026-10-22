@@ -4,12 +4,12 @@
  "capture_rate_hz": 48000,
  "devices_seen": {
   "Microphone Array (Realtek(R) Audio)": {
-   "n_sessions": 71,
+   "n_sessions": 125,
    "n_silent": 47,
    "peak_max": 3705
   },
   "?": {
-   "n_sessions": 28,
+   "n_sessions": 42,
    "n_silent": 9,
    "peak_max": 18064
   },
@@ -27,17 +27,17 @@
    "statement": "the input device delivers literal zeros: the saved WAV's peak is exactly 0 and every sample is 0",
    "detector": "peak_abs == 0 and nonzero == 0",
    "measurement": {
-    "n_sessions_with_a_wav": 139,
+    "n_sessions_with_a_wav": 207,
     "n_silent": 56,
-    "fraction_silent": 0.4029,
+    "fraction_silent": 0.2705,
     "peak_of_the_loud_sessions": {
      "min": 54,
      "max": 18064,
-     "median": 12859
+     "median": 785
     },
-    "n_sessions_on_a_synthetic_device": 68,
+    "n_sessions_on_a_synthetic_device": 82,
     "n_silent_on_the_real_microphone": 47,
-    "n_on_the_real_microphone": 71
+    "n_on_the_real_microphone": 125
    },
    "provenance": "measured over the corpus's free sessions; the class was 34 folders and 82.4M samples on the night it happened (browser_capture/DONE.md)"
   },
@@ -46,9 +46,9 @@
    "class": "level",
    "statement": "the level is not a property of the device alone: on the REAL microphone the loud sessions' peaks run from about 140 to about 3064, a 21.9x spread, in one room.  The much larger spread that the whole corpus shows is an artefact of the synthetic input device, and it is filed separately.",
    "measurement": {
-    "loud_peak_min": 89,
+    "loud_peak_min": 66,
     "loud_peak_max": 3705,
-    "ratio": 41.63,
+    "ratio": 56.14,
     "population": "the real microphone only",
     "whole_corpus_including_synthetic": {
      "loud_peak_min": 54,
@@ -64,61 +64,61 @@
    "class": "delay",
    "statement": "the delay between two arrivals of one sound is measured by the band-limited ENVELOPE cross-correlation, and it resolves to 0.004 ms -- 0.0014 m of range -- with a null bias of 0.0002 ms.  The estimator needs NO clock relationship between the two devices: the offset cancels, because the two signals are compared to each other rather than to a third reference.  What survives is a CONSTANT bias per device pair (the two devices' own internal latencies), which is a calibration and not a precision problem.",
    "measurement": {
-    "n_sessions": 6,
+    "n_sessions": 24,
     "null_bias_ms": {
      "median": 0.0,
      "max": 0.0002,
      "median_in_metres": 0.0
     },
     "resolution_error_ms": {
-     "median": 0.001,
-     "max": 0.004,
-     "median_in_metres": 0.0003
+     "median": 0.002,
+     "max": 1.757,
+     "median_in_metres": 0.0007
     },
     "by_injected_delay_ms": {
      "0": {
-      "n": 6,
+      "n": 24,
       "median_error_ms": 0.0,
       "max_error_ms": 0.0
      },
      "1": {
-      "n": 6,
-      "median_error_ms": 0.001,
-      "max_error_ms": 0.004
+      "n": 24,
+      "median_error_ms": 0.002,
+      "max_error_ms": 0.844
      },
      "2": {
-      "n": 6,
-      "median_error_ms": 0.0015,
-      "max_error_ms": 0.004
+      "n": 24,
+      "median_error_ms": 0.002,
+      "max_error_ms": 1.757
      },
      "5": {
-      "n": 6,
-      "median_error_ms": 0.0015,
-      "max_error_ms": 0.004
+      "n": 24,
+      "median_error_ms": 0.002,
+      "max_error_ms": 0.4
      },
      "10": {
-      "n": 6,
-      "median_error_ms": 0.0015,
-      "max_error_ms": 0.004
+      "n": 24,
+      "median_error_ms": 0.002,
+      "max_error_ms": 0.429
      },
      "20": {
-      "n": 6,
-      "median_error_ms": 0.001,
-      "max_error_ms": 0.004
+      "n": 24,
+      "median_error_ms": 0.0025,
+      "max_error_ms": 0.448
      },
      "40": {
-      "n": 6,
-      "median_error_ms": 0.0015,
-      "max_error_ms": 0.004
+      "n": 24,
+      "median_error_ms": 0.002,
+      "max_error_ms": 0.482
      },
      "80": {
-      "n": 6,
-      "median_error_ms": 0.001,
-      "max_error_ms": 0.004
+      "n": 24,
+      "median_error_ms": 0.002,
+      "max_error_ms": 0.515
      }
     },
     "the_null": "a signal against a gain-shifted copy of itself: a second channel of one device, and the same arrival, so the lag must be ZERO",
-    "the_range_resolution_m": 0.00034,
+    "the_range_resolution_m": 0.00069,
     "the_caveat": "the null is a WITHIN-DEVICE bias; the device-to-device bias is a different constant and is NOT measured, because the corpus holds one real device"
    },
    "provenance": "experiments/arrival_null.py, over the corpus's real-microphone sessions that carry signal; the full study is docs/research/ARRIVAL-NULL.md"
@@ -128,16 +128,16 @@
    "class": "failure_signature",
    "statement": "the corpus holds an end-to-end TEST rig alongside the room captures: Chrome's 'Fake Default Audio Input' with a static .y4m test pattern standing in for the camera.  A session from this rig is not evidence about the room, and a statistic that mixes the two is wrong by the synthetic fraction.",
    "measurement": {
-    "n_sessions_on_a_synthetic_device": 68,
-    "n_sessions_total": 139,
-    "fraction_synthetic": 0.4892,
+    "n_sessions_on_a_synthetic_device": 82,
+    "n_sessions_total": 207,
+    "fraction_synthetic": 0.3961,
     "devices": {
      "Microphone Array (Realtek(R) Audio)": {
-      "n_sessions": 71,
+      "n_sessions": 125,
       "peak_max": 3705
      },
      "?": {
-      "n_sessions": 28,
+      "n_sessions": 42,
       "peak_max": 18064
      },
      "Fake Default Audio Input": {
@@ -216,65 +216,65 @@
    "class": "signature",
    "statement": "the envelope carries the EVENT -- a crossing of the microphone's field shows up as a loudness hump -- but on this corpus it does NOT carry the direction.  Graded against the video's own radial label (the blob's apparent size grows toward the phone and shrinks away from it), the envelope's direction agrees 34 % of the time, which is chance.  The reason is measurable: the hump at a crossing is the SPEAKER'S OWN VOICE.  The envelope's peak lands on one of the session's own speech segments at 70-88 % of crossings, against a 32-42 % baseline for a random moment.  The corpus contains no labelled toward/pass/away crossings, so the claim is untested rather than refuted.",
    "measurement": {
-    "n_sessions": 103,
-    "n_crossings": 764,
-    "n_with_an_envelope": 761,
+    "n_sessions": 128,
+    "n_crossings": 703,
+    "n_with_an_envelope": 700,
     "envelope_excursion_db": {
-     "n": 761,
+     "n": 700,
      "min": 0.0,
      "p25": 0.0,
      "median": 0.0,
-     "p75": 7.530301276102932,
+     "p75": 8.490251134634256,
      "max": 124.30146156181064,
-     "mean": 7.5519850474594525
+     "mean": 7.754985608205491
     },
     "envelope_direction_counts": {
-     "TOWARD": 150,
-     "PASS": 505,
-     "AWAY": 106
+     "AWAY": 105,
+     "TOWARD": 153,
+     "PASS": 442
     },
     "video_frame_direction_counts": {
-     "RIGHT": 366,
-     "LEFT": 398
+     "RIGHT": 346,
+     "LEFT": 357
     },
     "video_radial_label_counts": {
-     "TOWARD": 329,
-     "PASS": 171,
-     "AWAY": 264
+     "AWAY": 247,
+     "TOWARD": 301,
+     "PASS": 155
     },
-    "n_graded": 761,
-    "n_agreeing_with_the_video_radial_label": 207,
-    "agreement_rate": 0.272,
+    "n_graded": 700,
+    "n_agreeing_with_the_video_radial_label": 196,
+    "agreement_rate": 0.28,
     "confusion_rows_video_cols_envelope": {
      "TOWARD": {
       "TOWARD": 66,
-      "PASS": 219,
-      "AWAY": 43
+      "PASS": 193,
+      "AWAY": 41
      },
      "PASS": {
-      "TOWARD": 31,
-      "PASS": 109,
-      "AWAY": 31
+      "TOWARD": 33,
+      "PASS": 94,
+      "AWAY": 28
      },
      "AWAY": {
-      "TOWARD": 53,
-      "PASS": 177,
-      "AWAY": 32
+      "TOWARD": 54,
+      "PASS": 155,
+      "AWAY": 36
      }
     },
-    "auc_envelope_slope_toward_vs_away": 0.4963,
-    "n_envelope_peak_on_a_speech_segment": 155,
-    "envelope_peak_on_speech_rate": 0.2037,
+    "auc_envelope_slope_toward_vs_away": 0.5028,
+    "n_envelope_peak_on_a_speech_segment": 143,
+    "envelope_peak_on_speech_rate": 0.2043,
     "audio_bearing_subset": {
-     "n_crossings_with_a_live_envelope": 281,
-     "n_agreeing_with_the_video_radial_label": 104,
-     "agreement_rate": 0.3701,
-     "auc_envelope_slope_toward_vs_away": 0.4925,
-     "n_envelope_peak_on_a_speech_segment": 155,
-     "envelope_peak_on_speech_rate": 0.5516,
+     "n_crossings_with_a_live_envelope": 283,
+     "n_agreeing_with_the_video_radial_label": 109,
+     "agreement_rate": 0.3852,
+     "auc_envelope_slope_toward_vs_away": 0.5002,
+     "n_envelope_peak_on_a_speech_segment": 143,
+     "envelope_peak_on_speech_rate": 0.5053,
      "population": "the crossings on the REAL microphone, with a live envelope",
      "n_sessions_on_a_synthetic_device": 35,
-     "n_sessions_on_the_real_microphone": 68,
+     "n_sessions_on_the_real_microphone": 93,
      "note": "the other crossings sit in sessions whose audio is digital silence, or on Chrome's synthetic test input, so their envelopes are flat or synthetic and their direction is the direction of a constant"
     }
    },
@@ -413,5 +413,5 @@
   }
  ],
  "lens_version": 1,
- "generated_utc": "2026-10-22T10:14:20Z"
+ "generated_utc": "2026-10-22T18:05:15Z"
 }

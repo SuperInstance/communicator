@@ -587,6 +587,10 @@ def walk_by_study(session_dirs):
             offs = clock.frame_offsets_s[:len(maps)]
         else:
             offs = np.arange(len(maps)) / 60.0
+        # THE SESSION'S OWN FRAME INTERVAL: the duration criterion is a
+        # time, and the time is the session's own moment.
+        _g = np.diff(offs)
+        _iv = float(np.median(_g)) if _g.size else 0.0
         events = find_crossings(maps, thr, offsets=offs)
         # the session's own speech segments: the CONFOUND.  A hump in
         # the envelope at a crossing is only evidence about a walk-by if
@@ -633,11 +637,180 @@ def walk_by_study(session_dirs):
                     "change_threshold": round(thr, 4),
                     "input_device": input_device(sdir),
                     "n_frames": len(maps),
+                    # THE SESSION'S OWN MOMENT, so that a reader can see
+                    # what the detector's duration criterion means in SECONDS
+                    # and not only in frames.
+                    "the_frame_interval_ms": round(_iv * 1000.0, 3),
+                    "the_minimum_duration_s": round(
+                        max(BLOB_MIN_SECONDS, MOMENT_FRAMES * _iv), 4),
+                    "the_minutes": round((float(offs[-1]) - float(offs[0])) / 60.0, 4)
+                    if len(offs) > 1 else 0.0,
                     "session_noise_floor_db": round(noise_floor_db, 2),
                     "speech_s": round(sum(e - s for s, e in speech), 2),
                     "n_crossings": len(events),
                     "crossings": rows})
     return out
+
+
+def walk_by_summary(rows: list[dict]) -> dict:
+    """THE RATE, REPORTED PER FRAME RATE AND NEVER POOLED.
+
+    A crossings-per-minute is only meaningful within one frame rate,
+    because the duration criterion is the session's own moment and the
+    two rates' moments are different lengths.  So the sessions are
+    grouped by their own frame rate, and each group carries the
+    minimum crossing duration that applied to it in SECONDS.
+    """
+    groups: dict = {}
+    for r in rows:
+        iv = float(r.get("the_frame_interval_ms") or 0.0) / 1000.0
+        hz = int(round(1.0 / iv)) if iv > 0 else 0
+        g = groups.setdefault(hz, {"the_frame_rate_hz": hz,
+                                   "the_frame_interval_ms": round(iv * 1000.0, 3),
+                                   "the_minimum_duration_s": r.get("the_minimum_duration_s"),
+                                   "the_sessions": 0, "the_minutes": 0.0,
+                                   "the_crossings": 0, "the_sessions_with_any": 0})
+        g["the_sessions"] += 1
+        g["the_minutes"] += float(r.get("the_minutes") or 0.0)
+        g["the_crossings"] += int(r.get("n_crossings") or 0)
+        if int(r.get("n_crossings") or 0) > 0:
+            g["the_sessions_with_any"] += 1
+    for g in groups.values():
+        mins = g["the_minutes"]
+        g["the_crossings_per_minute"] = round(g["the_crossings"] / mins, 4) if mins > 0 else None
+        g["the_minutes"] = round(mins, 4)
+    return {
+        "the_sessions": len(rows),
+        "the_crossings": sum(int(r.get("n_crossings") or 0) for r in rows),
+        "the_sessions_with_any": sum(1 for r in rows
+                                     if int(r.get("n_crossings") or 0) > 0),
+        "the_minutes": round(sum(float(r.get("the_minutes") or 0.0) for r in rows), 4),
+        "the_note": ("the rate is reported PER FRAME RATE and never pooled: "
+                     "the duration criterion is the session's own moment, so "
+                     "the two rates' moments are different lengths and a "
+                     "pooled rate is a mixture of two quantities"),
+        "by_frame_rate": [groups[k] for k in sorted(groups)],
+    }
+
+
+def _auc_of(scores: list[float], labels: list[bool]) -> float | None:
+    """THE AUC, BY THE TRAPEZOIDAL RULE.
+
+    For every positive score and every negative score: one if the
+    positive is greater, one half if they are equal, zero if it is
+    less, divided by the number of pairs.
+
+    **THE NAME IS NOT `_auc` ON PURPOSE.**  There is an older `_auc`
+    further down this file, from the pause-lens study, with the
+    signature `(pos, neg)`; a function of the same name defined later
+    SHADOWS this one, and the first version of this was silently
+    computed by the other one -- which is how a number with a stated
+    definition came out at 0.6045 when the filed prose says 0.5064.
+    **A NAME THAT IS TAKEN TWICE IS A NUMBER NOBODY CHECKED.**
+    """
+    pos = [s for s, l in zip(scores, labels) if l]
+    neg = [s for s, l in zip(scores, labels) if not l]
+    if not pos or not neg:
+        return None
+    tot = 0.0
+    for p in pos:
+        for t in neg:
+            if p > t:
+                tot += 1.0
+            elif p == t:
+                tot += 0.5
+    return tot / (len(pos) * len(neg))
+
+
+def envelope_grading(rows: list[dict]) -> dict:
+    """THE ENVELOPE GRADED AGAINST THE VIDEO'S OWN LABEL.
+
+    **THE NUMBERS HERE USED TO LIVE ONLY IN PROSE.**  The agreement, the
+    confusion matrix, the chance agreement and the AUC were written by
+    hand into the report and there was no tool behind any of them, which
+    is the same defect the 94.938 was.  This function is the tool, and
+    the filed numbers are its output.
+    """
+    live = []
+    for s in rows:
+        for c in s.get("crossings") or []:
+            env = c.get("envelope") or {}
+            if float(env.get("peak_db", -180.0)) <= -180.0:
+                continue          # no live envelope at this crossing
+            live.append(c)
+
+    labels = ("TOWARD", "PASS", "AWAY")
+    matrix = {v: {e: 0 for e in labels} for v in labels}
+    agree = 0
+    on_speech = 0
+    for c in live:
+        v = c.get("video_radial")
+        e = (c.get("envelope") or {}).get("direction_from_envelope")
+        if v in matrix and e in labels:
+            matrix[v][e] += 1
+            if v == e:
+                agree += 1
+        if c.get("envelope_peak_on_speech"):
+            on_speech += 1
+    n = len(live)
+    # THE CHANCE AGREEMENT FROM THE MARGINALS: sum over the labels of
+    # (the video's share) x (the envelope's share).  The diagonal only --
+    # a cell's chance is its row's share times its column's share.
+    chance = 0.0
+    if n:
+        for v in labels:
+            rv = sum(matrix[v][x] for x in labels)
+            cv = sum(matrix[y][v] for y in labels)
+            chance += (rv / n) * (cv / n)
+
+    # the AUC of the envelope's SLOPE at the event, TOWARD against AWAY,
+    # on the crossings whose VIDEO label says one or the other
+    scores, labels_b = [], []
+    for c in live:
+        v = c.get("video_radial")
+        if v not in ("TOWARD", "AWAY"):
+            continue
+        scores.append(float((c.get("envelope") or {}).get("slope_at_event_db_s", 0.0)))
+        labels_b.append(v == "TOWARD")
+    auc = _auc_of(scores, labels_b)
+
+    # and the same over EVERY crossing, live envelope or not
+    every = [c for s in rows for c in (s.get("crossings") or [])]
+    m2 = {v: {e: 0 for e in labels} for v in labels}
+    agree2 = 0
+    for c in every:
+        v = c.get("video_radial")
+        e = (c.get("envelope") or {}).get("direction_from_envelope")
+        if v in m2 and e in labels:
+            m2[v][e] += 1
+            if v == e:
+                agree2 += 1
+    n2 = len(every)
+    chance2 = 0.0
+    if n2:
+        for v in labels:
+            rv = sum(m2[v][x] for x in labels)
+            cv = sum(m2[y][v] for y in labels)
+            chance2 += (rv / n2) * (cv / n2)
+    return {
+        "the_crossings_with_a_live_envelope": n,
+        "the_agreeing_with_the_videos_label": agree,
+        "the_agreement": round(agree / n, 4) if n else None,
+        "the_chance_agreement": round(chance, 4),
+        "the_auc_of_the_envelopes_slope_toward_vs_away": round(auc, 4) if auc is not None else None,
+        "the_n_scored_for_the_auc": len(scores),
+        "the_envelopes_peak_on_a_speech_segment": on_speech,
+        "the_share_on_speech": round(on_speech / n, 4) if n else None,
+        "the_confusion_matrix": matrix,
+        "the_all_crossings": n2,
+        "the_all_crossings_agreeing": agree2,
+        "the_all_crossings_agreement": round(agree2 / n2, 4) if n2 else None,
+        "the_all_crossings_chance_agreement": round(chance2, 4),
+        "the_note": ("the video's radial label against the envelope's own "
+                     "direction, on the crossings that carry a live envelope; "
+                     "the AUC is the envelope's SLOPE at the event, TOWARD "
+                     "against AWAY"),
+    }
 
 
 # --------------------------------------------------------------------------
@@ -1397,14 +1570,28 @@ def main(argv=None) -> int:
         {"study": "walk-by envelope",
          "generated_utc": time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime()),
          "method": {
-             "crossing": ("a BURST of change events whose change-map "
-                         "centroid drifts consistently across the frame; the "
-                         "video has no consecutive changed frames, because "
-                         "the recorder repeats a picture until it changes"),
+             "crossing": ("a CONNECTED BLOB of change above the corpus's own "
+                         "noise floor that HOLDS ITS SHAPE while it "
+                         "TRANSLATES: the person is one object, it keeps its "
+                         "size, and it moves. The grain is below the floor, a "
+                         "highlight is one frame, a fidget does not travel, and "
+                         "neither does a shake."),
+             "the_threshold": CHANGE_NOISE_FLOOR,
+             "the_travel_columns": BLOB_MIN_TRAVEL,
+             "the_duration_is_a_time": True,
+             "the_moment_s": BLOB_MIN_SECONDS,
+             "the_moment_is_frame_aware": MOMENT_FRAMES,
+             "the_duration_rule": ("a crossing must be present for at least "
+                                   "max(0.35 s, 1.5 x the session's own median "
+                                   "frame interval) -- the SAME moment the "
+                                   "chaining gap uses, so the two frame rates "
+                                   "count the same kind of event"),
              "direction": "the drift of the change map's horizontal centroid",
              "envelope": "frame RMS in dB on the repository's 50 ms/10 ms grid",
              "window_s": [ENVELOPE_PRE_S, ENVELOPE_POST_S],
          },
+         "the_summary": walk_by_summary(walk),
+         "the_envelope_grading": envelope_grading(walk),
          "sessions": walk}, indent=1))
 
     print(f"wrote {len(written)} lens files: {', '.join(written)}")

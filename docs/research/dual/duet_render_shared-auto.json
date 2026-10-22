@@ -1,5 +1,5 @@
 {
-  "generated_utc": "2026-10-22T09:59:09Z",
+  "generated_utc": "2026-10-22T17:49:06Z",
   "the_pair_is_synthetic": false,
   "the_pair": {
     "fixed": {
@@ -50,6 +50,101 @@
     ],
     "renderable": true,
     "blockers": []
+  },
+  "the_relative_geometry": {
+    "the_scale_is_guessed": false,
+    "the_panels_are_aligned_in": "TIME, and not in space",
+    "the_fixed_frame_interval_ms": 499.75,
+    "the_roving_frame_interval_ms": 406.5,
+    "the_offset_ms": 500538.0,
+    "the_pose": {
+      "the_note": "the device orientation attached to every frame",
+      "the_alpha_range": [
+        1.6,
+        355.6
+      ],
+      "the_beta_range": [
+        3.1,
+        99.0
+      ],
+      "the_gamma_range": [
+        -88.80000000000001,
+        81.5
+      ],
+      "the_heading_is_null_in_every_frame": true,
+      "there_is_no_position": true,
+      "the_what_this_does_not_license": "there is NO POSITION in the pose, so the device cannot be placed in the room, and the heading is null, so its azimuth is unknown: a relative pose against another view cannot be solved from this bundle, and the SCALE certainly is not in it"
+    },
+    "the_what_the_take_supports": [
+      "the roving device's alpha (the azimuth-like tilt) over the session: 1.6 to 355.6 degrees",
+      "the roving device's beta (the pitch) over the session: 3.1 to 99.0 degrees",
+      "the roving device's gamma (the roll) over the session: -88.8 to 81.5 degrees"
+    ],
+    "the_what_the_take_does_not_support": [
+      "the roving device's HEADING is null in every frame, so its azimuth is unknown and the two views' relative ROTATION cannot be solved either",
+      "the roving device's POSITION was never recorded, so it cannot be placed in the room and the relative TRANSLATION is not measurable from this bundle"
+    ]
+  },
+  "the_channels": {
+    "the_rule": "each channel's SIGNAL threshold -- the threshold at which that channel is on 90 % of its frames -- and the crossings it finds at that threshold and at its grain floor",
+    "the_fixed": {
+      "the_label": "fixed witness",
+      "the_units": "luma (the camera's own)",
+      "the_floor": 3.0,
+      "the_duty_cycle": 0.586059,
+      "the_frame_interval_ms": 499.75,
+      "the_crossings_at_the_floor": 29,
+      "the_signal_threshold": {
+        "the_rule": "the threshold at which this channel is on 90 % of its frames: the 10th percentile of its per-frame change-map maxima",
+        "the_value": 0.0,
+        "the_convention": "nearest rank: the k-th smallest observed per-frame maximum, k = ceil((1 - duty) * n) = 187",
+        "the_rank": 187,
+        "the_value_linear_interpolation": 0.0,
+        "the_convention_gap": 0.0,
+        "the_n_frames": 1865,
+        "the_duty_cycle_above_the_value": 0.868097,
+        "the_duty_cycle_at_or_above_the_value": 1.0,
+        "the_target_duty_cycle": 0.9,
+        "the_ties_at_the_value": 246,
+        "the_share_is_exact": false,
+        "the_share_of_frames_at_exactly_zero": 0.131903,
+        "the_max": 154.4375,
+        "the_median": 10.125,
+        "the_min": 0.0,
+        "the_note": "A SIGNAL THRESHOLD, NOT A GRAIN FLOOR. The floor asks \"is there anything here at all\"; this asks \"is this channel reading the room\". It is a property of THIS recording, so it is measured here and not borrowed. THE MAXIMA CARRY 246 TIES AT THE THRESHOLD, so the share of frames above it is what the ties give and not the target. 246 of 1865 frames have a maximum of EXACTLY zero, so this channel is quiet only when the recorder repeats a picture.",
+        "the_crossings_at_this_threshold": 4,
+        "the_crossings_at_the_grain_floor": 29
+      }
+    },
+    "the_roving": {
+      "the_label": "roving eye",
+      "the_units": "the room-lens's own brightness: a 2.2x contrast stretch of the camera luma, clipped, with each glyph read as the LOWER edge of its band",
+      "the_floor": 15.9375,
+      "the_duty_cycle": 0.997951,
+      "the_frame_interval_ms": 406.5,
+      "the_crossings_at_the_floor": 29,
+      "the_signal_threshold": {
+        "the_rule": "the threshold at which this channel is on 90 % of its frames: the 10th percentile of its per-frame change-map maxima",
+        "the_value": 52.0625,
+        "the_convention": "nearest rank: the k-th smallest observed per-frame maximum, k = ceil((1 - duty) * n) = 49",
+        "the_rank": 49,
+        "the_value_linear_interpolation": 52.0625,
+        "the_convention_gap": 0.0,
+        "the_n_frames": 488,
+        "the_duty_cycle_above_the_value": 0.897541,
+        "the_duty_cycle_at_or_above_the_value": 0.901639,
+        "the_target_duty_cycle": 0.9,
+        "the_ties_at_the_value": 2,
+        "the_share_is_exact": false,
+        "the_share_of_frames_at_exactly_zero": 0.0,
+        "the_max": 143.4375,
+        "the_median": 142.375,
+        "the_min": 15.9375,
+        "the_note": "A SIGNAL THRESHOLD, NOT A GRAIN FLOOR. The floor asks \"is there anything here at all\"; this asks \"is this channel reading the room\". It is a property of THIS recording, so it is measured here and not borrowed. THE MAXIMA CARRY 2 TIES AT THE THRESHOLD, so the share of frames above it is what the ties give and not the target.",
+        "the_crossings_at_this_threshold": 28,
+        "the_crossings_at_the_grain_floor": 29
+      }
+    }
   },
   "the_dual_ascii": {
     "moments": [
@@ -4435,74 +4530,218 @@
     "the_readings": {
       "overlap": {
         "the_criterion": "the two crossings' intervals overlap at all",
-        "the_observed": 11,
-        "the_n_roving_crossings": 18,
-        "the_null_mean": 4.398,
-        "the_null_sd": 3.171,
-        "the_null_max": 12,
-        "the_z": 2.082,
-        "the_share_of_slides_that_match_it": 12,
+        "the_observed": 13,
+        "the_n_roving_crossings": 29,
+        "the_null_mean": 7.17,
+        "the_null_sd": 3.654,
+        "the_null_max": 17,
+        "the_z": 1.595,
+        "the_share_of_slides_that_match_it": 28,
         "the_n_slides": 241,
-        "the_p_by_the_slide": 0.0498
+        "the_p_by_the_slide": 0.1162
       },
       "half": {
         "the_criterion": "they share at least half of the SHORTER one",
-        "the_observed": 9,
-        "the_n_roving_crossings": 18,
-        "the_null_mean": 3.697,
-        "the_null_sd": 2.934,
-        "the_null_max": 10,
-        "the_z": 1.807,
-        "the_share_of_slides_that_match_it": 29,
+        "the_observed": 11,
+        "the_n_roving_crossings": 29,
+        "the_null_mean": 6.324,
+        "the_null_sd": 3.501,
+        "the_null_max": 16,
+        "the_z": 1.336,
+        "the_share_of_slides_that_match_it": 37,
         "the_n_slides": 241,
-        "the_p_by_the_slide": 0.1203
+        "the_p_by_the_slide": 0.1535
       }
     },
-    "the_fixed_crossings_total": 22,
-    "the_fixed_crossings_in_the_shared_minutes": 7,
-    "the_roving_crossings_total": 18,
+    "the_fixed_crossings_total": 29,
+    "the_fixed_crossings_in_the_shared_minutes": 8,
+    "the_roving_crossings_total": 29,
+    "the_alignment_sensitivity": [
+      {
+        "the_shift_s": 0.0,
+        "the_observed": 13,
+        "the_null_mean": 7.17,
+        "the_z": 1.595
+      },
+      {
+        "the_shift_s": 1.0,
+        "the_observed": 12,
+        "the_null_mean": 7.17,
+        "the_z": 1.322
+      },
+      {
+        "the_shift_s": 2.0,
+        "the_observed": 13,
+        "the_null_mean": 7.17,
+        "the_z": 1.595
+      },
+      {
+        "the_shift_s": 5.0,
+        "the_observed": 12,
+        "the_null_mean": 7.17,
+        "the_z": 1.322
+      },
+      {
+        "the_shift_s": 10.0,
+        "the_observed": 9,
+        "the_null_mean": 7.17,
+        "the_z": 0.501
+      },
+      {
+        "the_shift_s": 20.0,
+        "the_observed": 10,
+        "the_null_mean": 7.17,
+        "the_z": 0.774
+      }
+    ],
     "the_gaps_s": {
       "fixed": 0.75,
       "roving": 0.61
     },
-    "the_alignment_sensitivity": [
-      {
-        "the_shift_s": 0.0,
-        "the_observed": 11,
-        "the_null_mean": 4.398,
-        "the_z": 2.082
+    "the_by_threshold": {
+      "at_the_grain_floor": {
+        "the_fixed_threshold": 3.0,
+        "the_roving_threshold": 15.9375,
+        "the_fixed_crossings_total": 29,
+        "the_fixed_crossings_in_the_shared_minutes": 8,
+        "the_roving_crossings_total": 29,
+        "the_readings": {
+          "overlap": {
+            "the_criterion": "the two crossings' intervals overlap at all",
+            "the_observed": 13,
+            "the_n_roving_crossings": 29,
+            "the_null_mean": 7.17,
+            "the_null_sd": 3.654,
+            "the_null_max": 17,
+            "the_z": 1.595,
+            "the_share_of_slides_that_match_it": 28,
+            "the_n_slides": 241,
+            "the_p_by_the_slide": 0.1162
+          },
+          "half": {
+            "the_criterion": "they share at least half of the SHORTER one",
+            "the_observed": 11,
+            "the_n_roving_crossings": 29,
+            "the_null_mean": 6.324,
+            "the_null_sd": 3.501,
+            "the_null_max": 16,
+            "the_z": 1.336,
+            "the_share_of_slides_that_match_it": 37,
+            "the_n_slides": 241,
+            "the_p_by_the_slide": 0.1535
+          }
+        },
+        "the_alignment_sensitivity": [
+          {
+            "the_shift_s": 0.0,
+            "the_observed": 13,
+            "the_null_mean": 7.17,
+            "the_z": 1.595
+          },
+          {
+            "the_shift_s": 1.0,
+            "the_observed": 12,
+            "the_null_mean": 7.17,
+            "the_z": 1.322
+          },
+          {
+            "the_shift_s": 2.0,
+            "the_observed": 13,
+            "the_null_mean": 7.17,
+            "the_z": 1.595
+          },
+          {
+            "the_shift_s": 5.0,
+            "the_observed": 12,
+            "the_null_mean": 7.17,
+            "the_z": 1.322
+          },
+          {
+            "the_shift_s": 10.0,
+            "the_observed": 9,
+            "the_null_mean": 7.17,
+            "the_z": 0.501
+          },
+          {
+            "the_shift_s": 20.0,
+            "the_observed": 10,
+            "the_null_mean": 7.17,
+            "the_z": 0.774
+          }
+        ]
       },
-      {
-        "the_shift_s": 1.0,
-        "the_observed": 11,
-        "the_null_mean": 4.398,
-        "the_z": 2.082
-      },
-      {
-        "the_shift_s": 2.0,
-        "the_observed": 12,
-        "the_null_mean": 4.398,
-        "the_z": 2.397
-      },
-      {
-        "the_shift_s": 5.0,
-        "the_observed": 11,
-        "the_null_mean": 4.398,
-        "the_z": 2.082
-      },
-      {
-        "the_shift_s": 10.0,
-        "the_observed": 8,
-        "the_null_mean": 4.398,
-        "the_z": 1.136
-      },
-      {
-        "the_shift_s": 20.0,
-        "the_observed": 8,
-        "the_null_mean": 4.398,
-        "the_z": 1.136
+      "at_the_signal_threshold": {
+        "the_fixed_threshold": 0.0,
+        "the_roving_threshold": 52.0625,
+        "the_fixed_crossings_total": 4,
+        "the_fixed_crossings_in_the_shared_minutes": 3,
+        "the_roving_crossings_total": 28,
+        "the_readings": {
+          "overlap": {
+            "the_criterion": "the two crossings' intervals overlap at all",
+            "the_observed": 20,
+            "the_n_roving_crossings": 28,
+            "the_null_mean": 13.465,
+            "the_null_sd": 4.46,
+            "the_null_max": 22,
+            "the_z": 1.465,
+            "the_share_of_slides_that_match_it": 24,
+            "the_n_slides": 241,
+            "the_p_by_the_slide": 0.0996
+          },
+          "half": {
+            "the_criterion": "they share at least half of the SHORTER one",
+            "the_observed": 20,
+            "the_n_roving_crossings": 28,
+            "the_null_mean": 12.992,
+            "the_null_sd": 4.441,
+            "the_null_max": 22,
+            "the_z": 1.578,
+            "the_share_of_slides_that_match_it": 19,
+            "the_n_slides": 241,
+            "the_p_by_the_slide": 0.0788
+          }
+        },
+        "the_alignment_sensitivity": [
+          {
+            "the_shift_s": 0.0,
+            "the_observed": 20,
+            "the_null_mean": 13.465,
+            "the_z": 1.465
+          },
+          {
+            "the_shift_s": 1.0,
+            "the_observed": 20,
+            "the_null_mean": 13.465,
+            "the_z": 1.465
+          },
+          {
+            "the_shift_s": 2.0,
+            "the_observed": 20,
+            "the_null_mean": 13.465,
+            "the_z": 1.465
+          },
+          {
+            "the_shift_s": 5.0,
+            "the_observed": 18,
+            "the_null_mean": 13.465,
+            "the_z": 1.017
+          },
+          {
+            "the_shift_s": 10.0,
+            "the_observed": 19,
+            "the_null_mean": 13.465,
+            "the_z": 1.241
+          },
+          {
+            "the_shift_s": 20.0,
+            "the_observed": 18,
+            "the_null_mean": 13.465,
+            "the_z": 1.017
+          }
+        ]
       }
-    ],
+    },
     "the_note": "the looser criterion is the one that was asked for first and the tighter one is reported beside it, not instead of it. The result is a statement that the two views find the same crossings WITHIN A FEW SECONDS; it is not a measurement of the alignment, because it survives a misalignment of several seconds."
   },
   "the_alignment_sensitivity": [
@@ -4616,6 +4855,8 @@
     "map": "mean",
     "window_s": 0.5,
     "slice_s": 1.0,
-    "moments": 4
+    "moments": 4,
+    "the_moments_are_matched": false,
+    "the_moment_rule": "evenly spread across the overlap"
   }
 }

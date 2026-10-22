@@ -1,6 +1,6 @@
 {
   "tool": "dual_ingest -- the room-lens",
-  "generated_utc": "2026-10-22T17:13:22.456Z",
+  "generated_utc": "2026-10-22T17:48:46.474Z",
   "label": "the phone room-lens (the roving eye)",
   "source_session": "/home/proart/dual-capture/dual-3.json",
   "the_source_kind": "room-lens-session",
@@ -310,12 +310,13 @@
     "the_target_duty_cycle": 0.9,
     "the_ties_at_the_value": 2,
     "the_share_is_exact": false,
+    "the_share_of_frames_at_exactly_zero": 0.0,
     "the_max": 143.4375,
     "the_median": 142.375,
     "the_min": 15.9375,
     "the_note": "A SIGNAL THRESHOLD, NOT A GRAIN FLOOR. The floor asks \"is there anything here at all\"; this asks \"is this channel reading the room\". It is a property of THIS recording, so it is measured here and not borrowed. THE MAXIMA CARRY 2 TIES AT THE THRESHOLD, so the share of frames above it is what the ties give and not the target.",
-    "the_crossings_at_this_threshold": 16,
-    "the_crossings_at_the_own_floor": 18
+    "the_crossings_at_this_threshold": 28,
+    "the_crossings_at_the_own_floor": 29
   },
   "the_pose": {
     "the_note": "the device orientation attached to every frame",

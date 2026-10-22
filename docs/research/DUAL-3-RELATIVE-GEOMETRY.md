@@ -20,12 +20,14 @@
 
 | | at the grain floor | at the signal threshold |
 |---|---|---|
-| the fixed view's crossings | 22 (7 in the shared minutes) | 4 (3 in the shared minutes) |
-| the roving view's crossings | **0** | **2** |
-| the shared crossing, z against the slide null | — (no crossings to share) | **−0.32** (p 0.867) |
-| the same, on the tighter criterion | — | **−0.02** (p 0.768) |
+| the fixed view's crossings | 29 (8 in the shared minutes) | 4 (3 in the shared minutes) |
+| the roving view's crossings | **0** | **6** |
+| the shared crossing, z against the slide null | — (no crossings to share) | **+1.32** (p 0.208) |
+| the same, on the tighter criterion | — | **+1.61** (p 0.112) |
 
-**So the threshold rescues the roving channel from having no crossings at all, and the coincidence is still at chance.** One shared crossing out of two, against a slide null that produces 1.21 on average. The z is negative.
+**So the threshold rescues the roving channel from having no crossings at all, and the coincidence is suggestive and not significant.** Five shared crossings out of six, against a slide null that produces 3.30 on average. The z is +1.32, and the tighter criterion gives +1.61 with p 0.112.
+
+**THE DETECTOR'S DURATION RULE CHANGED UNDER THESE RENDERS, AND THE VERDICT MOVED WITH IT.** The corpus's crossing detector's minimum duration used to be **5 frames** — 0.083 s at 60 fps and 2.5 s at 2 fps — so the two frame rates were counting different events and the corpus's crossings-per-minute was a mixture of two quantities. It is now a **time**: `max(0.35 s, 1.5 × the session's own median frame interval)`, the same moment the chaining gap already uses. The rule was declared before the sweep that measured it, and the numbers in this file are the ones the new rule produces.
 
 **And the graded witness still cannot measure this take's own alignment.** Raw r **+0.2327** (z +1.425), log r **+0.3002** (z +1.689), and the slide null's own peak sits at **−42.1 s** (raw) with a spread of **227.3 s** — a broad region means the sweep found nothing to localise. The duet cannot align itself; only the claps can, and they are dead on this take.
 
@@ -126,14 +128,14 @@ The log reading is reported as a **second** reading and not a replacement: the r
 
 At the **grain floor** the roving view finds **no crossings at all**: the corpus detector needs a blob that holds its shape while it TRANSLATES, and a channel that changes everywhere — a hand-held camera, whose whole picture moves — has no such blob. That is a finding about the channel, not a failure of the render.
 
-At each channel's **own signal threshold** (§6) the roving view finds **2** crossings and the fixed view **4**, and the witness is then run properly:
+At each channel's **own signal threshold** (§6) the roving view finds **6** crossings and the fixed view **4**, and the witness is then run properly:
 
 | criterion | observed | null mean | null sd | z | slides that match it | p |
 |---|---|---|---|---|---|---|
-| the two intervals overlap at all | 1 of 2 | 1.21 | 0.66 | **−0.32** | 209 of 241 | 0.867 |
-| they share half of the shorter | 1 of 2 | 1.01 | 0.69 | **−0.02** | 185 of 241 | 0.768 |
+| the two intervals overlap at all | 5 of 6 | 3.303 | 1.283 | **+1.322** | 50 of 241 | 0.2075 |
+| they share half of the shorter | 5 of 6 | 2.996 | 1.244 | **+1.611** | 27 of 241 | 0.112 |
 
-**Both thresholds are reported and neither is picked.** The grain floor is the channel's own floor and the signal threshold is where the channel is reading the room; the gap between them is a finding about the channel, and not a parameter to be tuned until the answer comes out right. The verdict is the same at both: **the coincidence is at chance.**
+**Both thresholds are reported and neither is picked.** The grain floor is the channel's own floor and the signal threshold is where the channel is reading the room; the gap between them is a finding about the channel, and not a parameter to be tuned until the answer comes out right. The verdict is the same at both: **suggestive and not significant.**
 
 ---
 
@@ -149,11 +151,13 @@ The **94.938** in the earlier prose was a filed number with no tool behind it. I
 
 | channel | maps | threshold | interpolated | rank | share above | crossings at it | crossings at the floor |
 |---|---|---|---|---|---|---|---|
-| the phone's KEYFRAME channel | 102 | **94.9375** | 95.10625 | 11 of 102 | 89.2 % (90.2 % at-or-above) | **2** | **0** |
-| the phone's ASCII channel | 488 | 52.0625 | 52.0625 | 49 of 488 | 89.8 % | 16 | 18 |
-| the fixed ProArt view | 1865 | **0.0000** | 0.0000 | 187 of 1865 | 86.8 % | 4 | 22 |
+| the phone's KEYFRAME channel | 102 | **94.9375** | 95.10625 | 11 of 102 | 89.2 % (90.2 % at-or-above) | **6** | **0** |
+| the phone's ASCII channel | 488 | 52.0625 | 52.0625 | 49 of 488 | 89.8 % | 28 | 29 |
+| the fixed ProArt view | 1865 | **0.0000** | 0.0000 | 187 of 1865 | 86.8 % | 4 | 29 |
 
-**THE KEYFRAME CHANNEL IS SATURATED AT ITS OWN FLOOR AND READS AT ITS SIGNAL THRESHOLD.** At the corpus's grain floor of 3.000 it is on **100.0 %** of its frames and finds **no** crossings at all; at 94.9375 it is on 89.2 % of its frames and finds **two**. The fixed view is on 58.6 % of its frames at the same floor and finds 22 crossings.
+**THE KEYFRAME CHANNEL IS SATURATED AT ITS OWN FLOOR AND READS AT ITS SIGNAL THRESHOLD.** At the corpus's grain floor of 3.000 it is on **100.0 %** of its frames and finds **no** crossings at all; at 94.9375 it is on 89.2 % of its frames and finds **six**. The fixed view is on 58.6 % of its frames at the same floor and finds 29 crossings.
+
+**AND THE CROSSING COUNTS ARE THE CORPUS'S OWN DETECTOR'S, UNDER ITS NEW DURATION RULE.** The minimum duration used to be **5 frames** — 0.083 s at 60 fps against 2.5 s at 2 fps — so the two frame rates counted different events and the corpus's crossings-per-minute was a mixture of two quantities. It is now a **time**: `max(0.35 s, 1.5 × the session's own median frame interval)`, the corpus's own moment, which is the same expression the chaining gap already uses. **The rule was declared before the sweep that measured it**, and the counts above are the ones it produces.
 
 **THE FIXED VIEW'S THRESHOLD IS ZERO, AND THAT IS A FINDING ABOUT THE CHANNEL.** 13.2 % of the ProArt stream's change maps have a maximum of exactly zero — the recorder writes a picture only when it changes — so the threshold at which that channel is on 90 % of its frames is the threshold that reads **everything**. A channel that cannot be quiet is a channel that is saturated, and it is saturated at its own resolution. The render says this in full, next to the number.
 
@@ -171,7 +175,7 @@ The **94.938** in the earlier prose was a filed number with no tool behind it. I
 
 **NO ALIGNMENT OF ITS OWN.** The wall clock stands in, and it carries the device-to-device skew. The alignment's resolution is reported as **unmeasurable** from a sidecar with no clap times, rather than guessed.
 
-**NO VERDICT OF "THE SAME MOMENT".** The crossing witness at the signal threshold finds one shared crossing out of two, against a null that produces 1.21. The z is **−0.32**. That is chance, and it is filed as chance.
+**NO VERDICT OF "THE SAME MOMENT".** The crossing witness at the signal threshold finds five shared crossings out of six, against a null that produces 3.30. The z is **+1.32** and the tighter criterion **+1.61** with p 0.112. That is suggestive and not significant, and it is filed that way.
 
 ---
 

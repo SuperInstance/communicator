@@ -1,13 +1,26 @@
 ==============================================================================
 THE DUAL RENDER -- two cameras, two minutes, three ways
-  generated 2026-10-22T09:59:13Z
-  THE REAL DUET, the phone's CAMERA LUMA (the keyframes) against the ProArt: the two views in the SAME units, so one scale is honest.
+  generated 2026-10-22T17:49:09Z
   alignment: 0 clap pairs, offset +500538.000 ms, drift +0.0 ppm
   THE ALIGNMENT RESOLUTION: this sidecar carries NO CLAP TIMES, so the alignment's resolution cannot be measured from it -- the offset is as good as whatever produced it, and where that was the wall clock, it carries the device-to-device skew the corpus cannot measure
   THE DRIFT: the drift was read from `drift_ppm` (+0.000 ppm)
   THE SIDECAR SAYS: THE WALL CLOCK, NOT THE CLAPS. The two devices' clocks have never been compared, so this alignment carries the device-to-device skew -- the constant the corpus cannot measure -- and a drift the duet's 236 s cannot separate from a movement. zcode's clap alignment replaces this sidecar when it lands.
   overlap: +500.54 s .. +735.66 s (235.12 s of shared minutes)
 ==============================================================================
+
+THE RELATIVE GEOMETRY -- WHAT THESE PANELS CLAIM, AND WHAT THEY DO NOT
+  THE SCALE IS NOT HERE AND NONE IS GUESSED. The route for two uncalibrated views is audio-sync first and sub-frame, then a DUSt3R/MASt3R-style relative pose which is SCALE-FREE, and the metric scale from the ranging/TDOA side. Every number in this file is relative: a moment, a frame interval, a brightness against a floor. There is no distance in metres here, and none is assumed.
+  THE PANELS ARE ALIGNED IN TIME AND NOT IN SPACE. Each panel is its own viewpoint's own frame; a cell in the left panel and a cell in the right panel are NOT the same part of the room, and this render makes no attempt to make them so.
+  THE MATCHING IS BY MOMENT AND BY NOTHING ELSE. The two views are put side by side because they saw the same minute, not because they saw the same thing from the same place.
+  WHAT THE TAKE SUPPORTS about the relative geometry:
+    - the roving device's alpha (the azimuth-like tilt) over the session: 1.7 to 351.2 degrees
+    - the roving device's beta (the pitch) over the session: 5.3 to 99.0 degrees
+    - the roving device's gamma (the roll) over the session: -84.3 to 73.7 degrees
+  WHAT THE TAKE DOES NOT SUPPORT:
+    - the roving device's HEADING is null in every frame, so its azimuth is unknown and the two views' relative ROTATION cannot be solved either
+    - the roving device's POSITION was never recorded, so it cannot be placed in the room and the relative TRANSLATION is not measurable from this bundle
+  SO THE RELATIVE POSE IS NOT MEASURED HERE, AND THAT IS A PROPERTY OF THE TAKE AND NOT A CHOICE: the relative pose needs a position and a heading, and this bundle has neither. The scale has not landed, and it is not guessed.
+  THE TIME AXIS IS THE ONLY AXIS THEY SHARE: the fixed side is one frame every 499.750 ms and the roving side one every 2105.500 ms, and the offset between their clocks is +500538.000 ms (wallclock-fixed.json).
 
 THE DUAL-ASCII -- the same moments from both views
   fixed: /tmp/duet-3/fixed   roving: /tmp/duet-3/keyframes
@@ -21,8 +34,12 @@ THE DUAL-ASCII -- the same moments from both views
   the roving view: change in luma (the camera's own); its own floor 3.000; one frame every 2105.5 ms; it shows a change in 100.0 % of its frames
   A CHANNEL THAT IS ON MOST OF THE TIME CANNOT TIME A MOVEMENT: its witness marks are then close to constant, and the
   contingency table has nothing left to measure. That is what the duty cycle above is for.
+  the fixed view's SIGNAL threshold: 0.000 luma (the camera's own) -- the threshold at which this channel is on 86.8 % of its frames (nearest rank; the interpolated percentile would be 0.000). It finds 4 crossings at that threshold against 29 at its grain floor.
+  the fixed view's signal threshold is ZERO, and that is a finding about the channel and not about its sensitivity: 13.2 % of its frames have a maximum of exactly zero -- the recorder writes a picture only when it changes -- and the rest are above it, so the threshold at which this channel is on 90 % of its frames is the threshold that reads EVERYTHING. A channel that cannot be quiet is a channel that is saturated, and it is saturated at its own resolution.
+  the roving view's SIGNAL threshold: 94.938 luma (the camera's own) -- the threshold at which this channel is on 89.2 % of its frames (nearest rank; the interpolated percentile would be 95.106). It finds 6 crossings at that threshold against 0 at its grain floor.
+  THE SIGNAL THRESHOLD IS NOT THE GRAIN FLOOR. The floor asks "is there anything here at all"; the signal threshold asks "is this channel reading the room". The floor is a property of the sensor, the signal threshold a property of this recording.
   the two views sample the room at DIFFERENT rates: the roving view's interval is 4.21x the fixed view's, so the same movement covers 4.21x more of the picture per frame in the roving view
-  the two change maps are not in the same units and not in the same space: a cell on the left and a cell on the right are not the same part of the room
+  THE TWO CHANGE MAPS ARE IN THE SAME UNITS -- both are the camera's own luma, luma (the camera's own) -- so ONE scale is honest between them. They are still not in the same SPACE: a cell on the left and a cell on the right are not the same part of the room
 FIXED (fixed witness)                      |   ROVING (roving eye)                     
 
 --- t = +529.928 s fixed / +29.390 s roving   fixed 1657.5 luma  roving 57633.2 luma   (4 vs 1 frames in the window)
@@ -143,8 +160,12 @@ THE FUSED SCORE -- two staves, each channel annotating the other
   the roving view: change in luma (the camera's own); its own floor 3.000; one frame every 2105.5 ms; it shows a change in 100.0 % of its frames
   A CHANNEL THAT IS ON MOST OF THE TIME CANNOT TIME A MOVEMENT: its witness marks are then close to constant, and the
   contingency table has nothing left to measure. That is what the duty cycle above is for.
+  the fixed view's SIGNAL threshold: 0.000 luma (the camera's own) -- the threshold at which this channel is on 86.8 % of its frames (nearest rank; the interpolated percentile would be 0.000). It finds 4 crossings at that threshold against 29 at its grain floor.
+  the fixed view's signal threshold is ZERO, and that is a finding about the channel and not about its sensitivity: 13.2 % of its frames have a maximum of exactly zero -- the recorder writes a picture only when it changes -- and the rest are above it, so the threshold at which this channel is on 90 % of its frames is the threshold that reads EVERYTHING. A channel that cannot be quiet is a channel that is saturated, and it is saturated at its own resolution.
+  the roving view's SIGNAL threshold: 94.938 luma (the camera's own) -- the threshold at which this channel is on 89.2 % of its frames (nearest rank; the interpolated percentile would be 95.106). It finds 6 crossings at that threshold against 0 at its grain floor.
+  THE SIGNAL THRESHOLD IS NOT THE GRAIN FLOOR. The floor asks "is there anything here at all"; the signal threshold asks "is this channel reading the room". The floor is a property of the sensor, the signal threshold a property of this recording.
   the two views sample the room at DIFFERENT rates: the roving view's interval is 4.21x the fixed view's, so the same movement covers 4.21x more of the picture per frame in the roving view
-  the two change maps are not in the same units and not in the same space: a cell on the left and a cell on the right are not the same part of the room
+  THE TWO CHANGE MAPS ARE IN THE SAME UNITS -- both are the camera's own luma, luma (the camera's own) -- so ONE scale is honest between them. They are still not in the same SPACE: a cell on the left and a cell on the right are not the same part of the room
 
   time      |         |         |         |         |         |         |         |         |         |         |         |       
   FIXED         ....                           .                                                            .     .               
@@ -307,7 +328,23 @@ THE GRADED WITNESS -- do the two channels rise and fall together?
   nothing about the skew.  The claps are not optional.
 
 THE CROSSING WITNESS -- do the two views find the same CROSSINGS?
-  the roving view found no crossings at all. The corpus detector needs a blob that holds its shape while it TRANSLATES, and a channel that changes everywhere -- a hand-held camera, whose whole picture moves -- has no such blob. That is a finding about the channel, not a failure of the render.
+  a crossing is the corpus's own: a CONNECTED BLOB of change that holds its shape while it
+  TRANSLATES.  The grain does not translate, a highlight is one frame, a fidget does not travel,
+  and neither does a shake -- so this is the question each view can actually answer.
+  the fixed view found 29 crossings, 8 of them inside the shared minutes; the roving view found 0
+  the detector's gap is the corpus's own, counted in FRAMES (the fixed 0.75 s, the roving 3.16 s): a flat 0.35 s is 21 frames at 60 fps and 0.70 at 2,
+  and at 0.70 frames no blob ever chains, so the corpus's own walk-by study found NOTHING in its 2 fps sessions.
+
+  AT THE GRAIN FLOOR: the roving view found no crossings at all. The corpus detector needs a blob that holds its shape while it TRANSLATES, and a channel that changes everywhere -- a hand-held camera, whose whole picture moves -- has no such blob. That is a finding about the channel, not a failure of the render.
+
+  THE SAME WITNESS AT EACH CHANNEL'S OWN SIGNAL THRESHOLD -- the threshold at which that
+  channel is on 90 % of its frames, which is not the grain floor and is not chosen after the fact:
+    the fixed view at 0.000 finds 4 crossings (3 in the shared minutes); the roving view at 94.938 finds 6.
+    the two crossings' intervals overlap at      5 of   6        3.30      1.28  +1.32     50 of  241   0.207
+    they share at least half of the SHORTER      5 of   6        3.00      1.24  +1.61     27 of  241   0.112
+    BOTH THRESHOLDS ARE REPORTED AND NEITHER IS PICKED: the grain floor is the channel's own floor, and
+    the signal threshold is where the channel is reading the room. The gap between them is a finding
+    about the channel and not a parameter to be tuned until the answer comes out right.
 
 THE ALIGNMENT'S SENSITIVITY -- the witness count with the alignment moved on purpose
   the wall clock is NOT the claps: the two devices' clocks have never been compared, so the
@@ -340,8 +377,12 @@ THE DIFFERENCED VIEW -- the fixed frame, the roving frame, and the difference
   the roving view: change in luma (the camera's own); its own floor 3.000; one frame every 2105.5 ms; it shows a change in 100.0 % of its frames
   A CHANNEL THAT IS ON MOST OF THE TIME CANNOT TIME A MOVEMENT: its witness marks are then close to constant, and the
   contingency table has nothing left to measure. That is what the duty cycle above is for.
+  the fixed view's SIGNAL threshold: 0.000 luma (the camera's own) -- the threshold at which this channel is on 86.8 % of its frames (nearest rank; the interpolated percentile would be 0.000). It finds 4 crossings at that threshold against 29 at its grain floor.
+  the fixed view's signal threshold is ZERO, and that is a finding about the channel and not about its sensitivity: 13.2 % of its frames have a maximum of exactly zero -- the recorder writes a picture only when it changes -- and the rest are above it, so the threshold at which this channel is on 90 % of its frames is the threshold that reads EVERYTHING. A channel that cannot be quiet is a channel that is saturated, and it is saturated at its own resolution.
+  the roving view's SIGNAL threshold: 94.938 luma (the camera's own) -- the threshold at which this channel is on 89.2 % of its frames (nearest rank; the interpolated percentile would be 95.106). It finds 6 crossings at that threshold against 0 at its grain floor.
+  THE SIGNAL THRESHOLD IS NOT THE GRAIN FLOOR. The floor asks "is there anything here at all"; the signal threshold asks "is this channel reading the room". The floor is a property of the sensor, the signal threshold a property of this recording.
   the two views sample the room at DIFFERENT rates: the roving view's interval is 4.21x the fixed view's, so the same movement covers 4.21x more of the picture per frame in the roving view
-  the two change maps are not in the same units and not in the same space: a cell on the left and a cell on the right are not the same part of the room
+  THE TWO CHANGE MAPS ARE IN THE SAME UNITS -- both are the camera's own luma, luma (the camera's own) -- so ONE scale is honest between them. They are still not in the same SPACE: a cell on the left and a cell on the right are not the same part of the room
 
 FIXED CHANGE (fixed witness)               |   DIFFERENCE (witness mask)               
 ROVING CHANGE (roving eye)                 |   

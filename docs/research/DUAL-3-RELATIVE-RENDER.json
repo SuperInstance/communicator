@@ -1,5 +1,5 @@
 {
-  "generated_utc": "2026-10-22T17:19:29Z",
+  "generated_utc": "2026-10-22T17:49:21Z",
   "the_pair_is_synthetic": false,
   "the_pair": {
     "fixed": {
@@ -93,7 +93,7 @@
       "the_floor": 3.0,
       "the_duty_cycle": 0.586059,
       "the_frame_interval_ms": 499.75,
-      "the_crossings_at_the_floor": 22,
+      "the_crossings_at_the_floor": 29,
       "the_signal_threshold": {
         "the_rule": "the threshold at which this channel is on 90 % of its frames: the 10th percentile of its per-frame change-map maxima",
         "the_value": 0.0,
@@ -113,7 +113,7 @@
         "the_min": 0.0,
         "the_note": "A SIGNAL THRESHOLD, NOT A GRAIN FLOOR. The floor asks \"is there anything here at all\"; this asks \"is this channel reading the room\". It is a property of THIS recording, so it is measured here and not borrowed. THE MAXIMA CARRY 246 TIES AT THE THRESHOLD, so the share of frames above it is what the ties give and not the target. 246 of 1865 frames have a maximum of EXACTLY zero, so this channel is quiet only when the recorder repeats a picture.",
         "the_crossings_at_this_threshold": 4,
-        "the_crossings_at_the_grain_floor": 22
+        "the_crossings_at_the_grain_floor": 29
       }
     },
     "the_roving": {
@@ -141,7 +141,7 @@
         "the_median": 168.9375,
         "the_min": 40.4375,
         "the_note": "A SIGNAL THRESHOLD, NOT A GRAIN FLOOR. The floor asks \"is there anything here at all\"; this asks \"is this channel reading the room\". It is a property of THIS recording, so it is measured here and not borrowed.",
-        "the_crossings_at_this_threshold": 2,
+        "the_crossings_at_this_threshold": 6,
         "the_crossings_at_the_grain_floor": 0
       }
     }
@@ -3472,8 +3472,8 @@
   "the_crossing_witness": {
     "the_shift_max_s": 120.0,
     "the_readings": {},
-    "the_fixed_crossings_total": 22,
-    "the_fixed_crossings_in_the_shared_minutes": 7,
+    "the_fixed_crossings_total": 29,
+    "the_fixed_crossings_in_the_shared_minutes": 8,
     "the_roving_crossings_total": 0,
     "the_alignment_sensitivity": [],
     "the_gaps_s": {
@@ -3484,8 +3484,8 @@
       "at_the_grain_floor": {
         "the_fixed_threshold": 3.0,
         "the_roving_threshold": 3.0,
-        "the_fixed_crossings_total": 22,
-        "the_fixed_crossings_in_the_shared_minutes": 7,
+        "the_fixed_crossings_total": 29,
+        "the_fixed_crossings_in_the_shared_minutes": 8,
         "the_roving_crossings_total": 0,
         "the_note": "the roving view found no crossings at all. The corpus detector needs a blob that holds its shape while it TRANSLATES, and a channel that changes everywhere -- a hand-held camera, whose whole picture moves -- has no such blob. That is a finding about the channel, not a failure of the render."
       },
@@ -3494,69 +3494,69 @@
         "the_roving_threshold": 94.9375,
         "the_fixed_crossings_total": 4,
         "the_fixed_crossings_in_the_shared_minutes": 3,
-        "the_roving_crossings_total": 2,
+        "the_roving_crossings_total": 6,
         "the_readings": {
           "overlap": {
             "the_criterion": "the two crossings' intervals overlap at all",
-            "the_observed": 1,
-            "the_n_roving_crossings": 2,
-            "the_null_mean": 1.207,
-            "the_null_sd": 0.656,
-            "the_null_max": 2,
-            "the_z": -0.316,
-            "the_share_of_slides_that_match_it": 209,
+            "the_observed": 5,
+            "the_n_roving_crossings": 6,
+            "the_null_mean": 3.303,
+            "the_null_sd": 1.283,
+            "the_null_max": 6,
+            "the_z": 1.322,
+            "the_share_of_slides_that_match_it": 50,
             "the_n_slides": 241,
-            "the_p_by_the_slide": 0.8672
+            "the_p_by_the_slide": 0.2075
           },
           "half": {
             "the_criterion": "they share at least half of the SHORTER one",
-            "the_observed": 1,
-            "the_n_roving_crossings": 2,
-            "the_null_mean": 1.012,
-            "the_null_sd": 0.691,
-            "the_null_max": 2,
-            "the_z": -0.018,
-            "the_share_of_slides_that_match_it": 185,
+            "the_observed": 5,
+            "the_n_roving_crossings": 6,
+            "the_null_mean": 2.996,
+            "the_null_sd": 1.244,
+            "the_null_max": 6,
+            "the_z": 1.611,
+            "the_share_of_slides_that_match_it": 27,
             "the_n_slides": 241,
-            "the_p_by_the_slide": 0.7676
+            "the_p_by_the_slide": 0.112
           }
         },
         "the_alignment_sensitivity": [
           {
             "the_shift_s": 0.0,
-            "the_observed": 1,
-            "the_null_mean": 1.207,
-            "the_z": -0.316
+            "the_observed": 5,
+            "the_null_mean": 3.303,
+            "the_z": 1.322
           },
           {
             "the_shift_s": 1.0,
-            "the_observed": 1,
-            "the_null_mean": 1.207,
-            "the_z": -0.316
+            "the_observed": 5,
+            "the_null_mean": 3.303,
+            "the_z": 1.322
           },
           {
             "the_shift_s": 2.0,
-            "the_observed": 1,
-            "the_null_mean": 1.207,
-            "the_z": -0.316
+            "the_observed": 5,
+            "the_null_mean": 3.303,
+            "the_z": 1.322
           },
           {
             "the_shift_s": 5.0,
-            "the_observed": 1,
-            "the_null_mean": 1.207,
-            "the_z": -0.316
+            "the_observed": 5,
+            "the_null_mean": 3.303,
+            "the_z": 1.322
           },
           {
             "the_shift_s": 10.0,
-            "the_observed": 1,
-            "the_null_mean": 1.207,
-            "the_z": -0.316
+            "the_observed": 5,
+            "the_null_mean": 3.303,
+            "the_z": 1.322
           },
           {
             "the_shift_s": 20.0,
-            "the_observed": 0,
-            "the_null_mean": 1.207,
-            "the_z": -1.841
+            "the_observed": 4,
+            "the_null_mean": 3.303,
+            "the_z": 0.543
           }
         ]
       }

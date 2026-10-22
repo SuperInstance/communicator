@@ -1,5 +1,5 @@
 {
-  "generated_utc": "2026-10-22T09:59:16Z",
+  "generated_utc": "2026-10-22T17:49:10Z",
   "the_pair_is_synthetic": false,
   "the_pair": {
     "fixed": {
@@ -50,6 +50,101 @@
     ],
     "renderable": true,
     "blockers": []
+  },
+  "the_relative_geometry": {
+    "the_scale_is_guessed": false,
+    "the_panels_are_aligned_in": "TIME, and not in space",
+    "the_fixed_frame_interval_ms": 499.75,
+    "the_roving_frame_interval_ms": 2105.5,
+    "the_offset_ms": 500538.0,
+    "the_pose": {
+      "the_note": "the device orientation attached to every frame",
+      "the_alpha_range": [
+        1.7000000000000002,
+        351.20000000000005
+      ],
+      "the_beta_range": [
+        5.300000000000001,
+        99.0
+      ],
+      "the_gamma_range": [
+        -84.30000000000001,
+        73.7
+      ],
+      "the_heading_is_null_in_every_frame": true,
+      "there_is_no_position": true,
+      "the_what_this_does_not_license": "there is NO POSITION in the pose, so the device cannot be placed in the room, and the heading is null, so its azimuth is unknown: a relative pose against another view cannot be solved from this bundle, and the SCALE certainly is not in it"
+    },
+    "the_what_the_take_supports": [
+      "the roving device's alpha (the azimuth-like tilt) over the session: 1.7 to 351.2 degrees",
+      "the roving device's beta (the pitch) over the session: 5.3 to 99.0 degrees",
+      "the roving device's gamma (the roll) over the session: -84.3 to 73.7 degrees"
+    ],
+    "the_what_the_take_does_not_support": [
+      "the roving device's HEADING is null in every frame, so its azimuth is unknown and the two views' relative ROTATION cannot be solved either",
+      "the roving device's POSITION was never recorded, so it cannot be placed in the room and the relative TRANSLATION is not measurable from this bundle"
+    ]
+  },
+  "the_channels": {
+    "the_rule": "each channel's SIGNAL threshold -- the threshold at which that channel is on 90 % of its frames -- and the crossings it finds at that threshold and at its grain floor",
+    "the_fixed": {
+      "the_label": "fixed witness",
+      "the_units": "luma (the camera's own)",
+      "the_floor": 3.0,
+      "the_duty_cycle": 0.586059,
+      "the_frame_interval_ms": 499.75,
+      "the_crossings_at_the_floor": 29,
+      "the_signal_threshold": {
+        "the_rule": "the threshold at which this channel is on 90 % of its frames: the 10th percentile of its per-frame change-map maxima",
+        "the_value": 0.0,
+        "the_convention": "nearest rank: the k-th smallest observed per-frame maximum, k = ceil((1 - duty) * n) = 187",
+        "the_rank": 187,
+        "the_value_linear_interpolation": 0.0,
+        "the_convention_gap": 0.0,
+        "the_n_frames": 1865,
+        "the_duty_cycle_above_the_value": 0.868097,
+        "the_duty_cycle_at_or_above_the_value": 1.0,
+        "the_target_duty_cycle": 0.9,
+        "the_ties_at_the_value": 246,
+        "the_share_is_exact": false,
+        "the_share_of_frames_at_exactly_zero": 0.131903,
+        "the_max": 154.4375,
+        "the_median": 10.125,
+        "the_min": 0.0,
+        "the_note": "A SIGNAL THRESHOLD, NOT A GRAIN FLOOR. The floor asks \"is there anything here at all\"; this asks \"is this channel reading the room\". It is a property of THIS recording, so it is measured here and not borrowed. THE MAXIMA CARRY 246 TIES AT THE THRESHOLD, so the share of frames above it is what the ties give and not the target. 246 of 1865 frames have a maximum of EXACTLY zero, so this channel is quiet only when the recorder repeats a picture.",
+        "the_crossings_at_this_threshold": 4,
+        "the_crossings_at_the_grain_floor": 29
+      }
+    },
+    "the_roving": {
+      "the_label": "roving eye",
+      "the_units": "luma (the camera's own)",
+      "the_floor": 3.0,
+      "the_duty_cycle": 1.0,
+      "the_frame_interval_ms": 2105.5,
+      "the_crossings_at_the_floor": 0,
+      "the_signal_threshold": {
+        "the_rule": "the threshold at which this channel is on 90 % of its frames: the 10th percentile of its per-frame change-map maxima",
+        "the_value": 94.9375,
+        "the_convention": "nearest rank: the k-th smallest observed per-frame maximum, k = ceil((1 - duty) * n) = 11",
+        "the_rank": 11,
+        "the_value_linear_interpolation": 95.10625,
+        "the_convention_gap": 0.16875,
+        "the_n_frames": 102,
+        "the_duty_cycle_above_the_value": 0.892157,
+        "the_duty_cycle_at_or_above_the_value": 0.901961,
+        "the_target_duty_cycle": 0.9,
+        "the_ties_at_the_value": 1,
+        "the_share_is_exact": true,
+        "the_share_of_frames_at_exactly_zero": 0.0,
+        "the_max": 230.0625,
+        "the_median": 168.9375,
+        "the_min": 40.4375,
+        "the_note": "A SIGNAL THRESHOLD, NOT A GRAIN FLOOR. The floor asks \"is there anything here at all\"; this asks \"is this channel reading the room\". It is a property of THIS recording, so it is measured here and not borrowed.",
+        "the_crossings_at_this_threshold": 6,
+        "the_crossings_at_the_grain_floor": 0
+      }
+    }
   },
   "the_dual_ascii": {
     "moments": [
@@ -2309,12 +2404,94 @@
   "the_crossing_witness": {
     "the_shift_max_s": 120.0,
     "the_readings": {},
-    "the_fixed_crossings_total": 22,
-    "the_fixed_crossings_in_the_shared_minutes": 7,
+    "the_fixed_crossings_total": 29,
+    "the_fixed_crossings_in_the_shared_minutes": 8,
     "the_roving_crossings_total": 0,
+    "the_alignment_sensitivity": [],
     "the_gaps_s": {
       "fixed": 0.75,
       "roving": 3.158
+    },
+    "the_by_threshold": {
+      "at_the_grain_floor": {
+        "the_fixed_threshold": 3.0,
+        "the_roving_threshold": 3.0,
+        "the_fixed_crossings_total": 29,
+        "the_fixed_crossings_in_the_shared_minutes": 8,
+        "the_roving_crossings_total": 0,
+        "the_note": "the roving view found no crossings at all. The corpus detector needs a blob that holds its shape while it TRANSLATES, and a channel that changes everywhere -- a hand-held camera, whose whole picture moves -- has no such blob. That is a finding about the channel, not a failure of the render."
+      },
+      "at_the_signal_threshold": {
+        "the_fixed_threshold": 0.0,
+        "the_roving_threshold": 94.9375,
+        "the_fixed_crossings_total": 4,
+        "the_fixed_crossings_in_the_shared_minutes": 3,
+        "the_roving_crossings_total": 6,
+        "the_readings": {
+          "overlap": {
+            "the_criterion": "the two crossings' intervals overlap at all",
+            "the_observed": 5,
+            "the_n_roving_crossings": 6,
+            "the_null_mean": 3.303,
+            "the_null_sd": 1.283,
+            "the_null_max": 6,
+            "the_z": 1.322,
+            "the_share_of_slides_that_match_it": 50,
+            "the_n_slides": 241,
+            "the_p_by_the_slide": 0.2075
+          },
+          "half": {
+            "the_criterion": "they share at least half of the SHORTER one",
+            "the_observed": 5,
+            "the_n_roving_crossings": 6,
+            "the_null_mean": 2.996,
+            "the_null_sd": 1.244,
+            "the_null_max": 6,
+            "the_z": 1.611,
+            "the_share_of_slides_that_match_it": 27,
+            "the_n_slides": 241,
+            "the_p_by_the_slide": 0.112
+          }
+        },
+        "the_alignment_sensitivity": [
+          {
+            "the_shift_s": 0.0,
+            "the_observed": 5,
+            "the_null_mean": 3.303,
+            "the_z": 1.322
+          },
+          {
+            "the_shift_s": 1.0,
+            "the_observed": 5,
+            "the_null_mean": 3.303,
+            "the_z": 1.322
+          },
+          {
+            "the_shift_s": 2.0,
+            "the_observed": 5,
+            "the_null_mean": 3.303,
+            "the_z": 1.322
+          },
+          {
+            "the_shift_s": 5.0,
+            "the_observed": 5,
+            "the_null_mean": 3.303,
+            "the_z": 1.322
+          },
+          {
+            "the_shift_s": 10.0,
+            "the_observed": 5,
+            "the_null_mean": 3.303,
+            "the_z": 1.322
+          },
+          {
+            "the_shift_s": 20.0,
+            "the_observed": 4,
+            "the_null_mean": 3.303,
+            "the_z": 0.543
+          }
+        ]
+      }
     },
     "the_note": "the roving view found no crossings at all. The corpus detector needs a blob that holds its shape while it TRANSLATES, and a channel that changes everywhere -- a hand-held camera, whose whole picture moves -- has no such blob. That is a finding about the channel, not a failure of the render."
   },
@@ -2429,6 +2606,8 @@
     "map": "mean",
     "window_s": 1.0,
     "slice_s": 2.0,
-    "moments": 4
+    "moments": 4,
+    "the_moments_are_matched": false,
+    "the_moment_rule": "evenly spread across the overlap"
   }
 }

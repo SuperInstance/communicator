@@ -11,7 +11,7 @@ measured, not a bug.** The two views' change maps are not the same quantity, the
 phone's channel is saturated, and the alignment is the wall clock rather than the
 claps. Each of those three is quantified below, and each has a specific remedy. The
 one instrument that does work — the corpus's own *crossing* detector, asked whether
-the two views find the same moments — reaches **z = +1.97, p = 0.087**, which is
+the two views find the same moments — reaches **z = +1.60, p = 0.116**, which is
 suggestive and not significant, and survives a misalignment of five seconds.
 
 ## 1. The pair, and how the clock was found
@@ -202,6 +202,36 @@ five-second misalignment is **not** a measurement of the alignment — it is a
 statement that the two views find the same crossings at the same moments, which is
 the thing two sovereign logs of the same minutes give that neither gives alone.
 
+**NOTE, 2026-10-22 — THE DURATION WAS STILL IN FRAMES, AND FIXING IT MOVED THE
+DUET'S BEST NUMBER.** The gap above was fixed to the corpus's own moment; the
+minimum **duration** was still **5 frames**, which is 0.083 s at 60 fps and 2.5 s
+at 2 fps, so the two frame rates were counting different events and the corpus's
+crossings-per-minute was a mixture of two quantities. The duration is now a time
+— `max(0.35 s, 1.5 × the session's own median frame interval)`, the same moment
+the gap uses — and the rule was declared before the sweep that measured it.
+
+Measured over the whole corpus, on the **same sessions**:
+
+| the corpus's sessions | the 5-frame duration | the duration as a time |
+|---|---|---|
+| the 92 fast ones (60 fps) | 739 crossings | **640** — the fast rate loses the flickers it used to count |
+| the 11 slow ones (2 fps) | 25 crossings | **33** — the slow rate finds the crossings it used to miss |
+
+**And the duet's own witness weakened, because the null rose with the count:**
+
+| criterion | observed | null mean | null sd | z | slides that match it | p |
+|---|---|---|---|---|---|---|
+| the intervals overlap at all | 13 of 29 | 7.17 | 3.65 | **+1.60** | 28 of 241 | 0.116 |
+| they share half of the shorter one | 11 of 29 | 6.32 | 3.50 | +1.34 | 37 of 241 | 0.154 |
+
+**THE VERDICT IS THE SAME IN WORDS AND DIFFERENT IN THE NUMBER: SUGGESTIVE AND
+NOT SIGNIFICANT.** Under the old rule the crossing coincidence reached
+z +2.08 at p 0.050 — just past the line — and under the rule the corpus
+actually uses it reaches z +1.60 at p 0.116. **A significance that a
+detector's unit bug was carrying is not a significance.** The four filed
+renders and the relative-geometry render were all re-run under the new rule,
+and their files are the ones now filed.
+
 ## 7. The phone's camera luma, and why the roving eye is always on
 
 The duet produced a surprise worth filing on its own: **the phone's channel is
@@ -229,15 +259,16 @@ ProArt's cadence, and the corpus's 3.0 luma floor — measured on 0.5 s frames �
 saturated at that interval (the keyframe channel's duty cycle is 100 % at 3.0 and
 89.2 % at its own measured floor of 94.938). **A noise floor is a property of a
 sensor AND an interval**, and the corpus's floor is a property of the corpus's
-interval. At its own floor the keyframe channel finds 2 crossings, and 2 crossings
-say nothing at all.
+interval. At its own floor the keyframe channel finds 6 crossings, and 6 crossings
+say very little at all: the witness at that threshold shares 5 of them with the
+fixed view against a null of 3.30, which is z +1.32 and p 0.208.
 
 ## 8. What the duet does and does not show
 
 It does not show the synergy the brief is after, in the form the brief hoped for.
 The two channels' energies correlate at +0.26 (raw), which is suggestive and not
 significant against the honest null; the binary witness test cannot be formed at
-all; and the crossing coincidence reaches z = +1.97, p = 0.087. Three things are
+all; and the crossing coincidence reaches z = +1.60, p = 0.116. Three things are
 known, measured, and are not alignment artefacts: the phone's change map is a mask
 of band flips that is on 99.8 % of the time, the two change maps are in different
 units so no single threshold means the same thing on both sides, and a roving view
@@ -292,9 +323,11 @@ footing, in the camera's luma, where the two views' change maps are the same
 quantity and the witness test becomes a test.
 
 **A witness that asks about objects, not about change.** The crossing detector is
-the right instrument and it is already in the corpus. Its gap is now counted in
-frames, which leaves the corpus's 739 fast-session crossings exactly where they
-were and lets its 2 fps sessions be seen at all.
+the right instrument and it is already in the corpus. Its gap is counted in frames
+and its **duration in seconds**, both of them the corpus's own moment, so the two
+frame rates count the same kind of event: **640 crossings in the fast sessions**
+where the old 5-frame rule counted 739 flickers, and **33 in the slow ones** where
+it counted 25 misses.
 
 **A slice length above the frame interval.** At 2.0 and 2.5 fps a 0.25 s slice
 holds at most one frame from each view, and the fused score's slices are better at

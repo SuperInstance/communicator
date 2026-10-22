@@ -1,10 +1,10 @@
 # LENS AND WALK-BY — the sensors' own self-model, and what the envelope actually carries
 
-**Built by:** `experiments/lens.py` (13/13 selftest green)
+**Built by:** `experiments/lens.py` (26/26 selftest green)
 **The lens files:** `docs/research/lens/{microphone,camera,pitch_tracker,energy_segmenter,asr}.json`
 **The study:** `docs/research/walk_by_envelope.json`
 **Device:** CPU, numpy + scipy. No GPU, no paid API, no network.
-**Corpus:** `/mnt/c/proart_capture/corpus/free_sessions` — 97 session bundles at the time of the run, 80 of them with a live video layer.
+**Corpus:** `/mnt/c/proart_capture/corpus/free_sessions` — **a live corpus**: 153 session directories at the time of the last run, 128 of them speech-bearing
 
 ---
 
@@ -24,10 +24,10 @@ noise and cannot be read.
 
 The envelope half does not hold **on this corpus**, and the reason is
 measurable rather than a matter of taste. Graded against the video's own
-radial label, the envelope's direction agrees **41.5 %** of the time on
+radial label, the envelope's direction agrees **38.5 %** of the time on
 the audio-bearing crossings, and the AUC of the envelope's slope at the
-event is **0.5064** — chance, on the nose. The cause is in the data: at
-**74.5 %** of the audio-bearing crossings the envelope's peak lands on
+event is **0.5002** — chance, on the nose. The cause is in the data: at
+**50.5 %** of the audio-bearing crossings the envelope's peak lands on
 one of the session's own speech segments. The hump at a crossing is
 **Casey's own voice**, not a footstep. The corpus contains no labelled
 toward/pass/away crossings at all, so the claim is **untested rather
@@ -329,6 +329,58 @@ and the tool change land together; **the sweep has not been re-run yet**,
 and `results/walk_by_envelope.json` still holds the counts the old rule
 produced. The next commit runs the sweep and files what moves.
 
+**NOTE, 2026-10-22 — THE RUN, AND THE NUMBERS THAT MOVED.** The sweep was
+re-run under the new rule. **The corpus grew again while it ran**, which
+is the corpus's nature and not the rule's doing, so the two effects are
+separated: first the rule's effect alone, on the same sessions, and then
+what the new arrivals added.
+
+**THE RULE'S EFFECT ALONE, ON THE SAME SESSIONS:**
+
+| | the 5-frame duration | the duration as a time | the rate |
+|---|---|---|---|
+| the 92 fast sessions (60 fps), 63.54 min | 739 crossings | **640** (−99) | 11.6309 → **10.0728** per minute |
+| the 11 slow sessions (2 fps), 14.50 min | 25 crossings | **33** (+8) | 1.7247 → **2.2766** per minute |
+
+**THE DIRECTION IS THE ONE THE DECLARATION PREDICTED: THE FAST RATE FALLS
+AND THE SLOW RATE RISES.** The fast sessions lose the flickers the old
+5-frame rule admitted, and the slow sessions find the crossings the old
+rule could not see. **AND THE TWO RATES ARE CLOSER TOGETHER: the gap
+between them was 6.7× and is now 4.4×** — which is what a shared unit
+buys. They are not equal, and they should not be: a camera that looks
+twice a second cannot see a 0.4 s walk-by.
+
+**THE CORPUS GREW UNDER THE SWEEP, AND WHAT IT ADDED IS STATED
+SEPARATELY:** 21 new fast sessions (12.37 min, 22 crossings) and 4 new
+slow ones (5.82 min, 8 crossings). **THE WHOLE SET AS IT NOW STANDS:**
+
+| the frame rate | sessions | minutes | crossings | sessions with any | the rate | the minimum duration that applied |
+|---|---|---|---|---|---|---|
+| 60 fps | 113 | 75.87 | 662 | 42 | **8.7254** per minute | **0.35 s** |
+| 2 fps | 15 | 20.17 | 41 | 7 | **2.0329** per minute | **0.7441 s** |
+
+**THE RATE IS NOW REPORTED PER FRAME RATE AND NEVER POOLED**, and each
+rate's minimum crossing duration is stated in seconds beside it, because
+the duration criterion is the session's own moment and the two rates'
+moments are different lengths. The file's own `the_summary` carries the
+grouping; a pooled rate would be a mixture of two quantities, which is
+the defect this rule was declared to remove.
+
+**THE SWEEP AS A WHOLE: 128 session entries, 703 crossings, 49 sessions
+with any** — against the 103 entries, 764 crossings and 45 sessions with
+any that the 5-frame rule produced. The crossings fell because the fast
+sessions shed their flickers, and the corpus grew by twenty-five sessions
+while it ran.
+
+**AND THE ENVELOPE'S VERDICT HOLDS UNDER THE NEW RULE.** Graded against
+the video's own radial label on the crossings with a live envelope, the
+agreement is **38.5 %** against a chance of **37.4 %**, and the AUC of the
+envelope's slope at the event is **0.5002** — chance on the nose, where
+the old run read 0.5064. The envelope's peak still lands on the session's
+own speech **50.5 %** of the time, where it was 74.5 % then. **The hump
+at a crossing is still mostly Casey's own voice; it is half of them now
+instead of three quarters.**
+
 ### 3.5 The envelope, and the bug that hid itThe envelope is the repository's own: `src/energy.py:rms_series` on a
 50 ms frame with a 10 ms hop, in dB.
 
@@ -370,38 +422,61 @@ Size growth across the 574 crossings: p10 **0.25**, median **1.12**, p90
 
 ### 3.7 The result: the envelope carries the event and not the direction
 
-On the **audio-bearing** crossings — the 94 on the **real microphone**
-whose envelope is live rather than digital silence (the synthetic rig's
-27 sessions are excluded: their envelopes are a test tone, not a room):
+On the **audio-bearing** crossings — the 283 whose envelope is live rather
+than digital silence (the synthetic rig's sessions are excluded: their
+envelopes are a test tone, not a room):
 
-| | |
-|---|---|
-| crossings with a live envelope | 94 |
-| agreeing with the video's radial label | **39 (41.5 %)** |
-| AUC of the envelope's slope at the event, TOWARD vs AWAY | **0.5064** |
-| envelope's peak lands on one of the session's own speech segments | **70 (74.5 %)** |
+| | | the 574-crossing run this was first filed on |
+|---|---|---|
+| crossings with a live envelope | **283** | 94 |
+| agreeing with the video's radial label | **109 (38.5 %)** | 39 (41.5 %) |
+| chance agreement, from the marginals | **37.4 %** | 39.2 % |
+| AUC of the envelope's slope at the event, TOWARD vs AWAY | **0.5002** | 0.5064 |
+| envelope's peak lands on one of the session's own speech segments | **143 (50.5 %)** | 70 (74.5 %) |
 
-The confusion matrix over these 94 crossings (rows = video's label, columns =
+The confusion matrix over these 283 crossings (rows = video's label, columns =
 the envelope's):
 
 |  | TOWARD | PASS | AWAY |
 |---|---|---|---|
-| **TOWARD** | 28 | 2 | 17 |
-| **PASS** | 8 | 1 | 13 |
-| **AWAY** | 15 | 0 | 10 |
+| **TOWARD** | 66 | 12 | 41 |
+| **PASS** | 33 | 7 | 28 |
+| **AWAY** | 54 | 6 | 36 |
 
-Chance agreement on this split, from the marginals, is **39.2 %**; the
-measured agreement is **41.5 %**. The AUC of the envelope's slope at the
-event is **0.5064** — chance on the nose. Across all 574 crossings the
-same computation gives chance 24.6 % against measured 24.7 %.
+Chance agreement on this split, from the marginals, is **37.4 %**; the
+measured agreement is **38.5 %**. The AUC of the envelope's slope at the
+event is **0.5002** — chance on the nose. Across all 703 crossings the
+same computation gives chance **28.4 %** against measured **27.9 %**.
 
 **Why, and it is measurable.** The envelope's peak at a crossing lands
-on one of the session's own speech segments **74.5 %** of the time.
-Across all 574 crossings it is 12.2 %, and that low number is itself
-the confound made visible: the sessions whose audio is digital silence
-cannot produce a speech-aligned peak, so the all-sessions figure
-understates it. On the sessions where the microphone was actually
-alive, the hump at a crossing is **Casey's own voice**.
+on one of the session's own speech segments **50.5 %** of the time. Across
+all 703 crossings it is much lower, and that low number is itself the
+confound made visible: the sessions whose audio is digital silence cannot
+produce a speech-aligned peak, so the all-sessions figure understates it.
+On the sessions where the microphone was actually alive, the hump at a
+crossing is **Casey's own voice** — and it is half of them now, where it
+was three quarters when this was first filed.
+
+**EVERY NUMBER IN THIS SECTION NOW HAS A TOOL BEHIND IT, AND IT WAS NOT
+TRUE BEFORE.** The agreement, the confusion matrix, the chance agreement
+and the AUC were written by hand into this report and there was no code
+anywhere that produced them. `lens.envelope_grading(rows)` is the tool
+now, and it **reproduces every one of the old figures exactly** on the
+exact file the old figures were filed against — 94 live crossings, 39
+agreeing, 41.5 % against a chance of 39.2 %, an AUC of **0.5064**, 70 on
+speech, and 24.7 % against 24.6 % over all 574. **The old numbers were
+right; they were just unchecked.**
+
+**AND THE AUC'S DEFINITION HAD TO BE RECOVERED, WHICH IS HOW THE GAP WAS
+FOUND.** The filed 0.5064 is the **trapezoidal** AUC — one if a positive
+outscores a negative, half if they tie — of the envelope's slope at the
+event, labelled by the video's own radial label, on the crossings whose
+video label says TOWARD or AWAY. The Mann-Whitney rule gives 0.6045 on the
+same data, and the difference is not small. **The first version of this
+tool was silently computed by a DIFFERENT FUNCTION**: there is an older
+`_auc(pos, neg)` further down this file, and a function of the same name
+defined later shadows the newer one. The new one is called `_auc_of` now,
+and **a name that is taken twice is a number nobody checked.**
 
 This is the same confound the pause study found and named in the other
 direction — there, 47 free sessions carry no interior pause because the
