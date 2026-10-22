@@ -272,9 +272,64 @@ sessions carry signal. The arrival-null study's corpus therefore grew from
 holds and the resolution headline turns out to be a median and not a worst
 case.
 
-### 3.5 The envelope, and the bug that hid it
+**NOTE, 2026-10-22 — THE DURATION RULE IS DECLARED BEFORE THE RUN, AND IT
+WILL MOVE FILED NUMBERS.**
 
-The envelope is the repository's own: `src/energy.py:rms_series` on a
+The sweep-refresh note above named two of the detector's parameters being
+in the wrong unit: the gap was in seconds where the corpus had moved to a
+different interval, and the duration is still **5 FRAMES** where the
+corpus's window is in seconds. The gap is fixed. The duration is not.
+
+**THE RULE: A CROSSING MUST BE PRESENT FOR AT LEAST ONE MOMENT, AND A
+MOMENT IS A TIME.** The detector's criteria must be in the same units as
+the quantity they measure, and the corpus's window is in seconds. So the
+duration floor is:
+
+> the minimum duration = **max(0.35 s, 1.5 × the session's own median
+> frame interval)**
+
+**WHICH IS THE CORPUS'S OWN "A MOMENT", AND IT IS THE SAME EXPRESSION THE
+CHAINING GAP ALREADY USES.** The gap is how long a blob may be **MISSING**
+and the duration is how long it must be **PRESENT**; they are one moment,
+one constant and one frame rate. **The `5 FRAMES` criterion is retired.**
+
+**WHAT IT DOES TO THE TWO FRAME RATES**, stated before the run and not
+derived from it:
+
+| | the old floor | the new floor | what the floor means |
+|---|---|---|---|
+| 60 fps | 5 frames = 0.083 s | **0.35 s = 22 frames** | a blob present for a moment |
+| 2 fps | 5 frames = 2.5 s | **0.75 s = 3 frames** | a blob present for a moment |
+
+**AND THE OLD RULE NEVER EXCLUDED A HAND AT 60 fps ANYWAY.** Its stated
+purpose is to be "a crossing rather than a single moment of a person's
+hand", and a hand flick lasts longer than 83 ms — so at 60 fps the old
+floor admitted hand flicks. At 2 fps the old floor excluded the real
+crossings too, because a person who walks through in one second is two
+frames and the old rule wanted five. **Neither rate was counting
+walk-bys**, and the corpus's crossings-per-minute was a mixture of two
+quantities.
+
+**THE BARS, STATED BEFORE THE RUN.**
+
+1. **The rule is stated before the run, and the run consults no truth.**
+   The detector counts blobs; there is no label anywhere in it.
+2. **Every number that moves is filed with the number it replaces**, and
+   nothing is quietly restated: the crossings, the sessions with any, the
+   envelope's AUC and the rate are all restated with the new counts.
+3. **The crossings-per-minute is reported per frame rate and never
+   pooled**, and each rate's minimum crossing duration is stated in
+   seconds beside it.
+4. **Nothing else in the detector changes**: the same threshold (the
+   corpus's own floor of 3.0 luma), the same blob rule, the same travel
+   floor of 3 columns, and the same chaining gap.
+
+**AND THE FILED NUMBERS ARE STALE UNTIL THE NEXT COMMITMENT.** This note
+and the tool change land together; **the sweep has not been re-run yet**,
+and `results/walk_by_envelope.json` still holds the counts the old rule
+produced. The next commit runs the sweep and files what moves.
+
+### 3.5 The envelope, and the bug that hid itThe envelope is the repository's own: `src/energy.py:rms_series` on a
 50 ms frame with a 10 ms hop, in dB.
 
 The first run returned a null envelope for **every single crossing**. The

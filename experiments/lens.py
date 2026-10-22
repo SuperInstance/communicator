@@ -113,9 +113,32 @@ CHANGE_NOISE_FLOOR = 3.0
 #: than a highlight on a face.
 BLOB_MIN_CELLS = 4
 
-#: ... and it has to survive this many frames to be a crossing rather
-#: than a single moment of a person's hand.
+#: A blob has to survive at least this many FRAMES to be a crossing
+#: rather than a single moment of a person's hand.
+#:
+#: **RETIRED, 2026-10-22, AND THE REPLACEMENT IS A TIME.**  The frame
+#: count is the detector's last criterion in the wrong unit: five frames
+#: is 0.083 s at 60 fps and 2.5 s at 2 fps, so the corpus's
+#: crossings-per-minute was a mixture of two different quantities.  The
+#: replacement is `BLOB_MIN_SECONDS` below, and it is the same expression
+#: the chaining gap already uses.
 BLOB_MIN_FRAMES = 5
+
+#: THE CORPUS'S OWN "A MOMENT", IN SECONDS.  **THE DETECTOR'S CRITERIA
+#: MUST BE IN THE SAME UNITS AS THE QUANTITY THEY MEASURE, AND THE
+#: CORPUS'S WINDOW IS IN SECONDS.**
+#:
+#: The chaining GAP is how long a blob may be MISSING and still be the
+#: same object; the DURATION is how long it must be PRESENT.  They are
+#: the same moment, so they are the same expression: `max(0.35 s, 1.5 x
+#: the session's own median frame interval)`.  At 60 fps that is 0.35 s,
+#: and at 2 fps it is 0.75 s.
+BLOB_MIN_SECONDS = 0.35
+
+#: ... and the frame-aware factor that turns the moment into the
+#: session's own.  It is the gap rule's own factor, so the gap and the
+#: duration cannot drift apart.
+MOMENT_FRAMES = 1.5
 
 #: The blob's centroid has to move at least this far (in grid columns)
 #: across its life for the event to be a crossing and not a fidget.
@@ -277,17 +300,29 @@ def find_crossings(maps, threshold=CHANGE_NOISE_FLOOR, max_gap_s=None,
     **739** in the fast ones -- the same number, so no filed result
     moves -- and **25** in the slow ones.  The invisible became visible
     and nothing that was already known changed.
+
+    **AND THE DURATION MUST BE A TIME, FOR THE SAME REASON.**  The
+    minimum duration used to be **5 FRAMES**, which is 0.083 s at 60 fps
+    and 2.5 s at 2 fps -- so the two frame rates were counting different
+    events and the corpus's crossings-per-minute was a mixture of two
+    quantities.  The duration is now `max(BLOB_MIN_SECONDS, 1.5 x the
+    session's own median frame interval)`: **the same moment the gap
+    uses**, because the gap is how long a blob may be missing and the
+    duration is how long it must be present.  At 60 fps that is 0.35 s
+    and at 2 fps it is 0.75 s.
     """
     n = len(maps)
     if offsets is None:
         offsets = np.arange(n) / 60.0
+    _gaps = np.diff(offsets)
+    _iv = float(np.median(_gaps)) if _gaps.size else 0.0
+    # THE DURATION IS THE SESSION'S OWN MOMENT, in seconds.
+    min_duration_s = max(BLOB_MIN_SECONDS, MOMENT_FRAMES * _iv)
     if max_gap_s is None:
         # THE GAP IS COUNTED IN FRAMES, not in seconds.  A blob may be
         # missing for a moment and still be the same object, but "a
         # moment" is longer when the camera only looks twice a second.
-        _gaps = np.diff(offsets)
-        _iv = float(np.median(_gaps)) if _gaps.size else 0.0
-        max_gap_s = max(0.35, 1.5 * _iv)
+        max_gap_s = max(BLOB_MIN_SECONDS, MOMENT_FRAMES * _iv)
 
     # pass 1: the blob's position and size, frame by frame
     tracks = []          # (frame, cx, cy, area)
@@ -332,9 +367,15 @@ def find_crossings(maps, threshold=CHANGE_NOISE_FLOOR, max_gap_s=None,
 
     out = []
     for ev in events:
-        if len(ev) < BLOB_MIN_FRAMES:
+        # THE DURATION IS THE SESSION'S OWN MOMENT, IN SECONDS.  The old
+        # criterion was 5 FRAMES, which is 0.083 s at 60 fps and 2.5 s at
+        # 2 fps -- so the two frame rates counted different events and the
+        # corpus's crossings-per-minute was a mixture of two quantities.
+        if len(ev) < 2:
             continue
         ts = np.array([float(offsets[r[0]]) for r in ev])
+        if float(ts[-1] - ts[0]) < min_duration_s:
+            continue
         xs = np.array([r[1] for r in ev])
         ys = np.array([r[2] for r in ev])
         areas = np.array([r[3] for r in ev])
@@ -1420,12 +1461,23 @@ def selftest() -> int:
        shape2 and shape2["direction_from_envelope"] == "TOWARD",
        str(shape2["direction_from_envelope"] if shape2 else None))
 
-    # 5. the crossings: a synthetic change map
-    maps = np.zeros((40, 24, 40), dtype=np.float32)
-    for k in range(10, 20):             # a block moving RIGHT
-        maps[k, 10:14, 20 + k:24 + k] = 5.0
-    ev = find_crossings(maps, threshold=1.0,
-                        offsets=np.arange(40) / 60.0)
+    # 5. the crossings: a synthetic change map.  THE DURATION IS A TIME,
+    #    so the fixture has to LAST a moment: a block that survives 25
+    #    frames at 60 fps spans 0.40 s, and 0.40 s >= 0.35 s.  The block
+    #    travels 3 columns over its life, because the detector's own
+    #    travel floor is 3 columns and a blob that leaves the 40-wide
+    #    grid is not a blob.
+    def _blob(n_frames: int, interval_s: float, travel_cols: int = 3,
+              n_maps: int = 40):
+        mm = np.zeros((n_maps, 24, 40), dtype=np.float32)
+        for j in range(n_frames):
+            k = 8 + j
+            col = 18 + (j * travel_cols) // max(1, n_frames - 1)
+            mm[k, 10:14, col:col + 4] = 5.0
+        return find_crossings(mm, threshold=1.0,
+                              offsets=np.arange(n_maps) * interval_s)
+
+    ev = _blob(25, 1.0 / 60.0)
     ck("lens: a sustained change is a crossing", len(ev) == 1, str(len(ev)))
     if ev:
         ck("lens: the crossing has a direction", ev[0]["direction"] in
@@ -1439,6 +1491,30 @@ def selftest() -> int:
     ck("lens: a three-event flicker is not a crossing",
        len(find_crossings(maps2, threshold=1.0,
                           offsets=np.arange(40) / 60.0)) == 0)
+
+    # 6b. THE DURATION RULE, ASSERTED ON THE RULE AND NOT ON A DIRECTION.
+    #      The same blob, at two frame rates, and the verdict follows from
+    #      the session's own moment rather than from a frame count.
+    # five frames at 60 fps is 0.067 s -- shorter than a moment
+    ck("lens: five frames at 60 fps is NOT a crossing",
+       len(_blob(5, 1.0 / 60.0)) == 0,
+       str(len(_blob(5, 1.0 / 60.0))))
+    # the SAME five frames at 2 fps spans 2.0 s -- more than a moment
+    ck("lens: the same five frames at 2 fps IS a crossing",
+       len(_blob(5, 0.5)) == 1,
+       str(len(_blob(5, 0.5))))
+    # three frames at 2 fps spans 1.0 s, and 1.0 s >= max(0.35, 0.75)
+    ck("lens: three frames at 2 fps IS a crossing",
+       len(_blob(3, 0.5)) == 1,
+       str(len(_blob(3, 0.5))))
+    # and three frames at 60 fps spans 0.033 s, so it is not one
+    ck("lens: three frames at 60 fps is NOT a crossing",
+       len(_blob(3, 1.0 / 60.0)) == 0,
+       str(len(_blob(3, 1.0 / 60.0))))
+    # twenty-one frames at 60 fps spans 0.333 s, and 0.333 s < 0.35 s
+    ck("lens: twenty-one frames at 60 fps is NOT a crossing",
+       len(_blob(21, 1.0 / 60.0)) == 0,
+       str(len(_blob(21, 1.0 / 60.0))))
 
     # 7. the lens files have the shape
     lens = lens_energy_segmenter()
