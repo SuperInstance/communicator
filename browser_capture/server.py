@@ -65,6 +65,8 @@ ENDPOINTS:
     GET  /          -> free_record.html, the FREE RECORD front door (no-store,
                        so a refresh always gets latest)
     GET  /plan      -> index.html, the condition-plan page (no-store)
+    GET  /lens      -> the room-lens phone page, served from the sibling
+                       checkout (the phone reaches the bench over LAN)
     GET  /evolve    -> evolve.html, THE LAB: the stable shell (capture +
                        probe engine + safety rails) whose probes hot-swap
                        without reloads
@@ -1535,6 +1537,20 @@ class Handler(BaseHTTPRequestHandler):
             except OSError as exc:
                 self._json(500, {"ok": False,
                                  "error": f"free_record.html: {exc}"})
+                return
+            self._send(200, page, "text/html; charset=utf-8")
+        elif route == "/lens":
+            # the sibling checkout lives at projects/room-lens -- two
+            # levels above this file (server.py -> browser_capture ->
+            # communicator -> projects)
+            lp = Path(__file__).resolve().parent.parent.parent \
+                / "room-lens" / "index.html"
+            try:
+                page = lp.read_bytes()
+            except OSError:
+                self._json(503, {"ok": False,
+                                 "error": "room-lens checkout not present "
+                                          "beside browser_capture"})
                 return
             self._send(200, page, "text/html; charset=utf-8")
         elif route in ("/plan", "/index.html"):

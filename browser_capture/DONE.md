@@ -1078,3 +1078,12 @@ The corpus had banked nothing since 07:26 local. Found, fixed, proven:
 
 The pair analysis (clap sync, offset+drift, TDOA track) is staged and
 waits on the phone upload.
+
+## The /lens route: room-lens served live from the bench (2026-10-22)
+
+`GET /lens` serves `../room-lens/index.html` from disk per request (the
+evolve pattern: every push to the room-lens checkout is live on reload).
+This is the deploy path for the audio fix Casey's acceptance watches:
+the phone opens `http://<bench-LAN-IP>:8765/lens`. The audio-defect
+story -- cause from source, fix, self-test numbers (audioParts 2 with a
+rirMeasure mid-walk) -- is `room-lens/docs/AUDIO-FIX-REPORT.md`.
