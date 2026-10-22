@@ -1052,3 +1052,29 @@ and mutating `payload.meta` after `buildPayload` touches nothing (the
 blob is serialised inside -- the wake record now rides the seg). Also
 learned, kept as design truth: the buffer ends quiet BY DESIGN -- the
 first prompt syllable belongs to the segment, not the buffer.
+
+## DUAL-CAPTURE liveness check (2026-10-22T02:15Z, per BRIEF-DUAL-CAPTURE.md)
+
+The corpus had banked nothing since 07:26 local. Found, fixed, proven:
+
+- **Ghosts**: my own E2E headless Chromes (fake devices from the
+  OVER/wake runs) were squatting the camera/mic hours after their runs;
+  killed by profile-path sweep (the lesson is now standing practice:
+  kill by `user-data-dir` under Temp, never by image name).
+- **A lying health number**: `/api/status` reported `heartbeat_age_s: 0`
+  for a page 7 hours dead -- `time.mktime` read the UTC `received_at`
+  as local (AKDT), making every age negative and clamped to zero.
+  Fixed with `calendar.timegm`; the honest age after the fix was
+  26,541 s. A wrong liveness number is a silent-audio-class failure for
+  the API; this one is now measured correctly.
+- **Witness revived**: a real headful Chrome at `/evolve` on the
+  Windows desktop, REAL devices, AUTO armed. Status: ARMED ->
+  RECORDING, deaf:false, mic "Microphone Array (Realtek(R) Audio)",
+  cam "ASUS FHD webcam".
+- **Proven by a fresh banked session** (`free_sessions/1792635819`,
+  wall 02:18:37 -> 02:23:37Z): 300.1 s rotation segment, 14,404,096
+  samples @ 48 kHz, 96.7% nonzero, audio_silent=false. The chain --
+  page -> POST /free -> disk -> measured health -- is whole.
+
+The pair analysis (clap sync, offset+drift, TDOA track) is staged and
+waits on the phone upload.
