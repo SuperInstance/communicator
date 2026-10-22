@@ -204,6 +204,11 @@ DIAG_PATH = Path(__file__).resolve().parent / "diag.log"
 # The LIVE MONITOR's thumbnail: the capture page POSTs a small JPEG of
 # the 160x96 luma canvas once a second; only the LATEST is kept, in
 # memory -- it is a window, not a record.
+# the two-way chirp cue (TAKE-2): the latest phone chirp beacon, kept
+# for the witness shell's 500 ms /cue poll -- BeepBeep's trigger
+CUE_LOCK = threading.Lock()
+CUE_LATEST = {"at": None, "seq": 0}
+
 THUMB_LOCK = threading.Lock()
 THUMB = {"data": None, "ts": None}
 THUMB_MAX = 262144
@@ -323,6 +328,30 @@ def _mark_shipped(line: str) -> None:
             LIAISON_PENDING.write_text("".join(kept))
 
 
+def _heartbeat_watchdog() -> None:
+    """The witness page's heartbeat, watched: stale > 120 s fires a
+    PAGE_GONE alert once (outbox + console); a fresh heartbeat after a
+    gap fires PAGE_BACK. The 2026-10-21 outage -- page gone 3 h, nothing
+    alerted -- is the failure this closes."""
+    gone = False
+    while True:
+        time.sleep(30)
+        hb = _last_page_heartbeat()
+        stale = (not hb.get("present")) or hb.get("age_s", 1e9) > 120
+        if stale and not gone:
+            gone = True
+            print("[liaison][ALERT] PAGE_GONE: no page heartbeat for "
+                  f"{hb.get('age_s', 'n/a')} s", flush=True)
+            liaison_event({"class": "alert", "kind": "PAGE_GONE",
+                           "detail": "no capture-page heartbeat; the "
+                                     "witness ear is down"})
+        elif not stale and gone:
+            gone = False
+            liaison_event({"class": "page_back",
+                           "detail": "capture page heartbeat resumed"})
+            print("[liaison] PAGE_BACK: heartbeat resumed", flush=True)
+
+
 def _liaison_shipper(q) -> None:
     """Ships outbox lines to the Oracle rendezvous; failures stay in the
     pending file and retry every 5 minutes and on every new event."""
@@ -382,7 +411,8 @@ def _last_page_heartbeat() -> dict:
 LIAISON_FORWARD_KINDS = {"BOOT", "DEAF_ON", "DEAF_OFF", "DEVICE_FAILURE",
                          "SEGMENT_CLOSE", "MIC_SWITCH", "CAM_SWITCH",
                          "GC_DRY_RUN", "PIN_SET", "PIN_CLEARED",
-                         "LENS_UPDATED", "WAKE_FIRED", "WAKE_SAVE_FAILED"}
+                         "LENS_UPDATED", "WAKE_FIRED", "WAKE_SAVE_FAILED",
+                         "PHONE_CHIRP", "CHIRP_ANSWER"}
 
 
 # -- the NPY format, by hand (numpy is not stdlib) --------------------------
@@ -1139,6 +1169,12 @@ class Handler(BaseHTTPRequestHandler):
         with DIAG_LOCK:
             with DIAG_PATH.open("a", encoding="utf-8") as f:
                 f.write(json.dumps(line) + "\n")
+        if evt.get("kind") == "PHONE_CHIRP":
+            with CUE_LOCK:
+                CUE_LATEST["at"] = line["received_at"]
+                CUE_LATEST["seq"] = CUE_LATEST["seq"] + 1
+                CUE_LATEST.update({k: evt.get(k) for k in
+                                   ("phone", "sweep", "gain")})
         # page events of liaison interest ride the outbox too
         if evt.get("kind") in LIAISON_FORWARD_KINDS:
             liaison_event({"class": "page_" + str(evt.get("kind")).lower(),
@@ -1614,6 +1650,12 @@ class Handler(BaseHTTPRequestHandler):
             self._api_inbox_get()
         elif route == "/api/gc-report":
             self._api_gc_report()
+        elif route == "/cue":
+            with CUE_LOCK:
+                cue = dict(CUE_LATEST)
+            cue["now"] = time.strftime("%Y-%m-%dT%H:%M:%S", time.gmtime()) + \
+                f".{int((time.time() % 1) * 1000):03d}Z"
+            self._json(200, {"ok": True, **cue})
         elif route == "/api/lenses":
             self._api_lenses_get()
         else:
@@ -1724,6 +1766,7 @@ def main(argv=None) -> int:
     t = threading.Thread(target=_liaison_shipper,
                          args=(LIAISON_SHIP_Q,), daemon=True)
     t.start()
+    threading.Thread(target=_heartbeat_watchdog, daemon=True).start()
     liaison_event({"class": "liaison_started", "port": a.port,
                    "out": str(out), "pid": os.getpid()})
     print(f"browser_capture serving on http://{a.host}:{a.port}")

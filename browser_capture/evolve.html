@@ -1485,6 +1485,63 @@ async function tryBoot() {
   return true;
 }
 
+/* ============================================================================
+   TAKE-2 TWO-WAY CHIRP (BRIEF-DUAL-CAPTURE-TAKE2.md): when the phone
+   fires its sweep it beacons PHONE_CHIRP; this shell polls /cue every
+   500 ms and ANSWERS with the bench-speaker chirp (railed, level from
+   the speakers lens file -- set by the chirp-cal bench measurement).
+   Both devices record both chirps; the round trip cancels clock offset
+   and yields inter-device range (BeepBeep-style).
+   ========================================================================== */
+let chirpSeqSeen = -1;
+setInterval(async () => {
+  try {
+    const r = await fetch("/cue");
+    const c = await r.json();
+    if (c.at && c.seq > chirpSeqSeen) {
+      chirpSeqSeen = c.seq;
+      // answer only if FRESH (< 2.5 s old) -- a stale cue is history
+      const age = (Date.parse(c.now.replace(" ", "T")) -
+                   Date.parse(c.at)) / 1000;
+      if (age < 0 || age > 2.5) return;
+      playAnswerChirp();
+    }
+  } catch (e) { /* the cue is best-effort; the phone chirp still banks */ }
+}, 500);
+
+async function playAnswerChirp() {
+  // a 0.6 s linear chirp 1-4 kHz (the speakers' honest band), level
+  // from the lens registry, railed at 0.3 regardless
+  let gain = 0.15;
+  try {
+    const r = await fetch("/api/lenses");
+    const j = await r.json();
+    const g = j.lenses && j.lenses.speakers &&
+              j.lenses.speakers.normals &&
+              j.lenses.speakers.normals.chirp_gain;
+    if (typeof g === "number") gain = g;
+  } catch (e) {}
+  gain = Math.min(gain, RAILS.gainMax);
+  const dur = 0.6, sr = audioCtx.sampleRate;
+  const n = Math.round(dur * sr);
+  const buf = audioCtx.createBuffer(1, n, sr);
+  const ch = buf.getChannelData(0);
+  for (let i = 0; i < n; i++) {
+    const t = i / n;
+    const f = 1000 + 3000 * t;
+    ch[i] = Math.sin(2 * Math.PI * (1000 + 3000 * t / 2) * t * dur) *
+      Math.min(1, Math.min(i, n - 1 - i) / (0.01 * sr));
+  }
+  const g = audioCtx.createGain();
+  g.gain.value = gain;
+  g.connect(audioCtx.destination);
+  const srcN = audioCtx.createBufferSource();
+  srcN.buffer = buf;
+  srcN.connect(g);
+  srcN.start();
+  diagSend("CHIRP_ANSWER", { gain: gain, dur_s: dur, cue_seq: chirpSeqSeen });
+}
+
 let loopStarted = false;
 async function boot() {
   if (!loopStarted) { loopStarted = true; drawLoop(); }

@@ -1102,3 +1102,36 @@ state + the bank, per house rule. FOLLOW-UP for the incident class:
 the liaison already alerts on silent AUDIO; it should also alert when
 the PAGE disappears (heartbeat stale > 60s while out-of-session hours)
 -- queued.
+
+## TAKE-2 lanes (BRIEF-DUAL-CAPTURE-TAKE2.md), all four landed
+
+1. **The 20.000 s transient is CLOSED — my own detector's chunk-seam
+   artifact**: the transient scan processed energy in 4000-frame chunks
+   at a 5 ms hop = exactly 20.000 s; the seam frames spiked the
+   frame-diff, uniformly, forever. (Round numbers are artifacts until
+   proven innocent — proven guilty.) The raw-waveform click detector
+   finds the REAL transients: 4 irregular events (07:52:00, 07:54:19,
+   07:57:34, 08:01:18Z) at 8-12x floor — room sounds, no periodicity.
+2. **ESS recompute with per-band SNR + r2: ALL BANDS GRADE DISCARD.**
+   Band SNR is ~0 dB (-1.6 to +0.1) with r2 0.81-0.85: after
+   band-limiting, the deconvolved peak does not rise above the phone's
+   own noise. The previously reported T20s (2.6/3.8 s) are
+   noise-dominated and WITHDRAWN as measurements — the room's decay
+   remains unmeasured at the phone. Slopes only, distrust graded, as
+   briefed.
+3. **The heartbeat watchdog is live and already blooded**: PAGE_GONE
+   fired at 16:56:58Z when the (second) witness outage was found — the
+   3-hour-unalerted class is closed. Alert rides the outbox; PAGE_BACK
+   on recovery.
+4. **The TAKE-2 build**: phone beacons PHONE_CHIRP on every sweep
+   (room-lens); the witness shell polls /cue at 500 ms and answers with
+   a railed 1-4 kHz chirp (level from the speakers lens file); the
+   chirp-cal bench probe played the level ladder ON THE LIVE PAGE and
+   measured: **g0.05=5.4 dB, g0.12=4.9 dB, g0.25=6.3 dB — flat across a
+   5x level range, i.e. the detector saw ambient, not the chirp** (the
+   pass ran during an active segment: speech_now, motion 0.49). No
+   chirp_gain was set — the level-from-data rule refuses a bad
+   measurement; the probe re-runs hourly and sets it in a quiet room.
+   The flat ladder also says the bench speakers at current rails are too
+   quiet for two-way chirp ranging across a room — validating the
+   brief's ordering: loud claps are the primary sync, two-way behind it.

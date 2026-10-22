@@ -26,6 +26,15 @@
       "run_at_start": true,
       "audible": false,
       "description": "BRIEF-WAKE-AND-TURN mechanism 3: the OVER transmit word as a conjunction (terminal position + falling terminal prosody + >=1.5s trailing silence), template-matched against operator calibration; measures ambient false-fires per hour"
+    },
+    {
+      "name": "chirp-cal",
+      "file": "chirp-cal.js",
+      "version": 1,
+      "interval_s": 3600,
+      "run_at_start": true,
+      "audible": false,
+      "description": "TAKE-2 bench pass: plays the answer chirp at a railed level ladder, measures loop-SNR at the witness mic, writes chirp_gain into the speakers lens file (level from data, not constants)"
     }
   ]
 }
