@@ -108,6 +108,18 @@ rather than fitting a drift from one point. Three or more claps fit
 both, and the output prints the **residual** (the largest error of the
 fit) so a bad alignment is visible rather than hidden.
 
+**A SPURIOUS CLAP DOES NOT TILT THE ALIGNMENT.** One door slammed in
+the wrong place must not shift the whole minute. The tool finds the
+outliers by **search** — every pair of claps proposes a line and the
+line with the most claves on it wins — drops them, refits on the
+inliers, and **names the ones it dropped** in the output. The search
+is necessary because least squares *spreads* a bad clap's error over
+the good ones: with four claps and one 500 ms outlier, every clap ends
+up over the residual bar and nothing looks like an outlier. The
+threshold alone would not have found it. This is the same lesson the
+arrival-null study learned in the audio, where one bad arrival took the
+implied speed of sound from 343 to 306 m/s.
+
 ## 3. What zcode hands over: THE ROVING STREAM
 
 The phone's recording is ingested into the corpus's own bundle format
@@ -207,7 +219,7 @@ filtered for being dull.
 **Measured, on the tool's own fixture.** A synthetic pair — a person
 walking a known path, seen by a fixed witness and a roving eye with a
 known viewpoint transform — so the renders can be *graded* instead of
-admired. The selftest is **37 of 37** and it grades:
+admired. The selftest is **42 of 42** and it grades:
 
 - the fixed view's change centroid lands within **0.10** of the truth's
   position on both axes;
@@ -221,6 +233,9 @@ admired. The selftest is **37 of 37** and it grades:
 - the alignment: a 500 ppm drift is recovered as 500 ppm, one clap
   gives an offset and no drift, and the sidecar's clock is re-based
   onto each stream's first frame;
+- **a spurious clap**: with four claps and one 500 ms outlier the
+  offset still comes back as **−250.000 ms**, the outlier is **dropped
+  and named**, and four good claps drop nothing;
 - the witness count adds up, its chance baseline is the product of the
   two rates, and its excess is signed.
 
@@ -249,7 +264,7 @@ That is the control's whole job: **the measure does not manufacture
 agreement.** A witness count that found an excess between a real room
 and a meaningless video would be a bug in the measure, not a finding.
 
-**The selftests are 37 of 37** for the renderer and **16 of 16** for the
+**The selftests are 42 of 42** for the renderer and **16 of 16** for the
 ingest.
 
 **NOT measured, and not to be filed as if it were:**

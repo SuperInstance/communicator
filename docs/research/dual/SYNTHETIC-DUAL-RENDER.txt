@@ -6,7 +6,7 @@ THE DUAL RENDER -- THE SYNTHETIC PAIR, NOT THE REAL ONE
   synthetic-pair/the_truth.json.  It is here so the
   renders can be GRADED before the real pair lands --
   the real capture has NOT been made.
-  generated 2026-10-22T03:08:06Z
+  generated 2026-10-22T03:21:03Z
   NO ALIGNMENT: none (the two streams are ASSUMED to start together) -- the two views are aligned only to the frame
   overlap: +0.00 s .. +5.95 s (5.95 s of shared minutes)
 ==============================================================================

@@ -260,6 +260,12 @@ class Alignment:
         self.source = source
         self.n_claps = int(n_claps)
         self.residual_ms = residual_ms
+        #: the per-clap residuals, and which claps the fit used -- so a
+        #: reader can see WHICH clap was wrong, not just that something
+        #: was
+        self.the_clap_residuals_ms: list[float] = []
+        self.the_claps_used: list[int] = []
+        self.the_claps_dropped: list[int] = []
 
     @property
     def assumed(self) -> bool:
@@ -279,10 +285,24 @@ class Alignment:
         if self.assumed:
             return ('NO ALIGNMENT: ' + self.source +
                     ' -- the two views are aligned only to the frame')
-        return (f'alignment: {self.n_claps} clap pairs, offset '
-                f'{self.offset_ms:+.3f} ms, drift {self.drift_ppm:+.1f} ppm'
-                + (f', residual {self.residual_ms:.3f} ms'
-                   if self.residual_ms is not None else ''))
+        out = (f'alignment: {self.n_claps} clap pairs, offset '
+               f'{self.offset_ms:+.3f} ms, drift {self.drift_ppm:+.1f} ppm'
+               + (f', residual {self.residual_ms:.3f} ms'
+                  if self.residual_ms is not None else ''))
+        if self.the_clap_residuals_ms:
+            per = ', '.join(f'{v:.1f}' for v in self.the_clap_residuals_ms)
+            out += f'  [the per-clap residuals in ms: {per}]'
+        if self.the_claps_dropped:
+            out += (f'  [claps {self.the_claps_dropped} were DROPPED as '
+                    f'outliers]')
+        return out
+
+
+#: A clap whose residual from the fit is worse than this is not a clap
+#: the fit should believe.  The arrival-null study met the same thing
+#: in the audio: one bad arrival tilted the implied speed of sound from
+#: 343 to 306 m/s, and the fix was a robust refit on the inliers.
+CLAP_ROBUST_MS = 40.0
 
 
 def load_alignment(path: Path | None, fixed: Stream | None = None,
@@ -338,13 +358,59 @@ def load_alignment(path: Path | None, fixed: Stream | None = None,
         # The drift is the slope's DEPARTURE FROM ONE, so it is
         # (a - 1) in parts per million.  Writing a * 1e6 instead would
         # report a 1 ppm drift as 1e6 ppm and turn the slope into 2.
+        #
+        # A SPURIOUS CLAP.  One door slammed must not tilt the whole
+        # alignment -- the arrival-null study met exactly this in the
+        # audio, where one bad arrival took the implied speed of sound
+        # from 343 to 306 m/s.  The threshold cannot be applied to the
+        # ordinary fit, because least squares SPREADS a bad clap's
+        # error over the good ones: with four claps and one 500 ms
+        # outlier, every clap ends up over the bar and nothing looks
+        # like an outlier.  So the outliers are FOUND by search --
+        # every pair of claps proposes a line, and the line with the
+        # most claps on it wins, ties going to the line with the
+        # smallest total error.
         a, b = np.polyfit(r, f, 1)
-        pred = a * r + b
-        resid = float(np.max(np.abs(pred - f)))
-        return Alignment(offset_ms=b, drift_ppm=(a - 1.0) * 1e6,
-                         source=f'{path.name} (fitted from the clap pairs; '
-                                f'{clock_note})',
-                         n_claps=n, residual_ms=resid)
+        resid = np.abs(a * r + b - f)
+        used = list(range(n))
+        dropped: list[int] = []
+        if n >= 3 and float(resid.max()) > CLAP_ROBUST_MS:
+            best = None
+            for i in range(n):
+                for j in range(i + 1, n):
+                    if r[j] == r[i]:
+                        continue
+                    ca = (f[j] - f[i]) / (r[j] - r[i])
+                    cb = f[i] - ca * r[i]
+                    cres = np.abs(ca * r + cb - f)
+                    key = (int((cres <= CLAP_ROBUST_MS).sum()),
+                           -float(cres.sum()))
+                    if best is None or key > best[0]:
+                        best = (key, ca, cb, cres)
+            if best is not None:
+                inliers = [i for i in range(n)
+                           if best[3][i] <= CLAP_ROBUST_MS]
+                if len(inliers) >= 2 and len(inliers) < n:
+                    a, b = np.polyfit(r[inliers], f[inliers], 1)
+                    resid = np.abs(a * r + b - f)
+                    used = inliers
+                    dropped = [i for i in range(n) if i not in inliers]
+        out = Alignment(offset_ms=b, drift_ppm=(a - 1.0) * 1e6,
+                        source=f'{path.name} (fitted from the clap pairs; '
+                               f'{clock_note})',
+                        n_claps=n, residual_ms=float(resid.max()))
+        out.the_clap_residuals_ms = [round(float(v), 3) for v in resid]
+        out.the_claps_used = used
+        out.the_claps_dropped = dropped
+        if dropped:
+            out.source += (f'; {len(dropped)} clap(s) DROPPED as outliers '
+                           f'(residual over {CLAP_ROBUST_MS:.0f} ms) and the '
+                           f'fit was made on the {len(used)} inliers')
+        if float(resid.max()) > CLAP_ROBUST_MS:
+            out.source += ('; THE ALIGNMENT IS SUSPECT: a residual of '
+                           f'{float(resid.max()):.3f} ms is over the '
+                           f'{CLAP_ROBUST_MS:.0f} ms bar')
+        return out
     if 'offset_ms' in data or 'drift_ppm' in data:
         return Alignment(offset_ms=float(data.get('offset_ms', 0.0)),
                          drift_ppm=float(data.get('drift_ppm', 0.0)),
@@ -1039,6 +1105,42 @@ def selftest() -> int:
            abs(al5.fixed_time_for_roving(al5.roving_time_for_fixed(1.0))
                - 1.0) < 1e-9,
            f"{al5.fixed_time_for_roving(al5.roving_time_for_fixed(1.0)):.9f}")
+
+        # 3c. A SPURIOUS CLAP.  One door slammed must not tilt the whole
+        #     alignment -- the arrival-null study met exactly this in
+        #     the audio, where one bad arrival took the implied speed
+        #     of sound from 343 to 306 m/s.
+        r_ms = [1000.0, 4000.0, 7000.0, 10000.0]
+        f_ms = [v - delta_ms for v in r_ms]
+        f_ms_clean = list(f_ms)
+        f_ms[2] += 500.0          # the third clap is a door, not a clap
+        spur = tmp / 'spurious.json'
+        spur.write_text(json.dumps({'claps': {
+            'fixed_ms': [v + base_f for v in f_ms],
+            'roving_ms': [v + base_r for v in r_ms]}}))
+        al6 = load_alignment(spur, fixed, roving)
+        ck('align: one spurious clap does not tilt the offset',
+           abs(al6.offset_ms + delta_ms) < 1.0,
+           f'offset {al6.offset_ms:+.3f} ms (expected {-delta_ms:+.3f})')
+        ck('align: the spurious clap is DROPPED and named',
+           al6.the_claps_dropped == [2] and al6.the_claps_used == [0, 1, 3],
+           f'dropped {al6.the_claps_dropped}, used {al6.the_claps_used}')
+        ck('align: the output says the alignment was suspect',
+           'SUSPECT' in al6.source or 'DROPPED' in al6.source)
+        ck('align: the per-clap residuals are reported',
+           len(al6.the_clap_residuals_ms) == 4 and
+           max(al6.the_clap_residuals_ms) > CLAP_ROBUST_MS,
+           str(al6.the_clap_residuals_ms))
+        # and with all four claps good, nothing is dropped
+        clean = tmp / 'clean.json'
+        clean.write_text(json.dumps({'claps': {
+            'fixed_ms': [v + base_f for v in f_ms_clean],
+            'roving_ms': [v + base_r for v in r_ms]}}))
+        al7 = load_alignment(clean, fixed, roving)
+        ck('align: four good claps drop nothing',
+           al7.the_claps_dropped == [] and
+           abs(al7.offset_ms + delta_ms) < 1e-6,
+           f'dropped {al7.the_claps_dropped}, offset {al7.offset_ms:+.6f}')
 
     with tempfile.TemporaryDirectory() as td:
         tmp = Path(td)

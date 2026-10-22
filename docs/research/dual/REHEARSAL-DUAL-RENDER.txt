@@ -1,14 +1,14 @@
 ==============================================================================
 THE DUAL RENDER -- two cameras, two minutes, three ways
-  generated 2026-10-22T03:02:47Z
-  NEGATIVE CONTROL, NOT THE REAL PAIR: the fixed side is a REAL corpus session (1792553329) and the roving side is a SYNTHETIC phone recording of MEANINGLESS content. The two streams have nothing to do with each other, so the excess over chance is expected to be ZERO, and the injected -175.000 ms offset is expected to come back exactly. The real dual capture has NOT been made.
-  alignment: 3 clap pairs, offset -175.000 ms, drift +0.0 ppm, residual 0.000 ms
+  generated 2026-10-22T03:20:38Z
+  NEGATIVE CONTROL, NOT THE REAL PAIR
+  alignment: 3 clap pairs, offset -175.000 ms, drift +0.0 ppm, residual 0.000 ms  [the per-clap residuals in ms: 0.0, 0.0, 0.0]
   overlap: +0.00 s .. +17.08 s (17.08 s of shared minutes)
 ==============================================================================
 
 THE DUAL-ASCII -- the same moments from both views
   fixed: /mnt/c/proart_capture/corpus/free_sessions/1792553329   roving: /tmp/rehearsal3/roving
-  alignment: 3 clap pairs, offset -175.000 ms, drift +0.0 ppm, residual 0.000 ms
+  alignment: 3 clap pairs, offset -175.000 ms, drift +0.0 ppm, residual 0.000 ms  [the per-clap residuals in ms: 0.0, 0.0, 0.0]
   the panels are aligned in TIME and NOT in space: the two cameras see the room from different places
   mode: change   scale: shared-auto   window statistic: mean   window: +/-0.25 s
 FIXED (fixed witness)                      |   ROVING (roving eye)                     
@@ -67,7 +67,7 @@ FIXED (fixed witness)                      |   ROVING (roving eye)
 
 THE FUSED SCORE -- two staves, each channel annotating the other
   fixed: /mnt/c/proart_capture/corpus/free_sessions/1792553329   roving: /tmp/rehearsal3/roving
-  alignment: 3 clap pairs, offset -175.000 ms, drift +0.0 ppm, residual 0.000 ms
+  alignment: 3 clap pairs, offset -175.000 ms, drift +0.0 ppm, residual 0.000 ms  [the per-clap residuals in ms: 0.0, 0.0, 0.0]
   68 slices of 0.25 s from +0.00 s; the energy scale is shared, maximum 2495.7 luma (the mean change over the slice)
   marks:  = both moved   > only this one   < only the other   . neither
   a mark is decided by the STRONGEST frame in the slice, so a thing that moved for one frame still counts
@@ -169,7 +169,7 @@ THE WITNESS COUNT -- what the two views say together that neither says alone
 
 THE DIFFERENCED VIEW -- the fixed frame, the roving frame, and the difference
   fixed: /mnt/c/proart_capture/corpus/free_sessions/1792553329   roving: /tmp/rehearsal3/roving
-  alignment: 3 clap pairs, offset -175.000 ms, drift +0.0 ppm, residual 0.000 ms
+  alignment: 3 clap pairs, offset -175.000 ms, drift +0.0 ppm, residual 0.000 ms  [the per-clap residuals in ms: 0.0, 0.0, 0.0]
   t = +12.812 s fixed / +12.987 s roving   window +/-0.25 s   scale: shared-auto   window statistic: mean
   the fixed frame moved in 0 cells; the roving frame saw movement in 66 cells
 
