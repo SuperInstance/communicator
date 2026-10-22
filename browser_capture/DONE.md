@@ -1087,3 +1087,18 @@ This is the deploy path for the audio fix Casey's acceptance watches:
 the phone opens `http://<bench-LAN-IP>:8765/lens`. The audio-defect
 story -- cause from source, fix, self-test numbers (audioParts 2 with a
 rirMeasure mid-walk) -- is `room-lens/docs/AUDIO-FIX-REPORT.md`.
+
+## Witness outage 2026-10-22 ~04:37Z-07:51Z: what was wrong
+
+The witness Chrome window was simply GONE (closed or crashed -- no
+chrome process held the page; heartbeat went stale at ~04:37Z, ~3.2 h
+before the 07:50Z check). Not a server fault: the liaison was up, the
+last-heartbeat page state read stale-but-armed. Cost: one phone-only
+take (23:47 local) the ProArt never heard. Relaunched the same page
+(/evolve, same profile so device picks persist) at 07:51Z: AUTO armed,
+Realtek mic + ASUS cam live, deaf:false, and the first segment BANKED
+(free_sessions/1792655768) within ~5 min. Liveness reported from page
+state + the bank, per house rule. FOLLOW-UP for the incident class:
+the liaison already alerts on silent AUDIO; it should also alert when
+the PAGE disappears (heartbeat stale > 60s while out-of-session hours)
+-- queued.
