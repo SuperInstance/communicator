@@ -1,5 +1,5 @@
 {
-  "generated_utc": "2026-10-22T08:59:47Z",
+  "generated_utc": "2026-10-22T09:12:48Z",
   "the_pair_is_synthetic": false,
   "the_pair": {
     "fixed": {
@@ -2311,8 +2311,8 @@
     "the_fixed_crossings_in_the_shared_minutes": 7,
     "the_roving_crossings_total": 0,
     "the_gaps_s": {
-      "fixed": 0.999,
-      "roving": 4.211
+      "fixed": 0.75,
+      "roving": 3.158
     },
     "the_note": "the roving view found no crossings at all. The corpus detector needs a blob that holds its shape while it TRANSLATES, and a channel that changes everywhere -- a hand-held camera, whose whole picture moves -- has no such blob. That is a finding about the channel, not a failure of the render."
   },

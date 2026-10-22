@@ -1,5 +1,5 @@
 {
-  "generated_utc": "2026-10-22T08:59:44Z",
+  "generated_utc": "2026-10-22T09:12:44Z",
   "the_pair_is_synthetic": false,
   "the_pair": {
     "fixed": {
@@ -4433,72 +4433,72 @@
     "the_readings": {
       "overlap": {
         "the_criterion": "the two crossings' intervals overlap at all",
-        "the_observed": 10,
-        "the_n_roving_crossings": 17,
-        "the_null_mean": 4.228,
-        "the_null_sd": 2.928,
-        "the_null_max": 11,
-        "the_z": 1.971,
-        "the_share_of_slides_that_match_it": 21,
+        "the_observed": 11,
+        "the_n_roving_crossings": 18,
+        "the_null_mean": 4.398,
+        "the_null_sd": 3.171,
+        "the_null_max": 12,
+        "the_z": 2.082,
+        "the_share_of_slides_that_match_it": 12,
         "the_n_slides": 241,
-        "the_p_by_the_slide": 0.0871
+        "the_p_by_the_slide": 0.0498
       },
       "half": {
         "the_criterion": "they share at least half of the SHORTER one",
-        "the_observed": 8,
-        "the_n_roving_crossings": 17,
-        "the_null_mean": 3.544,
-        "the_null_sd": 2.687,
+        "the_observed": 9,
+        "the_n_roving_crossings": 18,
+        "the_null_mean": 3.697,
+        "the_null_sd": 2.934,
         "the_null_max": 10,
-        "the_z": 1.659,
-        "the_share_of_slides_that_match_it": 36,
+        "the_z": 1.807,
+        "the_share_of_slides_that_match_it": 29,
         "the_n_slides": 241,
-        "the_p_by_the_slide": 0.1494
+        "the_p_by_the_slide": 0.1203
       }
     },
     "the_fixed_crossings_total": 22,
     "the_fixed_crossings_in_the_shared_minutes": 7,
-    "the_roving_crossings_total": 17,
+    "the_roving_crossings_total": 18,
     "the_gaps_s": {
-      "fixed": 0.999,
-      "roving": 0.813
+      "fixed": 0.75,
+      "roving": 0.61
     },
     "the_alignment_sensitivity": [
       {
         "the_shift_s": 0.0,
-        "the_observed": 10,
-        "the_null_mean": 4.228,
-        "the_z": 1.971
+        "the_observed": 11,
+        "the_null_mean": 4.398,
+        "the_z": 2.082
       },
       {
         "the_shift_s": 1.0,
-        "the_observed": 10,
-        "the_null_mean": 4.228,
-        "the_z": 1.971
+        "the_observed": 11,
+        "the_null_mean": 4.398,
+        "the_z": 2.082
       },
       {
         "the_shift_s": 2.0,
-        "the_observed": 11,
-        "the_null_mean": 4.228,
-        "the_z": 2.313
+        "the_observed": 12,
+        "the_null_mean": 4.398,
+        "the_z": 2.397
       },
       {
         "the_shift_s": 5.0,
-        "the_observed": 10,
-        "the_null_mean": 4.228,
-        "the_z": 1.971
+        "the_observed": 11,
+        "the_null_mean": 4.398,
+        "the_z": 2.082
       },
       {
         "the_shift_s": 10.0,
-        "the_observed": 7,
-        "the_null_mean": 4.228,
-        "the_z": 0.947
+        "the_observed": 8,
+        "the_null_mean": 4.398,
+        "the_z": 1.136
       },
       {
         "the_shift_s": 20.0,
-        "the_observed": 7,
-        "the_null_mean": 4.228,
-        "the_z": 0.947
+        "the_observed": 8,
+        "the_null_mean": 4.398,
+        "the_z": 1.136
       }
     ],
     "the_note": "the looser criterion is the one that was asked for first and the tighter one is reported beside it, not instead of it. The result is a statement that the two views find the same crossings WITHIN A FEW SECONDS; it is not a measurement of the alignment, because it survives a misalignment of several seconds."

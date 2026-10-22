@@ -65,11 +65,15 @@ views is not yet a finding:
    reading at all.
 
    **THE GAP IS COUNTED IN FRAMES, NOT IN SECONDS.** The corpus's
-   detector defaults to a 0.35 s gap and to offsets at 60 fps, and
-   the corpus's own sessions run at 2 fps — so at 0.35 s no blob ever
-   chains and the detector finds **nothing at all**. The gap here is
-   two frames of each channel. That is a defect every 2 fps session
-   in the corpus has been carrying.
+   detector took a flat 0.35 s, which is 21 frames at the 60 fps the
+   corpus was captured at and **0.70 frames** at the 2 fps it is
+   captured at now — so at 0.70 frames no blob ever chains and the
+   walk-by study finds **nothing at all** in those sessions. The gap
+   is now the corpus's own rule, `max(0.35 s, 1.5 x the session's own
+   frame interval)`: the corpus's 92 fast sessions stay at exactly the
+   **739** crossings they already had — so no filed result moves — and
+   its 11 slow ones go from **2** to **25**. A defect every 2 fps
+   session in the corpus has been carrying.
 
 ## 1. The two rules the renders do not break
 

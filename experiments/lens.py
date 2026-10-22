@@ -142,7 +142,7 @@ def _largest_blob(mask):
     return cells, int(counts[best - 1])
 
 
-def find_crossings(maps, threshold=CHANGE_NOISE_FLOOR, max_gap_s=0.35,
+def find_crossings(maps, threshold=CHANGE_NOISE_FLOOR, max_gap_s=None,
                    offsets=None, min_travel=BLOB_MIN_TRAVEL):
     """The crossings: blobs of real change that TRANSLATE across the frame.
 
@@ -166,10 +166,29 @@ def find_crossings(maps, threshold=CHANGE_NOISE_FLOOR, max_gap_s=0.35,
     the person is one object, it keeps its size, and it moves.  The
     sensor's grain is below the floor; a highlight is one frame; a
     fidget does not travel.
+
+    **THE GAP MUST BE AT LEAST A FRAME, AND IT USED NOT TO BE.**  The
+    gap used to be a flat 0.35 s, which is 21 frames at the 60 fps the
+    corpus was captured at -- and 0.70 frames at the 2 fps the corpus
+    is captured at now.  At 0.70 frames no blob can EVER chain, every
+    blob is a singleton, and the walk-by study finds NOTHING in those
+    sessions.  Measured over the corpus: the flat gap finds 739
+    crossings in the 92 fast sessions and **2** in the 11 slow ones; a
+    gap of `max(0.35 s, 1.5 x the session's own frame interval)` finds
+    **739** in the fast ones -- the same number, so no filed result
+    moves -- and **25** in the slow ones.  The invisible became visible
+    and nothing that was already known changed.
     """
     n = len(maps)
     if offsets is None:
         offsets = np.arange(n) / 60.0
+    if max_gap_s is None:
+        # THE GAP IS COUNTED IN FRAMES, not in seconds.  A blob may be
+        # missing for a moment and still be the same object, but "a
+        # moment" is longer when the camera only looks twice a second.
+        _gaps = np.diff(offsets)
+        _iv = float(np.median(_gaps)) if _gaps.size else 0.0
+        max_gap_s = max(0.35, 1.5 * _iv)
 
     # pass 1: the blob's position and size, frame by frame
     tracks = []          # (frame, cx, cy, area)

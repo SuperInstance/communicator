@@ -1,6 +1,6 @@
 ==============================================================================
 THE DUAL RENDER -- two cameras, two minutes, three ways
-  generated 2026-10-22T08:59:47Z
+  generated 2026-10-22T09:12:47Z
   THE REAL DUET, the phone's CAMERA LUMA (the keyframes) against the ProArt: the two views in the SAME units, so one scale is honest.
   alignment: 0 clap pairs, offset +500538.000 ms, drift +0.0 ppm
   THE SIDECAR SAYS: THE WALL CLOCK, NOT THE CLAPS. The two devices' clocks have never been compared, so this alignment carries the device-to-device skew -- the constant the corpus cannot measure -- and a drift the duet's 236 s cannot separate from a movement. zcode's clap alignment replaces this sidecar when it lands.

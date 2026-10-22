@@ -912,27 +912,33 @@ def crossing_witness(fixed: Stream, roving: Stream, align: Alignment,
     is asked the question it can answer: did a THING move across the
     picture?
 
-    **THE GAP IS THE CHANNEL'S OWN, IN FRAMES, NOT IN SECONDS.**  The
-    corpus's detector defaults to a 0.35 s gap and to offsets at 60 fps,
-    and the corpus's own sessions run at 2 fps -- so at 0.35 s no blob
-    ever chains and the detector finds NOTHING AT ALL.  The gap here is
-    **two frames of the channel**, so a blob that misses one frame
-    still chains and one that misses two is a new event.
+    **THE GAP IS THE CORPUS'S OWN, AND IT IS COUNTED IN FRAMES.**  The
+    corpus's detector used to take a flat 0.35 s, which is 21 frames at
+    60 fps and 0.70 frames at the 2 fps these channels run at -- and at
+    0.70 frames no blob ever chains and the detector finds NOTHING.  The
+    corpus's gap is now `max(0.35 s, 1.5 x the session's own frame
+    interval)`, which leaves the corpus's 92 fast sessions at exactly
+    the 739 crossings they already had and lifts its 11 slow ones from
+    2 to 25.  This lane uses the corpus's own rule rather than a second
+    one, so there is one rule in one place.
     """
     out: dict = {'the_shift_max_s': shift_max_s, 'the_readings': {}}
-    gaps = {'fixed': max(0.04, fixed.interval_s * 2.0),
-            'roving': max(0.04, roving.interval_s * 2.0)}
     try:
         from experiments import lens as _lens  # noqa: PLC0415
     except Exception:  # noqa: BLE001
         out['the_note'] = 'the corpus lens could not be imported'
         return out
 
+    def gap_of(stream: Stream) -> float:
+        _g = np.diff(stream.motion_times_s)
+        _iv = float(np.median(_g)) if _g.size else 0.0
+        return max(0.35, 1.5 * _iv)
+
+    gaps = {'fixed': gap_of(fixed), 'roving': gap_of(roving)}
+
     def crossings(stream: Stream) -> list[tuple[float, float]]:
         ev = _lens.find_crossings(stream.motion, threshold=stream.floor,
-                                  offsets=stream.motion_times_s,
-                                  max_gap_s=gaps['fixed' if stream is fixed
-                                                 else 'roving'])
+                                  offsets=stream.motion_times_s)
         return [(float(stream.motion_times_s[e['start_frame']]),
                  float(stream.motion_times_s[e['end_frame']])) for e in ev]
 
@@ -1036,11 +1042,12 @@ def render_crossing_witness(w: dict) -> list[str]:
                  f'of them inside the shared minutes; the roving view found '
                  f'{w["the_roving_crossings_total"]}')
     g = w.get('the_gaps_s', {})
-    lines.append(f'  the detector\'s gap is TWO FRAMES of each channel (the '
-                 f'fixed {g.get("fixed", 0):.2f} s, the roving '
-                 f'{g.get("roving", 0):.2f} s), not the corpus tool\'s 0.35 s default:')
-    lines.append('  that default is calibrated for 60 fps and these channels '
-                 'run at 2, so at 0.35 s no blob ever chains.')
+    lines.append(f'  the detector\'s gap is the corpus\'s own, counted in '
+                 f'FRAMES (the fixed {g.get("fixed", 0):.2f} s, the roving '
+                 f'{g.get("roving", 0):.2f} s): a flat 0.35 s is 21 frames at '
+                 f'60 fps and 0.70 at 2,')
+    lines.append('  and at 0.70 frames no blob ever chains, so the corpus\'s '
+                 'own walk-by study found NOTHING in its 2 fps sessions.')
     lines.append('')
     lines.append('  criterion                                 observed   null mean'
                  '   null sd       z   slides that match it      p')
@@ -2037,20 +2044,54 @@ def selftest() -> int:
         #     tool's 0.35 s default is shorter than these channels'
         #     frame intervals, and then no blob ever chains.
         cw = crossing_witness(fixed, roving, al2, 0.0, 6.0)
-        ck('render: the crossing witness sets the gap to TWO FRAMES of the '
-           'channel',
+        ck('render: the crossing witness uses the corpus\'s own frame-aware '
+           'gap',
            abs(cw.get('the_gaps_s', {}).get('fixed', 0)
-               - 2.0 * fixed.interval_s) < 1e-6
+               - max(0.35, 1.5 * fixed.interval_s)) < 1e-6
            and abs(cw.get('the_gaps_s', {}).get('roving', 0)
-                   - 2.0 * roving.interval_s) < 1e-6,
+                   - max(0.35, 1.5 * roving.interval_s)) < 1e-6,
            str(cw.get('the_gaps_s')))
+
+        # 12b. the crossing witness, graded on a pair with a KNOWN
+        #      shared crossing: a block translating in BOTH views at the
+        #      SAME times, so the coincidence is a truth and the slide
+        #      null is the wrong alignments.
+        def _mini(name: str, offset_cols: int = 0):
+            d = tmp / name
+            d.mkdir(parents=True, exist_ok=True)
+            n, iv = 40, 0.5
+            maps = np.zeros((n, GRID_H, GRID_W), np.float32)
+            for k in range(10, 20):
+                c = 5 + k + offset_cols
+                maps[k, 10:14, max(0, c):max(0, c) + 4] = 6.0
+            (d / 'change.raw').write_bytes(maps.astype(np.float32).tobytes())
+            (d / 'timestamps.json').write_text(json.dumps({
+                'wall_clock_start': '2026-10-22T00:00:00.000Z',
+                'frame_offsets_ms': [round(k * iv * 1000, 3) for k in range(n)],
+                'change_offsets_ms': [round((k + 0.5) * iv * 1000, 3)
+                                      for k in range(n - 1)],
+            }))
+            return Stream(d, name)
+
+        mini_a = _mini('mini_a')
+        mini_b = _mini('mini_b', offset_cols=7)
+        mini_cw = crossing_witness(mini_a, mini_b, Alignment(offset_ms=0.0),
+                                   0.0, 20.0)
+        mraw = mini_cw.get('the_readings', {}).get('overlap', {})
+        ck('render: the crossing witness finds a KNOWN shared crossing',
+           mini_cw.get('the_fixed_crossings_total', 0) >= 1
+           and mini_cw.get('the_roving_crossings_total', 0) >= 1
+           and mraw.get('the_observed', 0) >= 1,
+           json.dumps({k: mini_cw.get(k) for k in
+                       ('the_fixed_crossings_total',
+                        'the_roving_crossings_total')}))
         ck('render: the crossing witness slides the roving channel',
-           all(r.get('the_n_slides', 0) > 3
-               for r in cw.get('the_readings', {}).values()),
-           str(sorted(cw.get('the_readings', {}).keys())))
+           mraw.get('the_n_slides', 0) > 3
+           and mraw.get('the_null_mean') is not None,
+           str(mraw.get('the_n_slides')))
         ck('render: the crossing witness says how wrong the alignment can be',
-           len(cw.get('the_alignment_sensitivity', [])) >= 3,
-           str(len(cw.get('the_alignment_sensitivity', []))))
+           len(mini_cw.get('the_alignment_sensitivity', [])) >= 3,
+           str(len(mini_cw.get('the_alignment_sensitivity', []))))
 
         # 11. the sidecar's OWN note is carried into the output
         note_path = tmp / 'note.json'

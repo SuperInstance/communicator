@@ -207,6 +207,30 @@ position: a blob that keeps its place is the same object seen again.
 
 **574 crossings across 80 sessions**, in 35 sessions that have any.
 
+**NOTE, 2026-10-22 — the gap was counted in seconds and the corpus moved
+to 2 fps.** The detector groups events by time as well as by position, and the
+gap it allowed a blob to be missing was a flat **0.35 s**. That is 21 frames at
+the 60 fps every session above was captured at, and **0.70 frames** at the 2 fps
+the corpus is captured at now. At 0.70 frames no blob can ever chain, every blob
+is a singleton, every event is shorter than the 5-frame minimum, and the
+walk-by study finds **nothing at all** in those sessions.
+
+The gap is now the session's own, counted in frames: `max(0.35 s, 1.5 × the
+session's median frame interval)`. Measured over the corpus as it stands:
+
+| the corpus's sessions | the flat 0.35 s gap | the gap in frames |
+|---|---|---|
+| the 92 fast ones (60 fps, all of them captured on 2026-10-21) | 739 crossings | **739** — the same number |
+| the 11 slow ones (2 fps, all of them captured on 2026-10-22) | 2 crossings | **25** |
+
+**NO FILED NUMBER MOVES.** The 574 crossings above are the fast sessions'
+crossings, and the fast sessions' crossings are unchanged; the eleven 2 fps
+sessions are all newer than this study, so this study never saw them. What the
+fix does is let the corpus's next 2 fps sessions be seen at all. The defect was
+found by the dual-capture lane, which had to ask the crossing question of two
+cameras of the same minutes and found the instrument returning nothing
+(`docs/research/dual/DUET-RENDER.md` §6).
+
 ### 3.5 The envelope, and the bug that hid it
 
 The envelope is the repository's own: `src/energy.py:rms_series` on a

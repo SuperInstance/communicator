@@ -166,32 +166,40 @@ sensor's grain is below the floor, a highlight is one frame, a fidget does not
 travel, and neither does a shake. So each view is asked the question it can
 actually answer: did a *thing* move across the picture?
 
-**AND THE INSTRUMENT HAD A HIDDEN ASSUMPTION.** The corpus's detector defaults to
-a 0.35 s gap and to offsets at 60 fps, and the corpus's own sessions run at 2 fps —
-so at 0.35 s no blob ever chains and the detector finds **nothing at all**. The gap
-has to be counted in *frames*, and here it is two frames of each channel, so a blob
-that misses one frame still chains and one that misses two is a new event. That one
-change is the difference between an empty result and a result, and it is a
-generalisable defect in a corpus tool that every 2 fps session in the corpus has
-been carrying.
+**AND THE INSTRUMENT HAD A HIDDEN ASSUMPTION.** The corpus's detector
+takes a gap in **seconds** — 0.35 s — which is 21 frames at the 60 fps
+the corpus was captured at, and **0.70 frames** at the 2 fps the corpus
+is captured at now. At 0.70 frames no blob can EVER chain, every blob
+is a singleton, and the walk-by study finds **nothing at all**. The gap
+has to be counted in *frames*, and it is now the corpus's own rule:
+`max(0.35 s, 1.5 × the session's own frame interval)`.
 
-With the gap fixed, the duet gives its best number:
+Measured over the whole corpus, that fix is exactly what it should be:
+
+| the corpus's sessions | the flat 0.35 s gap | the gap in frames |
+|---|---|---|
+| the 92 fast ones (60 fps) | 739 crossings | **739** — the same number, so no filed result moves |
+| the 11 slow ones (2 fps) | 2 crossings | **25** — five sessions the corpus could not see at all |
+
+That is a defect every one of the corpus's 2 fps sessions has been
+carrying, and it is why the duet needed a second look at the corpus's
+own tools. With the gap fixed, the duet gives its best number:
 
 | criterion | observed | null mean | null sd | z | slides that match it | p |
 |---|---|---|---|---|---|---|
-| the intervals overlap at all | 10 of 17 | 4.23 | 2.93 | **+1.97** | 21 of 241 | **0.087** |
-| they share half of the shorter one | 8 of 17 | 3.54 | 2.69 | +1.66 | 36 of 241 | 0.149 |
+| the intervals overlap at all | 11 of 18 | 4.40 | 3.17 | **+2.08** | 12 of 241 | **0.050** |
+| they share half of the shorter one | 9 of 18 | 3.70 | 2.93 | +1.81 | 29 of 241 | 0.120 |
 
 The looser criterion is the one that was asked for first and the tighter one is
 reported beside it, not instead of it. The honest reading is **suggestive and not
 significant**: the two views find the same crossings about twice as often as a
 random alignment would, and the result is of the same order under either criterion
-(z between +1.7 and +2.1). It is also stable: the alignment can be wrong by five
-seconds before it goes (z +1.97 at 0 s, +1.97 at 1 s, +2.31 at 2 s, +1.97 at 5 s,
-and +0.95 at 10 s). A result that survives a five-second misalignment is **not** a
-measurement of the alignment — it is a statement that the two views find the same
-crossings at the same moments, which is the thing two sovereign logs of the same
-minutes give that neither gives alone.
+(z between +1.8 and +2.1) and under either gap rule. It is also stable: the
+alignment can be wrong by five seconds before it goes (z +2.08 at 0 s, +2.08 at
+1 s, +2.40 at 2 s, +2.08 at 5 s, and +1.14 at 10 s). A result that survives a
+five-second misalignment is **not** a measurement of the alignment — it is a
+statement that the two views find the same crossings at the same moments, which is
+the thing two sovereign logs of the same minutes give that neither gives alone.
 
 ## 7. The phone's camera luma, and why the roving eye is always on
 
@@ -258,9 +266,9 @@ footing, in the camera's luma, where the two views' change maps are the same
 quantity and the witness test becomes a test.
 
 **A witness that asks about objects, not about change.** The crossing detector is
-the right instrument and it is already in the corpus. It needs its gap counted in
-frames, and the corpus's own `lens.find_crossings` default should be fixed for
-every 2 fps session the corpus holds.
+the right instrument and it is already in the corpus. Its gap is now counted in
+frames, which leaves the corpus's 739 fast-session crossings exactly where they
+were and lets its 2 fps sessions be seen at all.
 
 **A slice length above the frame interval.** At 2.0 and 2.5 fps a 0.25 s slice
 holds at most one frame from each view, and the fused score's slices are better at
