@@ -1,0 +1,851 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Potato Drill</title>
+<style>
+  :root { --bg:#101418; --panel:#1a2027; --panel2:#212a33; --line:#2d3945;
+    --fg:#e8edf2; --dim:#8fa1b3; --accent:#4db6ac; --rec:#e05252;
+    --ok:#7ec97e; --warn:#e0a458; }
+  * { box-sizing: border-box; }
+  body { margin:0 auto; padding:16px 18px 40px; background:var(--bg);
+    color:var(--fg); font-family: system-ui, -apple-system, "Segoe UI",
+    Roboto, sans-serif; max-width: 900px; }
+  header { display:flex; align-items:baseline; gap:14px; flex-wrap:wrap;
+    border-bottom:1px solid var(--line); padding-bottom:10px;
+    margin-bottom:14px; }
+  h1 { font-size:22px; margin:0; letter-spacing:2px; }
+  .sub { color:var(--dim); font-size:13px; }
+  .spacer { flex:1; }
+  a.plain { color:var(--dim); font-size:13px; }
+
+  #indicator { display:flex; align-items:center; justify-content:center;
+    gap:14px; padding:16px 10px; border-radius:10px; border:2px solid;
+    font-size:30px; font-weight:800; letter-spacing:3px;
+    margin-bottom:10px; }
+  #indicator .dot { width:16px; height:16px; border-radius:50%;
+    background:currentColor; flex:none; }
+  #indicator.pick { color:var(--dim); border-color:var(--line); }
+  #indicator.armed { color:var(--accent); border-color:var(--accent);
+    background:rgba(77,182,172,.07); }
+  #indicator.rec { color:var(--rec); border-color:var(--rec);
+    background:rgba(224,82,82,.09); }
+  #indicator.rec .dot { animation:blink 1s infinite; }
+  #indicator.paused { color:var(--warn); border-color:var(--warn); }
+  @keyframes blink { 50% { opacity:.12; } }
+  #subState { text-align:center; color:var(--dim); font-size:14px;
+    min-height:18px; margin-bottom:12px; }
+
+  #phraseCard { background:var(--panel2); border:1px solid var(--line);
+    border-radius:10px; padding:14px 18px; margin-bottom:14px; }
+  #phraseCard .cap { font-size:11px; letter-spacing:1.5px;
+    text-transform:uppercase; color:var(--dim); margin-bottom:6px; }
+  #phrase { font-size:clamp(30px, 5vw, 52px); font-weight:800;
+    text-align:center; font-family: Georgia, serif; }
+  #phraseEdit { width:100%; margin-top:8px; background:var(--bg);
+    color:var(--fg); border:1px solid var(--line); border-radius:6px;
+    padding:6px 10px; font-size:14px; font-family:inherit; }
+
+  #deck { display:flex; gap:10px; flex-wrap:wrap; margin-bottom:6px; }
+  .card-i { position:relative; background:var(--panel2);
+    border:2px solid var(--line); border-radius:10px; padding:14px 22px;
+    font-size:18px; font-weight:700; cursor:pointer; user-select:none; }
+  .card-i:hover { border-color:var(--accent); }
+  .card-i.sel { border-color:var(--accent); color:var(--accent);
+    background:rgba(77,182,172,.12); }
+  .card-i .x { position:absolute; top:2px; right:6px; font-size:12px;
+    color:var(--dim); font-weight:400; }
+  .card-i .x:hover { color:var(--rec); }
+  .deckRow { display:flex; gap:8px; margin:8px 0 14px; }
+  #newIntent { flex:1; background:var(--bg); color:var(--fg);
+    border:1px solid var(--line); border-radius:6px; padding:8px 10px;
+    font-size:14px; }
+  button { background:#212a33; color:var(--fg); border:1px solid
+    var(--line); border-radius:6px; padding:9px 18px; font-size:15px;
+    cursor:pointer; }
+  button:hover:not(:disabled) { border-color:var(--accent); }
+  button:disabled { opacity:.4; cursor:default; }
+  #abortBtn { border-color:var(--rec); color:var(--rec); font-weight:700; }
+
+  #videoWrap { position:relative; background:#000; border-radius:8px;
+    overflow:hidden; }
+  #video { width:100%; display:block; transform:scaleX(-1); }
+  .row { display:flex; gap:18px; align-items:center; margin-top:12px;
+    flex-wrap:wrap; }
+  #elapsed { font-size:40px; font-weight:800;
+    font-variant-numeric:tabular-nums; }
+  #meter { flex:1; min-width:180px; height:16px; background:#0b0e11;
+    border:1px solid var(--line); border-radius:4px; overflow:hidden; }
+  #meterFill { height:100%; width:0%; background:linear-gradient(90deg,
+    #2e7d6e, #4db6ac 70%, #e0a458 90%, #e06c75); }
+  #detRead { font-size:12px; color:var(--dim); width:100%;
+    font-variant-numeric:tabular-nums; }
+  #devLine { font-size:12.5px; color:var(--dim); width:100%; }
+  #devLine.deaf { color:var(--rec); font-weight:700; font-size:13.5px; }
+
+  #receipts { display:none; margin-top:14px; border:1px solid var(--line);
+    border-radius:8px; background:var(--panel); padding:10px 14px; }
+  #receipts .rHead { font-size:12px; letter-spacing:1.5px;
+    color:var(--dim); text-transform:uppercase; font-weight:600;
+    margin-bottom:6px; }
+  #receiptList { font-family: ui-monospace, Menlo, Consolas, monospace;
+    font-size:12.5px; line-height:1.7; color:#c7d3dd; }
+  #receiptList .r { white-space:nowrap; overflow-x:auto; }
+  #receiptList .r .ok { color:var(--ok); }
+  #msg { margin-top:10px; color:var(--dim); font-size:14px;
+    min-height:20px; }
+  #msg.err { color:#e06c75; }
+  .fine { margin-top:12px; color:var(--dim); font-size:12px;
+    line-height:1.6; }
+</style>
+</head>
+<body>
+<header>
+  <h1>POTATO DRILL</h1>
+  <span class="sub">same words every time &mdash; the intent is the delivery</span>
+  <span class="spacer"></span>
+  <a class="plain" href="/">free record</a> &middot;
+  <a class="plain" href="/live">live monitor</a> &middot;
+  <a class="plain" href="/plan">plan</a>
+</header>
+
+<div id="indicator" class="pick"><span class="dot"></span><span id="indText">PICK A CARD</span></div>
+<div id="subState">choose an intent, then say the phrase &mdash; each delivery
+  is recorded as its own segment, tagged with the intent</div>
+
+<div id="phraseCard">
+  <div class="cap">the phrase &mdash; edit it; it is remembered and stamped
+    into every delivery</div>
+  <div id="phrase">I love you</div>
+  <input id="phraseEdit" type="text" spellcheck="false" autocomplete="off"
+    placeholder="type a new phrase and press Enter">
+</div>
+
+<div id="deck"></div>
+<div class="deckRow">
+  <input id="newIntent" type="text" spellcheck="false" autocomplete="off"
+    placeholder="add your own intent (e.g. &lsquo;bored&rsquo;, &lsquo;confessing&rsquo;) and press Enter">
+  <button id="addIntent">ADD</button>
+</div>
+
+<div id="videoWrap">
+  <video id="video" autoplay playsinline muted></video>
+</div>
+<div class="row">
+  <div id="elapsed">0:00</div>
+  <div id="meter"><div id="meterFill"></div></div>
+  <div id="detRead">speech &mdash;</div>
+  <div id="devLine">mic: &mdash; &middot; cam: &mdash;</div>
+</div>
+
+<div class="controls" style="margin-top:12px; display:flex; gap:10px;">
+  <button id="abortBtn" disabled>ABORT DELIVERY (discard)</button>
+  <button id="retryDevices" style="display:none;">RETRY DEVICES</button>
+</div>
+<div id="msg"></div>
+<div id="receipts">
+  <div class="rHead">Receipts &mdash; deliveries saved this sitting</div>
+  <div id="receiptList"></div>
+</div>
+<div class="fine">A delivery starts on your first word and closes ~2 s
+  after you stop; it saves in the background and the deck advances to the
+  next intent. ABORT discards the delivery in progress. Keep this tab in
+  the foreground. The deafness watchdog turns the device line red if the
+  mic goes silent &mdash; a drill with a dead mic is worthless.</div>
+<script>
+"use strict";
+/* ============================================================================
+   THE POTATO DRILL (docs/research/BRIEF-POTATO-DRILL.md). One phrase, a
+   deck of intent cards; each delivery is auto-recorded as its own
+   segment tagged with the intent -- same words, delivery varies, and
+   the tone map is the deltas. The capture machinery is the AUTO page's
+   (worklet tap, 160x96 luma canvas, per-frame timestamps, WebM,
+   full-rate WAV, one POST /free per delivery); meta.json carries
+   mode: "drill" and drill: {phrase, intent}.
+
+   States: pick (no card) / armed (card chosen, listening) / recording
+   (delivering). Saves are background, shown as receipts. Detection is
+   the corpus's speech rule with the AUTO warm-up and frozen floor.
+   ========================================================================== */
+const $ = (id) => document.getElementById(id);
+const videoEl = $("video");
+const LB = 160 * 96;
+
+const DRILL_GRACE_MS = 2000;   // quiet time after speech that closes a delivery
+const DRILL_MAX_MS = 60000;    // a delivery never runs past this
+const FLOOR_WARMUP_MS = 2000;
+const DEFAULT_DECK = ["sincere", "leaving", "obligated", "everything",
+  "joking", "quiet-furious"];
+
+let stream = null, audioCtx = null, realRate = 0, micName = "", camName = "";
+let level = 0, nAudioBlocks = 0, lastSoundAt = 0;
+let state = "pick";            // pick | armed | recording (+ deviceFailure)
+let openSeg = null, savedCount = 0;
+const pendingSaves = [];
+let deck = [], selected = -1;
+
+let speechRing = [], speechFloor = 1e-4, speechNow = false;
+let armedAt = 0, floorsReady = false, lastFloorAt = 0, lastFrameAt = 0;
+
+function pct(arr, p) {
+  if (!arr.length) return null;
+  const s = Array.from(arr).sort(function (a, b) { return a - b; });
+  return s[Math.min(s.length - 1, Math.floor(s.length * p))];
+}
+function speechThr() { return Math.max(speechFloor * 10, 1e-4); }
+
+function speechStep(rms) {
+  speechRing.push(rms);
+  if (speechRing.length > 2048) speechRing.shift();
+  speechNow = floorsReady && rms >= speechThr();
+}
+function maybeRecomputeFloors() {
+  if (openSeg) return;
+  const now = performance.now();
+  if (!floorsReady && armedAt && now - armedAt >= FLOOR_WARMUP_MS &&
+      speechRing.length >= 64) {
+    floorsReady = true;
+    diagSend("FLOORS_READY", { speech_floor: speechFloor });
+  }
+  if (now - lastFloorAt < 500) return;
+  lastFloorAt = now;
+  const sf = pct(speechRing, 0.2);
+  if (sf != null) speechFloor = sf;
+}
+
+/* -- diagnostics + thumbnail + deafness (the AUTO page's, verbatim) ------- */
+function diagSend(kind, fields) {
+  const body = JSON.stringify(Object.assign({
+    kind: kind, page: "potato_drill", ts: new Date().toISOString(),
+    state: state, intent: selected >= 0 ? deck[selected] : null,
+    seg_open: !!openSeg, n_frames: openSeg ? openSeg.nFrames : 0,
+    n_samples: openSeg ? openSeg.nSamples : 0,
+    recorder: openSeg && openSeg.recorder ? openSeg.recorder.state : null,
+    audioCtxState: audioCtx ? audioCtx.state : null,
+    speech_level: Math.round(level * 1e6) / 1e6,
+    speech_thr: Math.round(speechThr() * 1e6) / 1e6,
+    speech_now: speechNow, floors_ready: floorsReady,
+    mic: micName, cam: camName, audio_blocks: nAudioBlocks,
+    audio_silent_s: audioCtx && nAudioBlocks ?
+      Math.round((performance.now() - lastSoundAt) / 100) / 10 : null,
+    saved: savedCount, pending_uploads: pendingSaves.length,
+    visibility: document.visibilityState,
+  }, fields || {}));
+  try {
+    if (navigator.sendBeacon && navigator.sendBeacon("/log",
+        new Blob([body], { type: "application/json" })))
+      return;
+  } catch (e) {}
+  fetch("/log", { method: "POST", body: body, keepalive: true,
+    headers: { "Content-Type": "application/json" } }).catch(() => {});
+}
+setInterval(() => {
+  diagSend("heartbeat");
+  postThumb();
+  deafCheck();
+}, 1000);
+
+const canvas = document.createElement("canvas");
+canvas.width = 160; canvas.height = 96;
+const cctx = canvas.getContext("2d", { willReadFrequently: true });
+cctx.imageSmoothingEnabled = true;
+cctx.imageSmoothingQuality = "high";
+
+function postThumb() {
+  if (!stream) return;
+  try {
+    const data = canvas.toDataURL("image/jpeg", 0.6);
+    fetch("/thumb", { method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ data: data, ts: new Date().toISOString() }),
+    }).catch(() => {});
+  } catch (err) {}
+}
+
+function deafCheck() {
+  if (!audioCtx) return;
+  const el = $("devLine");
+  if (nAudioBlocks === 0) {
+    el.className = "deaf";
+    el.textContent = "AUDIO DEAD -- no samples have reached the page " +
+      "(the audio tap failed). Reload the page.";
+  } else if (audioCtx.state === "running" &&
+             performance.now() - lastSoundAt > 20000) {
+    el.className = "deaf";
+    el.textContent = "AUDIO SILENT for " +
+      Math.round((performance.now() - lastSoundAt) / 1000) +
+      " s -- mic \"" + micName + "\" is delivering silence. A drill " +
+      "with a dead mic is worthless: check the Windows input device and " +
+      "the mic mute, or the browser took the wrong mic.";
+  } else {
+    el.className = "";
+    el.textContent = "mic: " + micName + " @ " + realRate + " Hz" +
+      "   \u00b7   cam: " + camName;
+  }
+}
+
+/* -- the deck -------------------------------------------------------------- */
+function loadDeck() {
+  try {
+    const d = JSON.parse(localStorage.bcDrillDeck || "null");
+    if (Array.isArray(d) && d.length) return d.map(String).slice(0, 24);
+  } catch (e) {}
+  return DEFAULT_DECK.slice();
+}
+function saveDeck() {
+  try { localStorage.bcDrillDeck = JSON.stringify(deck); } catch (e) {}
+}
+
+function renderDeck() {
+  const d = $("deck");
+  d.innerHTML = "";
+  deck.forEach((name, i) => {
+    const c = document.createElement("div");
+    c.className = "card-i" + (i === selected ? " sel" : "");
+    c.innerHTML = esc(name) +
+      ' <span class="x" title="remove this intent">\u00d7</span>';
+    c.onclick = (ev) => {
+      if (ev.target.classList.contains("x")) {
+        deck.splice(i, 1);
+        if (!deck.length) deck = DEFAULT_DECK.slice();
+        if (selected >= deck.length) selected = deck.length - 1;
+        saveDeck(); renderDeck(); paint();
+        return;
+      }
+      selectCard(i);
+    };
+    d.appendChild(c);
+  });
+}
+
+function selectCard(i) {
+  selected = i;
+  if (state === "recording") return;   // a delivery in flight finishes first
+  state = openSeg ? "recording" : "armed";
+  renderDeck();
+  paint();
+  diagSend("CARD_SELECTED", { intent: deck[i] });
+}
+
+/* -- segments --------------------------------------------------------------- */
+function pickMime() {
+  if (typeof MediaRecorder === "undefined") return null;
+  for (const c of ["video/webm;codecs=vp9,opus", "video/webm;codecs=vp8,opus",
+                   "video/webm"])
+    if (MediaRecorder.isTypeSupported(c)) return c;
+  return null;
+}
+
+function openSegment() {
+  const now = performance.now();
+  const preMs = preTs.length ? Math.max(0, now - preTs[0]) : 0;
+  const seg = {
+    mode: "drill", intent: deck[selected],
+    phrase: $("phrase").textContent,
+    close_reason: null,
+    wallStart: new Date(Date.now() - preMs).toISOString(),
+    t0ms: now - preMs,
+    frames: preFrames.slice(), frameTs: preTs.slice(),
+    nFrames: preFrames.length,
+    audioChunks: preAudio.slice(), nSamples: preAudioSamples,
+    webmChunks: [], webm: null, recorder: null,
+    mime: pickMime(), lastActive: now,
+    speech_floor: speechFloor, speech_thr: speechThr(),
+  };
+  if (seg.mime) {
+    try {
+      seg.recorder = new MediaRecorder(stream,
+        { mimeType: seg.mime, videoBitsPerSecond: 4000000 });
+      seg.recorder.ondataavailable = (e) => {
+        if (e.data && e.data.size) seg.webmChunks.push(e.data);
+      };
+      seg.recorder.start(1000);
+    } catch (err) { seg.recorder = null; }
+  }
+  openSeg = seg;
+  state = "recording";
+  paint();
+  diagSend("SEGMENT_OPEN", { trigger: "speech", mode: "drill",
+    intent: seg.intent });
+}
+
+async function closeSegment(reason) {
+  const seg = openSeg;
+  if (!seg) return;
+  openSeg = null;
+  preAudio = []; preAudioSamples = 0; preFrames = []; preTs = [];
+  seg.close_reason = reason;
+  seg.wallEnd = new Date().toISOString();
+  if (seg.recorder && seg.recorder.state !== "inactive") {
+    await Promise.race([
+      new Promise((res) => { seg.recorder.onstop = res;
+                             seg.recorder.stop(); }),
+      sleep(3000),
+    ]).catch(() => {});
+  }
+  if (seg.webmChunks.length) {
+    try {
+      seg.webm = new Uint8Array(await new Blob(seg.webmChunks).arrayBuffer());
+    } catch (err) { seg.webm = null; }
+  }
+  state = selected >= 0 ? "armed" : "pick";
+  paint();
+  diagSend("SEGMENT_CLOSE", { reason: reason, n_frames: seg.nFrames,
+    n_samples: seg.nSamples, intent: seg.intent });
+  if (reason === "aborted") return;   // discarded on purpose, never saved
+  uploadSegment(seg);
+}
+
+setInterval(() => {
+  for (const p of pendingSaves.slice()) uploadSegment(p.seg, p.tries + 1);
+}, 30000);
+
+async function uploadSegment(seg, tries) {
+  tries = tries || 0;
+  const payload = buildPayload(seg);
+  const receipt = {
+    dir: null, duration_s: realRate ? seg.nSamples / realRate : 0,
+    frames: seg.nFrames,
+    luma_bytes: seg.nFrames * LB,
+    wav_bytes: 44 + seg.nSamples * 2,
+    webm_bytes: seg.webm ? seg.webm.length : 0,
+    intent: seg.intent,
+  };
+  receipt.total_bytes = receipt.luma_bytes + receipt.wav_bytes +
+    receipt.webm_bytes;
+  const ctl = typeof AbortController !== "undefined" ?
+    new AbortController() : null;
+  const kill = ctl ? setTimeout(() => ctl.abort(), 300000) : 0;
+  try {
+    const resp = await fetch("/free", { method: "POST", body: payload.blob,
+      signal: ctl ? ctl.signal : undefined });
+    const j = await resp.json().catch(() => ({ ok: false,
+      error: "bad reply" }));
+    if (!resp.ok || !j.ok) throw new Error(j.error || ("HTTP " + resp.status));
+    savedCount++;
+    const i = pendingSaves.findIndex(p => p.seg === seg);
+    if (i >= 0) pendingSaves.splice(i, 1);
+    receipt.dir = j.dir;
+    addReceipt(receipt);
+    // the deck advances: the next intent is up
+    if (selected >= 0 && deck.length > 1)
+      selected = (selected + 1) % deck.length;
+    renderDeck(); paint();
+    diagSend("SEGMENT_SAVED", { dir: j.dir, n_frames: seg.nFrames,
+      tries: tries, intent: seg.intent, receipt: receipt });
+  } catch (err) {
+    if (!pendingSaves.some(p => p.seg === seg))
+      pendingSaves.push({ seg: seg, tries: tries });
+    $("msg").className = "err";
+    $("msg").textContent = "SAVE FAILED (" + err.message + ") -- the " +
+      "delivery is held in this tab and retried every 30 s";
+    diagSend("SEGMENT_SAVE_FAILED", { error: String(err.message),
+      tries: tries, intent: seg.intent });
+  } finally {
+    if (kill) clearTimeout(kill);
+  }
+}
+
+/* -- pre-roll ---------------------------------------------------------------- */
+let preAudio = [], preAudioSamples = 0, preFrames = [], preTs = [];
+function feedPreAudio(blk) {
+  preAudio.push(blk);
+  preAudioSamples += blk.length;
+  const cap = Math.ceil(realRate * 1.2) + 4096;
+  while (preAudioSamples > cap && preAudio.length > 1) {
+    preAudioSamples -= preAudio[0].length;
+    preAudio.shift();
+  }
+}
+function feedPreFrame(f, ts) {
+  preFrames.push(f);
+  preTs.push(ts);
+  while (preTs.length > 2 && ts - preTs[0] > 1200) {
+    preFrames.shift();
+    preTs.shift();
+  }
+}
+
+/* -- the POST body (the AUTO page's five-section shape) ---------------------- */
+function section(parts, bytes) {
+  const len = new ArrayBuffer(8);
+  new DataView(len).setBigUint64(0, BigInt(bytes.length), true);
+  parts.push(new Uint8Array(len), bytes);
+}
+const enc = (s) => new TextEncoder().encode(s);
+
+function buildWav(samples, n, rate) {
+  const buf = new ArrayBuffer(44 + n * 2);
+  const dv = new DataView(buf);
+  const ws = (off, s) => { for (let i = 0; i < s.length; i++)
+    dv.setUint8(off + i, s.charCodeAt(i)); };
+  ws(0, "RIFF"); dv.setUint32(4, 36 + n * 2, true); ws(8, "WAVE");
+  ws(12, "fmt "); dv.setUint32(16, 16, true); dv.setUint16(20, 1, true);
+  dv.setUint16(22, 1, true); dv.setUint32(24, rate, true);
+  dv.setUint32(28, rate * 2, true); dv.setUint16(32, 2, true);
+  dv.setUint16(34, 16, true); ws(36, "data"); dv.setUint32(40, n * 2, true);
+  const pcm = new Int16Array(buf, 44, n);
+  for (let i = 0; i < n; i++) {
+    let v = Math.round(samples[i] * 32767);
+    pcm[i] = v > 32767 ? 32767 : v < -32768 ? -32768 : v;
+  }
+  return new Uint8Array(buf);
+}
+
+function buildPayload(seg) {
+  const samples = new Float32Array(seg.nSamples);
+  let off = 0;
+  for (const c of seg.audioChunks) { samples.set(c, off); off += c.length; }
+  const wav = buildWav(samples, seg.nSamples, realRate);
+  const luma = new Uint8Array(seg.nFrames * LB);
+  for (let i = 0; i < seg.nFrames; i++) luma.set(seg.frames[i], i * LB);
+  let camSettings = {};
+  const vt = stream ? stream.getVideoTracks()[0] : null;
+  if (vt && vt.getSettings) {
+    const st = vt.getSettings() || {};
+    for (const k of ["frameRate", "width", "height", "exposureTime",
+                     "exposureMode", "deviceId"])
+      if (st[k] !== undefined) camSettings[k] = st[k];
+  }
+  const spanMs = seg.frameTs.length > 1 ?
+    seg.frameTs[seg.frameTs.length - 1] - seg.frameTs[0] : 0;
+  const meta = {
+    tool: "browser_free_record",
+    mode: "drill",
+    drill: { phrase: seg.phrase, intent: seg.intent },
+    trigger: "speech",
+    close_reason: seg.close_reason,
+    detection: {
+      rule: "drill: speech rms >= 10x the 20th-percentile floor (floor " +
+        "frozen while open); close " + (DRILL_GRACE_MS / 1000) +
+        "s after speech ends; max " + (DRILL_MAX_MS / 1000) + "s",
+      speech_floor_rms: seg.speech_floor, speech_thr_rms: seg.speech_thr,
+    },
+    wall_clock_start: seg.wallStart,
+    wall_clock_end: seg.wallEnd,
+    n_frames: seg.nFrames,
+    luma: { width: 160, height: 96, frame_bytes: LB,
+      format: "uint8 BT.601 full-range luma, row-major, frames " +
+        "concatenated -- np.fromfile(path, np.uint8).reshape(-1, 96, 160)" },
+    timestamps: { file: "timestamps.json",
+      frame_offsets_ms: "performance.now() minus the pre-roll base" },
+    video: { webm_mime: seg.mime,
+      webm_bytes: seg.webm ? seg.webm.length : 0,
+      recorder_ran: !!seg.recorder },
+    audio: { sample_rate: realRate, samples: seg.nSamples,
+      wav: "16-bit PCM mono at the AudioContext's honest rate" },
+    achieved_video_fps: spanMs > 0 ?
+      Math.round((seg.nFrames - 1) / (spanMs / 1000) * 10000) / 10000 : null,
+    camera: { label: camName, settings: camSettings },
+    mic: { label: micName },
+    browser: navigator.userAgent,
+  };
+  const ts = { wall_clock_start: seg.wallStart,
+               frame_offsets_ms: seg.frameTs };
+  const parts = [];
+  section(parts, enc(JSON.stringify(meta)));
+  section(parts, wav);
+  section(parts, luma);
+  section(parts, enc(JSON.stringify(ts)));
+  section(parts, seg.webm || new Uint8Array(0));
+  return { blob: new Blob(parts, { type: "application/octet-stream" }),
+           meta: meta };
+}
+
+/* -- receipts ---------------------------------------------------------------- */
+function fmtBytes(n) {
+  if (n >= 1024 * 1024) return (n / (1024 * 1024)).toFixed(1) + " MB";
+  if (n >= 1024) return (n / 1024).toFixed(0) + " kB";
+  return n + " B";
+}
+function addReceipt(r) {
+  $("receipts").style.display = "block";
+  const list = $("receiptList");
+  const line = document.createElement("div");
+  line.className = "r";
+  line.innerHTML = '<span class="ok">&#10003;</span> ' +
+    new Date().toTimeString().slice(0, 8) + "  " + esc(r.intent) +
+    "  --  " + r.duration_s.toFixed(1) + " s, " + r.frames + " frames, " +
+    fmtBytes(r.total_bytes) + "  " + esc(r.dir || "");
+  list.insertBefore(line, list.firstChild);
+  while (list.children.length > 30) list.removeChild(list.lastChild);
+  $("msg").textContent = "";
+}
+function esc(s) {
+  return String(s).replace(/&/g, "&amp;").replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;");
+}
+
+/* -- UI ------------------------------------------------------------------------ */
+function paint() {
+  const ind = $("indicator");
+  const intent = selected >= 0 ? deck[selected] : null;
+  if (!floorsReady && (state === "armed")) {
+    ind.className = "pick";
+    $("indText").textContent = "CALIBRATING";
+  } else if (state === "recording") {
+    ind.className = "rec";
+    $("indText").textContent = "RECORDING";
+  } else if (state === "armed" && intent) {
+    ind.className = "armed";
+    $("indText").textContent = "ARMED: " + intent.toUpperCase();
+  } else {
+    ind.className = "pick";
+    $("indText").textContent = "PICK A CARD";
+  }
+  $("subState").textContent = state === "recording" ?
+    "delivering \u201c" + $("phrase").textContent + "\u201d as " + intent +
+      " -- closes ~2 s after you stop" :
+    state === "armed" ?
+    "say \u201c" + $("phrase").textContent + "\u201d as " + intent +
+      " whenever you are ready" :
+    "choose an intent, then say the phrase";
+  $("abortBtn").disabled = state !== "recording";
+}
+function fmtT(s) {
+  const m = Math.floor(s / 60), r = Math.floor(s % 60);
+  return m + ":" + String(r).padStart(2, "0");
+}
+function sleep(ms) { return new Promise(r => setTimeout(r, ms)); }
+function rms(a) {
+  let s = 0;
+  for (let i = 0; i < a.length; i++) s += a[i] * a[i];
+  return Math.sqrt(s / a.length);
+}
+
+$("abortBtn").onclick = () => {
+  if (state !== "recording") return;
+  diagSend("ABORT_CLICKED", { intent: selected >= 0 ?
+    deck[selected] : null });
+  closeSegment("aborted");
+};
+
+/* -- the deck's plumbing -------------------------------------------------------- */
+$("addIntent").onclick = addIntent;
+$("newIntent").addEventListener("keydown", (ev) => {
+  if (ev.key === "Enter") addIntent();
+});
+function addIntent() {
+  const v = $("newIntent").value.trim();
+  if (!v) return;
+  if (!deck.includes(v)) deck.push(v);
+  $("newIntent").value = "";
+  saveDeck(); renderDeck();
+  diagSend("INTENT_ADDED", { intent: v });
+}
+$("phraseEdit").addEventListener("keydown", (ev) => {
+  if (ev.key !== "Enter") return;
+  const v = $("phraseEdit").value.trim();
+  if (!v) return;
+  $("phrase").textContent = v;
+  $("phraseEdit").value = "";
+  try { localStorage.bcDrillPhrase = v; } catch (e) {}
+  paint();
+  diagSend("PHRASE_SET", { phrase: v });
+});
+try {
+  const p = localStorage.bcDrillPhrase;
+  if (p) $("phrase").textContent = p;
+} catch (e) {}
+
+/* -- the loops -------------------------------------------------------------------- */
+function tick() {
+  if (stream && state !== "recording") {
+    const now = performance.now();
+    if (now - lastFrameAt >= 15) {
+      lastFrameAt = now;
+      cctx.drawImage(videoEl, 0, 0, 160, 96);
+      const d = cctx.getImageData(0, 0, 160, 96).data;
+      const f = new Uint8Array(LB);
+      for (let i = 0, j = 0; i < d.length; i += 4, j++) {
+        let y = 0.299 * d[i] + 0.587 * d[i + 1] + 0.114 * d[i + 2];
+        f[j] = y > 255 ? 255 : Math.round(y);
+      }
+      feedPreFrame(f, Math.round((now - bootT0) * 10) / 10);
+    }
+  } else if (stream && openSeg) {
+    const now = performance.now();
+    if (now - lastFrameAt >= 15) {
+      lastFrameAt = now;
+      cctx.drawImage(videoEl, 0, 0, 160, 96);
+      const d = cctx.getImageData(0, 0, 160, 96).data;
+      const f = new Uint8Array(LB);
+      for (let i = 0, j = 0; i < d.length; i += 4, j++) {
+        let y = 0.299 * d[i] + 0.587 * d[i + 1] + 0.114 * d[i + 2];
+        f[j] = y > 255 ? 255 : Math.round(y);
+      }
+      openSeg.frames.push(f);
+      openSeg.frameTs.push(Math.round((now - bootT0) * 10) / 10);
+      openSeg.nFrames++;
+    }
+  }
+  maybeRecomputeFloors();
+  if (openSeg) {
+    const now = performance.now();
+    if (speechNow) openSeg.lastActive = now;
+    if (now - openSeg.t0ms >= DRILL_MAX_MS) closeSegment("maxlen");
+    else if (now - openSeg.lastActive > DRILL_GRACE_MS)
+      closeSegment("quiet");
+  } else if (state === "armed" && floorsReady && speechNow) {
+    openSegment();
+  }
+  if (openSeg)
+    $("elapsed").textContent = fmtT((performance.now() - openSeg.t0ms) / 1000);
+  else $("elapsed").textContent = "0:00";
+  const db = 20 * Math.log10(Math.max(level, 1e-7));
+  $("meterFill").style.width =
+    Math.max(0, Math.min(100, (db + 60) / 60 * 100)).toFixed(1) + "%";
+  $("detRead").textContent = "speech " + (speechNow ? "YES" : "no") +
+    " (level " + level.toExponential(1) + " / thr " +
+    speechThr().toExponential(1) + ", mic " + db.toFixed(0) + " dB)" +
+    (selected >= 0 ? "   intent: " + deck[selected] : "");
+  if (floorsReady && state === "armed" && !openSeg) paint(); // leave CALIBRATING
+}
+const bootT0 = performance.now();
+function drawLoop() { requestAnimationFrame(drawLoop); tick(); }
+setInterval(tick, 500);   // keeps decisions alive in a backgrounded tab
+
+/* -- devices: the same failure honesty as the AUTO page --------------------------- */
+function deviceFailure(err) {
+  const name = err && err.name || String(err);
+  let head, body;
+  if (name === "NotReadableError" || name === "TrackStartError") {
+    head = "CAMERA BUSY";
+    body = "The camera (or microphone) is being used by ANOTHER app or " +
+      "tab right now. Close the other one, then press RETRY DEVICES.";
+  } else if (name === "NotFoundError" || name === "DevicesNotFoundError") {
+    head = "NO CAMERA";
+    body = "No camera or microphone was found. Plug one in, then press " +
+      "RETRY DEVICES.";
+  } else if (name === "NotAllowedError" || name === "PermissionDeniedError" ||
+             name === "SecurityError") {
+    head = "PERMISSION REFUSED";
+    body = "The browser blocked camera/microphone access. Use the " +
+      "address-bar camera icon to allow both, then press RETRY DEVICES.";
+  } else {
+    head = "DEVICES FAILED (" + name + ")";
+    body = (err && err.message || "") + " -- press RETRY DEVICES.";
+  }
+  $("indicator").className = "paused";
+  $("indText").textContent = head;
+  $("msg").className = "err";
+  $("msg").textContent = body;
+  $("retryDevices").style.display = "";
+  diagSend("DEVICE_FAILURE", { error: name, head: head });
+}
+
+async function tryBoot() {
+  if (audioCtx) { try { await audioCtx.close(); } catch (e) {} audioCtx = null; }
+  if (stream) { stream.getTracks().forEach(t => t.stop()); stream = null; }
+  $("retryDevices").style.display = "none";
+  try {
+    stream = await navigator.mediaDevices.getUserMedia({
+      video: true,
+      audio: { channelCount: 1, echoCancellation: false,
+               noiseSuppression: false, autoGainControl: false },
+    });
+  } catch (err) {
+    deviceFailure(err);
+    return false;
+  }
+  videoEl.srcObject = stream;
+  await videoEl.play();
+  micName = (stream.getAudioTracks()[0] || {}).label || "browser mic";
+  const vt = stream.getVideoTracks()[0];
+  camName = (vt || {}).label || "browser camera";
+  try {
+    const caps = vt && vt.getCapabilities ? vt.getCapabilities() : null;
+    if (caps && Array.isArray(caps.exposureMode) &&
+        caps.exposureMode.includes("continuous"))
+      await vt.applyConstraints(
+        { advanced: [{ exposureMode: "continuous" }] });
+  } catch (err) {}
+  try { audioCtx = new AudioContext(); }
+  catch (err) {
+    $("msg").className = "err";
+    $("msg").textContent = "no AudioContext (" + err.name + ")";
+    return false;
+  }
+  await audioCtx.resume();
+  realRate = audioCtx.sampleRate;
+  const workletSrc =
+    "class PColl extends AudioWorkletProcessor {" +
+    "  process(inputs) {" +
+    "    const ins = inputs[0];" +
+    "    if (ins && ins.length) {" +
+    "      let ch = ins[0];" +
+    "      if (ins.length > 1) {" +
+    "        const m = new Float32Array(ch.length);" +
+    "        for (let i = 0; i < ch.length; i++)" +
+    "          m[i] = (ins[0][i] + ins[1][i]) * 0.5;" +
+    "        ch = m;" +
+    "      }" +
+    "      const c = new Float32Array(ch.length);" +
+    "      c.set(ch);" +
+    "      this.port.postMessage(c, [c.buffer]);" +
+    "    }" +
+    "    return true;" +
+    "  }" +
+    "}" +
+    "registerProcessor('pcoll', PColl);";
+  await audioCtx.audioWorklet.addModule(URL.createObjectURL(
+    new Blob([workletSrc], { type: "application/javascript" })));
+  const src = audioCtx.createMediaStreamSource(stream);
+  const node = new AudioWorkletNode(audioCtx, "pcoll");
+  node.port.onmessage = (ev) => {
+    const blk = ev.data;
+    level = rms(blk);
+    nAudioBlocks++;
+    if (level > 1e-5) lastSoundAt = performance.now();
+    speechStep(level);
+    if (openSeg) {
+      openSeg.audioChunks.push(blk);
+      openSeg.nSamples += blk.length;
+    } else {
+      feedPreAudio(blk);
+    }
+  };
+  src.connect(node);
+  armedAt = performance.now();
+  lastSoundAt = armedAt;
+  floorsReady = false;
+  deafCheck();
+  paint();
+  diagSend("BOOT", { cam: camName, mic: micName, rate: realRate,
+    page: "potato_drill", deck: deck });
+  try {
+    const r = await fetch("/info");
+    const j = await r.json();
+    if (j && j.out)
+      $("msg").textContent = "deliveries save under " + j.out +
+        "/free_sessions/ -- pick a card and start";
+  } catch (err) {
+    $("msg").className = "err";
+    $("msg").textContent = "server DOWN -- run: python3 " +
+      "browser_capture/bench.py to check it";
+  }
+  return true;
+}
+let loopStarted = false;
+async function boot() {
+  deck = loadDeck();
+  renderDeck();
+  if (!loopStarted) { loopStarted = true; drawLoop(); }
+  await tryBoot();
+}
+boot();
+$("retryDevices").onclick = () => {
+  diagSend("RETRY_DEVICES_CLICKED");
+  tryBoot();
+};
+
+window.addEventListener("beforeunload", (ev) => {
+  if (openSeg || pendingSaves.length) {
+    ev.preventDefault();
+    ev.returnValue = "";
+  }
+});
+</script>
+</body>
+</html>
