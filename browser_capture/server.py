@@ -132,6 +132,7 @@ from __future__ import annotations
 
 import argparse
 import array
+import calendar
 import io
 import json
 import math
@@ -364,7 +365,11 @@ def _last_page_heartbeat() -> dict:
         except json.JSONDecodeError:
             continue
         if isinstance(d, dict) and d.get("kind") == "heartbeat":
-            age = max(0, int(time.time() - time.mktime(
+            # timegm, not mktime: received_at is UTC and mktime would
+            # read it as local, making every age negative->0 (found when
+            # a 7-hour-dead page reported hb_age 0 during the dual-
+            # capture liveness check)
+            age = max(0, int(time.time() - calendar.timegm(
                 time.strptime(d["received_at"][:19], "%Y-%m-%dT%H:%M:%S"))))
             return {"present": True, "age_s": age, "fields": d}
     return {"present": False}
