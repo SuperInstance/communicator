@@ -270,6 +270,64 @@ the marker's detectability rather than by the fleet's clocks.
 
 ---
 
+## 5a. The corpus grew fourfold, and the headline was a median — dated note, 2026-10-22
+
+**The estimator's corpus is now 24 real-microphone sessions that carry
+signal, against the 6 this study ran on, and the re-run says two things:
+the claim that matters HOLDS, and the headline number was a median and
+not a worst case.**
+
+**THE CLAIM THAT MATTERS HOLDS, AND IT HOLDS ON 4x THE CORPUS.** The
+**null bias** — the estimator against a gain-shifted copy of itself,
+which is the test for "does this instrument invent a bias" — is a median
+of **0.000 ms** and a **maximum of 0.0002 ms** over all 24 sessions,
+exactly the filed number. **The estimator invents no bias, and now that
+is said over four times the sessions.**
+
+**AND THE RESOLUTION HEADLINE WAS A MEDIAN CLAIM.** The filed headline
+— *it resolves a delay to 0.004 ms — 0.0014 m of range* — is true of
+the six sessions this study saw and is **not** the corpus's worst case:
+
+| | this study (6 sessions) | the grown corpus (24 sessions) |
+|---|---|---|
+| null bias, median / max | 0.000 / **0.0002 ms** | 0.000 / **0.0002 ms** — unchanged |
+| resolution error, median | 0.001 ms | **0.002 ms** (0.0007 m) |
+| resolution error, **worst** | 0.004 ms (0.0014 m) | **1.757 ms (0.60 m)** |
+
+**So THE SCALE'S PRECISION IS A PROPERTY OF THE RECORDING AND NOT OF THE
+INSTRUMENT, AND THE INSTRUMENT CAN NOW BE SEEN TO SAY SO.** The error is
+not the session's length (Spearman +0.045 against the duration) and not
+the null peak's margin (−0.163). It is the **correlation peak's HEIGHT
+after the shift** (−0.415), and the split on that is decisive:
+
+| | n | error median | error worst |
+|---|---|---|---|
+| the sessions whose peak stays **above 0.95** | **18** | 0.0015 ms | **0.010 ms** (0.0034 m) |
+| the sessions whose peak **collapses** under the shift | **6** | **0.1195 ms** | **0.429 ms** at a 10 ms shift, **1.757 ms** at a 2 ms shift |
+
+The traces show the mechanism plainly: on a good session the peak holds
+at **0.9970** after an 80 ms shift and the delay comes back to 0.010 ms;
+on the worst session the peak has fallen to **0.4831** and the delay
+comes back 0.429 ms out. **A SHIFT THAT SMears THE CORRELATION PEAK
+SPREADS THE ESTIMATE, AND NOTHING ELSE IN THE ESTIMATOR CHANGES.**
+
+**AND THE CONSEQUENCE FOR THE ROUTE IS IMMEDIATE: A TDOA MEASUREMENT MUST
+CARRY THE PEAK HEIGHT AS ITS OWN CONFIDENCE.** The tool already files the
+peak and the margin per delay, so the number is there; what was missing
+is a scale claim that says which sessions support it. The corpus's worst
+case of **0.60 m of range** and its best case of **0.0034 m** are two
+hundred times apart, and a scale built on the corpus needs to say which
+one it is quoting.
+
+**THIS ALSO NAMES WHY THE SCALE ROUTE DOES NOT DEPEND ON THE SYNC ROUTE.**
+The sync needs a sound both devices heard; the scale needs a delay
+between two signals **to each other**, so the clock offset cancels
+exactly. And now the scale's own uncertainty is measured on 24 sessions
+instead of 6, with a null bias of 0.0002 ms and a precision that is
+readable per session rather than asserted for the corpus.
+
+---
+
 ## 6. HOW TO REPRODUCE
 
 ```sh
