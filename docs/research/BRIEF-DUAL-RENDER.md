@@ -127,6 +127,26 @@ frames concatenated), `timestamps.json` and `meta.json` — exactly what
 the ProArt session bundles are, so `experiments/lens.py` and the
 renderer both read them with no changes.
 
+**THE BUNDLE IS FIRST-CLASS, AND THAT IS MEASURED.** The corpus's own
+walk-by study needs the luma **and** the audio, and it reads the
+phone's bundle with no changes — the ingest's selftest runs it. For
+that it needs `audio.wav` in the bundle, and the phone's audio track
+**cannot be decoded on this machine** (no ffmpeg, no `av`, no
+`imageio`). So zcode extracts the audio where there IS a decoder and
+hands the file over:
+
+```bash
+/home/proart/projects/gpu-venv/bin/python experiments/dual_ingest.py \
+    --video <phone.mp4> --out docs/research/dual/roving \
+    --audio <phone.wav> --label "Casey's phone (rear camera)" \
+    --wall-clock-start 2026-10-21T20:04:11.000Z
+```
+
+The audio is put in the corpus's own format: 16-bit PCM mono at the
+recording's own rate, no resampling and no processing. A bundle with
+no audio **says so** in its metadata rather than pretending to be
+complete.
+
 **`--wall-clock-start` is the only exact way to anchor a phone
 capture.** A phone recording carries no wall clock of its own. Without
 the flag the ingest falls back to the file's modification time, which
@@ -204,6 +224,14 @@ admired. The selftest is **37 of 37** and it grades:
 - the witness count adds up, its chance baseline is the product of the
   two rates, and its excess is signed.
 
+**Measured, on the ingest.** The phone-shaped fixture (portrait, 270 by
+480, 30 fps) lands in the corpus's shape at **30.000 fps** with the
+container's own per-frame timestamps; its change map finds the fixture's
+square to within **8 pixels** of where the fixture put it; its audio
+lands in the corpus's own format (16-bit PCM mono at the recording's
+own rate); and the corpus's own walk-by study — which needs the luma
+**and** the audio — reads the phone's bundle with no changes.
+
 **Measured, on a real corpus session.** The rehearsal
 (`docs/research/dual/REHEARSAL-DUAL-RENDER.txt`) pairs a **real** ProArt
 session (1792553329) with a **synthetic** phone recording of
@@ -221,7 +249,7 @@ That is the control's whole job: **the measure does not manufacture
 agreement.** A witness count that found an excess between a real room
 and a meaningless video would be a bug in the measure, not a finding.
 
-**The selftests are 37 of 37** for the renderer and **12 of 12** for the
+**The selftests are 37 of 37** for the renderer and **16 of 16** for the
 ingest.
 
 **NOT measured, and not to be filed as if it were:**

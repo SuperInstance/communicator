@@ -95,6 +95,54 @@ def iso_now() -> str:
     return datetime.now(timezone.utc).strftime('%Y-%m-%dT%H:%M:%S.%f')[:-3] + 'Z'
 
 
+def put_audio(wav_path: Path, out_dir: Path) -> dict:
+    """Put an extracted recording's AUDIO into the bundle as audio.wav.
+
+    The corpus's bundles carry their audio as `audio.wav`, and the
+    corpus's own tools read that file -- so a bundle without it is a
+    bundle with a hole in it.  The phone's audio track cannot be
+    decoded on this machine (no ffmpeg, no `av`, no `imageio`), so
+    zcode extracts it where there IS a decoder and hands the file
+    over; this puts it where the corpus expects it.
+
+    The format is the corpus's own: 16-bit PCM MONO at the recording's
+    own rate, no resampling and no processing, because the corpus's
+    audio tools reason about the WAV as it is.
+    """
+    import wave
+    wav_path = Path(wav_path)
+    if not wav_path.is_file():
+        raise FileNotFoundError(f'no such audio file: {wav_path}')
+    with wave.open(str(wav_path), 'rb') as w:
+        n_ch = w.getnchannels()
+        width = w.getsampwidth()
+        rate = w.getframerate()
+        raw = w.readframes(w.getnframes())
+    if width != 2:
+        raise ValueError(f'{wav_path} is {width * 8}-bit; the corpus\'s '
+                         f'bundles carry 16-bit PCM')
+    samples = np.frombuffer(raw, dtype='<i2').astype(np.float32)
+    if n_ch > 1:
+        samples = samples.reshape(-1, n_ch).mean(axis=1)
+    pcm = np.clip(samples, -32768, 32767).astype('<i2')
+    dest = Path(out_dir) / 'audio.wav'
+    with wave.open(str(dest), 'wb') as w:
+        w.setnchannels(1)
+        w.setsampwidth(2)
+        w.setframerate(rate)
+        w.writeframes(pcm.tobytes())
+    return {
+        'file': 'audio.wav',
+        'the_source': str(wav_path),
+        'the_source_channels': n_ch,
+        'sample_rate': rate,
+        'samples': int(pcm.size),
+        'duration_s': round(pcm.size / rate, 3) if rate else 0.0,
+        'format': '16-bit PCM mono at the recording\'s own rate (no '
+                  'resampling, no processing) -- the corpus\'s own format',
+    }
+
+
 # --------------------------------------------------------------------------
 # the geometry
 # --------------------------------------------------------------------------
@@ -133,7 +181,7 @@ def to_luma(frame: np.ndarray) -> np.ndarray:
 def ingest(video: Path, out_dir: Path, label: str = 'the phone camera',
            wall_clock_start: str | None = None, stride: int = 1,
            fit: str = 'crop', max_frames: int | None = None,
-           quiet: bool = False) -> dict:
+           audio: Path | None = None, quiet: bool = False) -> dict:
     """Decode a recording into a corpus bundle."""
     cv2 = _cv2()
     video = Path(video)
@@ -293,6 +341,18 @@ def ingest(video: Path, out_dir: Path, label: str = 'the phone camera',
         },
         'the_noise_of_this_sensor': the_noise,
     }
+    if audio is not None:
+        meta['audio'] = put_audio(Path(audio), out_dir)
+    else:
+        meta['audio'] = {
+            'file': None,
+            'note': 'NO AUDIO IN THIS BUNDLE. The phone\'s audio track '
+                    'cannot be decoded on this machine (no ffmpeg, no `av`, '
+                    'no `imageio`), so it is extracted where there IS a '
+                    'decoder and handed over with --audio. The corpus\'s '
+                    'audio tools need audio.wav, so a bundle without it has '
+                    'a hole in it.',
+        }
     (out_dir / 'meta.json').write_text(json.dumps(meta, indent=2))
 
     report = {
@@ -308,6 +368,7 @@ def ingest(video: Path, out_dir: Path, label: str = 'the phone camera',
         'the_wall_clock_start_source': start_source,
         'the_noise_of_this_sensor': the_noise,
         'the_luma_statistics': meta['the_luma_statistics'],
+        'the_audio': meta['audio'],
         'bytes_written': int((out_dir / 'luma.raw').stat().st_size),
     }
     (out_dir / 'ingest.json').write_text(json.dumps(report, indent=2))
@@ -450,7 +511,41 @@ def selftest() -> int:
         ck('ingest: the metadata says where the frame times came from',
            bool(meta['the_frame_times']), meta['the_frame_times'])
 
-        # 3. the GRADE: the ingested bundle's change map must find the
+        # 3b. the AUDIO: a bundle with no audio.wav has a hole in it,
+        #     because the corpus's own audio tools read that file
+        import wave as _wave
+        src_wav = tmp / 'phone.wav'
+        tone = (np.sin(2 * np.pi * 220.0 * np.arange(4800) / 48000.0)
+                * 8000.0).astype('<i2')
+        with _wave.open(str(src_wav), 'wb') as w:
+            w.setnchannels(1)
+            w.setsampwidth(2)
+            w.setframerate(48000)
+            w.writeframes(tone.tobytes())
+        out_a = tmp / 'bundle_with_audio'
+        ingest(vid, out_a, label='the test phone', audio=src_wav, quiet=True)
+        with _wave.open(str(out_a / 'audio.wav'), 'rb') as w:
+            got = {'ch': w.getnchannels(), 'width': w.getsampwidth(),
+                   'rate': w.getframerate(), 'n': w.getnframes()}
+        ck('ingest: the audio lands in the corpus\'s own format',
+           got == {'ch': 1, 'width': 2, 'rate': 48000, 'n': 4800}, str(got))
+        ck('ingest: the metadata says where the audio came from',
+           json.loads((out_a / 'meta.json').read_text())['audio']['file']
+           == 'audio.wav')
+        # and a bundle with NO audio says so rather than pretending
+        ck('ingest: a bundle with no audio says so',
+           json.loads((out / 'meta.json').read_text())['audio']['file'] is None)
+
+        # 3c. THE FIRST-CLASS CLAIM: the corpus's own walk-by study --
+        #     which needs the luma AND the audio -- reads the phone's
+        #     bundle with no changes.  That is what "the same format"
+        #     has to mean if it is to mean anything.
+        walk = lens.walk_by_study([('the test phone', out_a)])
+        ck('ingest: the corpus\'s own walk-by study reads the phone bundle',
+           bool(walk) and walk[0].get('n_crossings', 0) >= 1,
+           str(walk[0].get('n_crossings') if walk else 'no walk'))
+
+        # 4. the GRADE: the ingested bundle's change map must find the
         #    thing where the fixture put it.  This is the same grade the
         #    render lane leans on, run through a real video file.
         maps = lens.frame_motion_maps(out)
@@ -506,6 +601,10 @@ def main(argv=None) -> int:
                     help='keep every Nth frame (1 keeps all)')
     ap.add_argument('--fit', default='crop', choices=('crop', 'stretch'))
     ap.add_argument('--max-frames', type=int, default=None)
+    ap.add_argument('--audio', default=None,
+                    help='a WAV of the recording\'s audio, extracted where '
+                         'there IS a decoder -- it is put into the bundle as '
+                         'audio.wav so the corpus\'s audio tools can read it')
     ap.add_argument('--make-fixture', default=None,
                     help='write the phone-shaped rehearsal fixture to this '
                          'path and stop -- the content is MEANINGLESS on '
@@ -525,7 +624,8 @@ def main(argv=None) -> int:
         return 1
     ingest(Path(args.video), Path(args.out), label=args.label,
            wall_clock_start=args.wall_clock_start, stride=args.stride,
-           fit=args.fit, max_frames=args.max_frames)
+           fit=args.fit, max_frames=args.max_frames,
+           audio=Path(args.audio) if args.audio else None)
     return 0
 
 
