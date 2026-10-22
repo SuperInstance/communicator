@@ -1,0 +1,277 @@
+{
+  "generated_utc": "2026-10-22T02:42:04Z",
+  "the_pair_is_synthetic": true,
+  "the_pair": {
+    "fixed": {
+      "path": "/tmp/dual-stage/synthetic-pair/fixed",
+      "label": "fixed witness",
+      "frames": 120,
+      "ok": true,
+      "problems": [],
+      "wall_clock_start": "2026-10-21T00:00:00.000Z"
+    },
+    "roving": {
+      "path": "/tmp/dual-stage/synthetic-pair/roving",
+      "label": "roving eye",
+      "frames": 120,
+      "ok": true,
+      "problems": [],
+      "wall_clock_start": "2026-10-21T00:00:00.000Z"
+    },
+    "alignment": {
+      "source": "none (the two streams are ASSUMED to start together)",
+      "assumed": true,
+      "offset_ms": 0.0,
+      "drift_ppm": 0.0,
+      "n_claps": 0
+    },
+    "the_overlap_s": [
+      0.0,
+      5.95
+    ],
+    "renderable": true,
+    "blockers": []
+  },
+  "the_dual_ascii": {
+    "moments": [
+      {
+        "t_fixed_s": 1.488,
+        "t_roving_s": 1.488,
+        "fixed_energy": 1401.99,
+        "roving_energy": 2032.86,
+        "fixed_cells_above_floor": 12,
+        "roving_cells_above_floor": 13,
+        "fixed_window_frames": 10,
+        "roving_window_frames": 10,
+        "fixed_scale": 16.612,
+        "roving_scale": 16.612
+      },
+      {
+        "t_fixed_s": 4.463,
+        "t_roving_s": 4.463,
+        "fixed_energy": 1294.23,
+        "roving_energy": 2014.31,
+        "fixed_cells_above_floor": 0,
+        "roving_cells_above_floor": 11,
+        "fixed_window_frames": 10,
+        "roving_window_frames": 10,
+        "fixed_scale": 12.825,
+        "roving_scale": 12.825
+      }
+    ],
+    "window_statistic": "mean",
+    "scale_mode": "shared-auto"
+  },
+  "the_fused_score": {
+    "slices": [
+      {
+        "t_s": 0.0,
+        "fixed": 1703.762451171875,
+        "roving": 2224.2626953125,
+        "mark": "=",
+        "fixed_cells": 23,
+        "roving_cells": 65
+      },
+      {
+        "t_s": 0.25,
+        "fixed": 1712.4749755859375,
+        "roving": 2241.46240234375,
+        "mark": "=",
+        "fixed_cells": 25,
+        "roving_cells": 58
+      },
+      {
+        "t_s": 0.5,
+        "fixed": 1644.387451171875,
+        "roving": 2161.887451171875,
+        "mark": "=",
+        "fixed_cells": 21,
+        "roving_cells": 54
+      },
+      {
+        "t_s": 0.75,
+        "fixed": 1586.637451171875,
+        "roving": 2139.625,
+        "mark": "=",
+        "fixed_cells": 20,
+        "roving_cells": 56
+      },
+      {
+        "t_s": 1.0,
+        "fixed": 1508.02490234375,
+        "roving": 2110.03759765625,
+        "mark": "=",
+        "fixed_cells": 13,
+        "roving_cells": 59
+      },
+      {
+        "t_s": 1.25,
+        "fixed": 1395.862548828125,
+        "roving": 2013.9749755859375,
+        "mark": "=",
+        "fixed_cells": 12,
+        "roving_cells": 65
+      },
+      {
+        "t_s": 1.5,
+        "fixed": 1408.112548828125,
+        "roving": 2051.75,
+        "mark": "=",
+        "fixed_cells": 12,
+        "roving_cells": 74
+      },
+      {
+        "t_s": 1.75,
+        "fixed": 1510.0125732421875,
+        "roving": 2071.0,
+        "mark": "=",
+        "fixed_cells": 14,
+        "roving_cells": 64
+      },
+      {
+        "t_s": 2.0,
+        "fixed": 1607.25,
+        "roving": 2125.0,
+        "mark": "=",
+        "fixed_cells": 18,
+        "roving_cells": 59
+      },
+      {
+        "t_s": 2.25,
+        "fixed": 1657.012451171875,
+        "roving": 2217.60009765625,
+        "mark": "=",
+        "fixed_cells": 20,
+        "roving_cells": 49
+      },
+      {
+        "t_s": 2.5,
+        "fixed": 1732.9874267578125,
+        "roving": 2231.387451171875,
+        "mark": "=",
+        "fixed_cells": 22,
+        "roving_cells": 58
+      },
+      {
+        "t_s": 2.75,
+        "fixed": 1754.1500244140625,
+        "roving": 2260.1875,
+        "mark": "=",
+        "fixed_cells": 20,
+        "roving_cells": 66
+      },
+      {
+        "t_s": 3.0,
+        "fixed": 1765.800048828125,
+        "roving": 2289.4375,
+        "mark": "=",
+        "fixed_cells": 25,
+        "roving_cells": 50
+      },
+      {
+        "t_s": 3.25,
+        "fixed": 1720.5374755859375,
+        "roving": 2281.22509765625,
+        "mark": "=",
+        "fixed_cells": 23,
+        "roving_cells": 51
+      },
+      {
+        "t_s": 3.5,
+        "fixed": 1677.0,
+        "roving": 2199.53759765625,
+        "mark": "=",
+        "fixed_cells": 19,
+        "roving_cells": 64
+      },
+      {
+        "t_s": 3.75,
+        "fixed": 1427.97509765625,
+        "roving": 2192.46240234375,
+        "mark": "=",
+        "fixed_cells": 10,
+        "roving_cells": 49
+      },
+      {
+        "t_s": 4.0,
+        "fixed": 1305.60009765625,
+        "roving": 2088.050048828125,
+        "mark": "<",
+        "fixed_cells": 0,
+        "roving_cells": 44
+      },
+      {
+        "t_s": 4.25,
+        "fixed": 1298.4375,
+        "roving": 1983.9000244140625,
+        "mark": "<",
+        "fixed_cells": 0,
+        "roving_cells": 47
+      },
+      {
+        "t_s": 4.5,
+        "fixed": 1285.987548828125,
+        "roving": 1997.9500732421875,
+        "mark": "<",
+        "fixed_cells": 0,
+        "roving_cells": 56
+      },
+      {
+        "t_s": 4.75,
+        "fixed": 1307.97509765625,
+        "roving": 2097.2998046875,
+        "mark": "<",
+        "fixed_cells": 0,
+        "roving_cells": 46
+      },
+      {
+        "t_s": 5.0,
+        "fixed": 1429.4249267578125,
+        "roving": 2172.5,
+        "mark": "=",
+        "fixed_cells": 10,
+        "roving_cells": 63
+      },
+      {
+        "t_s": 5.25,
+        "fixed": 1677.5250244140625,
+        "roving": 2180.35009765625,
+        "mark": "=",
+        "fixed_cells": 19,
+        "roving_cells": 54
+      },
+      {
+        "t_s": 5.5,
+        "fixed": 1715.199951171875,
+        "roving": 2265.16259765625,
+        "mark": "=",
+        "fixed_cells": 23,
+        "roving_cells": 49
+      },
+      {
+        "t_s": 5.75,
+        "fixed": 1772.296875,
+        "roving": 2293.671875,
+        "mark": "=",
+        "fixed_cells": 22,
+        "roving_cells": 48
+      }
+    ],
+    "n_slices": 24
+  },
+  "the_differenced_view": {
+    "t_fixed_s": 4.463,
+    "t_roving_s": 4.463,
+    "n_fixed_cells_moved": 0,
+    "n_roving_cells_moved": 11,
+    "witnessed": true
+  },
+  "the_rendering_choices": {
+    "mode": "change",
+    "scale": "shared-auto",
+    "map": "mean",
+    "window_s": 0.25,
+    "slice_s": 0.25,
+    "moments": 2
+  }
+}
