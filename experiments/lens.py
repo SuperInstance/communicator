@@ -121,6 +121,105 @@ BLOB_MIN_FRAMES = 5
 #: across its life for the event to be a crossing and not a fidget.
 BLOB_MIN_TRAVEL = 3.0
 
+#: The SIGNAL threshold's target duty cycle.  The rule is one sentence:
+#: a channel is READING THE ROOM at the threshold where it is on this
+#: share of its frames.  It is a rule about the channel's own health,
+#: and it is deliberately NOT a rule about finding a peak.
+SIGNAL_DUTY_TARGET = 0.90
+
+
+def signal_threshold(maps, duty_target: float = SIGNAL_DUTY_TARGET) -> dict:
+    """THE SIGNAL THRESHOLD: where this channel stops being grain.
+
+    **THE GRAIN FLOOR AND THE SIGNAL THRESHOLD ARE DIFFERENT QUESTIONS.**
+    The floor (`CHANGE_NOISE_FLOOR`) asks "is there anything here at
+    all" -- it is a property of the sensor's own noise, measured on a
+    quiet session.  The signal threshold asks "is this channel actually
+    reading the room" -- it is a property of THIS recording, and it is
+    the threshold at which the channel is on `duty_target` of its own
+    frames.
+
+    **SO THE THRESHOLD IS THE 10th PERCENTILE OF THE PER-FRAME
+    MAXIMA.**  Each change map has a maximum (the strongest thing in
+    that frame); the threshold is the value at which the channel is
+    still on nine frames in ten.  It is the 10th percentile of those
+    maxima, and it is a SIGNAL threshold, not a grain floor: at it the
+    channel is *reading*, and below it the channel is *staring*.
+
+    **THE PERCENTILE CONVENTION IS NAMED, BECAUSE IT MOVES THE NUMBER.**
+    Two conventions are in common use and they do not agree:
+    nearest-rank takes the k-th smallest observed value (k = ceil((1 -
+    duty) * n)), while linear interpolation lands between two observed
+    values.  This function returns the NEAREST-RANK value as the
+    threshold, because it is the one that makes the rule exact -- the
+    channel is then on exactly the stated share of its frames -- and it
+    reports the interpolated value beside it so a reader can see the
+    gap.  On the duet's keyframe channel the two are 94.938 and 95.106:
+    the same data, two conventions, a number that has to carry its
+    convention with it.
+
+    **AND WHEN THE MAXIMA CARRY TIES, THE SHARE IS NOT EXACT.**  A
+    channel whose quiet frames all read exactly the same maximum has a
+    tie at the threshold, and then the share of frames above it is
+    whatever the tie gives -- not the target.  The threshold is still
+    the k-th smallest OBSERVED maximum, because that is what a
+    percentile is, but the share that was actually achieved is reported
+    beside it rather than the share that was asked for.
+
+    `maps` is the change-map stack, one 2-D array per frame pair.
+    """
+    arrs = [np.asarray(m, dtype=float) for m in maps]
+    if not arrs:
+        return {'the_value': None, 'the_n_frames': 0,
+                'the_rule': 'no change maps, so there is no channel to read',
+                'the_convention': 'nearest rank'}
+    maxima = np.asarray([float(a.max()) for a in arrs], dtype=float)
+    n = int(maxima.size)
+    srt = np.sort(maxima)
+    # NEAREST RANK: the k-th smallest observed value, 1-indexed.
+    k = int(math.ceil((1.0 - duty_target) * n))
+    k = max(1, min(k, n))
+    value = float(srt[k - 1])
+    interp = float(np.percentile(maxima, 100.0 * (1.0 - duty_target)))
+    duty_above = float((maxima > value).mean())
+    duty_at_or_above = float((maxima >= value).mean())
+    ties = int((maxima == value).sum())
+    zeros = int((maxima == 0.0).sum())
+    return {
+        'the_rule': ('the threshold at which this channel is on '
+                     f'{duty_target * 100.0:.0f} % of its frames: the '
+                     f'{100.0 * (1.0 - duty_target):.0f}th percentile of its '
+                     'per-frame change-map maxima'),
+        'the_value': value,
+        'the_convention': ('nearest rank: the k-th smallest observed '
+                           f'per-frame maximum, k = ceil((1 - duty) * n) = {k}'),
+        'the_rank': k,
+        'the_value_linear_interpolation': interp,
+        'the_convention_gap': round(interp - value, 6),
+        'the_n_frames': n,
+        'the_duty_cycle_above_the_value': round(duty_above, 6),
+        'the_duty_cycle_at_or_above_the_value': round(duty_at_or_above, 6),
+        'the_target_duty_cycle': duty_target,
+        'the_ties_at_the_value': ties,
+        'the_share_is_exact': bool(ties == 1),
+        'the_share_of_frames_at_exactly_zero': round(zeros / n, 6),
+        'the_max': round(float(maxima.max()), 6),
+        'the_median': round(float(np.median(maxima)), 6),
+        'the_min': round(float(maxima.min()), 6),
+        'the_note': ('A SIGNAL THRESHOLD, NOT A GRAIN FLOOR. The floor asks '
+                     '"is there anything here at all"; this asks "is this '
+                     'channel reading the room". It is a property of THIS '
+                     'recording, so it is measured here and not borrowed.'
+                     + ('' if ties == 1 else
+                        f' THE MAXIMA CARRY {ties} TIES AT THE THRESHOLD, so '
+                        'the share of frames above it is what the ties give '
+                        'and not the target.')
+                     + ('' if zeros == 0 else
+                        f' {zeros} of {n} frames have a maximum of EXACTLY '
+                        'zero, so this channel is quiet only when the '
+                        'recorder repeats a picture.')),
+    }
+
 
 def _largest_blob(mask):
     """The largest 8-connected blob in a boolean mask, and its cells.
@@ -1347,6 +1446,48 @@ def selftest() -> int:
        all("id" in b and "class" in b for b in lens["behaviours"]))
     ck("lens: every behaviour has a measurement and a provenance",
        all("measurement" in b and "provenance" in b for b in lens["behaviours"]))
+
+    # 8. THE SIGNAL THRESHOLD: the rule, on numbers whose answer is
+    #    known before the rule is run.  These assert the RULE, not the
+    #    data: a channel of known maxima must land on the k-th smallest.
+    syn = [np.full((4, 4), float(v)) for v in range(1, 11)]
+    st = signal_threshold(syn, duty_target=0.90)
+    ck("lens: the signal threshold is the k-th smallest per-frame maximum",
+       st["the_value"] == 1.0 and st["the_rank"] == 1,
+       f'{st["the_value"]} rank {st["the_rank"]}')
+    ck("lens: at the signal threshold the channel is on 90 % of its frames",
+       abs(st["the_duty_cycle_above_the_value"] - 0.9) < 1e-9,
+       str(st["the_duty_cycle_above_the_value"]))
+    ck("lens: the interpolated percentile is reported BESIDE the threshold",
+       abs(st["the_value_linear_interpolation"] - 1.9) < 1e-9
+       and abs(st["the_convention_gap"] - 0.9) < 1e-9,
+       f'{st["the_value_linear_interpolation"]} gap {st["the_convention_gap"]}')
+    # the duet's shape: 102 maps, so ceil(0.1 * 102) = 11 and the
+    # threshold is the 11th smallest, leaving 91 of 102 frames above it
+    syn102 = [np.full((4, 4), float(v)) for v in range(1, 103)]
+    st102 = signal_threshold(syn102, duty_target=0.90)
+    ck("lens: on 102 frames the threshold is the 11th smallest",
+       st102["the_value"] == 11.0 and st102["the_rank"] == 11,
+       f'{st102["the_value"]} rank {st102["the_rank"]}')
+    ck("lens: on 102 frames the channel is then on 89.22 % of them",
+       abs(st102["the_duty_cycle_above_the_value"] - 91.0 / 102.0) < 1e-6,
+       str(st102["the_duty_cycle_above_the_value"]))
+    ck("lens: an empty channel says so rather than guessing a threshold",
+       signal_threshold([])["the_value"] is None)
+    # and the TIES: a channel whose quiet frames all read the same
+    # maximum has a tie at the threshold, so the share of frames above
+    # it is what the tie gives and not the target.
+    tied = ([np.full((4, 4), 0.0) for _ in range(30)]
+            + [np.full((4, 4), 6.0) for _ in range(10)])
+    stt = signal_threshold(tied, duty_target=0.90)
+    ck("lens: a tied channel's threshold is still the k-th smallest",
+       stt["the_value"] == 0.0 and stt["the_rank"] == 4,
+       f'{stt["the_value"]} rank {stt["the_rank"]}')
+    ck("lens: a tied channel SAYS the share is not the target",
+       stt["the_ties_at_the_value"] == 30
+       and abs(stt["the_duty_cycle_above_the_value"] - 0.25) < 1e-6
+       and stt["the_share_is_exact"] is False,
+       str(stt["the_duty_cycle_above_the_value"]))
 
     failed = [c for c in checks if not c[1]]
     for name, ok, detail in checks:

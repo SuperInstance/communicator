@@ -743,12 +743,63 @@ news: **a TDOA measurement compares the two signals to each other, so
 the offset between the two clocks cancels exactly**, and a mistake in the
 sync cannot corrupt the scale.
 
-## 10. The files
+## 10. THE RELATIVE GEOMETRY, BUILT AND FILED
+
+Casey's ask was the three renders from dual-3 in **RELATIVE
+GEOMETRY** — per §8's route — with **no guessed scale**, filed where
+the pair report lives. It is done: `docs/research/DUAL-3-RELATIVE-GEOMETRY.md`,
+with the render beside it.
+
+**WHAT IS NEW IN THE TOOL.** `--matched` makes the moments the
+ROVING stream's **own frames**, each one carried into the fixed clock
+by the alignment — not an evenly spread set. A `the_relative_geometry`
+block states what the take supports and what it does not, and it says
+the scale is not guessed as a **field in the JSON**
+(`the_scale_is_guessed: false`), not as a promise in prose. And the two
+sensors' units are now **READ from the bundles** and printed either
+way, instead of being asserted to differ — which was false for the
+keyframe channel and is the truth for it.
+
+**AND A RULE FOR A NUMBER THAT HAD NONE.** The **94.938** in the
+earlier prose was a filed number with no tool behind it. It is now
+`lens.signal_threshold(maps, duty_target=0.90)`: **the threshold at
+which a channel is on 90 % of its frames** — the 10th percentile of its
+per-frame change-map maxima, nearest-rank by convention with the
+interpolated value reported beside it, and the ties reported too
+because they change the share. On this take it reproduces **94.9375**
+exactly and finds **2** crossings where the grain floor of 3.000 finds
+**0**.
+
+**THE WITNESS IS NOW RUN AT BOTH THRESHOLDS, AND NEITHER IS PICKED.**
+The grain floor is the channel's own floor; the signal threshold is
+where the channel is reading the room; the gap between them is a
+finding about the channel and not a parameter to be tuned until the
+answer comes out right.
+
+| the threshold | the fixed view | the roving view | the shared crossing |
+|---|---|---|---|
+| the grain floor | 22 crossings (7 in the shared minutes) | **0** | nothing to share |
+| the signal threshold | 4 crossings (3 in the shared minutes) | **2** | 1 of 2, z **−0.32**, p 0.867 |
+
+**AND THE VERDICT IS NEGATIVE, WITH THE REASONS.** The graded witness's
+slide null still finds its own peak at **−42.1 s** with a spread of
+**227.3 s**, so the duet cannot measure its own alignment. The one
+shared crossing at the signal threshold is what the null produces on
+average (1.21). The relative pose is not measured, because this take's
+pose carries no position and a null heading in all **513** frames.
+
+## 11. The files
 
 | file | what it is |
 |---|---|
 | `experiments/dual_render.py` | the renderer: the three renders, the witness count, the graded witness, the alignment consumer, the pair checker, the synthetic fixture, the selftest |
 | `experiments/dual_ingest.py` | the phone recording → the corpus's bundle format, the room-lens bundle, the verified merge, and the two fixtures |
+| `experiments/lens.py` | the corpus's own lens — and now the **signal threshold's** home: `signal_threshold(maps, duty_target)`, the 10th percentile of a channel's per-frame change-map maxima, beside the change-map floor it is distinct from |
+| `docs/research/DUAL-3-RELATIVE-GEOMETRY.md` | **the relative-geometry report on the real duet** — the matched moments, the three renders, the witnesses, the signal threshold, and what the take cannot license |
+| `docs/research/DUAL-3-RELATIVE-RENDER.txt` | the duet's three renders in relative geometry: the matched-moment dual-ASCII, the fused score, the differenced view, and the witness at both thresholds |
+| `docs/research/DUAL-3-RELATIVE-RENDER.json` | the numbers behind that render: the relative geometry, the channels' thresholds, the witnesses, the alignment sensitivity |
+| `docs/research/DUAL-3-KEYFRAME-META.json` | the keyframe channel's metadata: the crop, the interval, the corpus's own floor, the pose, and its signal threshold |
+| `docs/research/DUAL-3-PHONE-META.json` | the phone ASCII bundle's metadata: the ramp, the tiers, the pose ranges, the anchor estimators, and its signal threshold |
 | `docs/research/dual/DUET-RENDER.md` | **the report on the real pair** — what the duet does and does not show, and why |
 | `docs/research/dual/DUET-RENDER-FLOOR_RELATIVE.txt` | the real duet's three renders, each panel in times its own sensor's grain |
 | `docs/research/dual/DUET-RENDER-SHARED_AUTO.txt` | the same, on one shared scale — the ProArt's panel is black, and that is the point |

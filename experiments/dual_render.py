@@ -168,12 +168,30 @@ class Stream:
         self.floor: float = CHANGE_NOISE_FLOOR
         #: what the change map's numbers MEAN, in words
         self.units: str = 'luma (the camera\'s own)'
+        #: the device's own pose, if the bundle carries one.  It is
+        #: ORIENTATION ONLY -- no position, and the heading is null in
+        #: every frame -- so it says what the relative geometry IS and
+        #: what it cannot be.
+        self.pose: dict = {}
         #: the median interval between this stream's change maps
         self.interval_s: float = 0.0
         #: the share of this stream's frames that show a change above
         #: its OWN floor.  A channel that is on most of the time cannot
         #: TIME a movement, and the witness count is blind to it.
         self.duty_cycle: float = 0.0
+        #: THE SIGNAL THRESHOLD: the threshold at which this channel is
+        #: on 90 % of its frames -- the 10th percentile of its per-frame
+        #: change-map maxima.  It is a SIGNAL threshold and not a grain
+        #: floor: the floor asks "is anything here at all", and this asks
+        #: "is this channel reading the room".  It is measured from the
+        #: very change maps this render draws, so the number and the
+        #: panels cannot disagree.
+        self.signal: dict = {}
+        #: the crossings this channel finds at its OWN floor, and the
+        #: number it finds at its SIGNAL threshold.  Two thresholds, two
+        #: numbers, and the gap between them is a finding about the
+        #: channel rather than a parameter to be tuned.
+        self.crossings_at_floor: int = 0
         self.is_change_map: bool = False
 
         data: dict = {}
@@ -253,12 +271,30 @@ class Stream:
                 self.floor = float(noise['the_floor'])
             if smeta.get('the_units'):
                 self.units = str(smeta['the_units'])
+            if isinstance(smeta.get('the_pose'), dict):
+                self.pose = smeta['the_pose']
         if self.motion is not None and len(self.motion_times_s) >= 2:
             gaps = np.diff(self.motion_times_s)
             self.interval_s = float(np.median(gaps)) if gaps.size else 0.0
         if self.motion is not None and len(self.motion):
             mx = self.motion.reshape(len(self.motion), -1).max(axis=1)
             self.duty_cycle = float((mx > self.floor).mean())
+            # THE SIGNAL THRESHOLD, measured from THESE change maps.
+            self.signal = lens.signal_threshold(self.motion)
+            # the crossings at this channel's OWN floor, and at its
+            # signal threshold, with this channel's OWN frame offsets --
+            # the gap is counted in this channel's own frames, not in
+            # the corpus's 60 fps.
+            self.crossings_at_floor = len(lens.find_crossings(
+                self.motion, threshold=self.floor,
+                offsets=self.motion_times_s))
+            if self.signal.get('the_value') is not None:
+                _ev = lens.find_crossings(
+                    self.motion, threshold=float(self.signal['the_value']),
+                    offsets=self.motion_times_s)
+                self.signal['the_crossings_at_this_threshold'] = len(_ev)
+                self.signal['the_crossings_at_the_grain_floor'] = \
+                    self.crossings_at_floor
 
     @property
     def ok(self) -> bool:
@@ -815,13 +851,17 @@ def _picture_at(stream: Stream, t_s: float) -> np.ndarray:
 def _the_two_sensors(fixed: Stream, roving: Stream) -> list[str]:
     """What the two sensors ARE, in the units the panels are drawn in.
 
-    THE TWO VIEWS ARE NOT IN THE SAME UNITS, and a reader who is not
-    told that will read the panels as if they were.  The corpus's
-    change map is in the camera's luma; the room-lens's is in the
-    room-lens's own brightness -- a 2.2x contrast stretch of the
-    camera's luma, clipped, with half its range collapsed into one
-    glyph.  So each sensor's own noise floor is a different NUMBER,
-    and the two sample the room at different rates.
+    **WHETHER THE TWO ARE IN THE SAME UNITS IS A MEASUREMENT, NOT A
+    SENTENCE.**  The room-lens's ASCII channel is a POSTERISED picture --
+    a 2.2x contrast stretch of the camera's luma, clipped, with half its
+    range collapsed into one glyph -- so its change map is a mask of band
+    flips and its floor is a different NUMBER from the camera's.  The
+    phone's KEYFRAME channel is the camera's own luma, cropped to the
+    corpus's aspect, so its change map is the same quantity as the
+    ProArt's and one scale is honest between them.
+
+    What no pairing shares is the SPACE: the two cameras are in different
+    places, and that is said every time.
     """
     out = [
         f'  the fixed view:  change in {fixed.units}; its own floor '
@@ -837,6 +877,41 @@ def _the_two_sensors(fixed: Stream, roving: Stream) -> list[str]:
                    'and the')
         out.append('  contingency table has nothing left to measure. That is '
                    'what the duty cycle above is for.')
+    # THE SIGNAL THRESHOLDS, beside the duty cycle they explain.  A
+    # channel that is on all the time at the GRAIN FLOOR may still be
+    # reading the room at its own SIGNAL threshold -- and the crossing
+    # detector's answer changes with it.
+    for name, st in (('the fixed view', fixed.signal),
+                     ('the roving view', roving.signal)):
+        if not st or st.get('the_value') is None:
+            continue
+        out.append(
+            f'  {name}\'s SIGNAL threshold: {float(st["the_value"]):.3f} '
+            f'{fixed.units if name == "the fixed view" else roving.units} '
+            f'-- the threshold at which this channel is on '
+            f'{float(st["the_duty_cycle_above_the_value"]) * 100.0:.1f} % of '
+            f'its frames (nearest rank; the interpolated percentile would be '
+            f'{float(st["the_value_linear_interpolation"]):.3f}). It finds '
+            f'{int(st.get("the_crossings_at_this_threshold", 0))} crossings '
+            f'at that threshold against '
+            f'{int(st.get("the_crossings_at_the_grain_floor", 0))} at its '
+            f'grain floor.')
+        if float(st['the_value']) == 0.0:
+            out.append(
+                f'  {name}\'s signal threshold is ZERO, and that is a finding '
+                f'about the channel and not about its sensitivity: '
+                f'{float(st.get("the_share_of_frames_at_exactly_zero", 0)) * 100.0:.1f} % '
+                f'of its frames have a maximum of exactly zero -- the recorder '
+                f'writes a picture only when it changes -- and the rest are '
+                f'above it, so the threshold at which this channel is on 90 % '
+                f'of its frames is the threshold that reads EVERYTHING. A '
+                f'channel that cannot be quiet is a channel that is saturated, '
+                f'and it is saturated at its own resolution.')
+    out.append('  THE SIGNAL THRESHOLD IS NOT THE GRAIN FLOOR. The floor '
+               'asks "is there anything here at all"; the signal threshold '
+               'asks "is this channel reading the room". The floor is a '
+               'property of the sensor, the signal threshold a property of '
+               'this recording.')
     if fixed.interval_s and roving.interval_s:
         ratio = roving.interval_s / fixed.interval_s
         out.append(
@@ -844,10 +919,117 @@ def _the_two_sensors(fixed: Stream, roving: Stream) -> list[str]:
             f'roving view\'s interval is {ratio:.2f}x the fixed view\'s, so '
             f'the same movement covers {ratio:.2f}x more of the picture per '
             f'frame in the roving view')
-    out.append('  the two change maps are not in the same units and not in '
-               'the same space: a cell on the left and a cell on the right '
-               'are not the same part of the room')
+    if fixed.units == roving.units:
+        out.append(f'  THE TWO CHANGE MAPS ARE IN THE SAME UNITS -- both are '
+                   f'the camera\'s own luma, {fixed.units} -- so ONE scale is '
+                   f'honest between them. They are still not in the same '
+                   f'SPACE: a cell on the left and a cell on the right are '
+                   f'not the same part of the room')
+    else:
+        out.append('  the two change maps are not in the same units and not '
+                   'in the same space: a cell on the left and a cell on the '
+                   'right are not the same part of the room')
     return out
+
+
+def render_relative_geometry(fixed: Stream, roving: Stream,
+                             align: Alignment) -> tuple[list[str], dict]:
+    """THE RELATIVE GEOMETRY -- what these panels claim, and what they do not.
+
+    **THE ROUTE FOR TWO UNCALIBRATED VIEWS HAS THREE STAGES**, and this
+    render is the first one's output: audio-sync first and sub-frame,
+    then a DUSt3R/MASt3R-style relative pose which is SCALE-FREE, and
+    the metric scale from the ranging/TDOA side.
+
+    **SO NO SCALE IS HERE AND NONE IS GUESSED.** Every number below is
+    relative: a moment, a frame interval, a brightness against a floor.
+    There is no distance in metres in this render and none is assumed.
+
+    **AND THE PANELS ARE ALIGNED IN TIME AND NOT IN SPACE.** Each panel
+    is its own viewpoint's own frame, a cell in the left panel and a cell
+    in the right panel are NOT the same part of the room, and this
+    render makes no attempt to make them so.
+    """
+    blocks: list[str] = []
+    blocks.append('THE RELATIVE GEOMETRY -- WHAT THESE PANELS CLAIM, AND '
+                  'WHAT THEY DO NOT')
+    blocks.append('  THE SCALE IS NOT HERE AND NONE IS GUESSED. The route '
+                  'for two uncalibrated views is audio-sync first and '
+                  'sub-frame, then a DUSt3R/MASt3R-style relative pose '
+                  'which is SCALE-FREE, and the metric scale from the '
+                  'ranging/TDOA side. Every number in this file is '
+                  'relative: a moment, a frame interval, a brightness '
+                  'against a floor. There is no distance in metres here, '
+                  'and none is assumed.')
+    blocks.append('  THE PANELS ARE ALIGNED IN TIME AND NOT IN SPACE. Each '
+                  'panel is its own viewpoint\'s own frame; a cell in the '
+                  'left panel and a cell in the right panel are NOT the '
+                  'same part of the room, and this render makes no attempt '
+                  'to make them so.')
+    blocks.append('  THE MATCHING IS BY MOMENT AND BY NOTHING ELSE. The two '
+                  'views are put side by side because they saw the same '
+                  'minute, not because they saw the same thing from the '
+                  'same place.')
+
+    pose = roving.pose or {}
+    supported: list[str] = []
+    unsupported: list[str] = []
+    if pose:
+        if pose.get('there_is_no_pose'):
+            supported.append('the roving bundle carries no pose at all')
+            unsupported.append('the device\'s orientation is not recorded')
+        else:
+            for key, name in (('the_alpha_range', 'alpha (the azimuth-like '
+                               'tilt)'),
+                              ('the_beta_range', 'beta (the pitch)'),
+                              ('the_gamma_range', 'gamma (the roll)')):
+                rng = pose.get(key)
+                if isinstance(rng, list) and len(rng) == 2:
+                    supported.append(
+                        f'the roving device\'s {name} over the session: '
+                        f'{rng[0]:.1f} to {rng[1]:.1f} degrees')
+            if pose.get('the_heading_is_null_in_every_frame'):
+                unsupported.append(
+                    'the roving device\'s HEADING is null in every frame, so '
+                    'its azimuth is unknown and the two views\' relative '
+                    'ROTATION cannot be solved either')
+            if pose.get('there_is_no_position'):
+                unsupported.append(
+                    'the roving device\'s POSITION was never recorded, so it '
+                    'cannot be placed in the room and the relative '
+                    'TRANSLATION is not measurable from this bundle')
+    else:
+        unsupported.append('this bundle carries no pose, so nothing about '
+                           'the relative geometry can be said from it')
+
+    blocks.append('  WHAT THE TAKE SUPPORTS about the relative geometry:')
+    for s in supported:
+        blocks.append(f'    - {s}')
+    blocks.append('  WHAT THE TAKE DOES NOT SUPPORT:')
+    for s in unsupported:
+        blocks.append(f'    - {s}')
+    blocks.append('  SO THE RELATIVE POSE IS NOT MEASURED HERE, AND THAT IS '
+                  'A PROPERTY OF THE TAKE AND NOT A CHOICE: the relative '
+                  'pose needs a position and a heading, and this bundle has '
+                  'neither. The scale has not landed, and it is not guessed.')
+    blocks.append(f'  THE TIME AXIS IS THE ONLY AXIS THEY SHARE: the '
+                  f'fixed side is one frame every '
+                  f'{fixed.interval_s * 1000.0:.3f} ms and the roving side '
+                  f'one every {roving.interval_s * 1000.0:.3f} ms, and the '
+                  f'offset between their clocks is {align.offset_ms:+.3f} ms '
+                  f'({align.source.split(" (")[0]}).')
+
+    numbers = {
+        'the_scale_is_guessed': False,
+        'the_panels_are_aligned_in': 'TIME, and not in space',
+        'the_fixed_frame_interval_ms': round(fixed.interval_s * 1000.0, 3),
+        'the_roving_frame_interval_ms': round(roving.interval_s * 1000.0, 3),
+        'the_offset_ms': align.offset_ms,
+        'the_pose': pose or None,
+        'the_what_the_take_supports': supported,
+        'the_what_the_take_does_not_support': unsupported,
+    }
+    return blocks, numbers
 
 
 def render_dual_ascii(fixed: Stream, roving: Stream, align: Alignment,
@@ -1066,33 +1248,11 @@ def crossing_witness(fixed: Stream, roving: Stream, align: Alignment,
 
     gaps = {'fixed': gap_of(fixed), 'roving': gap_of(roving)}
 
-    def crossings(stream: Stream) -> list[tuple[float, float]]:
-        ev = _lens.find_crossings(stream.motion, threshold=stream.floor,
+    def crossings(stream: Stream, thr: float) -> list[tuple[float, float]]:
+        ev = _lens.find_crossings(stream.motion, threshold=thr,
                                   offsets=stream.motion_times_s)
         return [(float(stream.motion_times_s[e['start_frame']]),
                  float(stream.motion_times_s[e['end_frame']])) for e in ev]
-
-    fx_all = crossings(fixed)
-    rv_all = crossings(roving)
-    fx = [(a, b) for a, b in fx_all if b >= t0 and a <= t1]
-    out['the_fixed_crossings_total'] = len(fx_all)
-    out['the_fixed_crossings_in_the_shared_minutes'] = len(fx)
-    out['the_roving_crossings_total'] = len(rv_all)
-    out['the_gaps_s'] = {k: round(v, 3) for k, v in gaps.items()}
-    if not fx or not rv_all:
-        which = []
-        if not fx:
-            which.append('the fixed view')
-        if not rv_all:
-            which.append('the roving view')
-        out['the_note'] = (
-            f'{" and ".join(which)} found no crossings at all. The corpus '
-            f'detector needs a blob that holds its shape while it '
-            f'TRANSLATES, and a channel that changes everywhere -- a hand-'
-            f'held camera, whose whole picture moves -- has no such blob. '
-            f'That is a finding about the channel, not a failure of the '
-            f'render.')
-        return out
 
     def _overlap(a, b, c, d, crit: str) -> bool:
         lo, hi = max(a, c), min(b, d)
@@ -1102,54 +1262,117 @@ def crossing_witness(fixed: Stream, roving: Stream, align: Alignment,
             return True
         return (hi - lo) >= 0.5 * min(b - a, d - c)
 
-    def count(dx: float, crit: str) -> int:
-        n = 0
-        for a, b in rv_all:
-            A = align.fixed_time_for_roving(a) + dx
-            B = align.fixed_time_for_roving(b) + dx
-            if B < t0 or A > t1:
-                continue
-            for f0, f1 in fx:
-                if _overlap(A, B, f0, f1, crit):
-                    n += 1
-                    break
-        return n
-
     shifts = list(range(int(-shift_max_s), int(shift_max_s) + 1))
-    for crit in ('overlap', 'half'):
-        obs = count(0.0, crit)
-        slides = np.asarray([count(float(d), crit) for d in shifts])
-        sd = float(slides.std())
-        out['the_readings'][crit] = {
-            'the_criterion': ('the two crossings\' intervals overlap at all'
-                              if crit == 'overlap' else
-                              'they share at least half of the SHORTER one'),
-            'the_observed': obs,
-            'the_n_roving_crossings': len(rv_all),
-            'the_null_mean': round(float(slides.mean()), 3),
-            'the_null_sd': round(sd, 3),
-            'the_null_max': int(slides.max()),
-            'the_z': round((obs - float(slides.mean())) / sd, 3) if sd > 0 else None,
-            'the_share_of_slides_that_match_it': int((slides >= obs).sum()),
-            'the_n_slides': len(slides),
-            'the_p_by_the_slide': round(float((slides >= obs).sum()) / len(slides), 4),
+
+    def analyse(fx: list[tuple[float, float]],
+                rv_all: list[tuple[float, float]]) -> dict:
+        """The witness at ONE pair of thresholds: the null, the z, and
+        how far the alignment can be wrong before the answer goes."""
+        def count(dx: float, crit: str) -> int:
+            n = 0
+            for a, b in rv_all:
+                A = align.fixed_time_for_roving(a) + dx
+                B = align.fixed_time_for_roving(b) + dx
+                if B < t0 or A > t1:
+                    continue
+                for f0, f1 in fx:
+                    if _overlap(A, B, f0, f1, crit):
+                        n += 1
+                        break
+            return n
+
+        readings: dict = {}
+        for crit in ('overlap', 'half'):
+            obs = count(0.0, crit)
+            slides = np.asarray([count(float(d), crit) for d in shifts])
+            sd = float(slides.std())
+            readings[crit] = {
+                'the_criterion': ('the two crossings\' intervals overlap at all'
+                                  if crit == 'overlap' else
+                                  'they share at least half of the SHORTER one'),
+                'the_observed': obs,
+                'the_n_roving_crossings': len(rv_all),
+                'the_null_mean': round(float(slides.mean()), 3),
+                'the_null_sd': round(sd, 3),
+                'the_null_max': int(slides.max()),
+                'the_z': round((obs - float(slides.mean())) / sd, 3) if sd > 0 else None,
+                'the_share_of_slides_that_match_it': int((slides >= obs).sum()),
+                'the_n_slides': len(slides),
+                'the_p_by_the_slide': round(float((slides >= obs).sum()) / len(slides), 4),
+            }
+        # how far the alignment can be wrong before the result goes
+        sens = []
+        for d in (0.0, 1.0, 2.0, 5.0, 10.0, 20.0):
+            obs = count(d, 'overlap')
+            slides = np.asarray([count(float(x), 'overlap') for x in shifts])
+            sd = float(slides.std())
+            sens.append({'the_shift_s': d, 'the_observed': obs,
+                         'the_null_mean': round(float(slides.mean()), 3),
+                         'the_z': round((obs - float(slides.mean())) / sd, 3) if sd > 0 else None})
+        return {'the_readings': readings, 'the_alignment_sensitivity': sens}
+
+    # THE WITNESS IS RUN AT BOTH THRESHOLDS AND BOTH ARE REPORTED.
+    # The grain floor is the channel's own floor; the signal threshold
+    # is where each channel is on 90 % of its frames.  Neither is
+    # chosen after the fact: the grain floor is the primary and the
+    # signal threshold is reported beside it, because the gap between
+    # them is a finding about the channel and not a parameter to be
+    # tuned until the answer comes out right.
+    sig_fixed = fixed.signal.get('the_value')
+    sig_roving = roving.signal.get('the_value')
+    thresholds = [('at_the_grain_floor', float(fixed.floor),
+                   float(roving.floor))]
+    if sig_fixed is not None and sig_roving is not None:
+        thresholds.append(('at_the_signal_threshold', float(sig_fixed),
+                           float(sig_roving)))
+
+    by_threshold: dict = {}
+    for name, tf, tr in thresholds:
+        fx_all = crossings(fixed, tf)
+        rv_all = crossings(roving, tr)
+        fx = [(a, b) for a, b in fx_all if b >= t0 and a <= t1]
+        block: dict = {
+            'the_fixed_threshold': round(tf, 4),
+            'the_roving_threshold': round(tr, 4),
+            'the_fixed_crossings_total': len(fx_all),
+            'the_fixed_crossings_in_the_shared_minutes': len(fx),
+            'the_roving_crossings_total': len(rv_all),
         }
-    # how far the alignment can be wrong before the result goes
-    sens = []
-    for d in (0.0, 1.0, 2.0, 5.0, 10.0, 20.0):
-        obs = count(d, 'overlap')
-        slides = np.asarray([count(float(x), 'overlap') for x in shifts])
-        sd = float(slides.std())
-        sens.append({'the_shift_s': d, 'the_observed': obs,
-                     'the_null_mean': round(float(slides.mean()), 3),
-                     'the_z': round((obs - float(slides.mean())) / sd, 3) if sd > 0 else None})
-    out['the_alignment_sensitivity'] = sens
-    out['the_note'] = (
-        'the looser criterion is the one that was asked for first and the '
-        'tighter one is reported beside it, not instead of it. The result '
-        'is a statement that the two views find the same crossings WITHIN '
-        'A FEW SECONDS; it is not a measurement of the alignment, because '
-        'it survives a misalignment of several seconds.')
+        if not fx or not rv_all:
+            which = []
+            if not fx:
+                which.append('the fixed view')
+            if not rv_all:
+                which.append('the roving view')
+            block['the_note'] = (
+                f'{" and ".join(which)} found no crossings at all. The corpus '
+                f'detector needs a blob that holds its shape while it '
+                f'TRANSLATES, and a channel that changes everywhere -- a hand-'
+                f'held camera, whose whole picture moves -- has no such blob. '
+                f'That is a finding about the channel, not a failure of the '
+                f'render.')
+        else:
+            block.update(analyse(fx, rv_all))
+        by_threshold[name] = block
+
+    primary = by_threshold['at_the_grain_floor']
+    out['the_fixed_crossings_total'] = primary['the_fixed_crossings_total']
+    out['the_fixed_crossings_in_the_shared_minutes'] = \
+        primary['the_fixed_crossings_in_the_shared_minutes']
+    out['the_roving_crossings_total'] = primary['the_roving_crossings_total']
+    out['the_readings'] = primary.get('the_readings', {})
+    out['the_alignment_sensitivity'] = primary.get('the_alignment_sensitivity', [])
+    out['the_gaps_s'] = {k: round(v, 3) for k, v in gaps.items()}
+    out['the_by_threshold'] = by_threshold
+    if primary.get('the_note'):
+        out['the_note'] = primary['the_note']
+    else:
+        out['the_note'] = (
+            'the looser criterion is the one that was asked for first and the '
+            'tighter one is reported beside it, not instead of it. The result '
+            'is a statement that the two views find the same crossings WITHIN '
+            'A FEW SECONDS; it is not a measurement of the alignment, because '
+            'it survives a misalignment of several seconds.')
     return out
 
 
@@ -1158,9 +1381,6 @@ def render_crossing_witness(w: dict) -> list[str]:
     lines = []
     lines.append('THE CROSSING WITNESS -- do the two views find the same '
                  'CROSSINGS?')
-    if not w.get('the_readings'):
-        lines.append(f'  {w.get("the_note", "no reading")}')
-        return lines
     lines.append('  a crossing is the corpus\'s own: a CONNECTED BLOB of change '
                  'that holds its shape while it')
     lines.append('  TRANSLATES.  The grain does not translate, a highlight is one '
@@ -1178,30 +1398,64 @@ def render_crossing_witness(w: dict) -> list[str]:
                  f'60 fps and 0.70 at 2,')
     lines.append('  and at 0.70 frames no blob ever chains, so the corpus\'s '
                  'own walk-by study found NOTHING in its 2 fps sessions.')
-    lines.append('')
-    lines.append('  criterion                                 observed   null mean'
-                 '   null sd       z   slides that match it      p')
-    for name, r in w['the_readings'].items():
-        lines.append(
-            f'  {r["the_criterion"][:40]:40s}  {r["the_observed"]:4d} of '
-            f'{r["the_n_roving_crossings"]:3d}   {r["the_null_mean"]:9.2f}  '
-            f'{r["the_null_sd"]:8.2f}  {r["the_z"]:+5.2f}   '
-            f'{r["the_share_of_slides_that_match_it"]:4d} of '
-            f'{r["the_n_slides"]:4d}   {r["the_p_by_the_slide"]:.3f}')
-    lines.append('')
-    lines.append('  how much the alignment can be wrong before the result goes:')
-    for s in w.get('the_alignment_sensitivity', []):
-        lines.append(f'    the alignment moved {s["the_shift_s"]:+5.1f} s: the '
-                     f'observed {s["the_observed"]:3d}, the null mean '
-                     f'{s["the_null_mean"]:6.2f}, z {s["the_z"]:+5.2f}')
-    lines.append('')
-    lines.append('  A RESULT THAT SURVIVES A MISALIGNMENT OF SEVERAL SECONDS IS '
-                 'NOT A MEASUREMENT OF THE')
-    lines.append('  ALIGNMENT.  It is a statement that the two views find the '
-                 'same crossings at the same')
-    lines.append('  MOMENTS, which is the thing two sovereign logs of the same '
-                 'minutes give that neither')
-    lines.append('  gives alone.  The claps are still what settles the skew.')
+    if not w.get('the_readings'):
+        lines.append('')
+        lines.append(f'  AT THE GRAIN FLOOR: {w.get("the_note", "no reading")}')
+    else:
+        lines.append('')
+        lines.append('  criterion                                 observed   null mean'
+                     '   null sd       z   slides that match it      p')
+        for name, r in w['the_readings'].items():
+            lines.append(
+                f'  {r["the_criterion"][:40]:40s}  {r["the_observed"]:4d} of '
+                f'{r["the_n_roving_crossings"]:3d}   {r["the_null_mean"]:9.2f}  '
+                f'{r["the_null_sd"]:8.2f}  {r["the_z"]:+5.2f}   '
+                f'{r["the_share_of_slides_that_match_it"]:4d} of '
+                f'{r["the_n_slides"]:4d}   {r["the_p_by_the_slide"]:.3f}')
+        lines.append('')
+        lines.append('  how much the alignment can be wrong before the result goes:')
+        for s in w.get('the_alignment_sensitivity', []):
+            lines.append(f'    the alignment moved {s["the_shift_s"]:+5.1f} s: the '
+                         f'observed {s["the_observed"]:3d}, the null mean '
+                         f'{s["the_null_mean"]:6.2f}, z {s["the_z"]:+5.2f}')
+    # THE SAME WITNESS AT THE OTHER THRESHOLD, side by side.
+    sig_block = (w.get('the_by_threshold') or {}).get('at_the_signal_threshold')
+    if sig_block:
+        lines.append('')
+        lines.append('  THE SAME WITNESS AT EACH CHANNEL\'S OWN SIGNAL THRESHOLD '
+                     '-- the threshold at which that')
+        lines.append('  channel is on 90 % of its frames, which is not the '
+                     'grain floor and is not chosen after the fact:')
+        lines.append(f'    the fixed view at {sig_block["the_fixed_threshold"]:.3f} '
+                     f'finds {sig_block["the_fixed_crossings_total"]} crossings '
+                     f'({sig_block["the_fixed_crossings_in_the_shared_minutes"]} '
+                     f'in the shared minutes); the roving view at '
+                     f'{sig_block["the_roving_threshold"]:.3f} finds '
+                     f'{sig_block["the_roving_crossings_total"]}.')
+        for name, r in (sig_block.get('the_readings') or {}).items():
+            lines.append(
+                f'    {r["the_criterion"][:40]:40s}  {r["the_observed"]:4d} of '
+                f'{r["the_n_roving_crossings"]:3d}   {r["the_null_mean"]:9.2f}  '
+                f'{r["the_null_sd"]:8.2f}  {r["the_z"]:+5.2f}   '
+                f'{r["the_share_of_slides_that_match_it"]:4d} of '
+                f'{r["the_n_slides"]:4d}   {r["the_p_by_the_slide"]:.3f}')
+        if sig_block.get('the_note'):
+            lines.append(f'    AT THE SIGNAL THRESHOLD: {sig_block["the_note"]}')
+        lines.append('    BOTH THRESHOLDS ARE REPORTED AND NEITHER IS PICKED: the '
+                     'grain floor is the channel\'s own floor, and')
+        lines.append('    the signal threshold is where the channel is reading the '
+                     'room. The gap between them is a finding')
+        lines.append('    about the channel and not a parameter to be tuned until '
+                     'the answer comes out right.')
+    if w.get('the_readings'):
+        lines.append('')
+        lines.append('  A RESULT THAT SURVIVES A MISALIGNMENT OF SEVERAL SECONDS IS '
+                     'NOT A MEASUREMENT OF THE')
+        lines.append('  ALIGNMENT.  It is a statement that the two views find the '
+                     'same crossings at the same')
+        lines.append('  MOMENTS, which is the thing two sovereign logs of the same '
+                     'minutes give that neither')
+        lines.append('  gives alone.  The claps are still what settles the skew.')
     return lines
 
 
@@ -2065,6 +2319,42 @@ def selftest() -> int:
         ck('render: the dual-ASCII states the window statistic',
            any('window statistic' in line for line in dual))
 
+        # 6a. THE RELATIVE GEOMETRY: the law, and what the take supports
+        rel, reln = render_relative_geometry(fixed, roving, al2)
+        reltext = '\n'.join(rel)
+        ck('render: the relative geometry says the scale is not guessed',
+           'THE SCALE IS NOT HERE AND NONE IS GUESSED' in reltext
+           and reln['the_scale_is_guessed'] is False,
+           reltext[:160])
+        ck('render: the relative geometry says the panels are aligned in '
+           'TIME and not in space',
+           'NOT IN SPACE' in reltext
+           and reln['the_panels_are_aligned_in'].startswith('TIME'),
+           reln['the_panels_are_aligned_in'])
+        ck('render: the relative geometry names what the take does NOT '
+           'support',
+           bool(reln['the_what_the_take_does_not_support'])
+           and 'DOES NOT SUPPORT' in reltext,
+           str(reln['the_what_the_take_does_not_support'])[:160])
+
+        # 6b. THE MATCHED MOMENTS: the roving stream's own frames, each
+        #     one carried into the fixed clock by the alignment
+        matched_moments = [al2.fixed_time_for_roving(float(t))
+                           for t in roving.motion_times_s]
+        ck('render: the matched moments are the roving stream\'s own frames',
+           len(matched_moments) == len(roving.motion_times_s)
+           and len(matched_moments) > 0,
+           f'{len(matched_moments)} moments')
+        ck('render: the matched moments invert back to the roving frames',
+           all(abs(al2.roving_time_for_fixed(t) - float(r))
+               < 1e-9
+               for t, r in zip(matched_moments, roving.motion_times_s)))
+        ck('render: the matched moments are the roving frames and NOT an '
+           'evenly spread set',
+           len(matched_moments) > 3
+           and len({round(t, 3) for t in matched_moments}) == len(matched_moments),
+           f'{len(matched_moments)} distinct')
+
         # the whole overlap, so the slices cover the window where the
         # person walks OUT of the fixed camera's field of view and the
         # roving eye is the only one that still sees them
@@ -2225,6 +2515,43 @@ def selftest() -> int:
            len(mini_cw.get('the_alignment_sensitivity', [])) >= 3,
            str(len(mini_cw.get('the_alignment_sensitivity', []))))
 
+        # 12c. THE SIGNAL THRESHOLD: measured from the stream's OWN
+        #      change maps, and the witness run at BOTH thresholds.
+        ck('render: the stream measures its own signal threshold',
+           mini_a.signal.get('the_value') is not None
+           and mini_a.signal.get('the_n_frames', 0) == 40
+           and mini_a.signal.get('the_rank', 0) == 4,
+           json.dumps({k: mini_a.signal.get(k) for k in
+                       ('the_value', 'the_n_frames', 'the_rank')}))
+        ck('render: the stream counts its crossings at the signal threshold',
+           'the_crossings_at_this_threshold' in mini_a.signal
+           and 'the_crossings_at_the_grain_floor' in mini_a.signal,
+           json.dumps({k: mini_a.signal.get(k) for k in
+                       ('the_crossings_at_this_threshold',
+                        'the_crossings_at_the_grain_floor')}))
+        bt = mini_cw.get('the_by_threshold') or {}
+        ck('render: the crossing witness is run at BOTH thresholds and '
+           'neither is picked',
+           'at_the_grain_floor' in bt
+           and 'at_the_signal_threshold' in bt
+           and bt['at_the_grain_floor']['the_fixed_threshold']
+           == mini_a.floor
+           and bt['at_the_signal_threshold']['the_fixed_threshold']
+           == mini_a.signal.get('the_value'),
+           json.dumps({k: bt.get(k, {}).get('the_fixed_threshold')
+                       for k in bt}))
+        cwtext = '\n'.join(render_crossing_witness(mini_cw))
+        ck('render: the crossing witness PRINTS the other threshold',
+           'SIGNAL THRESHOLD' in cwtext
+           and 'BOTH THRESHOLDS ARE REPORTED' in cwtext,
+           cwtext[-240:])
+        sensors = '\n'.join(_the_two_sensors(mini_a, mini_b))
+        ck('render: the two sensors say the signal threshold is not the '
+           'grain floor',
+           'THE SIGNAL THRESHOLD IS NOT THE GRAIN FLOOR' in sensors
+           and 'SIGNAL threshold:' in sensors,
+           sensors[-240:])
+
         # 11. the sidecar's OWN note is carried into the output
         note_path = tmp / 'note.json'
         note_path.write_text(json.dumps({'offset_ms': 12.0, 'drift_ppm': 0.0,
@@ -2301,6 +2628,16 @@ def selftest() -> int:
         ck('render: the two change maps are not in the same units',
            'not in the same units' in ' '.join(_the_two_sensors(fixed, ps)),
            ' '.join(_the_two_sensors(fixed, ps))[:120])
+        # and the other branch: when the two ARE in the same units the
+        # output must say THAT, because the phone's KEYFRAME channel is
+        # the camera's own luma and one scale is honest between the views.
+        keep_units = ps.units
+        ps.units = fixed.units
+        same = ' '.join(_the_two_sensors(fixed, ps))
+        ps.units = keep_units
+        ck('render: when the two views ARE in the same units it says so',
+           'ARE IN THE SAME UNITS' in same and 'not in the same units' not in same,
+           same[-200:])
 
     failed = [c for c in checks if not c[1]]
     for name, ok, detail in checks:
@@ -2346,6 +2683,11 @@ def main(argv=None) -> int:
                     help='the slice length, in seconds, for the fused score')
     ap.add_argument('--moments', type=int, default=6,
                     help='how many moments the dual-ASCII shows')
+    ap.add_argument('--matched', action='store_true',
+                    help='the moments are the ROVING stream\'s OWN frames, '
+                         'each one paired with the witness\'s frame at the '
+                         'same instant: a MATCHED MOMENT, not an evenly '
+                         'spread one')
     ap.add_argument('--check', action='store_true',
                     help='report whether the pair is renderable and stop')
     ap.add_argument('--shifts', default='0,-250,-500,-1000,-2000,500,1000,2000',
@@ -2395,8 +2737,19 @@ def main(argv=None) -> int:
     out_dir.mkdir(parents=True, exist_ok=True)
     t0, t1 = report['the_overlap_s']
     span = max(0.0, t1 - t0)
-    moments = [t0 + span * (i + 0.5) / max(1, args.moments)
-               for i in range(args.moments)]
+    matched = bool(args.matched)
+    if matched:
+        # THE MATCHED MOMENTS: the ROVING stream's own frames, each one
+        # carried into the fixed clock by the alignment, so that every
+        # panel pair is the SAME MOMENT seen two ways.  The pairing is in
+        # TIME and in nothing else -- there is no spatial registration
+        # here and none is claimed.
+        moments = [align.fixed_time_for_roving(float(t))
+                   for t in roving.motion_times_s]
+        moments = [t for t in moments if t0 - 1e-6 <= t <= t1 + 1e-6]
+    else:
+        moments = [t0 + span * (i + 0.5) / max(1, args.moments)
+                   for i in range(args.moments)]
 
     blocks = []
     blocks.append('=' * 78)
@@ -2417,7 +2770,16 @@ def main(argv=None) -> int:
     blocks.append(f'  {align.describe()}')
     blocks.append(f'  overlap: {t0:+.2f} s .. {t1:+.2f} s '
                   f'({span:.2f} s of shared minutes)')
+    if matched:
+        blocks.append(f'  THE MOMENTS ARE MATCHED: {len(moments)} of them, '
+                      f'one per roving frame, each carried into the fixed '
+                      f'clock by the alignment. The pairing is by MOMENT '
+                      f'and by nothing else.')
     blocks.append('=' * 78)
+    blocks.append('')
+
+    rel_geom, rel_num = render_relative_geometry(fixed, roving, align)
+    blocks.extend(rel_geom)
     blocks.append('')
 
     dual, dnum = render_dual_ascii(fixed, roving, align, moments,
@@ -2450,6 +2812,31 @@ def main(argv=None) -> int:
         'generated_utc': time.strftime('%Y-%m-%dT%H:%M:%SZ', time.gmtime()),
         'the_pair_is_synthetic': bool(args.synthetic),
         'the_pair': report,
+        'the_relative_geometry': rel_num,
+        'the_channels': {
+            'the_rule': ('each channel\'s SIGNAL threshold -- the threshold at '
+                         'which that channel is on 90 % of its frames -- and '
+                         'the crossings it finds at that threshold and at its '
+                         'grain floor'),
+            'the_fixed': {
+                'the_label': fixed.label,
+                'the_units': fixed.units,
+                'the_floor': fixed.floor,
+                'the_duty_cycle': round(fixed.duty_cycle, 6),
+                'the_frame_interval_ms': round(fixed.interval_s * 1000.0, 3),
+                'the_crossings_at_the_floor': fixed.crossings_at_floor,
+                'the_signal_threshold': fixed.signal,
+            },
+            'the_roving': {
+                'the_label': roving.label,
+                'the_units': roving.units,
+                'the_floor': roving.floor,
+                'the_duty_cycle': round(roving.duty_cycle, 6),
+                'the_frame_interval_ms': round(roving.interval_s * 1000.0, 3),
+                'the_crossings_at_the_floor': roving.crossings_at_floor,
+                'the_signal_threshold': roving.signal,
+            },
+        },
         'the_dual_ascii': dnum,
         'the_fused_score': fnum,
         'the_witness_count': count,
@@ -2461,6 +2848,11 @@ def main(argv=None) -> int:
             'mode': args.mode, 'scale': args.scale, 'map': args.map,
             'window_s': args.window, 'slice_s': args.slice,
             'moments': len(moments),
+            'the_moments_are_matched': matched,
+            'the_moment_rule': ('the roving stream\'s own frames, each '
+                                'carried into the fixed clock by the '
+                                'alignment' if matched else
+                                'evenly spread across the overlap'),
         },
     }
     (out_dir / 'dual_render.json').write_text(json.dumps(summary, indent=2))

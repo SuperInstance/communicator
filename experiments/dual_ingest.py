@@ -725,6 +725,44 @@ def merge_fixed_sessions(session_dirs: list[Path], out_dir: Path,
     return out
 
 
+def the_pose_block(frames: list[dict]) -> dict:
+    """The device orientation the bundle carries, AND WHAT IT DOES NOT.
+
+    **THE POSE IS ORIENTATION ONLY.**  There is no position anywhere in
+    it, and the heading is null in every frame, so the bundle cannot
+    place the device in the room: the device's tilt is known, its azimuth
+    is not, and where it stood is not recorded at all.  That is why a
+    RELATIVE POSE against another view cannot be solved from this bundle
+    -- and why the SCALE certainly is not in it either.
+
+    Both the ASCII bundle and the keyframe bundle carry this, because the
+    keyframes are the phone's own frames and the phone's pose is the
+    phone's.
+    """
+    poses = [f['pose'] for f in frames
+             if isinstance(f, dict) and isinstance(f.get('pose'), dict)]
+    if not poses:
+        return {'the_note': 'this bundle carries no pose at all',
+                'there_is_no_pose': True}
+    return {
+        'the_note': 'the device orientation attached to every frame',
+        'the_alpha_range': [min(float(p['alpha']) for p in poses),
+                            max(float(p['alpha']) for p in poses)],
+        'the_beta_range': [min(float(p['beta']) for p in poses),
+                           max(float(p['beta']) for p in poses)],
+        'the_gamma_range': [min(float(p['gamma']) for p in poses),
+                            max(float(p['gamma']) for p in poses)],
+        'the_heading_is_null_in_every_frame': all(
+            p.get('heading') is None for p in poses),
+        'there_is_no_position': True,
+        'the_what_this_does_not_license': (
+            'there is NO POSITION in the pose, so the device cannot be '
+            'placed in the room, and the heading is null, so its azimuth is '
+            'unknown: a relative pose against another view cannot be solved '
+            'from this bundle, and the SCALE certainly is not in it'),
+    }
+
+
 def ingest_room_lens(path: Path, out_dir: Path, label: str = 'the phone room-lens',
                       fixed_dirs: list[Path] | None = None,
                       fixed_label: str = 'the fixed witness',
@@ -879,6 +917,20 @@ def ingest_room_lens(path: Path, out_dir: Path, label: str = 'the phone room-len
         the_noise = {'the_n_pairs': 0,
                      'note': 'no usable pairs'}
 
+    # THE SIGNAL THRESHOLD: where this channel stops being grain.  It is
+    # a SIGNAL threshold and not a grain floor: the floor asks "is there
+    # anything here at all", and this asks "is this channel reading the
+    # room".  It is measured on THIS recording, because a channel's
+    # health is a property of the recording and not of the sensor.
+    sig = lens.signal_threshold(change)
+    _ct_s = np.asarray(change_times, dtype=float) / 1000.0
+    if sig.get('the_value') is not None:
+        sig['the_crossings_at_this_threshold'] = len(
+            lens.find_crossings(change, threshold=float(sig['the_value']),
+                                 offsets=_ct_s))
+        sig['the_crossings_at_the_own_floor'] = len(
+            lens.find_crossings(change, threshold=float(band), offsets=_ct_s))
+
     tiers = [str(f.get('tier', '')) for f in frames]
     meta = {
         'tool': 'dual_ingest -- the room-lens',
@@ -941,17 +993,8 @@ def ingest_room_lens(path: Path, out_dir: Path, label: str = 'the phone room-len
                      'the luma render has a phone side to show'),
         },
         'the_noise_of_this_sensor': the_noise,
-        'the_pose': {
-            'the_note': 'the device orientation attached to every frame',
-            'the_alpha_range': [min(float(f['pose']['alpha']) for f in frames),
-                                max(float(f['pose']['alpha']) for f in frames)],
-            'the_beta_range': [min(float(f['pose']['beta']) for f in frames),
-                               max(float(f['pose']['beta']) for f in frames)],
-            'the_gamma_range': [min(float(f['pose']['gamma']) for f in frames),
-                                max(float(f['pose']['gamma']) for f in frames)],
-            'the_heading_is_null_in_every_frame': all(
-                f['pose'].get('heading') is None for f in frames),
-        },
+        'the_signal_threshold': sig,
+        'the_pose': the_pose_block(frames),
         'the_keyframes': len(data.get('keyframes') or []),
         'the_rir_measures': len(data.get('rirMeasures') or []),
     }
@@ -1095,6 +1138,30 @@ def ingest_room_lens_keyframes(data: dict, out_dir: Path,
 
     gaps = [times_ms[i + 1] - times_ms[i] for i in range(len(times_ms) - 1)]
     median_gap = sorted(gaps)[len(gaps) // 2]
+
+    # THE SIGNAL THRESHOLD for this channel, measured on THIS recording.
+    # The grain floor stays the corpus's own 3.0 -- that is a different
+    # question, and borrowing one for the other is how a number comes to
+    # mean nothing.  This asks: at what threshold is the keyframe
+    # channel on 90 % of its frames?  The answer is a property of the
+    # recording, so it is measured here and filed with the bundle.
+    kf_maps = lens.frame_motion_maps(out_dir)
+    sig = lens.signal_threshold(kf_maps)
+    if sig.get('the_value') is not None:
+        _kf_times_s = np.asarray(
+            [(times_ms[i] + times_ms[i + 1]) / 2.0
+             for i in range(len(times_ms) - 1)], dtype=float) / 1000.0
+        sig['the_crossings_at_this_threshold'] = len(
+            lens.find_crossings(kf_maps, threshold=float(sig['the_value']),
+                                offsets=_kf_times_s))
+        sig['the_crossings_at_the_grain_floor'] = len(
+            lens.find_crossings(kf_maps, threshold=CHANGE_NOISE_FLOOR,
+                                offsets=_kf_times_s))
+        sig['the_crossing_detector_note'] = (
+            'the corpus\'s OWN crossing detector, with this channel\'s own '
+            'frame offsets, so the gap is counted in this channel\'s own '
+            'frames and not in the corpus\'s 60 fps')
+
     meta = {
         'tool': 'dual_ingest -- the keyframe channel',
         'generated_utc': iso_now(),
@@ -1111,6 +1178,13 @@ def ingest_room_lens_keyframes(data: dict, out_dir: Path,
                           'note': 'the corpus\'s own luma geometry, so '
                                   'experiments/lens.py computes this '
                                   'channel\'s change map unchanged'},
+        'the_units': 'luma (the camera\'s own)',
+        'the_units_note': ('THIS CHANNEL IS IN THE SAME UNITS AS THE '
+                           'PROART\'S, because it IS the camera\'s own luma '
+                           'rather than the room-lens\'s posterised '
+                           'brightness: one scale is honest between the two '
+                           'views, and this is the only pairing of the '
+                           'phone\'s two channels where that is true'),
         'the_frame_interval_ms': {
             'the_median': round(median_gap, 3),
             'the_min': round(min(gaps), 3),
@@ -1119,6 +1193,7 @@ def ingest_room_lens_keyframes(data: dict, out_dir: Path,
         },
         'the_wall_clock_of_the_first_frame': _iso_from_ms(first_wall),
         'the_clock_anchor': anchor,
+        'the_pose': the_pose_block(kfs),
         'the_noise_of_this_sensor': {
             'the_floor': CHANGE_NOISE_FLOOR,
             'the_note': ('THE CORPUS\'S OWN FLOOR, because this channel IS '
@@ -1128,6 +1203,7 @@ def ingest_room_lens_keyframes(data: dict, out_dir: Path,
                          'different number because the ASCII channel is a '
                          'different quantity.'),
         },
+        'the_signal_threshold': sig,
         'the_note': ('the camera\'s own luma, from the keyframes the '
                      'room-lens already banked. This is the second way the '
                      'phone can be read, and the one that puts the two '
