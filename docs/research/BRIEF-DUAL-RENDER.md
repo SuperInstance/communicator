@@ -715,7 +715,35 @@ measurements say the same thing from the other end: the phone's channel
 is on **99.8 %** of the time, and a channel that is on most of the time
 cannot time a movement.
 
-## 9. The files
+## 9. WHAT THE NEXT TAKE MUST CARRY, AND WHY EACH ITEM IS THERE
+
+**Every item below kills a MEASURED failure on the dual-3 take, not a
+hypothetical one.** The take is spent — its clap channel was dead and the
+wall clock is permanent for it — so the next take's capture contract is
+the one thing this lane can still fix in advance.
+
+| the item | the measured failure it kills |
+|---|---|
+| **claps audible at BOTH devices** | four independent detectors were all at their floors on dual-3: the phone's speaker at gain 0.4 does not reach the Realtek witness across the room, and the phone's ambient audio — the only place its claps would have lived — is 4.4 s of 3.5 minutes |
+| **the phone's POSITION, recorded** | the bundle carries alpha, beta and gamma and nothing else: **no position, and no heading in any of the 513 frames**. A delay gives a hyperbola of position, not a point, so without the phone's place relative to the laptop the TDOA has no geometry and the device-to-device bias cannot be separated from it |
+| **a HEADING, not just a tilt** | the orientation's azimuth is null in every frame, so the phone's view cannot be registered to the ProArt's in space even by hand — the "aligned in TIME and NOT in space" line is not a caveat but the only thing that is true |
+| **the audio, decoded, every part** | the parts race is fixed (room-lens `474d6c0`), but this machine still cannot decode the phone's opus webm, and the ingest would have to take a decoded WAV from a machine that has a decoder |
+| **sub-frame clap times** | the route asks for a sync finer than the video. The capture lane's staged `pair_analysis.py` estimates onsets on a **5 ms hop**, which is sub-frame against the ProArt's 16.667 ms — that is the right kind of number, and the renderer's resolution measurement will say so |
+| **a frame rate the detector can use** | the resolution of a frame-quantised sync is set by the **coarser** of the two streams, and dual-3's fixed side ran at **499.75 ms** a frame, so a frame-quantised sync on that take was quantised at half a second |
+| **the drift in a name the renderer reads** | `drift_ppm` or `drift_ms_per_min` — both are read, both are converted exactly, and any THIRD spelling is reported as not read rather than silently dropped |
+
+**AND THE TWO THINGS NO CAPTURE CAN FIX.** The scale's precision is a
+property of the recording, not of the estimator: on the grown corpus the
+six sessions whose correlation peak collapses under a shift have a median
+delay error of **0.1195 ms** against **0.0015 ms** for the eighteen whose
+peak holds, which is **0.04 m of range against 0.0005 m**. A scale claim
+must therefore carry the peak height as its own confidence. And the
+route's three stages have independent error sources, which is the good
+news: **a TDOA measurement compares the two signals to each other, so
+the offset between the two clocks cancels exactly**, and a mistake in the
+sync cannot corrupt the scale.
+
+## 10. The files
 
 | file | what it is |
 |---|---|
