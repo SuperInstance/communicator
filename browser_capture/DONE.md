@@ -1135,3 +1135,16 @@ the PAGE disappears (heartbeat stale > 60s while out-of-session hours)
    The flat ladder also says the bench speakers at current rails are too
    quiet for two-way chirp ranging across a room — validating the
    brief's ordering: loud claps are the primary sync, two-way behind it.
+
+## FULL STOP (2026-10-22T18:23Z, Casey's order)
+
+All lanes halted on this laptop: the witness capture page is CLOSED
+(heartbeat dead at 18:22Z; the watchdog's PAGE_GONE fired at 18:24Z and
+will keep reporting the room as quiet), the forwarder service and the
+GC timer are STOPPED, the conversation V0 build halted mid-wire (the
+/converse endpoint landed moments before the stop; it speaks only when
+a page asks it to, and no page is running). The liaison server alone
+stays up so Casey can reach status and history when he wants them.
+NOTHING restarts without his explicit word -- no page relaunch, no
+service start, no probes. Quiet confirmed by measurement: no page
+heartbeat, no capture processes, both side services inactive.

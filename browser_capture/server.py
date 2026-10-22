@@ -234,6 +234,15 @@ LIAISON_INBOX = Path(__file__).resolve().parent / "liaison_inbox.jsonl"
 LIAISON_OUTBOX = Path(__file__).resolve().parent / "liaison_outbox.jsonl"
 LIAISON_PENDING = Path(__file__).resolve().parent / "liaison_outbox.pending.jsonl"
 LIAISON_STARTED_AT = time.time()
+
+# CONVERSATION V0: the ear (faster-whisper via the audio venv), the
+# mind (local ollama), the history (the thread)
+import urllib.request as _ur
+import collections
+HERE_DIR_STT = Path(__file__).resolve().parent / "stt.py"
+STT_PYTHON = "/home/proart/.local/audio-venv/bin/python"
+CONVERSE_MODEL = "llama3.2:1b"
+CONVERSE_HISTORY = collections.deque(maxlen=8)
 LIAISON_LOCKS = {name: threading.Lock() for name in
                  ("inbox", "outbox", "pending", "audio")}
 LIAISON_AUDIO_CACHE = {}   # (path, size, mtime) -> measured stats
@@ -1439,6 +1448,111 @@ class Handler(BaseHTTPRequestHandler):
                              "error": "no report yet -- run "
                                       "python3 browser_capture/gc.py"})
 
+    # -- CONVERSATION V0: the room answers out loud --------------------
+
+    def _api_converse(self):
+        """POST /converse {stamp}: transcribe that session's WAV
+        (faster-whisper, cached small.en), hold the thread (last 8
+        exchanges + the fresh pre-wake buffer as context), ask the local
+        model (ollama), return {transcript, reply} for the page to
+        SPEAK. Rough is fine; usable is the bar."""
+        import subprocess as sp
+        try:
+            n = int(self.headers.get("Content-Length", "0"))
+        except ValueError:
+            n = -1
+        if n <= 0 or n > 65536:
+            self._json(400, {"ok": False, "error": "bad Content-Length"})
+            return
+        try:
+            req = json.loads(self.rfile.read(n).decode("utf-8"))
+        except (UnicodeDecodeError, json.JSONDecodeError):
+            self._json(400, {"ok": False, "error": "not JSON"})
+            return
+        d = self._sess_dir(str(req.get("stamp") or ""))
+        if not d or not (d / "audio.wav").is_file():
+            self._json(404, {"ok": False, "error": "no such session"})
+            return
+
+        def transcribe(path, start=None, end=None):
+            cmd = [STT_PYTHON, str(HERE_DIR_STT), str(path)]
+            if start: cmd += ["--start", str(start)]
+            if end: cmd += ["--end", str(end)]
+            r = sp.run(cmd, capture_output=True, timeout=120)
+            try:
+                return json.loads(r.stdout.decode().strip()).get("text", "")
+            except Exception:
+                return ""
+
+        transcript = transcribe(d / "audio.wav")
+        if not transcript.strip():
+            self._json(200, {"ok": True, "transcript": "",
+                             "reply": "", "note": "nothing understood"})
+            return
+
+        # the pre-wake context: latest wake_prompt bundle under 15 min
+        context = ""
+        try:
+            root = self.out_dir / "free_sessions"
+            cands = sorted(root.glob("*/meta.json"), reverse=True)
+            for mp in cands:
+                m = json.loads(mp.read_text())
+                if m.get("mode") != "wake_prompt":
+                    continue
+                wk = m.get("wake") or {}
+                age = time.time() - time.mktime(time.strptime(
+                    (wk.get("wake_at") or "")[:19], "%Y-%m-%dT%H:%M:%S"))
+                if age < 0 or age > 900:
+                    break
+                wp = mp.parent / "audio.wav"
+                if wp.is_file():
+                    dur = (m.get("audio") or {}).get("samples", 0) / \
+                        max((m.get("audio") or {}).get("sample_rate", 1), 1)
+                    context = transcribe(wp, start=max(0, dur - 25))
+                break
+        except Exception:
+            context = ""
+
+        msgs = [{"role": "system", "content":
+                 "You are the voice of the room itself, speaking out loud "
+                 "through a laptop speaker to Casey, who just spoke to you. "
+                 "Reply in 1-3 short conversational sentences. Plain words, "
+                 "no markdown, no lists. If his words were fragmentary or "
+                 "ambient, reply briefly and naturally."}]
+        if context.strip():
+            msgs.append({"role": "system", "content":
+                         "Recently in the room (pre-wake context): " +
+                         context[:600]})
+        msgs += list(CONVERSE_HISTORY)
+        msgs.append({"role": "user", "content": transcript[:1000]})
+
+        reply = ""
+        try:
+            req2 = urllib.request.Request(
+                "http://127.0.0.1:11434/api/chat",
+                data=json.dumps({"model": CONVERSE_MODEL,
+                                 "messages": msgs, "stream": False
+                                 }).encode(),
+                headers={"Content-Type": "application/json"})
+            with urllib.request.urlopen(req2, timeout=60) as r:
+                reply = json.loads(r.read().decode())                     .get("message", {}).get("content", "").strip()
+        except Exception as exc:
+            reply = ""
+            self._json(200, {"ok": True, "transcript": transcript,
+                             "reply": "", "error": f"model: {exc}"})
+            return
+
+        CONVERSE_HISTORY.append({"role": "user", "content": transcript[:400]})
+        CONVERSE_HISTORY.append({"role": "assistant", "content": reply[:400]})
+        while len(CONVERSE_HISTORY) > 8:
+            CONVERSE_HISTORY.pop(0)
+        liaison_event({"class": "converse_turn",
+                       "stamp": req.get("stamp"),
+                       "heard": transcript[:120],
+                       "said": reply[:120]})
+        self._json(200, {"ok": True, "transcript": transcript,
+                         "reply": reply, "context": context[:200]})
+
     def _api_status(self):
         hb = _last_page_heartbeat()
         page = None
@@ -1691,6 +1805,9 @@ class Handler(BaseHTTPRequestHandler):
             return
         if route == "/api/lens":
             self._api_lens_post()
+            return
+        if route == "/api/converse":
+            self._api_converse()
             return
         if route != "/take":
             self._json(404, {"ok": False, "error": f"no {self.path!r}"})
