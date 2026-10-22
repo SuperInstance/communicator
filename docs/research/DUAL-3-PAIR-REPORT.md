@@ -71,3 +71,55 @@ The analysis script (`browser_capture/pair_analysis.py`) is staged with
 the clap finder; on a take with audible claps it produces offset, drift
 (sub-ms resolution at 5 ms hop onset estimates), and the TDOA track in
 one run.
+
+---
+
+## ADDENDUM — the research verdict, applied (2026-10-22)
+
+Survey verdict received (VM research notes, two-ears-two-eyes
+20261022-0915). Three points, each answered:
+
+**1. Alignment method confirmed**: windowed GCC-PHAT + robust affine
+fit (drift dominates; resample after). Adopted in `pair_analysis.py`'s
+design for any take with a live sync channel.
+
+**2. CORRECTION ACCEPTED — no position point from two mics.** One TDOA
+= one hyperbola branch, and the clock offset is perfectly confounded
+with range difference: the honest target is the TDOA *curve* + floor-
+plane prior + motion filtering + the cameras (my script's note already
+said "hyperbola, not a point"; the fuller target is now the stated
+goal). **New lane item for the next take: BeepBeep-style two-way
+ranging** — laptop and phone exchange the same chirp both directions;
+the round-trip cancels the clock offset entirely and pins metric scale
+for the views (literature: ~1–2 cm over 10 m). Implementation sketch:
+the witness page plays a chirp when the phone's sweep fires (both
+record both); round-trip time from the two recordings' emission and
+arrival stamps gives range at each sync moment — a ranging track
+along the walk, no hyperbola ambiguity.
+
+**3. The 7 sweeps, deconvolved (Farinas ESS, FFT-domain; honest band
+250 Hz–4 kHz).** T20 from Schroeder backward integration (-5→-25 dB
+× 3), per sweep, with distrust levels from peak-vs-pre-roll SNR:
+
+| sweep | at | peak SNR | T20 250–1000 Hz | T20 1–4 kHz | distrust |
+|---|---|---|---|---|---|
+| 1 | 07:52:12 | 3.6 dB | 2.56 s | 3.56 s | high |
+| 2 | 07:58:13 | 3.3 dB | 2.72 s | 3.97 s | high |
+| 3 | 07:59:00 | 3.9 dB | 2.69 s | 3.91 s | high |
+| 4 | 08:00:07 | 2.6 dB | 2.61 s | 3.70 s | high |
+| 5 | 08:00:53 | 3.7 dB | 2.60 s | 3.70 s | high |
+| 6 | 08:01:30 | 6.6 dB | 2.68 s | 3.85 s | high |
+| 7 | 08:02:56 | 4.3 dB | 2.65 s | 3.84 s | high |
+
+The consistency is real (250–1000 Hz: 2.56–2.72 s across seven
+positions; 1–4 kHz: 3.56–3.97 s) but **every sweep's peak SNR is 3–7
+dB — the deconvolved tails sit barely above the phone's own noise
+floor, so these T20s are TREND-TRUSTWORTHY, VALUE-DISTRUSTWORTHY**
+(high distrust on all seven: the -25 dB crossing may be noise arrival,
+making measured T20 an upper bound on the true decay). The phone's
+honest band tops out ~4 kHz (transducer); above that its loopback
+spectrum dies, so no 4–8 kHz T20 is reported at all. Room verdict the
+numbers whisper: a liveable, moderately live room (domestic T20
+~2.5–4 s is long — consistent with the bare-floors spare room the
+videos show), pending a louder sweep or a bench-side measurement for
+trustworthy values.
