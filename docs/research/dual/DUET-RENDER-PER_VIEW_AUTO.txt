@@ -1,0 +1,511 @@
+==============================================================================
+THE DUAL RENDER -- two cameras, two minutes, three ways
+  generated 2026-10-22T08:49:41Z
+  THE REAL DUET (the phone's room-lens and the ProArt, 236 s of shared minutes), aligned on the WALL CLOCK because zcode's clap alignment has not landed. Scale mode: per-view-auto.
+  alignment: 0 clap pairs, offset +500538.000 ms, drift +0.0 ppm
+  THE SIDECAR SAYS: THE WALL CLOCK, NOT THE CLAPS. The two devices' clocks have never been compared, so this alignment carries the device-to-device skew -- the constant the corpus cannot measure -- and a drift the duet's 236 s cannot separate from a movement. zcode's clap alignment replaces this sidecar when it lands.
+  overlap: +500.54 s .. +736.47 s (235.93 s of shared minutes)
+==============================================================================
+
+THE DUAL-ASCII -- the same moments from both views
+  fixed: /tmp/duet-3/fixed   roving: /tmp/duet-3
+  alignment: 0 clap pairs, offset +500538.000 ms, drift +0.0 ppm
+  THE SIDECAR SAYS: THE WALL CLOCK, NOT THE CLAPS. The two devices' clocks have never been compared, so this alignment carries the device-to-device skew -- the constant the corpus cannot measure -- and a drift the duet's 236 s cannot separate from a movement. zcode's clap alignment replaces this sidecar when it lands.
+  the panels are aligned in TIME and NOT in space: the two cameras see the room from different places
+  mode: change   scale: per-view-auto   window statistic: mean   window: +/-0.50 s
+  the fixed view:  change in luma (the camera's own); its own floor 3.000; one frame every 499.7 ms; it shows a change in 58.6 % of its frames
+  the roving view: change in the room-lens's own brightness: a 2.2x contrast stretch of the camera luma, clipped, with each glyph read as the LOWER edge of its band; its own floor 15.938; one frame every 406.5 ms; it shows a change in 99.8 % of its frames
+  A CHANNEL THAT IS ON MOST OF THE TIME CANNOT TIME A MOVEMENT: its witness marks are then close to constant, and the
+  contingency table has nothing left to measure. That is what the duty cycle above is for.
+  the two views sample the room at DIFFERENT rates: the roving view's interval is 0.81x the fixed view's, so the same movement covers 0.81x more of the picture per frame in the roving view
+  the two change maps are not in the same units and not in the same space: a cell on the left and a cell on the right are not the same part of the room
+  EACH VIEW HAS ITS OWN SCALE: the two panels are NOT comparable against each other
+FIXED (fixed witness)                      |   ROVING (roving eye)                     
+
+--- t = +530.030 s fixed / +29.492 s roving   fixed 1063.3 luma  roving 31049.8 luma   (2 vs 1 frames in the window)
+        .       .    ... ... .  ..     .   |   =-=---+=+*----::.      :=+=-: ..:-+=-..-
+       .         .  .. .. .                |   =::.+::%#-::::::=+--+--==:::...::--:.::-
+                 . ....  ...               |   -::*+::==:..    :-==-:==. ......:::-=:-.
+                    ..    ..           .   |   -:##:..-%#-. :-::===:-*+.  :......:.    
+                                           |   ..-+:::-+*=.. ...-=-.:+*-. ....:. .     
+                                    . .    |    ..     .--:--=........ .........       
+ .                                         |           .. .::.::-..... .. ..        ..:
+                                           |   ==-----+##++:  . :%%:..:::   .          
+                                           |     .++.-*%+.    . -@@-  +@@    : ===:=:  
+                                       .   |      ..:-::.-**  .  %@+  =@@-  .=.*-=-===.
+                                           |      .....::=%@+- ..*%+:.:@@+ .-*-+-+-+%%-
+                                           |   :::=*++==.-*#*==+-:: :...:..+%*::+--=%@-
+                                           |   ::-=:=+*==++=:...:*%*:.. -++##=-:.--*%#+
+                 .                     .   |   =---:.      . .::::-:=##=-+%*..:.+-.=+-+
+                          ..:.             |   ::=--.       ... -+--+-.:-:::..  ...++=*
+        .                .-:-=.            |   :.           :----#.#*: :..::*@%-.:.-=+-
+                          :=--.        .   |                  .  . :-. .:...-@@*       
+       .           .       -::...          |    .               .  :.:.... : +@%:.     
+     . .       .  ....  =*+:......   . .   |   :.                    .. ..    +@@:. .. 
+                .   ..  --=#......         |     .=- ::                        #@#     
+               ..  .....=-#%-::.:          |   ==-:::::::..                    :@@*   .
+                ..  . ..:*@...::-          |   #%*. :.   ..  :..                =@@=   
+      .        .:....  .   :  ....         |   *#+: ---+=:..-.: =:.:  .          #@@:  
+                  :=.. ... . ....:  . .    |   =*#=..:=:::--:--:+.=# .. .        +@@*  
+
+--- t = +589.013 s fixed / +88.475 s roving   fixed 1145.8 luma  roving 11916.8 luma   (2 vs 3 frames in the window)
+.....::...............::::.::.:.:.:....:   |   =..::::::..:-:::.-:..          :-=-::::.
+........:..... ......... ......:.:......   |   --:-::::::::.:=-:=---=--=---:=+=-::.::::
+:.............................:..:......   |   :..:--::-----=-=-......:-..::-:.... ... 
+......... . .......:.... ..:::....:....:   |   --..*:.:.:::==:-=      +*+-:-++-=+=====-
+:::...................:....:............   |   +::.*=---==-*=+++======*++---==-=::---==
+-:.:.............::.:...........:..:-:.:   |   *.:=.++--...:-.:=      #-    .-:*-+#=*#*
+:...:........::...:....:.:..::.....:++=-   |   :+*+:--===#+++=+=            ::=#*-%**:+
+...................:::-:-::::.::-=-*+@@#   |   .*=--  .==+:-#+%=            ..-+-=*+*%=
+.:.... ...... . ....  ..--*=......:.:...   |   .+@+**-:-=:=-: :+     ..     :.++++++%+=
+....... .........:.. . :=-:::...:.......   |   *==-:---:::-+=-:- :-: =.     :::==-:=:::
+::::-++=:.......:...:::::::...:::.:.::.:   |   %==-..:.. .=-++++*+++       ..        .:
+-.:....:..-::::::::::::::-:=:::-::-:::::   |   =-+*+==+-=+-+=.-+=:=--+-=+--+*.     .-+#
+=...   ....:... ...... :-.....:-+-:::-::   |   --=+.    =     + =-- =.              -.+
+:.::::..::.::.:--... . . . .....:::=:-..   |   ::--     =     *::=- +               : +
+::::....-:-:..:.... .... . ...:-:.::-++-   |   ..::     +....:-- =-.=.   ....         *
+. ..:. :::.::.:.:-..   ... ......-:.:.:.   |   ..:-.    ...:.    :::--=---=++=========-
+.......::::::.::::.. . ..  ....:=--.::--   |   ::-:.-                                  
+........::-........     .......:........   |       .+.                                 
+... ...:-:::..::::..............::::.:::   |   +    *+                                 
+ ....::.:.......::........  ..:.:..:::::   |   .    =#.                               -
+:...:-:....:..:-=-:.::.:..::-:..:..::...   |        .-                                .
+....:::..:.:.. .......:::--==-...   ..:.   |                                           
+:..:.-:::-:.::---::-.:..:..-::::.   :=--   |      :.                             ..:=*#
+...-..... .........:::-#**%-==-::....:-:   |                                           
+
+--- t = +647.996 s fixed / +147.458 s roving   fixed 682.1 luma  roving 47582.2 luma   (2 vs 2 frames in the window)
+...::-:-:::::::--::----:------:-:-=-----   |   - :+##++:*+:-#..=+++=*##*++++++++++++==-
+::::::-:-:-:..-=:-:::::-:.:-:--:-:--:::-   |   =--+#%%+-:-+-:=+++*##*++++++++++++++++==
+-:::.-:=-...::.:::--::-:::::::-----::-::   |   :::. .:::::-++--==+++++++++++++++++++===
+-:::::---::::::-.::-.:::..::=--=:=--::--   |   :....     :--=**+-==+++++*+==+++++==-:..
+-::-:::--::::::--::::::::.---:--.::---:-   |   ..:-=-   ...  .=**+:=++#***+=+==-..     
+-::::::::-:-::::::---::-:--::::.::---:::   |   ++++=::    . .-===--:-+****#*==-:...    
+-:-:::::::.::-:::::::-:.:::::-:::-:-:--:   |   +++++======-===+++++++++++*********##-  
+::-::..::-:::::----::.:-::-:::-::----:-:   |   +++++++++++++++++++*++===+*++++======-  
+-::::.::::-:-:.:::-::.::.:--:-=-:-::::--   |   ====+++++++++++++++========++=--:--=--:.
+=-::....::-::-::::::...-:::.:-----::-:--   |       +%#+++++++++++====--:::-::---:-=---:
+:--=:=-:::-::::--::::::::.::::--:-::-=-=   |      =@@@@@#++++=-:::.::::-----:.----=-==-
+--::.::-.:::--::.-:-:..:::.::=:::-:-:---   |     .-+****+=-+++++==----------=--:--===+=
+--::...-::-:::..::::...-::::--:::.::.::-   |   **#%%#+=-=+===+=:--==--------::::-::::.:
+--:--::-::-:::::-:-...::...:::::-:::-::-   |   +*#%%@@#==-=--:::::------:-::..:::-::..-
+::::-.::::.:.-:.::-........-::::::::-:--   |   +--####++---==-::--==+=+*====-:::::--::-
+:.:::-:---:::-:::::........:-:::::::::.:   |   -.:****-=-----:-==++++++=+======-===-:::
+:::.::::...:::.:.......:.:.:::.::..:.:..   |   ::-+=:.:-=:::::..-==-=+++++*+***#%##+-:-
+:::..::::----:-:.:.:...:...::::-:::-:::.   |   #%*=:....:.....::-=+++=++*+**++-----:---
+.:..--::::--::::--::...:.:.:::--------=:   |   -++--:.:::-::::..::--=++==-:.      ..:::
+.::.:-:=-:-:::-:-:.:.:::.:.:::-:::::::-:   |     :=::--==-::::-===-::.              .::
+::..:--:::::-:::.:::::::.:::--:.::::::::   |   -:..--:.-===--:..                     .:
+--:-::=:::-:::::::::::::.-:::::::.....:-   |   +-=-==::.--:..                        ..
+:.=:----::--:--:--::--.::.-::--.:...:-:-   |   *====+-:::-::.                          
+-:=::.::::::::::-:--::-::::--:-.::..===-   |   ++====-:::--:.                          
+
+--- t = +706.979 s fixed / +206.441 s roving   fixed 4032.6 luma  roving 31041.5 luma   (2 vs 2 frames in the window)
+        .....  .    ....:::.               |       ##+=+=.=@++==. ...#---:..:.:@**+*#-=
+        .....  .     ..::-:.               |   .   -@+==+:.@*+++- .:.++-+--=.:+%*=-@=-.
+        .....          .::..               |   =:   %#+===.*#=++= -=-=-*===-:-++=.+%. -
+          ...             .                |   +#:  ......-++====:=*=--=-=*-:+==. %*.-+
+                                           |   -----:-:      ...:+*+=-:+.=+:.==+=+%+-==
+                                           |   ----=++--=-.   . -#+=+--..-+:-=-+**+:::-
+                                           |   --+---%++=-=-==---#+==-==-+-:-. ===:=++=
+                                           |   .::. .-:--:+=+*:+==.-==:.:+-:+:-++=**+==
+                                           |    ...--.-=+=--:::==:++--=====-=:-=-:+++- 
+                                           |     ..  . .:=:-:=-:=+=+=             .::. 
+                                           |       .    .:--:::::*+++=                 
+                                     .     |     .::.. =:::--::.::*+++:                
+                                           |            .=-::.:..::#+++:             ..
+              .       :---.                |   :..       .    :..  .#++=.          ....
+                     -*#*+%+               |   .                    .*++=.          ...
+              .      .*+@+++.              |   =-::.    --:          :*++=.          ..
+                      -=#**-               |   --=-::--=:=:: :-    ..:+===-..        ..
+        ...   .   ..:+-=**:-=..            |   =+=..=::+=--::--:--:-----::::::::.....::
+      ........ .....=+-=+##:=-.            |   -:...-===:-:.:==-::.....-==----::.:..:::
+      .....     .. -@:.:+=+.-=             |   :::-:::--::-:=-==-. .-=-::::.......   .:
+      .-::..:..:.. ## : ....=%.            |      .:::...::.. .::..-+---...........   .
+     ..-::..:.  .: ==:%    .*@.            |      ...:......  .  ..:=-::.........      
+    ...::...:.   ..:--*   .-=.             |      .    ........ ...:--:: . ..          
+    .             .::--    :-              |      .      .::...   ...::..              
+
+THE FUSED SCORE -- two staves, each channel annotating the other
+  fixed: /tmp/duet-3/fixed   roving: /tmp/duet-3
+  alignment: 0 clap pairs, offset +500538.000 ms, drift +0.0 ppm
+  THE SIDECAR SAYS: THE WALL CLOCK, NOT THE CLAPS. The two devices' clocks have never been compared, so this alignment carries the device-to-device skew -- the constant the corpus cannot measure -- and a drift the duet's 236 s cannot separate from a movement. zcode's clap alignment replaces this sidecar when it lands.
+  236 slices of 1.00 s from +500.54 s; the energy scale is shared, maximum 70765.3 luma (the mean change over the slice)
+  marks:  = both moved   > only this one   < only the other   . neither
+  a mark is decided by the STRONGEST frame in the slice, so a thing that moved for one frame still counts
+  each eye is asked against its OWN floor: the fixed view at 3.000, the roving view at 15.938
+  the fixed view:  change in luma (the camera's own); its own floor 3.000; one frame every 499.7 ms; it shows a change in 58.6 % of its frames
+  the roving view: change in the room-lens's own brightness: a 2.2x contrast stretch of the camera luma, clipped, with each glyph read as the LOWER edge of its band; its own floor 15.938; one frame every 406.5 ms; it shows a change in 99.8 % of its frames
+  A CHANNEL THAT IS ON MOST OF THE TIME CANNOT TIME A MOVEMENT: its witness marks are then close to constant, and the
+  contingency table has nothing left to measure. That is what the duty cycle above is for.
+  the two views sample the room at DIFFERENT rates: the roving view's interval is 0.81x the fixed view's, so the same movement covers 0.81x more of the picture per frame in the roving view
+  the two change maps are not in the same units and not in the same space: a cell on the left and a cell on the right are not the same part of the room
+
+  time      |         |         |         |         |         |         |         |         |         |         |         |         |         |         |         |         |         |         |         |         |         |         |         |     
+  FIXED           .. . ..:...           .                                         ...                                                                                                                      ....        ....                             
+  <- roving ==============================================<=============================<<<<<<<<<<===<<<<<<<<<<==<<<<<<<<<====<<=<=<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<===<<<<<<<<<<<<<<<<<<<<==============================================================
+  ROVING    *:-==+-===++#-=*+=+=-##%#%%-==:==*+===::.: .. ...................-=-=@+*#%*##+++==+-:.:.:.... ...:..  ....:.:-=*###*#%***:=-:............. ......:@*#####%%%%%%%%%%%=====++**%+--:-=%%*+++--=+*+#++++=---+*%*==-::--*+-..... .:.:..::---:-=-
+  <- fixed  ==============================================>=============================>>>>>>>>>>===>>>>>>>>>>==>>>>>>>>>====>>=>=>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>===>>>>>>>>>>>>>>>>>>>>==============================================================
+
+  t(s)      fixed(luma)     roving(luma)     mark
+  +500.538          1011.5         43366.6  =
+  +501.538           914.2         17312.9  =
+  +502.538          1629.4         21040.0  =
+  +503.538          1161.5         31148.3  =
+  +504.538          1254.7         30455.8  =
+  +505.538          2398.9         35967.0  =
+  +506.538          4281.7         27470.5  =
+  +507.538          4593.0         30749.9  =
+  +508.538          3115.7         31499.1  =
+  +509.538          7458.4         29241.7  =
+  +510.538          3220.3         37944.4  =
+  +511.538          6718.1         36803.4  =
+  +512.538          9808.4         55709.1  =
+  +513.538         11950.8         23380.8  =
+  +514.538          4103.2         34915.1  =
+  +515.538          6103.3         45235.6  =
+  +516.538          4618.9         37052.1  =
+  +517.538          1856.8         34276.7  =
+  +518.538          2318.7         43078.8  =
+  +519.538          1654.7         32497.2  =
+  +520.538          1879.9         19670.7  =
+  +521.538          1267.7         54386.1  =
+  +522.538           904.5         52716.3  =
+  +523.538          2846.5         61889.5  =
+  +524.538          2897.8         51241.0  =
+  +525.538          2985.1         60297.3  =
+  +526.538          1815.7         65259.7  =
+  +527.538          2635.6         20204.1  =
+  +528.538          4798.8         34426.0  =
+  +529.538          1063.3         31049.8  =
+  +530.538          1693.8         13265.7  =
+  +531.538          1024.6         29096.5  =
+  +532.538           808.0         34071.7  =
+  +533.538           791.8         44947.1  =
+  +534.538          1576.5         37952.8  =
+  +535.538          2604.3         30578.6  =
+  +536.538          2583.2         35226.7  =
+  +537.538          1560.0         33390.6  =
+  +538.538          1825.3         14117.7  =
+  +539.538          1494.3         13550.8  =
+  +540.538           820.1          9911.6  =
+  +541.538          1410.6         13869.7  =
+  +542.538           859.2          2780.5  =
+  +543.538           756.6          8181.6  =
+  +544.538           640.1          8069.1  =
+  +545.538           693.2          3241.9  =
+  +546.538           626.2          6390.8  <
+  +547.538           627.4          8350.7  =
+  +548.538           667.7          4592.5  =
+  +549.538           726.5          8476.7  =
+  +550.538           702.8          7840.2  =
+  +551.538           656.7          8795.6  =
+  +552.538           757.3          8330.2  =
+  +553.538           709.2          6376.1  =
+  +554.538           720.0          9056.5  =
+  +555.538           782.0          7762.8  =
+  +556.538          1026.1         11141.8  =
+  +557.538           796.9          9717.5  =
+  +558.538           661.2          8073.3  =
+  +559.538           654.3          6976.1  =
+  +560.538           710.8          7447.0  =
+  +561.538           670.5          6801.0  =
+  +562.538           638.9          5877.6  =
+  +563.538          1012.3          7155.7  =
+  +564.538           706.3         11526.2  =
+  +565.538           647.6         19937.3  =
+  +566.538           773.1         33836.8  =
+  +567.538           718.1         26274.5  =
+  +568.538          1854.8         33937.1  =
+  +569.538          2992.7         68798.2  =
+  +570.538          7418.6         42176.4  =
+  +571.538          5282.5         44424.9  =
+  +572.538          6017.1         51558.1  =
+  +573.538          3465.1         60971.5  =
+  +574.538           674.1         46202.3  =
+  +575.538          3927.2         55284.8  =
+  +576.538           741.7         52534.4  <
+  +577.538           719.5         40278.7  <
+  +578.538           706.6         37519.8  <
+  +579.538           700.4         35610.1  <
+  +580.538           706.6         31995.8  <
+  +581.538           726.8         33125.0  <
+  +582.538           698.2         37690.2  <
+  +583.538           682.6         22547.5  <
+  +584.538           704.6         17263.6  <
+  +585.538           710.1         11613.8  <
+  +586.538           715.6         15984.4  =
+  +587.538           970.8          9161.9  =
+  +588.538          1145.8         11916.8  =
+  +589.538           693.2          7147.1  <
+  +590.538           681.6          7042.4  <
+  +591.538           683.8          7856.0  <
+  +592.538           679.5          6111.2  <
+  +593.538           677.0          1936.8  <
+  +594.538           673.9          8117.4  <
+  +595.538           686.1          7151.2  <
+  +596.538           674.5          7655.2  <
+  +597.538           676.9         12132.7  <
+  +598.538           689.9          7845.6  <
+  +599.538           698.9          6689.2  =
+  +600.538           709.4          3528.5  =
+  +601.538           696.4          3284.2  <
+  +602.538           691.9          7519.5  <
+  +603.538           711.7          8759.0  <
+  +604.538           676.8          6666.0  <
+  +605.538           684.9         11336.6  <
+  +606.538           678.5         15730.7  <
+  +607.538           680.7          6182.2  <
+  +608.538           686.6         15595.8  <
+  +609.538           686.6         20824.8  <
+  +610.538          1144.2         27742.7  =
+  +611.538          1144.2         46792.5  =
+  +612.538           829.9         56121.9  =
+  +613.538           790.5         51838.6  =
+  +614.538           748.2         58729.8  <
+  +615.538           730.9         43320.6  <
+  +616.538           695.0         51684.8  =
+  +617.538           694.0         59540.4  <
+  +618.538           706.4         48882.9  =
+  +619.538           727.9         50106.7  <
+  +620.538           713.9         50287.4  <
+  +621.538           699.1         18544.5  <
+  +622.538           693.8         28669.9  <
+  +623.538           683.3         23654.5  <
+  +624.538           682.2         13587.9  <
+  +625.538           684.3          6803.1  <
+  +626.538           680.1          9640.4  <
+  +627.538           671.6          5659.0  <
+  +628.538           676.8          9648.7  <
+  +629.538           688.9          6055.4  <
+  +630.538           685.2          5852.8  <
+  +631.538           682.4         11236.8  <
+  +632.538           710.0          5960.3  <
+  +633.538           681.0          6560.4  <
+  +634.538           679.3          9706.0  <
+  +635.538           683.2          6417.0  <
+  +636.538           677.3          5063.8  <
+  +637.538           674.0          9558.1  <
+  +638.538           682.4          2587.7  <
+  +639.538           675.4          8719.1  <
+  +640.538           684.6          7015.0  <
+  +641.538           681.2          4043.6  <
+  +642.538           684.5          4677.7  <
+  +643.538           686.5         10914.6  <
+  +644.538           683.7          9836.4  <
+  +645.538           680.7         12417.4  <
+  +646.538           675.9         70765.3  <
+  +647.538           682.1         47582.2  <
+  +648.538           676.4         57019.1  <
+  +649.538           713.1         57019.1  <
+  +650.538           713.1         57019.1  <
+  +651.538           832.7         57019.1  =
+  +652.538           832.7         57019.1  =
+  +653.538           832.7         59985.9  =
+  +654.538           679.9         59985.9  <
+  +655.538           679.3         59985.9  <
+  +656.538           672.1         59985.9  <
+  +657.538           677.9         59985.9  <
+  +658.538           678.0         59985.9  <
+  +659.538           677.5         59985.9  <
+  +660.538           673.0         59985.9  <
+  +661.538           676.3         59985.9  <
+  +662.538           684.6         59985.9  <
+  +663.538           681.6         59985.9  <
+  +664.538           693.6         33138.3  <
+  +665.538           672.9         33138.3  <
+  +666.538           675.4         33138.3  <
+  +667.538           679.2         33138.3  <
+  +668.538           681.8         33138.3  <
+  +669.538           669.7         36312.4  <
+  +670.538           683.1         42657.4  <
+  +671.538           679.2         45148.1  <
+  +672.538           668.3         48251.8  <
+  +673.538           678.9         59912.8  <
+  +674.538           798.2         39268.3  =
+  +675.538           812.5         22839.0  =
+  +676.538          1451.5         19693.5  =
+  +677.538          1074.7         18119.7  =
+  +678.538           897.8         22555.5  =
+  +679.538           884.1         31522.3  =
+  +680.538          1594.6         59351.9  =
+  +681.538           874.2         66801.7  =
+  +682.538           790.1         47043.3  =
+  +683.538          1041.4         41534.8  =
+  +684.538           722.0         35848.0  =
+  +685.538          2069.2         38811.4  =
+  +686.538          3252.4         24295.4  =
+  +687.538          2470.2         21913.5  =
+  +688.538          2860.8         34433.3  =
+  +689.538          2206.8         40453.5  =
+  +690.538          3646.1         45382.8  =
+  +691.538          4556.4         42658.9  =
+  +692.538          6217.7         53528.8  =
+  +693.538          7214.2         38658.1  =
+  +694.538          6009.1         36869.2  =
+  +695.538          1778.4         38126.5  =
+  +696.538           926.2         39507.8  =
+  +697.538           856.1         30673.0  =
+  +698.538          2066.4         23022.9  =
+  +699.538          1814.0         25342.9  =
+  +700.538          1674.5         21703.8  =
+  +701.538           948.9         35570.2  =
+  +702.538          1093.0         44963.5  =
+  +703.538          4772.6         65951.7  =
+  +704.538          9000.4         49098.1  =
+  +705.538          6226.9         30092.6  =
+  +706.538          4032.6         31041.5  =
+  +707.538          1771.8         20726.1  =
+  +708.538          1384.8         15768.6  =
+  +709.538          1005.2         19402.5  =
+  +710.538          1121.4         22271.5  =
+  +711.538          2278.2         20575.8  =
+  +712.538          1043.2         51004.5  =
+  +713.538          1166.3         41260.9  =
+  +714.538          1111.1         24466.3  =
+  +715.538          2636.9          9225.9  =
+  +716.538          2849.2          7081.4  =
+  +717.538          1242.1          9396.3  =
+  +718.538           732.5          8108.4  =
+  +719.538           702.2          4714.8  =
+  +720.538           720.9          3022.3  =
+  +721.538           709.2          7748.5  =
+  +722.538           710.5         14398.1  =
+  +723.538          1371.2          8558.3  =
+  +724.538           739.2         13463.6  =
+  +725.538           829.9         10955.6  =
+  +726.538           698.2         10456.9  =
+  +727.538           790.0         12175.3  =
+  +728.538           777.8         12656.5  =
+  +729.538           782.9         22076.9  =
+  +730.538          1419.1         20519.6  =
+  +731.538          2428.8         20040.1  =
+  +732.538          1214.2         17108.6  =
+  +733.538          1621.5         24681.1  =
+  +734.538           797.7         32300.2  =
+  +735.538           858.1         25959.7  =
+  the energy is the sum over the 960 cells of the mean change per frame in the slice; the mark is decided by the strongest single frame
+THE WITNESS COUNT -- what the two views say together that neither says alone
+  236 slices of 1.00 s; the windows TILE the time, so they do not overlap
+  both moved               151  ( 64.0 %)
+  only the fixed moved       0  (  0.0 %)
+  only the roving moved     85  ( 36.0 %)
+  neither moved              0  (  0.0 %)
+
+  the fixed view moved in  151 slices (64.0 %)
+  the roving view moved in 236 slices (100.0 %)
+  if the two views were INDEPENDENT they would both move in 64.0 % of the slices
+  they both move in 64.0 % -- +0.0 points over chance
+
+  THE EXCESS IS NOT TWO SENSORS AGREEING ABOUT A NUMBER. It is two eyes
+  agreeing about a MOVEMENT -- the same person, seen from two places, at
+  the same moment. That is the thing two sovereign logs of the same minutes
+  can give that neither gives alone.
+
+THE GRADED WITNESS -- do the two channels rise and fall together?
+  236 slices of 1.00 s; the reading is the correlation of the two channels' change energies
+  THE NULL IS THE SLIDE: the roving channel is slid against the fixed one and the
+  correlation is recomputed at every offset.  The null's spread is the AUTOCORRELATION of two slow
+  series, and the observed has to beat that, not the correlation of two noises.
+
+  reading   r(at the alignment)   null mean   null sd      z   slides that match it
+  raw                  +0.2553     -0.0221    0.1598   +1.74     18 of 237
+  log                  +0.3599     -0.0335    0.1921   +2.05      4 of 237
+
+  the raw reading: the slide's own maximum is at -44.0 s with r = +0.3423; the region within one null sd of it spans 58 s
+  the log reading: the slide's own maximum is at -2.0 s with r = +0.4132; the region within one null sd of it spans 52 s
+
+  A SHARP PEAK WOULD BE AN ALIGNMENT MEASURED FROM THE DATA. A BROAD ONE IS NOT:
+  two slow series correlate somewhere by luck, and a sweep that cannot say WHERE is saying
+  nothing about the skew.  The claps are not optional.
+
+THE ALIGNMENT'S SENSITIVITY -- the witness count with the alignment moved on purpose
+  the wall clock is NOT the claps: the two devices' clocks have never been compared, so the
+  alignment carries a skew nobody has measured.  This table asks what the count does when the
+  alignment is DELIBERATELY wrong, so the reader can see how much of the count is the room
+  and how much is the clock.
+
+  shift(ms)   both   p_fixed  p_roving   p_both   chance   excess   chi-sq      p
+         +0   151    0.640     1.000    0.640    0.640  +0.000       -         -
+       -250   151    0.640     1.000    0.640    0.640  +0.000       -         -
+       -500   151    0.640     1.000    0.640    0.640  +0.000       -         -
+      -1000   151    0.640     1.000    0.640    0.640  +0.000       -         -
+      -2000   151    0.640     1.000    0.640    0.640  +0.000       -         -
+       +500   151    0.640     1.000    0.640    0.640  +0.000       -         -
+      +1000   151    0.640     1.000    0.640    0.640  +0.000       -         -
+      +2000   151    0.640     1.000    0.640    0.640  +0.000       -         -
+
+  a count that collapses under a shift of a few hundred milliseconds was measuring the ALIGNMENT, not the room
+  a count that does not move is measuring something both cameras see whatever the clock says
+
+THE DIFFERENCED VIEW -- the fixed frame, the roving frame, and the difference
+  fixed: /tmp/duet-3/fixed   roving: /tmp/duet-3
+  alignment: 0 clap pairs, offset +500538.000 ms, drift +0.0 ppm
+  THE SIDECAR SAYS: THE WALL CLOCK, NOT THE CLAPS. The two devices' clocks have never been compared, so this alignment carries the device-to-device skew -- the constant the corpus cannot measure -- and a drift the duet's 236 s cannot separate from a movement. zcode's clap alignment replaces this sidecar when it lands.
+  t = +647.996 s fixed / +147.458 s roving   window +/-0.50 s   scale: per-view-auto   window statistic: mean
+  the fixed frame moved in 0 cells (its own floor 3.000); the roving frame saw movement in 767 cells (its own floor 15.938)
+  the fixed view:  change in luma (the camera's own); its own floor 3.000; one frame every 499.7 ms; it shows a change in 58.6 % of its frames
+  the roving view: change in the room-lens's own brightness: a 2.2x contrast stretch of the camera luma, clipped, with each glyph read as the LOWER edge of its band; its own floor 15.938; one frame every 406.5 ms; it shows a change in 99.8 % of its frames
+  A CHANNEL THAT IS ON MOST OF THE TIME CANNOT TIME A MOVEMENT: its witness marks are then close to constant, and the
+  contingency table has nothing left to measure. That is what the duty cycle above is for.
+  the two views sample the room at DIFFERENT rates: the roving view's interval is 0.81x the fixed view's, so the same movement covers 0.81x more of the picture per frame in the roving view
+  the two change maps are not in the same units and not in the same space: a cell on the left and a cell on the right are not the same part of the room
+  EACH VIEW HAS ITS OWN SCALE: the two panels are NOT comparable against each other
+
+FIXED CHANGE (fixed witness)               |   DIFFERENCE (witness mask)               
+ROVING CHANGE (roving eye)                 |   
+
+...::-:-:::::::--::----:------:-:-=-----   |   - :+##++:*+:-#..=+++=*##*++++++++++++==-
+::::::-:-:-:..-=:-:::::-:.:-:--:-:--:::-   |   =--+#%%+-:-+-:=+++*##*++++++++++++++++==
+-:::.-:=-...::.:::--::-:::::::-----::-::   |   :::. .:::::-++--==+++++++++++++++++++===
+-:::::---::::::-.::-.:::..::=--=:=--::--   |   :....     :--=**+-==+++++*+==+++++==-:..
+-::-:::--::::::--::::::::.---:--.::---:-   |   ..:-=-   ...  .=**+:=++#***+=+==-..     
+-::::::::-:-::::::---::-:--::::.::---:::   |   ++++=::    . .-===--:-+****#*==-:...    
+-:-:::::::.::-:::::::-:.:::::-:::-:-:--:   |   +++++======-===+++++++++++*********##-  
+::-::..::-:::::----::.:-::-:::-::----:-:   |   +++++++++++++++++++*++===+*++++======-  
+-::::.::::-:-:.:::-::.::.:--:-=-:-::::--   |   ====+++++++++++++++========++=--:--=--:.
+=-::....::-::-::::::...-:::.:-----::-:--   |       +%#+++++++++++====--:::-::---:-=---:
+:--=:=-:::-::::--::::::::.::::--:-::-=-=   |      =@@@@@#++++=-:::.::::-----:.----=-==-
+--::.::-.:::--::.-:-:..:::.::=:::-:-:---   |     .-+****+=-+++++==----------=--:--===+=
+--::...-::-:::..::::...-::::--:::.::.::-   |   **#%%#+=-=+===+=:--==--------::::-::::.:
+--:--::-::-:::::-:-...::...:::::-:::-::-   |   +*#%%@@#==-=--:::::------:-::..:::-::..-
+::::-.::::.:.-:.::-........-::::::::-:--   |   +--####++---==-::--==+=+*====-:::::--::-
+:.:::-:---:::-:::::........:-:::::::::.:   |   -.:****-=-----:-==++++++=+======-===-:::
+:::.::::...:::.:.......:.:.:::.::..:.:..   |   ::-+=:.:-=:::::..-==-=+++++*+***#%##+-:-
+:::..::::----:-:.:.:...:...::::-:::-:::.   |   #%*=:....:.....::-=+++=++*+**++-----:---
+.:..--::::--::::--::...:.:.:::--------=:   |   -++--:.:::-::::..::--=++==-:.      ..:::
+.::.:-:=-:-:::-:-:.:.:::.:.:::-:::::::-:   |     :=::--==-::::-===-::.              .::
+::..:--:::::-:::.:::::::.:::--:.::::::::   |   -:..--:.-===--:..                     .:
+--:-::=:::-:::::::::::::.-:::::::.....:-   |   +-=-==::.--:..                        ..
+:.=:----::--:--:--::--.::.-::--.:...:-:-   |   *====+-:::-::.                          
+-:=::.::::::::::-:--::-::::--:-.::..===-   |   ++====-:::--:.                          
+
+THE DIFFERENCE PANEL, alone (it is the point of the render):
+........................................
+........................................
+........................................
+........................................
+........................................
+........................................
+........................................
+........................................
+........................................
+........................................
+........................................
+........................................
+........................................
+........................................
+........................................
+........................................
+........................................
+........................................
+........................................
+........................................
+........................................
+........................................
+........................................
+........................................
+
+  . nothing moved in the fixed frame
+  + the fixed frame moved and the roving frame saw NOTHING at that moment
+  # the fixed frame moved and the roving frame WITNESSED movement at that moment

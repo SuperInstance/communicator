@@ -1,0 +1,318 @@
+{
+  "tool": "dual_ingest -- the room-lens",
+  "generated_utc": "2026-10-22T08:49:19.553Z",
+  "label": "the phone room-lens (the roving eye)",
+  "source_session": "/home/proart/dual-capture/dual-3.json",
+  "the_source_kind": "room-lens-session",
+  "the_source_session_id": "roomlens-2026-10-22T07-52-12-428Z-weyeuf",
+  "the_source_started_at": "2026-10-22T07:52:12.428Z",
+  "the_source_ended_at": "2026-10-22T08:03:25.546Z",
+  "the_user_agent": "Mozilla/5.0 (Linux; Android 10; K) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/155.0.0.0 Mobile Safari/537.36",
+  "the_audio": {
+    "present": true,
+    "parts": 5,
+    "startedAt": "2026-10-22T07:59:28.268Z",
+    "totalBytes": 111359,
+    "note": "5 parts: MEASURE ROOM interrupts bank as parts (each part carries startedAt/offsetMs; the gaps are the measures themselves)"
+  },
+  "the_clock_anchor": {
+    "the_estimators": [
+      {
+        "the_source": "the audio part at offset 0 ms",
+        "the_anchor_ms": 1792655968268.0
+      },
+      {
+        "the_source": "the audio part at offset 63407 ms",
+        "the_anchor_ms": 1792655968268.0
+      },
+      {
+        "the_source": "the audio part at offset 109092 ms",
+        "the_anchor_ms": 1792655968268.0
+      },
+      {
+        "the_source": "the audio part at offset 145875 ms",
+        "the_anchor_ms": 1792655968268.0
+      },
+      {
+        "the_source": "the audio part at offset 231864 ms",
+        "the_anchor_ms": 1792655968268.0
+      },
+      {
+        "the_source": "the room measure #3 at t 39305 ms",
+        "the_anchor_ms": 1792655968268.0
+      },
+      {
+        "the_source": "the room measure #4 at t 85087 ms",
+        "the_anchor_ms": 1792655968268.0
+      },
+      {
+        "the_source": "the room measure #5 at t 121756 ms",
+        "the_anchor_ms": 1792655968268.0
+      },
+      {
+        "the_source": "the room measure #6 at t 207831 ms",
+        "the_anchor_ms": 1792655968268.0
+      }
+    ],
+    "the_n_estimators": 9,
+    "the_anchor_ms": 1792655968268.0,
+    "the_spread_ms": 0.0,
+    "the_source": "DERIVED from the bundle's own wall stamps",
+    "the_note": "the walkabout's start, recovered from the audio parts' and the room measures' own wall clocks. meta.startedAt is the SESSION's creation time, which here is 435.840 s earlier, and it is NOT the origin of the frames' t."
+  },
+  "the_wall_clock_of_the_first_frame": "2026-10-22T07:59:28.350Z",
+  "the_wall_clock_of_the_last_frame": "2026-10-22T08:03:24.283Z",
+  "n_frames": 513,
+  "n_change_maps": 488,
+  "the_pairs_skipped_for_a_geometry_change": 24,
+  "the_geometry_runs": [
+    {
+      "the_geometry": [
+        125,
+        128
+      ],
+      "n_frames": 23
+    },
+    {
+      "the_geometry": [
+        93,
+        96
+      ],
+      "n_frames": 17
+    },
+    {
+      "the_geometry": [
+        125,
+        128
+      ],
+      "n_frames": 10
+    },
+    {
+      "the_geometry": [
+        93,
+        96
+      ],
+      "n_frames": 14
+    },
+    {
+      "the_geometry": [
+        125,
+        128
+      ],
+      "n_frames": 4
+    },
+    {
+      "the_geometry": [
+        93,
+        96
+      ],
+      "n_frames": 2
+    },
+    {
+      "the_geometry": [
+        125,
+        128
+      ],
+      "n_frames": 10
+    },
+    {
+      "the_geometry": [
+        93,
+        96
+      ],
+      "n_frames": 10
+    },
+    {
+      "the_geometry": [
+        125,
+        128
+      ],
+      "n_frames": 75
+    },
+    {
+      "the_geometry": [
+        93,
+        96
+      ],
+      "n_frames": 23
+    },
+    {
+      "the_geometry": [
+        125,
+        128
+      ],
+      "n_frames": 90
+    },
+    {
+      "the_geometry": [
+        93,
+        96
+      ],
+      "n_frames": 15
+    },
+    {
+      "the_geometry": [
+        125,
+        128
+      ],
+      "n_frames": 55
+    },
+    {
+      "the_geometry": [
+        93,
+        96
+      ],
+      "n_frames": 12
+    },
+    {
+      "the_geometry": [
+        125,
+        128
+      ],
+      "n_frames": 4
+    },
+    {
+      "the_geometry": [
+        93,
+        96
+      ],
+      "n_frames": 7
+    },
+    {
+      "the_geometry": [
+        125,
+        128
+      ],
+      "n_frames": 21
+    },
+    {
+      "the_geometry": [
+        93,
+        96
+      ],
+      "n_frames": 3
+    },
+    {
+      "the_geometry": [
+        125,
+        128
+      ],
+      "n_frames": 11
+    },
+    {
+      "the_geometry": [
+        93,
+        96
+      ],
+      "n_frames": 11
+    },
+    {
+      "the_geometry": [
+        125,
+        128
+      ],
+      "n_frames": 3
+    },
+    {
+      "the_geometry": [
+        93,
+        96
+      ],
+      "n_frames": 3
+    },
+    {
+      "the_geometry": [
+        125,
+        128
+      ],
+      "n_frames": 13
+    },
+    {
+      "the_geometry": [
+        93,
+        96
+      ],
+      "n_frames": 2
+    },
+    {
+      "the_geometry": [
+        125,
+        128
+      ],
+      "n_frames": 75
+    }
+  ],
+  "the_frame_interval_ms": {
+    "the_median": 407.0,
+    "the_min": 362.0,
+    "the_max": 20750.0,
+    "the_achieved_fps": 2.457
+  },
+  "the_tiers": {
+    "STILL": 392,
+    "SLOW": 121
+  },
+  "the_tier_meaning": "the room-lens's tier is its ADAPTIVE FIDELITY mode, chosen from the PHONE's own motion -- STILL is 128 cols at 8 fps, SLOW is 96 at 15, MOVING is 64 at 30. It says the phone was not moving; it does NOT say the room was still.",
+  "the_ramp": " .:-=+*#%@@@@@@@@",
+  "the_ramp_note": "the room-lens's ACTUAL ramp: 17 glyphs whose top 8 are all '@', so half the brightness range carries no information in the picture",
+  "the_contrast_stretch": 2.2,
+  "the_units": "the room-lens's own brightness: a 2.2x contrast stretch of the camera luma, clipped, with each glyph read as the LOWER edge of its band",
+  "the_brightness_is_a_lower_bound": true,
+  "the_grid": {
+    "width": 40,
+    "height": 24,
+    "note": "the phone's change maps are computed at the phone's native resolution and THEN reduced to the corpus's grid by area averaging"
+  },
+  "change": {
+    "file": "change.raw",
+    "dtype": "float32",
+    "shape": [
+      488,
+      24,
+      40
+    ],
+    "note": "the ABSOLUTE difference between consecutive frames, in the room-lens's own BRIGHTNESS units (a 2.2x contrast stretch of the camera luma, clipped), and each glyph is read as the LOWER edge of its band, so every value here is a lower bound on the true difference"
+  },
+  "luma_grid": {
+    "file": "luma_grid.raw",
+    "dtype": "uint8",
+    "shape": [
+      513,
+      24,
+      40
+    ],
+    "note": "the picture reduced to the corpus's 40x24 grid, so the luma render has a phone side to show"
+  },
+  "the_noise_of_this_sensor": {
+    "the_rule": "the phone's RESOLUTION: one brightness band, because below one band the rendering cannot express a change at all",
+    "the_floor": 15.9375,
+    "the_band": 15.9375,
+    "the_n_pairs": 488,
+    "the_n_quiet_pairs": 49,
+    "the_quiet_cut_mean_cell": 5.3564,
+    "the_quiet_max_median": 41.4375,
+    "the_quiet_max_p90": 65.025,
+    "the_share_of_pairs_at_EXACTLY_zero": 0.0,
+    "the_duty_cycle": 0.998,
+    "the_proarts_floor_for_comparison": 3.0,
+    "the_note": "the phone renders a POSTERISED picture -- 17 glyphs, the top 8 of them all '@' -- so its change map is a MASK of band flips, not the same KIND of quantity as the ProArt's. The floor is the smallest change it can express; the duty cycle is how often it expresses one, and a channel that is on most of the time cannot time a movement."
+  },
+  "the_pose": {
+    "the_note": "the device orientation attached to every frame",
+    "the_alpha_range": [
+      1.6,
+      355.6
+    ],
+    "the_beta_range": [
+      3.1,
+      99.0
+    ],
+    "the_gamma_range": [
+      -88.80000000000001,
+      81.5
+    ],
+    "the_heading_is_null_in_every_frame": true
+  },
+  "the_keyframes": 103,
+  "the_rir_measures": 7
+}

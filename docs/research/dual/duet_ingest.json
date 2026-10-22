@@ -1,0 +1,190 @@
+{
+  "the_out_dir": "/tmp/duet-3",
+  "the_source_session": "/home/proart/dual-capture/dual-3.json",
+  "n_frames": 513,
+  "n_change_maps": 488,
+  "the_pairs_skipped_for_a_geometry_change": 24,
+  "the_frame_interval_ms": {
+    "the_median": 407.0,
+    "the_min": 362.0,
+    "the_max": 20750.0,
+    "the_achieved_fps": 2.457
+  },
+  "the_tiers": {
+    "STILL": 392,
+    "SLOW": 121
+  },
+  "the_clock_anchor": {
+    "the_estimators": [
+      {
+        "the_source": "the audio part at offset 0 ms",
+        "the_anchor_ms": 1792655968268.0
+      },
+      {
+        "the_source": "the audio part at offset 63407 ms",
+        "the_anchor_ms": 1792655968268.0
+      },
+      {
+        "the_source": "the audio part at offset 109092 ms",
+        "the_anchor_ms": 1792655968268.0
+      },
+      {
+        "the_source": "the audio part at offset 145875 ms",
+        "the_anchor_ms": 1792655968268.0
+      },
+      {
+        "the_source": "the audio part at offset 231864 ms",
+        "the_anchor_ms": 1792655968268.0
+      },
+      {
+        "the_source": "the room measure #3 at t 39305 ms",
+        "the_anchor_ms": 1792655968268.0
+      },
+      {
+        "the_source": "the room measure #4 at t 85087 ms",
+        "the_anchor_ms": 1792655968268.0
+      },
+      {
+        "the_source": "the room measure #5 at t 121756 ms",
+        "the_anchor_ms": 1792655968268.0
+      },
+      {
+        "the_source": "the room measure #6 at t 207831 ms",
+        "the_anchor_ms": 1792655968268.0
+      }
+    ],
+    "the_n_estimators": 9,
+    "the_anchor_ms": 1792655968268.0,
+    "the_spread_ms": 0.0,
+    "the_source": "DERIVED from the bundle's own wall stamps",
+    "the_note": "the walkabout's start, recovered from the audio parts' and the room measures' own wall clocks. meta.startedAt is the SESSION's creation time, which here is 435.840 s earlier, and it is NOT the origin of the frames' t."
+  },
+  "the_noise_of_this_sensor": {
+    "the_rule": "the phone's RESOLUTION: one brightness band, because below one band the rendering cannot express a change at all",
+    "the_floor": 15.9375,
+    "the_band": 15.9375,
+    "the_n_pairs": 488,
+    "the_n_quiet_pairs": 49,
+    "the_quiet_cut_mean_cell": 5.3564,
+    "the_quiet_max_median": 41.4375,
+    "the_quiet_max_p90": 65.025,
+    "the_share_of_pairs_at_EXACTLY_zero": 0.0,
+    "the_duty_cycle": 0.998,
+    "the_proarts_floor_for_comparison": 3.0,
+    "the_note": "the phone renders a POSTERISED picture -- 17 glyphs, the top 8 of them all '@' -- so its change map is a MASK of band flips, not the same KIND of quantity as the ProArt's. The floor is the smallest change it can express; the duty cycle is how often it expresses one, and a channel that is on most of the time cannot time a movement."
+  },
+  "the_wall_clock_sidecars": [
+    {
+      "the_file": "wallclock-fixed.json",
+      "the_offset_ms": 500538.0
+    }
+  ],
+  "the_merged_fixed": {
+    "tool": "dual_ingest -- the merged fixed stream",
+    "generated_utc": "2026-10-22T08:49:19.843Z",
+    "label": "the ProArt, merged",
+    "the_sessions": [
+      {
+        "the_session": "1792655768",
+        "the_frames": 956,
+        "the_first_offset_ms": 4843.4,
+        "the_last_offset_ms": 305010.6,
+        "the_wall_clock_start": "2026-10-22T07:51:07.812Z"
+      },
+      {
+        "the_session": "1792656069",
+        "the_frames": 601,
+        "the_first_offset_ms": 305504.7,
+        "the_last_offset_ms": 605502.9,
+        "the_wall_clock_start": "2026-10-22T07:56:08.473Z"
+      },
+      {
+        "the_session": "1792656077",
+        "the_frames": 17,
+        "the_first_offset_ms": 606004.1,
+        "the_last_offset_ms": 614019.2,
+        "the_wall_clock_start": "2026-10-22T08:01:08.973Z"
+      },
+      {
+        "the_session": "1792656100",
+        "the_frames": 38,
+        "the_first_offset_ms": 618501.1,
+        "the_last_offset_ms": 637006.3,
+        "the_wall_clock_start": "2026-10-22T08:01:21.469Z"
+      },
+      {
+        "the_session": "1792656118",
+        "the_frames": 34,
+        "the_first_offset_ms": 638505.0,
+        "the_last_offset_ms": 655005.5,
+        "the_wall_clock_start": "2026-10-22T08:01:41.473Z"
+      },
+      {
+        "the_session": "1792656155",
+        "the_frames": 59,
+        "the_first_offset_ms": 660505.7,
+        "the_last_offset_ms": 691035.6,
+        "the_wall_clock_start": "2026-10-22T08:02:03.474Z"
+      },
+      {
+        "the_session": "1792656183",
+        "the_frames": 58,
+        "the_first_offset_ms": 691504.3,
+        "the_last_offset_ms": 720009.4,
+        "the_wall_clock_start": "2026-10-22T08:02:34.472Z"
+      },
+      {
+        "the_session": "1792656235",
+        "the_frames": 103,
+        "the_first_offset_ms": 721504.3,
+        "the_last_offset_ms": 772506.1,
+        "the_wall_clock_start": "2026-10-22T08:03:04.473Z"
+      }
+    ],
+    "the_page_base_wall_ms": 1792655462967.7,
+    "the_page_base_spread_ms": 1.2,
+    "the_page_base_tolerance_ms": 250.0,
+    "the_gaps": [
+      {
+        "after": "1792655768",
+        "before": "1792656069",
+        "the_gap_ms": 494.1
+      },
+      {
+        "after": "1792656069",
+        "before": "1792656077",
+        "the_gap_ms": 501.2
+      },
+      {
+        "after": "1792656077",
+        "before": "1792656100",
+        "the_gap_ms": 4481.9
+      },
+      {
+        "after": "1792656100",
+        "before": "1792656118",
+        "the_gap_ms": 1498.7
+      },
+      {
+        "after": "1792656118",
+        "before": "1792656155",
+        "the_gap_ms": 5500.2
+      },
+      {
+        "after": "1792656155",
+        "before": "1792656183",
+        "the_gap_ms": 468.7
+      },
+      {
+        "after": "1792656183",
+        "before": "1792656235",
+        "the_gap_ms": 1494.9
+      }
+    ],
+    "the_total_gap_ms": 14439.7,
+    "the_span_ms": 767662.7,
+    "the_frames": 1866,
+    "the_note": "the sessions were merged because they share one page clock, and that was CHECKED: their recovered page bases agree to 1.2 ms across 12.8 minutes. The gaps between the sessions are real and are listed."
+  },
+  "bytes_written": 2366400
+}

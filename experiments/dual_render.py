@@ -119,7 +119,23 @@ class Stream:
     and `frame_offsets_ms`).  That is what the ProArt session bundles
     already are, and what `experiments/dual_ingest.py` makes of a
     phone recording -- so ONE reader serves both sides and no new
-    format is invented."""
+    format is invented.
+
+    THE PHONE IS NOT A VIDEO, SO IT IS NOT THE SAME BUNDLE.  The
+    room-lens renders CHARACTERS, so the phone's bundle carries
+    `change.raw` (the change maps, already reduced to the corpus's
+    grid) and `luma_grid.raw` (the picture, at the corpus's grid)
+    instead of `luma.raw`.  One reader still serves both, because the
+    change map is the thing the renders are made of and it is the same
+    KIND of quantity in both cases: the mean absolute luma difference
+    over a cell, per frame pair.
+
+    EVERY STREAM CARRIES ITS OWN FLOOR.  The corpus's 3.0 luma floor
+    was measured on the ProArt, at the ProArt's frame interval, over
+    the ProArt's own change maps.  A different sensor rendering a
+    posterised picture has a different floor, and a witness threshold
+    borrowed from another sensor is a threshold with no meaning.
+    """
 
     def __init__(self, path: Path, label: str):
         self.path = Path(path)
@@ -127,12 +143,19 @@ class Stream:
         self.problems: list[str] = []
 
         luma = self.path / 'luma.raw'
+        change = self.path / 'change.raw'
         ts = self.path / 'timestamps.json'
-        if not luma.is_file():
-            self.problems.append(f'no luma.raw in {self.path}')
+        if not luma.is_file() and not change.is_file():
+            self.problems.append(f'no luma.raw or change.raw in {self.path}')
         if not ts.is_file():
             self.problems.append(f'no timestamps.json in {self.path}')
         self.frames: np.ndarray = np.zeros((0, FRAME_H, FRAME_W), np.float32)
+        #: the PICTURE, always on the corpus's cell grid, so the two
+        #: panels of a luma render are the same SIZE
+        self.picture: np.ndarray = np.zeros((0, GRID_H, GRID_W), np.float32)
+        self.motion: np.ndarray | None = None
+        #: the time of each change map, in this stream's own clock
+        self.motion_times_s: np.ndarray = np.zeros(0)
         self.offsets_s: np.ndarray = np.zeros(0)
         self.wall_clock_start = ''
         #: The file's OWN first frame offset, before this class re-bases
@@ -141,7 +164,63 @@ class Stream:
         #: the corpus: the ProArt sessions start at 6834.7 ms because
         #: their offsets are performance.now() minus the pre-roll base.
         self.base_offset_ms: float = 0.0
-        if luma.is_file() and ts.is_file():
+        #: this sensor's own noise floor, in this sensor's own units
+        self.floor: float = CHANGE_NOISE_FLOOR
+        #: what the change map's numbers MEAN, in words
+        self.units: str = 'luma (the camera\'s own)'
+        #: the median interval between this stream's change maps
+        self.interval_s: float = 0.0
+        #: the share of this stream's frames that show a change above
+        #: its OWN floor.  A channel that is on most of the time cannot
+        #: TIME a movement, and the witness count is blind to it.
+        self.duty_cycle: float = 0.0
+        self.is_change_map: bool = False
+
+        data: dict = {}
+        if ts.is_file():
+            try:
+                data = json.loads(ts.read_text())
+            except Exception:  # noqa: BLE001
+                self.problems.append('timestamps.json is not readable JSON')
+        self.wall_clock_start = str(data.get('wall_clock_start', ''))
+
+        # the frame offsets, in the file's clock and then re-based
+        offs = data.get('frame_offsets_ms')
+        if isinstance(offs, list) and len(offs) > 1:
+            raw_offs = np.asarray(offs, dtype=np.float64) / 1000.0
+            self.base_offset_ms = float(raw_offs[0] * 1000.0)
+            self.offsets_s = raw_offs - raw_offs[0]
+        elif not change.is_file():
+            self.problems.append('timestamps.json carries no frame_offsets_ms')
+
+        if change.is_file():
+            # THE CHANGE-MAP STREAM: the phone's room-lens bundle
+            self.is_change_map = True
+            raw = np.fromfile(change, dtype=np.float32)
+            n = raw.size // (GRID_H * GRID_W)
+            if n < 2:
+                self.problems.append(f'only {n} change maps in {self.path}')
+                self.motion = None
+            else:
+                self.motion = raw[:n * GRID_H * GRID_W].reshape(
+                    n, GRID_H, GRID_W).astype(np.float32)
+            c_offs = data.get('change_offsets_ms')
+            if isinstance(c_offs, list) and len(c_offs) == len(self.motion):
+                ct = np.asarray(c_offs, dtype=np.float64) / 1000.0
+                self.motion_times_s = ct - ct[0]
+            elif len(self.motion):
+                self.motion_times_s = np.arange(len(self.motion), dtype=np.float64)
+                self.problems.append(
+                    'timestamps.json carries no change_offsets_ms, so the '
+                    'change maps are placed on an ARBITRARY clock')
+            lg = self.path / 'luma_grid.raw'
+            if lg.is_file():
+                praw = np.fromfile(lg, dtype=np.uint8)
+                pn = praw.size // (GRID_H * GRID_W)
+                self.picture = praw[:pn * GRID_H * GRID_W].reshape(
+                    pn, GRID_H, GRID_W).astype(np.float32)
+        elif luma.is_file():
+            # THE CORPUS STREAM
             raw = np.fromfile(luma, dtype=np.uint8)
             n = raw.size // (FRAME_W * FRAME_H)
             if n < 3:
@@ -149,28 +228,37 @@ class Stream:
             else:
                 self.frames = raw[:n * FRAME_W * FRAME_H].reshape(
                     n, FRAME_H, FRAME_W).astype(np.float32)
-            try:
-                data = json.loads(ts.read_text())
-            except Exception:  # noqa: BLE001
-                data = {}
-                self.problems.append('timestamps.json is not readable JSON')
-            offs = data.get('frame_offsets_ms')
-            if isinstance(offs, list) and len(offs) > 1:
-                self.offsets_s = np.asarray(offs, dtype=np.float64) / 1000.0
-                # the ORIGIN IS THE SESSION'S FIRST FRAME, the same
-                # convention `experiments/speech_to_score.py:load_clock`
-                # uses, so every tool in the fleet reads one clock
-                self.base_offset_ms = float(self.offsets_s[0] * 1000.0)
-                self.offsets_s = self.offsets_s - self.offsets_s[0]
-            else:
-                self.problems.append('timestamps.json carries no frame_offsets_ms')
-            self.wall_clock_start = str(data.get('wall_clock_start', ''))
-
-        # the change map, the corpus's own construction
-        self.motion = (lens.frame_motion_maps(self.path)
-                       if luma.is_file() else None)
-        if self.motion is None:
+                # the picture on the corpus's grid, so the luma render
+                # can put two views side by side at the same SIZE
+                self.picture = self.frames.reshape(
+                    n, GRID_H, FRAME_H // GRID_H, GRID_W,
+                    FRAME_W // GRID_W).mean(axis=(2, 4)).astype(np.float32)
+            self.motion = (lens.frame_motion_maps(self.path)
+                           if luma.is_file() else None)
+            if self.motion is not None and self.offsets_s.size >= 2:
+                self.motion_times_s = (self.offsets_s[:-1]
+                                       + self.offsets_s[1:]) / 2.0
+        else:
             self.problems.append('the change map could not be computed')
+
+        # this sensor's own floor, and its own frame interval
+        meta_path = self.path / 'meta.json'
+        if meta_path.is_file():
+            try:
+                smeta = json.loads(meta_path.read_text())
+            except Exception:  # noqa: BLE001
+                smeta = {}
+            noise = smeta.get('the_noise_of_this_sensor') or {}
+            if isinstance(noise, dict) and noise.get('the_floor') is not None:
+                self.floor = float(noise['the_floor'])
+            if smeta.get('the_units'):
+                self.units = str(smeta['the_units'])
+        if self.motion is not None and len(self.motion_times_s) >= 2:
+            gaps = np.diff(self.motion_times_s)
+            self.interval_s = float(np.median(gaps)) if gaps.size else 0.0
+        if self.motion is not None and len(self.motion):
+            mx = self.motion.reshape(len(self.motion), -1).max(axis=1)
+            self.duty_cycle = float((mx > self.floor).mean())
 
     @property
     def ok(self) -> bool:
@@ -181,18 +269,28 @@ class Stream:
 
     def time_of_motion_frame(self, i: int) -> float:
         """The time of the change between frames i and i+1."""
-        if self.offsets_s.size < 2:
+        if self.motion_times_s.size == 0:
             return 0.0
-        i = max(0, min(i, len(self.offsets_s) - 2))
-        return float((self.offsets_s[i] + self.offsets_s[i + 1]) / 2.0)
+        i = max(0, min(i, len(self.motion_times_s) - 1))
+        return float(self.motion_times_s[i])
 
     def motion_index_at(self, t_s: float) -> int | None:
         """The change-map frame nearest a time."""
-        if self.motion is None or self.offsets_s.size < 2:
+        if self.motion is None or self.motion_times_s.size == 0:
             return None
-        mid = (self.offsets_s[:-1] + self.offsets_s[1:]) / 2.0
-        idx = int(np.argmin(np.abs(mid - t_s)))
+        idx = int(np.argmin(np.abs(self.motion_times_s - t_s)))
         return idx
+
+    def picture_index_at(self, t_s: float) -> int:
+        """The PICTURE frame nearest a time.
+
+        The picture and the change map are different lengths -- a
+        change map needs two frames and a picture needs one -- so they
+        are indexed separately."""
+        if self.picture.size == 0 or self.offsets_s.size == 0:
+            return 0
+        idx = int(np.argmin(np.abs(self.offsets_s - t_s)))
+        return max(0, min(idx, len(self.picture) - 1))
 
     def motion_window(self, t_s: float, half_window_s: float,
                       how: str = 'mean') -> np.ndarray:
@@ -215,7 +313,7 @@ class Stream:
         """
         if self.motion is None:
             return np.zeros((GRID_H, GRID_W), np.float32)
-        mid = (self.offsets_s[:-1] + self.offsets_s[1:]) / 2.0
+        mid = self.motion_times_s
         sel = (mid >= t_s - half_window_s) & (mid <= t_s + half_window_s)
         if not sel.any():
             idx = self.motion_index_at(t_s)
@@ -234,9 +332,9 @@ class Stream:
     def motion_window_count(self, t_s: float, half_window_s: float) -> int:
         """How many frames the window holds -- the sample count that
         says how much evidence a moment has behind it."""
-        if self.motion is None or self.offsets_s.size < 2:
+        if self.motion is None or self.motion_times_s.size == 0:
             return 0
-        mid = (self.offsets_s[:-1] + self.offsets_s[1:]) / 2.0
+        mid = self.motion_times_s
         sel = (mid >= t_s - half_window_s) & (mid <= t_s + half_window_s)
         return int(sel.sum())
 
@@ -254,12 +352,17 @@ class Alignment:
 
     def __init__(self, offset_ms: float = 0.0, drift_ppm: float = 0.0,
                  source: str = 'none (the two streams are ASSUMED to start together)',
-                 n_claps: int = 0, residual_ms: float | None = None):
+                 n_claps: int = 0, residual_ms: float | None = None,
+                 note: str = ''):
         self.offset_ms = float(offset_ms)
         self.drift_ppm = float(drift_ppm)
         self.source = source
         self.n_claps = int(n_claps)
         self.residual_ms = residual_ms
+        #: the sidecar's OWN note, carried through into every output --
+        #: a sidecar that says what it is (the wall clock, not the
+        #: claps) must have that said wherever the alignment is shown
+        self.note = note
         #: the per-clap residuals, and which claps the fit used -- so a
         #: reader can see WHICH clap was wrong, not just that something
         #: was
@@ -295,6 +398,8 @@ class Alignment:
         if self.the_claps_dropped:
             out += (f'  [claps {self.the_claps_dropped} were DROPPED as '
                     f'outliers]')
+        if self.note:
+            out += f'\n  THE SIDECAR SAYS: {self.note}'
         return out
 
 
@@ -452,8 +557,10 @@ def load_alignment(path: Path | None, fixed: Stream | None = None,
                          drift_ppm=float(data.get('drift_ppm', 0.0)),
                          source=f'{path.name} (offset and drift as given, in '
                                 f'the re-based clock)',
-                         n_claps=int(data.get('n_claps', 0)))
-    return Alignment(source=f'{path.name} carries neither clap pairs nor an offset')
+                         n_claps=int(data.get('n_claps', 0)),
+                         note=str(data.get('the_note', '')))
+    return Alignment(source=f'{path.name} carries neither clap pairs nor an offset',
+                     note=str(data.get('the_note', '')))
 
 
 # --------------------------------------------------------------------------
@@ -489,25 +596,128 @@ def side_by_side(left: list[str], right: list[str], gap: str = '   |   ') -> lis
     return out
 
 
-def shared_scale(a: np.ndarray, b: np.ndarray, mode: str) -> float:
-    """The scale both views are quantised with."""
+def shared_scale(a: np.ndarray, b: np.ndarray, mode: str,
+                 floor_a: float = CHANGE_NOISE_FLOOR,
+                 floor_b: float = CHANGE_NOISE_FLOOR) -> float:
+    """The scale both views are quantised with.
+
+    THE FLOORS ARE THE TWO SENSORS' OWN.  With one scale and two
+    sensors, the scale has to be at least the HIGHER of the two floors
+    -- otherwise a view's own "this is a thing, not grain" reading
+    would be squashed into the bottom of the ramp and would look like
+    nothing moved.
+    """
     if mode == 'shared-auto':
-        return float(max(a.max(), b.max(), CHANGE_NOISE_FLOOR))
+        return float(max(a.max(), b.max(), floor_a, floor_b))
     if mode == 'shared-floor':
-        return float(CHANGE_NOISE_FLOOR)
+        return float(max(floor_a, floor_b))
     if mode == 'shared-fixed':
         return 12.0
     raise ValueError(f'unknown scale mode {mode}')
 
 
-def per_view_scale(a: np.ndarray, b: np.ndarray) -> tuple[float, float]:
+def per_view_scale(a: np.ndarray, b: np.ndarray,
+                   floor_a: float = CHANGE_NOISE_FLOOR,
+                   floor_b: float = CHANGE_NOISE_FLOOR) -> tuple[float, float]:
     """Each view against its OWN maximum.
 
     This is the "more than one way" that is a lie: the two panels are
     then unreadable against each other, and every output that uses it
     says so in the header."""
-    return (float(max(a.max(), CHANGE_NOISE_FLOOR)),
-            float(max(b.max(), CHANGE_NOISE_FLOOR)))
+    return (float(max(a.max(), floor_a)), float(max(b.max(), floor_b)))
+
+
+def _scaled_pair(fa: np.ndarray, rb: np.ndarray, fixed: Stream,
+                 roving: Stream, scale_mode: str
+                 ) -> tuple[np.ndarray, np.ndarray, float, float]:
+    """The two panels' values, and the scales to quantise them with.
+
+    THE THREE WAYS, AND WHAT EACH ONE ANSWERS.
+
+      'shared-auto'      one scale for both views.  This is the
+                         default because a side-by-side of two scales
+                         says nothing about which view saw more.  It
+                         is only meaningful when the two views are in
+                         the SAME UNITS -- and the duet is not: the
+                         ProArt's change map is in the camera's luma
+                         and the phone's is in the room-lens's own
+                         brightness, so one scale renders one of them
+                         black.  Kept, and filed, because the black
+                         panel is the honest picture of that mismatch.
+
+      'per-view-auto'    each view against its own maximum.  The two
+                         panels are then readable, and NOT comparable
+                         in magnitude -- every output that uses it
+                         says so.
+
+      'floor-relative'   each view divided by that view's OWN noise
+                         floor, then one scale for both.  This is the
+                         only comparison the two sensors make
+                         possible: the panels read in TIMES THIS
+                         SENSOR'S OWN GRAIN, so a cell at the top of
+                         the ramp means the same thing on both sides.
+    """
+    if scale_mode == 'floor-relative':
+        na = fa / max(fixed.floor, 1e-6)
+        nb = rb / max(roving.floor, 1e-6)
+        sc = float(max(na.max(), nb.max(), 1.0))
+        return na, nb, sc, sc
+    if scale_mode == 'per-view-auto':
+        sc_l, sc_r = per_view_scale(fa, rb, fixed.floor, roving.floor)
+        return fa, rb, sc_l, sc_r
+    sc = shared_scale(fa, rb, scale_mode, fixed.floor, roving.floor)
+    return fa, rb, sc, sc
+
+
+def _picture_at(stream: Stream, t_s: float) -> np.ndarray:
+    """The picture nearest a time, on the corpus's cell grid.
+
+    BOTH PANELS LAND ON THE SAME GRID, so a luma render puts two
+    views side by side at the same SIZE.  It does not make them the
+    same VIEW: the two cameras see the room from different places, and
+    the header says so.
+    """
+    if stream.picture.size == 0:
+        return np.zeros((GRID_H, GRID_W), np.float32)
+    return stream.picture[stream.picture_index_at(t_s)]
+
+
+def _the_two_sensors(fixed: Stream, roving: Stream) -> list[str]:
+    """What the two sensors ARE, in the units the panels are drawn in.
+
+    THE TWO VIEWS ARE NOT IN THE SAME UNITS, and a reader who is not
+    told that will read the panels as if they were.  The corpus's
+    change map is in the camera's luma; the room-lens's is in the
+    room-lens's own brightness -- a 2.2x contrast stretch of the
+    camera's luma, clipped, with half its range collapsed into one
+    glyph.  So each sensor's own noise floor is a different NUMBER,
+    and the two sample the room at different rates.
+    """
+    out = [
+        f'  the fixed view:  change in {fixed.units}; its own floor '
+        f'{fixed.floor:.3f}; one frame every {fixed.interval_s * 1000.0:.1f} ms; '
+        f'it shows a change in {fixed.duty_cycle * 100.0:.1f} % of its frames',
+        f'  the roving view: change in {roving.units}; its own floor '
+        f'{roving.floor:.3f}; one frame every {roving.interval_s * 1000.0:.1f} ms; '
+        f'it shows a change in {roving.duty_cycle * 100.0:.1f} % of its frames',
+    ]
+    if fixed.duty_cycle > 0.5 or roving.duty_cycle > 0.5:
+        out.append('  A CHANNEL THAT IS ON MOST OF THE TIME CANNOT TIME A '
+                   'MOVEMENT: its witness marks are then close to constant, '
+                   'and the')
+        out.append('  contingency table has nothing left to measure. That is '
+                   'what the duty cycle above is for.')
+    if fixed.interval_s and roving.interval_s:
+        ratio = roving.interval_s / fixed.interval_s
+        out.append(
+            f'  the two views sample the room at DIFFERENT rates: the '
+            f'roving view\'s interval is {ratio:.2f}x the fixed view\'s, so '
+            f'the same movement covers {ratio:.2f}x more of the picture per '
+            f'frame in the roving view')
+    out.append('  the two change maps are not in the same units and not in '
+               'the same space: a cell on the left and a cell on the right '
+               'are not the same part of the room')
+    return out
 
 
 def render_dual_ascii(fixed: Stream, roving: Stream, align: Alignment,
@@ -528,28 +738,23 @@ def render_dual_ascii(fixed: Stream, roving: Stream, align: Alignment,
         t_r = align.roving_time_for_fixed(t)
         fa = fixed.motion_window(t, half_window_s, how)
         rb = roving.motion_window(t_r, half_window_s, how)
-        if scale_mode == 'per-view-auto':
-            sc_l, sc_r = per_view_scale(fa, rb)
-            sc = max(sc_l, sc_r)
-        else:
-            sc_l = sc_r = sc = shared_scale(fa, rb, scale_mode)
+        fa_q, rb_q, sc_l, sc_r = _scaled_pair(fa, rb, fixed, roving,
+                                              scale_mode)
         if mode in ('change', 'both'):
-            left_blocks.append(quantise(fa, sc_l).split('\n'))
-            right_blocks.append(quantise(rb, sc_r).split('\n'))
+            left_blocks.append(quantise(fa_q, sc_l).split('\n'))
+            right_blocks.append(quantise(rb_q, sc_r).split('\n'))
         if mode in ('luma', 'both'):
-            left_blocks.append(quantise(fixed.frames[min(
-                fixed.motion_index_at(t) or 0, len(fixed.frames) - 1)],
-                255.0, LUMA_RAMP).split('\n'))
-            right_blocks.append(quantise(roving.frames[min(
-                roving.motion_index_at(t_r) or 0, len(roving.frames) - 1)],
-                255.0, LUMA_RAMP).split('\n'))
+            left_blocks.append(quantise(_picture_at(fixed, t), 255.0,
+                                        LUMA_RAMP).split('\n'))
+            right_blocks.append(quantise(_picture_at(roving, t_r), 255.0,
+                                         LUMA_RAMP).split('\n'))
         numbers.append({
             't_fixed_s': round(t, 3),
             't_roving_s': round(t_r, 3),
             'fixed_energy': round(float(fa.sum()), 2),
             'roving_energy': round(float(rb.sum()), 2),
-            'fixed_cells_above_floor': int((fa > CHANGE_NOISE_FLOOR).sum()),
-            'roving_cells_above_floor': int((rb > CHANGE_NOISE_FLOOR).sum()),
+            'fixed_cells_above_floor': int((fa > fixed.floor).sum()),
+            'roving_cells_above_floor': int((rb > roving.floor).sum()),
             'fixed_window_frames': fixed.motion_window_count(t, half_window_s),
             'roving_window_frames': roving.motion_window_count(t_r, half_window_s),
             'fixed_scale': round(float(sc_l), 3),
@@ -563,9 +768,14 @@ def render_dual_ascii(fixed: Stream, roving: Stream, align: Alignment,
                   f'cameras see the room from different places')
     blocks.append(f'  mode: {mode}   scale: {scale_mode}   window statistic: '
                   f'{how}   window: +/-{half_window_s:.2f} s')
+    blocks.extend(_the_two_sensors(fixed, roving))
     if scale_mode == 'per-view-auto':
         blocks.append('  EACH VIEW HAS ITS OWN SCALE: the two panels are NOT '
                       'comparable against each other')
+    if scale_mode == 'floor-relative':
+        blocks.append('  EACH PANEL IS IN TIMES ITS OWN SENSOR\'S GRAIN: a '
+                      'cell at the top of the ramp means the same thing on '
+                      'both sides')
     header_left = f'FIXED ({fixed.label})'.ljust(GRID_W)
     header_right = f'ROVING ({roving.label})'.ljust(GRID_W)
     blocks.extend(side_by_side([header_left], [header_right]))
@@ -584,16 +794,13 @@ def render_dual_ascii(fixed: Stream, roving: Stream, align: Alignment,
                     'scale_mode': scale_mode}
 
 
-def render_fused_score(fixed: Stream, roving: Stream, align: Alignment,
-                       t0: float, t1: float, slice_s: float) -> tuple[list[str], dict]:
-    """THE FUSED SCORE -- two staves over time, each annotating the
-    other.
+def _fused_rows(fixed: Stream, roving: Stream, align: Alignment,
+                t0: float, t1: float, slice_s: float) -> list[dict]:
+    """The fused score's slices, as rows.
 
-    A score is quantized and it is read top to bottom, so the staves
-    are time slices.  Each staff carries its own channel's energy; the
-    row under it is the OTHER channel's witness: '=' when both moved,
-    '>' when only this one moved, '<' when only the other did, '.' when
-    neither did."""
+    Factored out of the render so that the SAME rows can be recomputed
+    under a different alignment -- which is how the alignment's
+    sensitivity is measured."""
     n_slices = max(1, int(round((t1 - t0) / slice_s)))
     rows = []
     fixed_energy = []
@@ -611,20 +818,38 @@ def render_fused_score(fixed: Stream, roving: Stream, align: Alignment,
         roving_energy.append(re)
         # the ENERGY is the mean over the window; the WITNESS asks
         # whether the other eye saw anything move at that moment, and
-        # that is a question about the strongest single frame.
+        # that is a question about the strongest single frame.  EACH
+        # EYE IS ASKED AGAINST ITS OWN FLOOR -- a threshold borrowed
+        # from the other sensor is a threshold with no meaning.
         fx = fixed.motion_window(mid, slice_s / 2.0, 'max')
         rx = roving.motion_window(
             align.roving_time_for_fixed(mid), slice_s / 2.0, 'max')
-        f_moved = bool((fx > CHANGE_NOISE_FLOOR).any())
-        r_moved = bool((rx > CHANGE_NOISE_FLOOR).any())
+        f_moved = bool((fx > fixed.floor).any())
+        r_moved = bool((rx > roving.floor).any())
         mark = '=' if (f_moved and r_moved) else ('>' if f_moved else
                                                   ('<' if r_moved else '.'))
         rows.append({'t_s': round(a, 3), 'fixed': fe, 'roving': re,
                      'mark': mark,
-                     'fixed_cells': int((fx > CHANGE_NOISE_FLOOR).sum()),
-                     'roving_cells': int((rx > CHANGE_NOISE_FLOOR).sum())})
+                     'fixed_cells': int((fx > fixed.floor).sum()),
+                     'roving_cells': int((rx > roving.floor).sum())})
+    return rows, fixed_energy, roving_energy
 
-    top = max(max(fixed_energy), max(roving_energy), CHANGE_NOISE_FLOOR)
+
+def render_fused_score(fixed: Stream, roving: Stream, align: Alignment,
+                       t0: float, t1: float, slice_s: float) -> tuple[list[str], dict]:
+    """THE FUSED SCORE -- two staves over time, each annotating the
+    other.
+
+    A score is quantized and it is read top to bottom, so the staves
+    are time slices.  Each staff carries its own channel's energy; the
+    row under it is the OTHER channel's witness: '=' when both moved,
+    '>' when only this one moved, '<' when only the other did, '.' when
+    neither did."""
+    rows, fixed_energy, roving_energy = _fused_rows(
+        fixed, roving, align, t0, t1, slice_s)
+    n_slices = len(rows)
+
+    top = max(max(fixed_energy), max(roving_energy), fixed.floor, roving.floor)
     f_chars = ''.join(MOTION_RAMP[min(len(MOTION_RAMP) - 1,
                                        int(round(v / top * (len(MOTION_RAMP) - 1))))]
                       for v in fixed_energy)
@@ -647,6 +872,9 @@ def render_fused_score(fixed: Stream, roving: Stream, align: Alignment,
                  '. neither')
     lines.append('  a mark is decided by the STRONGEST frame in the slice, so a '
                  'thing that moved for one frame still counts')
+    lines.append(f'  each eye is asked against its OWN floor: the fixed view at '
+                 f'{fixed.floor:.3f}, the roving view at {roving.floor:.3f}')
+    lines.extend(_the_two_sensors(fixed, roving))
     lines.append('')
     lines.append('  time      ' + ''.join(('|' if i % 10 == 0 else ' ')
                                           for i in range(n_slices)))
@@ -663,6 +891,210 @@ def render_fused_score(fixed: Stream, roving: Stream, align: Alignment,
                  'per frame in the slice; the mark is decided by the strongest '
                  'single frame')
     return lines, {'slices': rows, 'n_slices': n_slices}
+
+
+def _corr(a: np.ndarray, b: np.ndarray) -> float:
+    """The Pearson correlation of two series."""
+    if a.size < 3 or a.size != b.size:
+        return 0.0
+    x = a - a.mean()
+    y = b - b.mean()
+    den = float(np.sqrt((x * x).sum() * (y * y).sum()))
+    return float((x * y).sum() / den) if den > 0 else 0.0
+
+
+def graded_witness(fixed: Stream, roving: Stream, align: Alignment,
+                   t0: float, t1: float, slice_s: float) -> dict:
+    """THE GRADED WITNESS -- do the two channels' energies rise and fall
+    together?
+
+    THE BINARY COUNT IS BLUNT.  The 2x2 table asks "did something move
+    in this slice", which is a yes/no question about a channel that
+    may be SATURATED: when both cameras have something in view, both
+    say yes for most of the time, and the table has nothing left to
+    measure.  The GRADED question -- do the two channels' change
+    energies rise and fall TOGETHER -- uses the whole signal instead
+    of its sign.
+
+    THE NULL IS THE SLIDE.  The roving channel is slid against the
+    fixed one, slice by slice, and the correlation is recomputed at
+    every offset.  A correlation that a slide can match was not
+    measuring the alignment.  The null's spread is the
+    AUTOCORRELATION of two slow series -- a person walking about a
+    room produces bursts minutes long -- so the observed correlation
+    has to beat THAT, not the correlation of two noises.
+
+    AND THE SLIDE CANNOT FIND THE ALIGNMENT.  The sweep's largest
+    value need not be at the truth, because two slow series correlate
+    somewhere by luck.  So the sweep is reported with its shape, and
+    a peak is only called a peak if it is SHARP: the spread of the
+    region within one null standard deviation of the maximum is
+    reported beside it, and a broad region means the sweep found
+    nothing to localise.
+    """
+    rows, fe, re = _fused_rows(fixed, roving, align, t0, t1, slice_s)
+    fe = np.asarray(fe, dtype=np.float64)
+    re = np.asarray(re, dtype=np.float64)
+    n = fe.size
+    out: dict = {'n_slices': int(n), 'the_slice_s': slice_s,
+                 'the_readings': {}}
+    if n < 8:
+        out['the_note'] = 'too few slices to correlate'
+        return out
+    for name, (a, b) in (('raw', (fe, re)),
+                         ('log', (np.log1p(fe), np.log1p(re)))):
+        obs = _corr(a, b)
+        sweep = []
+        for d in range(-(n // 2), n // 2 + 1):
+            x, y = (a[:n - d], b[d:]) if d >= 0 else (a[-d:], b[:n + d])
+            sweep.append((d, _corr(x, y)))
+        vals = np.asarray([r for _, r in sweep])
+        best_d, best_r = max(sweep, key=lambda kv: kv[1])
+        sd = float(vals.std())
+        near = [d for d, r in sweep if r >= best_r - sd]
+        out['the_readings'][name] = {
+            'the_correlation_at_the_alignment': round(obs, 4),
+            'the_null_mean': round(float(vals.mean()), 4),
+            'the_null_sd': round(sd, 4),
+            'the_z_against_the_null': (round((obs - float(vals.mean())) / sd, 3)
+                                       if sd > 0 else None),
+            'the_share_of_slides_that_match_it': int((vals >= obs).sum()),
+            'the_n_slides': len(sweep),
+            'the_sweep_maximum': {'the_shift_slices': best_d,
+                                  'the_shift_s': round(best_d * slice_s, 3),
+                                  'the_correlation': round(best_r, 4)},
+            'the_sweep_minimum': {'the_shift_slices': min(sweep, key=lambda kv: kv[1])[0],
+                                  'the_correlation': round(min(r for _, r in sweep), 4)},
+            'the_peak_sharpness_s': round((max(near) - min(near)) * slice_s, 3),
+            'the_sweep': [{'the_shift_slices': d, 'the_shift_s': round(d * slice_s, 3),
+                           'the_correlation': round(r, 4)} for d, r in sweep],
+        }
+    out['the_note'] = (
+        'the raw reading is the one that was asked for first; the log '
+        'reading was added after the raw one was seen, so it is a SECOND '
+        'reading and not a replacement. Neither is called the answer '
+        'here: the slide null says how much of each is the room and how '
+        'much is two slow series correlating somewhere by luck.')
+    return out
+
+
+def render_graded_witness(w: dict, slice_s: float) -> list[str]:
+    """The graded witness, printed."""
+    lines = []
+    lines.append('THE GRADED WITNESS -- do the two channels rise and fall '
+                 'together?')
+    if not w.get('n_slices'):
+        return lines
+    lines.append(f'  {w["n_slices"]} slices of {slice_s:.2f} s; the reading is '
+                 f'the correlation of the two channels\' change energies')
+    lines.append('  THE NULL IS THE SLIDE: the roving channel is slid against '
+                 'the fixed one and the')
+    lines.append('  correlation is recomputed at every offset.  The null\'s '
+                 'spread is the AUTOCORRELATION of two slow')
+    lines.append('  series, and the observed has to beat that, not the '
+                 'correlation of two noises.')
+    lines.append('')
+    lines.append('  reading   r(at the alignment)   null mean   null sd      z'
+                 '   slides that match it')
+    for name, r in w.get('the_readings', {}).items():
+        lines.append(
+            f'  {name:7s}  {r["the_correlation_at_the_alignment"]:+19.4f}  '
+            f'{r["the_null_mean"]:+10.4f}  {r["the_null_sd"]:8.4f}  '
+            f'{r["the_z_against_the_null"]:+6.2f}   '
+            f'{r["the_share_of_slides_that_match_it"]:4d} of '
+            f'{r["the_n_slides"]}')
+    lines.append('')
+    for name, r in w.get('the_readings', {}).items():
+        m = r['the_sweep_maximum']
+        lines.append(
+            f'  the {name} reading: the slide\'s own maximum is at '
+            f'{m["the_shift_s"]:+.1f} s with r = {m["the_correlation"]:+.4f}; '
+            f'the region within one null sd of it spans '
+            f'{r["the_peak_sharpness_s"]:.0f} s')
+    lines.append('')
+    lines.append('  A SHARP PEAK WOULD BE AN ALIGNMENT MEASURED FROM THE DATA. '
+                 'A BROAD ONE IS NOT:')
+    lines.append('  two slow series correlate somewhere by luck, and a sweep '
+                 'that cannot say WHERE is saying')
+    lines.append('  nothing about the skew.  The claps are not optional.')
+    return lines
+
+
+def alignment_sensitivity(fixed: Stream, roving: Stream, align: Alignment,
+                          t0: float, t1: float, slice_s: float,
+                          shifts_ms: list[float]) -> list[dict]:
+    """HOW MUCH THE WITNESS COUNT DEPENDS ON THE ALIGNMENT.
+
+    THE WALL CLOCK IS NOT THE CLAPS.  The two devices' clocks have
+    never been compared, so the wall-clock alignment carries a
+    device-to-device skew that nobody has measured, and the count's
+    excess over chance is worth something only if it survives a
+    misalignment.  So the count is recomputed with the alignment
+    DELIBERATELY moved, and the table says how much it moves.
+
+    A count that collapses under a shift of a few hundred
+    milliseconds was measuring the alignment, not the room.  A count
+    that does not move is measuring something both cameras see
+    whatever the clock says -- a different claim, and the table is
+    what tells the two apart.
+    """
+    out = []
+    for d in shifts_ms:
+        a2 = Alignment(offset_ms=align.offset_ms + d,
+                       drift_ppm=align.drift_ppm,
+                       source=f'{align.source} (SHIFTED {d:+.0f} ms on purpose)',
+                       n_claps=align.n_claps, note=align.note)
+        rows, _, _ = _fused_rows(fixed, roving, a2, t0, t1, slice_s)
+        cnt = witness_count(rows)
+        out.append({
+            'the_shift_ms': d,
+            'n_slices': cnt.get('n_slices'),
+            'both_moved': cnt.get('both_moved'),
+            'p_fixed': cnt.get('p_fixed'),
+            'p_roving': cnt.get('p_roving'),
+            'p_both': cnt.get('p_both'),
+            'p_both_if_independent': cnt.get('p_both_if_independent'),
+            'the_excess_over_chance': cnt.get('the_excess_over_chance'),
+            'the_chi_square': cnt.get('the_chi_square'),
+            'the_p_value': cnt.get('the_p_value'),
+        })
+    return out
+
+
+def render_alignment_sensitivity(table: list[dict], slice_s: float) -> list[str]:
+    """The sensitivity table, printed."""
+    lines = []
+    lines.append('THE ALIGNMENT\'S SENSITIVITY -- the witness count with the '
+                 'alignment moved on purpose')
+    lines.append('  the wall clock is NOT the claps: the two devices\' clocks '
+                 'have never been compared, so the')
+    lines.append('  alignment carries a skew nobody has measured.  This table '
+                 'asks what the count does when the')
+    lines.append('  alignment is DELIBERATELY wrong, so the reader can see how '
+                 'much of the count is the room')
+    lines.append('  and how much is the clock.')
+    lines.append('')
+    lines.append('  shift(ms)   both   p_fixed  p_roving   p_both   chance   '
+                 'excess   chi-sq      p')
+    for r in table:
+        if r.get('p_both') is None:
+            continue
+        chi = r.get('the_chi_square')
+        pv = r.get('the_p_value')
+        chi_s = f'{chi:6.2f}' if chi is not None else '     -'
+        pv_s = f'{pv:8.4g}' if pv is not None else '       -'
+        lines.append(
+            f'  {r["the_shift_ms"]:+9.0f}  {r["both_moved"]:4d}  '
+            f'{r["p_fixed"]:7.3f}  {r["p_roving"]:8.3f}  '
+            f'{r["p_both"]:7.3f}  {r["p_both_if_independent"]:7.3f}  '
+            f'{r["the_excess_over_chance"]:+6.3f}  '
+            f'{chi_s}  {pv_s}')
+    lines.append('')
+    lines.append('  a count that collapses under a shift of a few hundred '
+                 'milliseconds was measuring the ALIGNMENT, not the room')
+    lines.append('  a count that does not move is measuring something both '
+                 'cameras see whatever the clock says')
+    return lines
 
 
 def witness_count(rows: list[dict]) -> dict:
@@ -791,14 +1223,11 @@ def render_differenced(fixed: Stream, roving: Stream, align: Alignment,
     t_r = align.roving_time_for_fixed(t)
     fa = fixed.motion_window(t, half_window_s, how)
     rb = roving.motion_window(t_r, half_window_s, how)
-    if scale_mode == 'per-view-auto':
-        sc_l, sc_r = per_view_scale(fa, rb)
-    else:
-        sc_l = sc_r = shared_scale(fa, rb, scale_mode)
-    f_moved = fa > CHANGE_NOISE_FLOOR
+    fa_q, rb_q, sc_l, sc_r = _scaled_pair(fa, rb, fixed, roving, scale_mode)
+    f_moved = fa > fixed.floor
     # the witness is asked of the strongest single frame in the window
     rx = roving.motion_window(t_r, half_window_s, 'max')
-    witnessed = bool((rx > CHANGE_NOISE_FLOOR).any())
+    witnessed = bool((rx > roving.floor).any())
 
     diff = np.full((GRID_H, GRID_W), '.', dtype='<U1')
     for r in range(GRID_H):
@@ -808,7 +1237,7 @@ def render_differenced(fixed: Stream, roving: Stream, align: Alignment,
     diff_lines = [''.join(row) for row in diff]
 
     n_fixed = int(f_moved.sum())
-    n_roving = int((rb > CHANGE_NOISE_FLOOR).sum())
+    n_roving = int((rb > roving.floor).sum())
     lines = []
     lines.append('THE DIFFERENCED VIEW -- the fixed frame, the roving frame, '
                  'and the difference')
@@ -817,19 +1246,25 @@ def render_differenced(fixed: Stream, roving: Stream, align: Alignment,
     lines.append(f'  t = {t:+.3f} s fixed / {t_r:+.3f} s roving   '
                  f'window +/-{half_window_s:.2f} s   scale: {scale_mode}   '
                  f'window statistic: {how}')
-    lines.append(f'  the fixed frame moved in {n_fixed} cells; the roving frame '
-                 f'saw movement in {n_roving} cells')
+    lines.append(f'  the fixed frame moved in {n_fixed} cells (its own floor '
+                 f'{fixed.floor:.3f}); the roving frame saw movement in '
+                 f'{n_roving} cells (its own floor {roving.floor:.3f})')
+    lines.extend(_the_two_sensors(fixed, roving))
     if scale_mode == 'per-view-auto':
         lines.append('  EACH VIEW HAS ITS OWN SCALE: the two panels are NOT '
                      'comparable against each other')
+    if scale_mode == 'floor-relative':
+        lines.append('  EACH PANEL IS IN TIMES ITS OWN SENSOR\'S GRAIN: a '
+                     'cell at the top of the ramp means the same thing on '
+                     'both sides')
     lines.append('')
     lines.extend(side_by_side(
         [f'FIXED CHANGE ({fixed.label})'.ljust(GRID_W),
          f'ROVING CHANGE ({roving.label})'.ljust(GRID_W)],
         [f'DIFFERENCE (witness mask)'.ljust(GRID_W)]))
     lines.append('')
-    lines.extend(side_by_side(quantise(fa, sc_l).split('\n'),
-                               quantise(rb, sc_r).split('\n'), gap='   |   '))
+    lines.extend(side_by_side(quantise(fa_q, sc_l).split('\n'),
+                               quantise(rb_q, sc_r).split('\n'), gap='   |   '))
     lines.append('')
     lines.append('THE DIFFERENCE PANEL, alone (it is the point of the render):')
     lines.extend(diff_lines)
@@ -857,21 +1292,47 @@ def check_pair(fixed: Stream, roving: Stream, align: Alignment) -> dict:
         'fixed': {'path': str(fixed.path), 'label': fixed.label,
                   'frames': len(fixed.frames), 'ok': fixed.ok,
                   'problems': fixed.problems,
-                  'wall_clock_start': fixed.wall_clock_start},
+                  'wall_clock_start': fixed.wall_clock_start,
+                  'the_change_maps': fixed.n_frames(),
+                  'the_floor': fixed.floor, 'the_units': fixed.units,
+                  'the_frame_interval_ms': round(fixed.interval_s * 1000.0, 3)},
         'roving': {'path': str(roving.path), 'label': roving.label,
                    'frames': len(roving.frames), 'ok': roving.ok,
                    'problems': roving.problems,
-                   'wall_clock_start': roving.wall_clock_start},
+                   'wall_clock_start': roving.wall_clock_start,
+                   'the_change_maps': roving.n_frames(),
+                   'the_floor': roving.floor, 'the_units': roving.units,
+                   'the_frame_interval_ms': round(roving.interval_s * 1000.0, 3)},
         'alignment': {'source': align.source, 'assumed': align.assumed,
                       'offset_ms': align.offset_ms, 'drift_ppm': align.drift_ppm,
-                      'n_claps': align.n_claps},
+                      'n_claps': align.n_claps, 'the_note': align.note},
     }
     blockers = list(fixed.problems) + list(roving.problems)
-    # the overlap: the window where both streams exist
-    t0 = max(0.0, float(fixed.offsets_s[0]) if fixed.offsets_s.size else 0.0)
-    t1 = min(float(fixed.offsets_s[-1]) if fixed.offsets_s.size else 0.0,
-             float(roving.offsets_s[-1]) if roving.offsets_s.size else 0.0)
+    # THE OVERLAP IS IN THE ALIGNED CLOCK.  The two streams have
+    # DIFFERENT origins -- in the duet the phone's walkabout started
+    # 500 s after the ProArt's page was loaded -- so their raw time
+    # ranges never meet, and the ALIGNMENT is what brings them
+    # together.  Taking the overlap of the raw ranges would report
+    # that the pair has no shared minutes at all.
+    def _span(stream: Stream):
+        if stream.offsets_s.size == 0:
+            return None
+        return (float(stream.offsets_s[0]), float(stream.offsets_s[-1]))
+
+    fs = _span(fixed)
+    rs = _span(roving)
+    if fs is None or rs is None:
+        t0 = t1 = 0.0
+    else:
+        rs_in_fixed = (align.fixed_time_for_roving(rs[0]),
+                       align.fixed_time_for_roving(rs[1]))
+        t0 = max(fs[0], rs_in_fixed[0])
+        t1 = min(fs[1], rs_in_fixed[1])
     out['the_overlap_s'] = [round(t0, 3), round(t1, 3)]
+    out['the_fixed_span_s'] = [round(fs[0], 3), round(fs[1], 3)] if fs else None
+    out['the_roving_span_s_in_the_fixed_clock'] = (
+        [round(align.fixed_time_for_roving(rs[0]), 3),
+         round(align.fixed_time_for_roving(rs[1]), 3)] if rs else None)
     if t1 <= t0:
         blockers.append('the two streams do not overlap in time')
     out['renderable'] = (not blockers)
@@ -1351,6 +1812,79 @@ def selftest() -> int:
         ck('check: a missing stream is a precise blocker, not an absence',
            not report['renderable'] and report['blockers'], str(report))
 
+        # 8. the OVERLAP IS IN THE ALIGNED CLOCK.  Two streams with
+        #    DIFFERENT origins share no minutes until the alignment
+        #    brings them together, and taking the overlap of the raw
+        #    ranges would report that the pair has nothing in common.
+        s1 = Stream(fixed.path, 'a')
+        s2 = Stream(roving.path, 'b')
+        al_shift = Alignment(offset_ms=500000.0)
+        rep2 = check_pair(s1, s2, al_shift)
+        ck('check: the overlap is computed in the ALIGNED clock',
+           rep2['the_overlap_s'][0] > 100.0, str(rep2['the_overlap_s']))
+        rep3 = check_pair(s1, s2, Alignment())
+        ck('check: with no alignment the overlap is the RAW one',
+           rep3['the_overlap_s'][1] <= rep2['the_overlap_s'][1] + 1.0,
+           str(rep3['the_overlap_s']))
+
+        # 9. the FLOOR-RELATIVE scale: each view in times its OWN
+        #    sensor's grain, which is the only comparison two sensors
+        #    in different units can make.
+        fa = np.array([[6.0, 0.0]])
+        rb = np.array([[60.0, 0.0]])
+        f_stream = Stream(fixed.path, 'f')
+        r_stream = Stream(roving.path, 'r')
+        f_stream.floor, r_stream.floor = 3.0, 30.0
+        na, nb, sc_a, sc_b = _scaled_pair(fa, rb, f_stream, r_stream,
+                                          'floor-relative')
+        ck('render: the floor-relative scale divides by each own floor',
+           abs(na[0, 0] - 2.0) < 1e-9 and abs(nb[0, 0] - 2.0) < 1e-9,
+           f'{na[0, 0]} {nb[0, 0]}')
+        ck('render: the floor-relative scale is ONE scale for both',
+           abs(sc_a - sc_b) < 1e-9, f'{sc_a} {sc_b}')
+
+        # 10. the GRADED WITNESS and its slide null
+        gw = graded_witness(fixed, roving, al2, 0.0, 6.0, 0.25)
+        raw = gw.get('the_readings', {}).get('raw', {})
+        ck('render: the graded witness reports the reading and its null',
+           'the_correlation_at_the_alignment' in raw
+           and 'the_null_sd' in raw and 'the_z_against_the_null' in raw,
+           str(sorted(raw.keys())))
+        ck('render: the graded witness slides the roving channel',
+           raw.get('the_n_slides', 0) > 3
+           and abs(raw.get('the_correlation_at_the_alignment', 0.0)) <= 1.0,
+           str(raw.get('the_n_slides')))
+        ck('render: the graded witness says whether the peak is sharp',
+           'the_peak_sharpness_s' in raw, str(sorted(raw.keys())))
+
+        # 11. the sidecar's OWN note is carried into the output
+        note_path = tmp / 'note.json'
+        note_path.write_text(json.dumps({'offset_ms': 12.0, 'drift_ppm': 0.0,
+                                         'the_note': 'THE WALL CLOCK, NOT '
+                                         'THE CLAPS'}))
+        a_note = load_alignment(note_path, fixed, roving)
+        ck('align: the sidecar\'s own note is carried into the output',
+           'THE WALL CLOCK' in a_note.describe(),
+           a_note.describe()[:120])
+
+        # 12. a CHANGE-MAP STREAM is read: the phone's room-lens bundle
+        from experiments import dual_ingest as di  # noqa: PLC0415
+        fx = di.make_room_lens_fixture(tmp / 'roomlens.json')
+        ph = tmp / 'phone'
+        di.ingest_room_lens(tmp / 'roomlens.json', ph, quiet=True)
+        ps = Stream(ph, 'the phone')
+        ck('render: the change-map stream is read by the render lane',
+           ps.ok and ps.is_change_map and ps.n_frames() == fx['the_n_frames'] - 1,
+           str(ps.problems))
+        ck('render: the change-map stream carries its own floor and units',
+           abs(ps.floor - 255.0 / 16.0) < 1e-6 and 'room-lens' in ps.units,
+           f'{ps.floor} {ps.units}')
+        ck('render: the change-map stream\'s picture is on the corpus grid',
+           ps.picture.shape[1:] == (GRID_H, GRID_W), str(ps.picture.shape))
+        ck('render: the two change maps are not in the same units',
+           'not in the same units' in ' '.join(_the_two_sensors(fixed, ps)),
+           ' '.join(_the_two_sensors(fixed, ps))[:120])
+
     failed = [c for c in checks if not c[1]]
     for name, ok, detail in checks:
         print(f"  {'PASS' if ok else 'FAIL'}  {name}"
@@ -1376,11 +1910,15 @@ def main(argv=None) -> int:
     ap.add_argument('--mode', default='change', choices=('change', 'luma', 'both'))
     ap.add_argument('--scale', default='shared-auto',
                     choices=('shared-auto', 'shared-floor', 'shared-fixed',
-                             'per-view-auto'),
+                             'per-view-auto', 'floor-relative'),
                     help='shared-auto: one scale for both views (the default, '
                          'because a side-by-side of two scales is a lie). '
                          'per-view-auto: each view against its own maximum, '
-                         'which the output labels as not comparable')
+                         'which the output labels as not comparable. '
+                         'floor-relative: each view divided by its OWN noise '
+                         'floor, so the two panels read in times this '
+                         "sensor's own grain -- the only comparison two "
+                         'sensors in different units can make')
     ap.add_argument('--map', default='mean', choices=('mean', 'max', 'sum'),
                     help='the window statistic: the mean change per frame '
                          '(the default), the strongest single frame, or the '
@@ -1393,6 +1931,10 @@ def main(argv=None) -> int:
                     help='how many moments the dual-ASCII shows')
     ap.add_argument('--check', action='store_true',
                     help='report whether the pair is renderable and stop')
+    ap.add_argument('--shifts', default='0,-250,-500,-1000,-2000,500,1000,2000',
+                    help='the DELIBERATE alignment shifts, in ms, for the '
+                         'sensitivity table -- how much of the witness count '
+                         'is the room and how much is the clock')
     ap.add_argument('--synthetic', action='store_true',
                     help='render the SYNTHETIC pair (a person walking a known '
                          'path) instead of a real one -- this is what grades '
@@ -1470,6 +2012,13 @@ def main(argv=None) -> int:
     count = witness_count(fnum['slices'])
     blocks.extend(render_witness_count(count, args.slice))
     blocks.append('')
+    graded = graded_witness(fixed, roving, align, t0, t1, args.slice)
+    blocks.extend(render_graded_witness(graded, args.slice))
+    blocks.append('')
+    shifts = [float(v) for v in str(args.shifts).split(',') if v.strip()]
+    sens = alignment_sensitivity(fixed, roving, align, t0, t1, args.slice, shifts)
+    blocks.extend(render_alignment_sensitivity(sens, args.slice))
+    blocks.append('')
     mid = moments[len(moments) // 2] if moments else t0
     diff, dn2 = render_differenced(fixed, roving, align, mid, args.scale,
                                    args.window, args.map)
@@ -1484,6 +2033,8 @@ def main(argv=None) -> int:
         'the_dual_ascii': dnum,
         'the_fused_score': fnum,
         'the_witness_count': count,
+        'the_graded_witness': graded,
+        'the_alignment_sensitivity': sens,
         'the_differenced_view': dn2,
         'the_rendering_choices': {
             'mode': args.mode, 'scale': args.scale, 'map': args.map,

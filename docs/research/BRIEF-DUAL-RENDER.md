@@ -43,6 +43,17 @@ views is not yet a finding:
    places, at the same moment. It is the thing two sovereign logs of
    the same minutes give that neither gives alone.
 
+   **AND WHEN THE BINARY COUNT IS DEGENERATE, A GRADED ONE.** The
+   2×2 table throws away everything but the sign, and it is blind to a
+   channel that is on most of the time: on the duet the roving view
+   moved in 236 of 236 slices, so the excess over chance was exactly
+   +0.0 points and no chi-square could be formed. The tool therefore
+   also computes the **graded** reading — the correlation of the two
+   channels' change energies — against a **slide null**: the roving
+   channel is slid against the fixed one and the correlation recomputed
+   at every offset, because the null here is the autocorrelation of two
+   slow series rather than the correlation of two noises.
+
 ## 1. The two rules the renders do not break
 
 **THE PANELS ARE ALIGNED IN TIME, NOT IN SPACE.** The fixed camera sits
@@ -59,6 +70,15 @@ different quantisation scales says nothing about which view saw more,
 and the reader is owed a comparison they can trust. The default is one
 scale for both. The per-view scale is available (`--scale per-view-auto`)
 and every output that uses it says the panels are **not comparable**.
+
+**AND WHEN THE TWO SENSORS ARE IN DIFFERENT UNITS, THE SHARED SCALE
+IS THE WRONG ONE.** The duet's two change maps are not the same
+quantity, and one scale renders the ProArt's panel **black**. The
+answer is `--scale floor-relative`: each view is divided by that
+view's **own noise floor** and the two are then scaled together, so a
+cell at the top of the ramp means the same thing on both sides — this
+many times this sensor's own grain. The shared-scale render is still
+filed, because the black panel is the honest picture of the mismatch.
 
 ## 2. What zcode hands over: THE SIDECAR
 
@@ -201,6 +221,62 @@ The ingest **measures the phone's own noise** rather than inheriting
 the ProArt's 3.0 luma floor, because a phone in a hand is a different
 sensor. The statistics are in `meta.json` under `the_noise_of_this_sensor`.
 
+### 3a. THE PHONE WAS NOT A VIDEO: THE ROOM-LENS PATH
+
+**THE DUET'S PHONE IS NOT A VIDEO, AND THAT CHANGES THE CONTRACT.**
+The capture that landed (`~/dual-capture/dual-3.json`) is zcode's
+room-lens session: one string of **CHARACTERS** per frame, with the
+device's pose attached, and the grid's geometry **changing during the
+session** (it alternates between 128×125 and 96×93 as the lens works).
+There is nothing to decode with OpenCV and no aspect to crop — the
+picture is already a grid — and the video ingest above does not apply.
+
+So the ingest has a second path, and it writes a bundle the renderer
+reads with the same reader:
+
+```bash
+/home/proart/projects/gpu-venv/bin/python experiments/dual_ingest.py \
+    --room-lens ~/dual-capture/dual-3.json --out /tmp/duet-3 \
+    --label "the phone room-lens (the roving eye)" \
+    --fixed-label "the ProArt, merged" \
+    --fixed-session 1792655768 --fixed-session 1792656069 \
+    --fixed-session 1792656077 --fixed-session 1792656100 \
+    --fixed-session 1792656118 --fixed-session 1792656155 \
+    --fixed-session 1792656183 --fixed-session 1792656235
+```
+
+It writes `change.raw` (the change maps, already on the corpus's
+40×24 grid), `luma_grid.raw` (the picture, on the same grid),
+`timestamps.json` and `meta.json`, and it writes the **merged fixed
+stream** and the **wall-clock sidecar** beside them.
+
+**THE ROOM-LENS'S CLOCK IS NOT WHERE `meta.startedAt` SAYS IT IS.**
+The room-lens stamps every frame `t = Date.now() - walkStart`, and the
+session's `startedAt` is written when the **session** is created — which
+can be minutes before the walkabout. The duet's session was created
+**435.840 s** before the walk began. So the anchor is **derived** from
+the bundle's own stamps: five audio parts and four walk-time room
+measures each carry a wall clock and an offset from the walkabout's
+start, and **all nine agree to 0.0 ms**. The tool files the estimators
+and their spread, and says so when it has to fall back to
+`meta.startedAt` because there is nothing to check it against.
+
+**THE MERGE IS VERIFIED, NOT ASSUMED.** The ProArt's sessions share the
+capture page's clock, and the page base is recoverable as
+`wall_clock_start - frame_offsets_ms[0]`. The duet corpus's eight
+sessions agree on that base to **1.2 ms across 12.8 minutes**, and the
+tool **refuses** a merge whose bases disagree by more than 250 ms,
+because merging two clocks invents a timeline.
+
+**THE PHONE'S FLOOR IS ITS RESOLUTION, NOT A GRAIN ESTIMATE.** The
+room-lens is a *deterministic renderer* of a noisy sensor: its change
+map is quantised to brightness bands, so below **one band** a change
+cannot be expressed at all — the graded fixture shows 12.8 % of its
+pairs at **exactly zero**. The phone's floor is therefore one band
+(15.9375), and the share of its frames that show any change at all —
+its **duty cycle** — is measured and reported, because a channel that
+is on most of the time cannot time a movement.
+
 ## 4. The invocations, ready to run
 
 **Is the pair renderable?**
@@ -233,10 +309,24 @@ It writes `docs/research/dual/DUAL-RENDER.txt` (the render itself) and
 
 **More than one way, all kept.** `--mode {change,luma,both}` is the
 picture; `--map {mean,max,sum}` is the window statistic; `--scale
-{shared-auto,shared-floor,shared-fixed,per-view-auto}` is the
-quantisation. **Every one of those choices is printed in the output**,
-because a rendering choice is not a measurement and the reader is
-entitled to know which one was made.
+{shared-auto,shared-floor,shared-fixed,per-view-auto,floor-relative}`
+is the quantisation. **Every one of those choices is printed in the
+output**, because a rendering choice is not a measurement and the
+reader is entitled to know which one was made.
+
+**`--scale floor-relative` IS THE ONE FOR TWO SENSORS IN DIFFERENT
+UNITS.** It divides each view by that view's **own noise floor** and
+then uses one scale, so a cell at the top of the ramp means the same
+thing on both sides: this many times this sensor's own grain. It is
+the only comparison the duet makes possible, and the filed headline
+render uses it. The `shared-auto` render is filed beside it, because
+its black ProArt panel is the honest picture of the units mismatch.
+
+**THE SLICE MUST EXCEED THE FRAME INTERVAL.** At 2.0 and 2.5 fps a
+0.25 s slice holds at most one frame from each view, and the fused
+score's slices are better at **1 s**. The window and the slice are
+printed in the output, and the number of frames each window actually
+held is printed beside each moment.
 
 **KEEP ALL.** Every moment in the overlap is rendered. Nothing is
 filtered for being dull.
@@ -246,7 +336,7 @@ filtered for being dull.
 **Measured, on the tool's own fixture.** A synthetic pair — a person
 walking a known path, seen by a fixed witness and a roving eye with a
 known viewpoint transform — so the renders can be *graded* instead of
-admired. The selftest is **46 of 46** and it grades:
+admired. The selftest is **58 of 58** and it grades:
 
 - the fixed view's change centroid lands within **0.10** of the truth's
   position on both axes;
@@ -295,28 +385,58 @@ That is the control's whole job: **the measure does not manufacture
 agreement.** A witness count that found an excess between a real room
 and a meaningless video would be a bug in the measure, not a finding.
 
-**The selftests are 46 of 46** for the renderer and **16 of 16** for the
+**The selftests are 58 of 58** for the renderer and **26 of 26** for the
 ingest.
+
+**Measured, on the REAL pair.** The duet has landed and been rendered.
+`docs/research/dual/DUET-RENDER.md` is the report and the three
+`DUET-RENDER-*.txt` files are the renders. What it says:
+
+- the phone's walkabout start is **07:59:28.268Z**, recovered from
+  **nine independent stamps that agree to 0.0 ms**, and the session's
+  own `meta.startedAt` is **435.840 s** earlier — believing it would
+  have moved the whole duet and paired the phone with the wrong
+  ProArt session;
+- the ProArt's eight sessions merge into one stream because their
+  recovered page bases agree to **1.2 ms** over 12.8 minutes;
+- the shared minutes are **235.93 s**, aligned on the **wall clock**
+  (+500538.0 ms), which is labelled as the wall clock in every output
+  because the two devices' clocks have never been compared;
+- the two change maps are **not the same quantity** — the ProArt's is
+  in the camera's luma, the phone's in the room-lens's own brightness
+  (a 2.2× contrast stretch, clipped, with **eight of seventeen**
+  glyphs all `@`);
+- the **witness count is DEGENERATE, not weak**: the roving view moved
+  in **236 of 236** slices, so the contingency table has a constant row,
+  the excess over chance is exactly **+0.0 points** and no chi-square
+  can be formed. The cause is the phone's **99.8 % duty cycle**;
+- the **graded** reading (the correlation of the two channels' change
+  energies) is **+0.2553** against a **slide null** — the roving
+  channel slid against the fixed one — whose own maximum is at **−44 s**
+  and whose region within one null sd spans **58 s**. The duet
+  therefore **cannot measure its own skew**, and the claps are the only
+  way.
 
 **NOT measured, and not to be filed as if it were:**
 
-- **The real dual pair has not been captured.** Every render in this
-  repository is of a synthetic pair or a rehearsal. The tool has never
-  seen two real cameras of the same minutes.
 - **The clap alignment has never been measured on real claps.** The
-  offset in the rehearsal was injected, not detected. zcode's detection
-  (cross-correlating the phone's opus against the ProArt's WAV) has not
-  been run, and the phone's **audio track cannot be decoded on this
-  machine** — there is no ffmpeg, no `av`, no `imageio` here. That is
-  zcode's lane and it needs a different machine or a different decoder.
+  offset in the rehearsal was injected, not detected, and the duet's
+  alignment is the **wall clock**. zcode's detection (cross-correlating
+  the phone's opus against the ProArt's WAV) has not been run, and the
+  phone's **audio track cannot be decoded on this machine** — there is
+  no ffmpeg, no `av`, no `imageio` here. That is zcode's lane and it
+  needs a different machine or a different decoder.
+- **The duet has not yet shown the synergy the brief is after.** The
+  two channels' energies are correlated at +0.2553 (raw) and +0.3599
+  (log), which is suggestive and not significant against the honest
+  null. The two causes are measured and both are fixable: the phone's
+  channel is saturated because the room-lens posterises its own luma
+  before the change is measured, and the alignment is unverified.
 - **The device-to-device latency bias is still unmeasured on hardware.**
   The protocol and the calculator are filed
   (`docs/research/TWO-DEVICE-LATENCY-PROTOCOL.md`); the corpus holds one
-  real device.
-- **The two views have never been compared on a real room**, so nothing
-  is known yet about how the phone's change map and the ProArt's change
-  map relate — only that they are different sensors with different
-  noise.
+  real device. The duet's wall-clock alignment carries exactly this
+  unmeasured constant.
 
 ## 6. The three things that were wrong in the first build
 
@@ -387,8 +507,15 @@ python experiments/dual_render.py \
 
 | file | what it is |
 |---|---|
-| `experiments/dual_render.py` | the renderer: the three renders, the witness count, the alignment consumer, the pair checker, the synthetic fixture, the selftest |
-| `experiments/dual_ingest.py` | the phone recording → the corpus's bundle format, and the rehearsal fixture generator |
+| `experiments/dual_render.py` | the renderer: the three renders, the witness count, the graded witness, the alignment consumer, the pair checker, the synthetic fixture, the selftest |
+| `experiments/dual_ingest.py` | the phone recording → the corpus's bundle format, the room-lens bundle, the verified merge, and the two fixtures |
+| `docs/research/dual/DUET-RENDER.md` | **the report on the real pair** — what the duet does and does not show, and why |
+| `docs/research/dual/DUET-RENDER-FLOOR_RELATIVE.txt` | the real duet's three renders, each panel in times its own sensor's grain |
+| `docs/research/dual/DUET-RENDER-SHARED_AUTO.txt` | the same, on one shared scale — the ProArt's panel is black, and that is the point |
+| `docs/research/dual/DUET-RENDER-PER_VIEW_AUTO.txt` | the same, each view against its own maximum — legible, and not comparable |
+| `docs/research/dual/duet_render_*.json` | the numbers behind the three real renders |
+| `docs/research/dual/duet_ingest.json` | what the ingest measured on the room-lens: the clock anchor, the geometry runs, the duty cycle |
+| `docs/research/dual/duet_phone_meta.json` | the phone bundle's metadata: the ramp, the tiers, the pose ranges, the anchor estimators |
 | `docs/research/dual/SYNTHETIC-DUAL-RENDER.txt` | the renders of the synthetic pair — the grade |
 | `docs/research/dual/REHEARSAL-DUAL-RENDER.txt` | the negative control: a real corpus session beside a meaningless phone |
 | `docs/research/dual/synthetic_dual_render.json` | the numbers behind the synthetic render |
