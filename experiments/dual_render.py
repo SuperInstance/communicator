@@ -1045,6 +1045,8 @@ def render_dual_ascii(fixed: Stream, roving: Stream, align: Alignment,
     blocks: list[str] = []
     left_blocks: list[list[str]] = []
     right_blocks: list[list[str]] = []
+    left_luma: list[list[str]] = []
+    right_luma: list[list[str]] = []
     numbers = []
     for t in moments_s:
         t_r = align.roving_time_for_fixed(t)
@@ -1056,10 +1058,16 @@ def render_dual_ascii(fixed: Stream, roving: Stream, align: Alignment,
             left_blocks.append(quantise(fa_q, sc_l).split('\n'))
             right_blocks.append(quantise(rb_q, sc_r).split('\n'))
         if mode in ('luma', 'both'):
-            left_blocks.append(quantise(_picture_at(fixed, t), 255.0,
-                                        LUMA_RAMP).split('\n'))
-            right_blocks.append(quantise(_picture_at(roving, t_r), 255.0,
+            # THE LUMA PANELS ARE THEIR OWN PANELS.  They used to be
+            # appended to the same list as the change panels, so in 'both'
+            # mode they sat at the END of the list, past the moments, and
+            # were never drawn: the mode called 'both' drew only 'change'.
+            # The picture and the change map are different questions, and
+            # a page that plays the duet needs both.
+            left_luma.append(quantise(_picture_at(fixed, t), 255.0,
                                          LUMA_RAMP).split('\n'))
+            right_luma.append(quantise(_picture_at(roving, t_r), 255.0,
+                                      LUMA_RAMP).split('\n'))
         numbers.append({
             't_fixed_s': round(t, 3),
             't_roving_s': round(t_r, 3),
@@ -1071,6 +1079,12 @@ def render_dual_ascii(fixed: Stream, roving: Stream, align: Alignment,
             'roving_window_frames': roving.motion_window_count(t_r, half_window_s),
             'fixed_scale': round(float(sc_l), 3),
             'roving_scale': round(float(sc_r), 3),
+            # THE PANELS THEMSELVES, so that a page can play them
+            # without parsing this tool's text output.
+            'the_fixed_panel': left_blocks[-1] if left_blocks else None,
+            'the_roving_panel': right_blocks[-1] if right_blocks else None,
+            'the_fixed_luma_panel': left_luma[-1] if left_luma else None,
+            'the_roving_luma_panel': right_luma[-1] if right_luma else None,
         })
 
     blocks.append('THE DUAL-ASCII -- the same moments from both views')
@@ -1101,6 +1115,9 @@ def render_dual_ascii(fixed: Stream, roving: Stream, align: Alignment,
                       f'({n["fixed_window_frames"]} vs '
                       f'{n["roving_window_frames"]} frames in the window)')
         blocks.extend(side_by_side(left_blocks[k], right_blocks[k]))
+        if mode == 'both':
+            blocks.append('    ... and the PICTURE, the camera\'s own luma:')
+            blocks.extend(side_by_side(left_luma[k], right_luma[k]))
         blocks.append('')
     return blocks, {'moments': numbers, 'window_statistic': how,
                     'scale_mode': scale_mode}
@@ -1337,6 +1354,17 @@ def crossing_witness(fixed: Stream, roving: Stream, align: Alignment,
             'the_fixed_crossings_total': len(fx_all),
             'the_fixed_crossings_in_the_shared_minutes': len(fx),
             'the_roving_crossings_total': len(rv_all),
+            # THE CROSSINGS THEMSELVES, WITH THEIR TIMES, so that a page
+            # can play them instead of only counting them.
+            'the_fixed_crossings': [
+                {'t_s': round(a, 3), 't_end_s': round(b, 3),
+                 'duration_s': round(b - a, 3),
+                 'in_the_shared_minutes': bool(b >= t0 and a <= t1)}
+                for a, b in fx_all],
+            'the_roving_crossings': [
+                {'t_s': round(a, 3), 't_end_s': round(b, 3),
+                 'duration_s': round(b - a, 3)}
+                for a, b in rv_all],
         }
         if not fx or not rv_all:
             which = []

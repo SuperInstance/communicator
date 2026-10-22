@@ -264,10 +264,22 @@ def measure(sessions, out_dir: Path) -> dict:
             'null': null,
             'resolution': res,
         })
-        print(f"  {name}: null bias {null['bias_ms']:.3f} ms "
-              f"({null['bias_m']:.3f} m), "
-              f"max resolution error {max((r['error_ms'] or 0) for r in res):.3f} ms"
-              if null else f"  {name}: no null")
+        # A SESSION TOO SHORT TO RESOLVE STILL CONTRIBUTES ITS NULL.  The
+        # corpus grew a set of short sessions, and the first version of
+        # this printed the worst resolution error of an EMPTY list and
+        # took the whole run down with it: one short session ended
+        # 138 sessions' worth of measurement.
+        _worst = max((r['error_ms'] or 0) for r in res) if res else None
+        if null is None:
+            print(f"  {name}: no null")
+        elif _worst is None:
+            print(f"  {name}: null bias {null['bias_ms']:.3f} ms "
+                  f"({null['bias_m']:.3f} m), NO RESOLUTION WINDOW "
+                  f"(the session is too short to calibrate)")
+        else:
+            print(f"  {name}: null bias {null['bias_ms']:.3f} ms "
+                  f"({null['bias_m']:.3f} m), "
+                  f"max resolution error {_worst:.3f} ms")
     out = {
         'study': 'arrival null -- the floor on the double-hearing technique',
         'generated_utc': time.strftime('%Y-%m-%dT%H:%M:%SZ', time.gmtime()),
@@ -401,6 +413,16 @@ def selftest() -> int:
     if nul is not None:
         ck('units: the bias converts to metres at 343 m/s',
            abs(nul['bias_m'] - nul['bias_ms'] / 1000.0 * 343.0) < 1e-6, str(nul))
+
+    # 8. A SESSION TOO SHORT TO RESOLVE MUST NOT TAKE THE RUN DOWN.  The
+    #    corpus grew a set of short sessions, and the first version of
+    #    this printed the worst resolution error of an EMPTY list and
+    #    lost 138 sessions' worth of measurement to it.
+    tiny = np.zeros(int(sr * 0.7), dtype=float)
+    tiny[100:300] = np.random.default_rng(9).normal(0, 0.2, 200)
+    ck('arrival: a session too short to resolve SAYS SO instead of raising',
+       arrival_resolution(tiny, sr) == [] and arrival_null(tiny, sr) is not None,
+       'a short session has a null and no resolution window')
 
     failed = [c for c in checks if not c[1]]
     for name, ok, detail in checks:
