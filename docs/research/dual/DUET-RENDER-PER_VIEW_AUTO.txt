@@ -1,9 +1,10 @@
 ==============================================================================
 THE DUAL RENDER -- two cameras, two minutes, three ways
-  generated 2026-10-22T09:44:54Z
+  generated 2026-10-22T09:59:10Z
   THE REAL DUET (the phone's room-lens and the ProArt, 236 s of shared minutes), aligned on the WALL CLOCK because zcode's clap alignment has not landed. Scale mode: per-view-auto.
   alignment: 0 clap pairs, offset +500538.000 ms, drift +0.0 ppm
   THE ALIGNMENT RESOLUTION: this sidecar carries NO CLAP TIMES, so the alignment's resolution cannot be measured from it -- the offset is as good as whatever produced it, and where that was the wall clock, it carries the device-to-device skew the corpus cannot measure
+  THE DRIFT: the drift was read from `drift_ppm` (+0.000 ppm)
   THE SIDECAR SAYS: THE WALL CLOCK, NOT THE CLAPS. The two devices' clocks have never been compared, so this alignment carries the device-to-device skew -- the constant the corpus cannot measure -- and a drift the duet's 236 s cannot separate from a movement. zcode's clap alignment replaces this sidecar when it lands.
   overlap: +500.54 s .. +736.47 s (235.93 s of shared minutes)
 ==============================================================================
@@ -12,6 +13,7 @@ THE DUAL-ASCII -- the same moments from both views
   fixed: /tmp/duet-3/fixed   roving: /tmp/duet-3
   alignment: 0 clap pairs, offset +500538.000 ms, drift +0.0 ppm
   THE ALIGNMENT RESOLUTION: this sidecar carries NO CLAP TIMES, so the alignment's resolution cannot be measured from it -- the offset is as good as whatever produced it, and where that was the wall clock, it carries the device-to-device skew the corpus cannot measure
+  THE DRIFT: the drift was read from `drift_ppm` (+0.000 ppm)
   THE SIDECAR SAYS: THE WALL CLOCK, NOT THE CLAPS. The two devices' clocks have never been compared, so this alignment carries the device-to-device skew -- the constant the corpus cannot measure -- and a drift the duet's 236 s cannot separate from a movement. zcode's clap alignment replaces this sidecar when it lands.
   the panels are aligned in TIME and NOT in space: the two cameras see the room from different places
   mode: change   scale: per-view-auto   window statistic: mean   window: +/-0.50 s
@@ -132,6 +134,7 @@ THE FUSED SCORE -- two staves, each channel annotating the other
   fixed: /tmp/duet-3/fixed   roving: /tmp/duet-3
   alignment: 0 clap pairs, offset +500538.000 ms, drift +0.0 ppm
   THE ALIGNMENT RESOLUTION: this sidecar carries NO CLAP TIMES, so the alignment's resolution cannot be measured from it -- the offset is as good as whatever produced it, and where that was the wall clock, it carries the device-to-device skew the corpus cannot measure
+  THE DRIFT: the drift was read from `drift_ppm` (+0.000 ppm)
   THE SIDECAR SAYS: THE WALL CLOCK, NOT THE CLAPS. The two devices' clocks have never been compared, so this alignment carries the device-to-device skew -- the constant the corpus cannot measure -- and a drift the duet's 236 s cannot separate from a movement. zcode's clap alignment replaces this sidecar when it lands.
   236 slices of 1.00 s from +500.54 s; the energy scale is shared, maximum 70765.3 luma (the mean change over the slice)
   marks:  = both moved   > only this one   < only the other   . neither
@@ -470,6 +473,7 @@ THE DIFFERENCED VIEW -- the fixed frame, the roving frame, and the difference
   fixed: /tmp/duet-3/fixed   roving: /tmp/duet-3
   alignment: 0 clap pairs, offset +500538.000 ms, drift +0.0 ppm
   THE ALIGNMENT RESOLUTION: this sidecar carries NO CLAP TIMES, so the alignment's resolution cannot be measured from it -- the offset is as good as whatever produced it, and where that was the wall clock, it carries the device-to-device skew the corpus cannot measure
+  THE DRIFT: the drift was read from `drift_ppm` (+0.000 ppm)
   THE SIDECAR SAYS: THE WALL CLOCK, NOT THE CLAPS. The two devices' clocks have never been compared, so this alignment carries the device-to-device skew -- the constant the corpus cannot measure -- and a drift the duet's 236 s cannot separate from a movement. zcode's clap alignment replaces this sidecar when it lands.
   t = +647.996 s fixed / +147.458 s roving   window +/-0.50 s   scale: per-view-auto   window statistic: mean
   the fixed frame moved in 0 cells (its own floor 3.000); the roving frame saw movement in 767 cells (its own floor 15.938)

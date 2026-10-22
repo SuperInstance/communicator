@@ -124,6 +124,25 @@ forms.
 {"offset_ms": -120.0, "drift_ppm": 0.0, "n_claps": 3}
 ```
 
+**AND THE DRIFT MAY ALSO BE WRITTEN AS `drift_ms_per_min`, BECAUSE THE
+CAPTURE LANE'S OWN PAIR-ANALYSIS SCRIPT WRITES IT THAT WAY.** The
+capture lane's `browser_capture/pair_analysis.py` fits the drift as the
+slope of the delay across the claps and writes it as **milliseconds per
+minute**. A sidecar that carried a fitted drift under a name this
+renderer did not know would be read as a drift of **ZERO** — and that
+is a claim, not an absence, and a false one: the duet's 236 s cannot
+separate a clock drift from a movement. So the renderer reads **both**
+spellings, converts exactly (**1 ppm is 0.06 ms per minute**), and
+prints which field it read:
+
+```
+THE DRIFT: the drift was read from `drift_ms_per_min` (+30.000 ms per minute), which is +500.000 ppm
+```
+
+**AND ANY OTHER FIELD CONTAINING "drift" IS REPORTED AS NOT READ**, in
+those words, because a silent omission is the failure mode this lane
+keeps paying for.
+
 **Form C — the same clap pairs, with the audio-to-frame skew.** A clap
 is detected in the **audio**. The sidecar wants it in the **frame
 clock**. Those are not the same clock: the corpus has already measured
@@ -416,7 +435,7 @@ filtered for being dull.
 **Measured, on the tool's own fixture.** A synthetic pair — a person
 walking a known path, seen by a fixed witness and a roving eye with a
 known viewpoint transform — so the renders can be *graded* instead of
-admired. The selftest is **65 of 65** and it grades:
+admired. The selftest is **68 of 68** and it grades:
 
 - the fixed view's change centroid lands within **0.10** of the truth's
   position on both axes;
@@ -442,6 +461,10 @@ admired. The selftest is **65 of 65** and it grades:
   alignment quantised to that stream's frame interval, and a sidecar
   whose clap times miss the grid by **12.345 ms** is reported as
   **SUB-FRAME**; both are in the output and not only in the code;
+- **the drift is never dropped silently**: `drift_ms_per_min` is read
+  and converted exactly (**30.0 ms per minute → +500.000 ppm**), the
+  canonical `drift_ppm` is read as itself, and any other field
+  containing "drift" is reported as **NOT READ**;
 - the witness count adds up, its chance baseline is the product of the
   two rates, and its excess is signed.
 
@@ -470,7 +493,7 @@ That is the control's whole job: **the measure does not manufacture
 agreement.** A witness count that found an excess between a real room
 and a meaningless video would be a bug in the measure, not a finding.
 
-**The selftests are 65 of 65** for the renderer and **29 of 29** for the
+**The selftests are 68 of 68** for the renderer and **29 of 29** for the
 ingest.
 
 **Measured, on the REAL pair.** The duet has landed and been rendered.
@@ -640,6 +663,57 @@ streams are about **2 fps** — the fixed side's frame interval is
 quantised at half a second, while the corpus's 60 fps sessions would
 give **16.667 ms**. The sync route is the one that has to come first
 and the one whose resolution depends on the capture.
+
+### 8a. The clap channel on this take was dead — dated note, 2026-10-22
+
+**THE RE-RUN PLAN IS NOT GOING TO HAPPEN ON THIS TAKE, AND THAT IS NOW A
+MEASURED FACT RATHER THAN AN ABSENCE.** zcode's dual-3 pair report
+(`docs/research/DUAL-3-PAIR-REPORT.md`, 2026-10-22) ran **four
+independent detectors** at the duet's sync and every one of them sits at
+its noise floor:
+
+| detector | best evidence | verdict |
+|---|---|---|
+| envelope correlation (300–2000 Hz, 20 ms hops) | r ∈ [0.765, 0.809], but sweeps 3–6 all "arrive" at the same witness instant (t ≈ 542 s) — a template self-match | no signal |
+| TF-path matched filter (log-frequency glide, 64 bands) | pathSNR = 1.00 on all 7 | no signal |
+| spectrogram correlation (phone loopback as template, 1–5 kHz glide) | r ∈ [0.074, 0.082] over 7 sweeps, ±90 s search | noise floor |
+| 8–16 kHz band energy at the 7 expected windows | mean 0.01 against a global p99 of 0.04 | sweeps absent above the witness floor |
+
+**SO THE WALL CLOCK IS PERMANENT FOR DUAL-3.** The phone's speaker at
+gain 0.4 does not reach the Realtek witness across the room, and the
+phone's ambient audio — the only place its claps would have lived — is
+**4.4 s of 3.5 minutes**, because of a parts race that has since been
+fixed (room-lens `474d6c0`). The renders filed here are therefore as
+good as this take can be made, and the re-run on a clap sidecar belongs
+to the **next** take.
+
+**AND THE NEXT TAKE'S SIDECAR WILL CARRY SUB-FRAME TIMES, WHICH IS WHAT
+THE ROUTE ASKS FOR.** The capture lane's staged `pair_analysis.py`
+estimates the clap onsets on a **5 ms hop** — sub-frame against the
+ProArt's 16.667 ms and very much sub-frame against the duet's own
+499.75 ms — and fits the offset and the drift from them. So when the
+sidecar lands, the resolution measurement in §2 will report **SUB-FRAME**
+on the audio side and say so.
+
+**THE POSE IS ORIENTATION ONLY, AND THE HEADING IS NULL IN EVERY
+FRAME.** The phone's bundle carries the device's alpha, beta and gamma
+and nothing else: **no position, no translation, and no heading in any of
+the 513 frames**. So the phone's view cannot be registered to the
+ProArt's in space from its own bundle, and the "aligned in TIME and NOT
+in space" line in every header is not a caveat — it is the only thing
+that is true. It also means **the scale cannot come from the phone's
+pose**, which is one more reason the scale has to come from the
+ranging/TDOA side.
+
+**AND THE STRUCTURAL REASON THE MOTION-ENVELOPE FALLBACK FAILED IS THE
+SAME ONE THIS LANE HAS BEEN MEASURING.** zcode's report: *"Roving-camera
+change and fixed-camera change are different observables; correlating them
+needs pose correction first."* The phone's frame-change signal is
+dominated by **self-motion** — a mean of **39 %** of characters changing
+per 400 ms — while the ProArt's is Casey in frame. The duet's own
+measurements say the same thing from the other end: the phone's channel
+is on **99.8 %** of the time, and a channel that is on most of the time
+cannot time a movement.
 
 ## 9. The files
 

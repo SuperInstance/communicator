@@ -258,6 +258,31 @@ could not. The tool already consumes a clap sidecar, and the sidecar's own note 
 carried into every output, so the re-run is one command and the comparison against
 this render is immediate.
 
+**BUT NOT ON THIS TAKE: the clap channel was dead, and that is now measured.**
+zcode's dual-3 pair report (`docs/research/DUAL-3-PAIR-REPORT.md`, 2026-10-22) ran
+**four independent detectors** at this duet's sync and every one of them sits at its
+noise floor — envelope correlation (r ∈ [0.765, 0.809], but sweeps 3–6 all "arrive"
+at the same witness instant, a template self-match), the TF-path matched filter
+(pathSNR = 1.00 on all 7), the spectrogram correlation (r ∈ [0.074, 0.082] over a
+±90 s search), and the 8–16 kHz band energy at the expected windows (mean 0.01
+against a global p99 of 0.04). The phone's speaker at gain 0.4 does not reach the
+Realtek witness across the room, and the phone's ambient audio — the only place its
+claps would have lived — is **4.4 s of 3.5 minutes**, a parts race that has since
+been fixed (room-lens `474d6c0`).
+
+**SO THE WALL CLOCK IS PERMANENT FOR DUAL-3, AND THESE RENDERS ARE AS GOOD AS
+THIS TAKE CAN BE MADE.** The clap sidecar belongs to the next take, and the
+capture lane's staged `pair_analysis.py` estimates onsets on a **5 ms hop** — which
+is sub-frame against the ProArt's 16.667 ms and very much sub-frame against this
+duet's own 499.75 ms — so the sync the route asks for is the sync the next take
+will carry.
+
+**AND THE POSE CARRIES NO SCALE.** The phone's bundle holds the device's alpha,
+beta and gamma and nothing else: no position, no translation, and **no heading in
+any of the 513 frames**. The phone's view cannot be registered to the ProArt's in
+space from its own bundle, so the metric scale has to come from the ranging/TDOA
+side, and until it does these renders carry no metric claim.
+
 **The phone's camera luma, banked every frame rather than every fifth.** The
 room-lens computes a luma field for its own ASCII and then posterises it; the
 posterisation is the lossy step, and keyframes every fifth frame are 4.2× too
@@ -307,7 +332,7 @@ experiments/dual_render.py --fixed /tmp/duet-3/fixed --roving /tmp/duet-3 \
   --scale floor-relative --moments 4 --slice 1.0 --window 0.5
 ```
 
-The selftests that grade this: `dual_ingest` 29/29 and `dual_render` 65/65. The
+The selftests that grade this: `dual_ingest` 29/29 and `dual_render` 68/68. The
 ingest's room-lens path is graded against a fixture with a known truth — a person
 walking a known path, rendered through the room-lens's own rules — and the change
 map has to land on the truth at five points along the walk.

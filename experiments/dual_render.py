@@ -388,6 +388,10 @@ class Alignment:
         #: frame grid: is the sidecar carrying FRAME TIMES or SUB-FRAME
         #: times?  An alignment as coarse as the video must say so.
         self.the_resolution_note: str = ''
+        #: WHERE THE DRIFT CAME FROM -- which field it was read out of,
+        #: or that a field it did not read carried one.  A drift that is
+        #: dropped silently is worse than no drift at all.
+        self.the_drift_note: str = ''
 
     @property
     def assumed(self) -> bool:
@@ -419,6 +423,8 @@ class Alignment:
                     f'outliers]')
         if self.the_resolution_note:
             out += f'\n  THE ALIGNMENT RESOLUTION: {self.the_resolution_note}'
+        if self.the_drift_note:
+            out += f'\n  THE DRIFT: {self.the_drift_note}'
         if self.note:
             out += f'\n  THE SIDECAR SAYS: {self.note}'
         return out
@@ -435,6 +441,40 @@ CLAP_ROBUST_MS = 40.0
 #: written from frame timestamps lands on the grid exactly, and one
 #: written from an interpolated onset misses it by milliseconds.
 CLAP_GRID_TOLERANCE_MS = 0.05
+
+
+def _read_drift(data: dict) -> tuple[float, str]:
+    """The drift, from whichever spelling the sidecar uses.
+
+    **A DRIFT THAT IS DROPPED SILENTLY IS WORSE THAN NO DRIFT AT ALL.**
+    A sidecar that carries a fitted drift under a name this tool does
+    not know would otherwise be read as a drift of ZERO -- and the
+    duet's 236 s cannot separate a clock drift from a movement, so a
+    zero drift there is a claim, and it would be a false one.
+
+    Two spellings are read: `drift_ppm` (the canonical one) and
+    `drift_ms_per_min` (the one the capture lane's own pair-analysis
+    script writes).  1 ppm is 0.06 ms per minute, so the conversion is
+    exact.  ANY OTHER FIELD CONTAINING "drift" IS REPORTED AS NOT READ.
+    """
+    if 'drift_ppm' in data:
+        return float(data.get('drift_ppm', 0.0)), (
+            f'the drift was read from `drift_ppm` '
+            f'({float(data.get("drift_ppm", 0.0)):+.3f} ppm)')
+    if 'drift_ms_per_min' in data:
+        per_min = float(data.get('drift_ms_per_min', 0.0))
+        ppm = per_min / 0.06
+        return ppm, (f'the drift was read from `drift_ms_per_min` '
+                     f'({per_min:+.3f} ms per minute), which is '
+                     f'{ppm:+.3f} ppm')
+    others = [k for k in data if 'drift' in k.lower()]
+    if others:
+        return 0.0, (
+            f'THIS SIDECAR CARRIES A DRIFT FIELD THIS TOOL DOES NOT READ '
+            f'({", ".join(sorted(others))}), so the drift below is ZERO BY '
+            f'OMISSION and not by measurement -- which is a claim, and a '
+            f'false one')
+    return 0.0, 'the sidecar carries no drift field, so the drift is zero'
 
 
 def clap_grid_distance_ms(clap_ms: np.ndarray,
@@ -633,11 +673,12 @@ def load_alignment(path: Path | None, fixed: Stream | None = None,
                            f'{float(resid.max()):.3f} ms is over the '
                            f'{CLAP_ROBUST_MS:.0f} ms bar')
         return out
-    if 'offset_ms' in data or 'drift_ppm' in data:
+    if 'offset_ms' in data or 'drift_ppm' in data or 'drift_ms_per_min' in data:
+        drift, drift_note = _read_drift(data)
         out2 = Alignment(offset_ms=float(data.get('offset_ms', 0.0)),
-                         drift_ppm=float(data.get('drift_ppm', 0.0)),
+                         drift_ppm=drift,
                          source=f'{path.name} (offset and drift as given, in '
-                                f'the re-based clock)',
+                                f'the re-based clock; {drift_note})',
                          n_claps=int(data.get('n_claps', 0)),
                          note=str(data.get('the_note', '')))
         out2.the_resolution_note = (
@@ -646,6 +687,7 @@ def load_alignment(path: Path | None, fixed: Stream | None = None,
             'good as whatever produced it, and where that was the wall '
             'clock, it carries the device-to-device skew the corpus '
             'cannot measure')
+        out2.the_drift_note = drift_note
         return out2
     return Alignment(source=f'{path.name} carries neither clap pairs nor an offset',
                      note=str(data.get('the_note', '')))
@@ -1576,7 +1618,8 @@ def check_pair(fixed: Stream, roving: Stream, align: Alignment) -> dict:
         'alignment': {'source': align.source, 'assumed': align.assumed,
                       'offset_ms': align.offset_ms, 'drift_ppm': align.drift_ppm,
                       'n_claps': align.n_claps, 'the_note': align.note,
-                      'the_resolution': align.the_resolution_note},
+                      'the_resolution': align.the_resolution_note,
+                      'the_drift': align.the_drift_note},
     }
     blockers = list(fixed.problems) + list(roving.problems)
     # THE OVERLAP IS IN THE ALIGNED CLOCK.  The two streams have
@@ -2212,6 +2255,34 @@ def selftest() -> int:
         ck('align: the resolution is in the output, not only in the source',
            'THE ALIGNMENT RESOLUTION' in al_sub.describe(),
            al_sub.describe()[:200])
+
+        # 11c. THE DRIFT IS NEVER DROPPED SILENTLY.  The capture lane's
+        # own pair-analysis script writes the drift as ms per minute,
+        # and a sidecar that carried a fitted drift under a name this
+        # tool did not know would be read as a drift of ZERO.
+        dpm = tmp / 'drift_per_min.json'
+        dpm.write_text(json.dumps({'offset_ms': 10.0,
+                                    'drift_ms_per_min': 30.0}))
+        al_dpm = load_alignment(dpm, fixed, roving)
+        ck('align: a drift in ms per minute is read and converted exactly',
+           abs(al_dpm.drift_ppm - 500.0) < 1e-6
+           and 'drift_ms_per_min' in al_dpm.describe(),
+           f'{al_dpm.drift_ppm:+.3f} ppm -- {al_dpm.describe()[:140]}')
+        weird = tmp / 'drift_weird.json'
+        weird.write_text(json.dumps({'offset_ms': 10.0,
+                                     'the_drift_ms_per_hour': 120.0}))
+        al_weird = load_alignment(weird, fixed, roving)
+        ck('align: a drift field this tool does not read is REPORTED',
+           'NOT READ' in al_weird.describe(),
+           al_weird.describe()[:200])
+        ppm_side = tmp / 'drift_ppm.json'
+        ppm_side.write_text(json.dumps({'offset_ms': 10.0,
+                                        'drift_ppm': -250.0}))
+        al_ppm = load_alignment(ppm_side, fixed, roving)
+        ck('align: the canonical drift_ppm is still read as itself',
+           abs(al_ppm.drift_ppm + 250.0) < 1e-6
+           and 'drift_ppm' in al_ppm.describe(),
+           f'{al_ppm.drift_ppm:+.3f} ppm -- {al_ppm.describe()[:140]}')
 
         # 12. a CHANGE-MAP STREAM is read: the phone's room-lens bundle
         from experiments import dual_ingest as di  # noqa: PLC0415
