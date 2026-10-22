@@ -1,0 +1,82 @@
+{
+  "tool": "dual_ingest -- the keyframe channel",
+  "generated_utc": "2026-10-22T08:58:40.895Z",
+  "label": "the phone camera (the keyframes)",
+  "the_source_session": "roomlens-2026-10-22T07-52-12-428Z-weyeuf",
+  "the_source_keyframes": 103,
+  "the_source_picture": {
+    "width": 320,
+    "height": 569
+  },
+  "the_crop": {
+    "fit": "crop",
+    "x0": 0,
+    "y0": 188,
+    "x1": 320,
+    "y1": 380,
+    "note": "the picture is CUT to the corpus's aspect and then resized; a stretched picture moves every cell and the grid is positional"
+  },
+  "the_luma_spec": {
+    "width": 160,
+    "height": 96,
+    "dtype": "uint8",
+    "note": "the corpus's own luma geometry, so experiments/lens.py computes this channel's change map unchanged"
+  },
+  "the_frame_interval_ms": {
+    "the_median": 2105.0,
+    "the_min": 1977.0,
+    "the_max": 22458.0,
+    "the_achieved_fps": 0.4751
+  },
+  "the_wall_clock_of_the_first_frame": "2026-10-22T07:59:28.350Z",
+  "the_clock_anchor": {
+    "the_estimators": [
+      {
+        "the_source": "the audio part at offset 0 ms",
+        "the_anchor_ms": 1792655968268.0
+      },
+      {
+        "the_source": "the audio part at offset 63407 ms",
+        "the_anchor_ms": 1792655968268.0
+      },
+      {
+        "the_source": "the audio part at offset 109092 ms",
+        "the_anchor_ms": 1792655968268.0
+      },
+      {
+        "the_source": "the audio part at offset 145875 ms",
+        "the_anchor_ms": 1792655968268.0
+      },
+      {
+        "the_source": "the audio part at offset 231864 ms",
+        "the_anchor_ms": 1792655968268.0
+      },
+      {
+        "the_source": "the room measure #3 at t 39305 ms",
+        "the_anchor_ms": 1792655968268.0
+      },
+      {
+        "the_source": "the room measure #4 at t 85087 ms",
+        "the_anchor_ms": 1792655968268.0
+      },
+      {
+        "the_source": "the room measure #5 at t 121756 ms",
+        "the_anchor_ms": 1792655968268.0
+      },
+      {
+        "the_source": "the room measure #6 at t 207831 ms",
+        "the_anchor_ms": 1792655968268.0
+      }
+    ],
+    "the_n_estimators": 9,
+    "the_anchor_ms": 1792655968268.0,
+    "the_spread_ms": 0.0,
+    "the_source": "DERIVED from the bundle's own wall stamps",
+    "the_note": "the walkabout's start, recovered from the audio parts' and the room measures' own wall clocks. meta.startedAt is the SESSION's creation time, which here is 435.840 s earlier, and it is NOT the origin of the frames' t."
+  },
+  "the_noise_of_this_sensor": {
+    "the_floor": 3.0,
+    "the_note": "THE CORPUS'S OWN FLOOR, because this channel IS the corpus's construction: 160x96 luma, the 4x4 block mean, the same units the ProArt's change map is in. The ASCII channel's floor was a different number because the ASCII channel is a different quantity."
+  },
+  "the_note": "the camera's own luma, from the keyframes the room-lens already banked. This is the second way the phone can be read, and the one that puts the two views in the same units."
+}

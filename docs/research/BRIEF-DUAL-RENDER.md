@@ -54,6 +54,23 @@ views is not yet a finding:
    at every offset, because the null here is the autocorrelation of two
    slow series rather than the correlation of two noises.
 
+5. **THE CROSSING WITNESS.** The corpus already has the right
+   instrument and this lane had not used it. A **crossing** is a
+   connected blob of change that holds its shape while it
+   **translates** — the person is one object, it keeps its size, and
+   it moves. The grain is below the floor, a highlight is one frame, a
+   fidget does not travel, and neither does a shake. So each view is
+   asked the question it can answer: did a *thing* move across the
+   picture? On the duet this is the only witness that produces a
+   reading at all.
+
+   **THE GAP IS COUNTED IN FRAMES, NOT IN SECONDS.** The corpus's
+   detector defaults to a 0.35 s gap and to offsets at 60 fps, and
+   the corpus's own sessions run at 2 fps — so at 0.35 s no blob ever
+   chains and the detector finds **nothing at all**. The gap here is
+   two frames of each channel. That is a defect every 2 fps session
+   in the corpus has been carrying.
+
 ## 1. The two rules the renders do not break
 
 **THE PANELS ARE ALIGNED IN TIME, NOT IN SPACE.** The fixed camera sits
@@ -277,6 +294,31 @@ pairs at **exactly zero**. The phone's floor is therefore one band
 its **duty cycle** — is measured and reported, because a channel that
 is on most of the time cannot time a movement.
 
+### 3b. THE KEYFRAME CHANNEL: THE PHONE'S OWN CAMERA LUMA
+
+**THE ASCII IS THE LOSSY STEP, AND THE BUNDLE ALREADY HAS WHAT IS
+BEHIND IT.** The room-lens computes a luma field for its own ASCII and
+then posterises it, and it banks **103 keyframes** of the camera's
+actual picture (320×569 JPEG). Those are the **camera's luma**, which
+is the very quantity the ProArt's change map is in.
+
+So the ingest builds a **second bundle** from them, in the corpus's own
+format: 160×96 luma, cropped to the corpus's aspect rather than
+stretched, with the corpus's own `timestamps.json` and `meta.json`. So
+`experiments/lens.py` computes this channel's change map with **no
+changes at all**, and the floor is the corpus's own 3.0 because the
+construction *is* the corpus's. The two views are commensurable in
+that bundle for the first time, and the render is filed beside the
+others as `DUET-RENDER-KEYFRAMES.txt`.
+
+**A NOISE FLOOR IS A PROPERTY OF A SENSOR AND AN INTERVAL.** The
+keyframes are one per 2.105 s — 4.2× the ProArt's cadence — and the
+corpus's 3.0 luma floor, measured on 0.5 s frames, is **saturated** at
+that interval: the keyframe channel's duty cycle is 100 % at 3.0 and
+89.2 % at its own measured floor of 94.938. The corpus's floor is a
+property of the corpus's interval, and borrowing it across a 4× gap is
+borrowing a threshold that has no meaning.
+
 ## 4. The invocations, ready to run
 
 **Is the pair renderable?**
@@ -336,7 +378,7 @@ filtered for being dull.
 **Measured, on the tool's own fixture.** A synthetic pair — a person
 walking a known path, seen by a fixed witness and a roving eye with a
 known viewpoint transform — so the renders can be *graded* instead of
-admired. The selftest is **58 of 58** and it grades:
+admired. The selftest is **61 of 61** and it grades:
 
 - the fixed view's change centroid lands within **0.10** of the truth's
   position on both axes;
@@ -385,7 +427,7 @@ That is the control's whole job: **the measure does not manufacture
 agreement.** A witness count that found an excess between a real room
 and a meaningless video would be a bug in the measure, not a finding.
 
-**The selftests are 58 of 58** for the renderer and **26 of 26** for the
+**The selftests are 61 of 61** for the renderer and **29 of 29** for the
 ingest.
 
 **Measured, on the REAL pair.** The duet has landed and been rendered.
@@ -513,9 +555,11 @@ python experiments/dual_render.py \
 | `docs/research/dual/DUET-RENDER-FLOOR_RELATIVE.txt` | the real duet's three renders, each panel in times its own sensor's grain |
 | `docs/research/dual/DUET-RENDER-SHARED_AUTO.txt` | the same, on one shared scale — the ProArt's panel is black, and that is the point |
 | `docs/research/dual/DUET-RENDER-PER_VIEW_AUTO.txt` | the same, each view against its own maximum — legible, and not comparable |
-| `docs/research/dual/duet_render_*.json` | the numbers behind the three real renders |
+| `docs/research/dual/DUET-RENDER-KEYFRAMES.txt` | the phone's **camera luma** (the keyframes) against the ProArt: the two views in the SAME units, so one scale is honest |
+| `docs/research/dual/duet_render_*.json` | the numbers behind the four real renders |
 | `docs/research/dual/duet_ingest.json` | what the ingest measured on the room-lens: the clock anchor, the geometry runs, the duty cycle |
 | `docs/research/dual/duet_phone_meta.json` | the phone bundle's metadata: the ramp, the tiers, the pose ranges, the anchor estimators |
+| `docs/research/dual/duet_keyframe_meta.json` | the keyframe channel's metadata: the crop, the interval, the corpus's own floor |
 | `docs/research/dual/SYNTHETIC-DUAL-RENDER.txt` | the renders of the synthetic pair — the grade |
 | `docs/research/dual/REHEARSAL-DUAL-RENDER.txt` | the negative control: a real corpus session beside a meaningless phone |
 | `docs/research/dual/synthetic_dual_render.json` | the numbers behind the synthetic render |

@@ -1,5 +1,5 @@
 {
-  "generated_utc": "2026-10-22T08:49:40Z",
+  "generated_utc": "2026-10-22T08:59:45Z",
   "the_pair_is_synthetic": false,
   "the_pair": {
     "fixed": {
@@ -4427,6 +4427,81 @@
       }
     },
     "the_note": "the raw reading is the one that was asked for first; the log reading was added after the raw one was seen, so it is a SECOND reading and not a replacement. Neither is called the answer here: the slide null says how much of each is the room and how much is two slow series correlating somewhere by luck."
+  },
+  "the_crossing_witness": {
+    "the_shift_max_s": 120.0,
+    "the_readings": {
+      "overlap": {
+        "the_criterion": "the two crossings' intervals overlap at all",
+        "the_observed": 10,
+        "the_n_roving_crossings": 17,
+        "the_null_mean": 4.228,
+        "the_null_sd": 2.928,
+        "the_null_max": 11,
+        "the_z": 1.971,
+        "the_share_of_slides_that_match_it": 21,
+        "the_n_slides": 241,
+        "the_p_by_the_slide": 0.0871
+      },
+      "half": {
+        "the_criterion": "they share at least half of the SHORTER one",
+        "the_observed": 8,
+        "the_n_roving_crossings": 17,
+        "the_null_mean": 3.544,
+        "the_null_sd": 2.687,
+        "the_null_max": 10,
+        "the_z": 1.659,
+        "the_share_of_slides_that_match_it": 36,
+        "the_n_slides": 241,
+        "the_p_by_the_slide": 0.1494
+      }
+    },
+    "the_fixed_crossings_total": 22,
+    "the_fixed_crossings_in_the_shared_minutes": 7,
+    "the_roving_crossings_total": 17,
+    "the_gaps_s": {
+      "fixed": 0.999,
+      "roving": 0.813
+    },
+    "the_alignment_sensitivity": [
+      {
+        "the_shift_s": 0.0,
+        "the_observed": 10,
+        "the_null_mean": 4.228,
+        "the_z": 1.971
+      },
+      {
+        "the_shift_s": 1.0,
+        "the_observed": 10,
+        "the_null_mean": 4.228,
+        "the_z": 1.971
+      },
+      {
+        "the_shift_s": 2.0,
+        "the_observed": 11,
+        "the_null_mean": 4.228,
+        "the_z": 2.313
+      },
+      {
+        "the_shift_s": 5.0,
+        "the_observed": 10,
+        "the_null_mean": 4.228,
+        "the_z": 1.971
+      },
+      {
+        "the_shift_s": 10.0,
+        "the_observed": 7,
+        "the_null_mean": 4.228,
+        "the_z": 0.947
+      },
+      {
+        "the_shift_s": 20.0,
+        "the_observed": 7,
+        "the_null_mean": 4.228,
+        "the_z": 0.947
+      }
+    ],
+    "the_note": "the looser criterion is the one that was asked for first and the tighter one is reported beside it, not instead of it. The result is a statement that the two views find the same crossings WITHIN A FEW SECONDS; it is not a measurement of the alignment, because it survives a misalignment of several seconds."
   },
   "the_alignment_sensitivity": [
     {

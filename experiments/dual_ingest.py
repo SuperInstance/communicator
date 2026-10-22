@@ -57,6 +57,7 @@ Run from the repo root:
 from __future__ import annotations
 
 import argparse
+import base64
 import json
 import math
 import os
@@ -988,10 +989,18 @@ def ingest_room_lens(path: Path, out_dir: Path, label: str = 'the phone room-len
         sidecars.append({'the_file': 'wallclock-fixed.json',
                          'the_offset_ms': round(offset_ms, 3)})
 
+    # THE KEYFRAME CHANNEL: the phone's own camera luma, in the
+    # corpus's own units, so the two views can be compared at all.
+    keyframes = None
+    if data.get('keyframes'):
+        keyframes = ingest_room_lens_keyframes(data, out_dir / 'keyframes',
+                                               quiet=True)
+
     report = {
         'the_out_dir': str(out_dir),
         'the_source_session': str(path),
         'n_frames': len(frames),
+        'the_keyframe_channel': keyframes,
         'n_change_maps': int(len(change)),
         'the_pairs_skipped_for_a_geometry_change': len(skipped),
         'the_frame_interval_ms': meta['the_frame_interval_ms'],
@@ -1004,6 +1013,134 @@ def ingest_room_lens(path: Path, out_dir: Path, label: str = 'the phone room-len
         + int((out_dir / 'luma_grid.raw').stat().st_size),
     }
     (out_dir / 'ingest.json').write_text(json.dumps(report, indent=2))
+    if not quiet:
+        print(json.dumps(report, indent=2))
+    return report
+
+
+def ingest_room_lens_keyframes(data: dict, out_dir: Path,
+                                label: str = 'the phone camera (the keyframes)',
+                                quiet: bool = False) -> dict:
+    """THE KEYFRAME CHANNEL: the phone's OWN CAMERA LUMA.
+
+    THE ASCII IS THE LOSSY STEP.  The room-lens renders CHARACTERS,
+    and the characters collapse half the brightness range into one
+    glyph and carry a 2.2x contrast stretch, so the ASCII change map is
+    a mask of band flips rather than a change detector -- on the duet
+    it was on 99.8 % of the time, which is a channel that cannot time a
+    movement.
+
+    But the bundle also carries 103 KEYFRAMES: the camera's own
+    picture, as JPEG, at the phone's own resolution.  Those are the
+    CAMERA'S LUMA, which is the very quantity the ProArt's change map
+    is in.  So the phone gets a second channel, in the corpus's own
+    units, and the two views become commensurable for the first time.
+
+    THE OUTPUT IS A FIRST-CLASS CORPUS BUNDLE.  `luma.raw` at 160x96,
+    `timestamps.json`, `meta.json` -- exactly what a ProArt session
+    bundle is -- so `experiments/lens.py` computes this channel's
+    change map with NO changes at all, the floor is the corpus's own
+    3.0 because the construction IS the corpus's, and every tool in
+    the fleet reads it without being told.
+
+    THE CROP IS THE CORPUS'S, NOT A STRETCH.  The keyframe is 320x569,
+    portrait, and the corpus's frame is 1.667; the picture is CUT to
+    the corpus's aspect and then resized, because a stretched picture
+    moves every cell and the grid is positional.  The rectangle is in
+    the metadata so anyone can re-derive where the picture came from.
+    """
+    import cv2  # noqa: PLC0415
+    out_dir = Path(out_dir)
+    out_dir.mkdir(parents=True, exist_ok=True)
+    kfs = data.get('keyframes') or []
+    if len(kfs) < 3:
+        raise RuntimeError(f'the bundle carries {len(kfs)} keyframes; a '
+                           f'change map needs at least 3')
+    frames = []
+    times_ms = []
+    for k in kfs:
+        b64 = str(k.get('jpeg', ''))
+        if ',' in b64:
+            b64 = b64.split(',', 1)[1]
+        raw = base64.b64decode(b64)
+        img = cv2.imdecode(np.frombuffer(raw, np.uint8), cv2.IMREAD_GRAYSCALE)
+        if img is None:
+            raise RuntimeError('a keyframe JPEG would not decode')
+        frames.append(img)
+        times_ms.append(float(k['t']))
+
+    h, w = frames[0].shape
+    if any(f.shape != frames[0].shape for f in frames):
+        raise RuntimeError('the keyframes are not all the same size')
+    x0, y0, x1, y1 = crop_box(w, h, 'crop')
+    luma = np.stack([
+        cv2.resize(f[y0:y1, x0:x1], (FRAME_W, FRAME_H),
+                   interpolation=cv2.INTER_AREA)
+        for f in frames]).astype(np.uint8)
+    (out_dir / 'luma.raw').write_bytes(luma.tobytes())
+
+    # the corpus's convention: the offsets stay in the source's own
+    # clock and wall_clock_start is the wall time of the FIRST FRAME
+    anchor = session_anchor_ms(data)
+    anchor_ms = float(anchor['the_anchor_ms'])
+    first_wall = anchor_ms + times_ms[0]
+    (out_dir / 'timestamps.json').write_text(json.dumps({
+        'wall_clock_start': _iso_from_ms(first_wall),
+        'frame_offsets_ms': [round(t, 3) for t in times_ms],
+        'the_convention': ('the corpus capture page\'s convention: the '
+                           'offsets are the session\'s own clock and '
+                           'wall_clock_start is the wall time of the FIRST '
+                           'FRAME'),
+    }, indent=1))
+
+    gaps = [times_ms[i + 1] - times_ms[i] for i in range(len(times_ms) - 1)]
+    median_gap = sorted(gaps)[len(gaps) // 2]
+    meta = {
+        'tool': 'dual_ingest -- the keyframe channel',
+        'generated_utc': iso_now(),
+        'label': label,
+        'the_source_session': str(data.get('meta', {}).get('sessionId', '')),
+        'the_source_keyframes': len(kfs),
+        'the_source_picture': {'width': int(w), 'height': int(h)},
+        'the_crop': {'fit': 'crop', 'x0': x0, 'y0': y0, 'x1': x1, 'y1': y1,
+                     'note': 'the picture is CUT to the corpus\'s aspect and '
+                             'then resized; a stretched picture moves every '
+                             'cell and the grid is positional'},
+        'the_luma_spec': {'width': FRAME_W, 'height': FRAME_H,
+                          'dtype': 'uint8',
+                          'note': 'the corpus\'s own luma geometry, so '
+                                  'experiments/lens.py computes this '
+                                  'channel\'s change map unchanged'},
+        'the_frame_interval_ms': {
+            'the_median': round(median_gap, 3),
+            'the_min': round(min(gaps), 3),
+            'the_max': round(max(gaps), 3),
+            'the_achieved_fps': round(1000.0 / median_gap, 4) if median_gap else None,
+        },
+        'the_wall_clock_of_the_first_frame': _iso_from_ms(first_wall),
+        'the_clock_anchor': anchor,
+        'the_noise_of_this_sensor': {
+            'the_floor': CHANGE_NOISE_FLOOR,
+            'the_note': ('THE CORPUS\'S OWN FLOOR, because this channel IS '
+                         'the corpus\'s construction: 160x96 luma, the 4x4 '
+                         'block mean, the same units the ProArt\'s change '
+                         'map is in. The ASCII channel\'s floor was a '
+                         'different number because the ASCII channel is a '
+                         'different quantity.'),
+        },
+        'the_note': ('the camera\'s own luma, from the keyframes the '
+                     'room-lens already banked. This is the second way the '
+                     'phone can be read, and the one that puts the two '
+                     'views in the same units.'),
+    }
+    (out_dir / 'meta.json').write_text(json.dumps(meta, indent=2))
+    report = {
+        'the_out_dir': str(out_dir),
+        'the_keyframes': len(kfs),
+        'the_frame_interval_ms': meta['the_frame_interval_ms'],
+        'the_crop': meta['the_crop'],
+        'the_wall_clock_of_the_first_frame': meta['the_wall_clock_of_the_first_frame'],
+    }
     if not quiet:
         print(json.dumps(report, indent=2))
     return report
@@ -1105,6 +1242,7 @@ def make_room_lens_fixture(path: Path, n_frames: int = 48, cols: int = 64,
 
     truth = []
     frames = []
+    keyframes = []
     for i in range(n_frames):
         t = i / fps
         frac = i / max(1, n_frames - 1)
@@ -1127,6 +1265,19 @@ def make_room_lens_fixture(path: Path, n_frames: int = 48, cols: int = 64,
             'pose': {'alpha': 0.0, 'beta': 0.0, 'gamma': 0.0, 'heading': None},
             'ascii': '\n'.join(lines),
         })
+        # the room-lens banks a keyframe every fifth frame: the camera's
+        # OWN picture, as a JPEG, at its own resolution
+        if i % 5 == 0:
+            import cv2  # noqa: PLC0415
+            kc = cv2.resize(frame.astype(np.uint8), (320, 310))
+            ok, buf = cv2.imencode('.jpg', kc,
+                                   [int(cv2.IMWRITE_JPEG_QUALITY), 60])
+            if not ok:
+                raise RuntimeError('the fixture\'s keyframe would not encode')
+            b64 = base64.b64encode(buf.tobytes()).decode('ascii')
+            keyframes.append({'t': round(t * 1000.0, 1),
+                               'pose': frames[-1]['pose'],
+                               'jpeg': 'data:image/jpeg;base64,' + b64})
         truth.append({
             'frame': i,
             't_s': round(t, 4),
@@ -1151,7 +1302,7 @@ def make_room_lens_fixture(path: Path, n_frames: int = 48, cols: int = 64,
                            'startedAt': wall, 'totalBytes': 1}},
         'endedAt': _iso_from_ms(walk_start + n_frames / fps * 1000.0),
         'frames': frames,
-        'keyframes': [],
+        'keyframes': keyframes,
         'rirMeasures': [],
         'audioParts': [{'mimeType': 'audio/webm', 'base64': '', 'bytes': 1,
                         'startedAt': wall, 'offsetMs': 0,
@@ -1160,7 +1311,8 @@ def make_room_lens_fixture(path: Path, n_frames: int = 48, cols: int = 64,
     path.parent.mkdir(parents=True, exist_ok=True)
     path.write_text(json.dumps(bundle))
     return {'the_truth': truth, 'the_path': str(path),
-            'the_n_frames': n_frames, 'the_walk_start_ms': walk_start,
+            'the_n_frames': n_frames, 'the_n_keyframes': len(keyframes),
+            'the_walk_start_ms': walk_start,
             'the_session_started_ms': started,
             'the_cols': cols, 'the_rows': rows}
 
@@ -1418,6 +1570,27 @@ def _room_lens_selftest(checks, ck) -> None:
         ck('room-lens: the ramp is the room-lens\'s own, with its eight @s',
            ROOM_LENS_RAMP.count('@') == 8 and len(ROOM_LENS_RAMP) == 17,
            ROOM_LENS_RAMP)
+
+        # the KEYFRAME CHANNEL: the phone's own camera luma, written as
+        # a FIRST-CLASS corpus bundle, so the corpus's own change map
+        # reads it with no changes at all.
+        kf_dir = out / 'keyframes'
+        ck('room-lens: the keyframe channel is a first-class corpus bundle',
+           (kf_dir / 'luma.raw').is_file()
+           and (kf_dir / 'timestamps.json').is_file()
+           and (kf_dir / 'meta.json').is_file(),
+           str(sorted(p.name for p in kf_dir.iterdir())) if kf_dir.is_dir() else 'none')
+        if (kf_dir / 'luma.raw').is_file():
+            kraw = np.fromfile(kf_dir / 'luma.raw', dtype=np.uint8)
+            kmaps = lens.frame_motion_maps(kf_dir)
+            ck('room-lens: the corpus\'s OWN change map reads the keyframe '
+               'channel',
+               kraw.size % FRAME_BYTES == 0 and kmaps is not None
+               and len(kmaps) == fx['the_n_frames'] // 5,
+               f'{kraw.size // FRAME_BYTES} frames, {len(kmaps) if kmaps is not None else 0} maps')
+            ck('room-lens: the keyframe channel keeps the corpus\'s floor',
+               json.loads((kf_dir / 'meta.json').read_text())
+               ['the_noise_of_this_sensor']['the_floor'] == CHANGE_NOISE_FLOOR)
         bright = room_lens_bright()
         ck('room-lens: a glyph\'s brightness is the LOWER edge of its band',
            abs(bright[' '] - 0.0) < 1e-6 and

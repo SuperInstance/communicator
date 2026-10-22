@@ -2,6 +2,25 @@
   "the_out_dir": "/tmp/duet-3",
   "the_source_session": "/home/proart/dual-capture/dual-3.json",
   "n_frames": 513,
+  "the_keyframe_channel": {
+    "the_out_dir": "/tmp/duet-3/keyframes",
+    "the_keyframes": 103,
+    "the_frame_interval_ms": {
+      "the_median": 2105.0,
+      "the_min": 1977.0,
+      "the_max": 22458.0,
+      "the_achieved_fps": 0.4751
+    },
+    "the_crop": {
+      "fit": "crop",
+      "x0": 0,
+      "y0": 188,
+      "x1": 320,
+      "y1": 380,
+      "note": "the picture is CUT to the corpus's aspect and then resized; a stretched picture moves every cell and the grid is positional"
+    },
+    "the_wall_clock_of_the_first_frame": "2026-10-22T07:59:28.350Z"
+  },
   "n_change_maps": 488,
   "the_pairs_skipped_for_a_geometry_change": 24,
   "the_frame_interval_ms": {
@@ -81,7 +100,7 @@
   ],
   "the_merged_fixed": {
     "tool": "dual_ingest -- the merged fixed stream",
-    "generated_utc": "2026-10-22T08:49:19.843Z",
+    "generated_utc": "2026-10-22T08:58:40.849Z",
     "label": "the ProArt, merged",
     "the_sessions": [
       {

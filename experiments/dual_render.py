@@ -893,6 +893,181 @@ def render_fused_score(fixed: Stream, roving: Stream, align: Alignment,
     return lines, {'slices': rows, 'n_slices': n_slices}
 
 
+def crossing_witness(fixed: Stream, roving: Stream, align: Alignment,
+                     t0: float, t1: float,
+                     shift_max_s: float = 120.0) -> dict:
+    """THE CROSSING WITNESS -- do the two views find the same CROSSINGS?
+
+    THE BINARY COUNT CANNOT SEE A MOVEMENT.  It asks "did something
+    change", and the roving eye is IN the room, so the answer is
+    almost always yes: the phone's channel is on 99.8 % of the time,
+    the contingency table has a constant row, and the excess over
+    chance is exactly zero points.
+
+    THE CORPUS'S OWN CROSSING IS THE RIGHT WITNESS.  A crossing is a
+    CONNECTED BLOB of change that holds its shape while it TRANSLATES
+    -- the person is one object, it keeps its size, and it moves.  The
+    sensor's grain is below the floor, a highlight is one frame, a
+    fidget does not travel, and neither does a SHAKE.  So each view
+    is asked the question it can answer: did a THING move across the
+    picture?
+
+    **THE GAP IS THE CHANNEL'S OWN, IN FRAMES, NOT IN SECONDS.**  The
+    corpus's detector defaults to a 0.35 s gap and to offsets at 60 fps,
+    and the corpus's own sessions run at 2 fps -- so at 0.35 s no blob
+    ever chains and the detector finds NOTHING AT ALL.  The gap here is
+    **two frames of the channel**, so a blob that misses one frame
+    still chains and one that misses two is a new event.
+    """
+    out: dict = {'the_shift_max_s': shift_max_s, 'the_readings': {}}
+    gaps = {'fixed': max(0.04, fixed.interval_s * 2.0),
+            'roving': max(0.04, roving.interval_s * 2.0)}
+    try:
+        from experiments import lens as _lens  # noqa: PLC0415
+    except Exception:  # noqa: BLE001
+        out['the_note'] = 'the corpus lens could not be imported'
+        return out
+
+    def crossings(stream: Stream) -> list[tuple[float, float]]:
+        ev = _lens.find_crossings(stream.motion, threshold=stream.floor,
+                                  offsets=stream.motion_times_s,
+                                  max_gap_s=gaps['fixed' if stream is fixed
+                                                 else 'roving'])
+        return [(float(stream.motion_times_s[e['start_frame']]),
+                 float(stream.motion_times_s[e['end_frame']])) for e in ev]
+
+    fx_all = crossings(fixed)
+    rv_all = crossings(roving)
+    fx = [(a, b) for a, b in fx_all if b >= t0 and a <= t1]
+    out['the_fixed_crossings_total'] = len(fx_all)
+    out['the_fixed_crossings_in_the_shared_minutes'] = len(fx)
+    out['the_roving_crossings_total'] = len(rv_all)
+    out['the_gaps_s'] = {k: round(v, 3) for k, v in gaps.items()}
+    if not fx or not rv_all:
+        which = []
+        if not fx:
+            which.append('the fixed view')
+        if not rv_all:
+            which.append('the roving view')
+        out['the_note'] = (
+            f'{" and ".join(which)} found no crossings at all. The corpus '
+            f'detector needs a blob that holds its shape while it '
+            f'TRANSLATES, and a channel that changes everywhere -- a hand-'
+            f'held camera, whose whole picture moves -- has no such blob. '
+            f'That is a finding about the channel, not a failure of the '
+            f'render.')
+        return out
+
+    def _overlap(a, b, c, d, crit: str) -> bool:
+        lo, hi = max(a, c), min(b, d)
+        if hi <= lo:
+            return False
+        if crit == 'overlap':
+            return True
+        return (hi - lo) >= 0.5 * min(b - a, d - c)
+
+    def count(dx: float, crit: str) -> int:
+        n = 0
+        for a, b in rv_all:
+            A = align.fixed_time_for_roving(a) + dx
+            B = align.fixed_time_for_roving(b) + dx
+            if B < t0 or A > t1:
+                continue
+            for f0, f1 in fx:
+                if _overlap(A, B, f0, f1, crit):
+                    n += 1
+                    break
+        return n
+
+    shifts = list(range(int(-shift_max_s), int(shift_max_s) + 1))
+    for crit in ('overlap', 'half'):
+        obs = count(0.0, crit)
+        slides = np.asarray([count(float(d), crit) for d in shifts])
+        sd = float(slides.std())
+        out['the_readings'][crit] = {
+            'the_criterion': ('the two crossings\' intervals overlap at all'
+                              if crit == 'overlap' else
+                              'they share at least half of the SHORTER one'),
+            'the_observed': obs,
+            'the_n_roving_crossings': len(rv_all),
+            'the_null_mean': round(float(slides.mean()), 3),
+            'the_null_sd': round(sd, 3),
+            'the_null_max': int(slides.max()),
+            'the_z': round((obs - float(slides.mean())) / sd, 3) if sd > 0 else None,
+            'the_share_of_slides_that_match_it': int((slides >= obs).sum()),
+            'the_n_slides': len(slides),
+            'the_p_by_the_slide': round(float((slides >= obs).sum()) / len(slides), 4),
+        }
+    # how far the alignment can be wrong before the result goes
+    sens = []
+    for d in (0.0, 1.0, 2.0, 5.0, 10.0, 20.0):
+        obs = count(d, 'overlap')
+        slides = np.asarray([count(float(x), 'overlap') for x in shifts])
+        sd = float(slides.std())
+        sens.append({'the_shift_s': d, 'the_observed': obs,
+                     'the_null_mean': round(float(slides.mean()), 3),
+                     'the_z': round((obs - float(slides.mean())) / sd, 3) if sd > 0 else None})
+    out['the_alignment_sensitivity'] = sens
+    out['the_note'] = (
+        'the looser criterion is the one that was asked for first and the '
+        'tighter one is reported beside it, not instead of it. The result '
+        'is a statement that the two views find the same crossings WITHIN '
+        'A FEW SECONDS; it is not a measurement of the alignment, because '
+        'it survives a misalignment of several seconds.')
+    return out
+
+
+def render_crossing_witness(w: dict) -> list[str]:
+    """The crossing witness, printed."""
+    lines = []
+    lines.append('THE CROSSING WITNESS -- do the two views find the same '
+                 'CROSSINGS?')
+    if not w.get('the_readings'):
+        lines.append(f'  {w.get("the_note", "no reading")}')
+        return lines
+    lines.append('  a crossing is the corpus\'s own: a CONNECTED BLOB of change '
+                 'that holds its shape while it')
+    lines.append('  TRANSLATES.  The grain does not translate, a highlight is one '
+                 'frame, a fidget does not travel,')
+    lines.append('  and neither does a shake -- so this is the question each view '
+                 'can actually answer.')
+    lines.append(f'  the fixed view found {w["the_fixed_crossings_total"]} '
+                 f'crossings, {w["the_fixed_crossings_in_the_shared_minutes"]} '
+                 f'of them inside the shared minutes; the roving view found '
+                 f'{w["the_roving_crossings_total"]}')
+    g = w.get('the_gaps_s', {})
+    lines.append(f'  the detector\'s gap is TWO FRAMES of each channel (the '
+                 f'fixed {g.get("fixed", 0):.2f} s, the roving '
+                 f'{g.get("roving", 0):.2f} s), not the corpus tool\'s 0.35 s default:')
+    lines.append('  that default is calibrated for 60 fps and these channels '
+                 'run at 2, so at 0.35 s no blob ever chains.')
+    lines.append('')
+    lines.append('  criterion                                 observed   null mean'
+                 '   null sd       z   slides that match it      p')
+    for name, r in w['the_readings'].items():
+        lines.append(
+            f'  {r["the_criterion"][:40]:40s}  {r["the_observed"]:4d} of '
+            f'{r["the_n_roving_crossings"]:3d}   {r["the_null_mean"]:9.2f}  '
+            f'{r["the_null_sd"]:8.2f}  {r["the_z"]:+5.2f}   '
+            f'{r["the_share_of_slides_that_match_it"]:4d} of '
+            f'{r["the_n_slides"]:4d}   {r["the_p_by_the_slide"]:.3f}')
+    lines.append('')
+    lines.append('  how much the alignment can be wrong before the result goes:')
+    for s in w.get('the_alignment_sensitivity', []):
+        lines.append(f'    the alignment moved {s["the_shift_s"]:+5.1f} s: the '
+                     f'observed {s["the_observed"]:3d}, the null mean '
+                     f'{s["the_null_mean"]:6.2f}, z {s["the_z"]:+5.2f}')
+    lines.append('')
+    lines.append('  A RESULT THAT SURVIVES A MISALIGNMENT OF SEVERAL SECONDS IS '
+                 'NOT A MEASUREMENT OF THE')
+    lines.append('  ALIGNMENT.  It is a statement that the two views find the '
+                 'same crossings at the same')
+    lines.append('  MOMENTS, which is the thing two sovereign logs of the same '
+                 'minutes give that neither')
+    lines.append('  gives alone.  The claps are still what settles the skew.')
+    return lines
+
+
 def _corr(a: np.ndarray, b: np.ndarray) -> float:
     """The Pearson correlation of two series."""
     if a.size < 3 or a.size != b.size:
@@ -1857,6 +2032,26 @@ def selftest() -> int:
         ck('render: the graded witness says whether the peak is sharp',
            'the_peak_sharpness_s' in raw, str(sorted(raw.keys())))
 
+        # 12. the CROSSING WITNESS: the corpus's own crossing detector,
+        #     with the gap set to each channel's OWN interval.  The
+        #     tool's 0.35 s default is shorter than these channels'
+        #     frame intervals, and then no blob ever chains.
+        cw = crossing_witness(fixed, roving, al2, 0.0, 6.0)
+        ck('render: the crossing witness sets the gap to TWO FRAMES of the '
+           'channel',
+           abs(cw.get('the_gaps_s', {}).get('fixed', 0)
+               - 2.0 * fixed.interval_s) < 1e-6
+           and abs(cw.get('the_gaps_s', {}).get('roving', 0)
+                   - 2.0 * roving.interval_s) < 1e-6,
+           str(cw.get('the_gaps_s')))
+        ck('render: the crossing witness slides the roving channel',
+           all(r.get('the_n_slides', 0) > 3
+               for r in cw.get('the_readings', {}).values()),
+           str(sorted(cw.get('the_readings', {}).keys())))
+        ck('render: the crossing witness says how wrong the alignment can be',
+           len(cw.get('the_alignment_sensitivity', [])) >= 3,
+           str(len(cw.get('the_alignment_sensitivity', []))))
+
         # 11. the sidecar's OWN note is carried into the output
         note_path = tmp / 'note.json'
         note_path.write_text(json.dumps({'offset_ms': 12.0, 'drift_ppm': 0.0,
@@ -2015,6 +2210,9 @@ def main(argv=None) -> int:
     graded = graded_witness(fixed, roving, align, t0, t1, args.slice)
     blocks.extend(render_graded_witness(graded, args.slice))
     blocks.append('')
+    cross = crossing_witness(fixed, roving, align, t0, t1)
+    blocks.extend(render_crossing_witness(cross))
+    blocks.append('')
     shifts = [float(v) for v in str(args.shifts).split(',') if v.strip()]
     sens = alignment_sensitivity(fixed, roving, align, t0, t1, args.slice, shifts)
     blocks.extend(render_alignment_sensitivity(sens, args.slice))
@@ -2034,6 +2232,7 @@ def main(argv=None) -> int:
         'the_fused_score': fnum,
         'the_witness_count': count,
         'the_graded_witness': graded,
+        'the_crossing_witness': cross,
         'the_alignment_sensitivity': sens,
         'the_differenced_view': dn2,
         'the_rendering_choices': {

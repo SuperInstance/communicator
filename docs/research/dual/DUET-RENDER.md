@@ -9,7 +9,10 @@ for what it is.
 **The short of it: the duet does not yet show the synergy, and the reason is
 measured, not a bug.** The two views' change maps are not the same quantity, the
 phone's channel is saturated, and the alignment is the wall clock rather than the
-claps. Each of those three is quantified below, and each has a specific remedy.
+claps. Each of those three is quantified below, and each has a specific remedy. The
+one instrument that does work — the corpus's own *crossing* detector, asked whether
+the two views find the same moments — reaches **z = +1.97, p = 0.087**, which is
+suggestive and not significant, and survives a misalignment of five seconds.
 
 ## 1. The pair, and how the clock was found
 
@@ -104,8 +107,8 @@ and the output says in its header that they are not comparable in magnitude.
 
 `floor-relative` divides each view by that view's own floor and then uses one scale.
 A cell at the top of the ramp then means the same thing on both sides: this many
-times this sensor's own grain. It is the only comparison the two sensors make
-possible, and it is the one the filed headline render uses.
+times this sensor's own grain. It is the only comparison the duet makes possible,
+and it is the one the filed headline render uses.
 
 ## 4. The witness count is degenerate, not merely weak
 
@@ -154,42 +157,116 @@ seconds. Two slow series correlate somewhere by luck. A sweep that cannot say
 where the peak is says it twice. **The duet cannot measure its own alignment. The
 claps are not optional; they are the only way.**
 
-## 6. What the duet does and does not show
+## 6. The crossing witness, and the instrument bug it exposed
 
-It does not show the synergy the brief is after. The two channels' energies are
-correlated at +0.26 (raw), which is suggestive and not significant against the
-honest null, and the binary witness test cannot be formed at all. Two things are
+The corpus already has the right instrument and this lane had not used it. A
+**crossing** is a connected blob of change that holds its shape while it
+*translates* — the person is one object, it keeps its size, and it moves. The
+sensor's grain is below the floor, a highlight is one frame, a fidget does not
+travel, and neither does a shake. So each view is asked the question it can
+actually answer: did a *thing* move across the picture?
+
+**AND THE INSTRUMENT HAD A HIDDEN ASSUMPTION.** The corpus's detector defaults to
+a 0.35 s gap and to offsets at 60 fps, and the corpus's own sessions run at 2 fps —
+so at 0.35 s no blob ever chains and the detector finds **nothing at all**. The gap
+has to be counted in *frames*, and here it is two frames of each channel, so a blob
+that misses one frame still chains and one that misses two is a new event. That one
+change is the difference between an empty result and a result, and it is a
+generalisable defect in a corpus tool that every 2 fps session in the corpus has
+been carrying.
+
+With the gap fixed, the duet gives its best number:
+
+| criterion | observed | null mean | null sd | z | slides that match it | p |
+|---|---|---|---|---|---|---|
+| the intervals overlap at all | 10 of 17 | 4.23 | 2.93 | **+1.97** | 21 of 241 | **0.087** |
+| they share half of the shorter one | 8 of 17 | 3.54 | 2.69 | +1.66 | 36 of 241 | 0.149 |
+
+The looser criterion is the one that was asked for first and the tighter one is
+reported beside it, not instead of it. The honest reading is **suggestive and not
+significant**: the two views find the same crossings about twice as often as a
+random alignment would, and the result is of the same order under either criterion
+(z between +1.7 and +2.1). It is also stable: the alignment can be wrong by five
+seconds before it goes (z +1.97 at 0 s, +1.97 at 1 s, +2.31 at 2 s, +1.97 at 5 s,
+and +0.95 at 10 s). A result that survives a five-second misalignment is **not** a
+measurement of the alignment — it is a statement that the two views find the same
+crossings at the same moments, which is the thing two sovereign logs of the same
+minutes give that neither gives alone.
+
+## 7. The phone's camera luma, and why the roving eye is always on
+
+The duet produced a surprise worth filing on its own: **the phone's channel is
+saturated because the roving eye is IN the scene, not only because of the
+posterisation.** The ProArt sits on a stand, so when the room goes still its picture
+goes to **exactly zero** change — the quietest tenth of its pairs is 0.000 luma.
+The phone's minimum per-pair change over 2.1 s is **40.438 luma** and it never
+reaches zero. A hand-held camera is always moving, so its picture always changes.
+
+That is structural, and it means the witness question cannot be "did anything
+change" — for a roving view the answer is always yes.
+
+**THE KEYFRAME CHANNEL.** The room-lens already computed the camera's own luma
+before it posterised it, and the bundle banks 103 **keyframes** of the camera's
+actual picture (320×569 JPEG). Those are the camera's *luma*, which is the very
+quantity the ProArt's change map is in. The ingest now builds a second bundle from
+them — 160×96 luma in the corpus's own format, cropped to the corpus's aspect
+rather than stretched — so `experiments/lens.py` computes its change map with **no
+changes at all**, and the floor is the corpus's own 3.0 because the construction
+*is* the corpus's. The two views are commensurable in that bundle for the first
+time.
+
+It is also a lesson about intervals. The keyframes are one per 2.105 s, 4.2× the
+ProArt's cadence, and the corpus's 3.0 luma floor — measured on 0.5 s frames — is
+saturated at that interval (the keyframe channel's duty cycle is 100 % at 3.0 and
+89.2 % at its own measured floor of 94.938). **A noise floor is a property of a
+sensor AND an interval**, and the corpus's floor is a property of the corpus's
+interval. At its own floor the keyframe channel finds 2 crossings, and 2 crossings
+say nothing at all.
+
+## 8. What the duet does and does not show
+
+It does not show the synergy the brief is after, in the form the brief hoped for.
+The two channels' energies correlate at +0.26 (raw), which is suggestive and not
+significant against the honest null; the binary witness test cannot be formed at
+all; and the crossing coincidence reaches z = +1.97, p = 0.087. Three things are
 known, measured, and are not alignment artefacts: the phone's change map is a mask
-of band flips that is on 99.8 % of the time, and the two change maps are in
-different units so no single threshold means the same thing on both sides.
+of band flips that is on 99.8 % of the time, the two change maps are in different
+units so no single threshold means the same thing on both sides, and a roving view
+in the room is always changing.
 
-It does show the machinery, working on the real pair, and it shows two traps that
+It does show the machinery, working on the real pair, and it shows three traps that
 would have produced false results. The clock trap — reading `meta.startedAt` as the
 frames' origin — would have moved the whole duet 435.840 s and paired the phone
 with the wrong ProArt session. The units trap — one scale for two sensors — would
-have rendered a black panel and a confident-looking number underneath it.
+have rendered a black panel and a confident-looking number underneath it. And the
+instrument trap — the corpus's 60 fps gap on 2 fps sessions — would have produced
+an empty crossing count that reads exactly like "the two views never agree".
 
-## 7. What would make it work, and who owns it
+## 9. What would make it work, and who owns it
 
 **zcode's clap alignment** replaces the wall clock and settles the skew the sweep
 could not. The tool already consumes a clap sidecar, and the sidecar's own note is
 carried into every output, so the re-run is one command and the comparison against
 this render is immediate.
 
-**The phone's camera luma, which the room-lens already has.** The renderer computes
-a luma field for its own ASCII and then posterises it; the posterisation is the
-lossy step, and it is what makes the phone's channel a saturated band-flip mask
-rather than a change detector. Banking that luma — or a change map computed from
-it — would put the phone on the corpus's own footing, in the camera's luma, where
-the two views' change maps become the same quantity and the witness test becomes a
-test. The bundle's 103 keyframes are the camera's actual picture and are a proxy
-for it now.
+**The phone's camera luma, banked every frame rather than every fifth.** The
+room-lens computes a luma field for its own ASCII and then posterises it; the
+posterisation is the lossy step, and keyframes every fifth frame are 4.2× too
+coarse to carry the corpus's own noise floor. Banking the luma — or a change map
+computed from it — at the ASCII's own cadence would put the phone on the corpus's
+footing, in the camera's luma, where the two views' change maps are the same
+quantity and the witness test becomes a test.
+
+**A witness that asks about objects, not about change.** The crossing detector is
+the right instrument and it is already in the corpus. It needs its gap counted in
+frames, and the corpus's own `lens.find_crossings` default should be fixed for
+every 2 fps session the corpus holds.
 
 **A slice length above the frame interval.** At 2.0 and 2.5 fps a 0.25 s slice
 holds at most one frame from each view, and the fused score's slices are better at
 1 s, which is what the filed render uses.
 
-## 8. The commands, so the whole thing re-runs
+## 10. The commands, so the whole thing re-runs
 
 ```
 experiments/dual_ingest.py --room-lens ~/dual-capture/dual-3.json --out /tmp/duet-3 \
@@ -203,7 +280,7 @@ experiments/dual_render.py --fixed /tmp/duet-3/fixed --roving /tmp/duet-3 \
   --scale floor-relative --moments 4 --slice 1.0 --window 0.5
 ```
 
-The selftests that grade this: `dual_ingest` 26/26 and `dual_render` 58/58. The
+The selftests that grade this: `dual_ingest` 29/29 and `dual_render` 61/61. The
 ingest's room-lens path is graded against a fixture with a known truth — a person
 walking a known path, rendered through the room-lens's own rules — and the change
 map has to land on the truth at five points along the walk.

@@ -1,6 +1,6 @@
 ==============================================================================
 THE DUAL RENDER -- two cameras, two minutes, three ways
-  generated 2026-10-22T08:49:41Z
+  generated 2026-10-22T08:59:46Z
   THE REAL DUET (the phone's room-lens and the ProArt, 236 s of shared minutes), aligned on the WALL CLOCK because zcode's clap alignment has not landed. Scale mode: per-view-auto.
   alignment: 0 clap pairs, offset +500538.000 ms, drift +0.0 ppm
   THE SIDECAR SAYS: THE WALL CLOCK, NOT THE CLAPS. The two devices' clocks have never been compared, so this alignment carries the device-to-device skew -- the constant the corpus cannot measure -- and a drift the duet's 236 s cannot separate from a movement. zcode's clap alignment replaces this sidecar when it lands.
@@ -418,6 +418,31 @@ THE GRADED WITNESS -- do the two channels rise and fall together?
   A SHARP PEAK WOULD BE AN ALIGNMENT MEASURED FROM THE DATA. A BROAD ONE IS NOT:
   two slow series correlate somewhere by luck, and a sweep that cannot say WHERE is saying
   nothing about the skew.  The claps are not optional.
+
+THE CROSSING WITNESS -- do the two views find the same CROSSINGS?
+  a crossing is the corpus's own: a CONNECTED BLOB of change that holds its shape while it
+  TRANSLATES.  The grain does not translate, a highlight is one frame, a fidget does not travel,
+  and neither does a shake -- so this is the question each view can actually answer.
+  the fixed view found 22 crossings, 7 of them inside the shared minutes; the roving view found 17
+  the detector's gap is TWO FRAMES of each channel (the fixed 1.00 s, the roving 0.81 s), not the corpus tool's 0.35 s default:
+  that default is calibrated for 60 fps and these channels run at 2, so at 0.35 s no blob ever chains.
+
+  criterion                                 observed   null mean   null sd       z   slides that match it      p
+  the two crossings' intervals overlap at     10 of  17        4.23      2.93  +1.97     21 of  241   0.087
+  they share at least half of the SHORTER      8 of  17        3.54      2.69  +1.66     36 of  241   0.149
+
+  how much the alignment can be wrong before the result goes:
+    the alignment moved  +0.0 s: the observed  10, the null mean   4.23, z +1.97
+    the alignment moved  +1.0 s: the observed  10, the null mean   4.23, z +1.97
+    the alignment moved  +2.0 s: the observed  11, the null mean   4.23, z +2.31
+    the alignment moved  +5.0 s: the observed  10, the null mean   4.23, z +1.97
+    the alignment moved +10.0 s: the observed   7, the null mean   4.23, z +0.95
+    the alignment moved +20.0 s: the observed   7, the null mean   4.23, z +0.95
+
+  A RESULT THAT SURVIVES A MISALIGNMENT OF SEVERAL SECONDS IS NOT A MEASUREMENT OF THE
+  ALIGNMENT.  It is a statement that the two views find the same crossings at the same
+  MOMENTS, which is the thing two sovereign logs of the same minutes give that neither
+  gives alone.  The claps are still what settles the skew.
 
 THE ALIGNMENT'S SENSITIVITY -- the witness count with the alignment moved on purpose
   the wall clock is NOT the claps: the two devices' clocks have never been compared, so the
