@@ -83,6 +83,26 @@ forms.
 {"offset_ms": -120.0, "drift_ppm": 0.0, "n_claps": 3}
 ```
 
+**Form C — the same clap pairs, with the audio-to-frame skew.** A clap
+is detected in the **audio**. The sidecar wants it in the **frame
+clock**. Those are not the same clock: the corpus has already measured
+the audio-to-video offset inside one capture at about **114 ms**, so
+the conversion is not free — and the two streams need not share the
+same skew. The sidecar may carry it and the renderer will apply it and
+say so:
+
+```json
+{
+  "claps": {"fixed_ms": [...], "roving_ms": [...]},
+  "audio_to_frame_ms": {"fixed": 114.0, "roving": 0.0}
+}
+```
+
+With the field absent, the clap times are taken as already being in the
+frame clock. **Either way the output says which it assumed**, because
+an unstated assumption in a clock is how a minute gets silently
+misaligned.
+
 **THE CLOCK IS THE TOOL'S BUSINESS, NOT THE SIDECAR'S.** A clap time is
 a time in **one stream's clock** — the browser's `performance.now()`
 for the ProArt, the video's own presentation time for the phone — and
@@ -119,6 +139,13 @@ up over the residual bar and nothing looks like an outlier. The
 threshold alone would not have found it. This is the same lesson the
 arrival-null study learned in the audio, where one bad arrival took the
 implied speed of sound from 343 to 306 m/s.
+
+**THE OFFSET IS CHECKED AGAINST THE CLAPS THEMSELVES.** A clap matched
+to the **wrong** clap does not give a small offset — it gives one of
+about a whole clap spacing, because that is how far the wrong clap is.
+So the bar is not a number somebody liked: it is **the distance between
+the claps**. An offset bigger than half the clap spacing is called
+**SUSPECT** in the output, in words.
 
 ## 3. What zcode hands over: THE ROVING STREAM
 
@@ -219,7 +246,7 @@ filtered for being dull.
 **Measured, on the tool's own fixture.** A synthetic pair — a person
 walking a known path, seen by a fixed witness and a roving eye with a
 known viewpoint transform — so the renders can be *graded* instead of
-admired. The selftest is **42 of 42** and it grades:
+admired. The selftest is **46 of 46** and it grades:
 
 - the fixed view's change centroid lands within **0.10** of the truth's
   position on both axes;
@@ -236,6 +263,10 @@ admired. The selftest is **42 of 42** and it grades:
 - **a spurious clap**: with four claps and one 500 ms outlier the
   offset still comes back as **−250.000 ms**, the outlier is **dropped
   and named**, and four good claps drop nothing;
+- **the offset's plausibility**: a clap matched to the wrong clap is
+  called **SUSPECT** and a sensible offset is not;
+- **the audio-to-frame skew**: when the sidecar carries it, it is
+  applied and the output says it was applied;
 - the witness count adds up, its chance baseline is the product of the
   two rates, and its excess is signed.
 
@@ -264,7 +295,7 @@ That is the control's whole job: **the measure does not manufacture
 agreement.** A witness count that found an excess between a real room
 and a meaningless video would be a bug in the measure, not a finding.
 
-**The selftests are 42 of 42** for the renderer and **16 of 16** for the
+**The selftests are 46 of 46** for the renderer and **16 of 16** for the
 ingest.
 
 **NOT measured, and not to be filed as if it were:**

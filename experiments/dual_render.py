@@ -322,10 +322,29 @@ def load_alignment(path: Path | None, fixed: Stream | None = None,
 
         {"claps": {"fixed_ms": [...], "roving_ms": [...]}}
         {"offset_ms": ..., "drift_ppm": ...}
+
+    A clap is detected in the AUDIO.  The sidecar wants it in the
+    FRAME clock.  Those are not the same clock: the corpus has already
+    measured the audio-to-video offset inside one capture at about
+    114 ms, so the conversion is not free.  A sidecar may therefore
+    carry the skew and let this tool apply it:
+
+        {"claps": {...},
+         "audio_to_frame_ms": {"fixed": 114.0, "roving": 0.0}}
+
+    When it is absent the clap times are taken as already being in the
+    frame clock, and the output says which it assumed.
     """
     if path is None:
         return Alignment()
     data = json.loads(Path(path).read_text())
+    skew = data.get('audio_to_frame_ms')
+    skew_note = ''
+    if isinstance(skew, dict):
+        sk_f = float(skew.get('fixed', 0.0))
+        sk_r = float(skew.get('roving', 0.0))
+        skew_note = (f'the audio-to-frame skew was applied (fixed '
+                     f'{sk_f:+.3f} ms, roving {sk_r:+.3f} ms)')
     claps = data.get('claps')
     if isinstance(claps, dict) and claps.get('fixed_ms') and claps.get('roving_ms'):
         f = np.asarray(claps['fixed_ms'], dtype=np.float64)
@@ -345,6 +364,11 @@ def load_alignment(path: Path | None, fixed: Stream | None = None,
                           f'-{base_r:.1f} ms)')
         f = f - base_f
         r = r - base_r
+        if isinstance(skew, dict):
+            f = f + float(skew.get('fixed', 0.0))
+            r = r + float(skew.get('roving', 0.0))
+        if skew_note:
+            clock_note = f'{clock_note}; {skew_note}'
         if n < 1:
             return Alignment(source=f'{path.name} (no clap pairs)')
         if n == 1:
@@ -402,6 +426,18 @@ def load_alignment(path: Path | None, fixed: Stream | None = None,
         out.the_clap_residuals_ms = [round(float(v), 3) for v in resid]
         out.the_claps_used = used
         out.the_claps_dropped = dropped
+        # THE PLAUSIBILITY OF THE OFFSET, GROUNDED IN THE CLAPS
+        # THEMSELVES.  A clap matched to the WRONG clap does not give a
+        # small offset -- it gives one of about half the clap spacing,
+        # because that is how far the wrong clap is.  So the bar is not
+        # a number somebody liked: it is the distance between the
+        # claps.
+        gaps = np.diff(np.sort(r))
+        if gaps.size and abs(b) > float(np.median(gaps)) / 2.0:
+            out.source += (f'; THE OFFSET IS SUSPECT: {b:+.1f} ms is more '
+                           f'than half the clap spacing '
+                           f'({float(np.median(gaps)):.1f} ms), which is what '
+                           f'a clap matched to the WRONG clap looks like')
         if dropped:
             out.source += (f'; {len(dropped)} clap(s) DROPPED as outliers '
                            f'(residual over {CLAP_ROBUST_MS:.0f} ms) and the '
@@ -1141,6 +1177,38 @@ def selftest() -> int:
            al7.the_claps_dropped == [] and
            abs(al7.offset_ms + delta_ms) < 1e-6,
            f'dropped {al7.the_claps_dropped}, offset {al7.offset_ms:+.6f}')
+
+        # 3d. THE PLAUSIBILITY OF THE OFFSET, grounded in the clap
+        #     spacing: a clap matched to the WRONG clap gives an
+        #     offset of about a whole spacing, and that must be said.
+        wrong = tmp / 'wrong_clap.json'
+        wrong.write_text(json.dumps({'claps': {
+            'fixed_ms': [v + base_f for v in [1000.0, 10000.0, 20000.0]],
+            'roving_ms': [v + base_r for v in [10000.0, 20000.0, 30000.0]]}}))
+        al8 = load_alignment(wrong, fixed, roving)
+        ck('align: a clap matched to the wrong clap is called SUSPECT',
+           'SUSPECT' in al8.source and 'WRONG clap' in al8.source,
+           al8.source[-160:])
+        ck('align: a sensible offset is not called SUSPECT',
+           'SUSPECT' not in al7.source, al7.source[-160:])
+
+        # 3e. THE AUDIO-TO-FRAME SKEW.  A clap is detected in the
+        #     AUDIO and the sidecar wants it in the FRAME clock, and
+        #     the corpus has measured those two apart by about 114 ms
+        #     inside one capture.  The skew may be carried in the
+        #     sidecar and applied here, and the output must say it did.
+        skew_side = tmp / 'skewed.json'
+        skew_side.write_text(json.dumps({
+            'claps': {'fixed_ms': [1000.0 + base_f, 4000.0 + base_f],
+                      'roving_ms': [1000.0 + base_r + delta_ms,
+                                    4000.0 + base_r + delta_ms]},
+            'audio_to_frame_ms': {'fixed': 114.0, 'roving': 0.0}}))
+        al9 = load_alignment(skew_side, fixed, roving)
+        ck('align: the audio-to-frame skew is applied when it is given',
+           abs(al9.offset_ms + delta_ms - 114.0) < 1e-6,
+           f'offset {al9.offset_ms:+.3f} ms (expected {-delta_ms + 114.0:+.3f})')
+        ck('align: the output says the skew was applied',
+           'skew was applied' in al9.source, al9.source[-140:])
 
     with tempfile.TemporaryDirectory() as td:
         tmp = Path(td)

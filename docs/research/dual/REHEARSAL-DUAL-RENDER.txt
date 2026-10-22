@@ -1,6 +1,6 @@
 ==============================================================================
 THE DUAL RENDER -- two cameras, two minutes, three ways
-  generated 2026-10-22T03:20:38Z
+  generated 2026-10-22T03:26:12Z
   NEGATIVE CONTROL, NOT THE REAL PAIR
   alignment: 3 clap pairs, offset -175.000 ms, drift +0.0 ppm, residual 0.000 ms  [the per-clap residuals in ms: 0.0, 0.0, 0.0]
   overlap: +0.00 s .. +17.08 s (17.08 s of shared minutes)
