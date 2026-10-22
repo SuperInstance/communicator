@@ -169,6 +169,40 @@ rather than fitting a drift from one point. Three or more claps fit
 both, and the output prints the **residual** (the largest error of the
 fit) so a bad alignment is visible rather than hidden.
 
+**THE CLAP TIMES SHOULD BE SUB-FRAME, AND THE TOOL NOW MEASURES
+WHETHER THEY ARE.** The route for two uncalibrated views is
+audio-sync **first**, and **sub-frame**: an alignment quantised to the
+video cannot be finer than the video. So the tool measures each clap
+time's distance from **its own stream's frame grid** and prints, in
+words, whether the sidecar carried **FRAME TIMES** or **SUB-FRAME
+times**:
+
+```
+THE ALIGNMENT RESOLUTION: the fixed clap times sit ON that stream's
+frame grid (at most 0.000 ms from it), so the alignment is quantised to
+that stream's frame interval (16.667 ms) and cannot be finer; the roving
+clap times are SUB-FRAME (up to 3.412 ms from that stream's frame grid,
+whose interval is 406.500 ms), so the alignment is finer than a frame on
+that side
+```
+
+**THE RESOLUTION OF A FRAME-QUANTISED SYNC IS SET BY THE COARSER OF THE
+TWO STREAMS**, and on the duet that is the fixed side: the merged
+ProArt stream's frame interval is **499.75 ms** and the phone's room-lens
+change maps are **406.5 ms** (the keyframe channel **2105.0 ms**). A
+sidecar written from frame timestamps would therefore be quantised at
+**half a second** on this pair. The corpus's other sessions are 60 fps
+(**16.667 ms**), so that is a property of this capture and not of the
+fleet.
+
+**AND A CLAP TIME THAT IS TAKEN FROM A FRAME IS A DIFFERENT KIND OF
+CLAIM FROM ONE THAT IS INTERPOLATED.** A sidecar that names a frame is
+claiming the clap happened somewhere inside that frame's interval; one
+that carries **1012.345 ms** is claiming a time. The renderer does not
+judge which is right — that is zcode's detection — but it says which
+kind it was given, because a claim and a guess must not look alike in
+the output.
+
 **A SPURIOUS CLAP DOES NOT TILT THE ALIGNMENT.** One door slammed in
 the wrong place must not shift the whole minute. The tool finds the
 outliers by **search** — every pair of claps proposes a line and the
@@ -382,7 +416,7 @@ filtered for being dull.
 **Measured, on the tool's own fixture.** A synthetic pair — a person
 walking a known path, seen by a fixed witness and a roving eye with a
 known viewpoint transform — so the renders can be *graded* instead of
-admired. The selftest is **61 of 61** and it grades:
+admired. The selftest is **65 of 65** and it grades:
 
 - the fixed view's change centroid lands within **0.10** of the truth's
   position on both axes;
@@ -403,6 +437,11 @@ admired. The selftest is **61 of 61** and it grades:
   called **SUSPECT** and a sensible offset is not;
 - **the audio-to-frame skew**: when the sidecar carries it, it is
   applied and the output says it was applied;
+- **the alignment's resolution**: a sidecar whose clap times land on the
+  stream's own frame grid is reported as **FRAME TIMES** and an
+  alignment quantised to that stream's frame interval, and a sidecar
+  whose clap times miss the grid by **12.345 ms** is reported as
+  **SUB-FRAME**; both are in the output and not only in the code;
 - the witness count adds up, its chance baseline is the product of the
   two rates, and its excess is signed.
 
@@ -431,7 +470,7 @@ That is the control's whole job: **the measure does not manufacture
 agreement.** A witness count that found an excess between a real room
 and a meaningless video would be a bug in the measure, not a finding.
 
-**The selftests are 61 of 61** for the renderer and **29 of 29** for the
+**The selftests are 65 of 65** for the renderer and **29 of 29** for the
 ingest.
 
 **Measured, on the REAL pair.** The duet has landed and been rendered.
@@ -549,7 +588,60 @@ python experiments/dual_render.py \
     --note "NEGATIVE CONTROL, NOT THE REAL PAIR"
 ```
 
-## 8. The files
+## 8. THE ROUTE, AND THE SCALE THAT IS NOT HERE YET
+
+**THE ROUTE FOR TWO UNCALIBRATED VIEWS HAS THREE STAGES, AND ONLY THE
+FIRST OF THEM IS THIS LANE'S.**
+
+1. **AUDIO-SYNC FIRST, AT SUB-FRAME PRECISION.** Two uncalibrated
+   cameras have no common clock, so the only thing that puts them on one
+   clock is a sound both of them heard. Sub-frame matters: an alignment
+   quantised to the video is as coarse as the video. This is zcode's
+   detection and this lane's consumption, and §2 now says which kind of
+   sidecar it was given.
+2. **THEN A RELATIVE POSE** — a DUSt3R/MASt3R-style relative
+   reconstruction — **which is SCALE-FREE.** It says where the two
+   viewpoints sit relative to each other and says nothing about how big
+   anything is.
+3. **AND THE SCALE COMES FROM THE RANGING/TDOA SIDE**, which is zcode's
+   lane and not this one.
+
+**SO THE FUSED RENDERS STAY IN RELATIVE GEOMETRY, AND NO SCALE IS BAKED
+IN.** A guessed scale is not a small error in a render; it is a number
+the reader cannot tell from a measured one, and it enters every
+distance, every width and every position at once. This lane will not
+invent one. What it has is the **temporal** alignment, and a temporal
+alignment is already a relative quantity — a moment, not a place.
+
+**AND THE PART WORTH HAVING IS THAT THE THREE STAGES HAVE INDEPENDENT
+ERROR SOURCES.** The arrival-null study measured the TDOA estimator: it
+resolves a delay to **0.004 ms**, which is **0.0014 m** of range, with a
+null bias of **0.0002 ms**. And it found the thing that makes the scale
+route independent of the sync route: **a TDOA measurement compares the
+two signals to each other, so the offset between the two clocks cancels
+exactly** — two signals with no clock relationship between them came
+back 7.0 ms apart when they were 7.3 ms apart. So the scale can be
+measured on a pair that is not synchronised at all, and a mistake in
+the sync cannot corrupt the scale. That is the architecture this route
+asks for and it is already measurable on this lane's own terms.
+
+**WHAT IT MEANS FOR THE CONCRETE DELIVERABLE.** The three renders are
+temporal, and they are already relative: a cell in the left panel and a
+cell in the right panel are not the same part of the room, and every
+output says so in its header. When a relative pose lands it lands
+**scale-free**, and the scale lands with the TDOA. Until then the
+renders carry no metric claim, and the duet's own alignment stays
+labelled as the **wall clock** with its unmeasured device-to-device
+skew.
+
+**AND THE DUET IS A GOOD PLACE TO SEE WHY THE ORDER MATTERS.** Its two
+streams are about **2 fps** — the fixed side's frame interval is
+**499.75 ms** — so a frame-quantised sync on this pair would be
+quantised at half a second, while the corpus's 60 fps sessions would
+give **16.667 ms**. The sync route is the one that has to come first
+and the one whose resolution depends on the capture.
+
+## 9. The files
 
 | file | what it is |
 |---|---|

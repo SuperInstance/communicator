@@ -1,5 +1,5 @@
 {
-  "generated_utc": "2026-10-22T09:12:44Z",
+  "generated_utc": "2026-10-22T09:44:51Z",
   "the_pair_is_synthetic": false,
   "the_pair": {
     "fixed": {
@@ -32,7 +32,8 @@
       "offset_ms": 500538.0,
       "drift_ppm": 0.0,
       "n_claps": 0,
-      "the_note": "THE WALL CLOCK, NOT THE CLAPS. The two devices' clocks have never been compared, so this alignment carries the device-to-device skew -- the constant the corpus cannot measure -- and a drift the duet's 236 s cannot separate from a movement. zcode's clap alignment replaces this sidecar when it lands."
+      "the_note": "THE WALL CLOCK, NOT THE CLAPS. The two devices' clocks have never been compared, so this alignment carries the device-to-device skew -- the constant the corpus cannot measure -- and a drift the duet's 236 s cannot separate from a movement. zcode's clap alignment replaces this sidecar when it lands.",
+      "the_resolution": "this sidecar carries NO CLAP TIMES, so the alignment's resolution cannot be measured from it -- the offset is as good as whatever produced it, and where that was the wall clock, it carries the device-to-device skew the corpus cannot measure"
     },
     "the_overlap_s": [
       500.538,

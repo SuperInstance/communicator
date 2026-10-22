@@ -264,6 +264,21 @@ class Stream:
     def ok(self) -> bool:
         return not self.problems and self.motion is not None
 
+    @property
+    def frame_grid_ms(self) -> np.ndarray:
+        """This stream's OWN frame times, re-based to its first frame.
+
+        THE GRID A CLAP TIME LANDS ON WHEN IT IS QUANTISED TO A FRAME,
+        AND THE GRID IT MISSES WHEN IT IS SUB-FRAME.  The literature
+        route for two uncalibrated views is audio-sync FIRST and at
+        sub-frame precision, and the difference between the two is the
+        difference between an alignment as coarse as the video and one
+        that is finer -- so the grid is worth having in the tool.
+        """
+        if self.is_change_map:
+            return self.motion_times_s * 1000.0
+        return self.offsets_s * 1000.0
+
     def n_frames(self) -> int:
         return 0 if self.motion is None else len(self.motion)
 
@@ -369,6 +384,10 @@ class Alignment:
         self.the_clap_residuals_ms: list[float] = []
         self.the_claps_used: list[int] = []
         self.the_claps_dropped: list[int] = []
+        #: THE ALIGNMENT'S RESOLUTION, measured against each stream's own
+        #: frame grid: is the sidecar carrying FRAME TIMES or SUB-FRAME
+        #: times?  An alignment as coarse as the video must say so.
+        self.the_resolution_note: str = ''
 
     @property
     def assumed(self) -> bool:
@@ -398,6 +417,8 @@ class Alignment:
         if self.the_claps_dropped:
             out += (f'  [claps {self.the_claps_dropped} were DROPPED as '
                     f'outliers]')
+        if self.the_resolution_note:
+            out += f'\n  THE ALIGNMENT RESOLUTION: {self.the_resolution_note}'
         if self.note:
             out += f'\n  THE SIDECAR SAYS: {self.note}'
         return out
@@ -408,6 +429,53 @@ class Alignment:
 #: in the audio: one bad arrival tilted the implied speed of sound from
 #: 343 to 306 m/s, and the fix was a robust refit on the inliers.
 CLAP_ROBUST_MS = 40.0
+
+#: HOW CLOSE A CLAP TIME MUST SIT TO A FRAME TO COUNT AS ON THE GRID.
+#: Well under any frame interval and well over float noise: a sidecar
+#: written from frame timestamps lands on the grid exactly, and one
+#: written from an interpolated onset misses it by milliseconds.
+CLAP_GRID_TOLERANCE_MS = 0.05
+
+
+def clap_grid_distance_ms(clap_ms: np.ndarray,
+                          grid_ms: np.ndarray) -> np.ndarray:
+    """How far each clap time sits from the stream's OWN frame grid.
+
+    **ZERO MEANS THE CLAP TIME WAS TAKEN FROM A FRAME.**  A distance
+    that does not vanish means the sidecar carried a SUB-FRAME time.
+    The literature route for two uncalibrated views is audio-sync
+    first, and sub-frame: an alignment that is quantised to the video
+    cannot be finer than the video, and saying so is the difference
+    between a measurement and a hope.
+    """
+    c = np.asarray(clap_ms, dtype=np.float64)
+    g = np.asarray(grid_ms, dtype=np.float64)
+    if g.size < 2 or c.size == 0:
+        return np.zeros(c.size)
+    g = np.sort(g)
+    idx = np.clip(np.searchsorted(g, c), 1, g.size - 1)
+    return np.minimum(np.abs(c - g[idx - 1]), np.abs(c - g[idx]))
+
+
+def _resolution_note(clap_ms: np.ndarray, stream, side: str) -> str:
+    """One side's alignment resolution, in words and in numbers."""
+    grid = (stream.frame_grid_ms if stream is not None
+            else np.zeros(0, dtype=np.float64))
+    if grid.size < 2:
+        return (f'the {side} stream carries no frame grid, so the '
+                f'alignment\'s resolution cannot be measured on that side')
+    d = clap_grid_distance_ms(clap_ms, grid)
+    far = float(d.max())
+    interval = float(np.median(np.diff(np.sort(grid))))
+    if far <= CLAP_GRID_TOLERANCE_MS:
+        return (f'the {side} clap times sit ON that stream\'s frame grid '
+                f'(at most {far:.3f} ms from it), so the alignment is '
+                f'quantised to that stream\'s frame interval '
+                f'({interval:.3f} ms) and cannot be finer')
+    return (f'the {side} clap times are SUB-FRAME (up to {far:.3f} ms '
+            f'from that stream\'s frame grid, whose interval is '
+            f'{interval:.3f} ms), so the alignment is finer than a frame '
+            f'on that side')
 
 
 def load_alignment(path: Path | None, fixed: Stream | None = None,
@@ -474,15 +542,27 @@ def load_alignment(path: Path | None, fixed: Stream | None = None,
             r = r + float(skew.get('roving', 0.0))
         if skew_note:
             clock_note = f'{clock_note}; {skew_note}'
+        # THE ALIGNMENT'S RESOLUTION, measured against each stream's own
+        # frame grid.  A sidecar written from frame timestamps lands ON
+        # the grid and the alignment cannot be finer than the video; a
+        # sidecar written from an interpolated onset misses it, and the
+        # alignment is sub-frame.  The literature route for two
+        # uncalibrated views is audio-sync FIRST and sub-frame, so this
+        # is the number that says whether the sync on offer is the kind
+        # the route needs.
+        resolution_note = (_resolution_note(f, fixed, 'fixed') + '; '
+                           + _resolution_note(r, roving, 'roving'))
         if n < 1:
             return Alignment(source=f'{path.name} (no clap pairs)')
         if n == 1:
             # one clap gives the offset and no drift
-            return Alignment(offset_ms=float(f[0] - r[0]), drift_ppm=0.0,
+            out1 = Alignment(offset_ms=float(f[0] - r[0]), drift_ppm=0.0,
                              source=f'{path.name} (1 clap pair: offset only, '
                                     f'no drift can be fitted from one clap; '
                                     f'{clock_note})',
                              n_claps=n)
+            out1.the_resolution_note = resolution_note
+            return out1
         # fixed_ms = a * roving_ms + b  ->  a is the slope, b the offset.
         # The drift is the slope's DEPARTURE FROM ONE, so it is
         # (a - 1) in parts per million.  Writing a * 1e6 instead would
@@ -531,6 +611,7 @@ def load_alignment(path: Path | None, fixed: Stream | None = None,
         out.the_clap_residuals_ms = [round(float(v), 3) for v in resid]
         out.the_claps_used = used
         out.the_claps_dropped = dropped
+        out.the_resolution_note = resolution_note
         # THE PLAUSIBILITY OF THE OFFSET, GROUNDED IN THE CLAPS
         # THEMSELVES.  A clap matched to the WRONG clap does not give a
         # small offset -- it gives one of about half the clap spacing,
@@ -553,12 +634,19 @@ def load_alignment(path: Path | None, fixed: Stream | None = None,
                            f'{CLAP_ROBUST_MS:.0f} ms bar')
         return out
     if 'offset_ms' in data or 'drift_ppm' in data:
-        return Alignment(offset_ms=float(data.get('offset_ms', 0.0)),
+        out2 = Alignment(offset_ms=float(data.get('offset_ms', 0.0)),
                          drift_ppm=float(data.get('drift_ppm', 0.0)),
                          source=f'{path.name} (offset and drift as given, in '
                                 f'the re-based clock)',
                          n_claps=int(data.get('n_claps', 0)),
                          note=str(data.get('the_note', '')))
+        out2.the_resolution_note = (
+            'this sidecar carries NO CLAP TIMES, so the alignment\'s '
+            'resolution cannot be measured from it -- the offset is as '
+            'good as whatever produced it, and where that was the wall '
+            'clock, it carries the device-to-device skew the corpus '
+            'cannot measure')
+        return out2
     return Alignment(source=f'{path.name} carries neither clap pairs nor an offset',
                      note=str(data.get('the_note', '')))
 
@@ -1487,7 +1575,8 @@ def check_pair(fixed: Stream, roving: Stream, align: Alignment) -> dict:
                    'the_frame_interval_ms': round(roving.interval_s * 1000.0, 3)},
         'alignment': {'source': align.source, 'assumed': align.assumed,
                       'offset_ms': align.offset_ms, 'drift_ppm': align.drift_ppm,
-                      'n_claps': align.n_claps, 'the_note': align.note},
+                      'n_claps': align.n_claps, 'the_note': align.note,
+                      'the_resolution': align.the_resolution_note},
     }
     blockers = list(fixed.problems) + list(roving.problems)
     # THE OVERLAP IS IN THE ALIGNED CLOCK.  The two streams have
@@ -2102,6 +2191,27 @@ def selftest() -> int:
         ck('align: the sidecar\'s own note is carried into the output',
            'THE WALL CLOCK' in a_note.describe(),
            a_note.describe()[:120])
+
+        # 11b. THE ALIGNMENT'S RESOLUTION.  The literature route for two
+        # uncalibrated views is audio-sync FIRST and sub-frame, so a
+        # sidecar written from frame timestamps must be caught saying so.
+        # `al3`'s sidecar carries the claps at 1000.0 and 4000.0 ms,
+        # which are the synthetic pair's own frame times.
+        ck('align: a sidecar written from FRAME TIMES says it is on the grid',
+           'ON that stream\'s frame grid' in al3.describe(),
+           al3.describe()[:200])
+        sub = tmp / 'subframe.json'
+        sub.write_text(json.dumps({'claps': {
+            'fixed_ms': [1012.345 + base_f, 4012.345 + base_f],
+            'roving_ms': [1012.345 + base_r + delta_ms,
+                          4012.345 + base_r + delta_ms]}}))
+        al_sub = load_alignment(sub, fixed, roving)
+        ck('align: a sidecar carrying SUB-FRAME times is seen to carry them',
+           'SUB-FRAME' in al_sub.describe(),
+           al_sub.describe()[:200])
+        ck('align: the resolution is in the output, not only in the source',
+           'THE ALIGNMENT RESOLUTION' in al_sub.describe(),
+           al_sub.describe()[:200])
 
         # 12. a CHANGE-MAP STREAM is read: the phone's room-lens bundle
         from experiments import dual_ingest as di  # noqa: PLC0415

@@ -50,6 +50,7 @@ drift from a movement.
 | the ProArt, merged | 1866 frames, 767.7 s, page base spread 1.2 ms |
 | the shared minutes | 235.93 s |
 | the alignment | +500538.0 ms, WALL CLOCK, not the claps |
+| the alignment's resolution | **not measurable from this sidecar** — it carries no clap times, and the wall clock's own relation to the two devices has never been compared |
 | the phone's change maps | 488 of 512 pairs (24 lost to a geometry change) |
 
 ## 2. The two views are not the same quantity, and the gap is measurable
@@ -274,6 +275,24 @@ were and lets its 2 fps sessions be seen at all.
 holds at most one frame from each view, and the fused score's slices are better at
 1 s, which is what the filed render uses.
 
+**And the sync at SUB-FRAME resolution, because the route asks for it.** The
+literature route for two uncalibrated views is audio-sync first and at sub-frame
+precision, and the resolution of a frame-quantised sync is set by the **coarser**
+of the two streams. On this pair that is the fixed side: the merged ProArt stream's
+frame interval is **499.75 ms** against the phone's **406.5 ms** and the keyframe
+channel's **2105.0 ms**. A sidecar written from frame timestamps would therefore
+carry a half-second quantisation, and the renderer now says so in every output —
+it measures each clap time's distance from its own stream's frame grid and reports
+whether the sidecar carried **FRAME TIMES** or **SUB-FRAME times**. The duet's own
+alignment carries no clap times at all, so its output says that the resolution
+cannot be measured from it, and the wall-clock skew stands.
+
+**AND NO SCALE IS BAKED IN.** The relative pose that comes after the sync is
+scale-free, and the metric scale comes from the ranging/TDOA side, which is
+zcode's lane. Until it lands, these renders carry no metric claim: a cell in the
+left panel and a cell in the right panel are not the same part of the room, and
+that has been true of every output this lane has ever filed.
+
 ## 10. The commands, so the whole thing re-runs
 
 ```
@@ -288,7 +307,7 @@ experiments/dual_render.py --fixed /tmp/duet-3/fixed --roving /tmp/duet-3 \
   --scale floor-relative --moments 4 --slice 1.0 --window 0.5
 ```
 
-The selftests that grade this: `dual_ingest` 29/29 and `dual_render` 61/61. The
+The selftests that grade this: `dual_ingest` 29/29 and `dual_render` 65/65. The
 ingest's room-lens path is graded against a fixture with a known truth — a person
 walking a known path, rendered through the room-lens's own rules — and the change
 map has to land on the truth at five points along the walk.
