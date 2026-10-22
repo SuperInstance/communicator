@@ -231,6 +231,47 @@ found by the dual-capture lane, which had to ask the crossing question of two
 cameras of the same minutes and found the instrument returning nothing
 (`docs/research/dual/DUET-RENDER.md` §6).
 
+**NOTE, 2026-10-22 — the corpus grew, the sweep was re-run, and the
+prediction above is confirmed.** The sweep now runs over **103** session
+entries (the filed json held 88), finds **764** crossings against the filed
+**574**, and **45** sessions have any against the filed **35**.
+
+**NOT ONE EXISTING SESSION'S CROSSINGS MOVED.** All 88 shared sessions came
+back byte-identical, which is the "no filed number moves" promise above kept
+on the real corpus rather than argued. **And THE ELEVEN 2 fps SESSIONS NOW
+CONTRIBUTE EXACTLY 25 CROSSINGS**, which is the number the table above
+predicted — 25 was measured in the gap note's own sweep, and here are those
+sessions inside the corpus sweep itself. The 25 crossings are spread over six
+of the eleven; five of the 2 fps sessions carry none.
+
+**THE FOUR NEW FAST SESSIONS ARE ORDINARY.** Their crossings per minute run
+0.22, 0.20, 0.20 and 0.09, inside the corpus's existing range (median 0.19,
+max 0.45 over the 35 sessions that had any). Their higher raw count is
+duration, not character: three of them run 198–300 s and carry 65, 58 and 39
+crossings, while the fourth runs 32 s and carries 3.
+
+**AND THE RATE IS NOT COMPARABLE ACROSS THE TWO FRAME RATES, WHICH IS THE
+NEXT THING TO FIX.** A crossing's minimum duration is **5 FRAMES**, and 5
+frames is **2.5 s at 2 fps** against **0.083 s at 60 fps**. The corpus's
+crossings-per-minute is therefore now a mixture of two different quantities,
+and only the COUNT is comparable between them. The 2 fps sessions show
+0.31–3.16 crossings per minute against the 60 fps sessions' median of 0.19.
+**THIS IS THE SAME FAMILY AS THE NOISE FLOOR: A MEASUREMENT IS A PROPERTY
+OF A SENSOR AND AN INTERVAL, AND THE DETECTOR'S FRAME CRITERIA ARE IN
+FRAMES WHILE ITS WINDOW IS IN SECONDS.** The gap defect was the chaining
+rule; this is the duration rule. Both are the detector's parameters being
+in seconds where the corpus has moved to a different interval.
+
+**THE LENS FILES MOVED WITH THE CORPUS, AND ONE OF THEM MATTERS FOR THE
+ARRIVAL NULL.** The real microphone's session count goes **53 → 71** with the
+silent count **unchanged at 47**, so the corpus's real-microphone silence
+fraction falls from **88.7 % to 66.2 %**: all eighteen new real-microphone
+sessions carry signal. The arrival-null study's corpus therefore grew from
+**6** sessions carrying signal to **24** — see
+`docs/research/ARRIVAL-NULL.md` §5a, where the re-run says the null bias
+holds and the resolution headline turns out to be a median and not a worst
+case.
+
 ### 3.5 The envelope, and the bug that hid it
 
 The envelope is the repository's own: `src/energy.py:rms_series` on a

@@ -4,12 +4,12 @@
  "capture_rate_hz": 48000,
  "devices_seen": {
   "Microphone Array (Realtek(R) Audio)": {
-   "n_sessions": 53,
+   "n_sessions": 71,
    "n_silent": 47,
-   "peak_max": 3064
+   "peak_max": 3705
   },
   "?": {
-   "n_sessions": 21,
+   "n_sessions": 28,
    "n_silent": 9,
    "peak_max": 18064
   },
@@ -27,17 +27,17 @@
    "statement": "the input device delivers literal zeros: the saved WAV's peak is exactly 0 and every sample is 0",
    "detector": "peak_abs == 0 and nonzero == 0",
    "measurement": {
-    "n_sessions_with_a_wav": 114,
+    "n_sessions_with_a_wav": 139,
     "n_silent": 56,
-    "fraction_silent": 0.4912,
+    "fraction_silent": 0.4029,
     "peak_of_the_loud_sessions": {
      "min": 54,
      "max": 18064,
-     "median": 13393.0
+     "median": 12859
     },
-    "n_sessions_on_a_synthetic_device": 61,
+    "n_sessions_on_a_synthetic_device": 68,
     "n_silent_on_the_real_microphone": 47,
-    "n_on_the_real_microphone": 53
+    "n_on_the_real_microphone": 71
    },
    "provenance": "measured over the corpus's free sessions; the class was 34 folders and 82.4M samples on the night it happened (browser_capture/DONE.md)"
   },
@@ -46,9 +46,9 @@
    "class": "level",
    "statement": "the level is not a property of the device alone: on the REAL microphone the loud sessions' peaks run from about 140 to about 3064, a 21.9x spread, in one room.  The much larger spread that the whole corpus shows is an artefact of the synthetic input device, and it is filed separately.",
    "measurement": {
-    "loud_peak_min": 140,
-    "loud_peak_max": 3064,
-    "ratio": 21.89,
+    "loud_peak_min": 89,
+    "loud_peak_max": 3705,
+    "ratio": 41.63,
     "population": "the real microphone only",
     "whole_corpus_including_synthetic": {
      "loud_peak_min": 54,
@@ -128,16 +128,16 @@
    "class": "failure_signature",
    "statement": "the corpus holds an end-to-end TEST rig alongside the room captures: Chrome's 'Fake Default Audio Input' with a static .y4m test pattern standing in for the camera.  A session from this rig is not evidence about the room, and a statistic that mixes the two is wrong by the synthetic fraction.",
    "measurement": {
-    "n_sessions_on_a_synthetic_device": 61,
-    "n_sessions_total": 114,
-    "fraction_synthetic": 0.5351,
+    "n_sessions_on_a_synthetic_device": 68,
+    "n_sessions_total": 139,
+    "fraction_synthetic": 0.4892,
     "devices": {
      "Microphone Array (Realtek(R) Audio)": {
-      "n_sessions": 53,
-      "peak_max": 3064
+      "n_sessions": 71,
+      "peak_max": 3705
      },
      "?": {
-      "n_sessions": 21,
+      "n_sessions": 28,
       "peak_max": 18064
      },
      "Fake Default Audio Input": {
@@ -216,65 +216,65 @@
    "class": "signature",
    "statement": "the envelope carries the EVENT -- a crossing of the microphone's field shows up as a loudness hump -- but on this corpus it does NOT carry the direction.  Graded against the video's own radial label (the blob's apparent size grows toward the phone and shrinks away from it), the envelope's direction agrees 34 % of the time, which is chance.  The reason is measurable: the hump at a crossing is the SPEAKER'S OWN VOICE.  The envelope's peak lands on one of the session's own speech segments at 70-88 % of crossings, against a 32-42 % baseline for a random moment.  The corpus contains no labelled toward/pass/away crossings, so the claim is untested rather than refuted.",
    "measurement": {
-    "n_sessions": 88,
-    "n_crossings": 574,
-    "n_with_an_envelope": 574,
+    "n_sessions": 103,
+    "n_crossings": 764,
+    "n_with_an_envelope": 761,
     "envelope_excursion_db": {
-     "n": 574,
+     "n": 761,
      "min": 0.0,
      "p25": 0.0,
      "median": 0.0,
-     "p75": 0.0,
-     "max": 124.20691818369545,
-     "mean": 4.2383549749158
+     "p75": 7.530301276102932,
+     "max": 124.30146156181064,
+     "mean": 7.5519850474594525
     },
     "envelope_direction_counts": {
-     "TOWARD": 51,
-     "AWAY": 40,
-     "PASS": 483
+     "TOWARD": 150,
+     "PASS": 505,
+     "AWAY": 106
     },
     "video_frame_direction_counts": {
-     "RIGHT": 271,
-     "LEFT": 303
+     "RIGHT": 366,
+     "LEFT": 398
     },
     "video_radial_label_counts": {
-     "TOWARD": 253,
-     "AWAY": 196,
-     "PASS": 125
+     "TOWARD": 329,
+     "PASS": 171,
+     "AWAY": 264
     },
-    "n_graded": 574,
-    "n_agreeing_with_the_video_radial_label": 142,
-    "agreement_rate": 0.2474,
+    "n_graded": 761,
+    "n_agreeing_with_the_video_radial_label": 207,
+    "agreement_rate": 0.272,
     "confusion_rows_video_cols_envelope": {
      "TOWARD": {
-      "TOWARD": 28,
-      "PASS": 208,
-      "AWAY": 17
+      "TOWARD": 66,
+      "PASS": 219,
+      "AWAY": 43
      },
      "PASS": {
-      "TOWARD": 8,
-      "PASS": 104,
-      "AWAY": 13
+      "TOWARD": 31,
+      "PASS": 109,
+      "AWAY": 31
      },
      "AWAY": {
-      "TOWARD": 15,
-      "PASS": 171,
-      "AWAY": 10
+      "TOWARD": 53,
+      "PASS": 177,
+      "AWAY": 32
      }
     },
-    "auc_envelope_slope_toward_vs_away": 0.5105,
-    "n_envelope_peak_on_a_speech_segment": 70,
-    "envelope_peak_on_speech_rate": 0.122,
+    "auc_envelope_slope_toward_vs_away": 0.4963,
+    "n_envelope_peak_on_a_speech_segment": 155,
+    "envelope_peak_on_speech_rate": 0.2037,
     "audio_bearing_subset": {
-     "n_crossings_with_a_live_envelope": 94,
-     "n_agreeing_with_the_video_radial_label": 39,
-     "agreement_rate": 0.4149,
-     "auc_envelope_slope_toward_vs_away": 0.5064,
-     "n_envelope_peak_on_a_speech_segment": 70,
-     "envelope_peak_on_speech_rate": 0.7447,
+     "n_crossings_with_a_live_envelope": 281,
+     "n_agreeing_with_the_video_radial_label": 104,
+     "agreement_rate": 0.3701,
+     "auc_envelope_slope_toward_vs_away": 0.4925,
+     "n_envelope_peak_on_a_speech_segment": 155,
+     "envelope_peak_on_speech_rate": 0.5516,
      "population": "the crossings on the REAL microphone, with a live envelope",
      "n_sessions_on_a_synthetic_device": 35,
-     "n_sessions_on_the_real_microphone": 53,
+     "n_sessions_on_the_real_microphone": 68,
      "note": "the other crossings sit in sessions whose audio is digital silence, or on Chrome's synthetic test input, so their envelopes are flat or synthetic and their direction is the direction of a constant"
     }
    },
@@ -413,5 +413,5 @@
   }
  ],
  "lens_version": 1,
- "generated_utc": "2026-10-21T19:13:41Z"
+ "generated_utc": "2026-10-22T10:14:20Z"
 }

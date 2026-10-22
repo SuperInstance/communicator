@@ -8,7 +8,7 @@
    "statement": "the recorder writes a frame only when the picture changed, and the driver repeats frames to fill the grid: a large fraction of the frames in the file are byte-identical to their predecessor",
    "measurement": {
     "n_sessions_sampled": 25,
-    "n_sessions_available": 114,
+    "n_sessions_available": 139,
     "sample": [
      "1792553040",
      "1792553042",
@@ -60,5 +60,5 @@
   }
  ],
  "lens_version": 1,
- "generated_utc": "2026-10-21T19:13:41Z"
+ "generated_utc": "2026-10-22T10:14:20Z"
 }
